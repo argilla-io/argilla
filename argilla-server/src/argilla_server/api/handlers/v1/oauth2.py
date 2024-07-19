@@ -20,9 +20,7 @@ from argilla_server import telemetry
 from argilla_server.api.schemas.v1.oauth2 import Provider, Providers, Token
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
-from argilla_server.enums import UserRole
 from argilla_server.errors.future import AuthenticationError
-from argilla_server.models import User
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
@@ -31,7 +29,15 @@ from argilla_server.security.settings import settings
 router = APIRouter(prefix="/oauth2", tags=["Authentication"])
 
 
-_USER_ROLE_ON_CREATION = UserRole.annotator
+def check_oauth_enabled_or_raise() -> None:
+    if not settings.oauth.enabled:
+        raise HTTPException(status_code=404, detail="OAuth2 is not enabled")
+
+
+def _get_provider_by_name_or_raise(provider_name: str) -> OAuth2ClientProvider:
+    if provider_name not in settings.oauth.providers:
+        raise HTTPException(status_code=404, detail=f"Provider '{provider_name}' not found")
+    return settings.oauth.providers[provider_name]
 
 
 @router.get("/providers", response_model=Providers)
@@ -43,9 +49,11 @@ def list_providers(_request: Request) -> Providers:
 
 
 @router.get("/providers/{provider}/authentication")
-def get_authentication(request: Request, provider: str) -> RedirectResponse:
-    _check_oauth_enabled_or_raise()
-
+def get_authentication(
+    request: Request,
+    provider: str,
+    _oauth_enabled: None = Depends(check_oauth_enabled_or_raise),
+) -> RedirectResponse:
     provider = _get_provider_by_name_or_raise(provider)
     return provider.authorization_redirect(request)
 
@@ -55,9 +63,8 @@ async def get_access_token(
     request: Request,
     provider: str,
     db: AsyncSession = Depends(get_async_db),
+    _oauth_enabled: None = Depends(check_oauth_enabled_or_raise),
 ) -> Token:
-    _check_oauth_enabled_or_raise()
-
     try:
         provider = _get_provider_by_name_or_raise(provider)
         user_info = UserInfo(await provider.get_user_data(request))
@@ -66,38 +73,19 @@ async def get_access_token(
         username = user_info.username
 
         user = await accounts.get_user_by_username(db, username)
-        if user is None:
+        if user.role != user_info.role:
+            raise AuthenticationError("Cannot authenticate user")
+        elif user is None:
             user = await accounts.create_user_with_random_password(
                 db,
                 username=username,
                 first_name=user_info.name,
-                role=_USER_ROLE_ON_CREATION,
+                role=user_info.role,
                 workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
             )
             telemetry.track_user_created(user, is_oauth=True)
-        elif not _is_user_created_by_oauth_provider(user):
-            # User should sign in using username/password workflow
-            raise AuthenticationError("Could not authenticate user")
 
         return Token(access_token=JWT.create(user_info))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # TODO: Create exception handler for AuthenticationError
     except AuthenticationError as e:
         raise HTTPException(status_code=401, detail=str(e))
-
-
-def _check_oauth_enabled_or_raise() -> None:
-    if not settings.oauth.enabled:
-        raise HTTPException(status_code=404, detail="OAuth2 is not enabled")
-
-
-def _get_provider_by_name_or_raise(provider_name: str) -> OAuth2ClientProvider:
-    if provider_name not in settings.oauth.providers:
-        raise HTTPException(status_code=404, detail=f"Provider '{provider_name}' not found")
-    return settings.oauth.providers[provider_name]
-
-
-def _is_user_created_by_oauth_provider(user: User) -> bool:
-    # TODO: We must link the created user with the provider, and base this check on that.
-    #  For now, we just validate the user role on creation.
-    return user.role == _USER_ROLE_ON_CREATION
