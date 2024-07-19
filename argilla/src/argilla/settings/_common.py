@@ -39,13 +39,25 @@ class SettingsPropertyBase(Resource):
     def title(self) -> Optional[str]:
         return self._model.title
 
+    @title.setter
+    def title(self, value: str):
+        self._model.title = value
+
     @property
     def required(self) -> bool:
         return self._model.required
 
+    @required.setter
+    def required(self, value: bool):
+        self._model.required = value
+
     @property
     def description(self) -> Optional[str]:
         return self._model.description
+
+    @description.setter
+    def description(self, value: str):
+        self._model.description = value
 
     @property
     def type(self) -> str:

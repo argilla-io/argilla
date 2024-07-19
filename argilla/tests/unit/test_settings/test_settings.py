@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
 import uuid
 
 import pytest
@@ -95,6 +96,34 @@ class TestSettings:
 
         with pytest.raises(SettingsError, match="names of dataset settings must be unique"):
             settings.validate()
+
+    def test_copy_settings(self):
+        settings = rg.Settings(
+            fields=[rg.TextField(name="text", title="text")],
+            metadata=[rg.FloatMetadataProperty("source")],
+            questions=[rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"])],
+            vectors=[rg.VectorField(name="text", dimensions=3)],
+        )
+
+        settings_copy = copy.copy(settings)
+        assert settings == settings_copy
+
+        settings.fields["text"].title = "New title"
+        assert settings == settings_copy
+
+    def test_custom_copy_settings(self):
+        settings = rg.Settings(
+            fields=[rg.TextField(name="text", title="text")],
+            metadata=[rg.FloatMetadataProperty("source")],
+            questions=[rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"])],
+            vectors=[rg.VectorField(name="text", dimensions=3)],
+        )
+
+        settings_copy = settings._copy()
+        assert settings == settings_copy
+
+        settings.fields["text"].title = "New title"
+        assert settings != settings_copy
 
     def test_settings_access(self):
         fields = [rg.TextField(name="text"), rg.TextField(name="other-text")]
