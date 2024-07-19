@@ -20,9 +20,9 @@ from argilla import Dataset, Settings, TextField, LabelQuestion, Argilla, Vector
 
 
 @pytest.fixture
-def dataset():
+def dataset(dataset_name: str):
     return Dataset(
-        name=f"test_dataset_{uuid.uuid4().int}",
+        name=dataset_name,
         settings=Settings(
             fields=[TextField(name="text", use_markdown=False)],
             questions=[LabelQuestion(name="label", labels=["a", "b", "c"])],
@@ -34,7 +34,7 @@ class TestUpdateDatasetSettings:
     def test_update_settings(self, client: Argilla, dataset: Dataset):
         settings = dataset.settings
 
-        settings.fields.text.use_markdown = True
+        settings.fields["text"].use_markdown = True
         dataset.settings.vectors.add(VectorField(name="vector", dimensions=10))
         dataset.settings.metadata.add(FloatMetadataProperty(name="metadata"))
         dataset.settings.update()
@@ -43,10 +43,17 @@ class TestUpdateDatasetSettings:
         settings = dataset.settings
         assert settings.fields["text"].use_markdown is True
         assert settings.vectors["vector"].dimensions == 10
-        assert isinstance(settings.metadata.metadata, FloatMetadataProperty)
+        assert isinstance(settings.metadata["metadata"], FloatMetadataProperty)
 
         settings.vectors["vector"].title = "A new title for vector"
 
         settings.update()
         dataset = client.datasets(dataset.name)
         assert dataset.settings.vectors["vector"].title == "A new title for vector"
+
+    def test_update_distribution_settings(self, client: Argilla, dataset: Dataset):
+        dataset.settings.distribution.min_submitted = 100
+        dataset.update()
+
+        dataset = client.datasets(dataset.name)
+        assert dataset.settings.distribution.min_submitted == 100
