@@ -265,7 +265,6 @@ class Settings(Resource):
     #  Private methods  #
     #####################
 
-
     @classmethod
     def _from_dict(cls, settings_dict: dict) -> "Settings":
         fields = settings_dict.get("fields", [])
@@ -293,11 +292,9 @@ class Settings(Resource):
             distribution=distribution,
         )
 
-
     def _copy(self) -> "Settings":
         instance = self.__class__._from_dict(self.serialize())
         return instance
-
 
     def _fetch_fields(self) -> List[TextField]:
         models = self._client.api.fields.list(dataset_id=self._dataset.id)
