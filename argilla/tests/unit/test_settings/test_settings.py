@@ -81,8 +81,9 @@ class TestSettings:
         )
 
         assert (
-            settings.__repr__()
-            == f"""Settings(guidelines=None, allow_extra_metadata=False, fields={settings.fields}, questions={settings.questions}, vectors={settings.vectors}, metadata={settings.metadata})"""
+            settings.__repr__() == f"Settings(guidelines=None, allow_extra_metadata=False, "
+            "distribution=OverlapTaskDistribution(min_submitted=1), "
+            f"fields={settings.fields}, questions={settings.questions}, vectors={settings.vectors}, metadata={settings.metadata})"
         )
 
     def test_settings_validation_with_duplicated_names(self):

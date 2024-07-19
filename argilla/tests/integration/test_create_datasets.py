@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import uuid
 
 import pytest
 
-from argilla import Argilla, Dataset, Settings, TextField, RatingQuestion, Workspace
+from argilla import Argilla, Dataset, Settings, TextField, RatingQuestion, LabelQuestion, Workspace
+from argilla.settings._task_distribution import TaskDistribution
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -28,8 +28,7 @@ def clean_datasets(client: Argilla):
 
 
 class TestCreateDatasets:
-    def test_create_dataset(self, client: Argilla):
-        dataset_name = f"test_dataset_{uuid.uuid4()}"
+    def test_create_dataset(self, client: Argilla, dataset_name: str):
         dataset = Dataset(
             name=dataset_name,
             settings=Settings(
@@ -44,10 +43,9 @@ class TestCreateDatasets:
 
         created_dataset = client.datasets(name=dataset_name)
         assert created_dataset.settings == dataset.settings
+        assert created_dataset.settings.distribution == TaskDistribution(min_submitted=1)
 
-    def test_create_multiple_dataset_with_same_settings(self, client: Argilla):
-        dataset_name = f"test_dataset_{uuid.uuid4()}"
-
+    def test_create_multiple_dataset_with_same_settings(self, client: Argilla, dataset_name: str):
         settings = Settings(
             fields=[TextField(name="text")],
             questions=[RatingQuestion(name="question", values=[1, 2, 3, 4, 5])],
@@ -70,8 +68,7 @@ class TestCreateDatasets:
             assert schema["question"].name == "question"
             assert schema["question"].values == [1, 2, 3, 4, 5]
 
-    def test_create_dataset_from_existing_dataset(self, client: Argilla):
-        dataset_name = f"test_dataset_{uuid.uuid4()}"
+    def test_create_dataset_from_existing_dataset(self, client: Argilla, dataset_name: str):
         dataset = Dataset(
             name=dataset_name,
             settings=Settings(
@@ -146,3 +143,17 @@ class TestCreateDatasets:
         new_dataset.records.log(records)
 
         assert len(list(dataset.records)) == len(list(new_dataset.records))
+        assert dataset.distribution == dataset_copy.distribution
+
+    def test_create_dataset_with_custom_task_distribution(self, client: Argilla, dataset_name: str):
+        task_distribution = TaskDistribution(min_submitted=4)
+
+        settings = Settings(
+            fields=[TextField(name="text", title="text")],
+            questions=[LabelQuestion(name="label", title="text", labels=["positive", "negative"])],
+            distribution=task_distribution,
+        )
+        dataset = Dataset(dataset_name, settings=settings).create()
+
+        assert client.api.datasets.exists(dataset.id)
+        assert dataset.settings.distribution == task_distribution

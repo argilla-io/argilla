@@ -13,17 +13,18 @@
 #  limitations under the License.
 
 import uuid
-from typing import TYPE_CHECKING, Dict, Generator
+from typing import TYPE_CHECKING, Dict, Generator, Optional
 
 import pytest
 import pytest_asyncio
+from sqlalchemy.engine.interfaces import IsolationLevel
 from httpx import AsyncClient
 from opensearchpy import OpenSearch
 
 from argilla_server import telemetry
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
-from argilla_server.database import get_async_db
+from argilla_server.database import get_async_db, get_serializable_async_db
 from argilla_server.models import User, UserRole, Workspace
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.settings import settings
@@ -77,9 +78,17 @@ async def async_client(
 ) -> Generator["AsyncClient", None, None]:
     from argilla_server import app
 
-    async def override_get_async_db():
+    async def override_get_async_db(isolation_level: Optional[IsolationLevel] = None):
         session = TestSession()
+
+        if isolation_level is not None:
+            await session.connection(execution_options={"isolation_level": isolation_level})
+
         yield session
+
+    async def override_get_serializable_async_db():
+        async for session in override_get_async_db(isolation_level="SERIALIZABLE"):
+            yield session
 
     async def override_get_search_engine():
         yield mock_search_engine
@@ -92,6 +101,7 @@ async def async_client(
     api_v1.dependency_overrides.update(
         {
             get_async_db: override_get_async_db,
+            get_serializable_async_db: override_get_serializable_async_db,
             get_search_engine: override_get_search_engine,
         }
     )

@@ -30,7 +30,7 @@ dataset.create()
 
 ```
 
-> To define the settings for fields, questions, metadata, or vectors, refer to the [`rg.TextField`](fields.md), [`rg.LabelQuestion`](questions.md), [`rg.TermsMetadataProperty`](metadata_property.md), and [`rg.VectorField`](vectors.md) class documentation.
+> To define the settings for fields, questions, metadata, vectors, or distribution, refer to the [`rg.TextField`](fields.md), [`rg.LabelQuestion`](questions.md), [`rg.TermsMetadataProperty`](metadata_property.md), and [`rg.VectorField`](vectors.md), [`rg.TaskDistribution`](task_distribution.md) class documentation.
 
 ---
 

@@ -15,6 +15,7 @@
       @toggle-expand="toggleExpand"
     >
       <slot name="downHeader" slot="panelHeader" />
+      <slot name="downHeaderExpanded" slot="panelHeaderExpanded" />
       <slot name="downContent" slot="panelContent" />
     </BaseCollapsablePanel>
   </div>

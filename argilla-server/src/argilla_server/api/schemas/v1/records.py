@@ -13,17 +13,14 @@
 #  limitations under the License.
 
 from datetime import datetime
-
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
-
-import fastapi
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
-from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder
+from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
 from argilla_server.search_engine import TextQuery
@@ -66,6 +63,7 @@ class RecordGetterDict(GetterDict):
 
 class Record(BaseModel):
     id: UUID
+    status: RecordStatus
     fields: Dict[str, Any]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
@@ -196,7 +194,7 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at]]
+    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal["status"]]
 
 
 class Records(BaseModel):
@@ -220,15 +218,6 @@ class MetadataParsedQueryParam:
 
         self.name: str = k
         self.value: str = "".join(v).strip()
-
-
-class MetadataQueryParams(BaseModel):
-    metadata: List[str] = Field(fastapi.Query([], pattern=r"^(?=.*[a-z0-9])[a-z0-9_-]+:(.+(,(.+))*)$"))
-
-    @property
-    def metadata_parsed(self) -> List[MetadataParsedQueryParam]:
-        # TODO: Validate metadata fields names from query params
-        return [MetadataParsedQueryParam(q) for q in self.metadata]
 
 
 class VectorQuery(BaseModel):
