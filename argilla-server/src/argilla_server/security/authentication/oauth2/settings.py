@@ -83,7 +83,8 @@ class OAuth2Settings:
 
     @classmethod
     def _build_workspaces(cls, settings: dict) -> List[AllowedWorkspace]:
-        return [AllowedWorkspace(**workspace) for workspace in settings.pop(cls.ALLOWED_WORKSPACES_KEY, [])]
+        allowed_workspaces = settings.pop(cls.ALLOWED_WORKSPACES_KEY) or []
+        return [AllowedWorkspace(**workspace) for workspace in allowed_workspaces]
 
     @classmethod
     def _build_providers(cls, settings: dict) -> List["OAuth2ClientProvider"]:
