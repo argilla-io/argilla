@@ -4,7 +4,7 @@
 
 ## Argilla is a platform to build high-quality AI datasets
 
-If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
+If you need support join the [Argilla Discord community](http://hf.co/join/discord)
 
 </div>
 
