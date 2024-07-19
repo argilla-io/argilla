@@ -119,7 +119,7 @@ def es_simple_query_string(field_name: str, query: str) -> dict:
             "fuzzy_transpositions": False,
         }
     }
-  
+
 
 def es_field_for_response_value(user: User, question: str) -> str:
     return f"responses.{es_path_for_user(user)}.values.{question}"
@@ -128,7 +128,7 @@ def es_field_for_response_value(user: User, question: str) -> str:
 def es_field_for_response_status(user: User) -> str:
     return f"responses.{es_path_for_user(user)}.status"
 
-  
+
 def es_nested_query(path: str, query: dict) -> dict:
     return {
         "nested": {
@@ -137,7 +137,6 @@ def es_nested_query(path: str, query: dict) -> dict:
             "score_mode": "avg",
         }
     }
-
 
 
 def es_field_for_suggestion_property(question: str, property: str) -> str:
