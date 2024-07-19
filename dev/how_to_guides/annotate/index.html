@@ -18,7 +18,7 @@
         <link rel="prev" href="../import_export/">
       
       
-        <link rel="next" href="../migrate_from_legacy_datasets/">
+        <link rel="next" href="../distribution/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
@@ -952,30 +952,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#annotate-in-teams" class="md-nav__link">
-    <span class="md-ellipsis">
-      Annotate in teams
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Annotate in teams">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#edit-guidelines-in-the-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Edit guidelines in the settings
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -992,11 +968,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../migrate_from_legacy_datasets/" class="md-nav__link">
+      <a href="../distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Migrate your legacy datasets to Argilla V2
+    Distribute the annotation task
   </span>
   
 
@@ -1525,6 +1501,27 @@
   
   <span class="md-ellipsis">
     Vectors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/argilla/settings/task_distribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distribution
   </span>
   
 
@@ -2095,30 +2092,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#annotate-in-teams" class="md-nav__link">
-    <span class="md-ellipsis">
-      Annotate in teams
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Annotate in teams">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#edit-guidelines-in-the-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Edit guidelines in the settings
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2247,8 +2220,16 @@
 <li><strong>Pending</strong>: The records without a response.</li>
 <li><strong>Draft</strong>: The records with partial responses. They can be submitted or discarded later. You can’t move them back to the pending queue.</li>
 <li><strong>Discarded</strong>: The records may or may not have responses. They can be edited but you can’t move them back to the pending queue.</li>
-<li><strong>Submitted</strong>: The records have been fully annotated and have already been submitted.</li>
+<li><strong>Submitted</strong>: The records have been fully annotated and have already been submitted. You can remove them from this queue and send them to the draft or discarded queues, but never back to the pending queue.</li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are working as part of a team, the number of records in your Pending queue may change as other members of the team submit responses and those records get completed.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you are working as part of a team, the records in the draft queue that have been completed by other team members will show a check mark to indicate that there is no need to provide a response.</p>
+</div>
 <h3 id="suggestions">Suggestions<a class="headerlink" href="#suggestions" title="Permanent link">&para;</a></h3>
 <p>If your dataset includes model predictions, you will see them represented by a sparkle icon <code>✨</code> in the label or value button. We call them “Suggestions” and they appear in the form as pre-filled responses. If confidence scores have been included by the dataset admin, they will be shown alongside with the label. Additionally, admins can choose to always show suggested labels at the beginning of the list. This can be configured from the dataset settings.</p>
 <p>If you agree with the suggestions, you just need to click on the <code>Submit</code> button, and they will be considered as your response. If the suggestion is incorrect, you can modify it and submit your final response.</p>
@@ -2277,8 +2258,8 @@
 <p>Please note that suggestions are not shown in bulk view (except for Spans) and that you will need to save as a draft when you are not providing responses to all required questions.</p>
 </div>
 <h3 id="annotation-progress">Annotation progress<a class="headerlink" href="#annotation-progress" title="Permanent link">&para;</a></h3>
-<p>The global progress of the annotation task from all users is displayed in the dataset list. This is indicated in the <code>Global progress</code> column, which shows the number of records still to be annotated, along with a progress bar. The progress bar displays the percentage and number of records submitted, conflicting (i.e., those with both submitted and discarded responses), discarded and pending by hovering your mouse over it.</p>
-<p>You can track your annotation progress in real time from the righ-bottom panel inside the dataset page. This means that, while you are annotating, the progress bar updates as you submit or discard a record. Expanding the panel, the distribution of <code>Pending</code>, <code>Draft</code>, <code>Submitted</code> and <code>Discarded</code> responses is displayed in a donut chart.</p>
+<p>You can track the progress of an annotation task in the progress bar shown in the dataset list and in the progress panel inside the dataset. This bar shows the number of records that have been completed (i.e., those that have the minimum number of submitted responses) and those left to be completed.</p>
+<p>You can also track your own progress in real time expanding the right-bottom panel inside the dataset page. There you can see the number of records for which you have <code>Pending</code>, <code>Draft</code>, <code>Submitted</code> and <code>Discarded</code> responses.</p>
 <h2 id="use-search-filters-and-sort">Use search, filters, and sort<a class="headerlink" href="#use-search-filters-and-sort" title="Permanent link">&para;</a></h2>
 <p>The UI offers various features designed for data exploration and understanding. Combining these features with bulk labelling can save you and your team hours of time.</p>
 <div class="admonition tip">
@@ -2319,17 +2300,6 @@
 <p>You can sort your records according to one or several attributes.</p>
 <p>The insertion time and last update are general to all records.</p>
 <p>The suggestion scores, response, and suggestion values for rating questions and metadata properties are available only when they were provided.</p>
-<h2 id="annotate-in-teams">Annotate in teams<a class="headerlink" href="#annotate-in-teams" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Argilla 2.1 will come with automatic task distribution, which will allow you to distribute the work across several users more efficiently.</p>
-</div>
-<h3 id="edit-guidelines-in-the-settings">Edit guidelines in the settings<a class="headerlink" href="#edit-guidelines-in-the-settings" title="Permanent link">&para;</a></h3>
-<p>As an <code>owner</code> or <code>admin</code>, you can edit the guidelines as much as you need from the icon settings on the header. Markdown format is enabled.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>If you want further guidance on good practices for guidelines during the project development, check this <a href="https://argilla.io/blog/annotation-guidelines-practices/">blog post</a>.</p>
-</div>
 
 
 
@@ -2385,13 +2355,13 @@
         
         
           
-          <a href="../migrate_from_legacy_datasets/" class="md-footer__link md-footer__link--next" aria-label="Next: Migrate your legacy datasets to Argilla V2">
+          <a href="../distribution/" class="md-footer__link md-footer__link--next" aria-label="Next: Distribute the annotation task">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Migrate your legacy datasets to Argilla V2
+                Distribute the annotation task
               </div>
             </div>
             <div class="md-footer__button md-icon">
