@@ -73,8 +73,8 @@ async def get_access_token(
         username = user_info.username
 
         user = await accounts.get_user_by_username(db, username)
-        if user.role != user_info.role:
-            raise AuthenticationError("Cannot authenticate user")
+        if user and user.role != user_info.role:
+            raise AuthenticationError("Could not authenticate user")
         elif user is None:
             user = await accounts.create_user_with_random_password(
                 db,
@@ -86,6 +86,8 @@ async def get_access_token(
             telemetry.track_user_created(user, is_oauth=True)
 
         return Token(access_token=JWT.create(user_info))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     # TODO: Create exception handler for AuthenticationError
     except AuthenticationError as e:
         raise HTTPException(status_code=401, detail=str(e))
