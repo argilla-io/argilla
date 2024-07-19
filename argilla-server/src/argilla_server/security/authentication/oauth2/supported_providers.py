@@ -63,9 +63,10 @@ def _resolve_argilla_role(user: dict) -> Union[str, None]:
             break
 
     if org:
-        if HUGGINGFACE_ROLE_IN_ORG not in org:
-            _LOGGER.warning("Cannot find user role in org. Review permissions")
-        return HUGGINGFACE_ROLES_MAPPING.get(org[HUGGINGFACE_ROLE_IN_ORG])
+        if HUGGINGFACE_ROLE_IN_ORG in org:
+            return HUGGINGFACE_ROLES_MAPPING.get(org[HUGGINGFACE_ROLE_IN_ORG])
+        else:
+            _LOGGER.warning(f"Cannot find user role in org {org}. Review permissions")
 
 
 # TODO: Move each provided to separate module
