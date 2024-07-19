@@ -47,6 +47,7 @@ _LOGGER = logging.getLogger("argilla")
 @contextlib.asynccontextmanager
 async def app_lifespan(app: FastAPI):
     # See https://fastapi.tiangolo.com/advanced/events/#lifespan
+    check_telemetry()
     await configure_database()
     await configure_search_engine()
     yield
@@ -66,7 +67,6 @@ def create_server_app() -> FastAPI:
     )
 
     configure_logging()
-    configure_telemetry()
     configure_middleware(app)
     configure_api_router(app)
     configure_app_statics(app)
@@ -165,7 +165,7 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_telemetry():
+def check_telemetry():
     message = "\n"
     message += inspect.cleandoc(
         "Argilla uses telemetry to report anonymous usage and error information. You\n"
