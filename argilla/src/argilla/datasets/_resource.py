@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import warnings
 from typing import Optional, Union
 from uuid import UUID, uuid4
@@ -72,7 +71,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
         self._workspace = workspace
         self._model = DatasetModel(name=name)
-        self._settings = settings or Settings(_dataset=self)
+        self._settings = settings._copy() if settings else Settings(_dataset=self)
         self._settings.dataset = self
         self.__records = DatasetRecords(client=self._client, dataset=self)
 
@@ -98,8 +97,9 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
     @settings.setter
     def settings(self, value: Settings) -> None:
-        value.dataset = self
-        self._settings = value
+        settings_copy = value._copy()
+        settings_copy.dataset = self
+        self._settings = settings_copy
 
     @property
     def fields(self) -> list:
