@@ -36,8 +36,8 @@
 
 
 <p align="center">
-<a  href="https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g">
-<img src="https://img.shields.io/badge/JOIN US ON SLACK-4A154B?style=for-the-badge&logo=slack&logoColor=white" />
+<a  href="http://hf.co/join/discord">
+<img src="https://img.shields.io/badge/JOIN US ON DISCORD-7289DA?style=for-the-badge&logo=discord&logoColor=white" />
 </a>
 <a href="https://linkedin.com/company/argilla-io">
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
@@ -46,7 +46,6 @@
 <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white" />
 </a>
 </p>
-
 <br>
 
 <h3>
@@ -133,8 +132,3 @@ This will run the latest quickstart docker image with 3 users `owner`, `admin`, 
 - `ANNOTATOR_PASSWORD`: This sets a custom password for login into the app with the `argilla` username. The default password
   is `12345678`. By setting up a custom password you can use your own password to login into the app.
 - `ARGILLA_WORKSPACE`: The name of a workspace that will be created and used by default for admin and annotator users. The default value will be the one defined by `ADMIN_USERNAME` environment variable.
-- `LOAD_DATASETS`: This variables will allow you to load sample datasets. The default value will be `full`. The
-  supported values for this variable is as follows:
-    1. `single`: Load single datasets for Feedback task.
-    2. `full`: Load all the sample datasets for NLP tasks (Feedback, TokenClassification, TextClassification, Text2Text)
-    3. `none`: No datasets being loaded.

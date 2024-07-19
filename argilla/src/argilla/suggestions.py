@@ -121,7 +121,7 @@ class Suggestion(Resource):
 
     @classmethod
     def from_model(cls, model: SuggestionModel, dataset: "Dataset") -> "Suggestion":
-        question = dataset.settings.question_by_id(model.question_id)
+        question = dataset.settings.questions[model.question_id]
         model.question_name = question.name
         model.value = cls.__from_model_value(model.value, question)
 
@@ -131,7 +131,7 @@ class Suggestion(Resource):
         if self.record is None or self.record.dataset is None:
             return self._model
 
-        question = self.record.dataset.settings.question_by_name(self.question_name)
+        question = self.record.dataset.settings.questions[self.question_name]
         return SuggestionModel(
             value=self.__to_model_value(self.value, question),
             question_name=self.question_name,

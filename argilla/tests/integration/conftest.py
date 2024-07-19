@@ -15,6 +15,7 @@
 import pytest
 
 import argilla as rg
+from argilla import Argilla, Workspace
 
 
 @pytest.fixture(scope="session")
@@ -34,3 +35,18 @@ def cleanup(client: rg.Argilla):
     for user in client.users:
         if user.username.startswith("test_"):
             user.delete()
+
+
+@pytest.fixture
+def workspace(client: Argilla) -> Workspace:
+    ws_name = "test-workspace"
+
+    workspace = client.workspaces(ws_name)
+    if workspace is None:
+        workspace = Workspace(name=ws_name).create()
+    yield workspace
+
+    for dataset in workspace.list_datasets():
+        dataset.delete()
+
+    workspace.delete()

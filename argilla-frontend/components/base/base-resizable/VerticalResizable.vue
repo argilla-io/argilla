@@ -59,8 +59,8 @@ export default {
   },
   methods: {
     limitElementWidth(element) {
-      element.style["max-width"] = "65%";
-      element.style["min-width"] = "35%";
+      element.style["max-width"] = "62%";
+      element.style["min-width"] = "38%";
     },
     savePositionOnStartResizing(e) {
       this.leftSidePrevPosition = {
@@ -112,6 +112,7 @@ $resizable-bar-width: $base-space;
   display: flex;
   justify-content: space-between;
   height: 100%;
+  min-height: 0;
   width: 100%;
   &.--v-resizing {
     user-select: none;

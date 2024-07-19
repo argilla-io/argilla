@@ -32,7 +32,7 @@ RESOURCE_REPR_CONFIG = {
 class ResourceHTMLReprMixin:
     def _resource_to_table_row(self, resource) -> Dict[str, Any]:
         row = {}
-        dumped_resource_model = resource._model.model_dump()
+        dumped_resource_model = resource.api_model().model_dump()
         resource_name = resource.__class__.__name__
         config = RESOURCE_REPR_CONFIG[resource_name].copy()
         len_column = config.pop("len_column", None)

@@ -16,6 +16,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Iterable
 from uuid import UUID, uuid4
 
+from argilla._exceptions import ArgillaError
 from argilla._models import (
     MetadataModel,
     RecordModel,
@@ -103,7 +104,7 @@ class Record(Resource):
 
     def __repr__(self) -> str:
         return (
-            f"Record(id={self.id},fields={self.fields},metadata={self.metadata},"
+            f"Record(id={self.id},status={self.status},fields={self.fields},metadata={self.metadata},"
             f"suggestions={self.suggestions},responses={self.responses})"
         )
 
@@ -148,6 +149,10 @@ class Record(Resource):
         return self.__vectors
 
     @property
+    def status(self) -> str:
+        return self._model.status
+
+    @property
     def _server_id(self) -> Optional[UUID]:
         return self._model.id
 
@@ -164,6 +169,7 @@ class Record(Resource):
             vectors=self.vectors.api_models(),
             responses=self.responses.api_models(),
             suggestions=self.suggestions.api_models(),
+            status=self.status,
         )
 
     def serialize(self) -> Dict[str, Any]:
@@ -185,6 +191,7 @@ class Record(Resource):
         """
         id = str(self.id) if self.id else None
         server_id = str(self._model.id) if self._model.id else None
+        status = self.status
         fields = self.fields.to_dict()
         metadata = self.metadata.to_dict()
         suggestions = self.suggestions.to_dict()
@@ -198,6 +205,7 @@ class Record(Resource):
             "suggestions": suggestions,
             "responses": responses,
             "vectors": vectors,
+            "status": status,
             "_server_id": server_id,
         }
 
@@ -245,7 +253,7 @@ class Record(Resource):
         Returns:
             A Record object.
         """
-        return cls(
+        instance = cls(
             id=model.external_id,
             fields=model.fields,
             metadata={meta.name: meta.value for meta in model.metadata},
@@ -257,9 +265,14 @@ class Record(Resource):
                 for response in UserResponse.from_model(response_model, dataset=dataset)
             ],
             suggestions=[Suggestion.from_model(model=suggestion, dataset=dataset) for suggestion in model.suggestions],
-            _dataset=dataset,
-            _server_id=model.id,
         )
+
+        # set private attributes
+        instance._dataset = dataset
+        instance._model.id = model.id
+        instance._model.status = model.status
+
+        return instance
 
 
 class RecordFields(dict):
@@ -324,6 +337,9 @@ class RecordResponses(Iterable[Response]):
     def __getitem__(self, name: str):
         return self.__responses_by_question_name[name]
 
+    def __len__(self):
+        return len(self.__responses)
+
     def __repr__(self) -> str:
         return {k: [{"value": v["value"]} for v in values] for k, values in self.to_dict().items()}.__repr__()
 
@@ -335,7 +351,7 @@ class RecordResponses(Iterable[Response]):
         response_dict = defaultdict(list)
         for response in self.__responses:
             response_dict[response.question_name].append({"value": response.value, "user_id": str(response.user_id)})
-        return response_dict
+        return dict(response_dict)
 
     def api_models(self) -> List[UserResponseModel]:
         """Returns a list of ResponseModel objects."""
@@ -345,7 +361,7 @@ class RecordResponses(Iterable[Response]):
             responses_by_user_id[response.user_id].append(response)
 
         return [
-            UserResponse(answers=responses, _record=self.record).api_model()
+            UserResponse(responses=responses, _record=self.record).api_model()
             for responses in responses_by_user_id.values()
         ]
 
@@ -354,9 +370,20 @@ class RecordResponses(Iterable[Response]):
         Args:
             response: The response to add.
         """
+        self._check_response_already_exists(response)
+
         response.record = self.record
         self.__responses.append(response)
         self.__responses_by_question_name[response.question_name].append(response)
+
+    def _check_response_already_exists(self, response: Response) -> None:
+        """Checks if a response for the same question name and user id already exists"""
+        for response in self.__responses_by_question_name[response.question_name]:
+            if response.user_id == response.user_id:
+                raise ArgillaError(
+                    f"Response for question with name {response.question_name!r} and user id {response.user_id!r} "
+                    f"already found. The responses for the same question name do not support more than one user"
+                )
 
 
 class RecordSuggestions(Iterable[Suggestion]):

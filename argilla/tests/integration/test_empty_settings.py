@@ -21,20 +21,7 @@ from argilla import Argilla, Dataset, Settings, Workspace, TextQuestion, TextFie
 from argilla._exceptions import SettingsError
 
 
-@pytest.fixture
-def workspace(client: Argilla) -> Workspace:
-    workspace = client.workspaces("test-workspace")
-    if not workspace.exists():
-        workspace.create()
-    yield workspace
-
-    for dataset in workspace.list_datasets():
-        client.api.datasets.delete(dataset.id)
-
-    workspace.delete()
-
-
-def test_dataset_empty_settings(client: Argilla, workspace: Workspace) -> Dataset:
+def test_dataset_empty_settings(client: Argilla, workspace: Workspace):
     name = "".join(random.choices(ascii_lowercase, k=16))
     settings = Settings()
     dataset = Dataset(

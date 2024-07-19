@@ -56,13 +56,13 @@ export default {
           },
           actions: [
             {
-              name: "copy",
+              name: "copy-name",
               icon: "copy",
-              title: "Copy url to clipboard",
+              title: "Copy name to clipboard",
               tooltip: "Copied",
             },
             {
-              name: "copy",
+              name: "copy-url",
               icon: "link",
               title: "Copy url to clipboard",
               tooltip: "Copied",
@@ -102,7 +102,7 @@ export default {
           component: {
             name: "DatasetProgress",
             props: (item) => ({
-              dataset: item,
+              datasetId: item.id,
             }),
           },
         },
@@ -179,7 +179,7 @@ export default {
         case "go-to-settings":
           this.goToSetting(dataset);
           break;
-        case "copy":
+        case "copy-url":
           this.copyUrl(dataset);
           break;
         case "copy-name":
