@@ -452,6 +452,17 @@ retrieved_dataset = client.datasets(name="my_dataset")
 retrieved_dataset = client.datasets(name="my_dataset", workspace=workspace)
 ```
 
+You can also use the user `id` to fetch the dataset:
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets(id="<uuid-or-uuid-string>")
+```
+
+If the dataset does not exist for the given id, the call will return `None`.
+
 ## Check dataset existence
 
 You can check if a dataset exists. The `client.datasets` method will return `None` if the dataset was not found.
