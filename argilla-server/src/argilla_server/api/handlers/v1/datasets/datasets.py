@@ -147,23 +147,7 @@ async def get_current_user_dataset_metrics(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return {
-        "records": {
-            "count": await datasets.count_records_by_dataset_id(db, dataset_id),
-        },
-        "responses": {
-            "count": await datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
-            "submitted": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.submitted
-            ),
-            "discarded": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.discarded
-            ),
-            "draft": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.draft
-            ),
-        },
-    }
+    return await datasets.get_user_dataset_metrics(db, current_user.id, dataset.id)
 
 
 @router.get("/datasets/{dataset_id}/progress", response_model=DatasetProgress)
@@ -189,7 +173,7 @@ async def create_dataset(
 ):
     await authorize(current_user, DatasetPolicy.create(dataset_create.workspace_id))
 
-    return await datasets.create_dataset(db, dataset_create)
+    return await datasets.create_dataset(db, dataset_create.dict())
 
 
 @router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
@@ -302,4 +286,4 @@ async def update_dataset(
 
     await authorize(current_user, DatasetPolicy.update(dataset))
 
-    return await datasets.update_dataset(db, dataset, dataset_update)
+    return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))

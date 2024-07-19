@@ -24,12 +24,11 @@ from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
 from argilla.settings._field import TextField
 from argilla.settings._metadata import MetadataType, MetadataField
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
+from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
-
 
 __all__ = ["Settings"]
 
@@ -62,7 +61,7 @@ class Settings(Resource):
         """
         super().__init__(client=_dataset._client if _dataset else None)
 
-        self.__questions = questions or []
+        self.__questions = QuestionsProperties(self, questions)
         self.__fields = SettingsProperties(self, fields)
         self.__vectors = SettingsProperties(self, vectors)
         self.__metadata = SettingsProperties(self, metadata)
@@ -85,12 +84,12 @@ class Settings(Resource):
         self.__fields = SettingsProperties(self, fields)
 
     @property
-    def questions(self) -> List[QuestionType]:
+    def questions(self) -> "SettingsProperties":
         return self.__questions
 
     @questions.setter
     def questions(self, questions: List[QuestionType]):
-        self.__questions = questions
+        self.__questions = QuestionsProperties(self, questions)
 
     @property
     def vectors(self) -> "SettingsProperties":
@@ -178,7 +177,7 @@ class Settings(Resource):
 
         self._update_dataset_related_attributes()
         self.__fields.create()
-        self._create_questions()
+        self.__questions.create()
         self.__vectors.create()
         self.__metadata.create()
 
@@ -197,23 +196,11 @@ class Settings(Resource):
         self._update_last_api_call()
         return self
 
-    def question_by_name(self, question_name: str) -> QuestionType:
-        for question in self.questions:
-            if question.name == question_name:
-                return question
-        raise ValueError(f"Question with name {question_name} not found")
-
-    def question_by_id(self, question_id: UUID) -> QuestionType:
-        property = self.schema_by_id.get(question_id)
-        if isinstance(property, QuestionPropertyBase):
-            return property
-        raise ValueError(f"Question with id {question_id} not found")
-
     def serialize(self):
         try:
             return {
                 "guidelines": self.guidelines,
-                "questions": self.__serialize_questions(self.questions),
+                "questions": self.__questions.serialize(),
                 "fields": self.__fields.serialize(),
                 "vectors": self.vectors.serialize(),
                 "metadata": self.metadata.serialize(),
@@ -326,16 +313,6 @@ class Settings(Resource):
         )
         self._client.api.datasets.update(dataset_model)
 
-    def _create_questions(self) -> None:
-        for question in self.__questions:
-            try:
-                question_model = self._client.api.questions.create(
-                    dataset_id=self._dataset.id, question=question._model
-                )
-                question._model = question_model
-            except ArgillaAPIError as e:
-                raise SettingsError(f"Failed to create question {question.name}") from e
-
     def _validate_empty_settings(self):
         if not all([self.fields, self.questions]):
             message = "Fields and questions are required"
@@ -366,9 +343,6 @@ class Settings(Resource):
 
         return guidelines
 
-    def __serialize_questions(self, questions: List[QuestionType]):
-        return [question.serialize() for question in questions]
-
 
 Property = Union[TextField, VectorField, MetadataType, QuestionType]
 
@@ -386,10 +360,15 @@ class SettingsProperties(Sequence[Property]):
         for property in properties or []:
             self.add(property)
 
-    def __getitem__(self, key: Union[str, int]) -> Optional[Property]:
+    def __getitem__(self, key: Union[UUID, str, int]) -> Optional[Property]:
         if isinstance(key, int):
             return list(self._properties_by_name.values())[key]
-        return self._properties_by_name.get(key)
+        elif isinstance(key, UUID):
+            for prop in self._properties_by_name.values():
+                if prop.id and prop.id == key:
+                    return prop
+        else:
+            return self._properties_by_name.get(key)
 
     def __iter__(self) -> Iterator[Property]:
         return iter(self._properties_by_name.values())
@@ -434,3 +413,28 @@ class SettingsProperties(Sequence[Property]):
 
         if property.name in dir(self):
             raise ValueError(f"Property with name {property.name!r} conflicts with an existing attribute")
+
+
+class QuestionsProperties(SettingsProperties[QuestionType]):
+    """
+    This class is used to align questions with the rest of the settings.
+
+    Since questions are not aligned with the Resource class definition, we use this
+    class to work with questions as we do with fields, vectors, or metadata (specially when creating questions).
+
+    Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
+    """
+
+    def create(self):
+        for question in self:
+            try:
+                self._create_question(question)
+            except ArgillaAPIError as e:
+                raise SettingsError(f"Failed to create question {question.name}") from e
+
+    def _create_question(self, question: QuestionType) -> None:
+        question_model = self._settings._client.api.questions.create(
+            dataset_id=self._settings.dataset.id,
+            question=question.api_model(),
+        )
+        question._model = question_model

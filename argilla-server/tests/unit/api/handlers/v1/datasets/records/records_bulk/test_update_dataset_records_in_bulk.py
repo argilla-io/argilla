@@ -35,9 +35,9 @@ from tests.factories import (
 
 
 @pytest.mark.asyncio
-class TestUpdateDatasetRecords:
+class TestUpdateDatasetRecordsInBulk:
     def url(self, dataset_id: UUID) -> str:
-        return f"/api/v1/datasets/{dataset_id}/records"
+        return f"/api/v1/datasets/{dataset_id}/records/bulk"
 
     async def test_update_dataset_records(
         self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
@@ -121,7 +121,7 @@ class TestUpdateDatasetRecords:
             dataset=dataset,
         )
 
-        response = await async_client.patch(
+        response = await async_client.put(
             self.url(dataset.id),
             headers=owner_auth_header,
             json={
@@ -180,7 +180,7 @@ class TestUpdateDatasetRecords:
             },
         )
 
-        assert response.status_code == 204
+        assert response.status_code == 200
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 6

@@ -102,7 +102,7 @@ export default {
           component: {
             name: "DatasetProgress",
             props: (item) => ({
-              dataset: item,
+              datasetId: item.id,
             }),
           },
         },

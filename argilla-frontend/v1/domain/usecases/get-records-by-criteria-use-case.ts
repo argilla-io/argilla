@@ -4,7 +4,11 @@ import { Suggestion } from "../entities/question/Suggestion";
 import { RecordAnswer } from "../entities/record/RecordAnswer";
 import { RecordCriteria } from "../entities/record/RecordCriteria";
 import { IRecordStorage } from "../services/IRecordStorage";
-import { Records, RecordsWithReference } from "../entities/record/Records";
+import {
+  EmptyQueueRecords,
+  Records,
+  RecordsWithReference,
+} from "../entities/record/Records";
 import { Record } from "../entities/record/Record";
 import { IQuestionRepository } from "../services/IQuestionRepository";
 import {
@@ -31,6 +35,23 @@ export class GetRecordsByCriteriaUseCase {
 
     const [recordsFromBackend, questionsFromBackend, fieldsFromBackend] =
       await Promise.all([getRecords, getQuestions, getFields]);
+
+    if (recordsFromBackend.records.length === 0) {
+      return new EmptyQueueRecords(
+        criteria,
+        questionsFromBackend.map((question) => {
+          return new Question(
+            question.id,
+            question.name,
+            question.description,
+            datasetId,
+            question.title,
+            question.required,
+            question.settings
+          );
+        })
+      );
+    }
 
     const recordsToAnnotate = recordsFromBackend.records.map(
       (record, index) => {
@@ -102,6 +123,7 @@ export class GetRecordsByCriteriaUseCase {
           record.query_score,
           recordPage,
           record.metadata,
+          record.status,
           record.inserted_at,
           record.updated_at
         );
@@ -143,18 +165,17 @@ export class GetRecordsByCriteriaUseCase {
           0,
           0,
           referenceRecordFromBackend.metadata,
+          referenceRecordFromBackend.status,
           referenceRecordFromBackend.inserted_at,
           referenceRecordFromBackend.updated_at
         );
       }
 
-      const recordsWithReference = new RecordsWithReference(
+      return new RecordsWithReference(
         recordsToAnnotate,
         recordsFromBackend.total,
         referenceRecord
       );
-
-      return recordsWithReference;
     }
 
     return new Records(recordsToAnnotate, recordsFromBackend.total);
