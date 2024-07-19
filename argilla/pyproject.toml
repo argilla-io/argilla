@@ -4,7 +4,7 @@ description = "The Argilla python server SDK"
 authors = [
     {name = "Argilla", email = "contact@argilla.io"},
 ]
-requires-python = ">=3.9,<=3.12"
+requires-python = ">= 3.9, <3.13"
 readme = "README.md"
 license = {text = "Apache 2.0"}
 
@@ -17,6 +17,7 @@ dependencies = [
     "tqdm>=4.60.0",
     "rich>=10.0.0",
     "datasets>=2.0.0",
+    "pyarrow < 16.0.0",
 ]
 
 legacy = [
