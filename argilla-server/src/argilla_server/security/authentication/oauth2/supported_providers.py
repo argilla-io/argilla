@@ -42,37 +42,37 @@ class GitHubClientProvider(OAuth2ClientProvider):
     name = "github"
 
 
+HUGGINGFACE_PREFERRED_USERNAME = "preferred_username"
+HUGGINGFACE_ROLE_IN_ORG = "roleInOrg"
+HUGGINGFACE_ROLES_MAPPING = {"admin": UserRole.owner}
+
+_LOGGER = logging.getLogger("argilla.security.oauth2.providers")
+
+
+def _resolve_argilla_role(user: dict) -> Union[str, None]:
+    # TODO: Create module for huggingface integrations: argilla_server.huggingface.spaces (oauth,...)
+    from argilla_server.api.schemas.v1.settings import HuggingfaceSettings
+
+    space_author_name = HuggingfaceSettings().space_author_name
+    if space_author_name == user[HUGGINGFACE_PREFERRED_USERNAME]:
+        return UserRole.owner
+
+    org = None
+    for org in user.get("orgs") or []:
+        if space_author_name == org[HUGGINGFACE_PREFERRED_USERNAME]:
+            break
+
+    if org:
+        if HUGGINGFACE_ROLE_IN_ORG not in org:
+            _LOGGER.warning("Cannot find user role in org. Review permissions")
+        return HUGGINGFACE_ROLES_MAPPING.get(org[HUGGINGFACE_ROLE_IN_ORG])
+
+
 # TODO: Move each provided to separate module
 class HuggingfaceClientProvider(OAuth2ClientProvider, LoggingMixin):
     """Specialized HuggingFace OAuth2 provider."""
 
-    _LOGGER = logging.getLogger("argilla.security.oauth2.huggingface")
-
-    _PREFERRED_USERNAME = "preferred_username"
-    _ROLE_IN_ORG = "roleInOrg"
-
-    _ROLES_MAPPING = {"admin": UserRole.owner}
-
-    @classmethod
-    def _resolve_argilla_role(cls, user: dict) -> Union[str, None]:
-        # TODO: Create module for huggingface integrations: argilla_server.huggingface.spaces (oauth,...)
-        from argilla_server.api.schemas.v1.settings import HuggingfaceSettings
-
-        space_author_name = HuggingfaceSettings().space_author_name
-        if space_author_name == user[cls._PREFERRED_USERNAME]:
-            return UserRole.owner
-
-        org = None
-        for org in user.get("orgs") or []:
-            if space_author_name == org[cls._PREFERRED_USERNAME]:
-                break
-
-        if org:
-            if cls._ROLE_IN_ORG not in org:
-                cls._LOGGER.warning("Cannot find user role in org. Review permissions")
-            return cls._ROLES_MAPPING.get(org[cls._ROLE_IN_ORG])
-
-    claims = Claims(username=_PREFERRED_USERNAME, role=_resolve_argilla_role)
+    claims = Claims(username=HUGGINGFACE_PREFERRED_USERNAME, role=_resolve_argilla_role)
     backend_class = HuggingfaceOpenId
     name = "huggingface"
 
