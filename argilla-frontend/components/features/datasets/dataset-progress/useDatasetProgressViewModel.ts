@@ -36,7 +36,6 @@ export const useDatasetProgressViewModel = ({
       },
     ];
 
-
     isLoaded.value = true;
   });
 
