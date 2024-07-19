@@ -42,6 +42,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
             vectors=[rg.VectorField(name="vector", dimensions=10)],
             guidelines="guidelines",
             allow_extra_metadata=True,
+            distribution=2
         )
         ```
 
@@ -96,6 +97,7 @@ settings = rg.Settings(
     guidelines="Select the sentiment of the prompt.",
     fields=[rg.TextField(name="prompt", use_markdown=True)],
     questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+    distribution=rg.TaskDistribution(min_submitted=3)
 )
 
 dataset1 = rg.Dataset(name="sentiment_analysis_1", settings=settings)
@@ -394,6 +396,19 @@ It is good practice to use at least the dataset guidelines if not both methods. 
 
 !!! tip
     If you want further guidance on good practices for guidelines during the project development, check our [blog post](https://argilla.io/blog/annotation-guidelines-practices/).
+
+### Distribution
+
+When working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You can use the `TaskDistribution` settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in your team members' pending queues.
+
+```python
+rg.TaskDistribution(
+    min_submitted = 2
+)
+```
+
+> To learn more about how to distribute the task among team members in the [Distribute the annotation guide](../how_to_guides/distribution.md).
+
 
 ## List datasets
 
