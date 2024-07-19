@@ -110,6 +110,7 @@ export default {
     flex: 1;
     flex-direction: column;
     gap: $base-space * 2;
+    margin-bottom: $base-space;
     max-width: 800px;
     padding-top: $base-space;
 

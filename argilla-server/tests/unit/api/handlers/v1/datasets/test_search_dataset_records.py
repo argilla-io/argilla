@@ -17,7 +17,7 @@ from uuid import UUID, uuid4
 import pytest
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_LE
 from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import RecordInclude, SortOrder
+from argilla_server.enums import RecordInclude, SortOrder, RecordStatus
 from argilla_server.search_engine import (
     AndFilter,
     Order,
@@ -118,6 +118,7 @@ class TestSearchDatasetRecords:
                 {
                     "record": {
                         "id": str(record_a.id),
+                        "status": RecordStatus.pending,
                         "fields": {
                             "sentiment": "neutral",
                             "text": "This is a text",
@@ -153,6 +154,7 @@ class TestSearchDatasetRecords:
                 {
                     "record": {
                         "id": str(record_b.id),
+                        "status": RecordStatus.pending,
                         "fields": {
                             "sentiment": "neutral",
                             "text": "This is a text",
@@ -314,12 +316,9 @@ class TestSearchDatasetRecords:
                     RangeFilter(scope=SuggestionFilterScope(question=question.name, property="score"), ge=0.5),
                 ]
             ),
-            metadata_filters=[],
             offset=0,
             limit=50,
             query=None,
-            sort_by=None,
-            user_response_status_filter=None,
         )
 
     async def test_with_sort(
@@ -365,12 +364,9 @@ class TestSearchDatasetRecords:
                 Order(scope=ResponseFilterScope(question=question.name), order=SortOrder.asc),
                 Order(scope=SuggestionFilterScope(question=question.name, property="score"), order=SortOrder.desc),
             ],
-            metadata_filters=[],
             offset=0,
             limit=50,
             query=None,
-            sort_by=None,
-            user_response_status_filter=None,
         )
 
     async def test_with_invalid_filter(self, async_client: AsyncClient, owner_auth_header: dict):
