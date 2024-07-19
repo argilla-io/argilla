@@ -181,6 +181,17 @@ def configure_telemetry():
 
 
 async def configure_database():
+    async def create_allowed_workspaces(db: AsyncSession):
+        from argilla_server.security.settings import settings as security_settings
+
+        if not security_settings.oauth.enabled:
+            return
+
+        for allowed_workspace in security_settings.oauth.allowed_workspaces:
+            if await accounts.get_workspace_by_name(db, name=allowed_workspace.name) is None:
+                _LOGGER.info(f"Creating workspace with name {allowed_workspace.name!r}")
+                await accounts.create_workspace(db, dict(name=allowed_workspace.name))
+
     async def check_default_user(db: AsyncSession):
         def _user_has_default_credentials(user: User):
             return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
@@ -195,6 +206,7 @@ async def configure_database():
 
     async with contextlib.asynccontextmanager(get_async_db)() as db:
         await check_default_user(db)
+        await create_allowed_workspaces(db)
 
 
 async def configure_search_engine():
