@@ -24,6 +24,7 @@ from argilla.client import Argilla
 from argilla.datasets._export import DiskImportExportMixin, HubImportExportMixin
 from argilla.records import DatasetRecords
 from argilla.settings import Settings
+from argilla.settings._task_distribution import TaskDistribution
 from argilla.workspaces._resource import Workspace
 
 __all__ = ["Dataset"]
@@ -133,6 +134,14 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         self._workspace = self._resolve_workspace()
         return self._workspace
 
+    @property
+    def distribution(self) -> TaskDistribution:
+        return self.settings.distribution
+
+    @distribution.setter
+    def distribution(self, value: TaskDistribution) -> None:
+        self.settings.distribution = value
+
     #####################
     #  Core methods     #
     #####################
@@ -197,7 +206,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             if workspace is None:
                 available_workspace_names = [ws.name for ws in self._client.workspaces]
                 raise NotFoundError(
-                    f"Workspace with name { workspace} not found. Available workspaces: {available_workspace_names}"
+                    f"Workspace with name {workspace} not found. Available workspaces: {available_workspace_names}"
                 )
         elif isinstance(workspace, UUID):
             ws_model = self._client.api.workspaces.get(workspace)

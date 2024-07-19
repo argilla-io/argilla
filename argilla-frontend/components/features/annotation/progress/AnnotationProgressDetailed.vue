@@ -16,31 +16,31 @@
   -->
 
 <template>
-  <div v-if="datasetMetrics.hasMetrics" class="metrics">
-    <BaseCircleProgress class="metrics__donut" :slices="progressItems" />
-    <ul class="metrics__list">
+  <div v-if="metrics.hasMetrics">
+    <ul class="my-progress__list">
       <li
         v-for="(status, index) in progressItems"
         :key="index"
-        class="metrics__list__item"
+        class="my-progress__list__item"
       >
-        <span
-          class="color-bullet"
-          :style="{ backgroundColor: status.color }"
-        ></span>
-        <label class="metrics__list__name" v-text="status.name" />
-        <span
-          class="metrics__list__counter"
-          v-text="`(${getFormattedProgress(status.value)})`"
-        />
+        <span>
+          <span
+            class="color-bullet"
+            :style="{ backgroundColor: status.color }"
+          ></span>
+          <label class="my-progress__list__name" v-text="status.name" />
+        </span>
+        <span class="my-progress__list__counter" v-text="status.value" />
       </li>
     </ul>
+    <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
+    <TeamProgress :datasetId="datasetId" />
   </div>
 </template>
 
 <script>
 import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
-import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
+import { useAnnotationProgressViewModel } from "./useAnnotationProgressViewModel";
 
 export default {
   props: {
@@ -59,44 +59,39 @@ export default {
         {
           name: RecordStatus.submitted.name,
           color: RecordStatus.submitted.color,
-          value: this.datasetMetrics.submitted,
-          percent: this.datasetMetrics.percentage.submitted,
+          value: this.metrics.submitted,
+          percent: this.metrics.percentage.submitted,
         },
         {
           name: RecordStatus.draft.name,
           color: RecordStatus.draft.color,
-          value: this.datasetMetrics.draft,
-          percent: this.datasetMetrics.percentage.draft,
+          value: this.metrics.draft,
+          percent: this.metrics.percentage.draft,
         },
         {
           name: RecordStatus.discarded.name,
           color: RecordStatus.discarded.color,
-          value: this.datasetMetrics.discarded,
-          percent: this.datasetMetrics.percentage.discarded,
+          value: this.metrics.discarded,
+          percent: this.metrics.percentage.discarded,
         },
         {
           name: RecordStatus.pending.name,
           color: RecordStatus.pending.color,
-          value: this.datasetMetrics.pending,
-          percent: this.datasetMetrics.percentage.pending,
+          value: this.metrics.pending,
+          percent: this.metrics.percentage.pending,
         },
       ];
     },
   },
-  methods: {
-    getFormattedProgress(progress) {
-      return progress && this.$options.filters.formatNumber(progress);
-    },
-  },
   setup(props) {
-    return useFeedbackTaskProgressViewModel(props);
+    return useAnnotationProgressViewModel(props);
   },
 };
 </script>
 
 <style lang="scss" scoped>
-$bullet-size: 10px;
-.metrics {
+$bullet-size: 8px;
+.my-progress {
   display: flex;
   align-items: center;
   gap: $base-space * 4;
@@ -106,28 +101,46 @@ $bullet-size: 10px;
     flex-shrink: 0;
   }
 }
+.team-progress {
+  &__title {
+    text-transform: uppercase;
+    color: $black-54;
+    font-weight: 500;
+  }
+}
 .color-bullet {
+  display: inline-flex;
   height: $bullet-size;
   width: $bullet-size;
+  margin-right: 4px;
   border-radius: $border-radius-rounded;
 }
 
-.metrics__list {
-  display: grid;
-  grid-template-columns: auto auto;
-  column-gap: $base-space * 2;
-  row-gap: $base-space;
+.my-progress__list {
+  display: flex;
   list-style: none;
+  gap: $base-space;
   padding-left: 0;
+  margin-top: 0;
+  margin-bottom: $base-space * 3;
   &__item {
+    background: palette(grey, 700);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: $base-space;
-    @include font-size(13px);
-    min-width: 140px;
+    padding: $base-space;
+    width: 100%;
+    border-radius: $border-radius;
   }
   &__name {
     text-transform: capitalize;
+    color: $black-54;
+    @include font-size(12px);
+  }
+  &__counter {
+    font-weight: 600;
+    color: $black-87;
+    @include font-size(14px);
   }
 }
 </style>

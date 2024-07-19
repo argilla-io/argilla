@@ -1,4 +1,5 @@
 import { PageCriteria } from "../page/PageCriteria";
+import { Question } from "../question/Question";
 import { Record } from "./Record";
 import { RecordStatus } from "./RecordAnswer";
 import { RecordCriteria } from "./RecordCriteria";
@@ -6,13 +7,10 @@ import { RecordCriteria } from "./RecordCriteria";
 export class Records {
   constructor(
     public records: Record[] = [],
-    public readonly total: number = 0
+    public readonly total: number = 0,
+    public readonly hasRecordsToAnnotate: boolean = records.length > 0
   ) {
     this.arrangeQueue();
-  }
-
-  get hasRecordsToAnnotate() {
-    return this.records.length > 0;
   }
 
   existsRecordOn(criteria: PageCriteria) {
@@ -130,5 +128,25 @@ export class Records {
 export class RecordsWithReference extends Records {
   constructor(records: Record[], total, public readonly reference: Record) {
     super(records, total);
+  }
+}
+
+export class EmptyQueueRecords extends Records {
+  constructor(criteria: RecordCriteria, questions: Question[] = []) {
+    const nullRecord = new Record(
+      undefined,
+      criteria.datasetId,
+      questions,
+      [],
+      null,
+      [],
+      0,
+      criteria.page.client.page,
+      null,
+      null,
+      null
+    );
+
+    super([nullRecord], -1, false);
   }
 }

@@ -1,21 +1,9 @@
 <template>
   <span class="bulk__container">
     <LoadLine v-if="isSubmitting || isDraftSaving || isDiscarding" />
-
-    <div v-if="!records.hasRecordsToAnnotate">
-      <section class="wrapper__records">
-        <DatasetFilters :recordCriteria="recordCriteria" />
-      </section>
-
-      <div class="wrapper--empty">
-        <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-      </div>
-    </div>
-
     <VerticalResizable
-      v-else
-      :id="`${recordCriteria.datasetId}-r-v-rz`"
       class="wrapper"
+      :id="`${recordCriteria.datasetId}-r-v-rz`"
     >
       <template #left>
         <HorizontalResizable
@@ -98,7 +86,11 @@
                 />
                 <PaginationFeedbackTask :recordCriteria="recordCriteria" />
               </div>
-              <div ref="bulkScrollableArea" class="bulk__records snap">
+              <div
+                ref="bulkScrollableArea"
+                class="bulk__records snap"
+                v-if="records.hasRecordsToAnnotate"
+              >
                 <Record
                   class="snap-child"
                   :class="{
@@ -113,6 +105,9 @@
                   :selectedRecords="selectedRecords"
                   @on-select-record="onSelectRecord"
                 />
+              </div>
+              <div v-else class="wrapper--empty">
+                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
               </div>
             </section>
           </template>
@@ -155,15 +150,15 @@
             />
           </template>
           <template #downHeader>
-            <p v-text="$t('metrics.progress')" />
             <AnnotationProgress
               class="annotation-progress"
               :datasetId="recordCriteria.datasetId"
-              enableFetch
             />
           </template>
+          <template #downHeaderExpanded>
+            <p v-text="$t('metrics.progress.my')" />
+          </template>
           <template #downContent>
-            <AnnotationProgress :datasetId="recordCriteria.datasetId" />
             <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
           </template>
         </HorizontalResizable>
@@ -279,11 +274,9 @@ export default {
       return this.affectAllRecords && this.numberOfSelectedRecords > 100;
     },
     spansQuestionsWithSelectedEntities() {
-      return (
-        this.record?.questions
-          .filter((q) => q.isSpanType)
-          .filter((s) => s.answer.options.some((e) => e.isSelected)) ?? []
-      );
+      return this.record.questions
+        .filter((q) => q.isSpanType)
+        .filter((s) => s.answer.options.some((e) => e.isSelected));
     },
   },
   methods: {
@@ -554,6 +547,12 @@ export default {
 .annotation-progress {
   .--expanded & {
     display: none;
+  }
+}
+.annotation-progress__title {
+  display: none;
+  .--expanded & {
+    display: block;
   }
 }
 [data-title] {

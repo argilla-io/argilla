@@ -9,9 +9,9 @@ export default {};
 </script>
 
 <styles lang="scss" scoped>
-$progressHeight: 12px;
+$progressHeight: 14px;
 $progressBackgroundColor: #f2f2f2;
-$borderRadius: 10px;
+$borderRadius: 3px;
 
 .progress__wrapper {
   height: $progressHeight;
