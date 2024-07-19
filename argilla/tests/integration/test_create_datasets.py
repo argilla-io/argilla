@@ -90,8 +90,7 @@ class TestCreateDatasets:
         assert schema["question"].name == "question"
         assert schema["question"].values == [1, 2, 3, 4, 5]
 
-    def test_copy_datasets_from_different_clients(self, client: Argilla):
-        dataset_name = f"test_dataset_{uuid.uuid4()}"
+    def test_copy_datasets_from_different_clients(self, client: Argilla, dataset_name: str):
         dataset = Dataset(
             name=dataset_name,
             settings=Settings(
@@ -122,8 +121,7 @@ class TestCreateDatasets:
         for question in new_dataset.settings.questions:
             assert question.name == "question"
 
-    def test_create_a_dataset_copy(self, client: Argilla):
-        dataset_name = f"test_dataset{uuid.uuid4()}"
+    def test_create_a_dataset_copy(self, client: Argilla, dataset_name: str):
         dataset = Dataset(
             name=dataset_name,
             settings=Settings(
@@ -143,7 +141,7 @@ class TestCreateDatasets:
         new_dataset.records.log(records)
 
         assert len(list(dataset.records)) == len(list(new_dataset.records))
-        assert dataset.distribution == dataset_copy.distribution
+        assert dataset.distribution == new_dataset.distribution
 
     def test_create_dataset_with_custom_task_distribution(self, client: Argilla, dataset_name: str):
         task_distribution = TaskDistribution(min_submitted=4)
