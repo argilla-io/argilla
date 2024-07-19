@@ -13,12 +13,12 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import Annotated, List, Literal, Optional
+from typing import Annotated, List, Literal, Optional, Union
 from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import FieldType
-from argilla_server.pydantic_v1 import BaseModel, constr
+from argilla_server.pydantic_v1 import BaseModel, constr, HttpUrl
 from argilla_server.pydantic_v1 import Field as PydanticField
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
@@ -50,6 +50,11 @@ FieldTitle = Annotated[
 
 class TextFieldSettings(BaseModel):
     type: Literal[FieldType.text]
+    use_markdown: bool
+
+
+class TextFieldSettingsCreate(BaseModel):
+    type: Literal[FieldType.text]
     use_markdown: bool = False
 
 
@@ -58,12 +63,54 @@ class TextFieldSettingsUpdate(UpdateSchema):
     use_markdown: bool
 
 
+class ImageFieldSettings(BaseModel):
+    type: Literal[FieldType.image]
+    url: HttpUrl
+
+
+class ImageFieldSettingsCreate(BaseModel):
+    type: Literal[FieldType.image]
+    url: HttpUrl
+
+
+class ImageFieldSettingsUpdate(BaseModel):
+    type: Literal[FieldType.image]
+    url: HttpUrl
+
+
+FieldSettings = Annotated[
+    Union[
+        TextFieldSettings,
+        ImageFieldSettings,
+    ],
+    PydanticField(..., discriminator="type"),
+]
+
+
+FieldSettingsCreate = Annotated[
+    Union[
+        TextFieldSettingsCreate,
+        ImageFieldSettingsCreate,
+    ],
+    PydanticField(..., discriminator="type"),
+]
+
+
+FieldSettingsUpdate = Annotated[
+    Union[
+        TextFieldSettingsUpdate,
+        ImageFieldSettingsUpdate,
+    ],
+    PydanticField(..., discriminator="type"),
+]
+
+
 class Field(BaseModel):
     id: UUID
     name: str
     title: str
     required: bool
-    settings: TextFieldSettings
+    settings: FieldSettings
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
@@ -80,11 +127,11 @@ class FieldCreate(BaseModel):
     name: FieldName
     title: FieldTitle
     required: Optional[bool]
-    settings: TextFieldSettings
+    settings: FieldSettingsCreate
 
 
 class FieldUpdate(UpdateSchema):
     title: Optional[FieldTitle]
-    settings: Optional[TextFieldSettingsUpdate]
+    settings: Optional[FieldSettingsUpdate]
 
     __non_nullable_fields__ = {"title", "settings"}
