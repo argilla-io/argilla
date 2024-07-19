@@ -53,40 +53,44 @@ dataset = rg.Dataset(
 
 ---
 
-## Class References
-
-### `rg.LabelQuestion`
+## `rg.LabelQuestion`
 
 ::: src.argilla.settings._question.LabelQuestion
     options:
         heading_level: 3
+        show_root_toc_entry: false
 
-### `rg.MultiLabelQuestion`
+## `rg.MultiLabelQuestion`
 
 ::: src.argilla.settings._question.MultiLabelQuestion
     options:
         heading_level: 3
+        show_root_toc_entry: false
 
-### `rg.RankingQuestion`
+## `rg.RankingQuestion`
 
 ::: src.argilla.settings._question.RankingQuestion
     options:
         heading_level: 3
+        show_root_toc_entry: false
 
-### `rg.TextQuestion`
+## `rg.TextQuestion`
 
 ::: src.argilla.settings._question.TextQuestion
     options:
         heading_level: 3
+        show_root_toc_entry: false
 
-### `rg.RatingQuestion`
+## `rg.RatingQuestion`
 
 ::: src.argilla.settings._question.RatingQuestion
     options:
         heading_level: 3
+        show_root_toc_entry: false
 
-### `rg.SpanQuestion`
+## `rg.SpanQuestion`
 
 ::: src.argilla.settings._question.SpanQuestion
     options:
         heading_level: 3
+        show_root_toc_entry: false

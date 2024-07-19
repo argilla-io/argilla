@@ -9,7 +9,7 @@
             v-html="settings.dataset.name"
           />
         </div>
-        <base-action-tooltip tooltip="$t('copied')">
+        <base-action-tooltip :tooltip="$t('copied')">
           <base-button
             title="Copy to clipboard"
             class="secondary small"

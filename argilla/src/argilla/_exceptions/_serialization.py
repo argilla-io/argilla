@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla._exceptions._base import ArgillaErrorBase
+from argilla._exceptions._base import ArgillaError
 
 
-class ArgillaSerializeError(ArgillaErrorBase):
+class ArgillaSerializeError(ArgillaError):
     pass

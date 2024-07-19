@@ -39,6 +39,8 @@ $gap-width: $base-space * 2;
 .center-area {
   grid-area: center;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
   @include media("<desktop") {
     min-height: 0;
   }

@@ -128,15 +128,7 @@ class UserResponseStatusFilter(BaseModel):
 
     @property
     def response_statuses(self) -> List[ResponseStatus]:
-        return [
-            status.value
-            for status in self.statuses
-            if status not in [ResponseStatusFilter.pending, ResponseStatusFilter.missing]
-        ]
-
-    @property
-    def has_pending_status(self) -> bool:
-        return ResponseStatusFilter.pending in self.statuses or ResponseStatusFilter.missing in self.statuses
+        return [status.value for status in self.statuses if status == ResponseStatusFilter.pending]
 
 
 class SearchResponseItem(BaseModel):
@@ -292,10 +284,6 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     async def configure_index_vectors(self, vector_settings: VectorSettings):
-        pass
-
-    @abstractmethod
-    async def set_records_vectors(self, dataset: Dataset, vectors: Iterable[Vector]):
         pass
 
     @abstractmethod

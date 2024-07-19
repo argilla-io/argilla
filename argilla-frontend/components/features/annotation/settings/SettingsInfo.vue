@@ -10,7 +10,7 @@
               v-html="settings.dataset.name"
             />
           </div>
-          <base-action-tooltip tooltip="$t('copied')">
+          <base-action-tooltip :tooltip="$t('copied')">
             <base-button
               title="Copy to clipboard"
               class="secondary small"
@@ -26,10 +26,36 @@
           @submit.prevent="onSubmit()"
           class="settings__edition-form-fields"
         >
+          <div class="settings__area">
+            <h2
+              class="--heading5 --medium description__title"
+              v-text="$t('taskDistribution')"
+            />
+
+            <div class="form_group">
+              <label
+                for="task-distribution"
+                v-text="$t('minimumSubmittedResponses')"
+              />
+              <span
+                class="info-icon"
+                :data-title="$t('taskDistributionTooltip')"
+              >
+                <svgicon name="info" width="22" height="22"></svgicon>
+              </span>
+              <input
+                type="number"
+                id="task-distribution"
+                v-model="settings.dataset.distribution.minSubmitted"
+              />
+            </div>
+          </div>
+
           <DatasetDescription
             :key="settings.dataset.updatedAt"
             v-model="settings.dataset"
           />
+
           <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
@@ -131,5 +157,40 @@ export default {
     }
   }
 }
+
+.form_group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: $base-space;
+
+  & > label {
+    color: $black-87;
+  }
+
+  & input {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    height: 24px;
+    padding: $base-space * 2;
+    background: palette(white);
+    border: 1px solid $black-20;
+    border-radius: $border-radius;
+    outline: 0;
+    &:focus {
+      border: 1px solid $primary-color;
+    }
+  }
+}
+.info-icon {
+  color: $black-87;
+  margin-right: $base-space * 2;
+}
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("top", 8px);
+}
 </styles>
-./useSettingInfoViewModel

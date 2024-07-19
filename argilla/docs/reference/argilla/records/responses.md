@@ -67,10 +67,9 @@ for record in dataset.records:
 
 ---
 
-## Class Reference
-
-### `rg.Response`
+## `rg.Response`
 
 ::: src.argilla.responses.Response
     options:
         heading_level: 3
+        show_root_toc_entry: false

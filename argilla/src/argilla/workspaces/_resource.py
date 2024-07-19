@@ -23,7 +23,8 @@ from argilla._resource import Resource
 from argilla.client import Argilla
 
 if TYPE_CHECKING:
-    from argilla import Dataset, User
+    from argilla.datasets._resource import Dataset
+    from argilla.users._resource import User
 
 
 class Workspace(Resource):
@@ -45,7 +46,6 @@ class Workspace(Resource):
         name: Optional[str] = None,
         id: Optional[UUID] = None,
         client: Optional["Argilla"] = None,
-        _model: Optional[WorkspaceModel] = None,
     ) -> None:
         """Initializes a Workspace object with a client and a name or id
 
@@ -53,24 +53,13 @@ class Workspace(Resource):
             client (Argilla): The client used to interact with Argilla
             name (str): The name of the workspace
             id (UUID): The id of the workspace
-            _model (WorkspaceModel): The internal Pydantic model of the workspace from/to the server
         Returns:
             Workspace: The initialized workspace object
         """
         client = client or Argilla._get_default()
         super().__init__(client=client, api=client.api.workspaces)
-        if _model is None:
-            _model = WorkspaceModel(name=name, id=id)
-        self._model = _model
 
-    def exists(self) -> bool:
-        """
-        Checks if the workspace exists in the server
-
-        Returns:
-            bool: True if the workspace exists, False otherwise
-        """
-        return self._api.exists(self.id)
+        self._model = WorkspaceModel(name=name, id=id)
 
     def add_user(self, user: Union["User", str]) -> "User":
         """Adds a user to the workspace. After adding a user to the workspace, it will have access to the datasets
@@ -102,6 +91,13 @@ class Workspace(Resource):
         datasets = self._client.api.datasets.list(self.id)
         self._log_message(f"Got {len(datasets)} datasets for workspace {self.id}")
         return [Dataset.from_model(model=dataset, client=self._client) for dataset in datasets]
+
+    @classmethod
+    def from_model(cls, model: WorkspaceModel, client: Argilla) -> "Workspace":
+        instance = cls(name=model.name, id=model.id, client=client)
+        instance._model = model
+
+        return instance
 
     ############################
     # Properties
@@ -188,12 +184,12 @@ class WorkspaceUsers(Sequence["User"], LoggingMixin):
 
     def _delete_user_by_username(self, username: str) -> "User":
         user = self._workspace._client.users(username=username)
-        if not user.exists():
+        if user is None:
             raise ValueError(f"User {username} does not exist")
         return user.remove_from_workspace(workspace=self._workspace)
 
     def _add_user_by_username(self, username: str) -> "User":
         user = self._workspace._client.users(username=username)
-        if not user.exists():
+        if user is None:
             raise ValueError(f"User {username} does not exist")
         return user.add_to_workspace(workspace=self._workspace)

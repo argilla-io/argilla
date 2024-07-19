@@ -23,8 +23,6 @@ from argilla_server.api.policies.v1 import DatasetPolicy, authorize
 from argilla_server.api.schemas.v1.records import (
     RecordIncludeParam,
     Records,
-    RecordsCreate,
-    RecordsUpdate,
     SearchRecordsQuery,
     SearchRecordsResult,
 )
@@ -37,15 +35,14 @@ from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
 from argilla_server.enums import RecordSortField
 from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.models import Dataset, User
 from argilla_server.repositories import DatasetsRepository, RecordsRepository
+from argilla_server.models import Dataset, Field, Record, User, VectorSettings
 from argilla_server.search_engine import (
     SearchEngine,
     get_search_engine,
 )
 from argilla_server.security import auth
 from argilla_server.services.search import SearchService
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 from argilla_server.utils import parse_query_param, parse_uuids
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
@@ -92,71 +89,6 @@ async def list_dataset_records(
     )
 
     return Records(items=records, total=total)
-
-
-@router.post(
-    "/datasets/{dataset_id}/records",
-    status_code=status.HTTP_204_NO_CONTENT,
-    deprecated=True,
-    description="Deprecated in favor of POST /datasets/{dataset_id}/records/bulk",
-)
-async def create_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    records_create: RecordsCreate,
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = await Dataset.get_or_raise(
-        db,
-        dataset_id,
-        options=[
-            selectinload(Dataset.fields),
-            selectinload(Dataset.questions),
-            selectinload(Dataset.metadata_properties),
-            selectinload(Dataset.vectors_settings),
-        ],
-    )
-
-    await authorize(current_user, DatasetPolicy.create_records(dataset))
-
-    await datasets.create_records(db, search_engine, dataset, records_create)
-
-    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_create.items)})
-
-
-@router.patch(
-    "/datasets/{dataset_id}/records",
-    status_code=status.HTTP_204_NO_CONTENT,
-    deprecated=True,
-    description="Deprecated in favor of PUT /datasets/{dataset_id}/records/bulk",
-)
-async def update_dataset_records(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    records_update: RecordsUpdate,
-    current_user: User = Security(auth.get_current_user),
-):
-    dataset = await Dataset.get_or_raise(
-        db,
-        dataset_id,
-        options=[
-            selectinload(Dataset.fields),
-            selectinload(Dataset.questions),
-            selectinload(Dataset.metadata_properties),
-        ],
-    )
-
-    await authorize(current_user, DatasetPolicy.update_records(dataset))
-
-    await datasets.update_records(db, search_engine, dataset, records_update)
-
-    telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": len(records_update.items)})
 
 
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)

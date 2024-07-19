@@ -15,6 +15,7 @@
       @toggle-expand="toggleExpand"
     >
       <slot name="downHeader" slot="panelHeader" />
+      <slot name="downHeaderExpanded" slot="panelHeaderExpanded" />
       <slot name="downContent" slot="panelContent" />
     </BaseCollapsablePanel>
   </div>
@@ -174,6 +175,7 @@ $resizable-bar-width: $base-space;
   justify-content: space-between;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   width: 100%;
   &.--h-resizing {
     user-select: none;

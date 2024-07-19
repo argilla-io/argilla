@@ -13,14 +13,14 @@ dynamic = ["version"]
 dependencies = [
     "httpx>=0.26.0",
     "pydantic>=2.6.0, <3.0.0",
-    "argilla-v1[listeners]",
+    "huggingface_hub>=0.22.0",
     "tqdm>=4.60.0",
     "rich>=10.0.0",
+    "datasets>=2.0.0",
 ]
 
-[project.optional-dependencies]
-io = [
-    "datasets>=2.0.0",
+legacy = [
+    "argilla-v1[listeners]",
 ]
 
 [build-system]
@@ -38,7 +38,7 @@ distribution = true
 
 [tool.pdm.version]
 source = "file"
-path = "src/argilla/__init__.py"
+path = "src/argilla/_version.py"
 
 [tool.pdm.dev-dependencies]
 dev = [

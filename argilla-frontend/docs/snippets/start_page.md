@@ -4,7 +4,7 @@
 
 ## Argilla is a platform for building high-quality AI datasets
 
-If you need support join the [Argilla Slack community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)
+If you need support join the [Argilla Discord community](http://hf.co/join/discord)
 
 </div>
 
@@ -30,7 +30,7 @@ import argilla as rg
 client = rg.Argilla(
     [local_]api_url="[LOCAL_HOST]",
     [hf_]api_url="https://[HF_OWNER]-[HF_SPACE_NAME].hf.space",
-    api_key="[USER_API_KEY]"
+    api_key="[USER_API_KEY]",
     [hf_]headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```

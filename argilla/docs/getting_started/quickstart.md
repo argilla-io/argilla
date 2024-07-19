@@ -8,27 +8,33 @@ This guide provides a quick overview of the Argilla SDK and how to create your f
 
 ## Setting up your Argilla project
 
-### Install the SDK with pip
-
-To work with Argilla datasets, you need to use the Argilla SDK. You can install the SDK with pip as follows:
-
-```console
-pip install argilla --pre
-```
-
 ### Run the Argilla server
 
 If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:
 
-* Remotely using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
+* Remotely using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space). Check out the [full guide](huggingface-spaces.md) for a more detailed configuration.
 
 !!! note
-    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc1`.
+    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc2`.
 
 * Locally using Docker.
 
 ```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc1
+docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2
+```
+
+After succesfully running this step, you should be able to see Argilla's UI sign in page (e.g., at the URL https://localhost:6900 if you ran the local Docker option).
+
+!!! tip "Default user credentials to log into the UI"
+
+    This type of deployment automatically sets up some default users for you. Check [this guide](../how-to-guides/user.md) to log in for the first time in the UI.
+
+### Install the SDK with pip
+
+To manage users, workspaces and datasets in Argilla, you need to use the Argilla Python SDK. You can install it with pip as follows:
+
+```console
+pip install argilla --pre
 ```
 
 ### Connect to the Argilla server

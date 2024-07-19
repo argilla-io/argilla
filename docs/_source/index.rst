@@ -62,7 +62,7 @@
    :maxdepth: 3
    :hidden:
 
-   Slack <https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g>
+   Discord <http://hf.co/join/discord>
    Github <https://github.com/argilla-io/argilla>
    community/developer_docs
    community/contributing
