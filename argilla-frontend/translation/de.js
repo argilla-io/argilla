@@ -36,12 +36,19 @@ export default {
     datasetSettings: "einstellungen",
     userSettings: "meine einstellungen",
   },
+  datasets: {
+    left: "übrig",
+    completed: "Vollendet",
+    pending: "Ausstehend",
+  },
   recordStatus: {
     pending: "Ausstehend",
     draft: "Entwurf",
     discarded: "Verworfen",
     submitted: "Gesichert",
     validated: "Validiert",
+    completedTooltip:
+      "Der Datensatz ist abgeschlossen, es hat die Anzahl der Antworten.",
   },
   userSettings: {
     title: "Meine Einstellungen",
@@ -209,7 +216,10 @@ export default {
   },
   metrics: {
     total: "Total",
-    progress: "Fortschritt",
+    progress: {
+      my: "mein Fortschritt",
+      team: "Fortschritte im Team",
+    },
   },
 
   validations: {

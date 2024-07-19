@@ -21,19 +21,6 @@ from argilla import Argilla, Dataset, Settings, TextField, TextQuestion, Workspa
 
 
 @pytest.fixture
-def workspace(client: Argilla) -> Workspace:
-    workspace = client.workspaces("test-workspace")
-    if not workspace.exists():
-        workspace.create()
-    yield workspace
-
-    for dataset in workspace.list_datasets():
-        client.api.datasets.delete(dataset.id)
-
-    workspace.delete()
-
-
-@pytest.fixture
 def dataset(client: Argilla, workspace: Workspace) -> Dataset:
     name = "".join(random.choices(ascii_lowercase, k=16))
     settings = Settings(
@@ -64,6 +51,19 @@ def test_list_records_with_start_offset(client: Argilla, dataset: Dataset):
 
     records = list(dataset.records(start_offset=1))
     assert len(records) == 1
+
+    assert [record.to_dict() for record in records] == [
+        {
+            "_server_id": str(records[0]._server_id),
+            "fields": {"text": "The record text field"},
+            "id": "2",
+            "status": "pending",
+            "metadata": {},
+            "responses": {},
+            "suggestions": {},
+            "vectors": {},
+        }
+    ]
 
 
 def test_list_records_with_responses(client: Argilla, dataset: Dataset):

@@ -44,7 +44,7 @@ export class LoadRecordsToAnnotateUseCase {
     if (!isFilteringBySimilarity && !isNextRecordExist) {
       const newRecords = await this.getRecords.execute(criteria);
 
-      records.append(newRecords);
+      if (newRecords.hasRecordsToAnnotate) records.append(newRecords);
 
       isNextRecordExist = records.existsRecordOn(page);
 

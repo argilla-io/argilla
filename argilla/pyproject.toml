@@ -13,14 +13,11 @@ dynamic = ["version"]
 dependencies = [
     "httpx>=0.26.0",
     "pydantic>=2.6.0, <3.0.0",
+    "huggingface_hub>=0.22.0",
     "tqdm>=4.60.0",
     "rich>=10.0.0",
-    "pyarrow < 16.0.0",
-]
-
-[project.optional-dependencies]
-io = [
     "datasets>=2.0.0",
+    "pyarrow < 16.0.0",
 ]
 
 legacy = [

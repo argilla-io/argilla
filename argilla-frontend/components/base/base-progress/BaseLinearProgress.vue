@@ -67,7 +67,7 @@ export default {
   },
   methods: {
     getPercentage(value) {
-      return ((value / this.progressMax) * 100).toFixed();
+      return ((value / this.progressMax) * 100).toFixed(2);
     },
     getTrianglePosition(range) {
       if (!range) return;
@@ -86,10 +86,10 @@ export default {
 </script>
 
 <styles lang="scss" scoped>
-$progressHeight: 12px;
+$progressHeight: 14px;
 $tooltipBackgroundColor: palette(grey, 600);
 $tooltipTriangleSize: 5px;
-$borderRadius: 10px;
+$borderRadius: 3px;
 
 .progress {
   $this: &;
@@ -103,12 +103,14 @@ $borderRadius: 10px;
     height: $progressHeight;
     border-radius: $borderRadius;
     overflow: hidden;
+    background: palette(grey, 600);
+    box-shadow: 0 0 0 1px palette(white);
   }
   &__bar {
     position: relative;
     height: 100%;
     border-radius: $borderRadius;
-    margin: 0 -4px;
+    margin: 0 -1px;
     box-shadow: 0 0 0 1px palette(white);
     z-index: 1;
     &:after {

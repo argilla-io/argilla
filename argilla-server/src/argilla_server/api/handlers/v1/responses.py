@@ -28,7 +28,7 @@ from argilla_server.api.schemas.v1.responses import (
     ResponseUpdate,
 )
 from argilla_server.contexts import datasets
-from argilla_server.database import get_async_db
+from argilla_server.database import get_serializable_async_db
 from argilla_server.models import Dataset, Record, Response, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
@@ -55,7 +55,7 @@ async def create_current_user_responses_bulk(
 @router.put("/responses/{response_id}", response_model=ResponseSchema)
 async def update_response(
     *,
-    db: AsyncSession = Depends(get_async_db),
+    db: AsyncSession = Depends(get_serializable_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     response_id: UUID,
     response_update: ResponseUpdate,
@@ -64,7 +64,9 @@ async def update_response(
     response = await Response.get_or_raise(
         db,
         response_id,
-        options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
+        options=[
+            selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
+        ],
     )
 
     await authorize(current_user, ResponsePolicy.update(response))
@@ -75,7 +77,7 @@ async def update_response(
 @router.delete("/responses/{response_id}", response_model=ResponseSchema)
 async def delete_response(
     *,
-    db: AsyncSession = Depends(get_async_db),
+    db: AsyncSession = Depends(get_serializable_async_db),
     search_engine=Depends(get_search_engine),
     response_id: UUID,
     current_user: User = Security(auth.get_current_user),
@@ -83,7 +85,9 @@ async def delete_response(
     response = await Response.get_or_raise(
         db,
         response_id,
-        options=[selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions)],
+        options=[
+            selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.questions),
+        ],
     )
 
     await authorize(current_user, ResponsePolicy.delete(response))

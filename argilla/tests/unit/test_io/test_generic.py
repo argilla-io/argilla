@@ -15,6 +15,7 @@
 from uuid import uuid4
 
 import argilla as rg
+from argilla import ResponseStatus
 from argilla.records._io import GenericIO
 
 
@@ -26,9 +27,9 @@ class TestGenericIO:
             fields={"field": "The field"},
             metadata={"key": "value"},
             responses=[
-                rg.Response(question_name="q1", value="value", user_id=user_a),
-                rg.Response(question_name="q2", value="value", user_id=user_a),
-                rg.Response(question_name="q2", value="value", user_id=user_b),
+                rg.Response(question_name="q1", value="value", user_id=user_a, status=ResponseStatus.submitted),
+                rg.Response(question_name="q2", value="value", user_id=user_a, status=ResponseStatus.submitted),
+                rg.Response(question_name="q2", value="value", user_id=user_b, status=ResponseStatus.draft),
                 rg.Response(question_name="q1", value="value", user_id=user_c),
             ],
             suggestions=[
@@ -41,13 +42,16 @@ class TestGenericIO:
         assert records_list == [
             {
                 "id": str(record.id),
+                "status": "pending",
                 "_server_id": None,
                 "field": "The field",
                 "key": "value",
                 "q1.responses": ["value", "value"],
                 "q1.responses.users": [str(user_a), str(user_c)],
+                "q1.responses.status": ["submitted", None],
                 "q2.responses": ["value", "value"],
                 "q2.responses.users": [str(user_a), str(user_b)],
+                "q2.responses.status": ["submitted", "draft"],
                 "q1.suggestion": "value",
                 "q1.suggestion.score": 0.1,
                 "q1.suggestion.agent": "test",
