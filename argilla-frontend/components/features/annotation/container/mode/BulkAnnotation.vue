@@ -496,12 +496,13 @@ export default {
   }
   &--empty {
     width: 100%;
-    height: 100%;
+    height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    @include media("<desktop") {
-      height: 80vh;
+    @include media("<=tablet") {
+      height: 100%;
+      text-align: center;
     }
   }
 }
