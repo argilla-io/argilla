@@ -36,8 +36,10 @@
             </div>
           </section>
         </template>
-
         <template #downHeader>
+          <p v-text="$t('guidelines')" />
+        </template>
+        <template #downHeaderExpanded>
           <p v-text="$t('guidelines')" />
         </template>
         <template #downContent>
