@@ -690,7 +690,6 @@ class TestSuiteDatasets:
         assert response.status_code == 401
 
     async def test_get_dataset(self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock):
-
         dataset = await DatasetFactory.create(name="dataset")
 
         response = await async_client.get(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)

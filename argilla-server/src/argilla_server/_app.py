@@ -219,7 +219,7 @@ async def configure_search_engine():
                     "the argilla server.\n"
                 )
 
-                
+
 def configure_app_security(app: FastAPI):
     auth.configure_app(app)
 
@@ -273,7 +273,7 @@ def configure_database(app: FastAPI):
             default_user = await accounts.get_user_by_username(db, DEFAULT_USERNAME)
             if default_user and _user_has_default_credentials(default_user):
                 _log_default_user_warning()
-                
+
     await ping_search_engine()
 
 
