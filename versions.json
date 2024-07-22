@@ -13,6 +13,14 @@
     }
   },
   {
+    "version": "docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2",
+    "title": "docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_5178-docs-add-from_diskto_disk-methods-to-docs",
     "title": "docs_5178-docs-add-from_diskto_disk-methods-to-docs",
     "aliases": [],
