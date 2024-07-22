@@ -69,6 +69,8 @@ $bullet-size: 8px;
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    margin-right: $base-space * 2;
   }
   &__item {
     background: palette(grey, 700);
