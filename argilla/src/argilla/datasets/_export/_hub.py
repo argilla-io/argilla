@@ -16,18 +16,17 @@ import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
-from typing import Any, Type, TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, Union
 from uuid import UUID
 
+from argilla.datasets._export._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
-from argilla.datasets._export._disk import DiskImportExportMixin
 
 if TYPE_CHECKING:
-    from argilla import Dataset
-    from argilla import Argilla
-    from argilla import Workspace
     from datasets import Dataset as HFDataset
+
+    from argilla import Argilla, Dataset, Workspace
 
 
 class HubImportExportMixin(DiskImportExportMixin):
@@ -38,6 +37,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         self: "Dataset",
         repo_id: str,
         *,
+        with_records: bool = True,
         generate_card: Optional[bool] = True,
         **kwargs,
     ) -> None:
@@ -46,13 +46,14 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         Parameters:
             repo_id: the ID of the Hugging Face Hub repo to push the `Dataset` to.
+            with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
             generate_card: whether to generate a dataset card for the `Dataset` in the Hugging Face Hub. Defaults
                 to `True`.
             *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
 
-        from huggingface_hub import HfApi, DatasetCardData
+        from huggingface_hub import DatasetCardData, HfApi
 
         from argilla.datasets._export.card import (
             ArgillaDatasetCard,
@@ -61,8 +62,9 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         hf_api = HfApi(token=kwargs.get("token"))
 
-        hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
-        hfds.push_to_hub(repo_id, **kwargs)
+        if with_records:
+            hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
+            hfds.push_to_hub(repo_id, **kwargs)
 
         with TemporaryDirectory() as tmpdirname:
             config_dir = os.path.join(tmpdirname, self._DEFAULT_DATASET_REPO_DIR)
@@ -98,7 +100,8 @@ class HubImportExportMixin(DiskImportExportMixin):
     def from_hub(
         cls: Type["Dataset"],
         repo_id: str,
-        workspace: Optional[Union["Workspace", str, UUID]] = None,
+        name: Optional[str] = None,
+        workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
         with_records: bool = True,
         **kwargs: Any,
@@ -107,7 +110,8 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         Parameters:
             repo_id: the ID of the Hugging Face Hub repo to load the `Dataset` from.
-            workspace: the workspace to load the `Dataset` into. If not provided, the default workspace will be used.
+            name (str, optional): The name to assign to the new dataset. Defaults to None and the dataset's source name is used, unless it already exists, in which case a unique UUID is appended.
+            workspace (Union[Workspace, str], optional): The workspace to import the dataset to. Defaults to None and default workspace is used.
             client: the client to use to load the `Dataset`. If not provided, the default client will be used.
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
             *args: the args to pass to `datasets.Dataset.load_from_hub`.
@@ -116,7 +120,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         Returns:
             A `Dataset` loaded from the Hugging Face Hub.
         """
-        from datasets import DatasetDict, load_dataset, Dataset
+        from datasets import Dataset, DatasetDict, load_dataset
         from huggingface_hub import snapshot_download
 
         folder_path = snapshot_download(  # download both files in parallel
@@ -126,7 +130,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             token=kwargs.get("token"),
         )
 
-        dataset = cls.from_disk(path=folder_path, target_workspace=workspace, client=client)
+        dataset = cls.from_disk(path=folder_path, workspace=workspace, name=name, client=client)
 
         hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
         if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
