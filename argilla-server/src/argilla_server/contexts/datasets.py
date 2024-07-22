@@ -884,7 +884,11 @@ async def upsert_response(
         "user_id": user.id,
     }
 
-    async with db.begin_nested():
+    from argilla_server.database import _get_async_db, AsyncSessionLocal
+
+    async for db in _get_async_db(isolation_level="SERIALIZABLE"):
+        record = await Record.get_or_raise(db, record.id)
+
         response = await Response.upsert(
             db,
             schema=schema,
@@ -892,17 +896,36 @@ async def upsert_response(
             autocommit=False,
         )
 
-        await _load_users_from_responses(response)
-        await _touch_dataset_last_activity_at(db, response.record.dataset)
+        # await _load_users_from_responses(response)
+        # await _touch_dataset_last_activity_at(db, response.record.dataset)
         await db.refresh(record, attribute_names=[Record.responses_submitted.key])
         await distribution.update_record_status(db, record)
+        # await search_engine.update_record_response(response)
+        # await search_engine.partial_record_update(record, status=record.status)
 
-    await db.commit()
-
-    await search_engine.update_record_response(response)
-    await search_engine.partial_record_update(record, status=record.status)
+        # await db.commit()
 
     return response
+
+    # async with db.begin_nested():
+    #     response = await Response.upsert(
+    #         db,
+    #         schema=schema,
+    #         constraints=[Response.record_id, Response.user_id],
+    #         autocommit=False,
+    #     )
+
+    #     await _load_users_from_responses(response)
+    #     await _touch_dataset_last_activity_at(db, response.record.dataset)
+    #     await db.refresh(record, attribute_names=[Record.responses_submitted.key])
+    #     await distribution.update_record_status(db, record)
+
+    # await db.commit()
+
+    # await search_engine.update_record_response(response)
+    # await search_engine.partial_record_update(record, status=record.status)
+
+    # return response
 
 
 @backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
