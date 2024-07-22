@@ -53,6 +53,14 @@
     }
   },
   {
+    "version": "docs_5144-docs-fix-pip-install-argilla2-within-the-old-argilla-docs",
+    "title": "docs_5144-docs-fix-pip-install-argilla2-within-the-old-argilla-docs",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_update-settings",
     "title": "docs_update-settings",
     "aliases": [],
