@@ -212,7 +212,30 @@ export class RecordRepository {
 
       const body: BackendAdvanceSearchQuery = {
         query: {},
+        filters: {
+          and: [
+            {
+              type: "terms",
+              scope: {
+                entity: "response",
+                property: "status",
+              },
+              values: [status],
+            },
+          ],
+        },
       };
+
+      if (status === "pending") {
+        body.filters.and.push({
+          type: "terms",
+          scope: {
+            entity: "record",
+            property: "status",
+          },
+          values: [status],
+        });
+      }
 
       if (isFilteringBySimilarity) {
         body.query.vector = {
@@ -229,40 +252,6 @@ export class RecordRepository {
           field: searchText.isFilteringByField
             ? searchText.value.field
             : undefined,
-        };
-      }
-
-      body.filters = {
-        and: [
-          {
-            type: "terms",
-            scope: {
-              entity: "response",
-              property: "status",
-            },
-            values: [status],
-          },
-        ],
-      };
-
-      if (status === "pending") {
-        body.filters.and.push({
-          type: "terms",
-          scope: {
-            entity: "record",
-            property: "status",
-          },
-          values: ["pending"],
-        });
-      }
-
-      if (
-        isFilteringByMetadata ||
-        isFilteringByResponse ||
-        isFilteringBySuggestion
-      ) {
-        body.filters = {
-          and: [],
         };
       }
 
