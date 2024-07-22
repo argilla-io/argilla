@@ -1713,11 +1713,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla-server/configuration/" class="md-nav__link">
+      <a href="../../reference/argilla-server/migrations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Server configuration
+    Database migrations
   </span>
   
 
@@ -2111,7 +2111,7 @@
 <p>In Argilla, you can import/export two main components of a dataset:
 - The dataset's complete configuration defined in <code>rg.Settings</code>. This is useful if your want to share your feedback task or restore it later in Argilla.
 - The records stored in the dataset, including <code>Metadata</code>, <code>Vectors</code>, <code>Suggestions</code>, and <code>Responses</code>. This is useful if you want to use your dataset's records outside of Argilla.</p>
-<p>Check the <a href="../reference/argilla/datasets/dataset.md">Dataset - Python Reference</a> to see the attributes, arguments, and methods of the export <code>Dataset</code> class in detail.</p>
+<p>Check the <a href="../../reference/argilla/datasets/datasets/">Dataset - Python Reference</a> to see the attributes, arguments, and methods of the export <code>Dataset</code> class in detail.</p>
 <p>To import records to a dataset, used the <code>rg.Datasets.records.log</code> method. Their is a guide on how to do this in the <a href="../record/">Record - Python Reference</a>.</p>
 <h2 id="import-and-export-an-rgdataset-from-argilla">Import and Export an <code>rg.Dataset</code> from Argilla<a class="headerlink" href="#import-and-export-an-rgdataset-from-argilla" title="Permanent link">&para;</a></h2>
 <p>First, we will go through exporting a complete dataset from Argilla. This includes the dataset's setting and records. All of these methods use the <code>rg.Dataset.from_*</code> and <code>rg.Dataset.to_*</code> methods.</p>
