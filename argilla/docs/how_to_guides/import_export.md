@@ -171,7 +171,7 @@ dataset = rg.Dataset.from_disk(path="path/to/dataset")
     dataset = rg.Dataset.from_disk(path="path/to/dataset", workspace=workspace, name="my_dataset")
     ```
 
-## Exporting and importing records
+## Importing and exporting records
 
 The records alone can be exported from a dataset in Argilla.  This is useful if you want to process the records in Python, export them to a different platform, or use them in model training. All of these methods use the `rg.Dataset.records` attribute.
 
@@ -241,4 +241,4 @@ The records can be exported as a dictionary, a list of dictionaries, or a `Datas
 
 ### Import records
 
-To import records to a dataset, used the `rg.Datasets.records.log` method. There is a guide on how to do this in [How-to guides - Record](./record.md) or you can check the [Record - Python Reference](../reference/argilla/records/records.md).
+To import records to a dataset, use the `rg.Datasets.records.log` method. There is a guide on how to do this in [How-to guides - Record](./record.md), or you can check the [Record - Python Reference](../reference/argilla/records/records.md).
