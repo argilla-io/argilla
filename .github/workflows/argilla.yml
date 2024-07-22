@@ -31,7 +31,6 @@ on:
       - "published"
 
 jobs:
-
   run_unit_tests:
     name: Run unit tests
     uses: ./.github/workflows/argilla.run-python-tests.yml
@@ -125,7 +124,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download python package
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: python-package
           path: dist
