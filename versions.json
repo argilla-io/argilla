@@ -69,6 +69,14 @@
     }
   },
   {
+    "version": "docs_2_0_minor_fixes",
+    "title": "docs_2_0_minor_fixes",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_update-settings",
     "title": "docs_update-settings",
     "aliases": [],
