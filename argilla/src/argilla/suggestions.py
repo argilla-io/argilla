@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Any, Optional, Literal, Union, List, TYPE_CHECKING, Dict
-from uuid import UUID
 
 from argilla._models import SuggestionModel
 from argilla._resource import Resource
@@ -29,13 +28,11 @@ class Suggestion(Resource):
     Suggestions are rendered in the user interfaces as 'hints' or 'suggestions' for the user to review and accept or reject.
 
     Attributes:
-        value (str): The value of the suggestion.add()
         question_name (str): The name of the question that the suggestion is for.
-        type (str): The type of suggestion, either 'model' or 'human'.
+        value (str): The value of the suggestion.add()
         score (float): The score of the suggestion. For example, the probability of the model prediction.
         agent (str): The agent that created the suggestion. For example, the model name.
-        question_id (UUID): The ID of the question that the suggestion is for.
-
+        type (str): The type of suggestion, either 'model' or 'human'.
     """
 
     _model: SuggestionModel
@@ -47,8 +44,6 @@ class Suggestion(Resource):
         score: Union[float, List[float], None] = None,
         agent: Optional[str] = None,
         type: Optional[Literal["model", "human"]] = None,
-        id: Optional[UUID] = None,
-        question_id: Optional[UUID] = None,
         _record: Optional["Record"] = None,
     ) -> None:
         super().__init__()
@@ -60,9 +55,7 @@ class Suggestion(Resource):
 
         self.record = _record
         self._model = SuggestionModel(
-            id=id,
             question_name=question_name,
-            question_id=question_id,
             value=value,
             type=type,
             score=score,
@@ -86,15 +79,6 @@ class Suggestion(Resource):
     @question_name.setter
     def question_name(self, value: str) -> None:
         self._model.question_name = value
-
-    @property
-    def question_id(self) -> Optional[UUID]:
-        """The ID of the question that the suggestion is for."""
-        return self._model.question_id
-
-    @question_id.setter
-    def question_id(self, value: UUID) -> None:
-        self._model.question_id = value
 
     @property
     def type(self) -> Optional[Literal["model", "human"]]:
@@ -125,7 +109,10 @@ class Suggestion(Resource):
         model.question_name = question.name
         model.value = cls.__from_model_value(model.value, question)
 
-        return cls(**model.model_dump())
+        instance = cls(question.name, model.value)
+        instance._model = model
+
+        return instance
 
     def api_model(self) -> SuggestionModel:
         if self.record is None or self.record.dataset is None:
@@ -134,8 +121,8 @@ class Suggestion(Resource):
         question = self.record.dataset.settings.questions[self.question_name]
         return SuggestionModel(
             value=self.__to_model_value(self.value, question),
-            question_name=self.question_name,
-            question_id=self.question_id or question.id,
+            question_name=question.name,
+            question_id=question.id,
             type=self._model.type,
             score=self._model.score,
             agent=self._model.agent,
