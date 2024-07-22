@@ -8,6 +8,9 @@
     <span class="team-progress__percent"
       >{{ progress.percentage.completed }}%</span
     >
+    <span v-if="visibleProgressValues" class="team-progress__info">
+      {{ progress.completed }} of {{ progress.total }}
+    </span>
   </div>
 </template>
 
@@ -19,6 +22,9 @@ export default {
     datasetId: {
       type: String,
       required: true,
+    },
+    visibleProgressValues: {
+      type: Boolean,
     },
   },
   computed: {
@@ -52,7 +58,6 @@ export default {
   align-items: center;
   gap: $base-space * 2;
   width: 100%;
-  max-width: 250px;
   color: $black-54;
   @include font-size(12px);
   &__bar {
