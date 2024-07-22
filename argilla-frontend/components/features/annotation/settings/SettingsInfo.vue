@@ -23,52 +23,77 @@
       </div>
       <div class="settings__area">
         <form
-          @submit.prevent="onSubmit()"
+          @submit.prevent="onSubmitDatasetTaskMinimumResponse()"
           class="settings__edition-form-fields"
         >
-          <div class="settings__area">
-            <h2
-              class="--heading5 --medium description__title"
-              v-text="$t('taskDistribution')"
-            />
-
-            <div class="form_group">
-              <label
-                for="task-distribution"
-                v-text="$t('minimumSubmittedResponses')"
-              />
-              <span
-                class="info-icon"
-                :data-title="$t('taskDistributionTooltip')"
-              >
-                <svgicon name="info" width="22" height="22"></svgicon>
-              </span>
-              <input
-                type="number"
-                id="task-distribution"
-                v-model="settings.dataset.distribution.minSubmitted"
-              />
-            </div>
-          </div>
-
-          <DatasetDescription
-            :key="settings.dataset.updatedAt"
-            v-model="settings.dataset"
+          <h2
+            class="--heading5 --medium description__title"
+            v-text="$t('taskDistribution')"
           />
+
+          <div class="form_group">
+            <label
+              for="task-distribution"
+              v-text="$t('minimumSubmittedResponses')"
+            />
+            <span class="info-icon" :data-title="$t('taskDistributionTooltip')">
+              <svgicon name="info" width="22" height="22"></svgicon>
+            </span>
+            <input
+              type="number"
+              id="task-distribution"
+              v-model="settings.dataset.distribution.minSubmitted"
+            />
+          </div>
 
           <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
               class="secondary light small"
-              @on-click="restore(settings.dataset)"
-              :disabled="!settings.dataset.isModified"
+              @on-click="settings.dataset.restoreDistribution()"
+              :disabled="!settings.dataset.isModifiedTaskDistribution"
             >
               <span v-text="$t('cancel')" />
             </BaseButton>
             <BaseButton
               type="submit"
               class="primary small"
-              :disabled="!settings.dataset.isModified"
+              :disabled="!settings.dataset.isModifiedTaskDistribution"
+            >
+              <span v-text="$t('update')" />
+            </BaseButton>
+          </div>
+        </form>
+      </div>
+
+      <div class="settings__area">
+        <form
+          @submit.prevent="onSubmitDatasetGuidelines()"
+          class="settings__edition-form-fields"
+        >
+          <Validation :validations="settings.dataset.validate().guidelines">
+            <DatasetDescription
+              :key="settings.dataset.updatedAt"
+              v-model="settings.dataset"
+            />
+          </Validation>
+
+          <div class="settings__edition-form__footer">
+            <BaseButton
+              type="button"
+              class="secondary light small"
+              @on-click="settings.dataset.restoreGuidelines()"
+              :disabled="!settings.dataset.isModifiedGuidelines"
+            >
+              <span v-text="$t('cancel')" />
+            </BaseButton>
+            <BaseButton
+              type="submit"
+              class="primary small"
+              :disabled="
+                !settings.dataset.isModifiedGuidelines ||
+                !settings.dataset.isValid
+              "
             >
               <span v-text="$t('update')" />
             </BaseButton>
@@ -96,8 +121,11 @@ export default {
     },
   },
   methods: {
-    onSubmit() {
-      this.update(this.settings.dataset);
+    onSubmitDatasetGuidelines() {
+      this.update(this.settings.dataset, "guidelines");
+    },
+    onSubmitDatasetTaskMinimumResponse() {
+      this.update(this.settings.dataset, "distribution");
     },
   },
   setup() {
