@@ -29,6 +29,7 @@ from argilla_server.models import (
     Field,
     FloatMetadataPropertySettings,
     IntegerMetadataPropertySettings,
+    MetadataProperty,
     MetadataPropertySettings,
     Question,
     Record,
@@ -128,13 +129,21 @@ class TelemetryClient:
         user_data = {"dataset_id": str(setting.dataset_id)}
         if isinstance(setting, (Field, Question)):
             user_data["required"] = setting.required
-            user_data.update(setting.settings)
+            user_data["type"] = setting.settings["type"]
         elif isinstance(
-            setting, (FloatMetadataPropertySettings, TermsMetadataPropertySettings, IntegerMetadataPropertySettings)
+            setting,
+            (
+                FloatMetadataPropertySettings,
+                TermsMetadataPropertySettings,
+                IntegerMetadataPropertySettings,
+                MetadataProperty,
+            ),
         ):
-            user_data["type"] = setting.type
+            user_data["type"] = setting.type.value
         elif isinstance(setting, VectorSettings):
             user_data["dimensions"] = setting.dimensions
+        else:
+            raise NotImplementedError("Expected a setting to be processed.")
 
         return user_data
 
@@ -206,7 +215,7 @@ class TelemetryClient:
             for attr in attributes:
                 if dataset.is_relationship_loaded(attr):
                     for obtained_attr in getattr(dataset, attr):
-                        self.track_crud_dataset_setting(
+                        await self.track_crud_dataset_setting(
                             action=action, setting_name=attr, dataset=dataset, setting=obtained_attr
                         )
 
@@ -218,24 +227,22 @@ class TelemetryClient:
         setting: Union[Field, VectorSettings, Question, MetadataPropertySettings, None] = None,
         count: Union[int, None] = None,
     ):
-        topic = f"dataset/{setting_name}"
-        if setting:
-            if hasattr(setting, "settings"):
-                topic = f"{topic}/{setting.settings['type']}"
-        topic = f"{topic}/{action}"
+        topic = f"dataset/{setting_name}/{action}"
         user_agent = self._process_dataset_model(dataset=dataset)
         if setting:
             user_agent.update(self._process_dataset_setting_settings(setting=setting))
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_crud_records(
-        self, action: str, record_or_dataset: Union[Record, None] = None, count: Union[int, None] = None
+        self, action: str, record_or_dataset: Union[Record, Dataset, None] = None, count: Union[int, None] = None
     ):
         topic = f"dataset/records/{action}"
         if isinstance(record_or_dataset, Record):
             user_agent = self._process_record_model(record=record_or_dataset)
-        else:
+        elif isinstance(record_or_dataset, Dataset):
             user_agent = self._process_dataset_model(dataset=record_or_dataset)
+        else:
+            raise NotImplementedError("Expected element of `Dataset` or `Record`")
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_crud_records_subtopic(
