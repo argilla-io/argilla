@@ -49,7 +49,7 @@ HUGGINGFACE_ROLES_MAPPING = {"admin": UserRole.owner}
 _LOGGER = logging.getLogger("argilla.security.oauth2.providers")
 
 
-def _resolve_argilla_role(user: dict) -> Union[str, None]:
+def _hf_to_argilla_role(user: dict) -> Union[str, None]:
     # TODO: Create module for huggingface integrations: argilla_server.huggingface.spaces (oauth,...)
     from argilla_server.api.schemas.v1.settings import HuggingfaceSettings
 
@@ -57,23 +57,20 @@ def _resolve_argilla_role(user: dict) -> Union[str, None]:
     if space_author_name == user[HUGGINGFACE_PREFERRED_USERNAME]:
         return UserRole.owner
 
-    org = None
     for org in user.get("orgs") or []:
         if space_author_name == org[HUGGINGFACE_PREFERRED_USERNAME]:
+            if HUGGINGFACE_ROLE_IN_ORG in org:
+                return HUGGINGFACE_ROLES_MAPPING.get(org[HUGGINGFACE_ROLE_IN_ORG])
+            else:
+                _LOGGER.warning(f"Cannot find user role in org {org}. Review permissions")
             break
-
-    if org:
-        if HUGGINGFACE_ROLE_IN_ORG in org:
-            return HUGGINGFACE_ROLES_MAPPING.get(org[HUGGINGFACE_ROLE_IN_ORG])
-        else:
-            _LOGGER.warning(f"Cannot find user role in org {org}. Review permissions")
 
 
 # TODO: Move each provided to separate module
 class HuggingfaceClientProvider(OAuth2ClientProvider, LoggingMixin):
     """Specialized HuggingFace OAuth2 provider."""
 
-    claims = Claims(username=HUGGINGFACE_PREFERRED_USERNAME, role=_resolve_argilla_role)
+    claims = Claims(username=HUGGINGFACE_PREFERRED_USERNAME, role=_hf_to_argilla_role)
     backend_class = HuggingfaceOpenId
     name = "huggingface"
 
