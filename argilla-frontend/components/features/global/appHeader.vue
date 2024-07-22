@@ -62,5 +62,39 @@ $header-button-color: #262a2e;
   position: sticky;
   background: $bg;
   z-index: 3;
+  :deep(.header__filters) {
+    position: relative;
+  }
+  &:not(.sticky) {
+    position: relative;
+  }
+}
+
+.button-settings {
+  margin-right: $base-space;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @extend %has-tooltip--bottom;
+    &:before,
+    &:after {
+      margin-top: calc($base-space/2);
+    }
+  }
+}
+.header__button {
+  background: $header-button-color;
+  color: palette(white);
+  margin-right: $base-space;
+  padding: 10px 12px 10px 10px;
+  font-weight: 600;
+  @include font-size(14px);
+  box-shadow: $shadow-200;
+  &:hover {
+    background: lighten($header-button-color, 3%);
+  }
+  svg {
+    fill: palette(white);
+  }
 }
 </style>
