@@ -33,9 +33,6 @@
 
 Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
 
-> [!NOTE]
-> This README represents the release candidate for the 2.0.0 SDK version. The README for the last stable version of the 1x SDK can be found [1.x](../argilla-v1/README.md)
-
 This repository only contains developer info about the backend server. If you want to get started, we recommend taking a
 look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://argilla-io.github.io/argilla/latest/).
 

@@ -42,6 +42,7 @@ class TestGenericIO:
         assert records_list == [
             {
                 "id": str(record.id),
+                "status": "pending",
                 "_server_id": None,
                 "field": "The field",
                 "key": "value",

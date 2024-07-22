@@ -19,7 +19,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import ResponseStatus
+from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.models import Dataset, Record, Response, Suggestion, User, UserRole
 from argilla_server.search_engine import SearchEngine
 from sqlalchemy import func, select
@@ -92,6 +92,7 @@ class TestSuiteRecords:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(record.id),
+            "status": RecordStatus.pending,
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
@@ -193,6 +194,7 @@ class TestSuiteRecords:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(record.id),
+            "status": RecordStatus.pending,
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": {
                 "terms-metadata-property": "c",
@@ -233,6 +235,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
         test_telemetry.track_crud_records.assert_called_with(action="update", record_or_dataset=record)
@@ -259,6 +262,7 @@ class TestSuiteRecords:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(record.id),
+            "status": RecordStatus.pending,
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
@@ -286,6 +290,7 @@ class TestSuiteRecords:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(record.id),
+            "status": RecordStatus.pending,
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
@@ -318,6 +323,7 @@ class TestSuiteRecords:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(record.id),
+            "status": RecordStatus.pending,
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": {
                 "terms-metadata-property": ["a", "b", "c"],
@@ -347,6 +353,7 @@ class TestSuiteRecords:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(record.id),
+            "status": RecordStatus.pending,
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
@@ -1447,6 +1454,7 @@ class TestSuiteRecords:
         assert response.status_code == 200
         assert response.json() == {
             "id": str(record.id),
+            "status": RecordStatus.pending,
             "fields": record.fields,
             "metadata": None,
             "external_id": record.external_id,

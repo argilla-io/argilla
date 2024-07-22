@@ -410,9 +410,6 @@ export default {
     min-height: $base-space * 6;
     border-radius: $border-radius-m - 1;
     padding: $base-space;
-    &:hover {
-      color: $black-87;
-    }
     &:disabled {
       pointer-events: visible;
       cursor: not-allowed;

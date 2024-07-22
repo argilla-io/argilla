@@ -46,6 +46,7 @@ class TestHFDatasetsIO:
 
         ds = HFDatasetsIO.to_datasets(records)
         assert ds.features == {
+            "status": Value(dtype="string", id=None),
             "_server_id": Value(dtype="null", id=None),
             "a": Value(dtype="string", id=None),
             "b": Value(dtype="string", id=None),

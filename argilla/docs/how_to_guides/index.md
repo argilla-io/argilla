@@ -59,6 +59,22 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](import_export.md)
 
+-   __Annotate a dataset__
+
+    ---
+
+    Learn how to use the Argilla UI to navigate datasets and submit responses.
+
+    [:octicons-arrow-right-24: How-to guide](annotate.md)
+
+-   __Distribute the annotation__
+
+    ---
+
+    Learn how to use Argilla's automatic task distribution to annotate as a team efficiently.
+
+    [:octicons-arrow-right-24: How-to guide](distribution.md)
+
 </div>
 
 ## Advanced

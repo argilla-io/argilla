@@ -4,7 +4,7 @@ description = "The Argilla python server SDK"
 authors = [
     {name = "Argilla", email = "contact@argilla.io"},
 ]
-requires-python = ">=3.9,<=3.12"
+requires-python = ">= 3.9, <3.13"
 readme = "README.md"
 license = {text = "Apache 2.0"}
 
@@ -61,7 +61,6 @@ dev = [
     "Pillow >= 9.5.0",
     "CairoSVG >= 2.7.1",
     "mknotebooks >= 0.8.0",
-    "datasets>=2.19.1",
     "argilla-v1[listeners] @ file:///${PROJECT_ROOT}/../argilla-v1",
 ]
 

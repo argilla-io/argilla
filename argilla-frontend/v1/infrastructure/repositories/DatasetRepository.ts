@@ -1,9 +1,12 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import {
+  BackendDataset,
   BackendDatasetFeedbackTaskResponse,
+  BackendDatasetWithWorkspace,
   BackendProgress,
   BackendUpdateDataset,
 } from "../types/dataset";
+import { Response } from "../types";
 import { largeCache, revalidateCache } from "./AxiosCache";
 import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
@@ -33,10 +36,14 @@ export class DatasetRepository implements IDatasetRepository {
       dataset.status,
       dataset.workspace_id,
       workspace,
+      dataset.allow_extra_metadata,
+      {
+        strategy: dataset.distribution.strategy,
+        minSubmitted: dataset.distribution.min_submitted,
+      },
       dataset.inserted_at,
       dataset.updated_at,
-      dataset.last_activity_at,
-      dataset.allow_extra_metadata
+      dataset.last_activity_at
     );
   }
 
@@ -52,10 +59,14 @@ export class DatasetRepository implements IDatasetRepository {
           datasetFromBackend.status,
           datasetFromBackend.workspace_id,
           datasetFromBackend.workspace_name,
+          datasetFromBackend.allow_extra_metadata,
+          {
+            strategy: datasetFromBackend.distribution.strategy,
+            minSubmitted: datasetFromBackend.distribution.min_submitted,
+          },
           datasetFromBackend.inserted_at,
           datasetFromBackend.updated_at,
-          datasetFromBackend.last_activity_at,
-          datasetFromBackend.allow_extra_metadata
+          datasetFromBackend.last_activity_at
         );
       }
     );
@@ -63,10 +74,14 @@ export class DatasetRepository implements IDatasetRepository {
     return [...feedbackDatasets];
   }
 
-  async update({ id, allowExtraMetadata, guidelines }: Dataset) {
+  async update({ id, allowExtraMetadata, guidelines, distribution }: Dataset) {
     const request: BackendUpdateDataset = {
       allow_extra_metadata: allowExtraMetadata,
       guidelines: guidelines?.trim() !== "" ? guidelines.trim() : null,
+      distribution: {
+        strategy: distribution.strategy,
+        min_submitted: distribution.minSubmitted,
+      },
     };
 
     try {
@@ -107,13 +122,7 @@ export class DatasetRepository implements IDatasetRepository {
         largeCache()
       );
 
-      return new Progress(
-        data.total,
-        data.submitted,
-        data.discarded,
-        data.conflicting,
-        data.pending
-      );
+      return new Progress(data.total, data.completed, data.pending);
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_DELETING_DATASET,
@@ -123,7 +132,7 @@ export class DatasetRepository implements IDatasetRepository {
 
   private async getDatasetById(datasetId: string) {
     try {
-      const { data } = await this.axios.get(
+      const { data } = await this.axios.get<BackendDataset>(
         `/v1/datasets/${datasetId}`,
         largeCache()
       );
@@ -153,9 +162,11 @@ export class DatasetRepository implements IDatasetRepository {
     }
   }
 
-  private fetchFeedbackDatasets = async (axios) => {
+  private fetchFeedbackDatasets = async () => {
     try {
-      const { data } = await axios.get("/v1/me/datasets");
+      const { data } = await this.axios.get<Response<BackendDataset[]>>(
+        "/v1/me/datasets"
+      );
 
       return data;
     } catch (err) {
@@ -165,9 +176,9 @@ export class DatasetRepository implements IDatasetRepository {
     }
   };
 
-  private fetchWorkspaces = async (axios) => {
+  private fetchWorkspaces = async () => {
     try {
-      const { data } = await axios.get("v1/me/workspaces");
+      const { data } = await this.axios.get("v1/me/workspaces");
 
       return data.items;
     } catch (err) {
@@ -180,7 +191,7 @@ export class DatasetRepository implements IDatasetRepository {
   private factoryFeedbackDatasetsWithCorrespondingWorkspaceName = (
     feedbackDatasets,
     workspaces
-  ) => {
+  ): BackendDatasetWithWorkspace[] => {
     const newFeedbackDatasets = feedbackDatasets.map((feedbackDataset) => {
       return {
         ...feedbackDataset,
@@ -195,8 +206,8 @@ export class DatasetRepository implements IDatasetRepository {
 
   private getDatasets = async () => {
     const [newDatasets, workspaces] = await Promise.all([
-      this.fetchFeedbackDatasets(this.axios),
-      this.fetchWorkspaces(this.axios),
+      this.fetchFeedbackDatasets(),
+      this.fetchWorkspaces(),
     ]);
 
     const { items: feedbackTaskDatasets } = newDatasets;

@@ -16,13 +16,15 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import ResponseStatus
-from argilla_server.models import Response, User
 from httpx import AsyncClient
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, SpanQuestionFactory
+from argilla_server.enums import ResponseStatus, DatasetDistributionStrategy, RecordStatus
+from argilla_server.models import Response, User
+
+from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, SpanQuestionFactory, TextQuestionFactory
 
 
 @pytest.mark.asyncio
@@ -560,3 +562,66 @@ class TestUpdateResponse:
         }
 
         assert (await db.execute(select(Response).filter_by(id=response.id))).scalar_one().values == response_values
+
+    async def test_update_response_updates_record_status_to_completed(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            },
+        )
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+        response = await ResponseFactory.create(record=record, status=ResponseStatus.draft)
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "text-question": {
+                        "value": "text question updated response",
+                    },
+                },
+                "status": ResponseStatus.submitted,
+            },
+        )
+
+        assert resp.status_code == 200
+        assert record.status == RecordStatus.completed
+
+    async def test_update_response_updates_record_status_to_pending(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            },
+        )
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset, status=RecordStatus.completed)
+        response = await ResponseFactory.create(
+            values={
+                "text-question": {
+                    "value": "text question response",
+                },
+            },
+            record=record,
+            status=ResponseStatus.submitted,
+        )
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={"status": ResponseStatus.draft},
+        )
+
+        assert resp.status_code == 200
+        assert record.status == RecordStatus.pending

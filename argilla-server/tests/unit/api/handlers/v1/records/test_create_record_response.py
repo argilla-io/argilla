@@ -16,13 +16,15 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import ResponseStatusFilter
-from argilla_server.models import Response, User
+
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import DatasetFactory, RecordFactory, SpanQuestionFactory
+from argilla_server.enums import ResponseStatus, RecordStatus, DatasetDistributionStrategy
+from argilla_server.models import Response, User
+
+from tests.factories import DatasetFactory, RecordFactory, SpanQuestionFactory, TextQuestionFactory
 
 
 @pytest.mark.asyncio
@@ -52,7 +54,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -72,7 +74,7 @@ class TestCreateRecordResponse:
                     ],
                 },
             },
-            "status": ResponseStatusFilter.submitted,
+            "status": ResponseStatus.submitted,
             "record_id": str(record.id),
             "user_id": str(owner.id),
             "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
@@ -101,7 +103,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -121,7 +123,7 @@ class TestCreateRecordResponse:
                     ],
                 },
             },
-            "status": ResponseStatusFilter.submitted,
+            "status": ResponseStatus.submitted,
             "record_id": str(record.id),
             "user_id": str(owner.id),
             "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
@@ -146,7 +148,7 @@ class TestCreateRecordResponse:
                         "value": [],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -162,7 +164,7 @@ class TestCreateRecordResponse:
                     "value": [],
                 },
             },
-            "status": ResponseStatusFilter.submitted,
+            "status": ResponseStatus.submitted,
             "record_id": str(record.id),
             "user_id": str(owner.id),
             "inserted_at": datetime.fromisoformat(response_json["inserted_at"]).isoformat(),
@@ -189,7 +191,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -219,7 +221,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -244,7 +246,7 @@ class TestCreateRecordResponse:
                         "value": [{"label": "label-a", "start": 5, "end": 6}],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -273,7 +275,7 @@ class TestCreateRecordResponse:
                         "value": [{"label": "label-a", "start": 4, "end": 6}],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -304,7 +306,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -331,7 +333,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -358,7 +360,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -385,7 +387,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -412,7 +414,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -446,7 +448,7 @@ class TestCreateRecordResponse:
                         ],
                     },
                 },
-                "status": ResponseStatusFilter.submitted,
+                "status": ResponseStatus.submitted,
             },
         )
 
@@ -454,3 +456,63 @@ class TestCreateRecordResponse:
         assert response.json() == {"detail": "overlapping values found between spans at index idx=0 and idx=2"}
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
+
+    async def test_create_record_response_updates_record_status_to_completed(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            }
+        )
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+
+        response = await async_client.post(
+            self.url(record.id),
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "text-question": {
+                        "value": "text question response",
+                    },
+                },
+                "status": ResponseStatus.submitted,
+            },
+        )
+
+        assert response.status_code == 201
+        assert record.status == RecordStatus.completed
+
+    async def test_create_record_response_does_not_updates_record_status_to_completed(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 2,
+            }
+        )
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+
+        response = await async_client.post(
+            self.url(record.id),
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "text-question": {
+                        "value": "text question response",
+                    },
+                },
+                "status": ResponseStatus.submitted,
+            },
+        )
+
+        assert response.status_code == 201
+        assert record.status == RecordStatus.pending

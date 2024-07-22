@@ -1,8 +1,5 @@
 <template>
-  <BaseLinearProgressSkeleton
-    v-if="$fetchState.pending"
-    class="dataset-progress__bar"
-  />
+  <BaseLinearProgressSkeleton v-if="!isLoaded" class="dataset-progress__bar" />
   <transition v-else-if="!!progress" name="fade" appear>
     <div class="dataset-progress">
       <p class="dataset-progress__pending-info">
@@ -23,8 +20,9 @@ import { useDatasetProgressViewModel } from "./useDatasetProgressViewModel";
 
 export default {
   props: {
-    dataset: {
-      type: Object,
+    datasetId: {
+      type: String,
+      required: true,
     },
   },
   setup(props) {

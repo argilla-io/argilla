@@ -9,7 +9,8 @@ type KindOfParam =
   | "sort"
   | "response"
   | "suggestion"
-  | "similarity";
+  | "similarity"
+  | "tab";
 
 type QueryParam = {
   key: KindOfParam;

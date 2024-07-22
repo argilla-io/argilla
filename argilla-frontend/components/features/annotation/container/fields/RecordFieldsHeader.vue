@@ -24,7 +24,7 @@
         :recordCriteria="recordCriteria"
         :recordId="record.id"
       />
-      <RecordStatus :recordStatus="record.status" />
+      <RecordStatus :record="record" />
       <RecordMenu :record="record" />
     </div>
   </div>

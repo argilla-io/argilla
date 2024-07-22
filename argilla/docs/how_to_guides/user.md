@@ -132,6 +132,17 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 retrieved_user = client.users("my_username")
 ```
 
+You can also use the user `id` to fetch the user:
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+user = client.users(id="<uuid-or-uuid-string>")
+```
+
+If the user does not exist for the given id, the call will return `None`
+
 ## List users in a workspace
 
 You can list all the users in a workspace by accessing the `users` attribute on the `Workspace` class and iterating over them. You can also use `len(workspace.users)` to get the number of users by workspace.

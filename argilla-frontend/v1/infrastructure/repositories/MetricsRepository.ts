@@ -3,14 +3,12 @@ import { largeCache } from "./AxiosCache";
 import { Metrics } from "~/v1/domain/entities/dataset/Metrics";
 
 interface BackendMetrics {
-  records: {
-    count: number;
-  };
   responses: {
-    count: number;
+    total: number;
     submitted: number;
     discarded: number;
     draft: number;
+    pending: number;
   };
 }
 
@@ -25,11 +23,11 @@ export class MetricsRepository {
       );
 
       return new Metrics(
-        data.records.count,
-        data.responses.count,
+        data.responses.total,
         data.responses.submitted,
         data.responses.discarded,
-        data.responses.draft
+        data.responses.draft,
+        data.responses.pending
       );
     } catch {
       /* lint:disable:no-empty */

@@ -7,32 +7,22 @@ import {
 } from "~/v1/infrastructure/events";
 import { useMetrics } from "~/v1/infrastructure/storage/MetricsStorage";
 
-interface FeedbackTaskProgressProps {
+interface AnnotationProgressProps {
   datasetId: string;
-  enableFetch?: boolean;
 }
-
-export const useFeedbackTaskProgressViewModel = (
-  props: FeedbackTaskProgressProps
+export const useAnnotationProgressViewModel = (
+  props: AnnotationProgressProps
 ) => {
-  const { state: datasetMetrics } = useMetrics();
+  const { state: metrics } = useMetrics();
   const getMetrics = useResolve(GetUserMetricsUseCase);
 
-  const loadMetrics = (datasetId: string) => {
-    getMetrics.execute(datasetId);
-  };
-
   onBeforeMount(() => {
-    if (!props.enableFetch) return;
+    useEvents(UpdateMetricsEventHandler);
 
-    useEvents(() => {
-      new UpdateMetricsEventHandler();
-    });
-
-    loadMetrics(props.datasetId);
+    getMetrics.execute(props.datasetId);
   });
 
   return {
-    datasetMetrics,
+    metrics,
   };
 };

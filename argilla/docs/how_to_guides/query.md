@@ -122,7 +122,7 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 
 ## Filter by status
 
-You can filter records based on their status. The status can be `pending`, `draft`, `submitted`, or `discarded`.
+You can filter records based on record or response status. Record status can be `pending` or `completed` and response status can be `pending`, `draft`, `submitted`, or `discarded`.
 
 ```python
 import argilla as rg
@@ -134,7 +134,12 @@ workspace = client.workspaces("my_workspace")
 dataset = client.datasets(name="my_dataset", workspace=workspace)
 
 status_filter = rg.Query(
-    filter=rg.Filter(("response.status", "==", "submitted"))
+    filter=rg.Filter(
+        [
+            ("status", "==", "completed"),
+            ("response.status", "==", "discarded")
+        ]
+    )
 )
 
 filtered_records = list(dataset.records(status_filter))

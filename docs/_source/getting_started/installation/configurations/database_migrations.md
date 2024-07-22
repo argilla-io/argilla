@@ -236,10 +236,8 @@ argilla server search-engine reindex --feedback-dataset-id 08476931-ac30-4eec-9a
 
 ::::
 
-If you are using the quickstart docker image, you can set the `REINDEX_DATASETS` environment variable to `true` to reindex the datasets.
-You can visit the [Docker Quickstart](/getting_started/installation/deployments/docker-quickstart) deployment page for more information.
+You can set the `REINDEX_DATASETS` environment variable to `true` to reindex the datasets.
 
 :::
 
 ::::
-

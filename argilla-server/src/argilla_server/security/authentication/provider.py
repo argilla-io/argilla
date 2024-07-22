@@ -14,7 +14,7 @@
 
 from typing import ClassVar, List, Optional
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends
 from fastapi.security import SecurityScopes
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.authentication import AuthenticationBackend
@@ -39,9 +39,6 @@ class AuthenticationProvider:
     @classmethod
     def new_instance(cls):
         return AuthenticationProvider()
-
-    def configure_app(self, app: FastAPI) -> None:
-        pass
 
     async def get_current_user(
         self,

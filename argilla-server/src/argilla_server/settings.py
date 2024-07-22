@@ -23,7 +23,6 @@ import re
 import warnings
 from pathlib import Path
 from typing import Dict, List, Optional
-from urllib.parse import urlparse
 
 from argilla_server.constants import (
     DATABASE_POSTGRESQL,
@@ -101,8 +100,6 @@ class Settings(BaseSettings):
     cors_origins: List[str] = ["*"]
 
     docs_enabled: bool = True
-
-    namespace: str = Field(default=None, regex=r"^[a-z]+$")
 
     enable_migration: bool = Field(
         default=False,
@@ -225,36 +222,6 @@ class Settings(BaseSettings):
         return values
 
     @property
-    def dataset_index_name(self) -> str:
-        ns = self.namespace
-        if ns:
-            return f"{self.namespace}.{self.__DATASETS_INDEX_NAME__}"
-        return self.__DATASETS_INDEX_NAME__
-
-    @property
-    def dataset_records_index_name(self) -> str:
-        ns = self.namespace
-        if ns:
-            return f"{self.namespace}.{self.__DATASETS_RECORDS_INDEX_NAME__}"
-        return self.__DATASETS_RECORDS_INDEX_NAME__
-
-    @property
-    def old_dataset_index_name(self) -> str:
-        index_name = ".rubrix<NAMESPACE>.datasets-v0"
-        ns = self.namespace
-        if ns is None:
-            return index_name.replace("<NAMESPACE>", "")
-        return index_name.replace("<NAMESPACE>", f".{ns}")
-
-    @property
-    def old_dataset_records_index_name(self) -> str:
-        index_name = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
-        ns = self.namespace
-        if ns is None:
-            return index_name.replace("<NAMESPACE>", "")
-        return index_name.replace("<NAMESPACE>", f".{ns}")
-
-    @property
     def database_engine_args(self) -> Dict:
         if self.database_is_sqlite:
             return {
@@ -292,14 +259,6 @@ class Settings(BaseSettings):
     @property
     def search_engine_is_opensearch(self) -> bool:
         return self.search_engine == SEARCH_ENGINE_OPENSEARCH
-
-    def obfuscated_elasticsearch(self) -> str:
-        """Returns configured elasticsearch url obfuscating the provided password, if any"""
-        parsed = urlparse(self.elasticsearch)
-        if parsed.password:
-            return self.elasticsearch.replace(parsed.password, "XXXX")
-
-        return self.elasticsearch
 
     class Config:
         env_prefix = "ARGILLA_"

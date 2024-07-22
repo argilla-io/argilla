@@ -35,6 +35,7 @@ export interface BackendRecord {
   updated_at: Date;
   inserted_at: Date;
   metadata?: { [key: string]: string };
+  status: "pending" | "completed";
   query_score: number;
 }
 

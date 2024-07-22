@@ -52,14 +52,14 @@ export default {
           color: RecordStatus.draft.color,
         },
         {
-          id: RecordStatus.submitted.name,
-          name: this.$t(`recordStatus.${RecordStatus.submitted.name}`),
-          color: RecordStatus.submitted.color,
-        },
-        {
           id: RecordStatus.discarded.name,
           name: this.$t(`recordStatus.${RecordStatus.discarded.name}`),
           color: RecordStatus.discarded.color,
+        },
+        {
+          id: RecordStatus.submitted.name,
+          name: this.$t(`recordStatus.${RecordStatus.submitted.name}`),
+          color: RecordStatus.submitted.color,
         },
       ],
     };

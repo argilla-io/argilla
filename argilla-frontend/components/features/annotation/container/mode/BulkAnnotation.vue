@@ -150,15 +150,15 @@
             />
           </template>
           <template #downHeader>
-            <p v-text="$t('metrics.progress')" />
             <AnnotationProgress
               class="annotation-progress"
               :datasetId="recordCriteria.datasetId"
-              enableFetch
             />
           </template>
+          <template #downHeaderExpanded>
+            <p v-text="$t('metrics.progress.my')" />
+          </template>
           <template #downContent>
-            <AnnotationProgress :datasetId="recordCriteria.datasetId" />
             <AnnotationProgressDetailed :datasetId="recordCriteria.datasetId" />
           </template>
         </HorizontalResizable>
@@ -496,12 +496,13 @@ export default {
   }
   &--empty {
     width: 100%;
-    height: 100%;
+    height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    @include media("<desktop") {
-      height: 80vh;
+    @include media("<=tablet") {
+      height: 100%;
+      text-align: center;
     }
   }
 }
@@ -547,6 +548,12 @@ export default {
 .annotation-progress {
   .--expanded & {
     display: none;
+  }
+}
+.annotation-progress__title {
+  display: none;
+  .--expanded & {
+    display: block;
   }
 }
 [data-title] {

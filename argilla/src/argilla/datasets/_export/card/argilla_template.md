@@ -27,7 +27,7 @@ This dataset has been created with [Argilla](https://github.com/argilla-io/argil
 
 ## Using this dataset with Argilla
 
-To load with Argilla, you'll just need to install Argilla as `pip install argilla --pre --upgrade` and then use the following code:
+To load with Argilla, you'll just need to install Argilla as `pip install argilla --upgrade` and then use the following code:
 
 ```python
 import argilla as rg

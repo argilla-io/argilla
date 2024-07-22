@@ -15,17 +15,13 @@ import dataclasses
 from abc import ABCMeta, abstractmethod
 from contextlib import asynccontextmanager
 from typing import (
-    Any,
     AsyncGenerator,
-    ClassVar,
-    Dict,
     Generic,
     Iterable,
     List,
     Optional,
-    Type,
-    TypeVar,
     Union,
+    TypeVar,
 )
 from uuid import UUID
 
@@ -38,16 +34,12 @@ from argilla_server.enums import (
     SortOrder,
 )
 from argilla_server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
-from argilla_server.pydantic_v1 import BaseModel, Field, root_validator
+from argilla_server.pydantic_v1 import BaseModel, Field
 from argilla_server.pydantic_v1.generics import GenericModel
 
 __all__ = [
     "SearchEngine",
     "TextQuery",
-    "MetadataFilter",
-    "TermsMetadataFilter",
-    "IntegerMetadataFilter",
-    "FloatMetadataFilter",
     "UserResponseStatusFilter",
     "SearchResponseItem",
     "SearchResponses",
@@ -136,76 +128,7 @@ class UserResponseStatusFilter(BaseModel):
 
     @property
     def response_statuses(self) -> List[ResponseStatus]:
-        return [
-            status.value
-            for status in self.statuses
-            if status not in [ResponseStatusFilter.pending, ResponseStatusFilter.missing]
-        ]
-
-    @property
-    def has_pending_status(self) -> bool:
-        return ResponseStatusFilter.pending in self.statuses or ResponseStatusFilter.missing in self.statuses
-
-
-class MetadataFilter(BaseModel):
-    metadata_property: MetadataProperty
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    @classmethod
-    @abstractmethod
-    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "MetadataFilter":
-        pass
-
-
-class TermsMetadataFilter(MetadataFilter):
-    values: List[str]
-
-    @classmethod
-    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "MetadataFilter":
-        return cls(metadata_property=metadata_property, values=string.split(","))
-
-
-NT = TypeVar("NT", int, float)
-
-
-class _RangeModel(GenericModel, Generic[NT]):
-    ge: Optional[NT]
-    le: Optional[NT]
-
-
-class NumericMetadataFilter(GenericModel, Generic[NT], MetadataFilter):
-    ge: Optional[NT] = None
-    le: Optional[NT] = None
-
-    _json_model: ClassVar[Type[_RangeModel]]
-
-    @root_validator(skip_on_failure=True)
-    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        ge = values.get("ge")
-        le = values.get("le")
-
-        if ge is None and le is None:
-            raise ValueError("One of 'ge' or 'le' values must be specified")
-
-        if ge is not None and le is not None and ge > le:
-            raise ValueError(f"'ge' ({ge}) must be lower or equal than 'le' ({le})")
-
-        return values
-
-    @classmethod
-    def from_string(cls, metadata_property: MetadataProperty, string: str) -> "NumericMetadataFilter":
-        model = cls._json_model.parse_raw(string)
-        return cls(metadata_property=metadata_property, ge=model.ge, le=model.le)
-
-
-class IntegerMetadataFilter(NumericMetadataFilter[int]):
-    _json_model = _RangeModel[int]
-
-
-class FloatMetadataFilter(NumericMetadataFilter[float]):
-    _json_model = _RangeModel[float]
+        return [status.value for status in self.statuses if status == ResponseStatusFilter.pending]
 
 
 class SearchResponseItem(BaseModel):
@@ -234,6 +157,9 @@ class TermsMetadataMetrics(BaseModel):
     type: MetadataPropertyType = Field(MetadataPropertyType.terms)
     total: int
     values: List[TermCount] = Field(default_factory=list)
+
+
+NT = TypeVar("NT", int, float)
 
 
 class NumericMetadataMetrics(GenericModel, Generic[NT]):
@@ -318,6 +244,10 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    async def partial_record_update(self, record: Record, **update):
+        pass
+
+    @abstractmethod
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
         pass
 
@@ -344,11 +274,6 @@ class SearchEngine(metaclass=ABCMeta):
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
         sort: Optional[List[Order]] = None,
-        # TODO: remove them and keep filter and order
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        metadata_filters: Optional[List[MetadataFilter]] = None,
-        sort_by: Optional[List[SortBy]] = None,
-        # END TODO
         offset: int = 0,
         limit: int = 100,
     ) -> SearchResponses:
@@ -362,10 +287,6 @@ class SearchEngine(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    async def set_records_vectors(self, dataset: Dataset, vectors: Iterable[Vector]):
-        pass
-
-    @abstractmethod
     async def similarity_search(
         self,
         dataset: Dataset,
@@ -374,10 +295,6 @@ class SearchEngine(metaclass=ABCMeta):
         record: Optional[Record] = None,
         query: Optional[Union[TextQuery, str]] = None,
         filter: Optional[Filter] = None,
-        # TODO: remove them and keep filter
-        user_response_status_filter: Optional[UserResponseStatusFilter] = None,
-        metadata_filters: Optional[List[MetadataFilter]] = None,
-        # END TODO
         max_results: int = 100,
         order: SimilarityOrder = SimilarityOrder.most_similar,
         threshold: Optional[float] = None,
