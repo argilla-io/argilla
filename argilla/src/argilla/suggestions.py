@@ -29,7 +29,7 @@ class Suggestion(Resource):
 
     Attributes:
         question_name (str): The name of the question that the suggestion is for.
-        value (str): The value of the suggestion.add()
+        value (str): The value of the suggestion
         score (float): The score of the suggestion. For example, the probability of the model prediction.
         agent (str): The agent that created the suggestion. For example, the model name.
         type (str): The type of suggestion, either 'model' or 'human'.
