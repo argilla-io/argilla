@@ -143,7 +143,7 @@ nav:
         - Distribute the annotation task: how_to_guides/distribution.md
         - Annotate datasets: how_to_guides/annotate.md
         - Query and filter records: how_to_guides/query.md
-        - Import/export datasets: how_to_guides/import_export.md  
+        - Import/export datasets: how_to_guides/import_export.md
       - Advanced:
         - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
         - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
