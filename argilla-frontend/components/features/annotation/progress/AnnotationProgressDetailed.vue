@@ -57,10 +57,10 @@ export default {
     progressItems() {
       return [
         {
-          name: RecordStatus.submitted.name,
-          color: RecordStatus.submitted.color,
-          value: this.metrics.submitted,
-          percent: this.metrics.percentage.submitted,
+          name: RecordStatus.pending.name,
+          color: RecordStatus.pending.color,
+          value: this.metrics.pending,
+          percent: this.metrics.percentage.pending,
         },
         {
           name: RecordStatus.draft.name,
@@ -75,10 +75,10 @@ export default {
           percent: this.metrics.percentage.discarded,
         },
         {
-          name: RecordStatus.pending.name,
-          color: RecordStatus.pending.color,
-          value: this.metrics.pending,
-          percent: this.metrics.percentage.pending,
+          name: RecordStatus.submitted.name,
+          color: RecordStatus.submitted.color,
+          value: this.metrics.submitted,
+          percent: this.metrics.percentage.submitted,
         },
       ];
     },
