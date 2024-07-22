@@ -11,24 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import contextlib
-from typing import TYPE_CHECKING, Dict, Generator
-
-import pytest
-import pytest_asyncio
-
-
-import uuid
 from typing import TYPE_CHECKING, Dict, Generator, Optional
 
 import pytest
 import pytest_asyncio
-from sqlalchemy.engine.interfaces import IsolationLevel
-from httpx import AsyncClient
-from opensearchpy import OpenSearch
-
-from argilla_server import telemetry
-
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.database import get_async_db, get_serializable_async_db
@@ -36,6 +22,10 @@ from argilla_server.models import User, UserRole, Workspace
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.settings import settings
 from argilla_server.telemetry import TelemetryClient
+from httpx import AsyncClient
+from opensearchpy import OpenSearch
+from sqlalchemy.engine.interfaces import IsolationLevel
+
 from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
