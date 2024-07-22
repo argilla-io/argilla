@@ -26,7 +26,8 @@ In Argilla, you can import/export two main components of a dataset:
         ```python
         rg.Dataset.from_hub(
             repo_id="<my_org>/<my_dataset>",
-            workspace="<my_argilla_workspace>"
+            name="<my_argilla_dataset>",
+            workspace="<my_argilla_workspace>",
             client=rg.Client(),
             with_records=True
         )
@@ -43,8 +44,8 @@ In Argilla, you can import/export two main components of a dataset:
         ```python
         rg.Dataset.from_disk(
             path="<directory>/<file>",
-            target_workspace=None,
-            target_name=None,
+            name="<my_argilla_dataset>",
+            workspace="<my_argilla_workspace>"
         )
         ```
     === "`rg.Dataset.records.to_datasets()`"
@@ -163,7 +164,7 @@ dataset = rg.Dataset.from_disk(path="path/to/dataset")
     You can also specify the workspace and name of the dataset when loading it from the disk.
 
     ```python
-    dataset = rg.Dataset.from_disk(path="path/to/dataset", target_workspace=workspace, target_name="my_dataset")
+    dataset = rg.Dataset.from_disk(path="path/to/dataset", workspace=workspace, name="my_dataset")
     ```
 
 ## Exporting and importing records
