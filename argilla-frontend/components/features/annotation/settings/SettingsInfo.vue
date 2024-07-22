@@ -46,6 +46,7 @@
               <input
                 type="number"
                 id="task-distribution"
+                min="1"
                 v-model="settings.dataset.distribution.minSubmitted"
               />
             </div>
