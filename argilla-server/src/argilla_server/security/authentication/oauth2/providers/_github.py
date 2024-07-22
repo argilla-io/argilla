@@ -12,7 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla_server.security.authentication.oauth2.providers import OAuth2ClientProvider  # noqa
-from argilla_server.security.authentication.oauth2.settings import OAuth2Settings  # noqa
+from social_core.backends.github import GithubOAuth2
 
-__all__ = ["OAuth2Settings", "OAuth2ClientProvider"]
+from argilla_server.security.authentication.claims import Claims
+from argilla_server.security.authentication.oauth2.providers._base import OAuth2ClientProvider
+
+
+class GitHubClientProvider(OAuth2ClientProvider):
+    claims = Claims(
+        picture="avatar_url",
+        identity=lambda user: f"{user.provider}:{user.id}",
+        username="login",
+    )
+    backend_class = GithubOAuth2
+    name = "github"
