@@ -17,7 +17,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server import telemetry
 from argilla_server.api.policies.v1 import UserPolicy, authorize
 from argilla_server.api.schemas.v1.users import User as UserSchema
 from argilla_server.api.schemas.v1.users import UserCreate, Users
@@ -26,13 +25,18 @@ from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.models import User
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["users"])
 
 
 @router.get("/me", response_model=UserSchema)
-async def get_current_user(request: Request, current_user: User = Security(auth.get_current_user)):
-    await telemetry.track_login(request, current_user)
+async def get_current_user(
+    request: Request,
+    current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
+):
+    await telemetry_client.track_user_login(request, current_user)
 
     return current_user
 
@@ -43,10 +47,15 @@ async def get_user(
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.get)
 
-    return await User.get_or_raise(db, user_id)
+    user = await User.get_or_raise(db, user_id)
+
+    await telemetry_client.track_crud_user(action="read", user=user)
+
+    return user
 
 
 @router.get("/users", response_model=Users)
@@ -54,10 +63,15 @@ async def list_users(
     *,
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.list)
 
     users = await accounts.list_users(db)
+
+    await telemetry_client.track_crud_user(action="list", user=None, is_oauth=False, count=len(users))
+    for user in users:
+        await telemetry_client.track_crud_user(action="read", user=user, is_oauth=False)
 
     return Users(items=users)
 
@@ -68,12 +82,13 @@ async def create_user(
     db: AsyncSession = Depends(get_async_db),
     user_create: UserCreate,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.create)
 
     user = await accounts.create_user(db, user_create.dict())
 
-    telemetry.track_user_created(user)
+    await telemetry_client.track_crud_user(action="create", user=user, is_oauth=False)
 
     return user
 
@@ -84,12 +99,17 @@ async def delete_user(
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     user = await User.get_or_raise(db, user_id)
 
     await authorize(current_user, UserPolicy.delete)
 
-    return await accounts.delete_user(db, user)
+    user = await accounts.delete_user(db, user)
+
+    await telemetry_client.track_crud_user(action="delete", user=user)
+
+    return user
 
 
 @router.get("/users/{user_id}/workspaces", response_model=Workspaces)
@@ -98,6 +118,7 @@ async def list_user_workspaces(
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.list_workspaces)
 
@@ -107,5 +128,9 @@ async def list_user_workspaces(
         workspaces = await accounts.list_workspaces(db)
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
+
+    for workspace in workspaces:
+        await telemetry_client.track_crud_workspace(action="read", workspace=workspace)
+    await telemetry_client.track_crud_workspace(action="list", workspace=None, count=len(workspaces))
 
     return Workspaces(items=workspaces)

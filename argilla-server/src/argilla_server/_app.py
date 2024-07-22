@@ -219,6 +219,61 @@ async def configure_search_engine():
                     "the argilla server.\n"
                 )
 
+
+def configure_app_security(app: FastAPI):
+    auth.configure_app(app)
+
+
+def configure_app_logging(app: FastAPI):
+    """Configure app logging using"""
+    app.on_event("startup")(configure_logging)
+
+
+def configure_telemetry(app: FastAPI):
+    message = "\n"
+    message += inspect.cleandoc(
+        """
+        Argilla uses telemetry to report anonymous usage and error information.
+
+        You can know more about what information is reported at:
+
+            https://docs.argilla.io/en/latest/reference/telemetry.html
+
+        Telemetry is currently enabled. If you want to disable it, you can configure
+        the environment variable before relaunching the server:
+    """
+    )
+    message += "\n\n    "
+    message += "#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"
+    message += "\n"
+
+    @app.on_event("startup")
+    async def check_telemetry():
+        if settings.enable_telemetry:
+            print(message, flush=True)
+
+
+_get_db_wrapper = contextlib.asynccontextmanager(get_async_db)
+
+
+def configure_database(app: FastAPI):
+    def _user_has_default_credentials(user: User):
+        return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
+
+    def _log_default_user_warning():
+        _LOGGER.warning(
+            f"User {DEFAULT_USERNAME!r} with default credentials has been found in the database. "
+            "If you are using argilla in a production environment this can be a serious security problem. "
+            f"We recommend that you create a new admin user and then delete the default {DEFAULT_USERNAME!r} one."
+        )
+
+    @app.on_event("startup")
+    async def log_default_user_warning_if_present():
+        async with _get_db_wrapper() as db:
+            default_user = await accounts.get_user_by_username(db, DEFAULT_USERNAME)
+            if default_user and _user_has_default_credentials(default_user):
+                _log_default_user_warning()
+
     await ping_search_engine()
 
 

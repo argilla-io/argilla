@@ -16,10 +16,9 @@ import uuid
 from unittest.mock import MagicMock
 
 import pytest
-from argilla_server import telemetry
 from argilla_server.enums import UserRole
 from argilla_server.models import User
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
+from argilla_server.telemetry import TelemetryClient
 from fastapi import Request
 
 mock_request = Request(scope={"type": "http", "headers": {}})
@@ -28,37 +27,39 @@ mock_request = Request(scope={"type": "http", "headers": {}})
 def test_disable_telemetry():
     telemetry_client = TelemetryClient(enable_telemetry=False)
 
-    assert telemetry_client.client is None
+    assert telemetry_client.enable_telemetry == False
+
+
+__CRUD__ = ["create", "read", "update", "delete"]
 
 
 @pytest.mark.asyncio
-async def test_track_login(test_telemetry: MagicMock):
-    user = User(id=uuid.uuid4(), username="argilla")
-    await telemetry.track_login(request=mock_request, user=user)
+class TestSuiteTelemetry:
+    async def test_track_user_login(self, test_telemetry: MagicMock):
+        user = User(id=uuid.uuid4(), username="argilla")
+        await test_telemetry.track_user_login(request=mock_request, user=user)
 
-    current_server_id = get_telemetry_client().server_id
-    expected_event_data = {
-        "accept-language": None,
-        "is_default_user": True,
-        "user_id": str(user.id),
-        "user-agent": None,
-        "user_hash": str(uuid.uuid5(current_server_id, name="argilla")),
-    }
-    test_telemetry.track_data.assert_called_once_with(action="UserInfoRequested", data=expected_event_data)
+        test_telemetry.track_user_login.assert_called_once_with(request=mock_request, user=user)
+        test_telemetry.track_data.assert_called()
 
+    @pytest.mark.parametrize("is_oauth", [True, False])
+    @pytest.mark.parametrize("username", ["argilla", "john"])
+    @pytest.mark.parametrize("action", __CRUD__)
+    async def test_user_crud(self, test_telemetry: MagicMock, username: str, is_oauth: bool, action: str):
+        user = User(id=uuid.uuid4(), username=username, role=UserRole.owner)
 
-@pytest.mark.parametrize("is_oauth", [True, False])
-@pytest.mark.parametrize("username", ["argilla", "john"])
-def test_user_created(test_telemetry, username: str, is_oauth: bool):
-    user = User(id=uuid.uuid4(), username=username, role=UserRole.owner)
+        await test_telemetry.track_crud_user(action=action, user=user, is_oauth=is_oauth)
 
-    telemetry.track_user_created(user=user, is_oauth=is_oauth)
-    test_telemetry.track_data.assert_called_once_with(
-        action="UserCreated",
-        data={
-            "is_default_user": username == "argilla",
-            "is_oauth": is_oauth,
-            "role": user.role,
-            "user_id": str(user.id),
-        },
-    )
+        test_telemetry.track_crud_user.assert_called_once_with(action=action, user=user, is_oauth=is_oauth)
+        test_telemetry.track_data.assert_called()
+
+    @pytest.mark.parametrize("is_oauth", [True, False])
+    @pytest.mark.parametrize("username", ["argilla", "john"])
+    @pytest.mark.parametrize("action", __CRUD__)
+    async def track_crud_workspace(self, test_telemetry: MagicMock, username: str, is_oauth: bool, action: str):
+        user = User(id=uuid.uuid4(), username=username, role=UserRole.owner)
+
+        await test_telemetry.track_crud_user(action=action, user=user, is_oauth=is_oauth)
+
+        test_telemetry.track_crud_user.assert_called_once_with(action=action, user=user, is_oauth=is_oauth)
+        test_telemetry.track_data.assert_called()

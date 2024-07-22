@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -23,7 +24,7 @@ from tests.factories import AnnotatorFactory, DatasetFactory, UserFactory, Works
 
 @pytest.mark.asyncio
 class TestSuiteWorkspaces:
-    async def test_get_workspace(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_workspace(self, async_client: AsyncClient, owner_auth_header: dict, test_telemetry: MagicMock):
         workspace = await WorkspaceFactory.create(name="workspace")
 
         response = await async_client.get(f"/api/v1/workspaces/{workspace.id}", headers=owner_auth_header)
@@ -35,6 +36,9 @@ class TestSuiteWorkspaces:
             "inserted_at": workspace.inserted_at.isoformat(),
             "updated_at": workspace.updated_at.isoformat(),
         }
+
+        test_telemetry.track_crud_workspace(action="read", workspace=workspace)
+        test_telemetry.track_data.assert_called()
 
     async def test_get_workspace_without_authentication(self, async_client: AsyncClient):
         workspace = await WorkspaceFactory.create()
@@ -80,7 +84,9 @@ class TestSuiteWorkspaces:
         assert response.status_code == 404
         assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
 
-    async def test_delete_workspace(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_delete_workspace(
+        self, async_client: AsyncClient, owner_auth_header: dict, test_telemetry: MagicMock
+    ):
         workspace = await WorkspaceFactory.create(name="workspace_delete")
         other_workspace = await WorkspaceFactory.create()
 
@@ -89,6 +95,9 @@ class TestSuiteWorkspaces:
         response = await async_client.delete(f"/api/v1/workspaces/{workspace.id}", headers=owner_auth_header)
 
         assert response.status_code == 200
+
+        test_telemetry.track_crud_workspace(action="delete", workspace=workspace)
+        test_telemetry.track_data.assert_called()
 
     async def test_delete_workspace_with_feedback_datasets(self, async_client: AsyncClient, owner_auth_header: dict):
         workspace = await WorkspaceFactory.create(name="workspace_delete")

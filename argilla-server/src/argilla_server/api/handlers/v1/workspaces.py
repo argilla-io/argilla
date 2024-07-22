@@ -33,6 +33,7 @@ from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError, UnprocessableEntityError
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["workspaces"])
 
@@ -43,10 +44,15 @@ async def get_workspace(
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, WorkspacePolicy.get(workspace_id))
 
-    return await Workspace.get_or_raise(db, workspace_id)
+    workspace = await Workspace.get_or_raise(db, workspace_id)
+
+    await telemetry_client.track_crud_workspace(action="read", workspace=workspace)
+
+    return workspace
 
 
 @router.post("/workspaces", status_code=status.HTTP_201_CREATED, response_model=WorkspaceSchema)
@@ -55,10 +61,15 @@ async def create_workspace(
     db: AsyncSession = Depends(get_async_db),
     workspace_create: WorkspaceCreate,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, WorkspacePolicy.create)
 
-    return await accounts.create_workspace(db, workspace_create.dict())
+    workspace = await accounts.create_workspace(db, workspace_create.dict())
+
+    await telemetry_client.track_crud_workspace(action="create", workspace=workspace)
+
+    return workspace
 
 
 @router.delete("/workspaces/{workspace_id}", response_model=WorkspaceSchema)
@@ -67,12 +78,17 @@ async def delete_workspace(
     db: AsyncSession = Depends(get_async_db),
     workspace_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, WorkspacePolicy.delete)
 
     workspace = await Workspace.get_or_raise(db, workspace_id)
 
-    return await accounts.delete_workspace(db, workspace)
+    workspace = await accounts.delete_workspace(db, workspace)
+
+    await telemetry_client.track_crud_workspace(action="delete", workspace=workspace)
+
+    return workspace
 
 
 @router.get("/me/workspaces", response_model=Workspaces)
@@ -80,6 +96,7 @@ async def list_workspaces_me(
     *,
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ) -> Workspaces:
     await authorize(current_user, WorkspacePolicy.list_workspaces_me)
 

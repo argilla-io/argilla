@@ -209,7 +209,9 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a"]
 
-    async def test_list_dataset_fields(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_fields(
+        self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock
+    ):
         dataset = await DatasetFactory.create()
         text_field_a = await TextFieldFactory.create(
             name="text-field-a", title="Text Field A", required=True, dataset=dataset
@@ -246,6 +248,11 @@ class TestSuiteDatasets:
                 },
             ],
         }
+
+        test_telemetry.track_crud_dataset_setting.assert_called_with(
+            action="list", dataset=dataset, setting_name="fields", count=len(response.json()["items"])
+        )
+        test_telemetry.track_data.assert_called()
 
     async def test_list_dataset_fields_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -302,7 +309,9 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
-    async def test_list_dataset_questions(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_list_dataset_questions(
+        self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock
+    ):
         dataset = await DatasetFactory.create()
         text_question = await TextQuestionFactory.create(
             name="text-question",
@@ -363,6 +372,11 @@ class TestSuiteDatasets:
                 },
             ]
         }
+
+        test_telemetry.track_crud_dataset_setting.assert_called_with(
+            action="list", dataset=dataset, setting_name="questions", count=len(response.json()["items"])
+        )
+        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
         "QuestionFactory, settings",
@@ -623,7 +637,9 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_list_dataset_vectors_settings(self, async_client: "AsyncClient", role: UserRole):
+    async def test_list_dataset_vectors_settings(
+        self, async_client: "AsyncClient", role: UserRole, test_telemetry: MagicMock
+    ):
         dataset = await DatasetFactory.create()
         vectors_settings = await VectorSettingsFactory.create_batch(size=3, dataset=dataset)
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -648,6 +664,11 @@ class TestSuiteDatasets:
             ]
         }
 
+        test_telemetry.track_crud_dataset_setting.assert_called_with(
+            action="list", dataset=dataset, setting_name="vectors_settings", count=len(response.json()["items"])
+        )
+        test_telemetry.track_data.assert_called()
+
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
     async def test_list_dataset_vectors_settings_as_user_from_another_workspace(
         self, async_client: "AsyncClient", role: UserRole
@@ -668,7 +689,7 @@ class TestSuiteDatasets:
 
         assert response.status_code == 401
 
-    async def test_get_dataset(self, async_client: "AsyncClient", owner_auth_header: dict):
+    async def test_get_dataset(self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock):
         dataset = await DatasetFactory.create(name="dataset")
 
         response = await async_client.get(f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header)
@@ -689,6 +710,9 @@ class TestSuiteDatasets:
             "inserted_at": dataset.inserted_at.isoformat(),
             "updated_at": dataset.updated_at.isoformat(),
         }
+
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="read", dataset=dataset)
+        test_telemetry.track_data.assert_called()
 
     async def test_get_dataset_without_authentication(self, async_client: "AsyncClient"):
         dataset = await DatasetFactory.create()
@@ -1024,6 +1048,7 @@ class TestSuiteDatasets:
         owner_auth_header: dict,
         settings: dict,
         expected_settings: dict,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create()
         field_json = {"name": "name", "title": "title", "settings": settings}
@@ -1047,6 +1072,11 @@ class TestSuiteDatasets:
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
+
+        test_telemetry.track_crud_dataset_setting.assert_called_once_with(
+            action="create", setting_name="fields", dataset=dataset, setting=ANY
+        )
+        test_telemetry.track_data.assert_called()
 
     async def test_create_dataset_field_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
         dataset = await DatasetFactory.create()
@@ -1270,6 +1300,7 @@ class TestSuiteDatasets:
         owner_auth_header: dict,
         settings: dict,
         expected_settings: dict,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create()
         metadata_property_json = {"name": "name", "title": "title", "settings": settings}
@@ -1293,6 +1324,11 @@ class TestSuiteDatasets:
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
+
+        test_telemetry.track_crud_dataset_setting.assert_called_once_with(
+            action="create", setting_name="metadata_properties", dataset=dataset, setting=ANY
+        )
+        test_telemetry.track_data.assert_called()
 
     async def test_create_dataset_metadata_property_with_dataset_ready(
         self,
@@ -1569,6 +1605,7 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         role: UserRole,
         dataset_status: DatasetStatus,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create(status=dataset_status)
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
@@ -1602,6 +1639,11 @@ class TestSuiteDatasets:
             mock_search_engine.configure_index_vectors.assert_not_called()
         else:
             mock_search_engine.configure_index_vectors.assert_called_once_with(vector_settings)
+
+        test_telemetry.track_crud_dataset_setting.assert_called_once_with(
+            action="create", setting_name="vectors_settings", dataset=dataset, setting=ANY
+        )
+        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
         "payload",
@@ -1819,9 +1861,10 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
+        test_telemetry.track_crud_records.assert_called_once_with(
+            action="create", record_or_dataset=dataset, count=len(records)
         )
+        test_telemetry.track_data.assert_called()
 
     async def test_create_dataset_records_with_response_for_multiple_users(
         self,
@@ -2575,9 +2618,10 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
+        test_telemetry.track_crud_records.assert_called_once_with(
+            action="create", record_or_dataset=dataset, count=len(records)
         )
+        test_telemetry.track_data.assert_called()
 
     async def test_create_dataset_records_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
@@ -2952,7 +2996,11 @@ class TestSuiteDatasets:
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_update_dataset_records(
-        self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", role: UserRole
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: "SearchEngine",
+        role: UserRole,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -3038,6 +3086,9 @@ class TestSuiteDatasets:
         }
 
         mock_search_engine.index_records.assert_called_once_with(dataset, records[:4])
+
+        test_telemetry.track_crud_records.assert_called_once_with(action="update", record_or_dataset=dataset, count=4)
+        test_telemetry.track_data.assert_called()
 
     async def test_update_dataset_records_with_suggestions(
         self, async_client: "AsyncClient", mock_search_engine: "SearchEngine", owner_auth_header: dict
@@ -3480,7 +3531,12 @@ class TestSuiteDatasets:
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_dataset_records(
-        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        mock_search_engine: SearchEngine,
+        role: UserRole,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -3502,6 +3558,11 @@ class TestSuiteDatasets:
         # `delete_records` is called with the records returned by the delete statement, which are different ORM objects
         # than the ones created by the factory
         mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=ANY)
+
+        test_telemetry.track_crud_records.assert_called_once_with(
+            action="delete", record_or_dataset=dataset, count=len(records_ids) + len(random_uuids)
+        )
+        test_telemetry.track_data.assert_called()
 
     async def test_delete_dataset_records_with_no_ids(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
@@ -4566,7 +4627,7 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-        test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="create", dataset=dataset)
         mock_search_engine.create_index.assert_called_once_with(dataset)
 
     async def test_publish_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
@@ -4673,7 +4734,9 @@ class TestSuiteDatasets:
         ],
     )
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
-    async def test_update_dataset(self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict):
+    async def test_update_dataset(
+        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict, test_telemetry: MagicMock
+    ):
         dataset = await DatasetFactory.create(
             name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
         )
@@ -4714,6 +4777,9 @@ class TestSuiteDatasets:
         assert dataset.name == name
         assert dataset.guidelines == guidelines
         assert dataset.allow_extra_metadata is allow_extra_metadata
+
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="update", dataset=dataset)
+        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
         "dataset_json",
@@ -4813,6 +4879,7 @@ class TestSuiteDatasets:
         mock_search_engine: SearchEngine,
         owner: User,
         owner_auth_header: dict,
+        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(dataset=dataset)
@@ -4839,6 +4906,9 @@ class TestSuiteDatasets:
         # ]
 
         mock_search_engine.delete_index.assert_called_once_with(dataset)
+
+        test_telemetry.track_crud_dataset.assert_called_once_with(action="delete", dataset=dataset)
+        test_telemetry.track_data.assert_called()
 
     async def test_delete_published_dataset(
         self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict
