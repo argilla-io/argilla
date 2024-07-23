@@ -18,7 +18,7 @@ import pytest
 
 import argilla as rg
 from argilla._exceptions import SettingsError
-from argilla.settings._resource import SettingsProperties
+from argilla.settings._task_distribution import TaskDistribution
 
 
 class TestSettings:
@@ -153,6 +153,15 @@ class TestSettings:
         settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
         with pytest.raises(IndexError):
             _ = settings.fields[10]
+
+    def test_settings_with_modified_default_task_distribution(self):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+
+        assert settings.distribution == TaskDistribution(min_submitted=1)
+        settings.distribution.min_submitted = 10
+
+        other_settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+        assert other_settings.distribution == TaskDistribution(min_submitted=1)
 
 
 class TestSettingsSerialization:
