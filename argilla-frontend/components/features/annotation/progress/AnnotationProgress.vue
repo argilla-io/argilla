@@ -73,12 +73,12 @@ $bullet-size: 8px;
     margin-right: $base-space * 2;
   }
   &__item {
-    background: palette(grey, 700);
     display: flex;
     flex-direction: row;
     gap: $base-space;
     padding: $base-space;
     width: auto;
+    background: $black-3;
     border-radius: $border-radius;
   }
   &__name {

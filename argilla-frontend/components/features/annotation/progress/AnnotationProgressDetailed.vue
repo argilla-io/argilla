@@ -128,7 +128,7 @@ $bullet-size: 8px;
   margin-top: 0;
   margin-bottom: $base-space * 3;
   &__item {
-    background: palette(grey, 700);
+    background: $black-3;
     display: flex;
     flex-direction: column;
     gap: $base-space;
