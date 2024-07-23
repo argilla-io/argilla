@@ -34,11 +34,13 @@ class DiskImportExportMixin(ABC):
     """A mixin for exporting and importing datasets to and from disk."""
 
     _model: DatasetModel
-    _default_settings_path = "settings.json"
     _default_records_path = "records.json"
-    _default_dataset_path = "dataset.json"
+    _default_config_repo_dir = ".argilla"
+    _default_settings_path = f"{_default_config_repo_dir}/settings.json"
+    _default_dataset_path = f"{_default_config_repo_dir}/dataset.json"
+    _default_configuration_files = [_default_settings_path, _default_dataset_path]
 
-    def to_disk(self: "Dataset", path: str, with_records: bool = True) -> str:
+    def to_disk(self: "Dataset", path: str, *, with_records: bool = True) -> str:
         """Exports the dataset to disk in the given path. The dataset is exported as a directory containing the dataset model, settings and records as json files.
 
         Parameters:
@@ -61,6 +63,7 @@ class DiskImportExportMixin(ABC):
     def from_disk(
         cls: Type["Dataset"],
         path: str,
+        *,
         name: Optional[str] = None,
         workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
@@ -137,6 +140,8 @@ class DiskImportExportMixin(ABC):
         path = Path(path)
         if not path.is_dir():
             raise NotADirectoryError(f"Path {path} is not a directory")
+        main_path = path / cls._default_config_repo_dir
+        main_path.mkdir(exist_ok=True)
         dataset_path = path / cls._default_dataset_path
         settings_path = path / cls._default_settings_path
         records_path = path / cls._default_records_path

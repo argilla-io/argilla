@@ -70,9 +70,6 @@ homepage = "https://www.argilla.io"
 documentation = "https://docs.argilla.io"
 repository = "https://github.com/argilla-io/argilla"
 
-[project.scripts]
-argilla_server = "argilla_server.cli:app"
-
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -167,8 +164,13 @@ line-length = 120
 [tool.pdm.scripts]
 _.env_file = ".env.dev"
 cli = { cmd = "python -m argilla_server.cli" }
-server = { cmd = "uvicorn argilla_server:app --reload" }
+server = { cmd = "uvicorn argilla_server:app --port 6900 --reload" }
 migrate = { cmd = "alembic upgrade head" }
+dev-server.composite = [
+    "migrate",
+    "cli database users create_default",
+    "server"
+]
 test = { cmd = "pytest", env_file = ".env.test" }
 
 build-server-image = { shell = "cp -R dist docker/server && docker build -t argilla/argilla-server:local docker/server" }

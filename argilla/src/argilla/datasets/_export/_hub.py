@@ -30,9 +30,6 @@ if TYPE_CHECKING:
 
 
 class HubImportExportMixin(DiskImportExportMixin):
-    _DEFAULT_DATASET_REPO_DIR = ".argilla"
-    _DEFAULT_CONFIGURATION_FILES = ["settings.json", "dataset.json"]
-
     def to_hub(
         self: "Dataset",
         repo_id: str,
@@ -62,21 +59,29 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         hf_api = HfApi(token=kwargs.get("token"))
 
+        hfds = False
         if with_records:
             hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
             hfds.push_to_hub(repo_id, **kwargs)
+        else:
+            hf_api.create_repo(repo_id=repo_id, repo_type="dataset", exist_ok=kwargs.get("exist_ok") or True)
 
         with TemporaryDirectory() as tmpdirname:
-            config_dir = os.path.join(tmpdirname, self._DEFAULT_DATASET_REPO_DIR)
+            config_dir = os.path.join(tmpdirname, self._default_config_repo_dir)
             os.makedirs(config_dir)
             self.to_disk(path=config_dir, with_records=False)
 
             if generate_card:
                 sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
-                sample_huggingface_record = hfds[0]
+                if hfds:
+                    sample_huggingface_record = hfds[0]
+                    size_categories = len(hfds)
+                else:
+                    sample_huggingface_record = "No sample records provided"
+                    size_categories = 0
                 card = ArgillaDatasetCard.from_template(
                     card_data=DatasetCardData(
-                        size_categories=size_categories_parser(len(hfds)),
+                        size_categories=size_categories_parser(size_categories),
                         tags=["rlfh", "argilla", "human-feedback"],
                     ),
                     repo_id=repo_id,
@@ -101,7 +106,6 @@ class HubImportExportMixin(DiskImportExportMixin):
         cls: Type["Dataset"],
         repo_id: str,
         *,
-        *,
         name: Optional[str] = None,
         workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
@@ -125,26 +129,30 @@ class HubImportExportMixin(DiskImportExportMixin):
         from datasets import Dataset, DatasetDict, load_dataset
         from huggingface_hub import snapshot_download
 
-        folder_path = snapshot_download(  # download both files in parallel
+        # download both files in parallel
+        folder_path = snapshot_download(
             repo_id=repo_id,
             repo_type="dataset",
-            allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
+            allow_patterns=cls._default_configuration_files,
             token=kwargs.get("token"),
         )
 
-        dataset = cls.from_disk(path=folder_path, workspace=workspace, name=name, client=client)
-
-        hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-        if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
-            if len(hf_dataset.keys()) > 1:
-                raise ValueError(
-                    "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
-                    f" are: {', '.join(hf_dataset.keys())}."
-                )
-            hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
+        dataset = cls.from_disk(
+            path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
+        )
 
         if with_records:
+            hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
+            if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
+                if len(hf_dataset.keys()) > 1:
+                    raise ValueError(
+                        "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
+                        f" are: {', '.join(hf_dataset.keys())}."
+                    )
+                hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
+
             cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
+
         return dataset
 
     @staticmethod
@@ -168,7 +176,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         # Check if all user ids are known to this Argilla client
         known_users_ids = [user.id for user in dataset._client.users]
         unknown_user_ids = set(user_ids.keys()) - set(known_users_ids)
-        my_user = dataset._client.me.id
+        my_user = dataset._client.me
         if len(unknown_user_ids) > 1:
             warnings.warn(
                 message=f"""Found unknown user ids in dataset repo: {unknown_user_ids}.
