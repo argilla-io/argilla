@@ -100,6 +100,7 @@ class HubImportExportMixin(DiskImportExportMixin):
     def from_hub(
         cls: Type["Dataset"],
         repo_id: str,
+        *,
         name: Optional[str] = None,
         workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
