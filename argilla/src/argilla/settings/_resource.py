@@ -67,17 +67,15 @@ class Settings(Resource):
         """
         super().__init__(client=_dataset._client if _dataset else None)
 
+        self._dataset = _dataset
+        self._distribution = distribution or DEFAULT_TASK_DISTRIBUTION
+        self.__guidelines = self.__process_guidelines(guidelines)
+        self.__allow_extra_metadata = allow_extra_metadata
+
         self.__questions = QuestionsProperties(self, questions)
         self.__fields = SettingsProperties(self, fields)
         self.__vectors = SettingsProperties(self, vectors)
         self.__metadata = SettingsProperties(self, metadata)
-
-        self.__guidelines = self.__process_guidelines(guidelines)
-        self.__allow_extra_metadata = allow_extra_metadata
-
-        self._distribution = distribution or DEFAULT_TASK_DISTRIBUTION
-
-        self._dataset = _dataset
 
     #####################
     # Properties        #
@@ -390,6 +388,8 @@ class SettingsProperties(Sequence[Property]):
         self._settings = settings
 
         for property in properties or []:
+            if self._settings.dataset and hasattr(property, "dataset"):
+                property.dataset = self._settings.dataset
             self.add(property)
 
     def __getitem__(self, key: Union[UUID, str, int]) -> Optional[Property]:
