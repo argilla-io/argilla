@@ -64,6 +64,75 @@ for record in dataset.records:
     1. Access the responses for the question named `label` for each record like a dictionary containing a list of `Response` objects.
     2. Add a response to the record if it does not already have one.
 
+## Format per `Question` type
+
+Depending on the `Question` type, responses might need to be formatted in a slightly different way.
+
+=== "For `LabelQuestion`"
+
+    ```python
+    rg.Response(
+        question_name="label",
+        value="positive",
+        user_id=user.id,
+        status="draft"
+    )
+    ```
+
+=== "For `MultiLabelQuestion`"
+
+    ```python
+    rg.Response(
+        question_name="multi-label",
+        value=["positive", "negative"],
+        user_id=user.id,
+        status="draft"
+    )
+    ```
+
+=== "For `RankingQuestion`"
+
+    ```python
+    rg.Response(
+        question_name="rank",
+        value=["1", "3", "2"],
+        user_id=user.id,
+        status="draft"
+    )
+    ```
+
+=== "For `RatingQuestion`"
+
+    ```python
+    rg.Response(
+        question_name="rating",
+        value=4,
+        user_id=user.id,
+        status="draft"
+    )
+    ```
+
+=== "For `SpanQuestion`"
+
+    ```python
+    rg.Response(
+        question_name="span",
+        value=[{"start": 0, "end": 9, "label": "MISC"}],
+        user_id=user.id,
+        status="draft"
+    )
+    ```
+
+=== "For `TextQuestion`"
+
+    ```python
+    rg.Response(
+        question_name="text",
+        value="value",
+        user_id=user.id,
+        status="draft"
+    )
+    ```
 
 ---
 

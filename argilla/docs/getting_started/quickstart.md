@@ -14,9 +14,6 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 
 * Remotely using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space). Check out the [full guide](huggingface-spaces.md) for a more detailed configuration.
 
-!!! note
-    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc2`.
-
 * Locally using Docker.
 
 ```console
@@ -34,7 +31,7 @@ After succesfully running this step, you should be able to see Argilla's UI sign
 To manage users, workspaces and datasets in Argilla, you need to use the Argilla Python SDK. You can install it with pip as follows:
 
 ```console
-pip install argilla --pre
+pip install argilla
 ```
 
 ### Connect to the Argilla server
