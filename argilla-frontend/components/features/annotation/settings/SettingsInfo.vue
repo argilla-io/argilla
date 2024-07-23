@@ -37,11 +37,12 @@
               v-text="$t('minimumSubmittedResponses')"
             />
             <span class="info-icon" :data-title="$t('taskDistributionTooltip')">
-              <svgicon name="info" width="22" height="22"></svgicon>
+              <svgicon name="info" width="20" height="20"></svgicon>
             </span>
             <input
               type="number"
               id="task-distribution"
+              min="1"
               v-model="settings.dataset.distribution.minSubmitted"
             />
           </div>
@@ -196,11 +197,12 @@ export default {
     color: $black-87;
   }
 
-  & input {
+  & input,
+  &__input--read-only {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: auto;
+    width: 80px;
     height: 24px;
     padding: $base-space * 2;
     background: palette(white);
@@ -211,9 +213,16 @@ export default {
       border: 1px solid $primary-color;
     }
   }
+  &__input {
+    &--read-only {
+      background: $black-4;
+      border: 1px solid $black-20;
+      opacity: 0.6;
+    }
+  }
 }
 .info-icon {
-  color: $black-87;
+  color: $black-37;
   margin-right: $base-space * 2;
 }
 [data-title] {
