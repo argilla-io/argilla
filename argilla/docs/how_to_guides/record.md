@@ -353,7 +353,6 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Make sure to include the `user_id` in case you're planning to add more than one response for the same question, if not responses will apply to all the annotators.
 
 > Check the [Responses - Python Reference](../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Response` class in detail.
->
 !!! note
     Keep in mind that records with responses will be displayed as "Draft" in the UI.
 
