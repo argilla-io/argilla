@@ -17,7 +17,6 @@ export const useSettingInfoViewModel = () => {
   };
 
   return {
-    restore,
     update,
   };
 };
