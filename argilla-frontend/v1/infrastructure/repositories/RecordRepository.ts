@@ -424,7 +424,7 @@ export class RecordRepository {
         });
       }
 
-      const params = this.createParams(from, many, status);
+      const params = this.createParams(from, many);
 
       const { data } = await this.axios.post<
         ResponseWithTotal<BackendSearchRecords[]>
@@ -489,7 +489,7 @@ export class RecordRepository {
     };
   }
 
-  private createParams(fromRecord: number, howMany: number, status: string) {
+  private createParams(fromRecord: number, howMany: number) {
     const offset = `${fromRecord - 1}`;
     const params = new URLSearchParams();
 
