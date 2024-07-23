@@ -871,7 +871,6 @@ async def update_response(
     return response
 
 
-@backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
 async def upsert_response(
     db: AsyncSession, search_engine: SearchEngine, record: Record, user: User, response_upsert: ResponseUpsert
 ) -> Response:
@@ -886,24 +885,50 @@ async def upsert_response(
 
     from argilla_server.database import _get_async_db, AsyncSessionLocal
 
-    async for db in _get_async_db(isolation_level="SERIALIZABLE"):
-        record = await Record.get_or_raise(db, record.id)
+    # async for inner_db in _get_async_db(isolation_level="SERIALIZABLE"):
+    async for inner_db in _get_async_db():
+        record = await Record.get_or_raise(
+            inner_db,
+            record.id,
+            options=[
+                selectinload(Record.dataset).selectinload(Dataset.questions),
+            ],
+        )
 
         response = await Response.upsert(
-            db,
+            inner_db,
             schema=schema,
             constraints=[Response.record_id, Response.user_id],
             autocommit=False,
         )
 
-        # await _load_users_from_responses(response)
-        # await _touch_dataset_last_activity_at(db, response.record.dataset)
-        await db.refresh(record, attribute_names=[Record.responses_submitted.key])
-        await distribution.update_record_status(db, record)
-        # await search_engine.update_record_response(response)
+        await _load_users_from_responses(response)
+        await _touch_dataset_last_activity_at(inner_db, response.record.dataset)
+        # await inner_db.refresh(record, attribute_names=[Record.responses_submitted.key])
+        # await distribution.update_record_status(inner_db, record)
+        await search_engine.update_record_response(response)
         # await search_engine.partial_record_update(record, status=record.status)
 
-        # await db.commit()
+        await inner_db.commit()
+
+    @backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
+    async def _update_record_status(record_id: UUID):
+        async for second_inner_db in _get_async_db(isolation_level="SERIALIZABLE"):
+            record = await Record.get_or_raise(
+                second_inner_db,
+                record_id,
+                options=[
+                    selectinload(Record.dataset).selectinload(Dataset.questions),  # QUITAR QUESTIONS PROBAR
+                ],
+            )
+
+            await second_inner_db.refresh(record, attribute_names=[Record.responses_submitted.key])
+            await distribution.update_record_status(second_inner_db, record)
+            await search_engine.partial_record_update(record, status=record.status)
+
+            await second_inner_db.commit()
+
+    await _update_record_status(record.id)
 
     return response
 
