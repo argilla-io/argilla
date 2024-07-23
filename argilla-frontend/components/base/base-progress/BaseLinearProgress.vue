@@ -26,12 +26,12 @@
           :style="{ left: `${getTrianglePosition(hoveredRange)}%` }"
         />
         <div class="progress__tooltip">
-          <span
-            class="progress__tooltip__percent-info"
-            v-text="
-              `${hoveredRange.name}: ${getPercentage(hoveredRange.value)}%`
-            "
-          />
+          <span class="progress__tooltip__percent-info"
+            >{{ hoveredRange.name }}:
+            <span v-if="showPercentInTooltip"
+              >{{ getPercentage(hoveredRange.value) }}%</span
+            >
+          </span>
           {{ hoveredRange.tooltip }}
         </div>
       </template>
@@ -45,6 +45,10 @@ export default {
     showTooltip: {
       type: Boolean,
       default: false,
+    },
+    showPercentInTooltip: {
+      type: Boolean,
+      default: true,
     },
     progressMax: {
       type: Number,
