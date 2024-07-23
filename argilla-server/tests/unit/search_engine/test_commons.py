@@ -40,6 +40,7 @@ from argilla_server.search_engine import (
     RangeFilter,
     Order,
     RecordFilterScope,
+    AndFilter,
 )
 from argilla_server.search_engine.commons import (
     BaseElasticAndOpenSearchEngine,
@@ -704,6 +705,15 @@ class TestBaseElasticAndOpenSearchEngine:
             (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.13, le=0.13), 1),
             (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), ge=0.0), 7),
             (RangeFilter(scope=MetadataFilterScope(metadata_property="seq_float"), le=12.03), 5),
+            (
+                AndFilter(
+                    filters=[
+                        TermsFilter(scope=MetadataFilterScope(metadata_property="label"), values=["negative"]),
+                        RangeFilter(scope=MetadataFilterScope(metadata_property="textId"), ge=3, le=4),
+                    ]
+                ),
+                1,
+            ),
         ],
     )
     async def test_search_with_metadata_filter(
