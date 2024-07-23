@@ -36,8 +36,10 @@
             </div>
           </section>
         </template>
-
         <template #downHeader>
+          <p v-text="$t('guidelines')" />
+        </template>
+        <template #downHeaderExpanded>
           <p v-text="$t('guidelines')" />
         </template>
         <template #downContent>
@@ -169,7 +171,7 @@ export default {
   &__right {
     @include media("<desktop") {
       overflow: visible;
-      height: auto !important;
+      height: 100% !important;
       max-height: none !important;
     }
   }
@@ -203,12 +205,13 @@ export default {
   }
   &--empty {
     width: 100%;
-    height: 100%;
+    height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    @include media("<desktop") {
-      height: 80vh;
+    @include media("<=tablet") {
+      height: 100%;
+      text-align: center;
     }
   }
 }

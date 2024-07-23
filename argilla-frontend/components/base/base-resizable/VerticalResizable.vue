@@ -139,6 +139,7 @@ $resizable-bar-width: $base-space;
     height: 100%;
     margin-left: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
+      align-items: flex-end;
       min-width: 100% !important;
       height: auto !important;
       margin-left: 0;
