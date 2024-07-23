@@ -37,4 +37,106 @@ describe("Dataset", () => {
       expect(dataset.isValid).toBeTruthy();
     });
   });
+
+  describe("restore", () => {
+    describe("restoreDistribution should", () => {
+      test("restore only the distribution based on original values", () => {
+        const dataset = createEmptyDataset();
+        dataset.distribution.minSubmitted = 20;
+
+        expect(dataset.distribution).not.toEqual(dataset.original.distribution);
+
+        dataset.restoreDistribution();
+
+        expect(dataset.distribution).toEqual(dataset.original.distribution);
+      });
+    });
+
+    describe("restoreMetadata should", () => {
+      test("restore only the metadata info based on original values", () => {
+        const dataset = createEmptyDataset();
+        dataset.allowExtraMetadata = true;
+
+        expect(dataset.allowExtraMetadata).not.toEqual(
+          dataset.original.allowExtraMetadata
+        );
+
+        dataset.restoreMetadata();
+
+        expect(dataset.allowExtraMetadata).toEqual(
+          dataset.original.allowExtraMetadata
+        );
+      });
+    });
+
+    describe("restoreGuidelines should", () => {
+      test("restore only the guidelines based on original values", () => {
+        const dataset = createEmptyDataset();
+        dataset.guidelines = "NEW GUIDELINES";
+
+        expect(dataset.guidelines).not.toEqual(dataset.original.guidelines);
+
+        dataset.restoreGuidelines();
+
+        expect(dataset.guidelines).toEqual(dataset.original.guidelines);
+      });
+    });
+  });
+
+  describe("update should", () => {
+    test("update just the guidelines", () => {
+      const dataset = createEmptyDataset();
+      dataset.guidelines = "NEW GUIDELINES";
+
+      expect(dataset.guidelines).not.toEqual(dataset.original.guidelines);
+
+      dataset.update("TODAY", "guidelines");
+
+      expect(dataset.guidelines).toEqual(dataset.original.guidelines);
+      expect(dataset.distribution.minSubmitted).toBe(
+        dataset.original.distribution.minSubmitted
+      );
+      expect(dataset.allowExtraMetadata).toBe(
+        dataset.original.allowExtraMetadata
+      );
+    });
+
+    test("update just the task distribution", () => {
+      const dataset = createEmptyDataset();
+      dataset.distribution.minSubmitted = 20;
+
+      expect(dataset.distribution.minSubmitted).not.toEqual(
+        dataset.original.distribution.minSubmitted
+      );
+
+      dataset.update("TODAY", "distribution");
+
+      expect(dataset.distribution.minSubmitted).toEqual(
+        dataset.original.distribution.minSubmitted
+      );
+      expect(dataset.guidelines).toBe(dataset.original.guidelines);
+      expect(dataset.allowExtraMetadata).toBe(
+        dataset.original.allowExtraMetadata
+      );
+    });
+
+    test("update just the metadata", () => {
+      const dataset = createEmptyDataset();
+      dataset.allowExtraMetadata = true;
+
+      expect(dataset.allowExtraMetadata).not.toEqual(
+        dataset.original.allowExtraMetadata
+      );
+
+      dataset.update("TODAY", "metadata");
+
+      expect(dataset.allowExtraMetadata).toEqual(
+        dataset.original.allowExtraMetadata
+      );
+      expect(dataset.guidelines).toBe(dataset.original.guidelines);
+      expect(dataset.distribution.minSubmitted).toBe(
+        dataset.original.distribution.minSubmitted
+      );
+    });
+  });
 });
