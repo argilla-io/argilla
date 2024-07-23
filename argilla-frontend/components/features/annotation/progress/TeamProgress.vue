@@ -5,6 +5,7 @@
       :progress-ranges="progressRanges"
       :progress-max="progress.total"
       :show-tooltip="showTooltip"
+      :tooltip-position-fixed="false"
       :show-percent-in-tooltip="false"
     />
     <span class="team-progress__percent"
@@ -41,14 +42,14 @@ export default {
           name: this.$t("datasets.completed"),
           color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
           value: this.progress.completed,
-          tooltip: `${this.progress.completed}/${this.progress.total}`,
+          tooltip: `${this.progress.completed}`,
         },
         {
           id: "pending",
           name: this.$t("datasets.left"),
           color: "linear-gradient(white)",
           value: this.progress.pending,
-          tooltip: `${this.progress.pending}/${this.progress.total}`,
+          tooltip: `${this.progress.pending}`,
         },
       ];
     },
@@ -78,6 +79,14 @@ export default {
   }
   &__percent {
     font-weight: lighter;
+  }
+  :deep(.progress__tooltip) {
+    gap: calc($base-space / 2);
+    min-width: auto;
+    justify-content: left;
+  }
+  :deep(.progress__tooltip__percent-info) {
+    font-weight: 500;
   }
 }
 </style>
