@@ -41,6 +41,10 @@ class OverlapTaskDistribution:
 
         return self._model == other._model
 
+    @classmethod
+    def default(cls) -> "OverlapTaskDistribution":
+        return cls(min_submitted=1)
+
     @property
     def min_submitted(self):
         return self._model.min_submitted
@@ -65,5 +69,3 @@ class OverlapTaskDistribution:
 
 
 TaskDistribution = OverlapTaskDistribution
-
-DEFAULT_TASK_DISTRIBUTION = OverlapTaskDistribution(min_submitted=1)
