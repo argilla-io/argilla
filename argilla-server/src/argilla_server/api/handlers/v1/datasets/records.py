@@ -389,8 +389,6 @@ async def list_current_user_dataset_records(
         record.dataset = dataset
         record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
 
-    await telemetry_client.track_crud_records(action="list", record_or_dataset=dataset, count=len(records))
-
     return Records(items=records, total=total)
 
 
@@ -425,7 +423,7 @@ async def list_dataset_records(
         sort_by_query_param=sort_by_query_param or LIST_DATASET_RECORDS_DEFAULT_SORT_BY,
     )
 
-    await telemetry_client.track_crud_records(action="list", record_or_dataset=dataset, count=len(records))
+    await telemetry_client.track_crud_records(action="read", record_or_dataset=dataset, count=len(records))
 
     return Records(items=records, total=total)
 

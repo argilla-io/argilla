@@ -191,12 +191,14 @@ async def upsert_suggestion(
 
     # NOTE: If there is already a suggestion for this record and question, we update it instead of creating a new one.
     # So we set the correct status code here.
+    action = "create"
     if await Suggestion.get_by(db, record_id=record_id, question_id=suggestion_create.question_id):
         response.status_code = status.HTTP_200_OK
+        action = "update"
 
     suggestion = await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
 
-    await telemetry_client.track_crud_records_subtopic(action="create", sub_topic="suggestions", record_id=record_id)
+    await telemetry_client.track_crud_records_subtopic(action=action, sub_topic="suggestions", record_id=record_id)
 
     return suggestion
 

@@ -234,7 +234,7 @@ class TestSuiteDatasets:
         }
 
         test_telemetry.track_crud_dataset_setting.assert_called_with(
-            action="list", dataset=dataset, setting_name="fields", count=len(response.json()["items"])
+            action="read", dataset=dataset, setting_name="fields", count=len(response.json()["items"])
         )
         test_telemetry.track_data.assert_called()
 
@@ -358,7 +358,7 @@ class TestSuiteDatasets:
         }
 
         test_telemetry.track_crud_dataset_setting.assert_called_with(
-            action="list", dataset=dataset, setting_name="questions", count=len(response.json()["items"])
+            action="read", dataset=dataset, setting_name="questions", count=len(response.json()["items"])
         )
         test_telemetry.track_data.assert_called()
 
@@ -649,7 +649,7 @@ class TestSuiteDatasets:
         }
 
         test_telemetry.track_crud_dataset_setting.assert_called_with(
-            action="list", dataset=dataset, setting_name="vectors_settings", count=len(response.json()["items"])
+            action="read", dataset=dataset, setting_name="vectors_settings", count=len(response.json()["items"])
         )
         test_telemetry.track_data.assert_called()
 

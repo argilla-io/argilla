@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -28,9 +27,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.asyncio
 class TestsUsersV1Endpoints:
-    async def test_list_user_workspaces(
-        self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock
-    ):
+    async def test_list_user_workspaces(self, async_client: "AsyncClient", owner_auth_header: dict):
         workspaces = await WorkspaceFactory.create_batch(3)
         user = await UserFactory.create(workspaces=workspaces)
 
@@ -48,9 +45,6 @@ class TestsUsersV1Endpoints:
                 for workspace in workspaces
             ]
         }
-
-        test_telemetry.track_crud_workspace.assert_called_with(action="list", workspace=None, count=len(workspaces))
-        test_telemetry.track_data.assert_called()
 
     async def test_list_user_workspaces_for_owner(self, async_client: "AsyncClient"):
         workspaces = await WorkspaceFactory.create_batch(5)

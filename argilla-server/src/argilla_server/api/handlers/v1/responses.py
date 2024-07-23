@@ -48,12 +48,18 @@ async def create_current_user_responses_bulk(
     current_user: User = Security(auth.get_current_user),
     use_case: UpsertResponsesInBulkUseCase = Depends(UpsertResponsesInBulkUseCaseFactory()),
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-):
+) -> ResponsesBulk:
     responses_bulk_items = await use_case.execute(body.items, user=current_user)
 
+    responses_bulk_items_filtered = [resp for resp in responses_bulk_items if resp.item]
     await telemetry_client.track_crud_records_subtopic(
-        action="create", sub_topic="responses", record_id=None, count=len(responses_bulk_items)
+        action="create", sub_topic="responses", record_id=None, count=len(responses_bulk_items_filtered)
     )
+    for response in responses_bulk_items_filtered:
+        if response.item:
+            await telemetry_client.track_crud_records_subtopic(
+                action="create", sub_topic="responses", record_id=response.item.record_id
+            )
 
     return ResponsesBulk(items=responses_bulk_items)
 

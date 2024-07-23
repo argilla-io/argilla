@@ -36,7 +36,7 @@ async def get_current_user(
     current_user: User = Security(auth.get_current_user),
     telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
-    await telemetry_client.track_user_login(request, current_user)
+    await telemetry_client.track_user_login(request=request, user=current_user)
 
     return current_user
 
@@ -69,7 +69,7 @@ async def list_users(
 
     users = await accounts.list_users(db)
 
-    await telemetry_client.track_crud_user(action="list", user=None, is_oauth=False, count=len(users))
+    await telemetry_client.track_crud_user(action="read", user=None, is_oauth=False, count=len(users))
     for user in users:
         await telemetry_client.track_crud_user(action="read", user=user, is_oauth=False)
 
@@ -118,7 +118,6 @@ async def list_user_workspaces(
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.list_workspaces)
 
@@ -128,9 +127,5 @@ async def list_user_workspaces(
         workspaces = await accounts.list_workspaces(db)
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
-
-    for workspace in workspaces:
-        await telemetry_client.track_crud_workspace(action="read", workspace=workspace)
-    await telemetry_client.track_crud_workspace(action="list", workspace=None, count=len(workspaces))
 
     return Workspaces(items=workspaces)

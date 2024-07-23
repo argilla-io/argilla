@@ -110,7 +110,7 @@ class TestSuiteTelemetry:
         setting_config = {setting_name: setting}
         dataset = await DatasetFactory.create(**setting_config)
         await test_telemetry.track_crud_dataset(action=action, dataset=dataset)
-        test_telemetry.track_crud_dataset_setting.assert_called_once_with(
+        test_telemetry.track_crud_dataset_setting.assert_called_with(
             action=action, setting_name=setting_name, setting=setting[0], dataset=dataset
         )
         test_telemetry.track_data.assert_called()

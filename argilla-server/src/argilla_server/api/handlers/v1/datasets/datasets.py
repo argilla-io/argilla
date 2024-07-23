@@ -71,7 +71,6 @@ async def _filter_metadata_properties_by_policy(
 async def list_current_user_datasets(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     workspace_id: Optional[UUID] = None,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -85,10 +84,6 @@ async def list_current_user_datasets(
             dataset_list = current_user.datasets
     else:
         dataset_list = await datasets.list_datasets_by_workspace_id(db, workspace_id)
-
-    await telemetry_client.track_crud_dataset(action="list", count=len(dataset_list))
-    for dataset in dataset_list:
-        await telemetry_client.track_crud_dataset(action="read", dataset=dataset)
 
     return Datasets(items=dataset_list)
 
@@ -110,7 +105,7 @@ async def list_dataset_fields(
             action="read", dataset=dataset, setting_name="fields", setting=field
         )
     await telemetry_client.track_crud_dataset_setting(
-        action="list", dataset=dataset, setting_name="fields", count=len(dataset.fields)
+        action="read", dataset=dataset, setting_name="fields", count=len(dataset.fields)
     )
 
     return Fields(items=dataset.fields)
@@ -133,7 +128,7 @@ async def list_dataset_vector_settings(
             action="read", dataset=dataset, setting_name="vectors_settings", setting=vectors_setting
         )
     await telemetry_client.track_crud_dataset_setting(
-        action="list", dataset=dataset, setting_name="vectors_settings", count=len(dataset.vectors_settings)
+        action="read", dataset=dataset, setting_name="vectors_settings", count=len(dataset.vectors_settings)
     )
 
     return VectorsSettings(items=dataset.vectors_settings)
@@ -160,7 +155,7 @@ async def list_current_user_dataset_metadata_properties(
             action="read", dataset=dataset, setting_name="metadata_properties", setting=metadata_property
         )
     await telemetry_client.track_crud_dataset_setting(
-        action="list", dataset=dataset, setting_name="metadata_properties", count=len(filtered_metadata_properties)
+        action="read", dataset=dataset, setting_name="metadata_properties", count=len(filtered_metadata_properties)
     )
 
     return MetadataProperties(items=filtered_metadata_properties)

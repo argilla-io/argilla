@@ -79,17 +79,18 @@ class TelemetryClient:
         return {header: request.headers.get(header) for header in ["user-agent", "accept-language"]}
 
     @staticmethod
+    def _process_user_model(user: User):
+        return {"user_id": str(user.id), "role": user.role, "is_default_user": user.username == DEFAULT_USERNAME}
+
+    @staticmethod
     def _process_workspace_model(workspace: Workspace):
-        return {
-            "workspace_id": str(workspace.id),
-            "workspace_hash": str(uuid.uuid5(namespace=_TELEMETRY_CLIENT.server_id, name=workspace.name)),
-        }
+        return {"workspace_id": str(workspace.id)}
 
     @staticmethod
     def _process_dataset_model(dataset: Dataset):
         return {
             "dataset_id": str(dataset.id),
-            "dataset_hash": str(uuid.uuid5(namespace=_TELEMETRY_CLIENT.server_id, name=dataset.name)),
+            "workspace_id": str(dataset.workspace_id),
         }
 
     @staticmethod
@@ -102,10 +103,6 @@ class TelemetryClient:
     @staticmethod
     def _process_dataset_settings(dataset: Dataset):
         attributes = [
-            "fields",
-            "questions",
-            "vectors_settings",
-            "metadata_properties",
             "allow_extra_metadata",
             "guidelines",
         ]
@@ -113,6 +110,17 @@ class TelemetryClient:
         for attr in attributes:
             if dataset.is_relationship_loaded(attr):
                 user_data[attr] = getattr(dataset, attr)
+
+        attributes = [
+            "fields",
+            "questions",
+            "vectors_settings",
+            "metadata_properties",
+        ]
+        for attr in attributes:
+            if dataset.is_relationship_loaded(attr):
+                user_data[f"count_{attr}"] = len(getattr(dataset, attr))
+
         return user_data
 
     @staticmethod
@@ -142,19 +150,11 @@ class TelemetryClient:
             user_data["type"] = setting.type.value
         elif isinstance(setting, VectorSettings):
             user_data["dimensions"] = setting.dimensions
+            user_data["type"] = "default"
         else:
             raise NotImplementedError("Expected a setting to be processed.")
 
         return user_data
-
-    @staticmethod
-    def _process_user_model(user: User):
-        return {
-            "user_id": str(user.id),
-            "role": user.role,
-            "is_default_user": user.username == DEFAULT_USERNAME,
-            "user_hash": str(uuid.uuid5(namespace=_TELEMETRY_CLIENT.server_id, name=user.username)),
-        }
 
     async def track_data(self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1):
         if not self.enable_telemetry:
@@ -181,6 +181,7 @@ class TelemetryClient:
         action: str,
         user: Union[User, None] = None,
         is_oauth: Union[bool, None] = None,
+        is_login: Union[bool, None] = None,
         count: Union[int, None] = None,
     ):
         topic = f"user/{action}"
@@ -189,6 +190,8 @@ class TelemetryClient:
             user_agent.update(self._process_user_model(user=user))
         if is_oauth is not None:
             user_agent["is_oauth"] = is_oauth
+        if is_login is not None:
+            user_agent["is_login"] = is_login
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_crud_workspace(
@@ -214,7 +217,11 @@ class TelemetryClient:
         if dataset:
             for attr in attributes:
                 if dataset.is_relationship_loaded(attr):
-                    for obtained_attr in getattr(dataset, attr):
+                    obtained_attr_list = getattr(dataset, attr)
+                    await self.track_crud_dataset_setting(
+                        action=action, setting_name=attr, dataset=dataset, setting=None, count=len(obtained_attr_list)
+                    )
+                    for obtained_attr in obtained_attr_list:
                         await self.track_crud_dataset_setting(
                             action=action, setting_name=attr, dataset=dataset, setting=obtained_attr
                         )
