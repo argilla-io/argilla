@@ -95,8 +95,6 @@ NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin]
 
 CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT = 5
 
-MAX_TIME_RETRY_SQLALCHEMY_ERROR = 15
-
 
 async def _touch_dataset_last_activity_at(db: AsyncSession, dataset: Dataset) -> None:
     await db.execute(
