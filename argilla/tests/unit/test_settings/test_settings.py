@@ -15,9 +15,12 @@ import copy
 import uuid
 
 import pytest
+from pytest_mock import MockerFixture
 
 import argilla as rg
+from argilla import Dataset
 from argilla._exceptions import SettingsError
+from argilla._models import DatasetModel
 from argilla.settings._task_distribution import TaskDistribution
 
 
@@ -163,15 +166,34 @@ class TestSettings:
         other_settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
         assert other_settings.distribution == TaskDistribution(min_submitted=1)
 
-
-class TestSettingsSerialization:
-    def test_serialize(self):
+    def test_read_settings_without_distribution(self, mocker: "MockerFixture"):
         settings = rg.Settings(
-            guidelines="This is a guideline",
-            fields=[rg.TextField(name="prompt", use_markdown=True)],
-            questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+            fields=[rg.TextField(name="text", title="title")],
+            _dataset=Dataset(name="dataset"),
         )
-        settings_serialized = settings.serialize()
-        assert settings_serialized["guidelines"] == "This is a guideline"
-        assert settings_serialized["fields"][0]["name"] == "prompt"
-        assert settings_serialized["fields"][0]["settings"]["use_markdown"] is True
+
+        mocker.patch.object(settings, "_fetch_fields", return_value=[f for f in settings.fields])
+        mocker.patch.object(settings, "_fetch_questions", return_value=[])
+        mocker.patch.object(settings, "_fetch_vectors", return_value=[])
+        mocker.patch.object(settings, "_fetch_metadata", return_value=[])
+
+        mocker.patch.object(
+            settings._client.api.datasets,
+            "get",
+            return_value=DatasetModel(name=settings.dataset.name, distribution=None),
+        )
+
+        settings.get()
+        assert settings.distribution == TaskDistribution.default()
+
+    class TestSettingsSerialization:
+        def test_serialize(self):
+            settings = rg.Settings(
+                guidelines="This is a guideline",
+                fields=[rg.TextField(name="prompt", use_markdown=True)],
+                questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+            )
+            settings_serialized = settings.serialize()
+            assert settings_serialized["guidelines"] == "This is a guideline"
+            assert settings_serialized["fields"][0]["name"] == "prompt"
+            assert settings_serialized["fields"][0]["settings"]["use_markdown"] is True
