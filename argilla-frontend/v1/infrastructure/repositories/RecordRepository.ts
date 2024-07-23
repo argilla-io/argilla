@@ -497,7 +497,6 @@ export class RecordRepository {
     params.append("include", "suggestions");
     params.append("offset", offset);
     params.append("limit", howMany.toString());
-    params.append("response_status", status);
 
     return params;
   }
