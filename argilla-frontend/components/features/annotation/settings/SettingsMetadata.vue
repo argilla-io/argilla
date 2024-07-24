@@ -60,15 +60,15 @@
           <BaseButton
             type="button"
             class="secondary light small"
-            @on-click="settings.dataset.restore()"
-            :disabled="!settings.dataset.isModified"
+            @on-click="settings.dataset.restoreMetadata()"
+            :disabled="!settings.dataset.isModifiedExtraMetadata"
           >
             <span v-text="$t('cancel')" />
           </BaseButton>
           <BaseButton
             type="submit"
             class="primary small"
-            :disabled="!settings.dataset.isModified"
+            :disabled="!settings.dataset.isModifiedExtraMetadata"
           >
             <span v-text="$t('update')" />
           </BaseButton>
