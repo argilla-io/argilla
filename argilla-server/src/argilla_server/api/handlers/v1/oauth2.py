@@ -29,26 +29,22 @@ from argilla_server.security.settings import settings
 router = APIRouter(prefix="/oauth2", tags=["Authentication"])
 
 
-def check_oauth_enabled_or_raise() -> None:
+def get_provider_by_name_or_raise(provider: str = Path()) -> OAuth2ClientProvider:
     if not settings.oauth.enabled:
         raise NotFoundError(message="OAuth2 is not enabled")
 
-
-def get_provider_by_name_or_raise(provider: str = Path()) -> OAuth2ClientProvider:
-    check_oauth_enabled_or_raise()
-
     if provider in settings.oauth.providers:
         return settings.oauth.providers[provider]
-    else:
-        raise NotFoundError(message=f"Provider '{provider}' not found")
+
+    raise NotFoundError(message=f"OAuth Provider '{provider}' not found")
 
 
 @router.get("/providers", response_model=Providers)
 def list_providers() -> Providers:
     if not settings.oauth.enabled:
         return Providers(items=[])
-    else:
-        return Providers(items=[Provider(name=provider_name) for provider_name in settings.oauth.providers])
+
+    return Providers(items=[Provider(name=provider_name) for provider_name in settings.oauth.providers])
 
 
 @router.get("/providers/{provider}/authentication")
