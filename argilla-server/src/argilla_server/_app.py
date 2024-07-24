@@ -47,6 +47,7 @@ _LOGGER = logging.getLogger("argilla")
 @contextlib.asynccontextmanager
 async def app_lifespan(app: FastAPI):
     # See https://fastapi.tiangolo.com/advanced/events/#lifespan
+    show_telemetry_warning()
     await configure_database()
     await configure_search_engine()
     yield
@@ -66,7 +67,6 @@ def create_server_app() -> FastAPI:
     )
 
     configure_logging()
-    configure_telemetry()
     configure_middleware(app)
     configure_api_router(app)
     configure_app_statics(app)
@@ -165,18 +165,17 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def configure_telemetry():
-    message = "\n"
-    message += inspect.cleandoc(
-        "Argilla uses telemetry to report anonymous usage and error information. You\n"
-        "can know more about what information is reported at:\n\n"
-        "    https://docs.argilla.io/en/latest/reference/telemetry.html\n\n"
-        "Telemetry is currently enabled. If you want to disable it, you can configure\n"
-        "the environment variable before relaunching the server:\n\n"
-        f'{"#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"}'
-    )
-
+def show_telemetry_warning():
     if settings.enable_telemetry:
+        message = "\n"
+        message += inspect.cleandoc(
+            "Argilla uses telemetry to report anonymous usage and error information. You\n"
+            "can know more about what information is reported at:\n\n"
+            "    https://docs.argilla.io/en/latest/reference/telemetry.html\n\n"
+            "Telemetry is currently enabled. If you want to disable it, you can configure\n"
+            "the environment variable before relaunching the server:\n\n"
+            f'{"#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"}'
+        )
         _LOGGER.warning(message)
 
 
