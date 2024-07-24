@@ -68,7 +68,7 @@ class CreateRecordsBulk:
 
             await self._upsert_records_relationships(records, bulk_create.items)
             await _preload_records_relationships_before_index(self._db, records)
-            await distribution.update_records_status(self._db, records)
+            await distribution.unsafe_update_records_status(self._db, records)
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
@@ -209,7 +209,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
 
             await self._upsert_records_relationships(records, bulk_upsert.items)
             await _preload_records_relationships_before_index(self._db, records)
-            await distribution.update_records_status(self._db, records)
+            await distribution.unsafe_update_records_status(self._db, records)
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
