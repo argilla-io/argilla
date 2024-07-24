@@ -32,8 +32,7 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
-
+Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
 If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space). Curious, and want to know more? Read our [documentation](https://argilla-io.github.io/argilla/latest/).
 
 ## Why use Argilla?
@@ -46,7 +45,7 @@ Compute is expensive and output quality is important. We help you focus on data,
 
 ### Take control of your data and models
 
-Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to **manage your data and models in a way that suits you best**.
+Most AI tools are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to **manage your data and models in a way that suits you best**.
 
 ### Improve efficiency by quickly iterating on the right data and models
 

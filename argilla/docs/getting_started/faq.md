@@ -7,7 +7,7 @@ hide: toc
 
 ??? Question "What is Argilla?"
 
-    Argilla is a collaboration platform for AI engineers and domain experts that require high-quality outputs, full data ownership, and overall efficiency. It is designed to help you achieve and keep high-quality data standards, store your training data, store the results of your models, evaluate their performance, and improve the data through human and AI feedback.
+    Argilla is a collaboration tool for AI engineers and domain experts that require high-quality outputs, full data ownership, and overall efficiency. It is designed to help you achieve and keep high-quality data standards, store your training data, store the results of your models, evaluate their performance, and improve the data through human and AI feedback.
 
 ??? Question "Does Argilla cost money?"
 
@@ -19,7 +19,7 @@ hide: toc
 
 ??? Question "Does Argilla train models?"
 
-    No. Argilla is a collaboration platform to achieve and keep high-quality data standards. You can use Argilla to store your training data, store the results of your models, evaluate their performance and improve the data. For training models, you can use any machine learning framework or library that you prefer even though we recommend starting with [Hugging Face Transformers](https://github.com/huggingface/transformers).
+    No. Argilla is a collaboration tool to achieve and keep high-quality data standards. You can use Argilla to store your training data, store the results of your models, evaluate their performance and improve the data. For training models, you can use any machine learning framework or library that you prefer even though we recommend starting with [Hugging Face Transformers](https://github.com/huggingface/transformers).
 
 ??? Question "Does Argilla provide annotation workforces?"
 
@@ -31,7 +31,7 @@ hide: toc
 
     Furthermore, Argilla places particular emphasis on smooth integration with other tools in the community, particularly within the realms of MLOps and NLP. So, its compatibility with popular frameworks like spaCy and Hugging Face makes it exceptionally user-friendly and accessible.
 
-    Finally, platforms like Snorkel, Prodigy or Scale, while more comprehensive, often require a significant commitment. Argilla, on the other hand, works more as a component within the MLOps ecosystem, allowing users to begin with specific use cases and then scale up as needed. This flexibility is particularly beneficial for users and customers who prefer to start small and expand their applications over time, as opposed to committing to an all-encompassing platform from the outset.
+    Finally, platforms like Snorkel, Prodigy or Scale, while more comprehensive, often require a significant commitment. Argilla, on the other hand, works more as a tool within the MLOps ecosystem, allowing users to begin with specific use cases and then scale up as needed. This flexibility is particularly beneficial for users and customers who prefer to start small and expand their applications over time, as opposed to committing to an all-encompassing tool from the outset.
 
 ??? Question "What is the difference between Argilla 2.0 and the legacy datasets in 1.0?"
 

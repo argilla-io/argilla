@@ -32,8 +32,7 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
-
+Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
 > [!NOTE]
 > This README represents the 1.29 SDK version. We have stopped development for the 1.x SDK version, while still committing to bug fixes. If you are looking for the README of the 2.x SDK version take a look [here](../README.md).
 
@@ -49,7 +48,7 @@ Compute is expensive and output quality is important. We help you focus on data,
 
 ### Take control of your data and models
 
-Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to **manage your data and models in a way that suits you best**.
+Most AI tools are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to **manage your data and models in a way that suits you best**.
 
 ### Improve efficiency by quickly iterating on the right data and models
 
