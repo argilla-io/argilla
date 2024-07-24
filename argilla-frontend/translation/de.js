@@ -209,10 +209,9 @@ export default {
   datasetTable: {
     name: "Dataset",
     workspace: "Arbeitsbereich",
-    task: "Datensatz",
-    tags: "Tags",
     createdAt: "Erstellt am",
     lastActivityAt: "Aktualisiert am",
+    progress: "Teamfortschritt",
   },
   metrics: {
     total: "Total",
