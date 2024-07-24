@@ -152,6 +152,7 @@ class TestHubImportExportMixin:
         self,
         token: str,
         dataset: rg.Dataset,
+        client,
         mock_data: List[dict[str, Any]],
         with_records_export: bool,
         with_records_import: bool,
@@ -166,9 +167,13 @@ class TestHubImportExportMixin:
                 expected_warning=UserWarning,
                 match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
             ):
-                new_dataset = rg.Dataset.from_hub(repo_id=repo_id, with_records=with_records_import, token=token)
+                new_dataset = rg.Dataset.from_hub(
+                    repo_id=repo_id, client=client, with_records=with_records_import, token=token
+                )
         else:
-            new_dataset = rg.Dataset.from_hub(repo_id=repo_id, with_records=with_records_import, token=token)
+            new_dataset = rg.Dataset.from_hub(
+                repo_id=repo_id, client=client, with_records=with_records_import, token=token
+            )
 
         if with_records_import and with_records_export:
             for i, record in enumerate(new_dataset.records(with_suggestions=True)):
