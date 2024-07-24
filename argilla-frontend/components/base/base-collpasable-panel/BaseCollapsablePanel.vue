@@ -58,6 +58,7 @@ export default {
   border-top: 1px solid $black-10;
 
   &__header {
+    overflow: visible;
     &__container {
       width: 100%;
       display: flex;
