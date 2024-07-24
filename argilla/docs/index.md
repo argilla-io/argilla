@@ -1,5 +1,6 @@
 ---
-description: Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.hide: navigation
+description: Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
+hide: navigation
 ---
 
 # Welcome to Argilla 2.x
