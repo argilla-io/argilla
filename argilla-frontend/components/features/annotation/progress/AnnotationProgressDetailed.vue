@@ -34,7 +34,11 @@
       </li>
     </ul>
     <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
-    <TeamProgress :datasetId="datasetId" />
+    <TeamProgress
+      visibleProgressValues
+      :datasetId="datasetId"
+      :show-tooltip="false"
+    />
   </div>
 </template>
 
@@ -124,7 +128,7 @@ $bullet-size: 8px;
   margin-top: 0;
   margin-bottom: $base-space * 3;
   &__item {
-    background: palette(grey, 700);
+    background: $black-3;
     display: flex;
     flex-direction: column;
     gap: $base-space;

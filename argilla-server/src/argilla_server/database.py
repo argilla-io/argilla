@@ -59,11 +59,6 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
         yield db
 
 
-async def get_serializable_async_db() -> AsyncGenerator[AsyncSession, None]:
-    async for db in _get_async_db(isolation_level="SERIALIZABLE"):
-        yield db
-
-
 async def _get_async_db(isolation_level: Optional[IsolationLevel] = None) -> AsyncGenerator[AsyncSession, None]:
     db: AsyncSession = AsyncSessionLocal()
 

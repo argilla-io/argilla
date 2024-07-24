@@ -25,7 +25,7 @@ from argilla._resource import Resource
 from argilla.settings._field import TextField
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
-from argilla.settings._task_distribution import DEFAULT_TASK_DISTRIBUTION, TaskDistribution
+from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
@@ -68,7 +68,7 @@ class Settings(Resource):
         super().__init__(client=_dataset._client if _dataset else None)
 
         self._dataset = _dataset
-        self._distribution = distribution or DEFAULT_TASK_DISTRIBUTION
+        self._distribution = distribution
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
@@ -131,7 +131,7 @@ class Settings(Resource):
 
     @property
     def distribution(self) -> TaskDistribution:
-        return self._distribution
+        return self._distribution or TaskDistribution.default()
 
     @distribution.setter
     def distribution(self, value: TaskDistribution) -> None:
@@ -323,7 +323,9 @@ class Settings(Resource):
 
         self.guidelines = dataset_model.guidelines
         self.allow_extra_metadata = dataset_model.allow_extra_metadata
-        self.distribution = TaskDistribution.from_model(dataset_model.distribution)
+
+        if dataset_model.distribution:
+            self.distribution = TaskDistribution.from_model(dataset_model.distribution)
 
     def _update_dataset_related_attributes(self):
         # This flow may be a bit weird, but it's the only way to update the dataset related attributes
