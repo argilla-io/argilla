@@ -12,16 +12,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Optional
+from social_core.backends.github import GithubOAuth2
 
-from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
-from argilla_server.pydantic_v1 import BaseModel
-
-
-class ArgillaSettings(BaseModel):
-    show_huggingface_space_persistent_storage_warning: Optional[bool]
+from argilla_server.security.authentication.claims import Claims
+from argilla_server.security.authentication.oauth2.providers._base import OAuth2ClientProvider
 
 
-class Settings(BaseModel):
-    argilla: ArgillaSettings
-    huggingface: Optional[HuggingfaceSettings]
+class GitHubClientProvider(OAuth2ClientProvider):
+    claims = Claims(
+        picture="avatar_url",
+        identity=lambda user: f"{user.provider}:{user.id}",
+        username="login",
+    )
+    backend_class = GithubOAuth2
+    name = "github"

@@ -12,16 +12,3 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Optional
-
-from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
-from argilla_server.pydantic_v1 import BaseModel
-
-
-class ArgillaSettings(BaseModel):
-    show_huggingface_space_persistent_storage_warning: Optional[bool]
-
-
-class Settings(BaseModel):
-    argilla: ArgillaSettings
-    huggingface: Optional[HuggingfaceSettings]
