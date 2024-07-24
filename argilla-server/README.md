@@ -70,24 +70,17 @@ Folders inside `/api` are organized by API version, having right now only v1 imp
 
 ## Development environment
 
-By default all commands executed with `pdm run` will get environment variables from `.env.dev` except command `pdm test`
-that will overwrite some of them using values coming from `.env.test` file.
+By default all commands executed with `pdm run` will get environment variables from `.env.dev` except the command `pdm test` which will overwrite some of them using values coming from `.env.test` file.
 
-These environment variables can be override if necessary so feel free to defined your own ones locally.
+These environment variables can be overridden if necessary so feel free to define your own ones locally.
 
-### Run cli
+### Run development server
 
-```sh
-pdm cli
-```
-
-### Run database migrations
-
-By default a SQLite located at `~/.argilla/argilla.db` will be used. You can create the database and run migrations with
-the following custom PDM command:
+A
+Note: If you need to run the frontend server you can follow the instructions at the [argilla-frontend](/argilla-frontend/README.md) project.
 
 ```sh
-pdm migrate
+server-dev
 ```
 
 ### Run tests
@@ -98,17 +91,29 @@ entire test suite using the following custom PDM command:
 ```sh
 pdm test
 ```
+## Development commands
 
-## Run development server
+### Run cli
 
-Note: If you need to run the frontend server you can follow the instructions at
-the [argilla-frontend](/argilla-frontend/README.md) project
+```sh
+pdm cli
+```
 
-### Run uvicorn development server
+### Run database migrations
+
+By default, the SQLite database is located at `~/.argilla/argilla.db` will be used. You can create the database and run migrations with
+the following custom PDM command:
+
+```sh
+pdm migrate
+```
+
+### Run uvicorn FastAPI server
 
 ```sh
 pdm server
 ```
+
 
 ## 🫱🏾‍🫲🏼 Contribute
 
