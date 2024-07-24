@@ -2129,14 +2129,12 @@
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:</p>
 <ul>
-<li>Remotely using a <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">HF Space</a>. ⚠️ If persistent storage is not enabled, you will lose your data when the server is stopped.</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>As this is a release candidate version, you'll need to manually change the version in the HF Space Files &gt; Dockerfile to <code>argilla/argilla-quickstart:v2.0.0rc2</code>.</p>
-</div>
-<ul>
-<li>Locally using Docker: <code>docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2</code></li>
+<li>
+<p>Remotely using a <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">HF Space</a>. ⚠️ If persistent storage is not enabled, you will lose your data when the server is stopped.</p>
+</li>
+<li>
+<p>Locally using Docker: <code>docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2</code></p>
+</li>
 </ul>
 </div>
 </div>
@@ -2158,7 +2156,7 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">argilla</span> <span class="o">--</span><span class="n">pre</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">argilla</span>
 </span></code></pre></div>
 
 </div>
