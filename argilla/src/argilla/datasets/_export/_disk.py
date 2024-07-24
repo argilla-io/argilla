@@ -33,12 +33,12 @@ if TYPE_CHECKING:
 class DiskImportExportMixin(ABC):
     """A mixin for exporting and importing datasets to and from disk."""
 
-    _model: DatasetModel
-    _default_records_path = "records.json"
-    _default_config_repo_dir = ".argilla"
-    _default_settings_path = f"{_default_config_repo_dir}/settings.json"
-    _default_dataset_path = f"{_default_config_repo_dir}/dataset.json"
-    _default_configuration_files = [_default_settings_path, _default_dataset_path]
+    _MODEL: DatasetModel
+    _DEFAULT_RECORDS_PATH = "records.json"
+    _DEFAULT_CONFIG_REPO_DIR = ".argilla"
+    _DEFAULT_SETTINGS_PATH = f"{_DEFAULT_CONFIG_REPO_DIR}/settings.json"
+    _DEFAULT_DATASET_PATH = f"{_DEFAULT_CONFIG_REPO_DIR}/dataset.json"
+    _DEFAULT_CONFIGURATION_FILES = [_DEFAULT_SETTINGS_PATH, _DEFAULT_DATASET_PATH]
 
     def to_disk(self: "Dataset", path: str, *, with_records: bool = True) -> str:
         """Exports the dataset to disk in the given path. The dataset is exported as a directory containing the dataset model, settings and records as json files.
@@ -123,7 +123,7 @@ class DiskImportExportMixin(ABC):
         if path.exists():
             raise FileExistsError(f"Dataset already exists at {path}")
         with open(file=path, mode="w") as f:
-            json.dump(self._model.model_dump(), f)
+            json.dump(self._MODEL.model_dump(), f)
 
     @classmethod
     def _load_dataset_model(cls, path: Path):
@@ -140,9 +140,9 @@ class DiskImportExportMixin(ABC):
         path = Path(path)
         if not path.is_dir():
             raise NotADirectoryError(f"Path {path} is not a directory")
-        main_path = path / cls._default_config_repo_dir
+        main_path = path / cls._DEFAULT_CONFIG_REPO_DIR
         main_path.mkdir(exist_ok=True)
-        dataset_path = path / cls._default_dataset_path
-        settings_path = path / cls._default_settings_path
-        records_path = path / cls._default_records_path
+        dataset_path = path / cls._DEFAULT_DATASET_PATH
+        settings_path = path / cls._DEFAULT_SETTINGS_PATH
+        records_path = path / cls._DEFAULT_RECORDS_PATH
         return dataset_path, settings_path, records_path

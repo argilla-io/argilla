@@ -68,7 +68,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             hf_api.create_repo(repo_id=repo_id, repo_type="dataset", exist_ok=kwargs.get("exist_ok") or True)
 
         with TemporaryDirectory() as tmpdirname:
-            config_dir = os.path.join(tmpdirname, self._default_config_repo_dir)
+            config_dir = os.path.join(tmpdirname, self._DEFAULT_CONFIG_REPO_DIR)
             os.makedirs(config_dir)
             self.to_disk(path=config_dir, with_records=False)
 
@@ -133,7 +133,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         folder_path = snapshot_download(
             repo_id=repo_id,
             repo_type="dataset",
-            allow_patterns=cls._default_configuration_files,
+            allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
             token=kwargs.get("token"),
         )
 
