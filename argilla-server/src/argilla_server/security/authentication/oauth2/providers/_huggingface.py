@@ -82,6 +82,6 @@ class HuggingfaceClientProvider(OAuth2ClientProvider, LoggingMixin):
             return _get_user_role_by_org(org)
         return UserRole.annotator
 
-    claims = Claims(username=_HF_PREFERRED_USERNAME, role=parse_role_from_userinfo)
+    claims = Claims(username=_HF_PREFERRED_USERNAME, role=parse_role_from_userinfo, first_name="name")
     backend_class = HuggingfaceOpenId
     name = "huggingface"
