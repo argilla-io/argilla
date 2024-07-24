@@ -123,7 +123,7 @@ class DiskImportExportMixin(ABC):
         if path.exists():
             raise FileExistsError(f"Dataset already exists at {path}")
         with open(file=path, mode="w") as f:
-            json.dump(self._MODEL.model_dump(), f)
+            json.dump(self.api_model().model_dump(), f)
 
     @classmethod
     def _load_dataset_model(cls, path: Path):
