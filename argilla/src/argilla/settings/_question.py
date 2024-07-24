@@ -14,6 +14,7 @@
 
 from typing import List, Literal, Optional, Union, Dict
 
+from argilla import Argilla
 from argilla._models._settings._questions import (
     LabelQuestionModel,
     LabelQuestionSettings,
@@ -30,6 +31,11 @@ from argilla._models._settings._questions import (
     RankingQuestionSettings,
 )
 from argilla.settings._common import SettingsPropertyBase
+
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
 
 __all__ = [
     "LabelQuestion",
@@ -70,6 +76,12 @@ class QuestionPropertyBase(SettingsPropertyBase):
     def _render_options_as_labels(cls, options: List[Dict[str, str]]) -> List[str]:
         """Render values as labels for the question so that they can be returned as a list of strings"""
         return list(cls._render_options_as_values(options=options).keys())
+
+    def _with_client(self, client: "Argilla") -> "Self":
+        self._client = client
+        self._api = client.api.questions
+
+        return self
 
 
 class LabelQuestion(QuestionPropertyBase):
