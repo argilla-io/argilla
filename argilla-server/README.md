@@ -76,11 +76,10 @@ These environment variables can be overridden if necessary so feel free to defin
 
 ### Run development server
 
-A
-Note: If you need to run the frontend server you can follow the instructions at the [argilla-frontend](/argilla-frontend/README.md) project.
+This single command prepares the development server to run locally. It does so by chaining commands to migrate the databse, create default users and launch the server on the right port. 
 
 ```sh
-pdm run server-dev
+pdm server-dev
 ```
 
 ### Run tests
@@ -91,6 +90,11 @@ entire test suite using the following custom PDM command:
 ```sh
 pdm test
 ```
+
+### Run frontend
+
+If you need to run the frontend server you can follow the instructions at the [argilla-frontend](/argilla-frontend/README.md) project.
+
 ## Development commands
 
 ### Run cli
