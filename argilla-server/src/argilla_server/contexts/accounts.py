@@ -84,10 +84,6 @@ async def user_exists(db: AsyncSession, user_id: UUID) -> bool:
     return await db.scalar(select(exists().where(User.id == user_id)))
 
 
-async def get_workspace_by_name(db: AsyncSession, name: str) -> Union[Workspace, None]:
-    return await db.scalar(select(Workspace).filter_by(name=name))
-
-
 async def get_user_by_username(db: AsyncSession, username: str) -> Union[User, None]:
     result = await db.execute(select(User).filter_by(username=username).options(selectinload(User.workspaces)))
     return result.scalar_one_or_none()
