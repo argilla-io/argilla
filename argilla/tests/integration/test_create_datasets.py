@@ -158,6 +158,11 @@ class TestCreateDatasets:
             settings=dataset.settings,
         ).create()
 
+        for properties in [new_dataset.settings.fields, new_dataset.settings.vectors, new_dataset.settings.metadata]:
+            for property in properties:
+                assert property.dataset == new_dataset
+                assert property._client == new_dataset._client
+
         records = list(dataset.records(with_vectors=True))
         new_dataset.records.log(records)
 

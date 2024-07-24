@@ -11,7 +11,7 @@
       class="circle"
       :data-title="$t('recordStatus.completedTooltip')"
     >
-      <svgicon class="check" name="check" width="14" height="14"></svgicon>
+      <svgicon class="check" name="check" width="12" height="12"></svgicon>
     </span>
   </span>
 </template>
@@ -97,18 +97,20 @@ export default {
       @extend %bullet;
       background: $draft-color;
     }
+    .check {
+      color: $draft-color;
+      flex-shrink: 0;
+    }
+    .circle {
+      border: 2px solid $draft-color;
+    }
   }
-}
-.check {
-  color: $black-87;
-  flex-shrink: 0;
 }
 .circle {
   z-index: 99;
   display: flex;
   align-items: center;
   border-radius: 50%;
-  border: 2px solid $black-87;
 }
 [data-title] {
   position: relative;

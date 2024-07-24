@@ -84,7 +84,7 @@ export interface BackendAdvanceSearchQuery {
       field?: string;
     };
   };
-  filters?: {
+  filters: {
     and: AndFilterBackendSearchQuery[];
   };
   sort?: BackendSort[];

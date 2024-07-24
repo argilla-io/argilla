@@ -140,7 +140,7 @@ nav:
       - Manage and create datasets: how_to_guides/dataset.md
       - Add, update, and delete records: how_to_guides/record.md
       - Query and filter records: how_to_guides/query.md
-      - Importing and exporting datasets: how_to_guides/import_export.md
+      - Importing and exporting datasets and records: how_to_guides/import_export.md
       - Annotate a dataset: how_to_guides/annotate.md
       - Distribute the annotation task: how_to_guides/distribution.md
       - Advanced:
