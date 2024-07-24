@@ -92,7 +92,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/server
-          # file: argilla-server/docker/server/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ env.SERVER_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -103,7 +102,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/server
-          # file: argilla-server/docker/server/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ env.SERVER_DOCKER_IMAGE }}:latest
           labels: ${{ steps.meta.outputs.labels }}
@@ -113,7 +111,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/argilla-hf-spaces
-          # file: argilla-server/docker/argilla-hf-spaces/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ env.HF_SPACES_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -127,7 +124,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/argilla-hf-spaces
-          # file: argilla-server/docker/argilla-hf-spaces/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ env.HF_SPACES_DOCKER_IMAGE }}:latest
           labels: ${{ steps.meta.outputs.labels }}
