@@ -15,11 +15,10 @@ from typing import cast
 from unittest import mock
 
 import pytest
-from pytest_mock import MockerFixture
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server._app import create_server_app, configure_database, _create_allowed_workspaces
+from argilla_server._app import create_server_app, configure_database, _create_oauth_allowed_workspaces
 from argilla_server.models import Workspace
 from argilla_server.security.authentication.oauth2 import OAuth2Settings
 from argilla_server.security.authentication.oauth2.settings import AllowedWorkspace
@@ -78,7 +77,7 @@ class TestApp:
                 }
             ),
         ):
-            await _create_allowed_workspaces(db)
+            await _create_oauth_allowed_workspaces(db)
 
             workspaces = (await db.scalars(select(Workspace))).all()
             assert len(workspaces) == 2
@@ -94,7 +93,7 @@ class TestApp:
                 }
             ),
         ):
-            await _create_allowed_workspaces(db)
+            await _create_oauth_allowed_workspaces(db)
 
             workspaces = (await db.scalars(select(Workspace))).all()
             assert len(workspaces) == 0
@@ -103,7 +102,7 @@ class TestApp:
         with mock.patch(
             "argilla_server.security.settings.Settings.oauth", new_callable=lambda: OAuth2Settings(enabled=True)
         ):
-            await _create_allowed_workspaces(db)
+            await _create_oauth_allowed_workspaces(db)
 
             workspaces = (await db.scalars(select(Workspace))).all()
             assert len(workspaces) == 0
@@ -115,7 +114,7 @@ class TestApp:
             "argilla_server.security.settings.Settings.oauth",
             new_callable=lambda: OAuth2Settings(enabled=True, allowed_workspaces=[AllowedWorkspace(name=ws.name)]),
         ):
-            await _create_allowed_workspaces(db)
+            await _create_oauth_allowed_workspaces(db)
 
             workspaces = (await db.scalars(select(Workspace))).all()
             assert len(workspaces) == 1

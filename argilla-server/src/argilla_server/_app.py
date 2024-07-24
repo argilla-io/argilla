@@ -179,7 +179,7 @@ def show_telemetry_warning():
         _LOGGER.warning(message)
 
 
-async def _create_allowed_workspaces(db: AsyncSession):
+async def _create_oauth_allowed_workspaces(db: AsyncSession):
     from argilla_server.security.settings import settings as security_settings
 
     if not security_settings.oauth.enabled:
@@ -191,7 +191,7 @@ async def _create_allowed_workspaces(db: AsyncSession):
             await accounts.create_workspace(db, dict(name=allowed_workspace.name))
 
 
-async def _check_default_user(db: AsyncSession):
+async def _show_default_user_warning(db: AsyncSession):
     def _user_has_default_credentials(user: User):
         return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
 
@@ -206,8 +206,8 @@ async def _check_default_user(db: AsyncSession):
 
 async def configure_database():
     async with contextlib.asynccontextmanager(get_async_db)() as db:
-        await _check_default_user(db)
-        await _create_allowed_workspaces(db)
+        await _show_default_user_warning(db)
+        await _create_oauth_allowed_workspaces(db)
 
 
 async def configure_search_engine():
