@@ -80,7 +80,7 @@ A
 Note: If you need to run the frontend server you can follow the instructions at the [argilla-frontend](/argilla-frontend/README.md) project.
 
 ```sh
-server-dev
+pdm run server-dev
 ```
 
 ### Run tests
