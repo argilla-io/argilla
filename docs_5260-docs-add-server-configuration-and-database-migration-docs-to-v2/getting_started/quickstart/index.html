@@ -855,7 +855,7 @@
         
   
   <span class="md-ellipsis">
-    Importing and exporting datasets
+    Importing and exporting datasets and records
   </span>
   
 
@@ -2127,14 +2127,12 @@
 <h3 id="run-the-argilla-server">Run the Argilla server<a class="headerlink" href="#run-the-argilla-server" title="Permanent link">&para;</a></h3>
 <p>If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:</p>
 <ul>
-<li>Remotely using a <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">HF Space</a>. Check out the <a href="huggingface-spaces.md">full guide</a> for a more detailed configuration.</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>As this is a release candidate version, you'll need to manually change the version in the HF Space Files &gt; Dockerfile to <code>argilla/argilla-quickstart:v2.0.0rc2</code>.</p>
-</div>
-<ul>
-<li>Locally using Docker.</li>
+<li>
+<p>Remotely using a <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">HF Space</a>. Check out the <a href="huggingface-spaces.md">full guide</a> for a more detailed configuration.</p>
+</li>
+<li>
+<p>Locally using Docker.</p>
+</li>
 </ul>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2</span>
 </span></code></pre></div>
@@ -2145,7 +2143,7 @@
 </div>
 <h3 id="install-the-sdk-with-pip">Install the SDK with pip<a class="headerlink" href="#install-the-sdk-with-pip" title="Permanent link">&para;</a></h3>
 <p>To manage users, workspaces and datasets in Argilla, you need to use the Argilla Python SDK. You can install it with pip as follows:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">pip install argilla --pre</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">pip install argilla</span>
 </span></code></pre></div>
 <h3 id="connect-to-the-argilla-server">Connect to the Argilla server<a class="headerlink" href="#connect-to-the-argilla-server" title="Permanent link">&para;</a></h3>
 <p>Get your <code>&lt;api_url&gt;</code>:</p>
