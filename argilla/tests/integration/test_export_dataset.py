@@ -86,6 +86,10 @@ class TestDiskImportExportMixin:
                 assert os.path.exists(records_path)
                 with open(records_path, "r") as f:
                     exported_records = json.load(f)
+
+                assert len(exported_records) == len(mock_data)
+                assert exported_records[0]["fields"]["text"] == "Hello World, how are you?"
+                assert exported_records[0]["suggestions"]["label"]["value"] == "positive"
             else:
                 assert not os.path.exists(records_path)
 
@@ -98,12 +102,6 @@ class TestDiskImportExportMixin:
             assert os.path.exists(dataset_path)
             with open(dataset_path, "r") as f:
                 exported_dataset = json.load(f)
-
-        if with_records_export and with_records_export:
-            assert len(exported_records) == len(mock_data)
-
-        assert exported_records[0]["fields"]["text"] == "Hello World, how are you?"
-        assert exported_records[0]["suggestions"]["label"]["value"] == "positive"
 
         assert exported_settings["fields"][0]["name"] == "text"
         assert exported_settings["questions"][0]["name"] == "label"
