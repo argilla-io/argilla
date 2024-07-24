@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 class DiskImportExportMixin(ABC):
     """A mixin for exporting and importing datasets to and from disk."""
 
-    _MODEL: DatasetModel
+    _model: DatasetModel
     _DEFAULT_RECORDS_PATH = "records.json"
     _DEFAULT_CONFIG_REPO_DIR = ".argilla"
     _DEFAULT_SETTINGS_PATH = f"{_DEFAULT_CONFIG_REPO_DIR}/settings.json"

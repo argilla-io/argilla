@@ -81,7 +81,7 @@ class TestDiskImportExportMixin:
         with TemporaryDirectory() as temp_dir:
             output_dir = dataset.to_disk(path=temp_dir, with_records=with_records_export)
 
-            records_path = os.path.join(output_dir, rg.Dataset._default_records_path)
+            records_path = os.path.join(output_dir, rg.Dataset._DEFAULT_RECORDS_PATH)
             if with_records_export:
                 assert os.path.exists(records_path)
                 with open(records_path, "r") as f:
@@ -93,12 +93,12 @@ class TestDiskImportExportMixin:
             else:
                 assert not os.path.exists(records_path)
 
-            settings_path = os.path.join(output_dir, rg.Dataset._default_settings_path)
+            settings_path = os.path.join(output_dir, rg.Dataset._DEFAULT_SETTINGS_PATH)
             assert os.path.exists(settings_path)
             with open(settings_path, "r") as f:
                 exported_settings = json.load(f)
 
-            dataset_path = os.path.join(output_dir, rg.Dataset._default_dataset_path)
+            dataset_path = os.path.join(output_dir, rg.Dataset._DEFAULT_DATASET_PATH)
             assert os.path.exists(dataset_path)
             with open(dataset_path, "r") as f:
                 exported_dataset = json.load(f)
