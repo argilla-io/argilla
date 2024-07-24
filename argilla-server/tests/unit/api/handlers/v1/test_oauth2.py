@@ -15,16 +15,16 @@
 from unittest import mock
 
 import pytest
-from argilla_server.enums import UserRole
-from argilla_server.errors.future import AuthenticationError
-from argilla_server.models import User
-from argilla_server.security.authentication import JWT
-from argilla_server.security.authentication.oauth2 import OAuth2Settings
 from httpcore import URL
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.enums import UserRole
+from argilla_server.errors.future import AuthenticationError
+from argilla_server.models import User
+from argilla_server.security.authentication import JWT
+from argilla_server.security.authentication.oauth2 import OAuth2Settings
 from tests.factories import AdminFactory, AnnotatorFactory
 
 
@@ -162,6 +162,57 @@ class TestOauth2:
                 user = (await db.execute(select(User).where(User.username == "username"))).scalar_one_or_none()
                 assert user is not None
                 assert user.role == UserRole.annotator
+
+    async def test_provider_huggingface_access_token_with_missing_username(
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        default_oauth_settings: OAuth2Settings,
+    ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            with mock.patch(
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
+                return_value={"name": "name"},
+            ):
+                response = await async_client.get(
+                    "/api/v1/oauth2/providers/huggingface/access-token",
+                    params={"code": "code", "state": "valid"},
+                    headers=owner_auth_header,
+                    cookies={"oauth2_state": "valid"},
+                )
+
+                assert response.status_code == 401
+
+    async def test_provider_huggingface_access_token_with_missing_name(
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        default_oauth_settings: OAuth2Settings,
+    ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            with mock.patch(
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
+                return_value={"preferred_username": "username"},
+            ):
+                response = await async_client.get(
+                    "/api/v1/oauth2/providers/huggingface/access-token",
+                    params={"code": "code", "state": "valid"},
+                    headers=owner_auth_header,
+                    cookies={"oauth2_state": "valid"},
+                )
+
+                assert response.status_code == 200
+
+                json_response = response.json()
+                assert JWT.decode(json_response["access_token"])["username"] == "username"
+                assert json_response["token_type"] == "bearer"
+
+                user = await db.scalar(select(User).filter_by(username="username"))
+                assert user is not None
+                assert user.role == UserRole.annotator
+                assert user.first_name == "username"
 
     async def test_provider_access_token_with_oauth_disabled(
         self,
