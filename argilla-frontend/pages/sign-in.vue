@@ -34,14 +34,6 @@
           type="password"
           autocomplete="on"
         />
-        <p
-          v-if="deployment == 'quickstart'"
-          v-html="
-            $t('login.quickstart', {
-              link: $config.documentationSiteQuickStart,
-            })
-          "
-        />
         <base-button
           type="submit"
           :disabled="!isButtonEnabled"
@@ -67,7 +59,6 @@ export default {
         username: "",
         password: "",
       },
-      deployment: false,
       hasAuthToken: false,
     };
   },
@@ -93,17 +84,6 @@ export default {
       }
     } catch {
       /* lint:disable:no-empty */
-    }
-  },
-  async mounted() {
-    try {
-      const response = await fetch("deployment.json");
-
-      const { deployment } = await response.json();
-
-      this.deployment = deployment;
-    } catch {
-      this.deployment = null;
     }
   },
   computed: {

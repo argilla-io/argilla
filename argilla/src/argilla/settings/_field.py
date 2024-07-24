@@ -21,6 +21,11 @@ from argilla.settings._common import SettingsPropertyBase
 from argilla.settings._metadata import MetadataField, MetadataType
 from argilla.settings._vector import VectorField
 
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
+
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
@@ -33,7 +38,7 @@ class TextField(SettingsPropertyBase):
     _model: FieldModel
     _api: FieldsAPI
 
-    _dataset: "Dataset"
+    _dataset: Optional["Dataset"]
 
     def __init__(
         self,
@@ -64,6 +69,8 @@ class TextField(SettingsPropertyBase):
             settings=TextFieldSettings(use_markdown=use_markdown),
         )
 
+        self._dataset = None
+
     @classmethod
     def from_model(cls, model: FieldModel) -> "TextField":
         instance = cls(name=model.name)
@@ -92,6 +99,14 @@ class TextField(SettingsPropertyBase):
     def dataset(self, value: "Dataset") -> None:
         self._dataset = value
         self._model.dataset_id = self._dataset.id
+        self._with_client(self._dataset._client)
+
+    def _with_client(self, client: "Argilla") -> "Self":
+        # TODO: Review and simplify. Maybe only one of them is required
+        self._client = client
+        self._api = self._client.api.fields
+
+        return self
 
 
 def field_from_dict(data: dict) -> Union[TextField, VectorField, MetadataType]:

@@ -74,15 +74,23 @@ export class DatasetRepository implements IDatasetRepository {
     return [...feedbackDatasets];
   }
 
-  async update({ id, allowExtraMetadata, guidelines, distribution }: Dataset) {
-    const request: BackendUpdateDataset = {
-      allow_extra_metadata: allowExtraMetadata,
-      guidelines: guidelines?.trim() !== "" ? guidelines.trim() : null,
-      distribution: {
-        strategy: distribution.strategy,
-        min_submitted: distribution.minSubmitted,
-      },
-    };
+  async update({ id, ...dataset }: Partial<Dataset>) {
+    const request: Partial<BackendUpdateDataset> = {};
+
+    if ("allowExtraMetadata" in dataset) {
+      request.allow_extra_metadata = dataset.allowExtraMetadata;
+    }
+
+    if ("guidelines" in dataset) {
+      request.guidelines = dataset.guidelines?.trim() ?? null;
+    }
+
+    if ("distribution" in dataset) {
+      request.distribution = {
+        strategy: dataset.distribution.strategy,
+        min_submitted: dataset.distribution.minSubmitted,
+      };
+    }
 
     try {
       const { data } =
