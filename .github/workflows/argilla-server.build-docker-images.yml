@@ -49,14 +49,14 @@ jobs:
             echo "PLATFORMS=linux/amd64,linux/arm64" >> $GITHUB_ENV
             echo "IMAGE_TAG=v$PACKAGE_VERSION" >> $GITHUB_ENV
             echo "SERVER_DOCKER_IMAGE=argilla/argilla-server" >> $GITHUB_ENV
-            echo "QUICKSTART_DOCKER_IMAGE=argilla/argilla-quickstart" >> $GITHUB_ENV
+            echo "HF_SPACES_DOCKER_IMAGE=argilla/argilla-hf-spaces" >> $GITHUB_ENV
             echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> $GITHUB_ENV
             echo "DOCKER_PASSWORD=$DOCKER_PASSWORD" >> $GITHUB_ENV
           else
             echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
             echo "IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
             echo "SERVER_DOCKER_IMAGE=argilladev/argilla-server" >> $GITHUB_ENV
-            echo "QUICKSTART_DOCKER_IMAGE=argilladev/argilla-quickstart" >> $GITHUB_ENV
+            echo "HF_SPACES_DOCKER_IMAGE=argilladev/argilla-hf-spaces" >> $GITHUB_ENV
             echo "DOCKER_USERNAME=$DOCKER_USERNAME_DEV" >> $GITHUB_ENV
             echo "DOCKER_PASSWORD=$DOCKER_PASSWORD_DEV" >> $GITHUB_ENV
           fi
@@ -92,7 +92,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/server
-          file: argilla-server/docker/server/Dockerfile
+          # file: argilla-server/docker/server/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ env.SERVER_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -103,35 +103,36 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/server
-          file: argilla-server/docker/server/Dockerfile
+          # file: argilla-server/docker/server/Dockerfile
           platforms: ${{ env.PLATFORMS }}
           tags: ${{ env.SERVER_DOCKER_IMAGE }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           push: true
 
-      - name: Build and push `argilla-quickstart` image
+      - name: Build and push `argilla-hf-spaces` image
         uses: docker/build-push-action@v5
         with:
-          context: argilla-server/docker/quickstart
-          file: argilla-server/docker/quickstart/Dockerfile
+          context: argilla-server/docker/argilla-hf-spaces
+          # file: argilla-server/docker/argilla-hf-spaces/Dockerfile
           platforms: ${{ env.PLATFORMS }}
-          tags: ${{ env.QUICKSTART_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+          tags: ${{ env.HF_SPACES_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             ARGILLA_SERVER_IMAGE=${{ env.SERVER_DOCKER_IMAGE }}
             ARGILLA_VERSION=${{ env.IMAGE_TAG }}
           push: true
 
-      - name: Push latest `argilla-quickstart` image
+      - name: Push latest `argilla-hf-spaces` image
         if: ${{ inputs.is_release && inputs.publish_latest }}
         uses: docker/build-push-action@v5
         with:
-          context: argilla-server/docker/quickstart
-          file: argilla-server/docker/quickstart/Dockerfile
+          context: argilla-server/docker/argilla-hf-spaces
+          # file: argilla-server/docker/argilla-hf-spaces/Dockerfile
           platforms: ${{ env.PLATFORMS }}
-          tags: ${{ env.QUICKSTART_DOCKER_IMAGE }}:latest
+          tags: ${{ env.HF_SPACES_DOCKER_IMAGE }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            ARGILLA_SERVER_IMAGE=${{ env.SERVER_DOCKER_IMAGE }}
             ARGILLA_VERSION=${{ env.IMAGE_TAG }}
           push: true
 
@@ -141,14 +142,14 @@ jobs:
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
-          repository: argilla/argilla-server
+          repository: $${{ env.SERVER_DOCKER_IMAGE }}
           readme-filepath: argilla-server/README.md
 
-      - name: Docker Hub Description for `argilla-quickstart`
+      - name: Docker Hub Description for `argilla-hf-spaces`
         uses: peter-evans/dockerhub-description@v4
         if: ${{ inputs.is_release && inputs.publish_latest }}
         with:
           username: ${{ secrets.AR_DOCKER_USERNAME }}
           password: ${{ secrets.AR_DOCKER_PASSWORD }}
-          repository: argilla/argilla-quickstart
-          readme-filepath: argilla-server/docker/quickstart/README.md
+          repository: $${{ env.HF_SPACES_DOCKER_IMAGE }}
+          readme-filepath: argilla-server/docker/argilla-hf-spaces/README.md
