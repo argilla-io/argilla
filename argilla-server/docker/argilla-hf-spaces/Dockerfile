@@ -31,7 +31,7 @@ RUN \
     chown argilla:argilla /etc/default/elasticsearch && \
     # Install quickstart image dependencies
     pip install -r /packages/requirements.txt && \
-    chmod +x /home/argilla/start_quickstart_argilla.sh && \
+    chmod +x /home/argilla/start.sh && \
     chmod +x /home/argilla/start_argilla_server.sh && \
     # Give ownership of the data directory to the argilla user
     chown -R argilla:argilla /data && \
