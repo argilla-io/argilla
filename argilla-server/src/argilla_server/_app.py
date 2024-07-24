@@ -36,7 +36,7 @@ from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.logging import configure_logging
-from argilla_server.models import User
+from argilla_server.models import User, Workspace
 from argilla_server.search_engine import get_search_engine
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
@@ -186,16 +186,16 @@ async def _create_oauth_allowed_workspaces(db: AsyncSession):
         return
 
     for allowed_workspace in security_settings.oauth.allowed_workspaces:
-        if await accounts.get_workspace_by_name(db, name=allowed_workspace.name) is None:
+        if await Workspace.get_by(db, name=allowed_workspace.name) is None:
             _LOGGER.info(f"Creating workspace with name {allowed_workspace.name!r}")
-            await accounts.create_workspace(db, dict(name=allowed_workspace.name))
+            await accounts.create_workspace(db, {"name": allowed_workspace.name})
 
 
 async def _show_default_user_warning(db: AsyncSession):
     def _user_has_default_credentials(user: User):
         return user.api_key == DEFAULT_API_KEY or accounts.verify_password(DEFAULT_PASSWORD, user.password_hash)
 
-    default_user = await accounts.get_user_by_username(db, DEFAULT_USERNAME)
+    default_user = await User.get_by(db, username=DEFAULT_USERNAME)
     if default_user and _user_has_default_credentials(default_user):
         _LOGGER.warning(
             f"User {DEFAULT_USERNAME!r} with default credentials has been found in the database. "
