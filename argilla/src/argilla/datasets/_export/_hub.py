@@ -48,7 +48,6 @@ class HubImportExportMixin(DiskImportExportMixin):
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
             generate_card: whether to generate a dataset card for the `Dataset` in the Hugging Face Hub. Defaults
                 to `True`.
-            *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
 
@@ -122,7 +121,6 @@ class HubImportExportMixin(DiskImportExportMixin):
             workspace (Union[Workspace, str], optional): The workspace to import the dataset to. Defaults to None and default workspace is used.
             client: the client to use to load the `Dataset`. If not provided, the default client will be used.
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
-            *args: the args to pass to `datasets.Dataset.load_from_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
