@@ -127,12 +127,15 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         query: dict,
         size: Optional[int] = None,
         from_: Optional[int] = None,
-        sort: str = None,
+        sort: Optional[dict] = None,
         aggregations: Optional[dict] = None,
     ) -> dict:
         body = {"query": query}
         if aggregations:
             body["aggs"] = aggregations
+
+        if sort:
+            body["sort"] = sort
 
         return await self.client.search(
             index=index,
@@ -140,7 +143,6 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
             from_=from_,
             size=size,
             _source=False,
-            sort=sort or "_score:desc,id:asc",
             track_total_hits=True,
         )
 

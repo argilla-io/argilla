@@ -212,7 +212,30 @@ export class RecordRepository {
 
       const body: BackendAdvanceSearchQuery = {
         query: {},
+        filters: {
+          and: [
+            {
+              type: "terms",
+              scope: {
+                entity: "response",
+                property: "status",
+              },
+              values: [status],
+            },
+          ],
+        },
       };
+
+      if (status === "pending") {
+        body.filters.and.push({
+          type: "terms",
+          scope: {
+            entity: "record",
+            property: "status",
+          },
+          values: [status],
+        });
+      }
 
       if (isFilteringBySimilarity) {
         body.query.vector = {
@@ -229,40 +252,6 @@ export class RecordRepository {
           field: searchText.isFilteringByField
             ? searchText.value.field
             : undefined,
-        };
-      }
-
-      body.filters = {
-        and: [
-          {
-            type: "terms",
-            scope: {
-              entity: "response",
-              property: "status",
-            },
-            values: [status],
-          },
-        ],
-      };
-
-      if (status === "pending") {
-        body.filters.and.push({
-          type: "terms",
-          scope: {
-            entity: "record",
-            property: "status",
-          },
-          values: ["pending"],
-        });
-      }
-
-      if (
-        isFilteringByMetadata ||
-        isFilteringByResponse ||
-        isFilteringBySuggestion
-      ) {
-        body.filters = {
-          and: [],
         };
       }
 
@@ -435,7 +424,7 @@ export class RecordRepository {
         });
       }
 
-      const params = this.createParams(from, many, status);
+      const params = this.createParams(from, many);
 
       const { data } = await this.axios.post<
         ResponseWithTotal<BackendSearchRecords[]>
@@ -500,7 +489,7 @@ export class RecordRepository {
     };
   }
 
-  private createParams(fromRecord: number, howMany: number, status: string) {
+  private createParams(fromRecord: number, howMany: number) {
     const offset = `${fromRecord - 1}`;
     const params = new URLSearchParams();
 
@@ -508,7 +497,6 @@ export class RecordRepository {
     params.append("include", "suggestions");
     params.append("offset", offset);
     params.append("limit", howMany.toString());
-    params.append("response_status", status);
 
     return params;
   }

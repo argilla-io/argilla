@@ -5,6 +5,6 @@ export interface IDatasetRepository {
   getById(id: string): Promise<Dataset>;
   getAll(): Promise<Dataset[]>;
   delete(datasetId: string);
-  update({ id, allowExtraMetadata, guidelines }: Dataset);
+  update(dataset: Partial<Dataset>): Promise<{ when: string }>;
   getProgress(datasetId: string): Promise<Progress>;
 }

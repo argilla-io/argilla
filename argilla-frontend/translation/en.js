@@ -185,8 +185,6 @@ export default {
     hide: "Hide",
     passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
-    quickstart:
-      "You are using the Quickstart version of Argilla. Check <a href='{link}' target='_blank'>this guide</a> to learn more about usage and configuration options.",
     hf: {
       title: "Welcome to {space}",
       subtitle: "Join <strong>{user}</strong> to build better datasets for AI",

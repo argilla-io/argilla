@@ -26,6 +26,11 @@ from argilla._models import (
 from argilla._resource import Resource
 from argilla.client import Argilla
 
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
+
 if TYPE_CHECKING:
     from argilla import Dataset
 
@@ -41,11 +46,13 @@ class MetadataPropertyBase(Resource):
     _model: MetadataFieldModel
     _api: MetadataAPI
 
-    _dataset: "Dataset"
+    _dataset: Optional["Dataset"]
 
     def __init__(self, client: Optional[Argilla] = None) -> None:
         client = client or Argilla._get_default()
         super().__init__(client=client, api=client.api.metadata)
+
+        self._dataset = None
 
     @property
     def name(self) -> str:
@@ -79,11 +86,19 @@ class MetadataPropertyBase(Resource):
     def dataset(self, value: "Dataset") -> None:
         self._dataset = value
         self._model.dataset_id = value.id
+        self._with_client(self._dataset._client)
 
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}(name={self.name}, title={self.title}, dimensions={self.visible_for_annotators})"
         )
+
+    def _with_client(self, client: "Argilla") -> "Self":
+        # TODO: Review and simplify. Maybe only one of them is required
+        self._client = client
+        self._api = self._client.api.metadata
+
+        return self
 
 
 class TermsMetadataProperty(MetadataPropertyBase):

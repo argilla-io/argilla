@@ -204,8 +204,6 @@ const config: NuxtConfig = {
   publicRuntimeConfig: {
     clientVersion: pkg.version,
     documentationSite: "https://docs.argilla.io/",
-    documentationSiteQuickStart:
-      "https://docs.argilla.io/en/latest/getting_started/quickstart.html",
     documentationSiteSemanticSearch:
       "https://docs.argilla.io/en/latest/reference/webapp/features.html#semantic-search",
     documentationSiteLabelScheme:

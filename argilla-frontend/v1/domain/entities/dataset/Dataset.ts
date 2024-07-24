@@ -35,27 +35,94 @@ export class Dataset {
     return this.workspaceName;
   }
 
-  public get isModified(): boolean {
+  get isModified(): boolean {
     return (
-      this.guidelines !== this.original.guidelines ||
-      this.allowExtraMetadata !== this.original.allowExtraMetadata ||
+      this.isModifiedGuidelines ||
+      this.isModifiedExtraMetadata ||
+      this.isModifiedTaskDistribution
+    );
+  }
+
+  get isModifiedGuidelines(): boolean {
+    return this.guidelines !== this.original.guidelines;
+  }
+
+  get isModifiedExtraMetadata(): boolean {
+    return this.allowExtraMetadata !== this.original.allowExtraMetadata;
+  }
+
+  get isModifiedTaskDistribution(): boolean {
+    return (
       JSON.stringify(this.distribution) !==
-        JSON.stringify(this.original.distribution)
+      JSON.stringify(this.original.distribution)
     );
   }
 
   restore() {
+    this.restoreGuidelines();
+    this.restoreMetadata();
+    this.restoreDistribution();
+  }
+
+  restoreGuidelines() {
     this.guidelines = this.original.guidelines;
+  }
+
+  restoreMetadata() {
     this.allowExtraMetadata = this.original.allowExtraMetadata;
+  }
+
+  restoreDistribution() {
     this.distribution = {
       ...this.original.distribution,
     };
   }
 
-  update(when: string) {
-    this.initializeOriginal();
+  update(when: string, part: "guidelines" | "metadata" | "distribution") {
+    this.original = {
+      ...this.original,
+    };
+
+    if (part === "guidelines") {
+      this.original.guidelines = this.guidelines;
+    }
+
+    if (part === "metadata") {
+      this.original.allowExtraMetadata = this.allowExtraMetadata;
+    }
+
+    if (part === "distribution") {
+      this.original.distribution = {
+        ...this.distribution,
+      };
+    }
 
     this.updatedAt = when;
+  }
+
+  validate(): Record<"guidelines" | "distribution", string[]> {
+    const validations: Record<"guidelines" | "distribution", string[]> = {
+      guidelines: [],
+      distribution: [],
+    };
+
+    if (this.guidelines?.trim().length < 1) {
+      validations.guidelines.push("This field is required.");
+    }
+
+    if (!this.distribution.minSubmitted || this.distribution.minSubmitted < 1) {
+      validations.distribution.push("This field is required.");
+    }
+
+    return validations;
+  }
+
+  get isValidGuidelines() {
+    return this.validate().guidelines.length === 0;
+  }
+
+  get isValidDistribution() {
+    return this.validate().distribution.length === 0;
   }
 
   private initializeOriginal() {
