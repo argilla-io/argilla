@@ -137,7 +137,7 @@ class TestDiskImportExportMixin:
 
 
 @pytest.mark.skipif(
-    not (os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING") or os.getenv("HF_TOKEN")),
+    not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"),
     reason="You are missing a token to write to `argilla-internal-testing` org on the Hugging Face Hub",
 )
 @pytest.mark.parametrize("with_records_export", [True, False])
