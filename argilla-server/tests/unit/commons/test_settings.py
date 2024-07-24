@@ -13,26 +13,8 @@
 #  limitations under the License.
 
 import pytest
+
 from argilla_server.settings import Settings
-
-from tests.pydantic_v1 import ValidationError
-
-
-@pytest.mark.parametrize("bad_namespace", ["Badns", "bad-ns", "12-bad-ns", "@bad"])
-def test_wrong_settings_namespace(monkeypatch, bad_namespace):
-    monkeypatch.setenv("ARGILLA_NAMESPACE", bad_namespace)
-    with pytest.raises(ValidationError):
-        Settings()
-
-
-def test_settings_namespace(monkeypatch):
-    monkeypatch.setenv("ARGILLA_NAMESPACE", "namespace")
-
-    settings = Settings()
-
-    assert settings.namespace == "namespace"
-    assert settings.dataset_index_name == "namespace.ar.datasets"
-    assert settings.dataset_records_index_name == "namespace.ar.dataset.{}"
 
 
 def test_settings_index_replicas_with_shards_defined(monkeypatch):

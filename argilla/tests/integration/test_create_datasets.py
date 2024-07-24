@@ -14,7 +14,17 @@
 
 import pytest
 
-from argilla import Argilla, Dataset, Settings, TextField, RatingQuestion, LabelQuestion, Workspace
+from argilla import (
+    Argilla,
+    Dataset,
+    Settings,
+    TextField,
+    RatingQuestion,
+    LabelQuestion,
+    Workspace,
+    VectorField,
+    TermsMetadataProperty,
+)
 from argilla.settings._task_distribution import TaskDistribution
 
 
@@ -127,20 +137,41 @@ class TestCreateDatasets:
             settings=Settings(
                 fields=[TextField(name="text")],
                 questions=[RatingQuestion(name="question", values=[1, 2, 3, 4, 5])],
+                vectors=[VectorField(name="vector", dimensions=2)],
+                metadata=[TermsMetadataProperty(name="terms")],
             ),
         ).create()
 
-        dataset.records.log([{"text": "This is a text"}])
+        dataset.records.log(
+            [
+                {
+                    "text": "This is a text",
+                    "terms": ["a", "b"],
+                    "vector": [1, 2],
+                    "question": 3,
+                }
+            ]
+        )
 
         new_dataset = Dataset(
             name=f"{dataset_name}_copy",
             settings=dataset.settings,
         ).create()
 
-        records = list(dataset.records)
+        records = list(dataset.records(with_vectors=True))
         new_dataset.records.log(records)
 
-        assert len(list(dataset.records)) == len(list(new_dataset.records))
+        expected_records = list(dataset.records(with_vectors=True))
+        records = list(new_dataset.records(with_vectors=True))
+        assert len(expected_records) == len(records)
+        assert len(records) == 1
+
+        record, expected_record = records[0], expected_records[0]
+
+        assert expected_record.metadata.to_dict() == record.metadata.to_dict()
+        assert expected_record.vectors.to_dict() == record.vectors.to_dict()
+        assert expected_record.suggestions.to_dict() == record.suggestions.to_dict()
+
         assert dataset.distribution == new_dataset.distribution
 
     def test_create_dataset_with_custom_task_distribution(self, client: Argilla, dataset_name: str):
