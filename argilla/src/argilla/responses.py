@@ -13,10 +13,11 @@
 # limitations under the License.
 import warnings
 from enum import Enum
-from typing import Any, TYPE_CHECKING, List, Dict, Optional, Iterable, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-from argilla._models import UserResponseModel, ResponseStatus as ResponseStatusModel
+from argilla._models import ResponseStatus as ResponseStatusModel
+from argilla._models import UserResponseModel
 from argilla._resource import Resource
 from argilla.settings import RankingQuestion
 
@@ -50,7 +51,14 @@ class Response:
         status: Optional[Union[ResponseStatus, str]] = None,
         _record: Optional["Record"] = None,
     ) -> None:
-        """Initializes a `Response` for a `Record` with a user_id and value"""
+        """Initializes a `Response` for a `Record` with a user_id and value
+
+        Attributes:
+            question_name (str): The name of the question that the suggestion is for.
+            value (str): The value of the response
+            user_id (UUID): The id of the user that submits the response
+            status (Union[ResponseStatus, str]): The status of the response as "draft", "submitted", "discarded".
+        """
 
         if question_name is None:
             raise ValueError("question_name is required")

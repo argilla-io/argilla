@@ -33,8 +33,6 @@
 </p>
 
 Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
-> [!NOTE]
-> This README represents the release candidate for the 2.0.0 SDK version. The README for the last stable version of the 1x SDK can be found [1.x](./argilla-v1/README.md)
 
 If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space). Curious, and want to know more? Read our [documentation](https://argilla-io.github.io/argilla/latest/).
 
@@ -88,7 +86,7 @@ AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](ht
 First things first! You can install the SDK with pip as follows:
 
 ```console
-pip install argilla --pre
+pip install argilla
 ```
 
 After that, you will need to deploy Argilla Server. The easiest way to do this is through our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space).

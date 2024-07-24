@@ -23,9 +23,7 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmo
 RUN echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-8.x.list
 
 RUN \
-    # Indicate that this is a quickstart deployment
-    echo -e "{  \"deployment\":  \"quickstart\" }" > /opt/venv/lib/python3.10/site-packages/argilla_server/static/deployment.json && \
-    # Create a directory where Elasticsearch and Argilla will store their data
+    # Create a directory where Argilla will store the data
     mkdir /data && \
     # Install Elasticsearch and configure it
     apt-get update && apt-get install -y elasticsearch=8.8.2 && \

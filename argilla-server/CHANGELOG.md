@@ -41,6 +41,7 @@ These are the section headers that we use:
 
 - Fixed SQLite connection settings not working correctly due to an outdated conditional. ([#5149](https://github.com/argilla-io/argilla/pull/5149))
 - Fixed errors when `allowed_workspaces` in `.oauth.yaml` file is empty. ([#5273](https://github.com/argilla-io/argilla/pull/5273))
+- Fixed errors when sorting with OpenSearch search engine. ([#5297](https://github.com/argilla-io/argilla/pull/5297))
 
 ### Removed
 

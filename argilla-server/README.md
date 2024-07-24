@@ -32,8 +32,6 @@
 </p>
 
 Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
-> [!NOTE]
-> This README represents the release candidate for the 2.0.0 SDK version. The README for the last stable version of the 1x SDK can be found [1.x](../argilla-v1/README.md)
 
 This repository only contains developer info about the backend server. If you want to get started, we recommend taking a
 look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://argilla-io.github.io/argilla/latest/).
@@ -69,24 +67,16 @@ Folders inside `/api` are organized by API version, having right now only v1 imp
 
 ## Development environment
 
-By default all commands executed with `pdm run` will get environment variables from `.env.dev` except command `pdm test`
-that will overwrite some of them using values coming from `.env.test` file.
+By default all commands executed with `pdm run` will get environment variables from `.env.dev` except the command `pdm test` which will overwrite some of them using values coming from `.env.test` file.
 
-These environment variables can be override if necessary so feel free to defined your own ones locally.
+These environment variables can be overridden if necessary so feel free to define your own ones locally.
 
-### Run cli
+### Run development server
 
-```sh
-pdm cli
-```
-
-### Run database migrations
-
-By default a SQLite located at `~/.argilla/argilla.db` will be used. You can create the database and run migrations with
-the following custom PDM command:
+This single command prepares the development server to run locally. It does so by chaining commands to migrate the databse, create default users and launch the server on the right port.
 
 ```sh
-pdm migrate
+pdm server-dev
 ```
 
 ### Run tests
@@ -98,16 +88,33 @@ entire test suite using the following custom PDM command:
 pdm test
 ```
 
-## Run development server
+### Run frontend
 
-Note: If you need to run the frontend server you can follow the instructions at
-the [argilla-frontend](/argilla-frontend/README.md) project
+If you need to run the frontend server you can follow the instructions at the [argilla-frontend](/argilla-frontend/README.md) project.
 
-### Run uvicorn development server
+## Development commands
+
+### Run cli
+
+```sh
+pdm cli
+```
+
+### Run database migrations
+
+By default, the SQLite database is located at `~/.argilla/argilla.db` will be used. You can create the database and run migrations with
+the following custom PDM command:
+
+```sh
+pdm migrate
+```
+
+### Run uvicorn FastAPI server
 
 ```sh
 pdm server
 ```
+
 
 ## 🫱🏾‍🫲🏼 Contribute
 

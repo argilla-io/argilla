@@ -46,6 +46,7 @@
               <input
                 type="number"
                 id="task-distribution"
+                min="1"
                 v-model="settings.dataset.distribution.minSubmitted"
               />
             </div>
@@ -187,10 +188,10 @@ export default {
 .info-icon {
   color: $black-87;
   margin-right: $base-space * 2;
-}
-[data-title] {
-  position: relative;
-  overflow: visible;
-  @include tooltip-mini("top", 8px);
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @include tooltip-mini("top", $base-space);
+  }
 }
 </styles>

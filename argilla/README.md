@@ -85,12 +85,10 @@ AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](ht
 First things first! You can install the SDK with pip as follows:
 
 ```console
-pip install argilla --pre
+pip install argilla
 ```
 
 After that, you will need to deploy Argilla Server. The easiest way to do this is through our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space).
-
-> As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc1`.
 
 To use the client, you need to import the `Argilla` class and instantiate it with the API URL and API key.
 
