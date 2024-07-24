@@ -19,6 +19,8 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
 from uuid import UUID
 
+from datasets.data_files import EmptyDatasetError
+
 from argilla.datasets._export._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
@@ -142,16 +144,22 @@ class HubImportExportMixin(DiskImportExportMixin):
         )
 
         if with_records:
-            hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-            if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
-                if len(hf_dataset.keys()) > 1:
-                    raise ValueError(
-                        "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
-                        f" are: {', '.join(hf_dataset.keys())}."
-                    )
-                hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
+            try:
+                hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
+                if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
+                    if len(hf_dataset.keys()) > 1:
+                        raise ValueError(
+                            "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
+                            f" are: {', '.join(hf_dataset.keys())}."
+                        )
+                    hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
 
-            cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
+                cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
+            except EmptyDatasetError:
+                warnings.warn(
+                    message="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
+                    category=UserWarning,
+                )
 
         return dataset
 
