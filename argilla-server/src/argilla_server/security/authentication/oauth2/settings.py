@@ -16,8 +16,7 @@ from typing import List
 
 import yaml
 
-from argilla_server.security.authentication.oauth2.client_provider import OAuth2ClientProvider
-from argilla_server.security.authentication.oauth2.supported_providers import ALL_SUPPORTED_OAUTH2_PROVIDERS
+from argilla_server.security.authentication.oauth2.providers import get_provider_by_name, OAuth2ClientProvider
 
 __all__ = ["OAuth2Settings"]
 
@@ -92,12 +91,7 @@ class OAuth2Settings:
 
         for provider in settings.pop("providers", []):
             name = provider.pop("name")
-
-            provider_class = ALL_SUPPORTED_OAUTH2_PROVIDERS.get(name)
-            if not provider_class:
-                raise ValueError(
-                    f"Unsupported provider {name}. Supported providers are {ALL_SUPPORTED_OAUTH2_PROVIDERS.keys()}"
-                )
+            provider_class = get_provider_by_name(name)
 
             providers.append(provider_class.from_dict(provider))
 

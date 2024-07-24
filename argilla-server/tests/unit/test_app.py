@@ -12,12 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from typing import cast
+from unittest import mock
 
 import pytest
-from argilla_server._app import create_server_app
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from argilla_server._app import create_server_app, configure_database, _create_oauth_allowed_workspaces
+from argilla_server.models import Workspace
+from argilla_server.security.authentication.oauth2 import OAuth2Settings
+from argilla_server.security.authentication.oauth2.settings import AllowedWorkspace
 from argilla_server.settings import Settings, settings
 from starlette.routing import Mount
 from starlette.testclient import TestClient
+
+from tests.factories import WorkspaceFactory
 
 
 @pytest.fixture
@@ -27,6 +36,7 @@ def test_settings():
     settings.base_url = "/"
 
 
+@pytest.mark.asyncio
 class TestApp:
     def test_create_app_with_base_url(self, test_settings: Settings):
         base_url = "/base/url"
@@ -56,3 +66,55 @@ class TestApp:
         response = client.get("/api/v1/version")
 
         assert response.headers["Server-Timing"]
+
+    async def test_create_allowed_workspaces(self, db: AsyncSession):
+        with mock.patch(
+            "argilla_server.security.settings.Settings.oauth",
+            new_callable=lambda: OAuth2Settings.from_dict(
+                {
+                    "enabled": True,
+                    "allowed_workspaces": [{"name": "ws1"}, {"name": "ws2"}],
+                }
+            ),
+        ):
+            await _create_oauth_allowed_workspaces(db)
+
+            workspaces = (await db.scalars(select(Workspace))).all()
+            assert len(workspaces) == 2
+            assert set([ws.name for ws in workspaces]) == {"ws1", "ws2"}
+
+    async def test_create_allowed_workspaces_with_oauth_disabled(self, db: AsyncSession):
+        with mock.patch(
+            "argilla_server.security.settings.Settings.oauth",
+            new_callable=lambda: OAuth2Settings.from_dict(
+                {
+                    "enabled": False,
+                    "allowed_workspaces": [{"name": "ws1"}, {"name": "ws2"}],
+                }
+            ),
+        ):
+            await _create_oauth_allowed_workspaces(db)
+
+            workspaces = (await db.scalars(select(Workspace))).all()
+            assert len(workspaces) == 0
+
+    async def test_create_workspaces_with_empty_workspaces_list(self, db: AsyncSession):
+        with mock.patch(
+            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: OAuth2Settings(enabled=True)
+        ):
+            await _create_oauth_allowed_workspaces(db)
+
+            workspaces = (await db.scalars(select(Workspace))).all()
+            assert len(workspaces) == 0
+
+    async def test_create_workspaces_with_existing_workspaces(self, db: AsyncSession):
+        ws = await WorkspaceFactory.create(name="test")
+
+        with mock.patch(
+            "argilla_server.security.settings.Settings.oauth",
+            new_callable=lambda: OAuth2Settings(enabled=True, allowed_workspaces=[AllowedWorkspace(name=ws.name)]),
+        ):
+            await _create_oauth_allowed_workspaces(db)
+
+            workspaces = (await db.scalars(select(Workspace))).all()
+            assert len(workspaces) == 1
