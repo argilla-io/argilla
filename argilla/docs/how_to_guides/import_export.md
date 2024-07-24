@@ -35,7 +35,7 @@ Check the [Dataset - Python Reference](../reference/argilla/datasets/datasets.md
             with_records=True
         )
         ```
-        
+
     === "`rg.Dataset.to_disk`"
 
         ```python
@@ -44,7 +44,7 @@ Check the [Dataset - Python Reference](../reference/argilla/datasets/datasets.md
             with_records=True
         )
         ```
-        
+
     === "`rg.Dataset.from_disk`"
 
         ```python
@@ -56,7 +56,7 @@ Check the [Dataset - Python Reference](../reference/argilla/datasets/datasets.md
             with_records=True
         )
         ```
-        
+
     === "`rg.Dataset.records.to_datasets()`"
 
         ```python
