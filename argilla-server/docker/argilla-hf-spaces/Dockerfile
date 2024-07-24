@@ -6,7 +6,7 @@ FROM ${ARGILLA_SERVER_IMAGE}:${ARGILLA_VERSION}
 USER root
 
 # Copy Argilla distribution files
-COPY scripts/start_quickstart_argilla.sh /home/argilla
+COPY scripts/start.sh /home/argilla
 COPY scripts/start_argilla_server.sh /home/argilla
 COPY Procfile /home/argilla
 COPY requirements.txt /packages/requirements.txt
@@ -31,7 +31,7 @@ RUN \
     chown argilla:argilla /etc/default/elasticsearch && \
     # Install quickstart image dependencies
     pip install -r /packages/requirements.txt && \
-    chmod +x /home/argilla/start_quickstart_argilla.sh && \
+    chmod +x /home/argilla/start.sh && \
     chmod +x /home/argilla/start_argilla_server.sh && \
     # Give ownership of the data directory to the argilla user
     chown -R argilla:argilla /data && \
@@ -57,6 +57,4 @@ ENV PASSWORD=""
 
 ENV ARGILLA_HOME_PATH=/data/argilla
 
-ENV UVICORN_PORT=6900
-
-CMD ["/bin/bash", "start_quickstart_argilla.sh"]
+CMD ["/bin/bash", "start.sh"]

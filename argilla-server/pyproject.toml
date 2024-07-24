@@ -173,5 +173,5 @@ server-dev.composite = [
 ]
 test = { cmd = "pytest", env_file = ".env.test" }
 
-build-server-image = { shell = "cp -R dist docker/server && docker build -t argilla/argilla-server:local docker/server" }
-build-quickstart-image = { shell = "docker build --build-arg ARGILLA_VERSION=local -t argilla/argilla-quickstart:local docker/quickstart" }
+docker-build-argilla-server = { shell = "pdm build && cp -R dist docker/server && docker build -t argilla/argilla-server:local docker/server" }
+docker-build-argilla-hf-spaces = { shell = "pdm run docker-build-argilla-server && docker build --build-arg ARGILLA_VERSION=local -t argilla/argilla-hf-spaces:local docker/argilla-hf-spaces" }
