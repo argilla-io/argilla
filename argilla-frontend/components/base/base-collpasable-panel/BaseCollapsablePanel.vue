@@ -2,7 +2,7 @@
   <div
     class="panel"
     :class="[
-      isExpanded ? '--expanded' : '--collapsed',
+      !isExpanded ? '--collapsed' : undefined,
       hideOnDesktop ? '--mobile' : undefined,
     ]"
   >
@@ -63,6 +63,10 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
+
+      @include media("<desktop") {
+        height: $base-space * 3;
+      }
     }
 
     width: 100%;
@@ -92,6 +96,12 @@ export default {
     padding: $base-space $base-space * 2;
     overflow-y: auto;
     @include font-size(13px);
+  }
+}
+
+.--collapsed {
+  @include media("<desktop") {
+    max-height: 6vh;
   }
 }
 

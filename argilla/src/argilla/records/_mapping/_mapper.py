@@ -242,11 +242,10 @@ class IngestedRecordMapper:
             parameters = {param.parameter_type: data.get(param.source) for param in route.parameters}
             if parameters.get(ParameterType.VALUE) is None:
                 continue
-            schema_item = self._dataset.schema.get(name)
+            question = self._dataset.questions[name]
             suggestion = Suggestion(
                 **parameters,
-                question_name=route.name,
-                question_id=schema_item.id,
+                question_name=question.name,
             )
             suggestions.append(suggestion)
 

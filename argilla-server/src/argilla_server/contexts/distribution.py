@@ -12,21 +12,49 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
+import backoff
+import sqlalchemy
 
+from typing import List
+from uuid import UUID
+
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.enums import DatasetDistributionStrategy, RecordStatus
 from argilla_server.models import Record
+from argilla_server.search_engine.base import SearchEngine
+from argilla_server.database import _get_async_db
+
+MAX_TIME_RETRY_SQLALCHEMY_ERROR = 15
 
 
-# TODO: Do this with one single update statement for all records if possible to avoid too many queries.
-async def update_records_status(db: AsyncSession, records: List[Record]):
+async def unsafe_update_records_status(db: AsyncSession, records: List[Record]):
     for record in records:
-        await update_record_status(db, record)
+        await _update_record_status(db, record)
 
 
-async def update_record_status(db: AsyncSession, record: Record) -> Record:
+@backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
+async def update_record_status(search_engine: SearchEngine, record_id: UUID) -> Record:
+    async for db in _get_async_db(isolation_level="SERIALIZABLE"):
+        record = await Record.get_or_raise(
+            db,
+            record_id,
+            options=[
+                selectinload(Record.dataset),
+                selectinload(Record.responses_submitted),
+            ],
+        )
+
+        await _update_record_status(db, record)
+        await search_engine.partial_record_update(record, status=record.status)
+
+        await db.commit()
+
+        return record
+
+
+async def _update_record_status(db: AsyncSession, record: Record) -> Record:
     if record.dataset.distribution_strategy == DatasetDistributionStrategy.overlap:
         return await _update_record_status_with_overlap_strategy(db, record)
 
