@@ -6,7 +6,7 @@ FROM ${ARGILLA_SERVER_IMAGE}:${ARGILLA_VERSION}
 USER root
 
 # Copy Argilla distribution files
-COPY scripts/start_quickstart_argilla.sh /home/argilla
+COPY scripts/start.sh /home/argilla
 COPY scripts/start_argilla_server.sh /home/argilla
 COPY Procfile /home/argilla
 COPY requirements.txt /packages/requirements.txt
@@ -57,6 +57,4 @@ ENV PASSWORD=""
 
 ENV ARGILLA_HOME_PATH=/data/argilla
 
-ENV UVICORN_PORT=6900
-
-CMD ["/bin/bash", "start_quickstart_argilla.sh"]
+CMD ["/bin/bash", "start.sh"]
