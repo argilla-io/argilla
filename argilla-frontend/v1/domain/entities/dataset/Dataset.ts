@@ -100,20 +100,29 @@ export class Dataset {
     this.updatedAt = when;
   }
 
-  validate(): Record<"guidelines", string[]> {
-    const validations: Record<"guidelines", string[]> = {
+  validate(): Record<"guidelines" | "distribution", string[]> {
+    const validations: Record<"guidelines" | "distribution", string[]> = {
       guidelines: [],
+      distribution: [],
     };
 
     if (this.guidelines?.trim().length < 1) {
       validations.guidelines.push("This field is required.");
     }
 
+    if (!this.distribution.minSubmitted || this.distribution.minSubmitted < 1) {
+      validations.distribution.push("This field is required.");
+    }
+
     return validations;
   }
 
-  get isValid() {
+  get isValidGuidelines() {
     return this.validate().guidelines.length === 0;
+  }
+
+  get isValidDistribution() {
+    return this.validate().distribution.length === 0;
   }
 
   private initializeOriginal() {

@@ -20,13 +20,14 @@ describe("Dataset", () => {
       expect(dataset.validate().guidelines).toHaveLength(0);
     });
   });
-  describe("isValid should", () => {
+
+  describe("isValidGuidelines should", () => {
     test("be false when the guidelines is empty", () => {
       const dataset = createEmptyDataset();
 
       dataset.guidelines = "";
 
-      expect(dataset.isValid).toBeFalsy();
+      expect(dataset.isValidGuidelines).toBeFalsy();
     });
 
     test("be true when the guidelines is empty", () => {
@@ -34,7 +35,33 @@ describe("Dataset", () => {
 
       dataset.guidelines = "FAKE";
 
-      expect(dataset.isValid).toBeTruthy();
+      expect(dataset.isValidGuidelines).toBeTruthy();
+    });
+  });
+
+  describe("isValidDistribution should", () => {
+    test("be false when the min submitted is empty", () => {
+      const dataset = createEmptyDataset();
+
+      dataset.distribution.minSubmitted = undefined;
+
+      expect(dataset.isValidDistribution).toBeFalsy();
+    });
+
+    test("be true when the min submitted is lower than 0", () => {
+      const dataset = createEmptyDataset();
+
+      dataset.distribution.minSubmitted = -1;
+
+      expect(dataset.isValidDistribution).toBeFalsy();
+    });
+
+    test("be true when the min submitted is lower than 0", () => {
+      const dataset = createEmptyDataset();
+
+      dataset.distribution.minSubmitted = 20;
+
+      expect(dataset.isValidDistribution).toBeTruthy();
     });
   });
 

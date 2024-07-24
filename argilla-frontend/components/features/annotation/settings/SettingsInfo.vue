@@ -31,21 +31,26 @@
             v-text="$t('taskDistribution')"
           />
 
-          <div class="form_group">
-            <label
-              for="task-distribution"
-              v-text="$t('minimumSubmittedResponses')"
-            />
-            <span class="info-icon" :data-title="$t('taskDistributionTooltip')">
-              <svgicon name="info" width="20" height="20"></svgicon>
-            </span>
-            <input
-              type="number"
-              id="task-distribution"
-              min="1"
-              v-model="settings.dataset.distribution.minSubmitted"
-            />
-          </div>
+          <Validation :validations="settings.dataset.validate().distribution">
+            <div class="form_group">
+              <label
+                for="task-distribution"
+                v-text="$t('minimumSubmittedResponses')"
+              />
+              <span
+                class="info-icon"
+                :data-title="$t('taskDistributionTooltip')"
+              >
+                <svgicon name="info" width="20" height="20"></svgicon>
+              </span>
+              <input
+                type="number"
+                id="task-distribution"
+                min="1"
+                v-model="settings.dataset.distribution.minSubmitted"
+              />
+            </div>
+          </Validation>
 
           <div class="settings__edition-form__footer">
             <BaseButton
@@ -59,7 +64,10 @@
             <BaseButton
               type="submit"
               class="primary small"
-              :disabled="!settings.dataset.isModifiedTaskDistribution"
+              :disabled="
+                !settings.dataset.isModifiedTaskDistribution ||
+                !settings.dataset.isValidDistribution
+              "
             >
               <span v-text="$t('update')" />
             </BaseButton>
@@ -93,7 +101,7 @@
               class="primary small"
               :disabled="
                 !settings.dataset.isModifiedGuidelines ||
-                !settings.dataset.isValid
+                !settings.dataset.isValidGuidelines
               "
             >
               <span v-text="$t('update')" />
