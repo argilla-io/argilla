@@ -224,10 +224,10 @@ export default {
 .info-icon {
   color: $black-37;
   margin-right: $base-space * 2;
-}
-[data-title] {
-  position: relative;
-  overflow: visible;
-  @include tooltip-mini("top", 8px);
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @include tooltip-mini("top", $base-space);
+  }
 }
 </styles>
