@@ -30,6 +30,14 @@ class UserInfo(BaseUser, dict):
         return True
 
     @property
+    def username(self) -> str:
+        return self["username"]
+
+    @property
+    def first_name(self) -> str:
+        return self.get("first_name") or self.username
+
+    @property
     def role(self) -> UserRole:
         role = self.get("role") or _DEFAULT_USER_ROLE
         return UserRole(role)
