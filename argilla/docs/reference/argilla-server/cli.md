@@ -22,15 +22,14 @@ to automatically authenticate in the Argilla server to run other commands or Pyt
 argilla login --api-url http://localhost:6900
 ```
 
-:::{note}
-To validate that the provided URL and API Key are valid, the `login` command will try to connect to the Argilla server
-using the provided credentials.
-:::
+!!! note
+    To validate that the provided URL and API Key are valid, the `login` command will try to connect to the Argilla server
+    using the provided credentials.
 
-:::{note}
-By default, Argilla will use `~/.cache/argilla` directory to store the local credentials. If you want to change this
-behaviour, you can set a valid directory using the `ARGILLA_CACHE_DIR` environment variable.
-:::
+
+!!! note
+    By default, Argilla will use `~/.cache/argilla` directory to store the local credentials. If you want to change this
+    behaviour, you can set a valid directory using the `ARGILLA_CACHE_DIR` environment variable.
 
 ## Logout
 
@@ -40,11 +39,10 @@ The `argilla logout` command removes the stored local credentials previously gen
 argilla logout
 ```
 
-:::{note}
-The `logout` will try to connect to the Argilla server before removing the stored credentials. If, for some reason,
-the Argilla server is not available but you still want to remove the stored credentials, the `--force` option can
-be used.
-:::
+!!! note
+    The `logout` will try to connect to the Argilla server before removing the stored credentials. If, for some reason,
+    the Argilla server is not available but you still want to remove the stored credentials, the `--force` option can
+    be used.
 
 ## Whoami
 
