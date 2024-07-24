@@ -34,7 +34,11 @@
       </li>
     </ul>
     <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
-    <TeamProgress :datasetId="datasetId" />
+    <TeamProgress
+      visibleProgressValues
+      :datasetId="datasetId"
+      :show-tooltip="false"
+    />
   </div>
 </template>
 
@@ -57,10 +61,10 @@ export default {
     progressItems() {
       return [
         {
-          name: RecordStatus.submitted.name,
-          color: RecordStatus.submitted.color,
-          value: this.metrics.submitted,
-          percent: this.metrics.percentage.submitted,
+          name: RecordStatus.pending.name,
+          color: RecordStatus.pending.color,
+          value: this.metrics.pending,
+          percent: this.metrics.percentage.pending,
         },
         {
           name: RecordStatus.draft.name,
@@ -75,10 +79,10 @@ export default {
           percent: this.metrics.percentage.discarded,
         },
         {
-          name: RecordStatus.pending.name,
-          color: RecordStatus.pending.color,
-          value: this.metrics.pending,
-          percent: this.metrics.percentage.pending,
+          name: RecordStatus.submitted.name,
+          color: RecordStatus.submitted.color,
+          value: this.metrics.submitted,
+          percent: this.metrics.percentage.submitted,
         },
       ];
     },
@@ -124,7 +128,7 @@ $bullet-size: 8px;
   margin-top: 0;
   margin-bottom: $base-space * 3;
   &__item {
-    background: palette(grey, 700);
+    background: $black-3;
     display: flex;
     flex-direction: column;
     gap: $base-space;

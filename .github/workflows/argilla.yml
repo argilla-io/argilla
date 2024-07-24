@@ -53,6 +53,10 @@ jobs:
       - name: Wait for argilla-quickstart to start
         run: |
           while ! curl -XGET http://localhost:6900/api/_status; do sleep 5; done
+      - name: Set huggingface hub credentials
+        run: |
+          echo "HF_TOKEN_ARGILLA_INTERNAL_TESTING=${{ secrets.HF_TOKEN_ARGILLA_INTERNAL_TESTING }}" >> "$GITHUB_ENV"
+          echo "Enable HF access token"
       - name: Run unit tests
         run: |
           pdm run test tests/unit

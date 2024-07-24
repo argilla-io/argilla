@@ -218,6 +218,7 @@ export default {
     workspace: "Workspace",
     createdAt: "Created",
     lastActivityAt: "Updated",
+    progress: "Team progress",
   },
   metrics: {
     total: "Total",
