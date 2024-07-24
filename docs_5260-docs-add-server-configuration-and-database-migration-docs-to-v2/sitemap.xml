@@ -186,6 +186,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/reference/argilla-server/cli/</loc>
+         <lastmod>2024-07-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/reference/argilla-server/configuration/</loc>
          <lastmod>2024-07-24</lastmod>
          <changefreq>daily</changefreq>

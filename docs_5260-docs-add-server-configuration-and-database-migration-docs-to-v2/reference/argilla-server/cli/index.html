@@ -6,34 +6,34 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="In this section, we will provide a step-by-step guide to show how to annotate records in the UI.">
+        <meta name="description" content="The Argilla python server SDK">
       
       
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/how_to_guides/annotate/">
+        <link rel="canonical" href="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/reference/argilla-server/cli/">
       
       
-        <link rel="prev" href="../import_export/">
+        <link rel="prev" href="../migrations/">
       
       
-        <link rel="next" href="../distribution/">
+        <link rel="next" href="../telemetry/">
       
       
-      <link rel="icon" href="../../assets/favicon.ico">
+      <link rel="icon" href="../../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.26">
     
     
       
-        <title>Annotate a dataset - Argilla Docs</title>
+        <title>Server CLI - Argilla Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.6543a935.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,17 +52,17 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-      <link rel="stylesheet" href="../../css/ansi-colours.css">
+      <link rel="stylesheet" href="../../../css/ansi-colours.css">
     
-      <link rel="stylesheet" href="../../css/jupyter-cells.css">
+      <link rel="stylesheet" href="../../../css/jupyter-cells.css">
     
-      <link rel="stylesheet" href="../../css/pandas-dataframe.css">
+      <link rel="stylesheet" href="../../../css/pandas-dataframe.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -71,11 +71,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Annotate a dataset - Argilla Docs" >
+        <meta  property="og:title"  content="Server CLI - Argilla Docs" >
       
-        <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to show how to annotate records in the UI." >
+        <meta  property="og:description"  content="The Argilla python server SDK" >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/assets/images/social/how_to_guides/annotate.png" >
+        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/assets/images/social/reference/argilla-server/cli.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,15 +83,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/how_to_guides/annotate/" >
+        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/reference/argilla-server/cli/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Annotate a dataset - Argilla Docs" >
+        <meta  name="twitter:title"  content="Server CLI - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to show how to annotate records in the UI." >
+        <meta  name="twitter:description"  content="The Argilla python server SDK" >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/assets/images/social/how_to_guides/annotate.png" >
+        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/docs_5260-docs-add-server-configuration-and-database-migration-docs-to-v2/assets/images/social/reference/argilla-server/cli.png" >
       
     
     
@@ -114,7 +114,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#annotate-your-dataset" class="md-skip">
+        <a href="#server-cli" class="md-skip">
           Skip to content
         </a>
       
@@ -132,9 +132,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../../.." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -151,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Annotate a dataset
+              Server CLI
             
           </span>
         </div>
@@ -275,7 +275,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
     
@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../getting_started/quickstart/" class="md-tabs__link">
+        <a href="../../../getting_started/quickstart/" class="md-tabs__link">
           
   
   Getting started
@@ -308,11 +308,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="../" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../../how_to_guides/" class="md-tabs__link">
         
   
     
@@ -329,7 +327,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../tutorials/" class="md-tabs__link">
+      <a href="../../../tutorials/" class="md-tabs__link">
         
   
     
@@ -344,17 +342,21 @@
         
   
   
+    
+  
   
     
     
       
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../reference/argilla/client/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../argilla/client/" class="md-tabs__link">
           
   
   API Reference
@@ -373,7 +375,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../community/" class="md-tabs__link">
+      <a href="../../../community/" class="md-tabs__link">
         
   
     
@@ -425,9 +427,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../../.." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     Argilla Docs
@@ -454,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -514,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/quickstart/" class="md-nav__link">
+      <a href="../../../getting_started/quickstart/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -535,7 +537,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/installation/" class="md-nav__link">
+      <a href="../../../getting_started/installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -556,7 +558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/faq/" class="md-nav__link">
+      <a href="../../../getting_started/faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -581,32 +583,27 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../../how_to_guides/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -617,13 +614,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             How-to guides
@@ -637,7 +634,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user/" class="md-nav__link">
+      <a href="../../../how_to_guides/user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -658,7 +655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../workspace/" class="md-nav__link">
+      <a href="../../../how_to_guides/workspace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -679,7 +676,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dataset/" class="md-nav__link">
+      <a href="../../../how_to_guides/dataset/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -700,7 +697,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../record/" class="md-nav__link">
+      <a href="../../../how_to_guides/record/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -721,7 +718,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../query/" class="md-nav__link">
+      <a href="../../../how_to_guides/query/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -742,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../import_export/" class="md-nav__link">
+      <a href="../../../how_to_guides/import_export/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -760,30 +757,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Annotate a dataset
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../how_to_guides/annotate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -792,170 +769,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#annotation-interface-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Annotation interface overview
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Annotation interface overview">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#flexible-layout" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flexible layout
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#shortcuts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Shortcuts
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#view-by-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      View by status
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#suggestions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Suggestions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#focus-view" class="md-nav__link">
-    <span class="md-ellipsis">
-      Focus view
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bulk-view" class="md-nav__link">
-    <span class="md-ellipsis">
-      Bulk view
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#annotation-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      Annotation progress
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#use-search-filters-and-sort" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use search, filters, and sort
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Use search, filters, and sort">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#search" class="md-nav__link">
-    <span class="md-ellipsis">
-      Search
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#order-by-record-semantic-similarity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Order by record semantic similarity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#filter-and-sort-by-metadata-responses-and-suggestions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Filter and sort by metadata, responses, and suggestions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Filter and sort by metadata, responses, and suggestions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#filter" class="md-nav__link">
-    <span class="md-ellipsis">
-      Filter
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sort" class="md-nav__link">
-    <span class="md-ellipsis">
-      Sort
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -968,7 +781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../distribution/" class="md-nav__link">
+      <a href="../../../how_to_guides/distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -994,20 +807,17 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_9" id="__nav_3_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_9" id="__nav_3_9_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1032,7 +842,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../use_markdown_to_format_rich_content/" class="md-nav__link">
+      <a href="../../../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1053,7 +863,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../migrate_from_legacy_datasets/" class="md-nav__link">
+      <a href="../../../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1106,7 +916,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../tutorials/" class="md-nav__link ">
+            <a href="../../../tutorials/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1137,7 +947,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/text_classification/" class="md-nav__link">
+      <a href="../../../tutorials/text_classification/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1162,25 +972,30 @@
       
   
   
+    
   
   
+  
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1191,7 +1006,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             API Reference
@@ -1210,17 +1025,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
         
           
-          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1245,7 +1063,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/client/" class="md-nav__link">
+      <a href="../../argilla/client/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1266,7 +1084,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/workspaces/" class="md-nav__link">
+      <a href="../../argilla/workspaces/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1287,7 +1105,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/users/" class="md-nav__link">
+      <a href="../../argilla/users/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1325,7 +1143,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../reference/argilla/datasets/datasets/" class="md-nav__link ">
+            <a href="../../argilla/datasets/datasets/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1356,7 +1174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/datasets/dataset_records/" class="md-nav__link">
+      <a href="../../argilla/datasets/dataset_records/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1402,7 +1220,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../reference/argilla/settings/settings/" class="md-nav__link ">
+            <a href="../../argilla/settings/settings/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1433,7 +1251,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/fields/" class="md-nav__link">
+      <a href="../../argilla/settings/fields/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1454,7 +1272,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/questions/" class="md-nav__link">
+      <a href="../../argilla/settings/questions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1475,7 +1293,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/metadata_property/" class="md-nav__link">
+      <a href="../../argilla/settings/metadata_property/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1496,7 +1314,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/vectors/" class="md-nav__link">
+      <a href="../../argilla/settings/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1517,7 +1335,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/task_distribution/" class="md-nav__link">
+      <a href="../../argilla/settings/task_distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1563,7 +1381,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../reference/argilla/records/records/" class="md-nav__link ">
+            <a href="../../argilla/records/records/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1594,7 +1412,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/responses/" class="md-nav__link">
+      <a href="../../argilla/records/responses/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1615,7 +1433,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/suggestions/" class="md-nav__link">
+      <a href="../../argilla/records/suggestions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1636,7 +1454,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/vectors/" class="md-nav__link">
+      <a href="../../argilla/records/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1657,7 +1475,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/metadata/" class="md-nav__link">
+      <a href="../../argilla/records/metadata/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1686,7 +1504,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/search/" class="md-nav__link">
+      <a href="../../argilla/search/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1707,7 +1525,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/markdown/" class="md-nav__link">
+      <a href="../../argilla/markdown/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1733,25 +1551,30 @@
                 
   
   
+    
   
   
+  
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1762,7 +1585,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5_2">
             <span class="md-nav__icon md-icon"></span>
             FastAPI Server
@@ -1776,7 +1599,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla-server/configuration/" class="md-nav__link">
+      <a href="../configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1797,7 +1620,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla-server/migrations/" class="md-nav__link">
+      <a href="../migrations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1815,10 +1638,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../reference/argilla-server/cli/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Server CLI
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1827,6 +1670,230 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#login" class="md-nav__link">
+    <span class="md-ellipsis">
+      Login
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logout
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whoami" class="md-nav__link">
+    <span class="md-ellipsis">
+      Whoami
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#info" class="md-nav__link">
+    <span class="md-ellipsis">
+      Info
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#users" class="md-nav__link">
+    <span class="md-ellipsis">
+      Users
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a user
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-a-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete a user
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      List users
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workspaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workspaces
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workspaces">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a workspace
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-user-to-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      Add user to workspace
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-use-from-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete use from workspace
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-workspaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      List workspaces
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Datasets
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Datasets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#delete-a-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete a dataset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      List datasets
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start the server
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-management-using-the-database-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      User management using the database connection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1852,17 +1919,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1887,7 +1957,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla-server/telemetry/" class="md-nav__link">
+      <a href="../telemetry/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1940,7 +2010,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../community/" class="md-nav__link ">
+            <a href="../../../community/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1971,7 +2041,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../community/contributor/" class="md-nav__link">
+      <a href="../../../community/contributor/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1992,7 +2062,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../community/popular_issues.md" class="md-nav__link">
+      <a href="../../../community/popular_issues.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2013,7 +2083,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../community/changelog/" class="md-nav__link">
+      <a href="../../../community/changelog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2129,73 +2199,73 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#annotation-interface-overview" class="md-nav__link">
+  <a href="#login" class="md-nav__link">
     <span class="md-ellipsis">
-      Annotation interface overview
+      Login
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Annotation interface overview">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logout" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logout
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whoami" class="md-nav__link">
+    <span class="md-ellipsis">
+      Whoami
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#info" class="md-nav__link">
+    <span class="md-ellipsis">
+      Info
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#users" class="md-nav__link">
+    <span class="md-ellipsis">
+      Users
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Users">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#flexible-layout" class="md-nav__link">
+  <a href="#create-a-user" class="md-nav__link">
     <span class="md-ellipsis">
-      Flexible layout
+      Create a user
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#shortcuts" class="md-nav__link">
+  <a href="#delete-a-user" class="md-nav__link">
     <span class="md-ellipsis">
-      Shortcuts
+      Delete a user
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#view-by-status" class="md-nav__link">
+  <a href="#list-users" class="md-nav__link">
     <span class="md-ellipsis">
-      View by status
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#suggestions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Suggestions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#focus-view" class="md-nav__link">
-    <span class="md-ellipsis">
-      Focus view
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#bulk-view" class="md-nav__link">
-    <span class="md-ellipsis">
-      Bulk view
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#annotation-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      Annotation progress
+      List users
     </span>
   </a>
   
@@ -2207,56 +2277,46 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-search-filters-and-sort" class="md-nav__link">
+  <a href="#workspaces" class="md-nav__link">
     <span class="md-ellipsis">
-      Use search, filters, and sort
+      Workspaces
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Use search, filters, and sort">
+    <nav class="md-nav" aria-label="Workspaces">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#search" class="md-nav__link">
+  <a href="#create-a-workspace" class="md-nav__link">
     <span class="md-ellipsis">
-      Search
+      Create a workspace
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#order-by-record-semantic-similarity" class="md-nav__link">
+  <a href="#add-user-to-workspace" class="md-nav__link">
     <span class="md-ellipsis">
-      Order by record semantic similarity
+      Add user to workspace
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#filter-and-sort-by-metadata-responses-and-suggestions" class="md-nav__link">
+  <a href="#delete-use-from-workspace" class="md-nav__link">
     <span class="md-ellipsis">
-      Filter and sort by metadata, responses, and suggestions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Filter and sort by metadata, responses, and suggestions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#filter" class="md-nav__link">
-    <span class="md-ellipsis">
-      Filter
+      Delete use from workspace
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#sort" class="md-nav__link">
+  <a href="#list-workspaces" class="md-nav__link">
     <span class="md-ellipsis">
-      Sort
+      List workspaces
     </span>
   </a>
   
@@ -2264,6 +2324,76 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Datasets
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Datasets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#delete-a-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete a dataset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      List datasets
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#start-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Start the server
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-management-using-the-database-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      User management using the database connection
+    </span>
+  </a>
   
 </li>
         
@@ -2287,7 +2417,7 @@
                   
 
   
-    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/how_to_guides/annotate.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/reference/argilla-server/cli.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -2295,191 +2425,139 @@
   
 
 
-<h1 id="annotate-your-dataset">Annotate your dataset<a class="headerlink" href="#annotate-your-dataset" title="Permanent link">&para;</a></h1>
+<h1 id="server-cli">Server CLI<a class="headerlink" href="#server-cli" title="Permanent link">&para;</a></h1>
+<p>This section list and describe the commands offered by the <code>argilla</code> CLI application. If you need more information about the available
+commands in the CLI you can use the <code>--help</code> option:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>argilla<span class="w"> </span>--help
+</span></code></pre></div>
+<p>If you need more information about a specific command you can use the <code>--help</code> option too:</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>argilla<span class="w"> </span>users<span class="w"> </span>create<span class="w"> </span>--help
+</span></code></pre></div>
+<h2 id="login">Login<a class="headerlink" href="#login" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla login</code> command is used to store the local credentials of a user, with the main purpose of reusing these credentials
+to automatically authenticate in the Argilla server to run other commands or Python scripts that use Argilla.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>argilla<span class="w"> </span>login<span class="w"> </span>--api-url<span class="w"> </span>http://localhost:6900
+</span></code></pre></div>
 <div class="admonition note">
-<p>To experience the UI features firsthand, you can take a look at the <a href="https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==">Demo ↗</a>.</p>
+<p class="admonition-title">Note</p>
+<p>To validate that the provided URL and API Key are valid, the <code>login</code> command will try to connect to the Argilla server
+using the provided credentials.</p>
 </div>
-<p>Argilla UI offers many functions to help you manage your annotation workflow, aiming to provide the most flexible approach to fit the wide variety of use cases handled by the community.</p>
-<h2 id="annotation-interface-overview">Annotation interface overview<a class="headerlink" href="#annotation-interface-overview" title="Permanent link">&para;</a></h2>
-<h3 id="flexible-layout">Flexible layout<a class="headerlink" href="#flexible-layout" title="Permanent link">&para;</a></h3>
-<p><img alt="UI overview" src="../../assets/images/how_to_guides/annotate/ui_overview.png" /></p>
-<p>The UI is responsive with two columns for larger devices and one column for smaller devices. This enables you to annotate data using your mobile phone for simple datasets (i.e., not very long text and 1-2 questions) or resize your screen to get a more compact UI.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:5"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Header</label><label for="__tabbed_1_2">Left pane</label><label for="__tabbed_1_3">Right pane</label><label for="__tabbed_1_4">Left bottom panel</label><label for="__tabbed_1_5">Right bottom panel</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>At the right side of the navigation breadcrumb, you can customize the dataset settings and edit your profile.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>By default, Argilla will use <code>~/.cache/argilla</code> directory to store the local credentials. If you want to change this
+behaviour, you can set a valid directory using the <code>ARGILLA_CACHE_DIR</code> environment variable.</p>
 </div>
-<div class="tabbed-block">
-<p>This area displays the <strong>control panel</strong> on the top. The control panel is used for performing keyword-based search, applying filters, and sorting the results.</p>
-<p>Below the control panel, the record card(s) are displayed one by one (Focus view) or in a vertical list (Bulk view).</p>
+<h2 id="logout">Logout<a class="headerlink" href="#logout" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla logout</code> command removes the stored local credentials previously generated by calling the <code>argilla login</code> command.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>argilla<span class="w"> </span><span class="nb">logout</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>logout</code> will try to connect to the Argilla server before removing the stored credentials. If, for some reason,
+the Argilla server is not available but you still want to remove the stored credentials, the <code>--force</code> option can
+be used.</p>
 </div>
-<div class="tabbed-block">
-<p>This is where you annotate your dataset. Simply fill it out as a form, then choose to <code>Submit</code>, <code>Save as Draft</code>, or <code>Discard</code>.</p>
-</div>
-<div class="tabbed-block">
-<p>This expandable area displays the annotation guidelines. The annotation guidelines can be edited by owner and admin roles in the dataset settings.</p>
-</div>
-<div class="tabbed-block">
-<p>This expandable area displays your annotation progress.</p>
-</div>
-</div>
-</div>
-<h3 id="shortcuts">Shortcuts<a class="headerlink" href="#shortcuts" title="Permanent link">&para;</a></h3>
-<p>The Argilla UI includes a range of shortcuts. For the main actions (submit, discard, save as draft and selecting labels) the keys are showed in the corresponding button.</p>
-<p>To learn how to move from one question to another or between records using the keyboard, take a look at the table below.</p>
-<p>Shortcuts provide a smoother annotation experience, especially with datasets using a single question (Label, MultiLabel, Rating, or Ranking).</p>
-<details>
-<summary>Available shortcuts</summary>
-<table>
-<thead>
-<tr>
-<th>Action</th>
-<th>Keys</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Activate form</td>
-<td>⇥ Tab</td>
-</tr>
-<tr>
-<td>Move between questions</td>
-<td>↓ Down arrow or ↑ Up arrow</td>
-</tr>
-<tr>
-<td>Select and unselect label</td>
-<td>1, 2, 3</td>
-</tr>
-<tr>
-<td>Move between labels or ranking options</td>
-<td>⇥ Tab or ⇧ Shift ⇥ Tab</td>
-</tr>
-<tr>
-<td>Select rating and rank</td>
-<td>1, 2, 3</td>
-</tr>
-<tr>
-<td>Fit span to character selection</td>
-<td>Hold ⇧ Shift</td>
-</tr>
-<tr>
-<td>Activate text area</td>
-<td>⇧ Shift ↵ Enter</td>
-</tr>
-<tr>
-<td>Exit text area</td>
-<td>Esc</td>
-</tr>
-<tr>
-<td>Discard</td>
-<td>⌫ Backspace</td>
-</tr>
-<tr>
-<td>Save draft (Mac os)</td>
-<td>⌘ Cmd S</td>
-</tr>
-<tr>
-<td>Save draft (Other)</td>
-<td>Ctrl S</td>
-</tr>
-<tr>
-<td>Submit</td>
-<td>↵ Enter</td>
-</tr>
-<tr>
-<td>Move between pages</td>
-<td>→ Right arrow or ← Left arrow</td>
-</tr>
-</tbody>
-</table>
-</details>
-<h3 id="view-by-status">View by status<a class="headerlink" href="#view-by-status" title="Permanent link">&para;</a></h3>
-<p>The view selector is set by default on Pending.</p>
-<p>If you are starting an annotation effort, all the records are initially kept in the Pending view. Once you start annotating, the records will move to the other queues: Draft, Submitted, Discarded.</p>
+<h2 id="whoami">Whoami<a class="headerlink" href="#whoami" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla whoami</code> command prints the information (username, workspaces, API Key, etc.) of the logged-in user.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>argilla<span class="w"> </span>whoami
+</span></code></pre></div>
+<h2 id="info">Info<a class="headerlink" href="#info" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla info</code> command prints the versions of the Python client, Argilla server and ElasticSearch server used and that might
+be useful for debugging purposes or reporting an issue.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>argilla<span class="w"> </span>info
+</span></code></pre></div>
+<h2 id="users">Users<a class="headerlink" href="#users" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla users</code> group of commands offers basic operations for managing the users of the connected Argilla server.</p>
+<h3 id="create-a-user">Create a user<a class="headerlink" href="#create-a-user" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla users create</code> command allows you to easily create a new user from the command line. The command will prompt for the
+username and password of the new user, but the following options can be provided:</p>
 <ul>
-<li><strong>Pending</strong>: The records without a response.</li>
-<li><strong>Draft</strong>: The records with partial responses. They can be submitted or discarded later. You can’t move them back to the pending queue.</li>
-<li><strong>Discarded</strong>: The records may or may not have responses. They can be edited but you can’t move them back to the pending queue.</li>
-<li><strong>Submitted</strong>: The records have been fully annotated and have already been submitted. You can remove them from this queue and send them to the draft or discarded queues, but never back to the pending queue.</li>
+<li><code>--username</code>: The username of the new user.</li>
+<li><code>--password</code>: The password of the new user.</li>
+<li><code>--first-name</code>: The first name of the new user. If not provided, the username will be used.</li>
+<li><code>--last-name</code>: The last name of the new user.</li>
+<li><code>--role</code>: The role of the new user. The default value is <code>annotator</code>.</li>
+<li><code>--workspace</code>: The name of the workspace where the new user will be added. It can be provided multiple times to add the user
+to multiple workspaces.</li>
 </ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you are working as part of a team, the number of records in your Pending queue may change as other members of the team submit responses and those records get completed.</p>
-</div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>If you are working as part of a team, the records in the draft queue that have been completed by other team members will show a check mark to indicate that there is no need to provide a response.</p>
-</div>
-<h3 id="suggestions">Suggestions<a class="headerlink" href="#suggestions" title="Permanent link">&para;</a></h3>
-<p>If your dataset includes model predictions, you will see them represented by a sparkle icon <code>✨</code> in the label or value button. We call them “Suggestions” and they appear in the form as pre-filled responses. If confidence scores have been included by the dataset admin, they will be shown alongside with the label. Additionally, admins can choose to always show suggested labels at the beginning of the list. This can be configured from the dataset settings.</p>
-<p>If you agree with the suggestions, you just need to click on the <code>Submit</code> button, and they will be considered as your response. If the suggestion is incorrect, you can modify it and submit your final response.</p>
-<h3 id="focus-view">Focus view<a class="headerlink" href="#focus-view" title="Permanent link">&para;</a></h3>
-<p><img alt="Focus view" height="10%" src="../../assets/images/how_to_guides/annotate/focus_view.png" width="10%" /></p>
-<p>This is the default view to annotate your dataset linearly, displaying one record after another.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>You should use this view if you have a large number of required questions or need a strong focus on the record content to be labelled. This is also the recommended view for annotating a dataset sample to avoid potential biases introduced by using filters, search, sorting and bulk labelling.</p>
-</div>
-<p>Once you submit your first response, the next record will appear automatically. To see again your submitted response, just click on <code>Prev</code>.</p>
-<p><strong>Navigating through the records</strong></p>
-<p>To navigate through the records, you can use the <code>Prev</code>, shown as <code>&lt;</code>, and <code>Next</code>, <code>&gt;</code> buttons on top of the record card.</p>
-<p>Each time the page is fully refreshed, the records with modified statuses (Pending to Discarded, Pending to Save as Draft, Pending to Submitted) are sent to the corresponding queue. The <strong>control panel</strong> displays the <strong>status selector</strong>, which is set to Pending by default.</p>
-<h3 id="bulk-view">Bulk view<a class="headerlink" href="#bulk-view" title="Permanent link">&para;</a></h3>
-<p><img alt="Bulk view" height="10%" src="../../assets/images/how_to_guides/annotate/bulk_view.png" width="10%" /></p>
-<p>The bulk view is designed to speed up the annotation and get a quick overview of the whole dataset.</p>
-<p>The bulk view displays the records in a vertical list. Once this view is active, some functions from the control panel will activate to optimize the view. You can define the number of records to display by page between <code>10</code>, <code>25</code>, <code>50</code>, <code>100</code> and whether records are shown with a fixed (<code>Collapse records</code>) or their natural height (<code>Expand records</code>).</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>You should use this to quickly explore a dataset. This view is also recommended if you have a good understanding of the domain and want to apply your knowledge based on things like similarity and keyword search, filters, and suggestion score thresholds. For a datasets with a large number of required questions or very long fields, the focus view would be more suitable.</p>
-<p>With multiple questions, think about using the bulk view to annotate massively one question. Then, you can complete the annotation per record from the draft queue.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Please note that suggestions are not shown in bulk view (except for Spans) and that you will need to save as a draft when you are not providing responses to all required questions.</p>
-</div>
-<h3 id="annotation-progress">Annotation progress<a class="headerlink" href="#annotation-progress" title="Permanent link">&para;</a></h3>
-<p>You can track the progress of an annotation task in the progress bar shown in the dataset list and in the progress panel inside the dataset. This bar shows the number of records that have been completed (i.e., those that have the minimum number of submitted responses) and those left to be completed.</p>
-<p>You can also track your own progress in real time expanding the right-bottom panel inside the dataset page. There you can see the number of records for which you have <code>Pending</code>, <code>Draft</code>, <code>Submitted</code> and <code>Discarded</code> responses.</p>
-<h2 id="use-search-filters-and-sort">Use search, filters, and sort<a class="headerlink" href="#use-search-filters-and-sort" title="Permanent link">&para;</a></h2>
-<p>The UI offers various features designed for data exploration and understanding. Combining these features with bulk labelling can save you and your team hours of time.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>You should use this when you are familiar with your data and have large volumes to annotate based on verified beliefs and experience.</p>
-</div>
-<h3 id="search">Search<a class="headerlink" href="#search" title="Permanent link">&para;</a></h3>
-<p>From the <strong>control panel</strong> at the top of the left pane, you can search by keyword across the entire dataset. If you have more than one field in your records, you may specify if the search is to be performed “All” fields or on a specific one. Matched results are highlighted in color.</p>
-<h3 id="order-by-record-semantic-similarity">Order by record semantic similarity<a class="headerlink" href="#order-by-record-semantic-similarity" title="Permanent link">&para;</a></h3>
-<p>You can retrieve records based on their similarity to another record if vectors have been added to the dataset.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Check these guides to know how to add vectors to your <a href="../dataset/">dataset</a> and <a href="../record/">records</a>.</p>
-</div>
-<p>To use the search by semantic similarity function, click on <code>Find similar</code> within the record you wish to use as a reference. If multiple vectors are available, select the desired vector. You can also choose whether to retrieve the most or least similar records.</p>
-<p>The retrieved records are then ordered by similarity, with the similarity score displayed on each record card.</p>
-<p>While the semantic search is active, you can update the selected vector or adjust the order of similarity, and specify the number of desired results.</p>
-<p>To cancel the search, click on the cross icon next to the reference record.</p>
-<h3 id="filter-and-sort-by-metadata-responses-and-suggestions">Filter and sort by metadata, responses, and suggestions<a class="headerlink" href="#filter-and-sort-by-metadata-responses-and-suggestions" title="Permanent link">&para;</a></h3>
-<h4 id="filter">Filter<a class="headerlink" href="#filter" title="Permanent link">&para;</a></h4>
-<p>If the dataset contains metadata, responses and suggestions, click on <strong>Filter</strong> in the <strong>control panel</strong> to display the available filters. You can select multiple filters and combine them.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Record info including metadata is visible from the ellipsis menu in the record card.</p>
-</div>
-<p>From the <code>Metadata</code> dropdown, type and select the property. You can set a range for integer and float properties, and select specific values for term metadata.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Note that if a metadata property was set to <code>visible_for_annotators=False</code> this metadata property will only appear in the metadata filter for users with the <code>admin</code> or <code>owner</code> role.</p>
-</div>
-<p>From the <code>Responses</code> dropdown, type and select the question. You can set a range for rating questions and select specific values for label, multi-label, and span questions.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The text and ranking questions are not available for filtering.</p>
-</div>
-<p>From the Suggestions dropdown, filter the suggestions by <code>Suggestion values</code>, <code>Score</code> , or <code>Agent</code>. </p>
-<h4 id="sort">Sort<a class="headerlink" href="#sort" title="Permanent link">&para;</a></h4>
-<p>You can sort your records according to one or several attributes.</p>
-<p>The insertion time and last update are general to all records.</p>
-<p>The suggestion scores, response, and suggestion values for rating questions and metadata properties are available only when they were provided.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>argilla<span class="w"> </span>users<span class="w"> </span>create<span class="w"> </span>--username<span class="w"> </span>joe<span class="w"> </span>--first-name<span class="w"> </span>Joe<span class="w"> </span>--last-name<span class="w"> </span>Doe<span class="w"> </span>--role<span class="w"> </span>admin<span class="w"> </span>--workspace<span class="w"> </span>workspace1<span class="w"> </span>--workspace<span class="w"> </span>workspace2
+</span></code></pre></div>
+<h3 id="delete-a-user">Delete a user<a class="headerlink" href="#delete-a-user" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla users delete</code> command allows you to easily delete an existing user from the command line by providing the username of the
+user to delete.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>argilla<span class="w"> </span>users<span class="w"> </span>delete<span class="w"> </span>joe
+</span></code></pre></div>
+<h3 id="list-users">List users<a class="headerlink" href="#list-users" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla users list</code> command shows the list of the registered users in the Argilla server. Optionally, the <code>--workspace</code>
+option can be provided to show only the users that belong to a specific workspace.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>argilla<span class="w"> </span>users<span class="w"> </span>list
+</span></code></pre></div>
+<h2 id="workspaces">Workspaces<a class="headerlink" href="#workspaces" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla workspaces</code> group of commands offers basic operations for managing the workspaces of the connected Argilla server.
+The commands of this group that perform an operation in a specific workspace require the <code>--name</code> option to be provided to
+specify the workspace where the operation will be performed.</p>
+<h3 id="create-a-workspace">Create a workspace<a class="headerlink" href="#create-a-workspace" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla workspaces create</code> command allows you to easily create a new workspace from the command line.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>argilla<span class="w"> </span>workspaces<span class="w"> </span>create<span class="w"> </span>my-new-workspace
+</span></code></pre></div>
+<h3 id="add-user-to-workspace">Add user to workspace<a class="headerlink" href="#add-user-to-workspace" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla workspaces add-user</code> command allows you to add a user to a workspace by providing the username of the user and the name of the workspace.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>argilla<span class="w"> </span>workspaces<span class="w"> </span>--name<span class="w"> </span>my-workspace<span class="w"> </span>add-user<span class="w"> </span>joe
+</span></code></pre></div>
+<h3 id="delete-use-from-workspace">Delete use from workspace<a class="headerlink" href="#delete-use-from-workspace" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla workspaces delete-user</code> command allows you to delete a user from a workspace by providing the username of the user and the name of the workspace.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>argilla<span class="w"> </span>workspaces<span class="w"> </span>--name<span class="w"> </span>my-workspace<span class="w"> </span>delete-user<span class="w"> </span>joe
+</span></code></pre></div>
+<h3 id="list-workspaces">List workspaces<a class="headerlink" href="#list-workspaces" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla workspaces list</code> command shows the list of the workspaces in the Argilla server.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>argilla<span class="w"> </span>workspaces<span class="w"> </span>list
+</span></code></pre></div>
+<h2 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla datasets</code> group of commands offers basic operations for managing the datasets stored in the connected Argilla server.
+The commands of this group that perform an operation in a specific dataset require the <code>--name</code> option to be provided and optionally
+the <code>--workspace</code> option to specify the workspace where the dataset is stored. If the <code>--workspace</code> option is not provided, then the
+workspace stored in the local credentials will be used.</p>
+<h3 id="delete-a-dataset">Delete a dataset<a class="headerlink" href="#delete-a-dataset" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla datasets delete</code> command allows you to remove a <code>FeedbackDataset</code> from the Argilla server by providing the name of the
+dataset and optionally the workspace where the dataset is stored.</p>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>argilla<span class="w"> </span>datasets<span class="w"> </span>--name<span class="w"> </span>my-dataset<span class="w"> </span>--workspace<span class="w"> </span>my-workspace<span class="w"> </span>delete
+</span></code></pre></div>
+<h3 id="list-datasets">List datasets<a class="headerlink" href="#list-datasets" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla datasets list</code> shows the list of the datasets stored in the Argilla server. The following options can be provided:</p>
+<ul>
+<li><code>--workspace</code>: The name of the workspace from which the datasets will be listed. If not provided, all the datasets from all the workspaces
+will be listed.</li>
+<li><code>--type</code>: The type of datasets to be listed. Two possible values: <code>feedback</code> and <code>other</code> (for <code>TextClassification</code>, <code>TokenClassification</code> and <code>Text2Text</code> datasets).</li>
+</ul>
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>argilla<span class="w"> </span>datasets<span class="w"> </span>list
+</span></code></pre></div>
+<h2 id="server">Server<a class="headerlink" href="#server" title="Permanent link">&para;</a></h2>
+<p>The <code>argilla server</code> group of commands contains commands for managing the Argilla server and its database.</p>
+<h3 id="start-the-server">Start the server<a class="headerlink" href="#start-the-server" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla server start</code> command will start the Argilla server blocking the current terminal. The following options can be provided:</p>
+<ul>
+<li><code>--host</code>: The host where the Argilla server will be bound. Default value is <code>0.0.0.0</code>.</li>
+<li><code>--port</code>: The port where the Argilla server will be bound. Default value is <code>6900</code>.</li>
+<li><code>--access-log/--no-access-log</code>: Enable/disable the server access log. Default value is <code>True</code>.</li>
+</ul>
+<h3 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla server database</code> group of commands offers functionality for managing the Argilla server database:</p>
+<ul>
+<li><code>argilla server database migrate</code>: applies the database migrations.</li>
+<li><code>argilla server database revisions</code>: list the different revisions to which the database can be migrated.</li>
+</ul>
+<h3 id="user-management-using-the-database-connection">User management using the database connection<a class="headerlink" href="#user-management-using-the-database-connection" title="Permanent link">&para;</a></h3>
+<p>The <code>argilla server database users</code> group of commands offers functionality for managing the users of the Argilla server. To do so,
+the <code>argilla server database users</code> commands use the database connection instead of the Argilla API, so these commands will have
+to get executed from a machine that has access to the database. To set the URL of the database that will be used by the commands,
+check <a href="/getting_started/installation/configurations/server_configuration.md#sqlite-and-postgresql">SQLite and PostgreSQL</a> section.</p>
+<ul>
+<li><code>argilla server database users create</code>: creates a new user in the Argilla server database.</li>
+<li><code>argilla server database users create_default</code>: creates the default users in the Argilla server database.</li>
+<li><code>argilla server database users migrate</code>: migrates the users from the old <code>YAML</code> file to the Argilla server database.</li>
+<li><code>argilla server database users update</code>: updates a user in the Argilla server database.</li>
+</ul>
 
 
 
@@ -2518,7 +2596,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../import_export/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Importing and exporting datasets and records">
+          <a href="../migrations/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Database migrations">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -2528,20 +2606,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Importing and exporting datasets and records
+                Database migrations
               </div>
             </div>
           </a>
         
         
           
-          <a href="../distribution/" class="md-footer__link md-footer__link--next" aria-label="Next: Distribute the annotation task">
+          <a href="../telemetry/" class="md-footer__link md-footer__link--next" aria-label="Next: Server Telemetry">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Distribute the annotation task
+                Server Telemetry
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2627,12 +2705,12 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
-        <script src="../../js/open_in_new_tab.js"></script>
+        <script src="../../../js/open_in_new_tab.js"></script>
       
     
   </body>
