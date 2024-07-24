@@ -42,42 +42,46 @@ class HuggingfaceOpenId(OpenIdConnectAuth):
 _HF_PREFERRED_USERNAME = "preferred_username"
 
 
-def is_space_author(userinfo: dict, space_author: str) -> bool:
+def _is_space_author(userinfo: dict, space_author: str) -> bool:
     """Return True if the space author name is the userinfo username. Otherwise, False"""
-    return space_author == userinfo.get(_HF_PREFERRED_USERNAME)
+    return space_author and space_author == userinfo.get(_HF_PREFERRED_USERNAME)
 
 
-def find_org_from_userinfo(userinfo: dict, org_name: str) -> Optional[dict]:
+def _find_org_from_userinfo(userinfo: dict, org_name: str) -> Optional[dict]:
     """Find the organization by name from the userinfo"""
     for org in userinfo.get("orgs") or []:
         if org_name == org.get(_HF_PREFERRED_USERNAME):
             return org
 
 
-def get_user_role_by_org(org: dict) -> Union[UserRole, None]:
+def _get_user_role_by_org(org: dict) -> Union[UserRole, None]:
     """Return the computed UserRole from the role found in a organization (if any)"""
     _ROLE_IN_ORG = "roleInOrg"
     _ROLES_MAPPING = {"admin": UserRole.owner}
 
+    org_role = None
     if _ROLE_IN_ORG not in org:
         _LOGGER.warning(f"Cannot find the user role info in org {org}. Review granted permissions")
     else:
-        return _ROLES_MAPPING.get(org[_ROLE_IN_ORG])
+        org_role = org[_ROLE_IN_ORG]
+
+    return _ROLES_MAPPING.get(org_role) or UserRole.annotator
 
 
 class HuggingfaceClientProvider(OAuth2ClientProvider, LoggingMixin):
     """Specialized HuggingFace OAuth2 provider."""
 
     @staticmethod
-    def parse_role_from_user_info(user: dict) -> Union[str, None]:
+    def parse_role_from_userinfo(userinfo: dict) -> Union[str, None]:
         """Parse the Argilla user role from info provided as part of the user info"""
         space_author_name = HUGGINGFACE_SETTINGS.space_author_name
 
-        if is_space_author(user, space_author_name):
+        if _is_space_author(userinfo, space_author_name):
             return UserRole.owner
-        elif org := find_org_from_userinfo(user, space_author_name):
-            return get_user_role_by_org(org)
+        elif org := _find_org_from_userinfo(userinfo, space_author_name):
+            return _get_user_role_by_org(org)
+        return UserRole.annotator
 
-    claims = Claims(username=_HF_PREFERRED_USERNAME, role=parse_role_from_user_info)
+    claims = Claims(username=_HF_PREFERRED_USERNAME, role=parse_role_from_userinfo)
     backend_class = HuggingfaceOpenId
     name = "huggingface"
