@@ -40,7 +40,7 @@ dependencies:
       # extra test dependencies
       - cleanlab~=2.0.0 # With this version, tests are failing
       - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
-      - huggingface_hub>=0.5.0
+      - huggingface_hub>=0.5.0, huggingface_hub<0.24
       - flair>=0.12.2
       - scipy~=1.12.0 # To avoid error importing scipy.linalg (https://github.com/argilla-io/argilla/actions/runs/8689560057/job/23828206007#step:12:3851)
       - faiss-cpu
