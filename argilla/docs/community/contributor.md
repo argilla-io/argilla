@@ -21,8 +21,8 @@ Discord is a handy tool for more casual conversations and to answer day-to-day q
 
 When part of the Hugging Face Discord, you can select "Channels & roles" and select "Argilla" along with any of the other groups that are interesting to you. "Argilla" will cover anything about argilla and distilabel. You can join the following channels:
 
-* **#argilla-general**: 📣 Stay up-to-date and general discussions.
-* **#argilla-help**: 🙋‍♀️ Need assistance? We're always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
+* **#argilla-distilabel-general**: 📣 Stay up-to-date and general discussions.
+* **#argilla-distilabel-help**: 🙋‍♀️ Need assistance? We're always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
 
 So now there is only one thing left to do: introduce yourself and talk to the community. You'll always be welcome! 🤗👋
 

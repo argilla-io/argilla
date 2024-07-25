@@ -13,7 +13,7 @@ However you choose to contribute, please be mindful and respect our
 
 ## Need some help?
 
-We understand that getting started might be a bit difficult, therefore, you can join our discord channel [#argilla-general](https://discord.gg/hugging-face-879548962464493619) by selecting *Argilla* in *Channels and Roles* after joining the Discord.
+We understand that getting started might be a bit difficult, therefore, you can join our discord channel [#argilla-distilabel-general](https://discord.gg/hugging-face-879548962464493619) by selecting *Argilla* in *Channels and Roles* after joining the Discord.
 
 ## Want to work on your own?
 
