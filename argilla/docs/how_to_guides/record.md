@@ -240,9 +240,9 @@ You can associate vectors, like text embeddings, to your records. They can be us
                 "question": "What is the boiling point of water?",
                 "answer": "100 degrees Celsius"
             },
-            vectors=[
-                rg.Vector("my_vector", [0.2, 0.5, 0.3])
-            ],
+            vectors={
+                "my_vector": [0.2, 0.5, 0.3]
+            },
         ),
     ]
     dataset.records.log(records)
