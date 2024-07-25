@@ -93,11 +93,7 @@ async def get_access_token(
                 workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
             )
             telemetry.track_user_created(user, is_oauth=True)
-
-        elif user.role != user_info.role:
-            raise AuthenticationError("Could not authenticate user")
-
-        return Token(access_token=JWT.create(user_info))
+        return Token(access_token=accounts.generate_user_token(user))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     # TODO: Create exception handler for AuthenticationError
