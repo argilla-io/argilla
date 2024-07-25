@@ -133,14 +133,13 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
 
-        vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
             fields=data["inputs"],
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             suggestions=suggestions,
             responses=responses,
         )
@@ -163,14 +162,13 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
 
-        vectors = data.get("vectors") or {}
         return rg.Record(
             id=data["id"],
             fields=data["inputs"],
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             suggestions=suggestions,
             responses=responses,
         )
@@ -193,14 +191,13 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="spans", value=annotation, user_id=user_id))
 
-        vectors = data.get("vectors") or {}
         return rg.Record(
             id=data["id"],
             fields={"text": data["text"]},
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             # The vectors field should be a dictionary with the same keys as the `vectors` in the settings
             suggestions=suggestions,
             responses=responses,
@@ -227,14 +224,13 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(rg.Response(question_name="text_generation", value=annotation, user_id=user_id))
 
-        vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
             fields={"text": data["text"]},
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             # The vectors field should be a dictionary with the same keys as the `vectors` in the settings
             suggestions=suggestions,
             responses=responses,

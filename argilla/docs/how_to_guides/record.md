@@ -231,9 +231,9 @@ You can associate vectors, like text embeddings, to your records. They can be us
                 "question": "Do you need oxygen to breathe?",
                 "answer": "Yes"
             },
-            vectors=[
-                rg.Vector("my_vector", [0.1, 0.2, 0.3])
-            ],
+            vectors={
+                "my_vector": [0.1, 0.2, 0.3]
+            },
         ),
         rg.Record(
             fields={
