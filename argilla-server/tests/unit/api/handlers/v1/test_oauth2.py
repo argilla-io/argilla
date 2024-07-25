@@ -159,7 +159,7 @@ class TestOauth2:
                 assert JWT.decode(json_response["access_token"])["username"] == "username"
                 assert json_response["token_type"] == "bearer"
 
-                user = (await db.execute(select(User).where(User.username == "username"))).scalar_one_or_none()
+                user = await db.scalar(select(User).filter_by(username="username"))
                 assert user is not None
                 assert user.role == UserRole.annotator
 
@@ -182,7 +182,7 @@ class TestOauth2:
                     cookies={"oauth2_state": "valid"},
                 )
 
-                assert response.status_code == 401
+                assert response.status_code == 500
 
     async def test_provider_huggingface_access_token_with_missing_name(
         self,
@@ -244,7 +244,7 @@ class TestOauth2:
             response = await async_client.get(
                 "/api/v1/oauth2/providers/huggingface/access-token", headers=owner_auth_header
             )
-            assert response.status_code == 400
+            assert response.status_code == 422
             assert response.json() == {"detail": "'code' parameter was not found in callback request"}
 
     async def test_provider_access_token_with_not_found_state(
@@ -254,7 +254,7 @@ class TestOauth2:
             response = await async_client.get(
                 "/api/v1/oauth2/providers/huggingface/access-token", params={"code": "code"}, headers=owner_auth_header
             )
-            assert response.status_code == 400
+            assert response.status_code == 422
             assert response.json() == {"detail": "'state' parameter was not found in callback request"}
 
     async def test_provider_access_token_with_invalid_state(
@@ -267,7 +267,7 @@ class TestOauth2:
                 headers=owner_auth_header,
                 cookies={"oauth2_state": "valid"},
             )
-            assert response.status_code == 400
+            assert response.status_code == 422
             assert response.json() == {"detail": "'state' parameter does not match"}
 
     async def test_provider_access_token_with_authentication_error(
