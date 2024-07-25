@@ -15,10 +15,10 @@
         <link rel="canonical" href="https://argilla-io.github.io/argilla/dev/how_to_guides/distribution/">
       
       
-        <link rel="prev" href="../annotate/">
+        <link rel="prev" href="../record/">
       
       
-        <link rel="next" href="../use_markdown_to_format_rich_content/">
+        <link rel="next" href="../annotate/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
@@ -634,6 +634,51 @@
                 
   
   
+    
+  
+  
+  
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Basic
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Basic
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
@@ -683,7 +728,7 @@
         
   
   <span class="md-ellipsis">
-    Manage and create datasets
+    Create, update and delete datasets
   </span>
   
 
@@ -705,69 +750,6 @@
   
   <span class="md-ellipsis">
     Add, update, and delete records
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../query/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Query and filter records
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../import_export/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Importing and exporting datasets and records
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../annotate/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Annotate a dataset
   </span>
   
 
@@ -862,6 +844,77 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../annotate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Annotate datasets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Query and filter records
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../import_export/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Import and export datasets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -878,10 +931,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_9" id="__nav_3_9_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -892,8 +945,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
             <span class="md-nav__icon md-icon"></span>
             Advanced
           </label>
@@ -1865,7 +1918,7 @@
 
 <h1 id="distribute-the-annotation-task-among-the-team">Distribute the annotation task among the team<a class="headerlink" href="#distribute-the-annotation-task-among-the-team" title="Permanent link">&para;</a></h1>
 <p>This guide explains how you can use Argilla’s <strong>automatic task distribution</strong> to efficiently divide the task of annotating a dataset among multiple team members.</p>
-<p>Owners and admins can define the minimum number of submitted responses expected for each record depending on whether the dataset should have annotation overlap and how much. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of all users with access to the dataset.</p>
+<p>Owners and admins can define the minimum number of submitted responses expected for each record. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of all users with access to the dataset.</p>
 <p>When a record has met the minimum number of submissions, the status of the record will change to <code>completed</code> and the record will be removed from the <code>Pending</code> queue of all team members, so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the <code>completed</code> status.</p>
 <p><img alt="Task Distribution diagram" src="../../assets/images/how_to_guides/distribution/taskdistribution.svg" /></p>
 <div class="admonition note">
@@ -1964,7 +2017,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../annotate/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Annotate a dataset">
+          <a href="../record/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Add, update, and delete records">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -1974,20 +2027,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Annotate a dataset
+                Add, update, and delete records
               </div>
             </div>
           </a>
         
         
           
-          <a href="../use_markdown_to_format_rich_content/" class="md-footer__link md-footer__link--next" aria-label="Next: Use Markdown to format rich content">
+          <a href="../annotate/" class="md-footer__link md-footer__link--next" aria-label="Next: Annotate datasets">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Use Markdown to format rich content
+                Annotate datasets
               </div>
             </div>
             <div class="md-footer__button md-icon">
