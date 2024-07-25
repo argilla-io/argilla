@@ -149,6 +149,14 @@
     }
   },
   {
+    "version": "docs_fix-migration-docs",
+    "title": "docs_fix-migration-docs",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_document-how-to-setup-hf-oauth",
     "title": "docs_document-how-to-setup-hf-oauth",
     "aliases": [],
