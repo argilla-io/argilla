@@ -102,8 +102,6 @@ class Settings(BaseSettings):
 
     docs_enabled: bool = True
 
-    namespace: str = Field(default=None, regex=r"^[a-z]+$")
-
     enable_migration: bool = Field(
         default=False,
         description="If enabled, try to migrate data from old rubrix installation",
@@ -209,36 +207,6 @@ class Settings(BaseSettings):
         Path(values["home_path"]).mkdir(parents=True, exist_ok=True)
 
         return values
-
-    @property
-    def dataset_index_name(self) -> str:
-        ns = self.namespace
-        if ns:
-            return f"{self.namespace}.{self.__DATASETS_INDEX_NAME__}"
-        return self.__DATASETS_INDEX_NAME__
-
-    @property
-    def dataset_records_index_name(self) -> str:
-        ns = self.namespace
-        if ns:
-            return f"{self.namespace}.{self.__DATASETS_RECORDS_INDEX_NAME__}"
-        return self.__DATASETS_RECORDS_INDEX_NAME__
-
-    @property
-    def old_dataset_index_name(self) -> str:
-        index_name = ".rubrix<NAMESPACE>.datasets-v0"
-        ns = self.namespace
-        if ns is None:
-            return index_name.replace("<NAMESPACE>", "")
-        return index_name.replace("<NAMESPACE>", f".{ns}")
-
-    @property
-    def old_dataset_records_index_name(self) -> str:
-        index_name = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
-        ns = self.namespace
-        if ns is None:
-            return index_name.replace("<NAMESPACE>", "")
-        return index_name.replace("<NAMESPACE>", f".{ns}")
 
     @property
     def database_engine_args(self) -> Dict:

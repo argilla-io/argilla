@@ -26,7 +26,7 @@ from argilla_server.api.schemas.v1.responses import Response, ResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion as SuggestionSchema
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate, Suggestions
 from argilla_server.contexts import datasets
-from argilla_server.database import get_async_db, get_serializable_async_db
+from argilla_server.database import get_async_db
 from argilla_server.errors.future.base_errors import NotFoundError, UnprocessableEntityError
 from argilla_server.models import Dataset, Question, Record, Suggestion, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
@@ -88,7 +88,7 @@ async def update_record(
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
 async def create_record_response(
     *,
-    db: AsyncSession = Depends(get_serializable_async_db),
+    db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     record_id: UUID,
     response_create: ResponseCreate,

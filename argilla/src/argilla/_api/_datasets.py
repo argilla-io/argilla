@@ -35,7 +35,7 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
 
     @api_error_handler
     def create(self, dataset: "DatasetModel") -> "DatasetModel":
-        json_body = dataset.model_dump()
+        json_body = dataset.model_dump(exclude_unset=True)
         response = self.http_client.post(
             url=self.url_stub,
             json=json_body,
@@ -48,13 +48,13 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
 
     @api_error_handler
     def update(self, dataset: "DatasetModel") -> "DatasetModel":
-        json_body = dataset.model_dump()
+        json_body = dataset.model_dump(exclude_unset=True)
         dataset_id = json_body["id"]  # type: ignore
         response = self.http_client.patch(f"{self.url_stub}/{dataset_id}", json=json_body)
         response.raise_for_status()
         response_json = response.json()
         dataset = self._model_from_json(response_json=response_json)
-        self._log_message(message=f"Updated dataset {dataset.url}")
+        self._log_message(message=f"Updated dataset {dataset.id}")
         return dataset
 
     @api_error_handler
@@ -63,7 +63,7 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         response.raise_for_status()
         response_json = response.json()
         dataset = self._model_from_json(response_json=response_json)
-        self._log_message(message=f"Got dataset {dataset.url}")
+        self._log_message(message=f"Got dataset {dataset.id}")
         return dataset
 
     @api_error_handler

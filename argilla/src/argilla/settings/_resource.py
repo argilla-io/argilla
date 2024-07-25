@@ -25,6 +25,7 @@ from argilla._resource import Resource
 from argilla.settings._field import TextField
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
+from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
@@ -48,28 +49,33 @@ class Settings(Resource):
         metadata: Optional[List[MetadataType]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = False,
+        distribution: Optional[TaskDistribution] = None,
         _dataset: Optional["Dataset"] = None,
     ) -> None:
         """
         Args:
             fields (List[TextField]): A list of TextField objects that represent the fields in the Dataset.
-            questions (List[Union[LabelQuestion, MultiLabelQuestion, RankingQuestion, TextQuestion, RatingQuestion]]): A list of Question objects that represent the questions in the Dataset.
+            questions (List[Union[LabelQuestion, MultiLabelQuestion, RankingQuestion, TextQuestion, RatingQuestion]]):
+                A list of Question objects that represent the questions in the Dataset.
             vectors (List[VectorField]): A list of VectorField objects that represent the vectors in the Dataset.
             metadata (List[MetadataField]): A list of MetadataField objects that represent the metadata in the Dataset.
             guidelines (str): A string containing the guidelines for the Dataset.
-            allow_extra_metadata (bool): A boolean that determines whether or not extra metadata is allowed in the Dataset. Defaults to False.
+            allow_extra_metadata (bool): A boolean that determines whether or not extra metadata is allowed in the
+                Dataset. Defaults to False.
+            distribution (TaskDistribution): The annotation task distribution configuration.
+                Default to DEFAULT_TASK_DISTRIBUTION
         """
         super().__init__(client=_dataset._client if _dataset else None)
+
+        self._dataset = _dataset
+        self._distribution = distribution
+        self.__guidelines = self.__process_guidelines(guidelines)
+        self.__allow_extra_metadata = allow_extra_metadata
 
         self.__questions = QuestionsProperties(self, questions)
         self.__fields = SettingsProperties(self, fields)
         self.__vectors = SettingsProperties(self, vectors)
         self.__metadata = SettingsProperties(self, metadata)
-
-        self.__guidelines = self.__process_guidelines(guidelines)
-        self.__allow_extra_metadata = allow_extra_metadata
-
-        self._dataset = _dataset
 
     #####################
     # Properties        #
@@ -124,6 +130,14 @@ class Settings(Resource):
         self.__allow_extra_metadata = value
 
     @property
+    def distribution(self) -> TaskDistribution:
+        return self._distribution or TaskDistribution.default()
+
+    @distribution.setter
+    def distribution(self, value: TaskDistribution) -> None:
+        self._distribution = value
+
+    @property
     def dataset(self) -> "Dataset":
         return self._dataset
 
@@ -167,7 +181,7 @@ class Settings(Resource):
         self.questions = self._fetch_questions()
         self.vectors = self._fetch_vectors()
         self.metadata = self._fetch_metadata()
-        self.__get_dataset_related_attributes()
+        self.__fetch_dataset_related_attributes()
 
         self._update_last_api_call()
         return self
@@ -205,6 +219,7 @@ class Settings(Resource):
                 "vectors": self.vectors.serialize(),
                 "metadata": self.metadata.serialize(),
                 "allow_extra_metadata": self.allow_extra_metadata,
+                "distribution": self.distribution.to_dict(),
             }
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the settings. {e.__class__.__name__}") from e
@@ -228,26 +243,7 @@ class Settings(Resource):
 
         with open(path, "r") as file:
             settings_dict = json.load(file)
-
-        fields = settings_dict.get("fields", [])
-        vectors = settings_dict.get("vectors", [])
-        metadata = settings_dict.get("metadata", [])
-        guidelines = settings_dict.get("guidelines")
-        allow_extra_metadata = settings_dict.get("allow_extra_metadata")
-
-        questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
-        fields = [TextField.from_dict(field) for field in fields]
-        vectors = [VectorField.from_dict(vector) for vector in vectors]
-        metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
-
-        return cls(
-            questions=questions,
-            fields=fields,
-            vectors=vectors,
-            metadata=metadata,
-            guidelines=guidelines,
-            allow_extra_metadata=allow_extra_metadata,
-        )
+            return cls._from_dict(settings_dict)
 
     def __eq__(self, other: "Settings") -> bool:
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
@@ -259,12 +255,44 @@ class Settings(Resource):
     def __repr__(self) -> str:
         return (
             f"Settings(guidelines={self.guidelines}, allow_extra_metadata={self.allow_extra_metadata}, "
+            f"distribution={self.distribution}, "
             f"fields={self.fields}, questions={self.questions}, vectors={self.vectors}, metadata={self.metadata})"
         )
 
     #####################
     #  Private methods  #
     #####################
+
+    @classmethod
+    def _from_dict(cls, settings_dict: dict) -> "Settings":
+        fields = settings_dict.get("fields", [])
+        vectors = settings_dict.get("vectors", [])
+        metadata = settings_dict.get("metadata", [])
+        guidelines = settings_dict.get("guidelines")
+        distribution = settings_dict.get("distribution")
+        allow_extra_metadata = settings_dict.get("allow_extra_metadata")
+
+        questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
+        fields = [TextField.from_dict(field) for field in fields]
+        vectors = [VectorField.from_dict(vector) for vector in vectors]
+        metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
+
+        if distribution:
+            distribution = TaskDistribution.from_dict(distribution)
+
+        return cls(
+            questions=questions,
+            fields=fields,
+            vectors=vectors,
+            metadata=metadata,
+            guidelines=guidelines,
+            allow_extra_metadata=allow_extra_metadata,
+            distribution=distribution,
+        )
+
+    def _copy(self) -> "Settings":
+        instance = self.__class__._from_dict(self.serialize())
+        return instance
 
     def _fetch_fields(self) -> List[TextField]:
         models = self._client.api.fields.list(dataset_id=self._dataset.id)
@@ -282,7 +310,7 @@ class Settings(Resource):
         models = self._client.api.metadata.list(dataset_id=self._dataset.id)
         return [MetadataField.from_model(model) for model in models]
 
-    def __get_dataset_related_attributes(self):
+    def __fetch_dataset_related_attributes(self):
         # This flow may be a bit weird, but it's the only way to update the dataset related attributes
         # Everything is point that we should have several settings-related endpoints in the API to handle this.
         # POST /api/v1/datasets/{dataset_id}/settings
@@ -295,6 +323,9 @@ class Settings(Resource):
 
         self.guidelines = dataset_model.guidelines
         self.allow_extra_metadata = dataset_model.allow_extra_metadata
+
+        if dataset_model.distribution:
+            self.distribution = TaskDistribution.from_model(dataset_model.distribution)
 
     def _update_dataset_related_attributes(self):
         # This flow may be a bit weird, but it's the only way to update the dataset related attributes
@@ -310,6 +341,7 @@ class Settings(Resource):
             name=self._dataset.name,
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
+            distribution=self.distribution._api_model(),
         )
         self._client.api.datasets.update(dataset_model)
 
@@ -358,6 +390,8 @@ class SettingsProperties(Sequence[Property]):
         self._settings = settings
 
         for property in properties or []:
+            if self._settings.dataset and hasattr(property, "dataset"):
+                property.dataset = self._settings.dataset
             self.add(property)
 
     def __getitem__(self, key: Union[UUID, str, int]) -> Optional[Property]:

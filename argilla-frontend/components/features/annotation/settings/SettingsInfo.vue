@@ -23,15 +23,15 @@
       </div>
       <div class="settings__area">
         <form
-          @submit.prevent="onSubmit()"
+          @submit.prevent="onSubmitDatasetTaskMinimumResponse()"
           class="settings__edition-form-fields"
         >
-          <div class="settings__area">
-            <h2
-              class="--heading5 --medium description__title"
-              v-text="$t('taskDistribution')"
-            />
+          <h2
+            class="--heading5 --medium description__title"
+            v-text="$t('taskDistribution')"
+          />
 
+          <Validation :validations="settings.dataset.validate().distribution">
             <div class="form_group">
               <label
                 for="task-distribution"
@@ -41,34 +41,68 @@
                 class="info-icon"
                 :data-title="$t('taskDistributionTooltip')"
               >
-                <svgicon name="info" width="22" height="22"></svgicon>
+                <svgicon name="info" width="20" height="20"></svgicon>
               </span>
               <input
                 type="number"
                 id="task-distribution"
+                min="1"
                 v-model="settings.dataset.distribution.minSubmitted"
               />
             </div>
-          </div>
-
-          <DatasetDescription
-            :key="settings.dataset.updatedAt"
-            v-model="settings.dataset"
-          />
+          </Validation>
 
           <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
               class="secondary light small"
-              @on-click="restore(settings.dataset)"
-              :disabled="!settings.dataset.isModified"
+              @on-click="settings.dataset.restoreDistribution()"
+              :disabled="!settings.dataset.isModifiedTaskDistribution"
             >
               <span v-text="$t('cancel')" />
             </BaseButton>
             <BaseButton
               type="submit"
               class="primary small"
-              :disabled="!settings.dataset.isModified"
+              :disabled="
+                !settings.dataset.isModifiedTaskDistribution ||
+                !settings.dataset.isValidDistribution
+              "
+            >
+              <span v-text="$t('update')" />
+            </BaseButton>
+          </div>
+        </form>
+      </div>
+
+      <div class="settings__area">
+        <form
+          @submit.prevent="onSubmitDatasetGuidelines()"
+          class="settings__edition-form-fields"
+        >
+          <Validation :validations="settings.dataset.validate().guidelines">
+            <DatasetDescription
+              :key="settings.dataset.updatedAt"
+              v-model="settings.dataset"
+            />
+          </Validation>
+
+          <div class="settings__edition-form__footer">
+            <BaseButton
+              type="button"
+              class="secondary light small"
+              @on-click="settings.dataset.restoreGuidelines()"
+              :disabled="!settings.dataset.isModifiedGuidelines"
+            >
+              <span v-text="$t('cancel')" />
+            </BaseButton>
+            <BaseButton
+              type="submit"
+              class="primary small"
+              :disabled="
+                !settings.dataset.isModifiedGuidelines ||
+                !settings.dataset.isValidGuidelines
+              "
             >
               <span v-text="$t('update')" />
             </BaseButton>
@@ -96,8 +130,11 @@ export default {
     },
   },
   methods: {
-    onSubmit() {
-      this.update(this.settings.dataset);
+    onSubmitDatasetGuidelines() {
+      this.update(this.settings.dataset, "guidelines");
+    },
+    onSubmitDatasetTaskMinimumResponse() {
+      this.update(this.settings.dataset, "distribution");
     },
   },
   setup() {
@@ -168,11 +205,12 @@ export default {
     color: $black-87;
   }
 
-  & input {
+  & input,
+  &__input--read-only {
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: auto;
+    width: 80px;
     height: 24px;
     padding: $base-space * 2;
     background: palette(white);
@@ -183,14 +221,21 @@ export default {
       border: 1px solid $primary-color;
     }
   }
+  &__input {
+    &--read-only {
+      background: $black-4;
+      border: 1px solid $black-20;
+      opacity: 0.6;
+    }
+  }
 }
 .info-icon {
-  color: $black-87;
+  color: $black-37;
   margin-right: $base-space * 2;
-}
-[data-title] {
-  position: relative;
-  overflow: visible;
-  @include tooltip-mini("top", 8px);
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @include tooltip-mini("top", $base-space);
+  }
 }
 </styles>

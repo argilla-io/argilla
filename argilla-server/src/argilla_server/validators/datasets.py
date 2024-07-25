@@ -16,7 +16,11 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
+from argilla_server.errors.future import (
+    NotUniqueError,
+    UnprocessableEntityError,
+    UpdateDistributionWithExistingResponsesError,
+)
 from argilla_server.models import Dataset, Workspace
 
 
@@ -45,6 +49,6 @@ class DatasetUpdateValidator:
     @classmethod
     async def _validate_distribution(cls, dataset: Dataset, dataset_attrs: dict) -> None:
         if dataset_attrs.get("distribution") is not None and (await dataset.responses_count) > 0:
-            raise UnprocessableEntityError(
+            raise UpdateDistributionWithExistingResponsesError(
                 "Distribution settings cannot be modified for a dataset with records including responses"
             )

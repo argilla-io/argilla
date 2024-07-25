@@ -162,6 +162,8 @@ Record metadata can include any information about the record that is not part of
 !!! note
     Remember that to use metadata within a dataset, you must define a metadata property in the [dataset settings](dataset.md).
 
+> Check the [Metadata - Python Reference](../reference/argilla/records/metadata.md) to see the attributes, arguments, and methods for using metadata in detail.
+
 === "As `Record` objects"
 
     You can add metadata to a record in an initialized `Record` object.
@@ -188,6 +190,7 @@ Record metadata can include any information about the record that is not part of
     ```
 
 === "From a generic data structure"
+
     You can add metadata to a record directly as a dictionary structure, where the keys correspond to the names of metadata properties in the dataset and the values are the metadata to be added. Remember that you can also use the `mapping` parameter to specify the data structure.
 
     ```python
@@ -207,7 +210,6 @@ Record metadata can include any information about the record that is not part of
     dataset.records.log(data)
     ```
 
-
 ### Vectors
 
 You can associate vectors, like text embeddings, to your records. They can be used for semantic search in the UI and the Python SDK. Make sure that the length of the list corresponds to the dimensions set in the vector settings.
@@ -215,12 +217,11 @@ You can associate vectors, like text embeddings, to your records. They can be us
 !!! note
     Remember that to use vectors within a dataset, you must define them in the [dataset settings](dataset.md).
 
+> Check the [Vector - Python Reference](../reference/argilla/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
 
 === "As `Record` objects"
 
     You can also add vectors to a record in an initialized `Record` object.
-
-    > Check the [Vector - Python Reference](../reference/argilla/records/vectors.md) to see the attributes, arguments, and methods of the `Vector` class in detail.
 
     ```python
     # Add records to the dataset with the vector 'my_vector' and dimension=3
@@ -249,7 +250,7 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
 === "From a generic data structure"
 
-    You can add vectors from a dictionary like structure, where the keys correspond to the `name`s of the vector settings that were configured for your dataset and the value is a list of floats. Remember that you can also use the `mapping` parameter to specify the data structure.
+    You can add vectors from a dictionary-like structure, where the keys correspond to the `name`s of the vector settings that were configured for your dataset and the value is a list of floats. Remember that you can also use the `mapping` parameter to specify the data structure.
 
     ```python
     # Add records to the dataset with the vector 'my_vector' and dimension=3
@@ -272,10 +273,13 @@ You can associate vectors, like text embeddings, to your records. They can be us
 
 Suggestions refer to suggested responses (e.g. model predictions) that you can add to your records to make the annotation process faster. These can be added during the creation of the record or at a later stage. Only one suggestion can be provided for each question, and suggestion values must be compliant with the pre-defined questions e.g. if we have a `RatingQuestion` between 1 and 5, the suggestion should have a valid value within that range.
 
+> Check the [Suggestions - Python Reference](../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
+
+!!! tip
+    Check the [Suggestions - Python Reference](../reference/argilla/records/suggestions.md) for different formats per `Question` type.
+
 === "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
-
-    > Check the [Suggestions - Python Reference](../reference/argilla/records/suggestions.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -313,11 +317,12 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
     ```
 
 === "From a generic data structure"
+
     You can add suggestions as a dictionary, where the keys correspond to the `name`s of the labels that were configured for your dataset. Remember that you can also use the `mapping` parameter to specify the data structure.
 
     ```python
-        # Add records to the dataset with the label question 'my_label'
-    data = [
+    # Add records to the dataset with the label question 'my_label'
+    data =  [
         {
             "question": "Do you need oxygen to breathe?",
             "answer": "Yes",
@@ -347,13 +352,15 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 
 If your dataset includes some annotations, you can add those to the records as you create them. Make sure that the responses adhere to the same format as Argilla's output and meet the schema requirements for the specific type of question being answered. Make sure to include the `user_id` in case you're planning to add more than one response for the same question, if not responses will apply to all the annotators.
 
+> Check the [Responses - Python Reference](../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Response` class in detail.
 !!! note
     Keep in mind that records with responses will be displayed as "Draft" in the UI.
 
+!!! tip
+    Check the [Responses - Python Reference](../reference/argilla/records/responses.md) for different formats per `Question` type.
+
 === "As `Record` objects"
     You can also add suggestions to a record in an initialized `Record` object.
-
-    > Check the [Responses - Python Reference](../reference/argilla/records/responses.md) to see the attributes, arguments, and methods of the `Suggestion` class in detail.
 
     ```python
     # Add records to the dataset with the label 'my_label'
@@ -410,7 +417,7 @@ for record in dataset.records(
     with_suggestions=True,
     with_responses=True,
     with_vectors=True
-    ):
+):
 
     # Access the record properties
     print(record.metadata)
@@ -444,6 +451,9 @@ dataset.records.log(records=updated_data)
 === "Update the metadata"
     The `metadata` of `Record` object is a python dictionary. So to update the metadata of a record, you can iterate over the records and update the metadata by key or using `metadata.update`. After that, you should update the records in the dataset.
 
+    !!! tip
+        Check the [Metadata - Python Reference](../reference/argilla/records/metadata.md) for different formats per `MetadataProperty` type.
+
     ```python
     updated_records = []
 
@@ -463,10 +473,67 @@ dataset.records.log(records=updated_data)
     ```python
     updated_records = []
 
-    for record in dataset.records():
+    for record in dataset.records(with_vectors=True):
 
         record.vectors["new_vector"] = [ 0, 1, 2, 3, 4, 5 ]
         record.vector["v"] = [ 0.1, 0.2, 0.3 ]
+
+        updated_records.append(record)
+
+    dataset.records.log(records=updated_records)
+    ```
+
+=== "Update suggestions"
+    When you want to add a suggestion or when some value for the existing record suggestions must updated, you can iterate over the records and update the suggestions in the same way as the metadata.
+
+    !!! tip
+        Check the [Suggestions - Python Reference](../reference/argilla/records/suggestions.md) for different formats per `Question` type.
+
+    ```python
+    updated_records = []
+
+    for record in dataset.records(with_suggestions=True):
+
+        # We can update existing suggestions
+
+        record.suggestions["label"].value = "new_value"
+        record.suggestions["label"].score = 0.9
+        record.suggestions["label"].agent = "model_name"
+
+        # We can also add new suggestions with the `add` method:
+
+        if not record.suggestions["label"]:
+            record.suggestions.add(
+                rg.Suggestion("value", "label", score=0.9, agent="model_name")
+            )
+
+        updated_records.append(record)
+
+    dataset.records.log(records=updated_records)
+    ```
+
+=== "Update responses"
+    When you want to add a suggestion or when the existing record response must updated, you can iterate over the records and update the responses in the same way as the metadata.
+
+    !!! tip
+        Check the [Responses - Python Reference](../reference/argilla/records/responses.md) for different formats per `Question` type.
+
+    ```python
+    updated_records = []
+
+    for record in dataset.records(with_responses=True):
+
+        # We can update existing responses
+
+        for response in record.responses["label"]:
+            response.value = "new_value"
+            response.user_id = UUID("existing_user_id")
+
+        # We can also add new responses with the `add` method:
+
+        record.responses.add(
+            rg.Response("label", "positive", user_id=user.id)
+        )
 
         updated_records.append(record)
 

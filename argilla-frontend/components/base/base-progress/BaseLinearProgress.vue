@@ -25,13 +25,20 @@
           class="progress__tooltip__triangle"
           :style="{ left: `${getTrianglePosition(hoveredRange)}%` }"
         />
-        <div class="progress__tooltip">
-          <span
-            class="progress__tooltip__percent-info"
-            v-text="
-              `${hoveredRange.name}: ${getPercentage(hoveredRange.value)}%`
-            "
-          />
+        <div
+          class="progress__tooltip"
+          :style="{
+            left: tooltipPositionFixed
+              ? '50%'
+              : `${getTrianglePosition(hoveredRange)}%`,
+          }"
+        >
+          <span class="progress__tooltip__percent-info"
+            >{{ hoveredRange.name }}:
+            <span v-if="showPercentInTooltip"
+              >{{ getPercentage(hoveredRange.value) }}%</span
+            >
+          </span>
           {{ hoveredRange.tooltip }}
         </div>
       </template>
@@ -45,6 +52,14 @@ export default {
     showTooltip: {
       type: Boolean,
       default: false,
+    },
+    showPercentInTooltip: {
+      type: Boolean,
+      default: true,
+    },
+    tooltipPositionFixed: {
+      type: Boolean,
+      default: true,
     },
     progressMax: {
       type: Number,
@@ -126,7 +141,6 @@ $borderRadius: 3px;
     white-space: nowrap;
     min-width: 180px;
     bottom: calc(100% + #{$tooltipTriangleSize} + 2px);
-    left: 50%;
     transform: translateX(-50%);
     padding: calc($base-space / 2);
     background: $tooltipBackgroundColor;
