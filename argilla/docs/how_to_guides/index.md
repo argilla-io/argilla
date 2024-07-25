@@ -27,7 +27,7 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](workspace.md)
 
--   __Manage datasets__
+-   __Create, update, and delete datasets__
 
     ---
 
@@ -67,7 +67,7 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](query.md)
 
--   __Import/export datasets and records__
+-   __Import and export datasets and records__
 
     ---
 
