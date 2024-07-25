@@ -13,6 +13,8 @@
 #  limitations under the License.
 from typing import Optional
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Path
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,6 +70,9 @@ def get_authentication(
     return provider.authorization_redirect(request)
 
 
+_LOGGER = logging.getLogger("argilla")
+
+
 @router.get("/providers/{provider}/access-token", response_model=Token)
 async def get_access_token(
     request: Request,
@@ -99,7 +104,9 @@ async def get_access_token(
 
         return Token(access_token=JWT.create(user_info))
     except ValueError as e:
+        _LOGGER.error(e, exc_info=e, stacklevel=2)
         raise HTTPException(status_code=400, detail=str(e)) from e
     # TODO: Create exception handler for AuthenticationError
     except AuthenticationError as e:
+        _LOGGER.error(e, exc_info=e, stacklevel=2)
         raise HTTPException(status_code=401, detail=str(e)) from e
