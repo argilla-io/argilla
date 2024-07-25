@@ -66,6 +66,8 @@ class APIErrorHandler:
     @classmethod
     async def common_exception_handler(cls, request: Request, error: Exception):
         """Wraps errors as custom generic error"""
+        _LOGGER.error(error, exc_info=error, stacklevel=2)
+
         argilla_error = cls._exception_to_argilla_error(error)
         await cls.track_error(argilla_error, request=request)
 
@@ -96,7 +98,6 @@ class APIErrorHandler:
         if isinstance(error, ServerError):
             return error
 
-        _LOGGER.error(error, exc_info=error, stacklevel=2)
         if isinstance(error, RequestValidationError):
             return ValidationError(error)
 
