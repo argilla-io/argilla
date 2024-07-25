@@ -125,6 +125,14 @@
     }
   },
   {
+    "version": "docs_onboarding_improvement",
+    "title": "docs_onboarding_improvement",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_improve_quickstart",
     "title": "docs_improve_quickstart",
     "aliases": [],

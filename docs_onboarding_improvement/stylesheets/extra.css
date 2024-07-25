@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..600&display=swap');
+
+:root {
+    --md-text-font:                      "Inter";
+    --md-admonition-icon--huggingface: url("https://cdn-lfs.huggingface.co/repos/96/a2/96a2c8468c1546e660ac2609e49404b8588fcf5a748761fa72c154b2836b4c83/942cad1ccda905ac5a659dfd2d78b344fccfb84a8a3ac3721e08f488205638a0?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27hf-logo.svg%3B+filename%3D%22hf-logo.svg%22%3B&response-content-type=image%2Fsvg%2Bxml&Expires=1722181662&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTcyMjE4MTY2Mn19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5odWdnaW5nZmFjZS5jby9yZXBvcy85Ni9hMi85NmEyYzg0NjhjMTU0NmU2NjBhYzI2MDllNDk0MDRiODU4OGZjZjVhNzQ4NzYxZmE3MmMxNTRiMjgzNmI0YzgzLzk0MmNhZDFjY2RhOTA1YWM1YTY1OWRmZDJkNzhiMzQ0ZmNjZmI4NGE4YTNhYzM3MjFlMDhmNDg4MjA1NjM4YTA%7EcmVzcG9uc2UtY29udGVudC1kaXNwb3NpdGlvbj0qJnJlc3BvbnNlLWNvbnRlbnQtdHlwZT0qIn1dfQ__&Signature=g8HP86K%7EZWkNX8HqCJ02SSFnej3vWaw7A10Kxq4HA08u-QktmS2xhOyhKGDgctlqZZOW8G52TqlFjLrNTH7jnr2iqFOHvAqW%7Eh3CDgtopT4VNUwyoXKnidqgv89ZSm6lFN1ws6tlF2UVHJPtlru6MJZ2ZyE2OnnWBB1RbYj-T-ETA05yVDyACBX7ZubgiRdRb3%7EGwpBmLV9YdiFRZqNIrW3McHP07Z2b076F2AAcraA8l0jN12it7U%7EG7sDQ7wL1htZGX9-QoVoMBZli-70SSdcF8UwNw1kwI%7EUdNbDm9Xnp7covMf-2paXqsVPbLPWCckaWNcedxhG1aczzJwKB9Q__&Key-Pair-Id=K3ESJI6DHPFC7");
+    --md-admonition-icon--docker: url("../assets/docker-mark-blue.svg");
+  }
+
+[data-md-color-scheme="default"] {
+    --md-typeset-a-code-color:           var(--md-default-fg-color--light);
+    --md-accent-typeset-a-code-color:    var(--md-default-fg-color--lighter);
+    --md-typeset-a-color:                #5859c0;
+    --md-accent-fg-color:                #6366fa;
+}
+
+[data-md-color-scheme="slate"] {
+    --md-primary-fg-color:               hsla(var(--md-hue), 15%, 9%, 1);
+    --md-primary-fg-color--dark:         hsla(var(--md-hue), 15%, 9%, 1);
+    --md-typeset-a-code-color:           var(--md-accent-bg-color);
+    --md-accent-typeset-a-code-color:    var(--md-default-fg-color);
+    --md-typeset-a-color:                #8384cc;
+    --md-accent-fg-color:                #7f81f3;
+}
+
+.md-typeset a code {
+    color: var(--md-typeset-a-code-color);
+}
+
+.md-typeset a:hover code {
+    color: var(--md-accent-typeset-a-code-color);
+}
+
+.md-typeset .admonition.huggingface,
+.md-typeset details.huggingface {
+  border-color: #FFD21E;
+  font-size: 100%;
+}
+.md-typeset .huggingface > .admonition-title,
+.md-typeset .huggingface > summary {
+  background-color: #fcf1c7;
+  font-size: 18px;
+}
+.md-typeset .admonition.huggingface > .admonition-title::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    background-image: var(--md-admonition-icon--huggingface);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    -webkit-mask-image: none; /* Remove any mask image */
+    mask-image: none; /* Remove any mask image */
+    background-color: transparent; /* Ensure background color is transparent */
+}
+
+
+.md-typeset .admonition.docker,
+.md-typeset details.docker {
+  border-color: #1e5eff;
+}
+.md-typeset .docker > .admonition-title,
+.md-typeset .docker > summary {
+  background-color: #c7e4fc;
+}
+.md-typeset .admonition.docker > .admonition-title::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    background-image: var(--md-admonition-icon--docker);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    -webkit-mask-image: none; /* Remove any mask image */
+    mask-image: none; /* Remove any mask image */
+    background-color: transparent; /* Ensure background color is transparent */
+}
+
