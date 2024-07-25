@@ -287,7 +287,7 @@ class TestOauth2:
                 assert response.status_code == 401
                 assert response.json() == {"detail": "error"}
 
-    async def test_provider_access_token_with_unauthorized_user(
+    async def test_provider_access_token_with_already_created_user(
         self,
         async_client: AsyncClient,
         db: AsyncSession,
@@ -307,8 +307,11 @@ class TestOauth2:
                     headers=owner_auth_header,
                     cookies={"oauth2_state": "valid"},
                 )
-                assert response.status_code == 401
-                assert response.json() == {"detail": "Could not authenticate user"}
+                assert response.status_code == 200
+
+                userinfo = JWT.decode(response.json()["access_token"])
+                assert userinfo["username"] == admin.username
+                assert userinfo["role"] == admin.role
 
     async def test_provider_access_token_with_same_username(
         self,
