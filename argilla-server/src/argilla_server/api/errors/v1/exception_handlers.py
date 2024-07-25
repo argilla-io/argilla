@@ -75,3 +75,7 @@ def add_exception_handlers(app: FastAPI):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"code": exc.code, "message": exc.message},
         )
+
+    @app.exception_handler(errors.AuthenticationError)
+    async def authentication_error(request, exc):
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"detail": str(exc)})
