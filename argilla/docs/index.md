@@ -13,7 +13,7 @@ Argilla is a **collaboration tool for AI engineers and domain experts** to build
 
     ---
 
-    Deploy Argilla for free on Hugging Face or with `Docker`. Install the Python client with `pip` and create your first project.
+    Deploy Argilla for free on the Hugging Face Hub or with `Docker`. Install the Python SDK with `pip` and create your first project.
 
     [:octicons-arrow-right-24: Quickstart](getting_started/quickstart.md)
 

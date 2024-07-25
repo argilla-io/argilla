@@ -1,50 +1,82 @@
 ---
-description: Quickstart of Argilla on how to create your first dataset.
+description: Get started with Argilla in under 10 minutes
 ---
 
 # Quickstart
 
-This guide provides a quick overview of the Argilla SDK and how to create your first dataset.
+Argilla is a free, open-source, self-hosted tool. This means you need to deploy its server to start using it. There is two main ways to deploy Argilla:
 
-## Setting up your Argilla project
+!!! huggingface "Deploy on the Hugging Face Hub"
 
-### Run the Argilla server
+    The **recommended choice to get started**. You can get up and running in under 5 minutes and don't need to maintain a server or run any commands. 
+    
+    If you're just getting started with Argilla, you need to click the button below and:
 
-If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:
+    - Leave the default Space owner (your personal account)
+    - Leave the `USERNAME` and `PASSWORD` Space secrets empty, you'll be able to sign in as Argilla owner with your HF user so you don't need a username and password.
+    - Set the Space to public, click create Space to launch Argilla 🚀.
+    - It will take a couple of minutes and once you see the Argilla UI [go to this section](#sign-in-into-the-argilla-ui)
 
-* Remotely using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space). Check out the [full guide](huggingface-spaces.md) for a more detailed configuration.
+    <div style="margin: 5px">
+	<a href="http://huggingface.co/new-space?template=argilla/argilla-template-space" target="_blank">
+	    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
+	</a>
+    </div>
 
-* Locally using Docker.
+    !!! warning "Persistent storage"
+        Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. 
+        
+        If you plan to **use the Argilla Space beyond testing**, it's highly recommended to **set persistent storage to `Small`**.
+    If you want to deploy Argilla within a Hugging Face organization, setup a more stable Space, or understand the settings, [check out the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
 
-```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2
-```
+!!! docker "Deploy with Docker"
+     If you want to run Argilla locally on your machine or a server, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
 
-After succesfully running this step, you should be able to see Argilla's UI sign in page (e.g., at the URL https://localhost:6900 if you ran the local Docker option).
+## Sign in into the Argilla UI
+If everything went well, you should see the Argilla sign in page that looks like this:
 
-!!! tip "Default user credentials to log into the UI"
+**TODO** add login page image
 
-    This type of deployment automatically sets up some default users for you. Check [this guide](../how-to-guides/user.md) to log in for the first time in the UI.
+!!! info "Building errors"
+    If you get a build error, sometimes restarting the Space from the Settings page works, otherwise [check the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
 
-### Install the SDK with pip
 
-To manage users, workspaces and datasets in Argilla, you need to use the Argilla Python SDK. You can install it with pip as follows:
+You need to:
+
+1. Click on **Sign in with Hugging Face**
+2. **Authorize the application** and you should see the home page of Argilla
+
+!!! info "Unauthorized error"
+    Sometimes, after granting permissions you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button solves the issue.
+
+Congrats! Your Argilla server is ready to start your first project using the Python SDK. Follow the instructions in the home page, or keep reading this guide if you want a more detailed explanation.
+
+## Install the Python SDK
+
+To manage users, workspaces, and datasets in Argilla, you need to use the Argilla Python SDK. You can install it with pip as follows:
 
 ```console
 pip install argilla
 ```
 
-### Connect to the Argilla server
+## Create your first dataset using the SDK
+For getting started with Argilla and its SDK, we highly recommend you to use Jupyter Notebook or online notebooks like Google Colab.
 
-Get your `<api_url>`:
+To start interacting with your Argilla server, you need to create a client using the API key and the API URL of your Argilla Server. 
 
-* If you are using Hugging Face Spaces, the URL should be constructed as follows: `https://[your-owner-name]-[your_space_name].hf.space`
-* If you are using Docker, the URL is the URL shown in your browser (by default `http://localhost:6900`)
+You can find your `<api_key>` in the `My Settings` page of your Argilla 
 
-Get your `<api_key>` in `My Settings` in the Argilla UI (by default `owner.apikey`).
+The `<api_url>` is the URL shown in your browser if it ends with `*.hf.space`.
+
+!!! info "Find out your API URL"
+    If you're using Spaces, sometimes the Argilla UI is embedded into the Hub UI so the URL of the browser won't match the API URL. In these scenarios, there are two options:
+        1. Click on the three points menu at the top of the Space, select "Embed this Space", and open the direct URL.
+        2. Write it following this pattern: `https://[your-owner-name]-[your_space_name].hf.space`.  
 
 !!! note
-    Make sure to replace `<api_url>` and `<api_key>` with your actual values. If you are using a private Hugging Face Space, you need to specify your `HF_TOKEN` which can be found [here](https://huggingface.co/settings/tokens).
+    Make sure to replace `<api_url>` and `<api_key>` with your actual values.
+
+Then run:
 
 ```python
 import argilla as rg
@@ -52,9 +84,10 @@ import argilla as rg
 client = rg.Argilla(
     api_url="<api_url>",
     api_key="<api_key>"
-    # headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
+
+
 
 ## Create your first dataset
 
