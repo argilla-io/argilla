@@ -17,7 +17,7 @@ export const useSettingsMetadataViewModel = () => {
   };
 
   const updateDataset = async (dataset: Dataset) => {
-    await updateDatasetSetting.execute(dataset);
+    await updateDatasetSetting.execute(dataset, "metadata");
   };
 
   return {

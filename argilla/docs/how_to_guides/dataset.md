@@ -42,6 +42,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
             vectors=[rg.VectorField(name="vector", dimensions=10)],
             guidelines="guidelines",
             allow_extra_metadata=True,
+            distribution=2
         )
         ```
 
@@ -96,6 +97,7 @@ settings = rg.Settings(
     guidelines="Select the sentiment of the prompt.",
     fields=[rg.TextField(name="prompt", use_markdown=True)],
     questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+    distribution=rg.TaskDistribution(min_submitted=3)
 )
 
 dataset1 = rg.Dataset(name="sentiment_analysis_1", settings=settings)
@@ -106,9 +108,9 @@ dataset1.create()
 dataset2.create()
 ```
 
-### Create a dataset with settings from an existing dataset
+### Create a dataset from an existing dataset
 
-To create a new dataset with settings from an existing dataset, get the settings from the existing dataset and pass it
+To create a new dataset from an existing dataset, get the settings from the existing dataset and pass it
 to the new dataset.
 
 ```python
@@ -122,6 +124,13 @@ dataset = rg.Dataset(name="sentiment_analysis_copy", settings=existing_dataset.s
 
 # Create the dataset on the server
 dataset.create()
+```
+
+You can also copy the records from the original dataset to the new one:
+
+```python
+records = list(existing_dataset.records)
+dataset.records.log(records)
 ```
 
 ## Define dataset settings
@@ -395,6 +404,19 @@ It is good practice to use at least the dataset guidelines if not both methods. 
 !!! tip
     If you want further guidance on good practices for guidelines during the project development, check our [blog post](https://argilla.io/blog/annotation-guidelines-practices/).
 
+### Distribution
+
+When working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You can use the `TaskDistribution` settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in your team members' pending queues.
+
+```python
+rg.TaskDistribution(
+    min_submitted = 2
+)
+```
+
+> To learn more about how to distribute the task among team members in the [Distribute the annotation guide](../how_to_guides/distribution.md).
+
+
 ## List datasets
 
 You can list all the datasets available in a workspace using the `datasets` attribute of the `Workspace` class. You can also use `len(workspace.datasets)` to get the number of datasets in a workspace.
@@ -429,6 +451,17 @@ retrieved_dataset = client.datasets(name="my_dataset")
 # Retrieve the dataset from the specified workspace
 retrieved_dataset = client.datasets(name="my_dataset", workspace=workspace)
 ```
+
+You can also use the user `id` to fetch the dataset:
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets(id="<uuid-or-uuid-string>")
+```
+
+If the dataset does not exist for the given id, the call will return `None`.
 
 ## Check dataset existence
 

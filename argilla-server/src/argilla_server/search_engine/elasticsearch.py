@@ -135,7 +135,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         query: dict,
         size: Optional[int] = None,
         from_: Optional[int] = None,
-        sort: Optional[str] = None,
+        sort: Optional[dict] = None,
         aggregations: Optional[dict] = None,
     ) -> dict:
         return await self.client.search(

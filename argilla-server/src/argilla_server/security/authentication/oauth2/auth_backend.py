@@ -19,7 +19,7 @@ from fastapi.security import HTTPBearer
 from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
 
 from argilla_server.security.authentication.jwt import JWT
-from argilla_server.security.authentication.oauth2.client_provider import OAuth2ClientProvider
+from argilla_server.security.authentication.oauth2.providers import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 
 

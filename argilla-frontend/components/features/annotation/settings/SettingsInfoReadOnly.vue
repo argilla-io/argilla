@@ -21,6 +21,23 @@
       </div>
     </div>
     <div class="settings__area">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('taskDistribution')"
+      />
+
+      <div class="form_group">
+        <label v-text="$t('minimumSubmittedResponses')" />
+        <span class="info-icon" :data-title="$t('taskDistributionTooltip')">
+          <svgicon name="info" width="20" height="20"></svgicon>
+        </span>
+        <span
+          class="form_group__input--read-only"
+          v-text="settings.dataset.distribution.minSubmitted"
+        />
+      </div>
+    </div>
+    <div class="settings__area">
       <DatasetDescriptionReadOnly
         :guidelines="guidelines"
         :isColorLight="!guidelines"

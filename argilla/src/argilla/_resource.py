@@ -11,10 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from abc import abstractmethod
 from datetime import datetime
 from typing import Any, TYPE_CHECKING, Optional
 from uuid import UUID
+
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
 
 from argilla._exceptions import ArgillaSerializeError
 from argilla._helpers import LoggingMixin
@@ -125,3 +130,7 @@ class Resource(LoggingMixin):
     def _seconds_from_last_api_call(self) -> Optional[float]:
         if self._last_api_call:
             return (datetime.utcnow() - self._last_api_call).total_seconds()
+
+    @abstractmethod
+    def _with_client(self, client: "Argilla") -> "Self":
+        pass

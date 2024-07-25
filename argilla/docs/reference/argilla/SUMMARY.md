@@ -8,6 +8,7 @@
     * [Questions](settings/questions.md)
     * [Metadata](settings/metadata_property.md)
     * [Vectors](settings/vectors.md)
+    * [Distribution](settings/task_distribution.md)
 * [rg.Record](records/records.md)
     * [rg.Response](records/responses.md)
     * [rg.Suggestion](records/suggestions.md)

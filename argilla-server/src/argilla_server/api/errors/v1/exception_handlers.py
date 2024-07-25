@@ -67,3 +67,11 @@ def add_exception_handlers(app: FastAPI):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={"code": exc.code, "message": exc.message},
         )
+
+    # TODO: Once we move to v2.0 we can remove this exception handler and use UnprocessableEntityError
+    @app.exception_handler(errors.UpdateDistributionWithExistingResponsesError)
+    async def update_distribution_with_existing_responses(request, exc):
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={"code": exc.code, "message": exc.message},
+        )

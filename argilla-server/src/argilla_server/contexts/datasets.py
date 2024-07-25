@@ -11,9 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import asyncio
-import backoff
 import copy
+import sqlalchemy
+
 from datetime import datetime
 from typing import (
     TYPE_CHECKING,
@@ -31,8 +33,6 @@ from typing import (
     Union,
 )
 from uuid import UUID
-
-import sqlalchemy
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Select, and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -94,8 +94,6 @@ VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin, UserRole.annotator]
 NOT_VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES = [UserRole.admin]
 
 CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT = 5
-
-MAX_TIME_RETRY_SQLALCHEMY_ERROR = 15
 
 
 async def _touch_dataset_last_activity_at(db: AsyncSession, dataset: Dataset) -> None:
@@ -809,7 +807,6 @@ async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record:
     return record
 
 
-@backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
 async def create_response(
     db: AsyncSession, search_engine: SearchEngine, record: Record, user: User, response_create: ResponseCreate
 ) -> Response:
@@ -833,18 +830,14 @@ async def create_response(
         await db.flush([response])
         await _load_users_from_responses([response])
         await _touch_dataset_last_activity_at(db, record.dataset)
-        await db.refresh(record, attribute_names=[Record.responses_submitted.key])
-        await distribution.update_record_status(db, record)
+        await search_engine.update_record_response(response)
 
     await db.commit()
-
-    await search_engine.update_record_response(response)
-    await search_engine.partial_record_update(record, status=record.status)
+    await distribution.update_record_status(search_engine, record.id)
 
     return response
 
 
-@backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
 async def update_response(
     db: AsyncSession, search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
 ):
@@ -861,65 +854,52 @@ async def update_response(
 
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
-        await db.refresh(response.record, attribute_names=[Record.responses_submitted.key])
-        await distribution.update_record_status(db, response.record)
+        await search_engine.update_record_response(response)
 
     await db.commit()
-
-    await search_engine.update_record_response(response)
-    await search_engine.partial_record_update(response.record, status=response.record.status)
+    await distribution.update_record_status(search_engine, response.record_id)
 
     return response
 
 
-@backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
 async def upsert_response(
     db: AsyncSession, search_engine: SearchEngine, record: Record, user: User, response_upsert: ResponseUpsert
 ) -> Response:
     ResponseUpsertValidator(response_upsert).validate_for(record)
 
-    schema = {
-        "values": jsonable_encoder(response_upsert.values),
-        "status": response_upsert.status,
-        "record_id": response_upsert.record_id,
-        "user_id": user.id,
-    }
-
     async with db.begin_nested():
         response = await Response.upsert(
             db,
-            schema=schema,
+            schema={
+                "values": jsonable_encoder(response_upsert.values),
+                "status": response_upsert.status,
+                "record_id": response_upsert.record_id,
+                "user_id": user.id,
+            },
             constraints=[Response.record_id, Response.user_id],
             autocommit=False,
         )
 
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
-        await db.refresh(record, attribute_names=[Record.responses_submitted.key])
-        await distribution.update_record_status(db, record)
+        await search_engine.update_record_response(response)
 
     await db.commit()
-
-    await search_engine.update_record_response(response)
-    await search_engine.partial_record_update(record, status=record.status)
+    await distribution.update_record_status(search_engine, record.id)
 
     return response
 
 
-@backoff.on_exception(backoff.expo, sqlalchemy.exc.SQLAlchemyError, max_time=MAX_TIME_RETRY_SQLALCHEMY_ERROR)
 async def delete_response(db: AsyncSession, search_engine: SearchEngine, response: Response) -> Response:
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
 
         await _load_users_from_responses(response)
         await _touch_dataset_last_activity_at(db, response.record.dataset)
-        await db.refresh(response.record, attribute_names=[Record.responses_submitted.key])
-        await distribution.update_record_status(db, response.record)
+        await search_engine.delete_record_response(response)
 
     await db.commit()
-
-    await search_engine.delete_record_response(response)
-    await search_engine.partial_record_update(record=response.record, status=response.record.status)
+    await distribution.update_record_status(search_engine, response.record_id)
 
     return response
 
