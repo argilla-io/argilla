@@ -14,27 +14,12 @@
 
 from typing import Optional
 
-from argilla_server.pydantic_v1 import BaseModel, BaseSettings, Field
+from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
+from argilla_server.pydantic_v1 import BaseModel
 
 
 class ArgillaSettings(BaseModel):
     show_huggingface_space_persistent_storage_warning: Optional[bool]
-
-
-class HuggingfaceSettings(BaseSettings):
-    space_id: str = Field(None, env="SPACE_ID")
-    space_title: str = Field(None, env="SPACE_TITLE")
-    space_subdomain: str = Field(None, env="SPACE_SUBDOMAIN")
-    space_host: str = Field(None, env="SPACE_HOST")
-    space_repo_name: str = Field(None, env="SPACE_REPO_NAME")
-    space_author_name: str = Field(None, env="SPACE_AUTHOR_NAME")
-    # NOTE: Hugging Face has a typo in their environment variable name,
-    # using PERSISTANT instead of PERSISTENT. We will use the correct spelling in our code.
-    space_persistent_storage_enabled: bool = Field(False, env="PERSISTANT_STORAGE_ENABLED")
-
-    @property
-    def is_running_on_huggingface(self) -> bool:
-        return bool(self.space_id)
 
 
 class Settings(BaseModel):

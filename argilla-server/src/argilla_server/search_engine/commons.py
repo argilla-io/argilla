@@ -464,7 +464,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def build_elasticsearch_filter(self, filter: Filter) -> Dict[str, Any]:
         if isinstance(filter, AndFilter):
             filters = [self.build_elasticsearch_filter(f) for f in filter.filters]
-            return es_bool_query(should=filters, minimum_should_match=len(filters))
+            return es_bool_query(must=filters)
 
         if isinstance(filter.scope, ResponseFilterScope):
             return self._response_filter_to_es_filter(filter)
@@ -864,7 +864,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         query: dict,
         size: Optional[int] = None,
         from_: Optional[int] = None,
-        sort: Optional[str] = None,
+        sort: Optional[dict] = None,
         aggregations: Optional[dict] = None,
     ) -> dict:
         """Executes request for search documents on a index"""
