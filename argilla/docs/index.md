@@ -37,7 +37,7 @@ Argilla is a **collaboration tool for AI engineers and domain experts** to build
 
 ## Why use Argilla?
 
-Argilla can be used for collecting human feedback for a wide variety of AI projects like traditional NLP (text classification, NER, etc.), LLMs (RAG, preference tuning, etc.), or multimodal models (text to image, etc.). 
+Argilla can be used for collecting human feedback for a wide variety of AI projects like traditional NLP (text classification, NER, etc.), LLMs (RAG, preference tuning, etc.), or multimodal models (text to image, etc.).
 
 Argilla's programmatic approach lets you build workflows for continuous evaluation and model improvement. The goal of Argilla is to ensure **your data work pays off by quickly iterating on the right data and models**.
 

@@ -8,8 +8,8 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
 !!! huggingface "Deploy on the Hugging Face Hub"
 
-    The **recommended choice to get started**. You can get up and running in under 5 minutes and don't need to maintain a server or run any commands. 
-    
+    The **recommended choice to get started**. You can get up and running in under 5 minutes and don't need to maintain a server or run any commands.
+
     If you're just getting started with Argilla, click the deploy button below and:
 
     - Leave the default Space owner (your personal account)
@@ -24,8 +24,8 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
     </div>
 
     !!! warning "Persistent storage"
-        Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. 
-        
+        Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings.
+
         If you plan to **use the Argilla Space beyond testing**, it's highly recommended to **set persistent storage to `Small`**.
     If you want to deploy Argilla within a Hugging Face organization, setup a more stable Space, or understand the settings, [check out the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
 
@@ -62,16 +62,16 @@ pip install argilla
 ## Create your first dataset using the SDK
 For getting started with Argilla and its SDK, we recommend to use Jupyter Notebook or Google Colab.
 
-To start interacting with your Argilla server, you need to create a client using the API key and the API URL: 
+To start interacting with your Argilla server, you need to create a client using the API key and the API URL:
 
-- The `<api_key>` is in the `My Settings` page of your Argilla Space. 
+- The `<api_key>` is in the `My Settings` page of your Argilla Space.
 
 - The `<api_url>` is the URL shown in your browser if it ends with `*.hf.space`.
 
 !!! info "Find your API URL"
     If you're using Spaces, sometimes the Argilla UI is embedded into the Hub UI so the URL of the browser won't match the API URL. In these scenarios, there are two options:
         1. Click on the three points menu at the top of the Space, select "Embed this Space", and open the direct URL.
-        2. Use this pattern: `https://[your-owner-name]-[your_space_name].hf.space`.  
+        2. Use this pattern: `https://[your-owner-name]-[your_space_name].hf.space`.
 
 Then run:
 
@@ -111,8 +111,8 @@ settings = rg.Settings(
 Now you can **create the dataset with these settings**. Publish the dataset to make it available in the UI and add the records.
 
 !!! info "About workspaces"
-    Workspaces in Argilla group datasets and user access rights. The `workspace` parameter is optional in this case. If you don't specify it, the dataset will be created in the default workspace `argilla`. 
-    
+    Workspaces in Argilla group datasets and user access rights. The `workspace` parameter is optional in this case. If you don't specify it, the dataset will be created in the default workspace `argilla`.
+
     By default, this workspace will be visible to users joining with the Sign in with Hugging Face button. You can create other workspaces and decide to grant access to users either with the SDK or the OAuth configuration.
 
 ```python
