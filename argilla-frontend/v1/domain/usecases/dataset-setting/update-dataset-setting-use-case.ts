@@ -10,9 +10,10 @@ export class UpdateDatasetSettingUseCase {
   ) {
     try {
       const response = await this.update(dataset, part);
+
       dataset.update(response.when, part);
     } catch (e) {
-      this.restore(dataset, part);
+      dataset.restore(part);
     }
   }
 
@@ -37,16 +38,5 @@ export class UpdateDatasetSettingUseCase {
         id: dataset.id,
         distribution: dataset.distribution,
       });
-  }
-
-  private restore(
-    dataset: Dataset,
-    part: "guidelines" | "metadata" | "distribution"
-  ) {
-    if (part === "guidelines") dataset.restoreGuidelines();
-
-    if (part === "metadata") dataset.restoreMetadata();
-
-    if (part === "distribution") dataset.restoreDistribution();
   }
 }
