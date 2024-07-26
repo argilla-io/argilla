@@ -136,14 +136,15 @@ nav:
       - FAQ: getting_started/faq.md
   - How-to guides:
       - how_to_guides/index.md
-      - Manage users and credentials: how_to_guides/user.md
-      - Manage workspaces: how_to_guides/workspace.md
-      - Manage and create datasets: how_to_guides/dataset.md
-      - Add, update, and delete records: how_to_guides/record.md
-      - Query and filter records: how_to_guides/query.md
-      - Importing and exporting datasets and records: how_to_guides/import_export.md
-      - Annotate a dataset: how_to_guides/annotate.md
-      - Distribute the annotation task: how_to_guides/distribution.md
+      - Basic:
+        - Manage users and credentials: how_to_guides/user.md
+        - Manage workspaces: how_to_guides/workspace.md
+        - Create, update and delete datasets: how_to_guides/dataset.md
+        - Add, update, and delete records: how_to_guides/record.md
+        - Distribute the annotation task: how_to_guides/distribution.md
+        - Annotate datasets: how_to_guides/annotate.md
+        - Query and filter records: how_to_guides/query.md
+        - Import and export datasets: how_to_guides/import_export.md
       - Advanced:
         - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
         - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md

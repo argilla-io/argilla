@@ -4,11 +4,8 @@ import { Record } from "~/v1/domain/entities/record/Record";
 import { DiscardRecordUseCase } from "~/v1/domain/usecases/discard-record-use-case";
 import { SubmitRecordUseCase } from "~/v1/domain/usecases/submit-record-use-case";
 import { SaveDraftUseCase } from "~/v1/domain/usecases/save-draft-use-case";
-import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 
 export const useFocusAnnotationViewModel = () => {
-  const debounceForSubmit = useDebounce(300);
-
   const isDraftSaving = ref(false);
   const isDiscarding = ref(false);
   const isSubmitting = ref(false);
@@ -17,33 +14,36 @@ export const useFocusAnnotationViewModel = () => {
   const saveDraftUseCase = useResolve(SaveDraftUseCase);
 
   const discard = async (record: Record) => {
-    isDiscarding.value = true;
+    try {
+      isDiscarding.value = true;
 
-    await discardUseCase.execute(record);
-
-    await debounceForSubmit.wait();
-
-    isDiscarding.value = false;
+      await discardUseCase.execute(record);
+    } catch {
+    } finally {
+      isDiscarding.value = false;
+    }
   };
 
   const submit = async (record: Record) => {
-    isSubmitting.value = true;
+    try {
+      isSubmitting.value = true;
 
-    await submitUseCase.execute(record);
-
-    await debounceForSubmit.wait();
-
-    isSubmitting.value = false;
+      await submitUseCase.execute(record);
+    } catch {
+    } finally {
+      isSubmitting.value = false;
+    }
   };
 
   const saveAsDraft = async (record: Record) => {
-    isDraftSaving.value = true;
+    try {
+      isDraftSaving.value = true;
 
-    await saveDraftUseCase.execute(record);
-
-    await debounceForSubmit.wait();
-
-    isDraftSaving.value = false;
+      await saveDraftUseCase.execute(record);
+    } catch {
+    } finally {
+      isDraftSaving.value = false;
+    }
   };
 
   return {
