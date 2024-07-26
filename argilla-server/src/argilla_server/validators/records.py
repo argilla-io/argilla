@@ -17,7 +17,7 @@ import copy
 from abc import ABC, abstractmethod
 from typing import Dict, List, Union
 from uuid import UUID
-from urllib.parse import ParseResultBytes, urlparse, ParseResult
+from urllib.parse import urlparse, ParseResult, ParseResultBytes
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
