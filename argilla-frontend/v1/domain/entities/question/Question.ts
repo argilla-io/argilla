@@ -97,13 +97,11 @@ export class Question {
     return this.type.isRatingType;
   }
 
-  public get isModified(): boolean {
-    return (
-      this.isSettingsModified || !this.answer.isEqual(this.original.answer)
-    );
+  public get isAnswerModified(): boolean {
+    return !this.answer.isEqual(this.original.answer);
   }
 
-  public get isSettingsModified(): boolean {
+  public get isModified(): boolean {
     return (
       this.title !== this.original.title ||
       this.description !== this.original.description ||
