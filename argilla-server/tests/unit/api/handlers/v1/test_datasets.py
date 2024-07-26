@@ -2037,22 +2037,31 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-        records_json = {
-            "items": [
-                {
-                    "fields": {"input": "Say Hello", "output": 33},
-                },
-                {
-                    "fields": {"input": "Say Hello", "output": "Hi"},
-                },
-                {
-                    "fields": {"input": "Say Pello", "output": "Hello World"},
-                },
-            ]
-        }
-
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records/bulk",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                            "output": 33,
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                            "output": "Hi",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Pello",
+                            "output": "Hello World",
+                        },
+                    },
+                ],
+            },
         )
 
         assert response.status_code == 422
@@ -2065,7 +2074,7 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
-                        }
+                        },
                     ]
                 },
             }
@@ -2081,16 +2090,29 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-        records_json = {
-            "items": [
-                {"fields": {"input": "Say Hello", "output": "unexpected"}},
-                {"fields": {"input": "Say Hello"}},
-                {"fields": {"input": "Say Pello"}},
-            ]
-        }
-
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records/bulk",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                            "output": "unexpected",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Pello",
+                        },
+                    },
+                ],
+            },
         )
 
         assert response.status_code == 422
@@ -2152,7 +2174,7 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
-                        }
+                        },
                     ]
                 },
             }

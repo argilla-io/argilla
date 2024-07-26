@@ -44,10 +44,7 @@ class TestCreateDatasetField:
                 "name": "name",
                 "title": "title",
                 "required": True,
-                "settings": {
-                    "type": FieldType.image,
-                    "url": "https://argilla.io/image.jpeg",
-                },
+                "settings": {"type": FieldType.image},
             },
         )
 
@@ -59,55 +56,8 @@ class TestCreateDatasetField:
             "name": "name",
             "title": "title",
             "required": True,
-            "settings": {
-                "type": FieldType.image,
-                "url": "https://argilla.io/image.jpeg",
-            },
+            "settings": {"type": FieldType.image},
             "dataset_id": str(dataset.id),
             "inserted_at": image_field.inserted_at.isoformat(),
             "updated_at": image_field.updated_at.isoformat(),
         }
-
-    async def test_create_dataset_image_field_without_url(
-        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-
-        response = await async_client.post(
-            self.url(dataset.id),
-            headers=owner_auth_header,
-            json={
-                "name": "name",
-                "title": "title",
-                "required": True,
-                "settings": {
-                    "type": FieldType.image,
-                },
-            },
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar_one() == 0
-
-    @pytest.mark.parametrize("invalid_url", [None, "", " ", "wrong-url", "argilla.io", "http//argilla.io"])
-    async def test_create_dataset_image_field_with_invalid_url(
-        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, invalid_url: Any
-    ):
-        dataset = await DatasetFactory.create()
-
-        response = await async_client.post(
-            self.url(dataset.id),
-            headers=owner_auth_header,
-            json={
-                "name": "name",
-                "title": "title",
-                "required": True,
-                "settings": {
-                    "type": FieldType.image,
-                    "url": invalid_url,
-                },
-            },
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar_one() == 0

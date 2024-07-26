@@ -37,10 +37,7 @@ class TestUpdateField:
             self.url(image_field.id),
             headers=owner_auth_header,
             json={
-                "settings": {
-                    "type": FieldType.image,
-                    "url": "https://argilla.io/updated-image.jpeg",
-                },
+                "title": "Updated title",
             },
         )
 
@@ -48,47 +45,10 @@ class TestUpdateField:
         assert response.json() == {
             "id": str(image_field.id),
             "name": image_field.name,
-            "title": image_field.title,
+            "title": "Updated title",
             "required": False,
-            "settings": {
-                "type": FieldType.image,
-                "url": "https://argilla.io/updated-image.jpeg",
-            },
+            "settings": {"type": FieldType.image},
             "dataset_id": str(image_field.dataset_id),
             "inserted_at": image_field.inserted_at.isoformat(),
             "updated_at": image_field.updated_at.isoformat(),
         }
-
-    async def test_update_dataset_image_field_without_url(self, async_client: AsyncClient, owner_auth_header: dict):
-        image_field = await ImageFieldFactory.create()
-
-        response = await async_client.patch(
-            self.url(image_field.id),
-            headers=owner_auth_header,
-            json={
-                "settings": {
-                    "type": FieldType.image,
-                },
-            },
-        )
-
-        assert response.status_code == 422
-
-    @pytest.mark.parametrize("invalid_url", [None, "", " ", "wrong-url", "argilla.io", "http//argilla.io"])
-    async def test_update_dataset_image_field_with_invalid_url(
-        self, async_client: AsyncClient, owner_auth_header: dict, invalid_url: Any
-    ):
-        image_field = await ImageFieldFactory.create()
-
-        response = await async_client.patch(
-            self.url(image_field.id),
-            headers=owner_auth_header,
-            json={
-                "settings": {
-                    "type": FieldType.image,
-                    "url": invalid_url,
-                },
-            },
-        )
-
-        assert response.status_code == 422

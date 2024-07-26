@@ -13,9 +13,11 @@
 #  limitations under the License.
 
 import copy
+
 from abc import ABC, abstractmethod
 from typing import Dict, List, Union
 from uuid import UUID
+from urllib.parse import ParseResultBytes, urlparse, ParseResult
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -39,6 +41,7 @@ class RecordValidatorBase(ABC):
 
         self._validate_required_fields(dataset, fields)
         self._validate_extra_fields(dataset, fields)
+        self._validate_image_fields(dataset, fields)
 
     def _validate_metadata(self, dataset: Dataset) -> None:
         metadata = self._record_change.metadata or {}
@@ -71,6 +74,27 @@ class RecordValidatorBase(ABC):
         if fields_copy:
             raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
 
+    def _validate_image_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
+        for field in filter(lambda field: field.is_image, dataset.fields):
+            if fields.get(field.name) is not None and not self._is_valid_url(fields.get(field.name)):
+                raise UnprocessableEntityError(
+                    f"image field {field.name!r} has an invalid URL value: {fields.get(field.name)!r}"
+                )
+
+    def _is_valid_url(self, url: Union[str, None]) -> bool:
+        try:
+            parse_result = urlparse(url)
+        except ValueError:
+            return False
+
+        return self._is_valid_web_url(parse_result) or self._is_valid_data_url(parse_result)
+
+    def _is_valid_web_url(self, parse_result: Union[ParseResult, ParseResultBytes]) -> bool:
+        return all([parse_result.scheme in ["http", "https"], parse_result.netloc, parse_result.path])
+
+    def _is_valid_data_url(self, parse_result: Union[ParseResult, ParseResultBytes]) -> bool:
+        return all([parse_result.scheme == "data", parse_result.path])
+
 
 class RecordCreateValidator(RecordValidatorBase):
     def __init__(self, record_create: RecordCreate):
@@ -92,6 +116,7 @@ class RecordUpdateValidator(RecordValidatorBase):
     def _validate_duplicated_suggestions(self):
         if not self._record_change.suggestions:
             return
+
         question_ids = [s.question_id for s in self._record_change.suggestions]
         if len(question_ids) != len(set(question_ids)):
             raise UnprocessableEntityError("found duplicate suggestions question IDs")

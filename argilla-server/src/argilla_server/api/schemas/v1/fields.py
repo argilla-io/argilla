@@ -18,7 +18,7 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import FieldType
-from argilla_server.pydantic_v1 import BaseModel, constr, HttpUrl
+from argilla_server.pydantic_v1 import BaseModel, constr
 from argilla_server.pydantic_v1 import Field as PydanticField
 
 FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
@@ -58,24 +58,21 @@ class TextFieldSettingsCreate(BaseModel):
     use_markdown: bool = False
 
 
-class TextFieldSettingsUpdate(UpdateSchema):
+class TextFieldSettingsUpdate(BaseModel):
     type: Literal[FieldType.text]
     use_markdown: bool
 
 
 class ImageFieldSettings(BaseModel):
     type: Literal[FieldType.image]
-    url: HttpUrl
 
 
 class ImageFieldSettingsCreate(BaseModel):
     type: Literal[FieldType.image]
-    url: HttpUrl
 
 
 class ImageFieldSettingsUpdate(BaseModel):
     type: Literal[FieldType.image]
-    url: HttpUrl
 
 
 FieldSettings = Annotated[

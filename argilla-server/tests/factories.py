@@ -264,7 +264,6 @@ class TextFieldFactory(FieldFactory):
 class ImageFieldFactory(FieldFactory):
     settings = {
         "type": FieldType.image,
-        "url": "https://argilla.io/image.jpeg",
     }
 
 
