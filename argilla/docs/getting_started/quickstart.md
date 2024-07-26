@@ -35,7 +35,7 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 ## Sign in into the Argilla UI
 If everything went well, you should see the Argilla sign in page that looks like this:
 
-**TODO** add login page image
+![Focus view](../assets/images/getting_started/signin-hf-page.png){ width=100% height=100% }
 
 !!! info "Building errors"
     If you get a build error, sometimes restarting the Space from the Settings page works, otherwise [check the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
