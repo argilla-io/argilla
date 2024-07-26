@@ -16,13 +16,13 @@ This section details how to configure and deploy Argilla on Hugging Face Spaces.
     If you just discovered Argilla and want to get started quickly, go to the [Quickstart guide](quickstart.md).
 
 ## Persistent storage
-In the Space creation UI, persistent storage is set to `Small PAID`, which is a paid service, charged per hour of usage. 
+In the Space creation UI, persistent storage is set to `Small PAID`, which is a paid service, charged per hour of usage.
 
 **Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings**. Persistent storage enables Argilla to save to disk your datasets and configurations across restarts.
 
 !!! warning "Ephimeral FREE persistent storage"
-    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. 
-        
+    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
+
     If you plan to **use the Argilla Space beyond testing**, it's highly recommended to **set persistent storage to `Small`**.
 
 If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose `Ephemeral FREE`. `Ephemeral FREE` means your datasets and configuration will not be saved to disk, when the Space is restarted your datasets, workspaces, and users will be lost.
@@ -39,7 +39,7 @@ If you just want to quickly test or use Argilla for a few hours with the risk of
 ## How to configure and disable OAuth access
 By default, Argilla Spaces are configured with Hugging Face OAuth, in the following way:
 
-- Any Hugging Face user that can see your Space, can use the Sign in button, join as an `annotator`, and have contribute to the datasets available under the `argilla` workspace. This workspace is created during the deployment process. 
+- Any Hugging Face user that can see your Space, can use the Sign in button, join as an `annotator`, and have contribute to the datasets available under the `argilla` workspace. This workspace is created during the deployment process.
 - These users can only explore and annotate datasets in the `argilla` workspace but can't perform any critical operation like create, delete, update, or configure datasets. By default, any other workspace you create, won't be visible to these users.
 
 To restrict access or change the default behaviour, there's two options:
@@ -55,7 +55,7 @@ To restrict access or change the default behaviour, there's two options:
 providers:
   - name: huggingface
 
-# Allowed workspaces must exists 
+# Allowed workspaces must exists
 allowed_workspaces:
   - name: argilla
 ```
@@ -96,7 +96,7 @@ client = rg.Argilla(
 
 ### Owner
 
-By default, the Space will be created in under your personal account. 
+By default, the Space will be created in under your personal account.
 
 If you are part of some Hugging Face organizations and have enough rights you will see them in the dropdown list. If you select an organization, the Space will be created under `https://huggingface.co/spaces/{organization_name}/`.
 
@@ -105,19 +105,19 @@ If you are part of some Hugging Face organizations and have enough rights you wi
 For most usages you can leave the default `CPU basic FREE` option. For usage with more than 50 annotators and large datasets, `CPU Upgrade PAID` is recommended.
 
 ### Persistent Storage
-By default, persistent storage is set to `Small PAID`, which is paid services, charged per hour of usage. This is the most important setting if you plan to use Argilla more than a few hours. 
+By default, persistent storage is set to `Small PAID`, which is paid services, charged per hour of usage. This is the most important setting if you plan to use Argilla more than a few hours.
 
-If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose `Ephemeral FREE`. 
+If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose `Ephemeral FREE`.
 
 !!! warning "Ephemeral persistent storage"
-    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. 
+    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
 
 ### Space Secrets
 
-By default Argilla Spaces are configured with a sign in with Hugging Face button. 
+By default Argilla Spaces are configured with a sign in with Hugging Face button.
 
-!!! info "Creating a Space under your personal account" 
-    If you are creating the Space under your personal account, **don't insert any value for `USERNAME` and `PASSWORD`**. Once you launch the Space you will be able to Sign in with your Hugging Face username and the `owner` role. 
+!!! info "Creating a Space under your personal account"
+    If you are creating the Space under your personal account, **don't insert any value for `USERNAME` and `PASSWORD`**. Once you launch the Space you will be able to Sign in with your Hugging Face username and the `owner` role.
 
-!!! info "Creating a Space under an organization" 
+!!! info "Creating a Space under an organization"
     If you are creating the Space under an organization **make sure to insert your Hugging Face username in the secret `USERNAME`**. In this way, you'll be able to Sign in with your Hugging Face user.
