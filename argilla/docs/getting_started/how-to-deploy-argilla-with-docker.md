@@ -14,7 +14,7 @@ mkdir argilla && cd argilla
 Download `docker-compose.yaml`:
 
 ```console
-wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/examples/deployments/docker/docker-compose.yaml && docker-compose up -d
+wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/examples/deployments/docker/docker-compose.yaml
 ```
 
 Generate a 32 character random string with:
@@ -27,9 +27,9 @@ Copy the value and modify the following line of your local `docker-compose.yaml`
 
 ```yaml
 environment:
-      ARGILLA_HOME_PATH: /var/lib/argilla
-      ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
-      ARGILLA_AUTH_SECRET_KEY: <add_generated_key_here>
+  ARGILLA_HOME_PATH: /var/lib/argilla
+  ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+  ARGILLA_AUTH_SECRET_KEY: <add_generated_key_here>
 ```
 
 Run to deploy the server on `http://localhost:6900`:

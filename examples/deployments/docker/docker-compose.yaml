@@ -1,7 +1,4 @@
-version: "3.9"
-
 services:
-
   argilla:
     image: argilla/argilla-server:latest
     restart: unless-stopped
@@ -12,7 +9,8 @@ services:
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
       ARGILLA_AUTH_SECRET_KEY: ${ARGILLA_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
 
-      # ARGILLA_ENABLE_TELEMETRY: 0 # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
+      # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
+      # ARGILLA_ENABLE_TELEMETRY: 0
 
       # Set user configuration https://docs.argilla.io/en/latest/getting_started/installation/configurations/user_management.html
       # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
@@ -28,6 +26,7 @@ services:
       # ARGILLA_HOME_PATH is used to define where Argilla will save it's application data.
       # If you change ARGILLA_HOME_PATH value please copy that same value to argilladata volume too.
       - argilladata:/var/lib/argilla
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
     environment:
@@ -36,7 +35,7 @@ services:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - cluster.routing.allocation.disk.threshold_enabled=false
-      #- xpack.security.enabled=false
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1
@@ -48,6 +47,7 @@ services:
       - "9300:9300"
     volumes:
       - elasticdata:/usr/share/elasticsearch/data/
+
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.2
     ports:
@@ -61,6 +61,7 @@ services:
 networks:
   argilla:
     driver: bridge
+
 volumes:
   argilladata:
   elasticdata:
