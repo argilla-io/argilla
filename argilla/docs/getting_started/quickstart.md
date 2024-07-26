@@ -1,5 +1,5 @@
 ---
-description: Get started with Argilla in under 10 minutes
+description: Get started with Argilla in less 10 minutes
 ---
 
 # Quickstart
@@ -113,7 +113,7 @@ Now you can **create the dataset with these settings**. Publish the dataset to m
 !!! info "About workspaces"
     Workspaces in Argilla group datasets and user access rights. The `workspace` parameter is optional in this case. If you don't specify it, the dataset will be created in the default workspace `argilla`.
 
-    By default, this workspace will be visible to users joining with the Sign in with Hugging Face button. You can create other workspaces and decide to grant access to users either with the SDK or the OAuth configuration.
+    By default, **this workspace will be visible to users joining with the Sign in with Hugging Face button**. You can create other workspaces and decide to grant access to users either with the SDK or the [changing the OAuth configuration](getting_started/how-to-configure-argilla-on-huggingface.md).
 
 ```python
 dataset = rg.Dataset(
@@ -142,4 +142,4 @@ dataset.records.log(records=data, mapping={"text": "review"})
 
 - To learn Argilla with hands-on examples, check the [Tutorials section](../tutorials/index.md).
 
-- To further configure your Argilla Spaces configuration, check the [Hugging Face Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
+- To further configure your Argilla Space, check the [Hugging Face Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
