@@ -14,13 +14,13 @@ This section details how to configure and deploy Argilla on Hugging Face Spaces.
     If you just discovered Argilla and want to get started quickly, go to the [Quickstart guide](quickstart.md).
 
 ## Persistent storage
-In the Space creation UI, persistent storage is set to `Small PAID`, which is a paid service, charged per hour of usage. 
+In the Space creation UI, persistent storage is set to `Small PAID`, which is a paid service, charged per hour of usage.
 
 **Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings**. Persistent storage enables Argilla to save to disk your datasets and configurations across restarts.
 
 !!! warning "Ephimeral FREE persistent storage"
-    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. 
-        
+    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
+
     If you plan to **use the Argilla Space beyond testing**, it's highly recommended to **set persistent storage to `Small`**.
 
 If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose `Ephemeral FREE`. `Ephemeral FREE` means your datasets and configuration will not be saved to disk, when the Space is restarted your datasets, workspaces, and users will be lost.
@@ -37,7 +37,7 @@ If you just want to quickly test or use Argilla for a few hours with the risk of
 ## How to configure and disable OAuth access
 By default, Argilla Spaces are configured with Hugging Face OAuth, in the following way:
 
-- Any Hugging Face user that can see your Space, can use the Sign in button, join as an `annotator`, and contribute to the datasets available under the `argilla` workspace. This workspace is created during the deployment process. 
+- Any Hugging Face user that can see your Space, can use the Sign in button, join as an `annotator`, and contribute to the datasets available under the `argilla` workspace. This workspace is created during the deployment process.
 - These users can only explore and annotate datasets in the `argilla` workspace but can't perform any critical operation like create, delete, update, or configure datasets. By default, any other workspace you create, won't be visible to these users.
 
 To restrict access or change the default behaviour, there's two options:
@@ -53,7 +53,7 @@ To restrict access or change the default behaviour, there's two options:
 providers:
   - name: huggingface
 
-# Allowed workspaces must exists 
+# Allowed workspaces must exists
 allowed_workspaces:
   - name: argilla
 ```
@@ -85,8 +85,8 @@ The steps are very similar the [Quickstart guide](quickstart.md) with two import
     You need to **set up the `USERNAME` Space Secret with your Hugging Face username**. This way, the first time you enter with the `Hugging Face Sign in` button, you'll be granted the `owner` role.
 
 !!! tip "Enable Persistent Storage `SMALL`"
-    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. 
-        
+    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
+
     For Argilla Spaces with many users, it's strongly recommended to **set persistent storage to `Small`**.
 
 ## How to use Private Spaces
@@ -113,7 +113,7 @@ client = rg.Argilla(
 
 
 ## Space Secrets overview
-There's two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of the Argilla Space. Remember that, by default Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space. 
+There's two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of the Argilla Space. Remember that, by default Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space.
 
 The `USERNAME` and `PASSWORD` are only useful in a couple of scenarios:
 
@@ -121,8 +121,8 @@ The `USERNAME` and `PASSWORD` are only useful in a couple of scenarios:
 - You want to [set up Argilla under an organization](#how-to-deploy-argilla-under-a-hugging-face-organization) and want your Hugging Face username to be granted the `owner` role.
 
 In summary, when setting up a Space:
-!!! info "Creating a Space under your personal account" 
-    If you are creating the Space under your personal account, **don't insert any value for `USERNAME` and `PASSWORD`**. Once you launch the Space you will be able to Sign in with your Hugging Face username and the `owner` role. 
+!!! info "Creating a Space under your personal account"
+    If you are creating the Space under your personal account, **don't insert any value for `USERNAME` and `PASSWORD`**. Once you launch the Space you will be able to Sign in with your Hugging Face username and the `owner` role.
 
-!!! info "Creating a Space under an organization" 
+!!! info "Creating a Space under an organization"
     If you are creating the Space under an organization **make sure to insert your Hugging Face username in the secret `USERNAME`**. In this way, you'll be able to Sign in with your Hugging Face user.
