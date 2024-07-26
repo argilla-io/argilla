@@ -639,53 +639,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#settings-overview" class="md-nav__link">
+  <a href="#space-secrets-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Settings overview
+      Space Secrets overview
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Settings overview">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#owner" class="md-nav__link">
-    <span class="md-ellipsis">
-      Owner
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#space-hardware" class="md-nav__link">
-    <span class="md-ellipsis">
-      Space hardware
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#persistent-storage_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Persistent Storage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#space-secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      Space Secrets
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1988,53 +1946,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#settings-overview" class="md-nav__link">
+  <a href="#space-secrets-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Settings overview
+      Space Secrets overview
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Settings overview">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#owner" class="md-nav__link">
-    <span class="md-ellipsis">
-      Owner
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#space-hardware" class="md-nav__link">
-    <span class="md-ellipsis">
-      Space hardware
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#persistent-storage_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Persistent Storage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#space-secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      Space Secrets
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -2067,9 +1983,8 @@
 <ul>
 <li>Persistent storage</li>
 <li>How to deploy Argilla under a Hugging Face Organization</li>
-<li>How to configure and disable OAuth access</li>
-<li>How to use Private Spaces.</li>
-<li>Troubleshooting</li>
+<li>How to configure and disable HF OAuth access</li>
+<li>How to use Private Spaces</li>
 </ul>
 <div class="admonition tip">
 <p class="admonition-title">Looking to get started easily?</p>
@@ -2098,7 +2013,7 @@
 <h2 id="how-to-configure-and-disable-oauth-access">How to configure and disable OAuth access<a class="headerlink" href="#how-to-configure-and-disable-oauth-access" title="Permanent link">&para;</a></h2>
 <p>By default, Argilla Spaces are configured with Hugging Face OAuth, in the following way:</p>
 <ul>
-<li>Any Hugging Face user that can see your Space, can use the Sign in button, join as an <code>annotator</code>, and have contribute to the datasets available under the <code>argilla</code> workspace. This workspace is created during the deployment process.</li>
+<li>Any Hugging Face user that can see your Space, can use the Sign in button, join as an <code>annotator</code>, and contribute to the datasets available under the <code>argilla</code> workspace. This workspace is created during the deployment process.</li>
 <li>These users can only explore and annotate datasets in the <code>argilla</code> workspace but can't perform any critical operation like create, delete, update, or configure datasets. By default, any other workspace you create, won't be visible to these users.</li>
 </ul>
 <p>To restrict access or change the default behaviour, there's two options:</p>
@@ -2116,7 +2031,7 @@
 </span></code></pre></div>
 You can modify two things:</p>
 <ul>
-<li>Uncomment <code>enabled: false</code> to completely disable the Sign in with Hugging Face.</li>
+<li>Uncomment <code>enabled: false</code> to completely disable the Sign in with Hugging Face. If you disable it make sure to set the <code>USERNAME</code> and <code>PASSWORD</code> Space secrets to be able to login as an <code>owner</code>.</li>
 <li>Change the list of <code>allowed</code> workspaces.</li>
 </ul>
 <p>For example if you want to let users join a new workspace <code>community-initiative</code>:</p>
@@ -2125,9 +2040,30 @@ You can modify two things:</p>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">community-initiative</span>
 </span></code></pre></div>
 <h2 id="how-to-deploy-argilla-under-a-hugging-face-organization">How to deploy Argilla under a Hugging Face Organization<a class="headerlink" href="#how-to-deploy-argilla-under-a-hugging-face-organization" title="Permanent link">&para;</a></h2>
-<p>If you are creating the Space under an organization make sure to insert your Hugging Face username in the secret <code>USERNAME</code>. In this way, you'll be able to Sign in with your Hugging Face user.</p>
+<p>Creating an Argilla Space within an organization is useful for several scenarios:</p>
+<ul>
+<li><strong>You want to only enable members of your organization to join your Space</strong>. You can achieve this by setting your Space to private.</li>
+<li><strong>You want manage the Space together with other users</strong> (e.g., Space settings, etc.). Note that if you just want to manage your Argilla datasets, workspaces, you can achieve this by adding other Argilla <code>owner</code> roles to your Argilla Server.</li>
+<li><strong>More generally, you want to make available your space under an organization/community umbrella</strong>.</li>
+</ul>
+<p>The steps are very similar the <a href="../quickstart/">Quickstart guide</a> with two important differences:</p>
+<div class="admonition tip">
+<p class="admonition-title">Setup USERNAME</p>
+<p>You need to <strong>set up the <code>USERNAME</code> Space Secret with your Hugging Face username</strong>. This way, the first time you enter with the <code>Hugging Face Sign in</code> button, you'll be granted the <code>owner</code> role.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Enable Persistent Storage <code>SMALL</code></p>
+<p>Not setting persistent storage to <code>Small</code> means that <strong>you will loose your data when the Space restarts</strong>.</p>
+<p>For Argilla Spaces with many users, it's strongly recommended to <strong>set persistent storage to <code>Small</code></strong>.</p>
+</div>
 <h2 id="how-to-use-private-spaces">How to use Private Spaces<a class="headerlink" href="#how-to-use-private-spaces" title="Permanent link">&para;</a></h2>
-<p>If you are using a private Hugging Face Space, you need to specify your <code>HF_TOKEN</code> which can be found <a href="https://huggingface.co/settings/tokens">here</a>.</p>
+<p>Setting your Space visibility to private can be useful if:</p>
+<ul>
+<li>You want to work on your personal, solo project.</li>
+<li>You want your Argilla to be available only to members of the organization where you deploy the Argilla Space.</li>
+</ul>
+<p>You can set the visibility of the Space during the Space creation process or afterwards under the <code>Settings</code> Tab.</p>
+<p>To use the Python SDK with private Spaces you need to specify your <code>HF_TOKEN</code> which can be found <a href="https://huggingface.co/settings/tokens">here</a>, when creating the client:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">HF_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
@@ -2138,21 +2074,14 @@ You can modify two things:</p>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">HF_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="settings-overview">Settings overview<a class="headerlink" href="#settings-overview" title="Permanent link">&para;</a></h2>
-<h3 id="owner">Owner<a class="headerlink" href="#owner" title="Permanent link">&para;</a></h3>
-<p>By default, the Space will be created in under your personal account.</p>
-<p>If you are part of some Hugging Face organizations and have enough rights you will see them in the dropdown list. If you select an organization, the Space will be created under <code>https://huggingface.co/spaces/{organization_name}/</code>.</p>
-<h3 id="space-hardware">Space hardware<a class="headerlink" href="#space-hardware" title="Permanent link">&para;</a></h3>
-<p>For most usages you can leave the default <code>CPU basic FREE</code> option. For usage with more than 50 annotators and large datasets, <code>CPU Upgrade PAID</code> is recommended.</p>
-<h3 id="persistent-storage_1">Persistent Storage<a class="headerlink" href="#persistent-storage_1" title="Permanent link">&para;</a></h3>
-<p>By default, persistent storage is set to <code>Small PAID</code>, which is paid services, charged per hour of usage. This is the most important setting if you plan to use Argilla more than a few hours.</p>
-<p>If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose <code>Ephemeral FREE</code>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Ephemeral persistent storage</p>
-<p>Not setting persistent storage to <code>Small</code> means that <strong>you will loose your data when the Space restarts</strong>.</p>
-</div>
-<h3 id="space-secrets">Space Secrets<a class="headerlink" href="#space-secrets" title="Permanent link">&para;</a></h3>
-<p>By default Argilla Spaces are configured with a sign in with Hugging Face button.</p>
+<h2 id="space-secrets-overview">Space Secrets overview<a class="headerlink" href="#space-secrets-overview" title="Permanent link">&para;</a></h2>
+<p>There's two optional secrets to set up the <code>USERNAME</code> and <code>PASSWORD</code> of the <code>owner</code> of the Argilla Space. Remember that, by default Argilla Spaces are configured with a <em>Sign in with Hugging Face</em> button, which is also used to grant an <code>owner</code> to the creator of the Space.</p>
+<p>The <code>USERNAME</code> and <code>PASSWORD</code> are only useful in a couple of scenarios:</p>
+<ul>
+<li>You have <a href="#how-to-configure-and-disable-oauth-access">disabled Hugging Face OAuth</a>.</li>
+<li>You want to <a href="#how-to-deploy-argilla-under-a-hugging-face-organization">set up Argilla under an organization</a> and want your Hugging Face username to be granted the <code>owner</code> role.</li>
+</ul>
+<p>In summary, when setting up a Space:</p>
 <div class="admonition info">
 <p class="admonition-title">Creating a Space under your personal account</p>
 <p>If you are creating the Space under your personal account, <strong>don't insert any value for <code>USERNAME</code> and <code>PASSWORD</code></strong>. Once you launch the Space you will be able to Sign in with your Hugging Face username and the <code>owner</code> role.</p>
