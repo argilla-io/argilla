@@ -1707,6 +1707,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#sqlite-and-postgresql" class="md-nav__link">
     <span class="md-ellipsis">
       SQLite and PostgreSQL
@@ -2201,6 +2210,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#sqlite-and-postgresql" class="md-nav__link">
     <span class="md-ellipsis">
       SQLite and PostgreSQL
@@ -2357,6 +2375,10 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <li>
 <p><code>ARGILLA_ENABLE_TELEMETRY</code>: If False, disables telemetry for usage metrics.</p>
 </li>
+</ul>
+<h4 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>ARGILLA_AUTH_SECRET_KEY</code>: The secret key used to sign the API token data. You can use <code>openssl rand -hex 32</code> to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.</li>
 </ul>
 <h4 id="sqlite-and-postgresql">SQLite and PostgreSQL<a class="headerlink" href="#sqlite-and-postgresql" title="Permanent link">&para;</a></h4>
 <ul>
