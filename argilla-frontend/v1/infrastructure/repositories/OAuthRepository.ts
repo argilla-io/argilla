@@ -1,5 +1,4 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Auth } from "@nuxtjs/auth-next";
 import { Response } from "../types";
 import { useRunningEnvironment } from "../services/useRunningEnvironment";
 import { largeCache } from "./AxiosCache";
