@@ -62,6 +62,10 @@ You can set the following environment variables to further configure your server
 
 - `ARGILLA_ENABLE_TELEMETRY`: If False, disables telemetry for usage metrics.
 
+#### Authentication
+
+- `ARGILLA_AUTH_SECRET_KEY`: The secret key used to sign the API token data. You can use `openssl rand -hex 32` to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.
+
 #### SQLite and PostgreSQL
 
 - `ARGILLA_DATABASE_URL`: A URL string that contains the necessary information to connect to a database. Argilla uses SQLite by default, PostgreSQL is also officially supported (Default: `sqlite:///$ARGILLA_HOME_PATH/argilla.db?check_same_thread=False`).
