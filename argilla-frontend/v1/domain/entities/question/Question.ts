@@ -99,10 +99,15 @@ export class Question {
 
   public get isModified(): boolean {
     return (
+      this.isSettingsModified || !this.answer.isEqual(this.original.answer)
+    );
+  }
+
+  public get isSettingsModified(): boolean {
+    return (
       this.title !== this.original.title ||
       this.description !== this.original.description ||
-      !this.settings.isEqual(this.original.settings) ||
-      !this.answer.isEqual(this.original.answer)
+      !this.settings.isEqual(this.original.settings)
     );
   }
 
