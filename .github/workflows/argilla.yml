@@ -31,7 +31,6 @@ jobs:
         image: argilladev/argilla-server:develop
         ports:
           - 6900:6900
-        options: --health-cmd "curl -XGET http://localhost:6900/api/_status" --health-interval 15s --health-retries 5 --health-start-interval	10s
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
           ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
