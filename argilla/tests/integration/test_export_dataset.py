@@ -22,6 +22,7 @@ from typing import Any, List
 
 import argilla as rg
 import pytest
+from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 
 @pytest.fixture
@@ -71,7 +72,7 @@ def token():
     return os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING")
 
 
-@pytest.mark.flaky(retries=3, only_on=[OSError])  # I/O error hub consistency CICD pipline
+@pytest.mark.flaky(retries=3, only_on=[OSError])  # I/O consistency CICD pipline
 @pytest.mark.parametrize("with_records_export", [True, False])
 class TestDiskImportExportMixin:
     def test_export_dataset_to_disk(
@@ -135,6 +136,9 @@ class TestDiskImportExportMixin:
         assert new_dataset.settings.questions[0].name == "label"
 
 
+@pytest.mark.flaky(
+    retries=3, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError]
+)  # Hub consistency CICD pipline
 @pytest.mark.skipif(
     not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"),
     reason="You are missing a token to write to `argilla-internal-testing` org on the Hugging Face Hub",
