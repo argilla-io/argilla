@@ -144,6 +144,22 @@ The following options can be provided:
 - `--port`: The port where the Argilla server will be bound. Default value is `6900`.
 - `--access-log/--no-access-log`: Enable/disable the server access log. Default value is `True`.
 
+#### Running with `uvicorn`
+
+You can also launch the argilla server using `uvicorn`:
+
+```bash
+
+uvicorn argilla_server:app --port 6900
+
+```
+
+!!! {note}
+
+    For more details about FastAPI and uvicorn, see [here](https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn).
+
+    You can also visit the uvicorn official documentation [here](https://www.uvicorn.org/#usage).
+
 ### Database
 
 The `argilla_server database` group of commands offers functionality for managing the Argilla server database:
