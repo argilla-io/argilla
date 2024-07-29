@@ -13,7 +13,7 @@ We are an open-source community-driven project not only focused on building a gr
 
     ---
 
-    In our Discord channels (#argilla-general and #argilla-help), you can get direct support from the community.
+    In our Discord channels (#argilla-distilabel-general and #argilla-distilabel-help), you can get direct support from the community.
 
 
     [:octicons-arrow-right-24: Discord ↗](http://hf.co/join/discord)
