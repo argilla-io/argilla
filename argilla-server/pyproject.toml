@@ -67,7 +67,7 @@ postgresql = [
 
 [project.urls]
 homepage = "https://www.argilla.io"
-documentation = "https://docs.v1.argilla.io"
+documentation = "https://docs.argilla.io"
 repository = "https://github.com/argilla-io/argilla"
 
 [build-system]
