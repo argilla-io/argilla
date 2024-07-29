@@ -78,4 +78,10 @@ def add_exception_handlers(app: FastAPI):
 
     @app.exception_handler(errors.AuthenticationError)
     async def authentication_error(request, exc):
-        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={"detail": str(exc)})
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            # TODO: Once we move to v2.0 we can remove the content using detail attribute
+            # and use the new one using code and message.
+            # content={"code": exc.code, "message": exc.message},
+            content={"detail": str(exc)},
+        )
