@@ -633,6 +633,46 @@
   
   
   
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Basic
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Basic
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../../how_to_guides/user/" class="md-nav__link">
         
@@ -680,7 +720,7 @@
         
   
   <span class="md-ellipsis">
-    Manage and create datasets
+    Create, update and delete datasets
   </span>
   
 
@@ -702,6 +742,48 @@
   
   <span class="md-ellipsis">
     Add, update, and delete records
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../how_to_guides/distribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distribute the annotation task
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../how_to_guides/annotate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Annotate datasets
   </span>
   
 
@@ -743,7 +825,7 @@
         
   
   <span class="md-ellipsis">
-    Importing and exporting datasets and records
+    Import and export datasets
   </span>
   
 
@@ -753,43 +835,9 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../how_to_guides/annotate/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Annotate a dataset
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../how_to_guides/distribution/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Distribute the annotation task
-  </span>
-  
-
-      </a>
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -814,10 +862,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_9" id="__nav_3_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -828,8 +876,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
             <span class="md-nav__icon md-icon"></span>
             Advanced
           </label>
@@ -2081,21 +2129,6 @@
 <li>The underlying platform spec with as much useful information as possible. (eg. <code>macOS-10.16-x86_64-i386-64bit</code>)</li>
 <li>The type of deployment: <code>quickstart</code> or <code>server</code></li>
 <li>The dockerized deployment flag: <code>True</code> or <code>False</code></li>
-</ul>
-<p>This is performed by registering information from the following API methods:</p>
-<ul>
-<li><code>GET /api/me</code></li>
-<li><code>POST /api/dataset/{name}/{task}:bulk</code></li>
-<li><code>POST /api/users</code></li>
-<li>Raised server API errors</li>
-</ul>
-<p>Additionally, we report the usage of integration for our Python library:</p>
-<ul>
-<li><code>ArgillaTrainer</code> framework usage and NLP task-type.</li>
-</ul>
-<p>We also report the usage of our tutorials by <code>tutorial_running</code>:</p>
-<ul>
-<li>The tutorial usage count and its name.</li>
 </ul>
 <p>For transparency, you can inspect the source code where this is performed <a href="https://github.com/argilla-io/argilla/blob/main/src/argilla/utils/telemetry.py">here</a>.</p>
 <p>If you have any doubts, don't hesitate to join our <a href="http://hf.co/join/discord">Discord channel</a> or open a GitHub issue. We'd be very happy to discuss how we can improve this.</p>
