@@ -18,11 +18,11 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
             </a>
     </div>
     You can use the default values following these steps:
+
     - Leave the default Space owner (your personal account)
     - Leave `USERNAME` and `PASSWORD` secrets empty since you'll sign in with your HF user as the   Argilla Space `owner`.
     - Click create Space to launch Argilla 🚀.
-    - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the Building message for longer than 2-3 min refresh the page.
-
+    - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
 
     !!! warning "Persistent storage"
         Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings.
