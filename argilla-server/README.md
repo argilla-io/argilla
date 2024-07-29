@@ -198,7 +198,7 @@ Tagged revisions
 • 1.17 (revision: '84f6b9ff6076')
 • 1.18 (revision: 'bda6fe24314e')
 • 1.28 (revision: 'ca7293c38970')
-• 2.0 (revision: 'd00f819ccc67')
+• 2.0 (revision: '237f7c674d74')
 
 Alembic revisions
 -----------------
