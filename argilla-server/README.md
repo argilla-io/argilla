@@ -148,7 +148,7 @@ The following options can be provided:
 
 You can also launch the argilla server using `uvicorn`:
 
-```bash
+```sh
 
 uvicorn argilla_server:app --port 6900
 
