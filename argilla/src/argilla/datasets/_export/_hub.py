@@ -113,7 +113,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         with_records: bool = True,
         **kwargs: Any,
     ):
-        """Loads a `FeedbackDataset` from the Hugging Face Hub.
+        """Loads a `Dataset` from the Hugging Face Hub.
 
         Parameters:
             repo_id: the ID of the Hugging Face Hub repo to load the `Dataset` from.
