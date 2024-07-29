@@ -14,6 +14,7 @@ This section details how to configure and deploy Argilla on Hugging Face Spaces.
     If you just discovered Argilla and want to get started quickly, go to the [Quickstart guide](quickstart.md).
 
 ## Persistent storage
+
 In the Space creation UI, persistent storage is set to `Small PAID`, which is a paid service, charged per hour of usage.
 
 **Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings**. Persistent storage enables Argilla to save to disk your datasets and configurations across restarts.
@@ -35,6 +36,7 @@ If you just want to quickly test or use Argilla for a few hours with the risk of
     - **Recover your data**, by following the above mentioned guides.
 
 ## How to configure and disable OAuth access
+
 By default, Argilla Spaces are configured with Hugging Face OAuth, in the following way:
 
 - Any Hugging Face user that can see your Space, can use the Sign in button, join as an `annotator`, and contribute to the datasets available under the `argilla` workspace. This workspace is created during the deployment process.
@@ -70,7 +72,6 @@ allowed_workspaces:
   - name: community-initiative
 ```
 
-
 ## How to deploy Argilla under a Hugging Face Organization
 
 Creating an Argilla Space within an organization is useful for several scenarios:
@@ -90,6 +91,7 @@ The steps are very similar the [Quickstart guide](quickstart.md) with two import
     For Argilla Spaces with many users, it's strongly recommended to **set persistent storage to `Small`**.
 
 ## How to use Private Spaces
+
 Setting your Space visibility to private can be useful if:
 
 - You want to work on your personal, solo project.
@@ -113,6 +115,7 @@ client = rg.Argilla(
 
 
 ## Space Secrets overview
+
 There's two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of the Argilla Space. Remember that, by default Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space.
 
 The `USERNAME` and `PASSWORD` are only useful in a couple of scenarios:
