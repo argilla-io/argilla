@@ -4,6 +4,7 @@
   --md-text-font: "Inter";
   --md-admonition-icon--huggingface: url("../assets/images/huggingface-mark.svg");
   --md-admonition-icon--docker: url("../assets/images/docker-mark-blue.svg");
+  --iframe-scale-factor: 0.75
 }
 
 [data-md-color-scheme="default"] {
@@ -86,4 +87,18 @@
 
 .md-typeset .admonition.docker>.admonition-title::before {
   background-image: var(--md-admonition-icon--docker);
+}
+
+@media screen and (min-width: 60em) {
+  .iframe-wrapper {
+    height: 650px;
+  }
+
+  .iframe-wrapper iframe {
+    transform: scale(var(--iframe-scale-factor));
+    width: calc(1/var(--iframe-scale-factor) * 100%) !important;
+    max-width: calc(1/var(--iframe-scale-factor) * 100%) !important;
+    height: calc(1/var(--iframe-scale-factor) * 650px);
+    transform-origin: left top;
+  }
 }
