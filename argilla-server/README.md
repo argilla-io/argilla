@@ -31,7 +31,7 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
+Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
 
 This repository only contains developer info about the backend server. If you want to get started, we recommend taking a
 look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://argilla-io.github.io/argilla/latest/).
