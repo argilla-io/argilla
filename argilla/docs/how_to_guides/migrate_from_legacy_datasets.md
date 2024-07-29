@@ -123,7 +123,7 @@ Next, define the new dataset settings:
     ```python
     settings = rg.Settings(
         fields=[
-            rg.TextField(name="text"), 
+            rg.TextField(name="text"),
         ],
         questions=[
             rg.SpanQuestion(name="spans", labels=settings_v1.label_schema),
@@ -140,7 +140,7 @@ Next, define the new dataset settings:
     1. Here, we need to provide all relevant metadata fields available in the dataset.
 
     2.  Here, we need to provide all relevant vectors available in the dataset.
-    
+
 === "For text generation"
 
     ```python
@@ -161,7 +161,7 @@ Next, define the new dataset settings:
     ```
 
     1. Here, we need to provide all relevant metadata fields available in the dataset.
-    
+
     2.  Here, we need to provide all relevant vectors available in the dataset.
 
 Finally, create the new dataset on the Argilla V2 server:
