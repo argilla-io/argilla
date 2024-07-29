@@ -21,7 +21,7 @@ Apart from the common environment variables defined in docs, the docker image pr
 
 - `PASSWORD`: If provided, the owner password. If `USERNAME` and `PASSWORD` are provided, the owner user will be created with these credentials on the server startup (Default: `""`).
 
-- `API_KEY`: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
+- `API_KEY`: If provided, the owner api key. When `USERNAME` and `PASSWORD` are provided and `API_KEY` is empty, a new random value will be generated (Default: `""`).
 
 - `REINDEX_DATASET`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
 
