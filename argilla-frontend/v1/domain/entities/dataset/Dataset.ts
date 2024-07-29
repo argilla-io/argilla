@@ -58,21 +58,23 @@ export class Dataset {
     );
   }
 
-  restore() {
-    this.restoreGuidelines();
-    this.restoreMetadata();
-    this.restoreDistribution();
+  restore(part: "guidelines" | "metadata" | "distribution") {
+    if (part === "guidelines") return this.restoreGuidelines();
+
+    if (part === "metadata") return this.restoreMetadata();
+
+    if (part === "distribution") return this.restoreDistribution();
   }
 
-  restoreGuidelines() {
+  private restoreGuidelines() {
     this.guidelines = this.original.guidelines;
   }
 
-  restoreMetadata() {
+  private restoreMetadata() {
     this.allowExtraMetadata = this.original.allowExtraMetadata;
   }
 
-  restoreDistribution() {
+  private restoreDistribution() {
     this.distribution = {
       ...this.original.distribution,
     };

@@ -17,16 +17,17 @@ import os
 import random
 import re
 import string
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from typing import Dict, Any, ClassVar, Type, Optional, Union, List, Tuple
 from urllib.parse import urljoin
 
 import httpx
-from fastapi import Request
-from fastapi.responses import RedirectResponse
 from oauthlib.oauth2 import WebApplicationClient
 from social_core.backends.oauth import BaseOAuth2
 from social_core.exceptions import AuthException
+
 from social_core.strategy import BaseStrategy
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
 from argilla_server.errors import future
 from argilla_server.security.authentication.claims import Claims
@@ -48,7 +49,7 @@ class OAuth2ClientProvider:
     """OAuth2 flow handler  of a certain provider."""
 
     OAUTH_STATE_COOKIE_NAME = "oauth2_state"
-    OAUTH_STATE_COOKIE_MAX_AGE = 10
+    OAUTH_STATE_COOKIE_MAX_AGE = 90
 
     name: ClassVar[str]
     backend_class: ClassVar[Type[BaseOAuth2]]

@@ -17,3 +17,4 @@ from argilla.settings._metadata import *  # noqa: F403
 from argilla.settings._vector import *  # noqa: F403
 from argilla.settings._question import *  # noqa: F403
 from argilla.settings._resource import *  # noqa: F403
+from argilla.settings._task_distribution import *  # noqa: F403
