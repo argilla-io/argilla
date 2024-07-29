@@ -30,12 +30,15 @@ To get started:
 </div>
 
 Or, play with the Argilla UI signing in with you Hugging Face account:
+
+<div class="iframe-wrapper">
 <iframe
 	src="https://argilla-argilla-template-space.hf.space"
 	frameborder="0"
 	width="100%"
 	height="650"
 ></iframe>
+</div>
 
 
 !!! INFO "Looking for Argilla 1.x?"
