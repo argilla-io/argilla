@@ -71,6 +71,7 @@ def token():
     return os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING")
 
 
+@pytest.mark.flaky(retries=3, only_on=[OSError])  # I/O error hub consistency CICD pipline
 @pytest.mark.parametrize("with_records_export", [True, False])
 class TestDiskImportExportMixin:
     def test_export_dataset_to_disk(

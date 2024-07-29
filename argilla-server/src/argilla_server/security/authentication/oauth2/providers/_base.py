@@ -49,7 +49,7 @@ class OAuth2ClientProvider:
     """OAuth2 flow handler  of a certain provider."""
 
     OAUTH_STATE_COOKIE_NAME = "oauth2_state"
-    OAUTH_STATE_COOKIE_MAX_AGE = 10
+    OAUTH_STATE_COOKIE_MAX_AGE = 90
 
     name: ClassVar[str]
     backend_class: ClassVar[Type[BaseOAuth2]]
