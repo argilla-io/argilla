@@ -112,19 +112,15 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING`: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: `true`).
 
-- `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `$SPACE_AUTHOR_NAME`).
-
-- `PASSWORD`: If provided, the owner password. If `USERNAME` and `PASSWORD` are provided, the owner user will be created with these credentials on the server startup (Default: `""`).
-
-### `argilla-server` docker image only
+### Docker images only
 
 - `REINDEX_DATASET`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
 
-- `DEFAULT_USER_ENABLED`: If `true`, the default owner user will be created when launching the server (Default: `true`).
+- `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `""`).
 
-- `DEFAULT_USER_PASSWORD`: The default user password to use (Default: `1234`).
+- `PASSWORD`: If provided, the owner password. If `USERNAME` and `PASSWORD` are provided, the owner user will be created with these credentials on the server startup (Default: `""`).
 
-- `DEFAULT_USER_API_KEY`: The default user api key to user (Default: `argilla.apikey`)
+- `API_KEY`: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
 
 
 ## REST API docs
