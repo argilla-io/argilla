@@ -231,18 +231,18 @@ You can associate vectors, like text embeddings, to your records. They can be us
                 "question": "Do you need oxygen to breathe?",
                 "answer": "Yes"
             },
-            vectors=[
-                rg.Vector("my_vector", [0.1, 0.2, 0.3])
-            ],
+            vectors={
+                "my_vector": [0.1, 0.2, 0.3]
+            },
         ),
         rg.Record(
             fields={
                 "question": "What is the boiling point of water?",
                 "answer": "100 degrees Celsius"
             },
-            vectors=[
-                rg.Vector("my_vector", [0.2, 0.5, 0.3])
-            ],
+            vectors={
+                "my_vector": [0.2, 0.5, 0.3]
+            },
         ),
     ]
     dataset.records.log(records)
@@ -476,7 +476,7 @@ dataset.records.log(records=updated_data)
     for record in dataset.records(with_vectors=True):
 
         record.vectors["new_vector"] = [ 0, 1, 2, 3, 4, 5 ]
-        record.vector["v"] = [ 0.1, 0.2, 0.3 ]
+        record.vectors["v"] = [ 0.1, 0.2, 0.3 ]
 
         updated_records.append(record)
 
