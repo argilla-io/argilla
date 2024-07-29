@@ -117,6 +117,14 @@
     }
   },
   {
+    "version": "docs_review-code-snippets",
+    "title": "docs_review-code-snippets",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_readme_hf_space_docker_img",
     "title": "docs_readme_hf_space_docker_img",
     "aliases": [],
