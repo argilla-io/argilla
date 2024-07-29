@@ -258,7 +258,7 @@ Here are a set of example functions to convert the records for single-label and 
             responses.append(
                 rg.Response(
                     question_name="labels", # (2)
-                    value=annotation, 
+                    value=annotation,
                     user_id=user_id
                 )
             )
