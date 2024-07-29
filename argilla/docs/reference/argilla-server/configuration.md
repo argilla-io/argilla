@@ -30,28 +30,6 @@ NGINX and Traefik have been tested and are known to work with Argilla:
 - [NGINX example](https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/nginx)
 - [Traefik example](https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/traefik)
 
-[//]: # (### with `uvicorn`)
-
-[//]: # ()
-[//]: # (Since the Argilla Server is built on FastAPI, you can launch it using `uvicorn`:)
-
-[//]: # ()
-[//]: # (```bash)
-
-[//]: # (uvicorn argilla_server:app --port 6900)
-
-[//]: # (```)
-
-[//]: # ()
-[//]: # (!!! {note})
-
-[//]: # (    For more details about FastAPI and uvicorn, see [here]&#40;https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn&#41;.)
-
-[//]: # ()
-[//]: # (    You can also visit the uvicorn official documentation [here]&#40;https://www.uvicorn.org/#usage&#41;.)
-
-[//]: # ()
-[//]: # ()
 ## Environment variables
 
 You can set the following environment variables to further configure your server and client.
