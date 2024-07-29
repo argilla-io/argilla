@@ -1772,9 +1772,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla-server-docker-image-only" class="md-nav__link">
+  <a href="#docker-images-only" class="md-nav__link">
     <span class="md-ellipsis">
-      argilla-server docker image only
+      Docker images only
     </span>
   </a>
   
@@ -2230,9 +2230,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#argilla-server-docker-image-only" class="md-nav__link">
+  <a href="#docker-images-only" class="md-nav__link">
     <span class="md-ellipsis">
-      argilla-server docker image only
+      Docker images only
     </span>
   </a>
   
@@ -2369,29 +2369,21 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 </ul>
 <h3 id="hugging-face">Hugging Face<a class="headerlink" href="#hugging-face" title="Permanent link">&para;</a></h3>
 <ul>
-<li>
-<p><code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING</code>: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: <code>true</code>).</p>
-</li>
-<li>
-<p><code>USERNAME</code>: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: <code>$SPACE_AUTHOR_NAME</code>).</p>
-</li>
-<li>
-<p><code>PASSWORD</code>: If provided, the owner password. If <code>USERNAME</code> and <code>PASSWORD</code> are provided, the owner user will be created with these credentials on the server startup (Default: <code>""</code>).</p>
-</li>
+<li><code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING</code>: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: <code>true</code>).</li>
 </ul>
-<h3 id="argilla-server-docker-image-only"><code>argilla-server</code> docker image only<a class="headerlink" href="#argilla-server-docker-image-only" title="Permanent link">&para;</a></h3>
+<h3 id="docker-images-only">Docker images only<a class="headerlink" href="#docker-images-only" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
 <p><code>REINDEX_DATASET</code>: If <code>true</code> or <code>1</code>, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: <code>0</code>).</p>
 </li>
 <li>
-<p><code>DEFAULT_USER_ENABLED</code>: If <code>true</code>, the default owner user will be created when launching the server (Default: <code>true</code>).</p>
+<p><code>USERNAME</code>: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: <code>""</code>).</p>
 </li>
 <li>
-<p><code>DEFAULT_USER_PASSWORD</code>: The default user password to use (Default: <code>1234</code>).</p>
+<p><code>PASSWORD</code>: If provided, the owner password. If <code>USERNAME</code> and <code>PASSWORD</code> are provided, the owner user will be created with these credentials on the server startup (Default: <code>""</code>).</p>
 </li>
 <li>
-<p><code>DEFAULT_USER_API_KEY</code>: The default user api key to user (Default: <code>argilla.apikey</code>)</p>
+<p><code>API_KEY</code>: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: <code>""</code>).</p>
 </li>
 </ul>
 <h2 id="rest-api-docs">REST API docs<a class="headerlink" href="#rest-api-docs" title="Permanent link">&para;</a></h2>
