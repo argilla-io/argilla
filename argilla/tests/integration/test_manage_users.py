@@ -18,17 +18,6 @@ from argilla import User, Argilla, Workspace
 from argilla._exceptions import UnprocessableEntityError
 
 
-@pytest.fixture(scope="session", autouse=True)
-def clean_environment(client: Argilla):
-    for user in client.users:
-        if user.username.startswith("test"):
-            user.delete()
-    yield
-    for user in client.users:
-        if user.username.startswith("test"):
-            user.delete()
-
-
 class TestManageUsers:
     def test_create_user(self, client: Argilla):
         user = User(username="test_user", password="test_password")
