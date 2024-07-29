@@ -23,7 +23,6 @@ The guide will take you through three steps:
 2. **Define the new dataset** in the Argilla V2 format.
 3. **Upload the dataset records** to the new Argilla V2 dataset format and attributes.
 
-
 ### Step 1: Retrieve the legacy dataset
 
 Connect to the Argilla V1 server via the new `argilla` package. First, you should install an extra dependency:
@@ -32,6 +31,7 @@ pip install "argilla[legacy]"
 ```
 
 Now, you can use the `v1` module to connect to the Argilla V1 server.
+
 ```python
 import argilla.v1 as rg_v1
 
@@ -87,11 +87,11 @@ Next, define the new dataset settings:
     )
     ```
 
-    1. The default field in `DatasetForTextClassification` is `text`, but we should provide all fields included in `record.inputs`.
+    1. The default field in `DatasetForTextClassification` is `text`, but make sure you provide all fields included in `record.inputs`.
 
-    2. Here, we need to provide all relevant metadata fields available in the dataset.
+    2. Make sure you provide all relevant metadata fields available in the dataset.
 
-    3. Here, we need to provide all relevant vectors available in the dataset.
+    3. Make sure you provide all relevant vectors available in the dataset.
 
 === "For multi-label classification"
 
@@ -114,9 +114,9 @@ Next, define the new dataset settings:
 
     1. The default field in `DatasetForTextClassification` is `text`, but we should provide all fields included in `record.inputs`.
 
-    2. Here, we need to provide all relevant metadata fields available in the dataset.
+    2. Make sure you provide all relevant metadata fields available in the dataset.
 
-    3. Here, we need to provide all relevant vectors available in the dataset.
+    3. Make sure you provide all relevant vectors available in the dataset.
 
 === "For token classification"
 
@@ -137,9 +137,9 @@ Next, define the new dataset settings:
     )
     ```
 
-    1. Here, we need to provide all relevant metadata fields available in the dataset.
+    1. Make sure you provide all relevant metadata fields available in the dataset.
 
-    2.  Here, we need to provide all relevant vectors available in the dataset.
+    2. Make sure you provide all relevant vectors available in the dataset.
 
 === "For text generation"
 
@@ -160,9 +160,9 @@ Next, define the new dataset settings:
     )
     ```
 
-    1. Here, we need to provide all relevant metadata fields available in the dataset.
+    1. We should provide all relevant metadata fields available in the dataset.
 
-    2.  Here, we need to provide all relevant vectors available in the dataset.
+    2. We should provide all relevant vectors available in the dataset.
 
 Finally, create the new dataset on the Argilla V2 server:
 
@@ -257,7 +257,7 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(
                 rg.Response(
-                    question_name="label", # (2)
+                    question_name="labels", # (2)
                     value=annotation, 
                     user_id=user_id
                 )
@@ -377,7 +377,6 @@ Here are a set of example functions to convert the records for single-label and 
 The functions above depend on the `users_by_name` dictionary and the `current_user` object to assign responses to users, we need to load the existing users. You can retrieve the users from the Argilla V2 server and the current user as follows:
 
 ```python
-# For
 users_by_name = {user.username: user for user in client.users}
 current_user = client.me
 ```
@@ -393,5 +392,5 @@ for data in hf_records:
 # Upload the records to the new dataset
 dataset.records.log(records)
 ```
-You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the [How to guides](index.md).
 
+You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the [How to guides](index.md).
