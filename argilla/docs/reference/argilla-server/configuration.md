@@ -30,20 +30,28 @@ NGINX and Traefik have been tested and are known to work with Argilla:
 - [NGINX example](https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/nginx)
 - [Traefik example](https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/traefik)
 
-### with `uvicorn`
+[//]: # (### with `uvicorn`)
 
-Since the Argilla Server is built on FastAPI, you can launch it using `uvicorn`:
+[//]: # ()
+[//]: # (Since the Argilla Server is built on FastAPI, you can launch it using `uvicorn`:)
 
-```bash
-uvicorn argilla_server:app --port 6900
-```
+[//]: # ()
+[//]: # (```bash)
 
-!!! {note}
-    For more details about FastAPI and uvicorn, see [here](https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn).
+[//]: # (uvicorn argilla_server:app --port 6900)
 
-    You can also visit the uvicorn official documentation [here](https://www.uvicorn.org/#usage).
+[//]: # (```)
 
+[//]: # ()
+[//]: # (!!! {note})
 
+[//]: # (    For more details about FastAPI and uvicorn, see [here]&#40;https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn&#41;.)
+
+[//]: # ()
+[//]: # (    You can also visit the uvicorn official documentation [here]&#40;https://www.uvicorn.org/#usage&#41;.)
+
+[//]: # ()
+[//]: # ()
 ## Environment variables
 
 You can set the following environment variables to further configure your server and client.
@@ -103,6 +111,21 @@ The following environment variables are useful only when PostgreSQL is used:
 ### Hugging Face
 
 - `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING`: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: `true`).
+
+- `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `$SPACE_AUTHOR_NAME`).
+
+- `PASSWORD`: If provided, the owner password. If `USERNAME` and `PASSWORD` are provided, the owner user will be created with these credentials on the server startup (Default: `""`).
+
+### `argilla-server` docker image only
+
+- `REINDEX_DATASET`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
+
+- `DEFAULT_USER_ENABLED`: If `true`, the default owner user will be created when launching the server (Default: `true`).
+
+- `DEFAULT_USER_PASSWORD`: The default user password to use (Default: `1234`).
+
+- `DEFAULT_USER_API_KEY`: The default user api key to user (Default: `argilla.apikey`)
+
 
 ## REST API docs
 
