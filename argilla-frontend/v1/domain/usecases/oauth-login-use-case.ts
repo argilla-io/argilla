@@ -29,6 +29,6 @@ export class OAuthLoginUseCase {
 
     const token = await this.oauthRepository.login(provider, oauthParams);
 
-    if (token) this.auth.setUserToken(token);
+    if (token) await this.auth.setUserToken(token);
   }
 }
