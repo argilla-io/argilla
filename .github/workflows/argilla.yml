@@ -27,7 +27,10 @@ jobs:
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
           ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
-          DEFAULT_USER_ENABLED: 1
+          # Set credentials
+          USERNAME: argilla
+          PASSWORD: 12345678
+          API_KEY: argilla.apikey
       elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
         ports:
