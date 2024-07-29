@@ -7,7 +7,7 @@ services:
     environment:
       ARGILLA_HOME_PATH: /var/lib/argilla
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
-      
+
       # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
       # ARGILLA_ENABLE_TELEMETRY: 0
 
