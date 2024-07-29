@@ -20,13 +20,6 @@ on:
 jobs:
   build:
     services:
-      elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
-        ports:
-          - 9200:9200
-        env:
-          discovery.type: single-node
-          xpack.security.enabled: false
       argilla-server:
         image: argilladev/argilla-server:develop
         ports:
@@ -35,6 +28,13 @@ jobs:
           ARGILLA_ENABLE_TELEMETRY: 0
           ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
           DEFAULT_USER_ENABLED: 1
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -55,7 +55,7 @@ jobs:
       - name: Install dependencies
         run: |
           pdm install
-      - name: Wait for argilla-quickstart to start
+      - name: Wait for argilla server to start
         run: |
           while ! curl -XGET http://localhost:6900/api/_status; do sleep 5; done
       - name: Set huggingface hub credentials
