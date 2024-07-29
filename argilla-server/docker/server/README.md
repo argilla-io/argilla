@@ -15,7 +15,8 @@ Whether you are working on monitoring and improving complex **generative tasks**
 
 ### Environment variables
 
-Apart from the common environment variables defined in docs, the docker image provides a set of variables to simplify the server startup:
+Besides the common environment variables defined in docs, this Docker image provides a set of variables to simplify the server startup:
+:
 
 - `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `""`).
 
