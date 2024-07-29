@@ -7,6 +7,8 @@ hide: navigation
 
 Argilla is a **collaboration tool for AI engineers and domain experts** to build high-quality datasets.
 
+To get started:
+
 <div class="grid cards" markdown>
 
 -  __Get started in 5 minutes!__
@@ -26,6 +28,15 @@ Argilla is a **collaboration tool for AI engineers and domain experts** to build
     [:octicons-arrow-right-24: Learn more](how_to_guides/index.md)
 
 </div>
+
+Or, play with the Argilla UI signing in with you Hugging Face account:
+<iframe
+	src="https://argilla-argilla-template-space.hf.space"
+	frameborder="0"
+	width="100%"
+	height="650"
+></iframe>
+
 
 !!! INFO "Looking for Argilla 1.x?"
     Looking for documentation for Argilla 1.x? Visit [the latest release](https://docs.argilla.io/en/latest/).
