@@ -11,6 +11,8 @@ In Argilla, you can import/export two main components of a dataset:
 - The dataset's complete configuration is defined in `rg.Settings`. This is useful if you want to share your feedback task or restore it later in Argilla.
 - The records stored in the dataset, including `Metadata`, `Vectors`, `Suggestions`, and `Responses`. This is useful if you want to use your dataset's records outside of Argilla.
 
+Check the [Dataset - Python Reference](../reference/argilla/datasets/datasets.md) to see the attributes, arguments, and methods of the export `Dataset` class in detail.
+
 !!! info "Main Classes"
     === "`rg.Dataset.to_hub`"
 
@@ -33,6 +35,7 @@ In Argilla, you can import/export two main components of a dataset:
             with_records=True
         )
         ```
+
     === "`rg.Dataset.to_disk`"
 
         ```python
@@ -41,6 +44,7 @@ In Argilla, you can import/export two main components of a dataset:
             with_records=True
         )
         ```
+
     === "`rg.Dataset.from_disk`"
 
         ```python
@@ -52,6 +56,7 @@ In Argilla, you can import/export two main components of a dataset:
             with_records=True
         )
         ```
+
     === "`rg.Dataset.records.to_datasets()`"
 
         ```python

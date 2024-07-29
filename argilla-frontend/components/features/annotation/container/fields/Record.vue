@@ -62,7 +62,7 @@ export default {
         if (
           this.record?.questions
             .filter((q) => q.isSpanType)
-            .some((q) => q.isModified)
+            .some((q) => q.isAnswerModified)
         ) {
           this.onSelectedRecord(true);
         }

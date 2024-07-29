@@ -11,8 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import os
 
 import pytest
+from pytest_mock import MockerFixture
 
 from argilla_server.enums import UserRole
 from argilla_server.security.authentication import UserInfo
@@ -51,3 +53,9 @@ class TestUserInfo:
 
         assert userinfo.first_name == "USER"
         assert userinfo.last_name == "Peter"
+
+    def test_get_userinfo_role_with_username_env(self, mocker: MockerFixture):
+        mocker.patch.dict(os.environ, {"USERNAME": "user"})
+
+        userinfo = UserInfo({"id": "user"}).use_claims(Claims(username="id"))
+        assert userinfo.role == UserRole.owner

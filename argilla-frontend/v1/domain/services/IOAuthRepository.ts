@@ -9,5 +9,5 @@ export interface IOAuthRepository {
 
   authorize(provider: ProviderType): void;
 
-  login(provider: ProviderType, oauthParams: OAuthParams): Promise<void>;
+  login(provider: ProviderType, oauthParams: OAuthParams): Promise<string>;
 }
