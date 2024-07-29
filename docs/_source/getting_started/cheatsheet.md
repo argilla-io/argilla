@@ -163,7 +163,7 @@ records = rg.load(name="dataset", vector=("my_vector_name", [0, 43, 1985]))
 
 ::::
 
-<a href="https://docs.argilla.io/en/latest/guides/label_records_with_semanticsearch.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/guides/label_records_with_semanticsearch.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
 
 ## Weak supervision
 
@@ -218,7 +218,7 @@ rg.log(records_for_training, name="majority_voter_results")
 
 ::::
 
-<a href="https://docs.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/guides/programmatic_labeling_with_rules.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
 
 ## Train Models
 

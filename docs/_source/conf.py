@@ -349,7 +349,7 @@ pygments_dark_style = "material"
 
 
 # Open graph meta
-ogp_image = "https://docs.argilla.io/en/latest/_static/images/og-doc.png"
+ogp_image = "https://docs.v1.argilla.io/en/latest/_static/images/og-doc.png"
 
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',

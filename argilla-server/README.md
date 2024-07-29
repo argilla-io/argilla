@@ -34,7 +34,7 @@
 Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
 
 This repository only contains developer info about the backend server. If you want to get started, we recommend taking a
-look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://argilla-io.github.io/argilla/latest/).
+look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://docs.argilla.io/latest/).
 
 Are you a contributor or do you want to understand what is going on under the hood, please keep reading the
 documentation below.
@@ -118,7 +118,7 @@ pdm server
 
 ## 🫱🏾‍🫲🏼 Contribute
 
-To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [community](https://docs.argilla.io/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 
