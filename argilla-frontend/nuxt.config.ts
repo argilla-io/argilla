@@ -205,7 +205,7 @@ const config: NuxtConfig = {
     clientVersion: pkg.version,
     documentationSite: "https://docs.argilla.io/",
     documentationPersistentStorage:
-      "https://docs.argilla.io/en/latest/getting_started/installation/deployments/huggingface-spaces.html#setting-up-persistent-storage",
+      "https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#persistent-storage",
   },
 };
 export default config;
