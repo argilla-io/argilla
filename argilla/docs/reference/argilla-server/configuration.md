@@ -96,7 +96,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_ELASTICSEARCH`: URL of the connection endpoint of the Elasticsearch instance (Default: `http://localhost:9200`).
 
-- `ARGILLA_SEARCH_ENGINE`: (Only for Feedback datasets) Search engine to use. Valid values are "elasticsearch" and "opensearch" (Default: "elasticsearch").
+- `ARGILLA_SEARCH_ENGINE`: Search engine to use. Valid values are "elasticsearch" and "opensearch" (Default: "elasticsearch").
 
 - `ARGILLA_ELASTICSEARCH_SSL_VERIFY`: If "False", disables SSL certificate verification when connecting to the Elasticsearch backend.
 
