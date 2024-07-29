@@ -11,6 +11,7 @@ services:
       # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
       # ARGILLA_ENABLE_TELEMETRY: 0
 
+      # REINDEX_DATASETS: 1 # Uncomment this line to reindex Argilla datasets into the search engine when starting up
       # DEFAULT_USER_ENABLED: false # Uncomment this line to disable the creation of the default user
       # DEFAULT_USER_PASSWORD: custom-password # Uncomment this line to set a custom password for the default user
       # DEFAULT_USER_API_KEY: custom-api-key # Uncomment this line to set a custom api-key for the default user
