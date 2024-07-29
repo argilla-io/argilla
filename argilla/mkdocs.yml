@@ -153,8 +153,6 @@ nav:
       - Python SDK: reference/argilla/
       - FastAPI Server:
         - Server configuration: reference/argilla-server/configuration.md
-        - Database migrations: reference/argilla-server/migrations.md
-        - Server CLI: reference/argilla-server/cli.md
       - Telemetry:
         - Server Telemetry: reference/argilla-server/telemetry.md
   - Community:
