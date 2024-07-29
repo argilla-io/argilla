@@ -66,8 +66,6 @@
 .md-typeset .admonition.docker>.admonition-title::before {
   content: "";
   display: inline-block;
-  width: 24px;
-  height: 24px;
   margin-right: 8px;
   background-size: contain;
   background-repeat: no-repeat;
@@ -81,6 +79,8 @@
 }
 
 .md-typeset .admonition.huggingface>.admonition-title::before {
+  width: 24px;
+  height: 24px;
   background-image: var(--md-admonition-icon--huggingface);
 }
 
