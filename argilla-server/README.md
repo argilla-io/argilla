@@ -115,6 +115,56 @@ pdm migrate
 pdm server
 ```
 
+## CLI commands
+
+This section list and describe the commands offered by the `argilla_server` Python package. If you need more information about the available
+commands in the CLI you can use the `--help` option:
+
+```sh
+python -m argilla_server --help
+```
+
+If you need more information about a specific command you can use the `--help` option too:
+
+```sh
+python -m argilla_server database --help
+```
+
+### Start the server
+
+The `argilla_server start` command will start the Argilla server blocking the current terminal. You can use the following command to start the server:
+
+```sh
+python -m argilla_server start
+```
+
+The following options can be provided:
+
+- `--host`: The host where the Argilla server will be bound. Default value is `0.0.0.0`.
+- `--port`: The port where the Argilla server will be bound. Default value is `6900`.
+- `--access-log/--no-access-log`: Enable/disable the server access log. Default value is `True`.
+
+### Database
+
+The `argilla_server database` group of commands offers functionality for managing the Argilla server database:
+
+- `python -m argilla_server database migrate`: applies the database migrations.
+- `python -m argilla_server database revisions`: list the different revisions to which the database can be migrated.
+
+#### Users management
+
+The `argilla_server database users` group of commands offers functionality for managing the users of the Argilla server.
+
+- `python -m argilla_server database users create`: creates a new user in the Argilla server database.
+- `python -m argilla_server database users create_default`: creates the default users in the Argilla server database.
+- `python -m argilla_server database users migrate`: migrates the users from the old `YAML` file to the Argilla server database.
+- `python -m argilla_server database users update`: updates a user in the Argilla server database.
+
+### Search engine
+
+The `argilla_server search-engine` group of commands offers functionality to work with the search engine used by Argilla.
+
+- `python -m argilla_server search-engine reindex`: reindex all Argilla entities into search engine.
 
 ## 🫱🏾‍🫲🏼 Contribute
 
