@@ -26,6 +26,8 @@ In the Space creation UI, persistent storage is set to `Small PAID`, which is a 
 
 If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose `Ephemeral FREE`. `Ephemeral FREE` means your datasets and configuration will not be saved to disk, when the Space is restarted your datasets, workspaces, and users will be lost.
 
+If you want to disable the persistence storage warning, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING=false`
+
 !!! warning "Read this if you have datasets and want to enable persistent storage"
     If you want to enable persistent storage `Small PAID` and you have created datasets, users, or workspaces, follow this process:
 
