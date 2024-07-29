@@ -22,6 +22,10 @@ from argilla import Argilla, Workspace
 @pytest.fixture(scope="session")
 def client() -> rg.Argilla:
     client = rg.Argilla()
+
+    if len(list(client.workspaces)) == 0:
+        client.workspaces.add(rg.Workspace(name=f"test_{uuid.uuid4()}"))
+
     yield client
 
 
