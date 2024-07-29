@@ -1663,15 +1663,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#with-uvicorn" class="md-nav__link">
-    <span class="md-ellipsis">
-      with uvicorn
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1769,6 +1760,15 @@
   <a href="#hugging-face" class="md-nav__link">
     <span class="md-ellipsis">
       Hugging Face
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#argilla-server-docker-image-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      argilla-server docker image only
     </span>
   </a>
   
@@ -2157,15 +2157,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#with-uvicorn" class="md-nav__link">
-    <span class="md-ellipsis">
-      with uvicorn
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2268,6 +2259,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#argilla-server-docker-image-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      argilla-server docker image only
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2329,14 +2329,6 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <li><a href="https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/nginx">NGINX example</a></li>
 <li><a href="https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/traefik">Traefik example</a></li>
 </ul>
-<h3 id="with-uvicorn">with <code>uvicorn</code><a class="headerlink" href="#with-uvicorn" title="Permanent link">&para;</a></h3>
-<p>Since the Argilla Server is built on FastAPI, you can launch it using <code>uvicorn</code>:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>uvicorn<span class="w"> </span>argilla_server:app<span class="w"> </span>--port<span class="w"> </span><span class="m">6900</span>
-</span></code></pre></div>
-<p>!!! {note}
-    For more details about FastAPI and uvicorn, see <a href="https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn">here</a>.</p>
-<div class="language-text highlight"><pre><span></span><code>You can also visit the uvicorn official documentation [here](https://www.uvicorn.org/#usage).
-</code></pre></div>
 <h2 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
 <p>You can set the following environment variables to further configure your server and client.</p>
 <h3 id="server">Server<a class="headerlink" href="#server" title="Permanent link">&para;</a></h3>
@@ -2407,7 +2399,30 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 </ul>
 <h3 id="hugging-face">Hugging Face<a class="headerlink" href="#hugging-face" title="Permanent link">&para;</a></h3>
 <ul>
-<li><code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING</code>: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: <code>true</code>).</li>
+<li>
+<p><code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING</code>: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: <code>true</code>).</p>
+</li>
+<li>
+<p><code>USERNAME</code>: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: <code>$SPACE_AUTHOR_NAME</code>).</p>
+</li>
+<li>
+<p><code>PASSWORD</code>: If provided, the owner password. If <code>USERNAME</code> and <code>PASSWORD</code> are provided, the owner user will be created with these credentials on the server startup (Default: <code>""</code>).</p>
+</li>
+</ul>
+<h3 id="argilla-server-docker-image-only"><code>argilla-server</code> docker image only<a class="headerlink" href="#argilla-server-docker-image-only" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>REINDEX_DATASET</code>: If <code>true</code> or <code>1</code>, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: <code>0</code>).</p>
+</li>
+<li>
+<p><code>DEFAULT_USER_ENABLED</code>: If <code>true</code>, the default owner user will be created when launching the server (Default: <code>true</code>).</p>
+</li>
+<li>
+<p><code>DEFAULT_USER_PASSWORD</code>: The default user password to use (Default: <code>1234</code>).</p>
+</li>
+<li>
+<p><code>DEFAULT_USER_API_KEY</code>: The default user api key to user (Default: <code>argilla.apikey</code>)</p>
+</li>
 </ul>
 <h2 id="rest-api-docs">REST API docs<a class="headerlink" href="#rest-api-docs" title="Permanent link">&para;</a></h2>
 <p>FastAPI also provides beautiful REST API docs that you can check at <a href="http://localhost:6900/api/v1/docs">http://localhost:6900/api/v1/docs</a>.</p>
