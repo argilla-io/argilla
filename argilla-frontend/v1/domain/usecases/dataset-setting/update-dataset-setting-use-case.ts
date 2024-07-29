@@ -8,9 +8,13 @@ export class UpdateDatasetSettingUseCase {
     dataset: Dataset,
     part: "guidelines" | "metadata" | "distribution"
   ) {
-    const response = await this.update(dataset, part);
+    try {
+      const response = await this.update(dataset, part);
 
-    dataset.update(response.when, part);
+      dataset.update(response.when, part);
+    } catch (e) {
+      dataset.restore(part);
+    }
   }
 
   private update(

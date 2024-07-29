@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from pydantic import BaseSettings, Field
+from argilla_server.pydantic_v1 import BaseSettings, Field
 
 
 class HuggingfaceSettings(BaseSettings):

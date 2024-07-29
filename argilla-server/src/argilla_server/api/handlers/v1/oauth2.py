@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Path
+from fastapi import APIRouter, Depends, Request, Path
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,10 +23,9 @@ from argilla_server.api.schemas.v1.users import UserCreate
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.enums import UserRole
-from argilla_server.errors.future import AuthenticationError, NotFoundError
+from argilla_server.errors.future import NotFoundError
 from argilla_server.models import User
-from argilla_server.pydantic_v1 import Field, ValidationError
-from argilla_server.security.authentication.jwt import JWT
+from argilla_server.pydantic_v1 import Field
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 from argilla_server.security.settings import settings
@@ -74,32 +73,22 @@ async def get_access_token(
     provider: OAuth2ClientProvider = Depends(get_provider_by_name_or_raise),
     db: AsyncSession = Depends(get_async_db),
 ) -> Token:
-    try:
-        user_info = UserInfo(await provider.get_user_data(request)).use_claims(provider.claims)
-        user = await User.get_by(db, username=user_info.username)
-        if user is None:
-            try:
-                user_create = UserOAuthCreate(
-                    username=user_info.username,
-                    first_name=user_info.first_name,
-                    role=user_info.role,
-                )
-            except ValidationError as ex:
-                raise AuthenticationError("Could not authenticate user") from ex
+    userinfo = UserInfo(await provider.get_user_data(request)).use_claims(provider.claims)
 
-            user = await accounts.create_user_with_random_password(
-                db,
-                **user_create.dict(exclude_unset=True),
-                workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
-            )
-            telemetry.track_user_created(user, is_oauth=True)
+    if not userinfo.username:
+        raise RuntimeError("OAuth error: Missing username")
 
-        elif user.role != user_info.role:
-            raise AuthenticationError("Could not authenticate user")
+    user = await User.get_by(db, username=userinfo.username)
+    if user is None:
+        user = await accounts.create_user_with_random_password(
+            db,
+            **UserOAuthCreate(
+                username=userinfo.username,
+                first_name=userinfo.first_name,
+                role=userinfo.role,
+            ).dict(exclude_unset=True),
+            workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
+        )
+        telemetry.track_user_created(user, is_oauth=True)
 
-        return Token(access_token=JWT.create(user_info))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    # TODO: Create exception handler for AuthenticationError
-    except AuthenticationError as e:
-        raise HTTPException(status_code=401, detail=str(e)) from e
+    return Token(access_token=accounts.generate_user_token(user))
