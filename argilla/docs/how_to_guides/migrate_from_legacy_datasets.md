@@ -198,11 +198,24 @@ Here are a set of example functions to convert the records for single-label and 
         if prediction := data.get("prediction"):
             label, score = prediction[0].values()
             agent = data["prediction_agent"]
-            suggestions.append(rg.Suggestion(question_name="label", value=label, score=score, agent=agent))
+            suggestions.append(
+                rg.Suggestion(
+                    question_name="label", # (1)
+                    value=label, 
+                    score=score, 
+                    agent=agent
+                )
+            )
 
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="label", # (2)
+                    value=annotation, 
+                    user_id=user_id
+                )
+            )
 
         return rg.Record(
             id=data["id"],
@@ -215,6 +228,10 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
+
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
 
 === "For multi-label classification"
 
@@ -227,11 +244,24 @@ Here are a set of example functions to convert the records for single-label and 
         if prediction := data.get("prediction"):
             labels, scores = zip(*[(pred["label"], pred["score"]) for pred in prediction])
             agent = data["prediction_agent"]
-            suggestions.append(rg.Suggestion(question_name="labels", value=labels, score=scores, agent=agent))
+            suggestions.append(
+                rg.Suggestion(
+                    question_name="labels", # (1)
+                    value=labels, 
+                    score=scores, 
+                    agent=agent
+                )
+            )
 
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="label", # (2)
+                    value=annotation, 
+                    user_id=user_id
+                )
+            )
 
         return rg.Record(
             id=data["id"],
@@ -244,6 +274,10 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
+    
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
 
 === "For token classification"
 
@@ -256,11 +290,24 @@ Here are a set of example functions to convert the records for single-label and 
         if prediction := data.get("prediction"):
             scores = [span["score"] for span in prediction]
             agent = data["prediction_agent"]
-            suggestions.append(rg.Suggestion(question_name="spans", value=prediction, score=scores, agent=agent))
+            suggestions.append(
+                rg.Suggestion(
+                    question_name="spans", # (1)
+                    value=prediction, 
+                    score=scores, 
+                    agent=agent
+                )
+            )
 
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="spans", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="spans", # (2)
+                    value=annotation, 
+                    user_id=user_id
+                )
+            )
 
         return rg.Record(
             id=data["id"],
@@ -274,6 +321,10 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
+
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
 
 === "For text generation"
 
@@ -287,13 +338,24 @@ Here are a set of example functions to convert the records for single-label and 
             first = prediction[0]
             agent = data["prediction_agent"]
             suggestions.append(
-                rg.Suggestion(question_name="text_generation", value=first["text"], score=first["score"], agent=agent)
+                rg.Suggestion(
+                    question_name="text_generation", # (1)
+                    value=first["text"], 
+                    score=first["score"], 
+                    agent=agent
+                )
             )
 
         if annotation := data.get("annotation"):
             # From data[annotation]
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="text_generation", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="text_generation", # (2)
+                    value=annotation, 
+                    user_id=user_id
+                )
+            )
 
         return rg.Record(
             id=data["id"],
@@ -307,6 +369,10 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
+
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
 
 The functions above depend on the `users_by_name` dictionary and the `current_user` object to assign responses to users, we need to load the existing users. You can retrieve the users from the Argilla V2 server and the current user as follows:
 
