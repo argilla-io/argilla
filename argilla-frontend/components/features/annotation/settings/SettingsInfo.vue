@@ -56,7 +56,7 @@
             <BaseButton
               type="button"
               class="secondary light small"
-              @on-click="settings.dataset.restoreDistribution()"
+              @on-click="settings.dataset.restore('distribution')"
               :disabled="!settings.dataset.isModifiedTaskDistribution"
             >
               <span v-text="$t('cancel')" />
@@ -91,7 +91,7 @@
             <BaseButton
               type="button"
               class="secondary light small"
-              @on-click="settings.dataset.restoreGuidelines()"
+              @on-click="settings.dataset.restore('guidelines')"
               :disabled="!settings.dataset.isModifiedGuidelines"
             >
               <span v-text="$t('cancel')" />
