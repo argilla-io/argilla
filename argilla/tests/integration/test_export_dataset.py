@@ -24,6 +24,8 @@ import argilla as rg
 import pytest
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
+_RETRIES = 5
+
 
 @pytest.fixture
 def dataset(client) -> rg.Dataset:
@@ -72,7 +74,7 @@ def token():
     return os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING")
 
 
-@pytest.mark.flaky(retries=3, only_on=[OSError])  # I/O consistency CICD pipline
+@pytest.mark.flaky(retries=_RETRIES, only_on=[OSError])  # I/O consistency CICD pipline
 @pytest.mark.parametrize("with_records_export", [True, False])
 class TestDiskImportExportMixin:
     def test_export_dataset_to_disk(
@@ -137,7 +139,7 @@ class TestDiskImportExportMixin:
 
 
 @pytest.mark.flaky(
-    retries=3, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError]
+    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError]
 )  # Hub consistency CICD pipline
 @pytest.mark.skipif(
     not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"),
