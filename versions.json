@@ -117,6 +117,14 @@
     }
   },
   {
+    "version": "docs_review-docker-readme",
+    "title": "docs_review-docker-readme",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_review-code-snippets",
     "title": "docs_review-code-snippets",
     "aliases": [],
