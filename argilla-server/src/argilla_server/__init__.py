@@ -21,4 +21,3 @@ if PYDANTIC_MAJOR_VERSION >= 2:
 else:
     from argilla_server._app import app  # noqa
 
-# FORCE CI Build
