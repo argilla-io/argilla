@@ -11,8 +11,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import os
+from typing import Any, Callable, Union, Optional
 
-from typing import Any, Callable, Union
+from argilla_server.enums import UserRole
+
+
+def _parse_role_from_environment(userinfo: dict) -> Optional[UserRole]:
+    """This is a temporal solution, and it will be replaced by a proper Sign up process"""
+    if userinfo["username"] == os.getenv("USERNAME"):
+        return UserRole.owner
 
 
 class Claims(dict):
@@ -29,3 +37,4 @@ class Claims(dict):
         self["identity"] = kwargs.get("identity", self.get("identity", "sub"))
         self["picture"] = kwargs.get("picture", self.get("picture", "picture"))
         self["email"] = kwargs.get("email", self.get("email", "email"))
+        self["role"] = kwargs.get("role", _parse_role_from_environment)
