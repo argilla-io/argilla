@@ -7,15 +7,9 @@ services:
     environment:
       ARGILLA_HOME_PATH: /var/lib/argilla
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
-      ARGILLA_AUTH_SECRET_KEY: ${ARGILLA_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
 
       # Opt-out for telemetry https://docs.argilla.io/en/latest/reference/telemetry.html
       # ARGILLA_ENABLE_TELEMETRY: 0
-
-      # Set user configuration https://docs.argilla.io/en/latest/getting_started/installation/configurations/user_management.html
-      # ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /config/.users.yaml
-      # volumes:
-      #- ${PWD}/.users.yaml:/config/.users.yaml
 
       # DEFAULT_USER_ENABLED: false # Uncomment this line to disable the creation of the default user
       # DEFAULT_USER_PASSWORD: custom-password # Uncomment this line to set a custom password for the default user
@@ -47,16 +41,6 @@ services:
       - "9300:9300"
     volumes:
       - elasticdata:/usr/share/elasticsearch/data/
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.2
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
-    networks:
-      - argilla
 
 networks:
   argilla:
