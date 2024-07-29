@@ -68,30 +68,101 @@ client = rg.Argilla()
 
 Next, define the new dataset settings:
 
-```python
-settings = rg.Settings(
-    fields=[
-        rg.TextField(name="text"), # (1)
-    ],
-    questions=[
-        rg.LabelQuestion(name="label", labels=settings_v1.label_schema), # (2)
-    ],
-    metadata=[
-        rg.TermsMetadataProperty(name="split"), # (3)
-    ],
-    vectors=[
-        rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (4)
-    ],
-)
-```
+=== "For single-label classification"
 
-1. The default name for text classification is `text`, but we should provide all names included in `record.inputs`.
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"), # (1)
+        ],
+        questions=[
+            rg.LabelQuestion(name="label", labels=settings_v1.label_schema),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (2)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (3)
+        ],
+    )
+    ```
 
-2. The basis question for text classification is a `LabelQuestion` for single-label or `MultiLabelQuestion` for multi-label classification.
+    1. The default field in `DatasetForTextClassification` is `text`, but we should provide all fields included in `record.inputs`.
 
-3. Here, we need to provide all relevant metadata fields.
+    2. Here, we need to provide all relevant metadata fields available in the dataset.
 
-4. The vectors fields available in the dataset.
+    3. Here, we need to provide all relevant vectors available in the dataset.
+
+=== "For multi-label classification"
+
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"), # (1)
+        ],
+        questions=[
+            rg.MultiLabelQuestion(name="labels", labels=settings_v1.label_schema),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (2)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (3)
+        ],
+    )
+    ```
+
+    1. The default field in `DatasetForTextClassification` is `text`, but we should provide all fields included in `record.inputs`.
+
+    2. Here, we need to provide all relevant metadata fields available in the dataset.
+
+    3. Here, we need to provide all relevant vectors available in the dataset.
+
+=== "For token classification"
+
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"), 
+        ],
+        questions=[
+            rg.SpanQuestion(name="spans", labels=settings_v1.label_schema),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (1)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (2)
+        ],
+    )
+    ```
+
+    1. Here, we need to provide all relevant metadata fields available in the dataset.
+
+    2.  Here, we need to provide all relevant vectors available in the dataset.
+    
+=== "For text generation"
+
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"),
+        ],
+        questions=[
+            rg.TextQuestion(name="text_generation"),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (1)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (2)
+        ],
+    )
+    ```
+
+    1. Here, we need to provide all relevant metadata fields available in the dataset.
+    
+    2.  Here, we need to provide all relevant vectors available in the dataset.
 
 Finally, create the new dataset on the Argilla V2 server:
 
@@ -204,7 +275,7 @@ Here are a set of example functions to convert the records for single-label and 
         )
     ```
 
-=== "For Text generation"
+=== "For text generation"
 
     ```python
     def map_to_record_for_text_generation(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
