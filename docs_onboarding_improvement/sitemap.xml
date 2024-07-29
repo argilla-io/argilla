@@ -196,6 +196,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://argilla-io.github.io/argilla/docs_onboarding_improvement/reference/argilla-server/configuration/</loc>
+         <lastmod>2024-07-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://argilla-io.github.io/argilla/docs_onboarding_improvement/reference/argilla-server/telemetry/</loc>
+         <lastmod>2024-07-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://argilla-io.github.io/argilla/docs_onboarding_improvement/tutorials/</loc>
          <lastmod>2024-07-29</lastmod>
          <changefreq>daily</changefreq>

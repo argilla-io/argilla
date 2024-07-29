@@ -6,34 +6,34 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="In this section, we will provide a step-by-step guide to show how to manage workspaces.">
+        <meta name="description" content="The Argilla python server SDK">
       
       
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/docs_onboarding_improvement/how_to_guides/workspace/">
+        <link rel="canonical" href="https://argilla-io.github.io/argilla/docs_onboarding_improvement/reference/argilla-server/telemetry/">
       
       
-        <link rel="prev" href="../user/">
+        <link rel="prev" href="../configuration/">
       
       
-        <link rel="next" href="../dataset/">
+        <link rel="next" href="../../../community/">
       
       
-      <link rel="icon" href="../../assets/favicon.ico">
+      <link rel="icon" href="../../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.26">
     
     
       
-        <title>Manage workspaces - Argilla Docs</title>
+        <title>Server Telemetry - Argilla Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.6543a935.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,17 +52,17 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-      <link rel="stylesheet" href="../../css/ansi-colours.css">
+      <link rel="stylesheet" href="../../../css/ansi-colours.css">
     
-      <link rel="stylesheet" href="../../css/jupyter-cells.css">
+      <link rel="stylesheet" href="../../../css/jupyter-cells.css">
     
-      <link rel="stylesheet" href="../../css/pandas-dataframe.css">
+      <link rel="stylesheet" href="../../../css/pandas-dataframe.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -71,11 +71,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Manage workspaces - Argilla Docs" >
+        <meta  property="og:title"  content="Server Telemetry - Argilla Docs" >
       
-        <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to show how to manage workspaces." >
+        <meta  property="og:description"  content="The Argilla python server SDK" >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/docs_onboarding_improvement/assets/images/social/how_to_guides/workspace.png" >
+        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/docs_onboarding_improvement/assets/images/social/reference/argilla-server/telemetry.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,15 +83,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/docs_onboarding_improvement/how_to_guides/workspace/" >
+        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/docs_onboarding_improvement/reference/argilla-server/telemetry/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Manage workspaces - Argilla Docs" >
+        <meta  name="twitter:title"  content="Server Telemetry - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to show how to manage workspaces." >
+        <meta  name="twitter:description"  content="The Argilla python server SDK" >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/docs_onboarding_improvement/assets/images/social/how_to_guides/workspace.png" >
+        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/docs_onboarding_improvement/assets/images/social/reference/argilla-server/telemetry.png" >
       
     
     
@@ -114,7 +114,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#workspace-management" class="md-skip">
+        <a href="#server-telemetry" class="md-skip">
           Skip to content
         </a>
       
@@ -132,9 +132,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../../.." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -151,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Manage workspaces
+              Server Telemetry
             
           </span>
         </div>
@@ -275,7 +275,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
     
@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../getting_started/quickstart/" class="md-tabs__link">
+        <a href="../../../getting_started/quickstart/" class="md-tabs__link">
           
   
   Getting started
@@ -308,11 +308,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="../" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../../how_to_guides/" class="md-tabs__link">
         
   
     
@@ -329,7 +327,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../tutorials/" class="md-tabs__link">
+      <a href="../../../tutorials/" class="md-tabs__link">
         
   
     
@@ -344,17 +342,21 @@
         
   
   
+    
+  
   
     
     
       
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../reference/argilla/client/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../argilla/client/" class="md-tabs__link">
           
   
   API Reference
@@ -373,7 +375,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../community/" class="md-tabs__link">
+      <a href="../../../community/" class="md-tabs__link">
         
   
     
@@ -425,9 +427,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../../.." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     Argilla Docs
@@ -454,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -514,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/quickstart/" class="md-nav__link">
+      <a href="../../../getting_started/quickstart/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -535,7 +537,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/how-to-deploy-argilla-with-docker/" class="md-nav__link">
+      <a href="../../../getting_started/how-to-deploy-argilla-with-docker/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -556,7 +558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/how-to-configure-argilla-on-huggingface/" class="md-nav__link">
+      <a href="../../../getting_started/how-to-configure-argilla-on-huggingface/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -577,7 +579,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/faq/" class="md-nav__link">
+      <a href="../../../getting_started/faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -602,32 +604,27 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../" class="md-nav__link ">
+            <a href="../../../how_to_guides/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -638,13 +635,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             How-to guides
@@ -655,30 +652,25 @@
                 
   
   
-    
   
   
-  
     
     
     
       
       
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
         
           
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -689,7 +681,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3_1">
             <span class="md-nav__icon md-icon"></span>
             Basic
@@ -703,7 +695,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user/" class="md-nav__link">
+      <a href="../../../how_to_guides/user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -721,30 +713,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Manage workspaces
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../how_to_guides/workspace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -753,107 +725,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#default-workspaces" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default workspaces
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#create-a-new-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create a new workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#list-workspaces" class="md-nav__link">
-    <span class="md-ellipsis">
-      List workspaces
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#retrieve-a-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Retrieve a workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#check-workspace-existence" class="md-nav__link">
-    <span class="md-ellipsis">
-      Check workspace existence
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#list-users-in-a-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      List users in a workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#add-a-user-to-a-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Add a user to a workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#remove-a-user-from-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Remove a user from workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-a-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete a workspace
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -866,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dataset/" class="md-nav__link">
+      <a href="../../../how_to_guides/dataset/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -887,7 +758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../record/" class="md-nav__link">
+      <a href="../../../how_to_guides/record/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -908,7 +779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../distribution/" class="md-nav__link">
+      <a href="../../../how_to_guides/distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -929,7 +800,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../annotate/" class="md-nav__link">
+      <a href="../../../how_to_guides/annotate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -950,7 +821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../query/" class="md-nav__link">
+      <a href="../../../how_to_guides/query/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -971,7 +842,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../import_export/" class="md-nav__link">
+      <a href="../../../how_to_guides/import_export/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1005,20 +876,17 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1043,7 +911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../use_markdown_to_format_rich_content/" class="md-nav__link">
+      <a href="../../../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1064,7 +932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../migrate_from_legacy_datasets/" class="md-nav__link">
+      <a href="../../../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1117,7 +985,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../tutorials/" class="md-nav__link ">
+            <a href="../../../tutorials/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1148,7 +1016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorials/text_classification/" class="md-nav__link">
+      <a href="../../../tutorials/text_classification/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1173,25 +1041,30 @@
       
   
   
+    
   
   
+  
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1202,7 +1075,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             API Reference
@@ -1221,17 +1094,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
         
           
-          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1256,7 +1132,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/client/" class="md-nav__link">
+      <a href="../../argilla/client/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1277,7 +1153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/workspaces/" class="md-nav__link">
+      <a href="../../argilla/workspaces/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1298,7 +1174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/users/" class="md-nav__link">
+      <a href="../../argilla/users/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1336,7 +1212,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../reference/argilla/datasets/datasets/" class="md-nav__link ">
+            <a href="../../argilla/datasets/datasets/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1367,7 +1243,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/datasets/dataset_records/" class="md-nav__link">
+      <a href="../../argilla/datasets/dataset_records/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1413,7 +1289,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../reference/argilla/settings/settings/" class="md-nav__link ">
+            <a href="../../argilla/settings/settings/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1444,7 +1320,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/fields/" class="md-nav__link">
+      <a href="../../argilla/settings/fields/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1465,7 +1341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/questions/" class="md-nav__link">
+      <a href="../../argilla/settings/questions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1486,7 +1362,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/metadata_property/" class="md-nav__link">
+      <a href="../../argilla/settings/metadata_property/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1507,7 +1383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/vectors/" class="md-nav__link">
+      <a href="../../argilla/settings/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1528,7 +1404,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/settings/task_distribution/" class="md-nav__link">
+      <a href="../../argilla/settings/task_distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1574,7 +1450,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../reference/argilla/records/records/" class="md-nav__link ">
+            <a href="../../argilla/records/records/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1605,7 +1481,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/responses/" class="md-nav__link">
+      <a href="../../argilla/records/responses/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1626,7 +1502,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/suggestions/" class="md-nav__link">
+      <a href="../../argilla/records/suggestions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1647,7 +1523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/vectors/" class="md-nav__link">
+      <a href="../../argilla/records/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1668,7 +1544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/records/metadata/" class="md-nav__link">
+      <a href="../../argilla/records/metadata/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1697,7 +1573,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/search/" class="md-nav__link">
+      <a href="../../argilla/search/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1718,7 +1594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla/markdown/" class="md-nav__link">
+      <a href="../../argilla/markdown/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1752,17 +1628,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1787,7 +1666,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/argilla-server/configuration/" class="md-nav__link">
+      <a href="../configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1813,25 +1692,30 @@
                 
   
   
+    
   
   
+  
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1842,7 +1726,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             Telemetry
@@ -1853,10 +1737,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../reference/argilla-server/telemetry/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Server Telemetry
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1865,6 +1769,62 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-opt-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to opt out
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-reporting-telemetry" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why reporting telemetry
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sensitive-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sensitive data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#information-reported" class="md-nav__link">
+    <span class="md-ellipsis">
+      Information reported
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1909,7 +1869,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../community/" class="md-nav__link ">
+            <a href="../../../community/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1940,7 +1900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../community/contributor/" class="md-nav__link">
+      <a href="../../../community/contributor/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1961,7 +1921,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../community/popular_issues.md" class="md-nav__link">
+      <a href="../../../community/popular_issues.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1982,7 +1942,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../community/changelog/" class="md-nav__link">
+      <a href="../../../community/changelog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2098,81 +2058,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#default-workspaces" class="md-nav__link">
+  <a href="#how-to-opt-out" class="md-nav__link">
     <span class="md-ellipsis">
-      Default workspaces
+      How to opt out
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-a-new-workspace" class="md-nav__link">
+  <a href="#why-reporting-telemetry" class="md-nav__link">
     <span class="md-ellipsis">
-      Create a new workspace
+      Why reporting telemetry
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#list-workspaces" class="md-nav__link">
+  <a href="#sensitive-data" class="md-nav__link">
     <span class="md-ellipsis">
-      List workspaces
+      Sensitive data
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#retrieve-a-workspace" class="md-nav__link">
+  <a href="#information-reported" class="md-nav__link">
     <span class="md-ellipsis">
-      Retrieve a workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#check-workspace-existence" class="md-nav__link">
-    <span class="md-ellipsis">
-      Check workspace existence
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#list-users-in-a-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      List users in a workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#add-a-user-to-a-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Add a user to a workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#remove-a-user-from-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Remove a user from workspace
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#delete-a-workspace" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete a workspace
+      Information reported
     </span>
   </a>
   
@@ -2193,7 +2108,7 @@
                   
 
   
-    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/how_to_guides/workspace.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/reference/argilla-server/telemetry.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -2201,160 +2116,43 @@
   
 
 
-<h1 id="workspace-management">Workspace management<a class="headerlink" href="#workspace-management" title="Permanent link">&para;</a></h1>
-<p>This guide provides an overview of workspaces, explaining how to set up and manage workspaces in Argilla.</p>
-<p>A <strong>workspace</strong> is a <em>space</em> inside your Argilla instance where authorized users can collaborate on datasets. It is accessible through the Python SDK and the UI.</p>
-<details class="question">
-<summary>Question: Who can manage workspaces?</summary>
-<p>Only users with the <code>owner</code> role can manage (create, read and delete) workspaces.</p>
-<p>A user with the <code>admin</code> role can only read the workspace to which it belongs.</p>
-</details>
-<h2 id="default-workspaces">Default workspaces<a class="headerlink" href="#default-workspaces" title="Permanent link">&para;</a></h2>
-<p>Argilla provides a default workspace to help you get started in Python and the UI. The name of this workspace varies depending on the server configuration.</p>
-<table>
-<thead>
-<tr>
-<th>Environment</th>
-<th>Name</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Quickstart Docker and HF Space</td>
-<td>admin</td>
-</tr>
-<tr>
-<td>Server image</td>
-<td>argilla</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition info">
-<p class="admonition-title">Main Class</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">Workspace</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">client</span><span class="o">=</span><span class="n">client</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
+<h1 id="server-telemetry">Server Telemetry<a class="headerlink" href="#server-telemetry" title="Permanent link">&para;</a></h1>
+<p>Argilla uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used.</p>
+<h2 id="how-to-opt-out">How to opt out<a class="headerlink" href="#how-to-opt-out" title="Permanent link">&para;</a></h2>
+<p>You can opt out of telemetry reporting using the <code>ENV</code> variable <code>ARGILLA_ENABLE_TELEMETRY</code> before launching the server. Setting this variable to <code>0</code> will completely disable telemetry reporting.</p>
+<p>If you are a Linux/MacOs user, you should run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ARGILLA_ENABLE_TELEMETRY</span><span class="o">=</span><span class="m">0</span>
 </span></code></pre></div>
-<blockquote>
-<p>Check the <a href="../../reference/argilla/workspaces/">Workspace - Python Reference</a> to see the attributes, arguments, and methods of the <code>Workspace</code> class in detail.</p>
-</blockquote>
-</div>
-<h2 id="create-a-new-workspace">Create a new workspace<a class="headerlink" href="#create-a-new-workspace" title="Permanent link">&para;</a></h2>
-<p>To create a new workspace in Argilla, you can define it in the <code>Workspace</code> class and then call the <code>create</code> method. This method is inherited from the <code>Resource</code> base class and operates without modifications.</p>
-<blockquote>
-<p>When you create a new workspace, it will be empty. To create and add a new dataset, check these <a href="../dataset/">guides</a>.</p>
-</blockquote>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">workspace_to_create</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Workspace</span><span class="p">(</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_workspace&quot;</span><span class="p">,</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">client</span><span class="o">=</span><span class="n">client</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">)</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">created_workspace</span> <span class="o">=</span> <span class="n">workspace_to_create</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">created_workspace</span>
+<p>If you are a Windows user, you should run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">set</span><span class="w"> </span><span class="nv">ARGILLA_ENABLE_TELEMETRY</span><span class="o">=</span><span class="m">0</span>
 </span></code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Accessing attributes</p>
-<p>Access the attributes of a workspace by calling them directly on the <code>Workspace</code> object. For example, <code>workspace.id</code> or <code>workspace.name</code>.</p>
-</div>
-<h2 id="list-workspaces">List workspaces<a class="headerlink" href="#list-workspaces" title="Permanent link">&para;</a></h2>
-<p>You can list all the existing workspaces in Argilla by calling the <code>workspaces</code> attribute on the <code>Argilla</code> class and iterating over them. You can also use <code>len(client.workspaces)</code> to get the number of workspaces.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">workspaces</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="n">workspaces</span><span class="p">:</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
-</span></code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Notebooks</p>
-<p>When using a notebook, executing <code>client.workspaces</code> will display a table with the number of <code>datasets</code> in each workspace, <code>name</code>, <code>id</code>, and the last update as <code>updated_at</code>.</p>
-</div>
-<h2 id="retrieve-a-workspace">Retrieve a workspace<a class="headerlink" href="#retrieve-a-workspace" title="Permanent link">&para;</a></h2>
-<p>You can retrieve a workspace by accessing the <code>workspaces</code> method on the <code>Argilla</code> class and passing the name of the workspace as an argument.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">retrieved_workspace</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="s2">&quot;my_workspace&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<p>You can also use the user <code>id</code> to fetch the workspace:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">workspace</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;&lt;uuid-or-uuid-string&gt;&quot;</span><span class="p">)</span>
-</span></code></pre></div></p>
-<p>If the workspace does not exist for the given id, the call will return <code>None</code>.</p>
-<h2 id="check-workspace-existence">Check workspace existence<a class="headerlink" href="#check-workspace-existence" title="Permanent link">&para;</a></h2>
-<p>You can check if a workspace exists. The <code>client.workspaces</code> method will return <code>None</code> if the workspace was not found.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">workspace</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="s2">&quot;my_workspace&quot;</span><span class="p">)</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">workspace_exists</span> <span class="o">=</span> <span class="n">workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span></code></pre></div>
-<h2 id="list-users-in-a-workspace">List users in a workspace<a class="headerlink" href="#list-users-in-a-workspace" title="Permanent link">&para;</a></h2>
-<p>You can list all the users in a workspace by accessing the <code>users</code> attribute on the <code>Workspace</code> class and iterating over them. You can also use <code>len(workspace.users)</code> to get the number of users by workspace.</p>
-<blockquote>
-<p>For further information on how to manage users, check this <a href="../user/">how-to guide</a>.</p>
-</blockquote>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">workspace</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="s1">&#39;my_workspace&#39;</span><span class="p">)</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">users</span><span class="p">:</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="add-a-user-to-a-workspace">Add a user to a workspace<a class="headerlink" href="#add-a-user-to-a-workspace" title="Permanent link">&para;</a></h2>
-<p>You can also add a user to a workspace by calling the <code>add_user</code> method on the <code>Workspace</code> class.</p>
-<blockquote>
-<p>For further information on how to manage users, check this <a href="../user/">how-to guide</a>.</p>
-</blockquote>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">workspace</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="s2">&quot;my_workspace&quot;</span><span class="p">)</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">added_user</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">add_user</span><span class="p">(</span><span class="s2">&quot;my_username&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="remove-a-user-from-workspace">Remove a user from workspace<a class="headerlink" href="#remove-a-user-from-workspace" title="Permanent link">&para;</a></h2>
-<p>You can also remove a user from a workspace by calling the <code>remove_user</code> method on the <code>Workspace</code> class.</p>
-<blockquote>
-<p>For further information on how to manage users, check this <a href="../user/">how-to guide</a>.</p>
-</blockquote>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">workspace</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="s2">&quot;my_workspace&quot;</span><span class="p">)</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">removed_user</span> <span class="o">=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">remove_user</span><span class="p">(</span><span class="s2">&quot;my_username&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="delete-a-workspace">Delete a workspace<a class="headerlink" href="#delete-a-workspace" title="Permanent link">&para;</a></h2>
-<p>To delete a workspace, <strong>no dataset can be associated with it</strong>. If the workspace contains any dataset, deletion will fail. You can delete a workspace by calling the <code>delete</code> method on the <code>Workspace</code> class.</p>
-<blockquote>
-<p>To clear a workspace and delete all their datasets, refer to this <a href="../dataset/">how-to guide</a>.</p>
-</blockquote>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">workspace_to_delete</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">workspaces</span><span class="p">(</span><span class="s2">&quot;my_workspace&quot;</span><span class="p">)</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">deleted_workspace</span> <span class="o">=</span> <span class="n">workspace_to_delete</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-</span></code></pre></div>
+<p>To opt in again, you can set the variable to <code>1</code>.</p>
+<h2 id="why-reporting-telemetry">Why reporting telemetry<a class="headerlink" href="#why-reporting-telemetry" title="Permanent link">&para;</a></h2>
+<p>Anonymous telemetry information enables us to continuously improve the product and detect recurring problems to better serve all users. We collect aggregated information about general usage and errors. We do NOT collect any information on users' data records, datasets, or metadata information.</p>
+<h2 id="sensitive-data">Sensitive data<a class="headerlink" href="#sensitive-data" title="Permanent link">&para;</a></h2>
+<p>We do not collect any piece of information related to the source data you store in Argilla. We don't identify individual users. Your data does not leave your server at any time:</p>
+<ul>
+<li>No dataset record is collected.</li>
+<li>No dataset names or metadata are collected.</li>
+</ul>
+<h2 id="information-reported">Information reported<a class="headerlink" href="#information-reported" title="Permanent link">&para;</a></h2>
+<p>The following usage and error information is reported:</p>
+<ul>
+<li>The code of the raised error and the entity type related to the error, if any (Dataset, Workspace,...)</li>
+<li>The <code>user-agent</code> and <code>accept-language</code> http headers</li>
+<li>Task name and number of records for bulk operations</li>
+<li>An anonymous generated user uuid</li>
+<li>The Argilla version running the server</li>
+<li>The Python version, e.g. <code>3.8.13</code></li>
+<li>The system/OS name, such as <code>Linux</code>, <code>Darwin</code>, <code>Windows</code></li>
+<li>The system’s release version, e.g. <code>Darwin Kernel Version 21.5.0: Tue Apr 26 21:08:22 PDT 2022; root:xnu-8020</code></li>
+<li>The machine type, e.g. <code>AMD64</code></li>
+<li>The underlying platform spec with as much useful information as possible. (eg. <code>macOS-10.16-x86_64-i386-64bit</code>)</li>
+<li>The type of deployment: <code>quickstart</code> or <code>server</code></li>
+<li>The dockerized deployment flag: <code>True</code> or <code>False</code></li>
+</ul>
+<p>For transparency, you can inspect the source code where this is performed <a href="https://github.com/argilla-io/argilla/blob/main/src/argilla/utils/telemetry.py">here</a>.</p>
+<p>If you have any doubts, don't hesitate to join our <a href="http://hf.co/join/discord">Discord channel</a> or open a GitHub issue. We'd be very happy to discuss how we can improve this.</p>
 
 
 
@@ -2393,7 +2191,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../user/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Manage users and credentials">
+          <a href="../configuration/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Server configuration">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -2403,20 +2201,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Manage users and credentials
+                Server configuration
               </div>
             </div>
           </a>
         
         
           
-          <a href="../dataset/" class="md-footer__link md-footer__link--next" aria-label="Next: Create, update and delete datasets">
+          <a href="../../../community/" class="md-footer__link md-footer__link--next" aria-label="Next: Community">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Create, update and delete datasets
+                Community
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2502,12 +2300,12 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
-        <script src="../../js/open_in_new_tab.js"></script>
+        <script src="../../../js/open_in_new_tab.js"></script>
       
     
   </body>
