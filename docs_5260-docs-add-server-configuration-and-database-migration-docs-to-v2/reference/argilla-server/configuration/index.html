@@ -18,7 +18,7 @@
         <link rel="prev" href="../../argilla/markdown/">
       
       
-        <link rel="next" href="../migrations/">
+        <link rel="next" href="../telemetry/">
       
       
       <link rel="icon" href="../../../assets/favicon.ico">
@@ -1707,13 +1707,14 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sqlite-and-postgresql" class="md-nav__link">
+  <a href="#database" class="md-nav__link">
     <span class="md-ellipsis">
-      SQLite and PostgreSQL
+      Database
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Database">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#sqlite" class="md-nav__link">
@@ -1733,10 +1734,15 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+        
           <li class="md-nav__item">
-  <a href="#elasticsearch-and-opensearch" class="md-nav__link">
+  <a href="#search-engine" class="md-nav__link">
     <span class="md-ellipsis">
-      Elasticsearch and Opensearch
+      Search engine
     </span>
   </a>
   
@@ -1792,48 +1798,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../migrations/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Database migrations
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../cli.md" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Server CLI
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -2201,13 +2165,14 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sqlite-and-postgresql" class="md-nav__link">
+  <a href="#database" class="md-nav__link">
     <span class="md-ellipsis">
-      SQLite and PostgreSQL
+      Database
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Database">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#sqlite" class="md-nav__link">
@@ -2227,10 +2192,15 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+        
           <li class="md-nav__item">
-  <a href="#elasticsearch-and-opensearch" class="md-nav__link">
+  <a href="#search-engine" class="md-nav__link">
     <span class="md-ellipsis">
-      Elasticsearch and Opensearch
+      Search engine
     </span>
   </a>
   
@@ -2354,16 +2324,16 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <ul>
 <li><code>ARGILLA_AUTH_SECRET_KEY</code>: The secret key used to sign the API token data. You can use <code>openssl rand -hex 32</code> to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.</li>
 </ul>
-<h4 id="sqlite-and-postgresql">SQLite and PostgreSQL<a class="headerlink" href="#sqlite-and-postgresql" title="Permanent link">&para;</a></h4>
+<h4 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>ARGILLA_DATABASE_URL</code>: A URL string that contains the necessary information to connect to a database. Argilla uses SQLite by default, PostgreSQL is also officially supported (Default: <code>sqlite:///$ARGILLA_HOME_PATH/argilla.db?check_same_thread=False</code>).</li>
 </ul>
-<h4 id="sqlite">SQLite<a class="headerlink" href="#sqlite" title="Permanent link">&para;</a></h4>
+<h5 id="sqlite">SQLite<a class="headerlink" href="#sqlite" title="Permanent link">&para;</a></h5>
 <p>The following environment variables are useful only when SQLite is used:</p>
 <ul>
 <li><code>ARGILLA_DATABASE_SQLITE_TIMEOUT</code>: How many seconds the connection should wait before raising an <code>OperationalError</code> when a table is locked. If another connection opens a transaction to modify a table, that table will be locked until the transaction is committed. (Defaut: <code>15</code> seconds).</li>
 </ul>
-<h4 id="postgresql">PostgreSQL<a class="headerlink" href="#postgresql" title="Permanent link">&para;</a></h4>
+<h5 id="postgresql">PostgreSQL<a class="headerlink" href="#postgresql" title="Permanent link">&para;</a></h5>
 <p>The following environment variables are useful only when PostgreSQL is used:</p>
 <ul>
 <li>
@@ -2373,7 +2343,7 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <p><code>ARGILLA_DATABASE_POSTGRESQL_MAX_OVERFLOW</code>: The number of connections that can be opened above and beyond <code>ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE</code> setting (Default: <code>10</code>).</p>
 </li>
 </ul>
-<h4 id="elasticsearch-and-opensearch">Elasticsearch and Opensearch<a class="headerlink" href="#elasticsearch-and-opensearch" title="Permanent link">&para;</a></h4>
+<h4 id="search-engine">Search engine<a class="headerlink" href="#search-engine" title="Permanent link">&para;</a></h4>
 <ul>
 <li>
 <p><code>ARGILLA_ELASTICSEARCH</code>: URL of the connection endpoint of the Elasticsearch instance (Default: <code>http://localhost:9200</code>).</p>
@@ -2481,13 +2451,13 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
         
         
           
-          <a href="../migrations/" class="md-footer__link md-footer__link--next" aria-label="Next: Database migrations">
+          <a href="../telemetry/" class="md-footer__link md-footer__link--next" aria-label="Next: Server Telemetry">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Database migrations
+                Server Telemetry
               </div>
             </div>
             <div class="md-footer__button md-icon">
