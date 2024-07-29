@@ -276,7 +276,7 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
     def default(self) -> "Workspace":
         """The default workspace."""
         if len(self) == 0:
-            raise ArgillaError("There are no workspaces defined in the server. Please create a new workspace first")
+            raise ArgillaError("There are no workspaces created. Please create a new workspace first")
         return self[0]
 
     ############################
