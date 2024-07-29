@@ -201,8 +201,8 @@ Here are a set of example functions to convert the records for single-label and 
             suggestions.append(
                 rg.Suggestion(
                     question_name="label", # (1)
-                    value=label, 
-                    score=score, 
+                    value=label,
+                    score=score,
                     agent=agent
                 )
             )
@@ -212,7 +212,7 @@ Here are a set of example functions to convert the records for single-label and 
             responses.append(
                 rg.Response(
                     question_name="label", # (2)
-                    value=annotation, 
+                    value=annotation,
                     user_id=user_id
                 )
             )
@@ -247,8 +247,8 @@ Here are a set of example functions to convert the records for single-label and 
             suggestions.append(
                 rg.Suggestion(
                     question_name="labels", # (1)
-                    value=labels, 
-                    score=scores, 
+                    value=labels,
+                    score=scores,
                     agent=agent
                 )
             )
@@ -274,7 +274,7 @@ Here are a set of example functions to convert the records for single-label and 
             responses=responses,
         )
     ```
-    
+
     1. Make sure the `question_name` matches the name of the question in question settings.
 
     2. Make sure the `question_name` matches the name of the question in question settings.
@@ -293,8 +293,8 @@ Here are a set of example functions to convert the records for single-label and 
             suggestions.append(
                 rg.Suggestion(
                     question_name="spans", # (1)
-                    value=prediction, 
-                    score=scores, 
+                    value=prediction,
+                    score=scores,
                     agent=agent
                 )
             )
@@ -304,7 +304,7 @@ Here are a set of example functions to convert the records for single-label and 
             responses.append(
                 rg.Response(
                     question_name="spans", # (2)
-                    value=annotation, 
+                    value=annotation,
                     user_id=user_id
                 )
             )
@@ -340,8 +340,8 @@ Here are a set of example functions to convert the records for single-label and 
             suggestions.append(
                 rg.Suggestion(
                     question_name="text_generation", # (1)
-                    value=first["text"], 
-                    score=first["score"], 
+                    value=first["text"],
+                    score=first["score"],
                     agent=agent
                 )
             )
@@ -352,7 +352,7 @@ Here are a set of example functions to convert the records for single-label and 
             responses.append(
                 rg.Response(
                     question_name="text_generation", # (2)
-                    value=annotation, 
+                    value=annotation,
                     user_id=user_id
                 )
             )
