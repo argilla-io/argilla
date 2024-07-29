@@ -94,17 +94,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_ELASTICSEARCH_CA_PATH`: Path to CA cert for ES host. For example: `/full/path/to/root-ca.pem` (Optional)
 
-- `ARGILLA_NAMESPACE`: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same Elasticsearch instance for several independent Argilla instances.
-
-- `ARGILLA_DEFAULT_ES_SEARCH_ANALYZER`: Default analyzer for textual fields excluding the metadata (Default: "standard").
-
-- `ARGILLA_EXACT_ES_SEARCH_ANALYZER`: Default analyzer for `*.exact` fields in textual information (Default: "whitespace").
-
-- `ARGILLA_METADATA_FIELDS_LIMIT`: Max number of fields in the metadata (Default: 50, max: 100).
-
-- `ARGILLA_METADATA_FIELD_LENGTH`: Max length supported for the string metadata fields. Higher values will be truncated. Abusing this may lead to Elastic performance issues (Default: 128).
-
-### Feedback Datasets
+### Datasets
 
 - `ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS`: Set the number of maximum items to be allowed by label and multi label questions (Default: `500`).
 
@@ -114,14 +104,6 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING`: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: `true`).
 
-### Client
-
-- `ARGILLA_API_URL`: The default API URL when calling {meth}`argilla.init`.
-
-- `ARGILLA_API_KEY`: The default API key when calling {meth}`argilla.init`.
-
-- `ARGILLA_WORKSPACE`: The default workspace when calling {meth}`argilla.init`.
-
 ## REST API docs
 
-FastAPI also provides beautiful REST API docs that you can check at [http://localhost:6900/api/docs](http://localhost:6900/api/docs).
+FastAPI also provides beautiful REST API docs that you can check at [http://localhost:6900/api/v1/docs](http://localhost:6900/api/v1/docs).
