@@ -154,11 +154,9 @@ uvicorn argilla_server:app --port 6900
 
 ```
 
-!!! {note}
-
-    For more details about FastAPI and uvicorn, see [here](https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn).
-
-    You can also visit the uvicorn official documentation [here](https://www.uvicorn.org/#usage).
+> [!NOTE]
+> For more details about FastAPI and uvicorn, see [here](https://fastapi.tiangolo.com/deployment/manually/#run-a-server-manually-uvicorn).
+> You can also visit the uvicorn official documentation [here](https://www.uvicorn.org/#usage).
 
 ### Database
 
