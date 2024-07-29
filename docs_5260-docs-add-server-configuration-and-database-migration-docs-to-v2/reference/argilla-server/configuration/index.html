@@ -1757,9 +1757,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#feedback-datasets" class="md-nav__link">
+  <a href="#datasets" class="md-nav__link">
     <span class="md-ellipsis">
-      Feedback Datasets
+      Datasets
     </span>
   </a>
   
@@ -1769,15 +1769,6 @@
   <a href="#hugging-face" class="md-nav__link">
     <span class="md-ellipsis">
       Hugging Face
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Client
     </span>
   </a>
   
@@ -2260,9 +2251,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#feedback-datasets" class="md-nav__link">
+  <a href="#datasets" class="md-nav__link">
     <span class="md-ellipsis">
-      Feedback Datasets
+      Datasets
     </span>
   </a>
   
@@ -2272,15 +2263,6 @@
   <a href="#hugging-face" class="md-nav__link">
     <span class="md-ellipsis">
       Hugging Face
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Client
     </span>
   </a>
   
@@ -2413,23 +2395,8 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <li>
 <p><code>ARGILLA_ELASTICSEARCH_CA_PATH</code>: Path to CA cert for ES host. For example: <code>/full/path/to/root-ca.pem</code> (Optional)</p>
 </li>
-<li>
-<p><code>ARGILLA_NAMESPACE</code>: A prefix used to manage Elasticsearch indices. You can use this namespace to use the same Elasticsearch instance for several independent Argilla instances.</p>
-</li>
-<li>
-<p><code>ARGILLA_DEFAULT_ES_SEARCH_ANALYZER</code>: Default analyzer for textual fields excluding the metadata (Default: "standard").</p>
-</li>
-<li>
-<p><code>ARGILLA_EXACT_ES_SEARCH_ANALYZER</code>: Default analyzer for <code>*.exact</code> fields in textual information (Default: "whitespace").</p>
-</li>
-<li>
-<p><code>ARGILLA_METADATA_FIELDS_LIMIT</code>: Max number of fields in the metadata (Default: 50, max: 100).</p>
-</li>
-<li>
-<p><code>ARGILLA_METADATA_FIELD_LENGTH</code>: Max length supported for the string metadata fields. Higher values will be truncated. Abusing this may lead to Elastic performance issues (Default: 128).</p>
-</li>
 </ul>
-<h3 id="feedback-datasets">Feedback Datasets<a class="headerlink" href="#feedback-datasets" title="Permanent link">&para;</a></h3>
+<h3 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">&para;</a></h3>
 <ul>
 <li>
 <p><code>ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS</code>: Set the number of maximum items to be allowed by label and multi label questions (Default: <code>500</code>).</p>
@@ -2442,20 +2409,8 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <ul>
 <li><code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING</code>: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: <code>true</code>).</li>
 </ul>
-<h3 id="client">Client<a class="headerlink" href="#client" title="Permanent link">&para;</a></h3>
-<ul>
-<li>
-<p><code>ARGILLA_API_URL</code>: The default API URL when calling {meth}<code>argilla.init</code>.</p>
-</li>
-<li>
-<p><code>ARGILLA_API_KEY</code>: The default API key when calling {meth}<code>argilla.init</code>.</p>
-</li>
-<li>
-<p><code>ARGILLA_WORKSPACE</code>: The default workspace when calling {meth}<code>argilla.init</code>.</p>
-</li>
-</ul>
 <h2 id="rest-api-docs">REST API docs<a class="headerlink" href="#rest-api-docs" title="Permanent link">&para;</a></h2>
-<p>FastAPI also provides beautiful REST API docs that you can check at <a href="http://localhost:6900/api/docs">http://localhost:6900/api/docs</a>.</p>
+<p>FastAPI also provides beautiful REST API docs that you can check at <a href="http://localhost:6900/api/v1/docs">http://localhost:6900/api/v1/docs</a>.</p>
 
 
 
