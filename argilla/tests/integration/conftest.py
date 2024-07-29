@@ -28,9 +28,10 @@ def client() -> rg.Argilla:
 
     yield client
 
+    _cleanup(client)
 
-@pytest.fixture(autouse=True)
-def cleanup(client: rg.Argilla):
+
+def _cleanup(client: rg.Argilla):
     for workspace in client.workspaces:
         if workspace.name.startswith("test_"):
             for dataset in workspace.datasets:
@@ -50,7 +51,7 @@ def dataset_name() -> str:
 
 @pytest.fixture
 def workspace(client: Argilla) -> Workspace:
-    ws_name = "test-workspace"
+    ws_name = f"test-{uuid.uuid4()}"
 
     workspace = client.workspaces(ws_name)
     if workspace is None:
