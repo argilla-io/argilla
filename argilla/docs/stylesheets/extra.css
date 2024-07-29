@@ -89,7 +89,7 @@
   background-image: var(--md-admonition-icon--docker);
 }
 
-@media screen and (min-width: 60em) {
+@media screen and (min-width: 45em) {
   .iframe-wrapper {
     height: 650px;
   }
