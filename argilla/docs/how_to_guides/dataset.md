@@ -42,7 +42,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
             vectors=[rg.VectorField(name="vector", dimensions=10)],
             guidelines="guidelines",
             allow_extra_metadata=True,
-            distribution=2
+            distribution=rg.TaskDistribution(min_submitted=2),
         )
         ```
 
@@ -78,7 +78,6 @@ dataset = rg.Dataset(
     name="my_dataset",
     workspace="my_workspace",
     settings=settings,
-    client=client,
 )
 
 dataset.create()
@@ -93,15 +92,19 @@ To create multiple datasets with the same settings, define the settings once and
 ```python
 import argilla as rg
 
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
 settings = rg.Settings(
-    guidelines="Select the sentiment of the prompt.",
-    fields=[rg.TextField(name="prompt", use_markdown=True)],
-    questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
-    distribution=rg.TaskDistribution(min_submitted=3)
+    guidelines="These are some guidelines.",
+    fields=[rg.TextField(name="text", use_markdown=True)],
+    questions=[
+        rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"])
+    ],
+    distribution=rg.TaskDistribution(min_submitted=3),
 )
 
-dataset1 = rg.Dataset(name="sentiment_analysis_1", settings=settings)
-dataset2 = rg.Dataset(name="sentiment_analysis_2", settings=settings)
+dataset1 = rg.Dataset(name="my_dataset_1", settings=settings)
+dataset2 = rg.Dataset(name="my_dataset_2", settings=settings)
 
 # Create the datasets on the server
 dataset1.create()
@@ -110,28 +113,27 @@ dataset2.create()
 
 ### Create a dataset from an existing dataset
 
-To create a new dataset from an existing dataset, get the settings from the existing dataset and pass it
-to the new dataset.
+To create a new dataset from an existing dataset, get the settings from the existing dataset and pass them to the new dataset.
 
 ```python
 import argilla as rg
 
-# Get the settings from an existing dataset
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
 existing_dataset = client.datasets("sentiment_analysis")
 
-# Create a new dataset with the same settings
-dataset = rg.Dataset(name="sentiment_analysis_copy", settings=existing_dataset.settings)
+new_dataset = rg.Dataset(name="sentiment_analysis_copy", settings=existing_dataset.settings)
 
-# Create the dataset on the server
-dataset.create()
+new_dataset.create()
 ```
 
-You can also copy the records from the original dataset to the new one:
+!!! info
+    You can also copy the records from the original dataset to the new one:
 
-```python
-records = list(existing_dataset.records)
-dataset.records.log(records)
-```
+    ```python
+    records = list(existing_dataset.records)
+    new_dataset.records.log(records)
+    ```
 
 ## Define dataset settings
 
@@ -369,6 +371,9 @@ Metadata properties allow you to configure the use of metadata information for t
     ```
     ![FloatMetadataProperty](../assets/images/how_to_guides/dataset/float_metadata.png)
 
+!!! note
+    You can also set the `allow_extra_metadata` argument in the dataset to `True` to specify whether the dataset will allow metadata fields in the records other than those specified under metadata. Note that these will not be accessible from the UI for any user, only retrievable using the Python SDK.
+
 ### Vectors
 
 To use the similarity search in the UI and the Python SDK, you will need to configure vectors using the `VectorField` class. It has the following configuration:
@@ -433,35 +438,38 @@ datasets = workspace.datasets
 for dataset in datasets:
     print(dataset)
 ```
+!!! tip "Notebooks"
+    When using a notebook, executing `client.datasets` will display a table with the `name`of the existing datasets, the `id`, `workspace_id` to which they belong, and the last update as `updated_at`. .
 
 ## Retrieve a dataset
 
-You can retrieve a dataset by calling the `datasets` method on the `Argilla` class and passing the name of the dataset as an argument. By default, this method attempts to retrieve the dataset from the first workspace. If the dataset is in a different workspace, you must specify either the workspace name or id as an argument.
+You can retrieve a dataset by calling the `datasets` method on the `Argilla` class and passing the `name` or `id` of the dataset as an argument. If the dataset does not exist, a warning message will be raised and `None` will be returned.
 
-```python
-import argilla as rg
+=== "By name"
 
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+    By default, this method attempts to retrieve the dataset from the first workspace. If the dataset is in a different workspace, you must specify either the workspace or workspace name as an argument.
 
-workspace = client.workspaces("my_workspace")
+    ```python
+    import argilla as rg
 
-# Retrieve the dataset from the first workspace
-retrieved_dataset = client.datasets(name="my_dataset")
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-# Retrieve the dataset from the specified workspace
-retrieved_dataset = client.datasets(name="my_dataset", workspace=workspace)
-```
+    # Retrieve the dataset from the first workspace
+    retrieved_dataset = client.datasets(name="my_dataset")
 
-You can also use the user `id` to fetch the dataset:
-```python
-import argilla as rg
+    # Retrieve the dataset from the specified workspace
+    retrieved_dataset = client.datasets(name="my_dataset", workspace="my_workspace")
+    ```
 
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+=== "By id"
 
-dataset = client.datasets(id="<uuid-or-uuid-string>")
-```
+    ```python
+    import argilla as rg
 
-If the dataset does not exist for the given id, the call will return `None`.
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    dataset = client.datasets(id="<uuid-or-uuid-string>")
+    ```
 
 ## Check dataset existence
 
@@ -474,12 +482,13 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 dataset = client.datasets(name="my_dataset")
 
-dataset_exist = dataset is not None
+if dataset is not None:
+    pass
 ```
 
 ## Update a dataset
 
-Once a dataset is published, there are limited things you can update. Here is a summary of the attributes you can change:
+Once a dataset is published, there are limited things you can update. Here is a summary of the attributes you can change for each setting:
 
 === "Fields"
     | Attributes | From SDK | From UI |
@@ -539,6 +548,10 @@ Once a dataset is published, there are limited things you can update. Here is a 
 To modify these attributes, you can simply set the new value of the attributes you wish to change and call the `update` method on the `Dataset` object.
 
 ```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
 dataset = client.datasets("my_dataset")
 
 dataset.settings.fields["text"].use_markdown = True
@@ -547,18 +560,41 @@ dataset.settings.metadata["my_metadata"].visible_for_annotators = False
 dataset.update()
 ```
 
-You can also add and delete metadata properties and vector fields using the `add` and `delete` methods:
+You can also add and delete metadata properties and vector fields using the `add` and `delete` methods.
 
-```python
-dataset = client.datasets("my_dataset")
+=== "Add"
 
-# add
-dataset.vectors.add(rg.VectorField(name="my_vector", dimensions=123))
-dataset.update()
+    ```python
+    import argilla as rg
 
-#delete
-dataset.metadata["my_metadata"].delete()
-```
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    dataset = client.datasets("my_dataset")
+
+    dataset.settings.vectors.add(rg.VectorField(name="my_new_vector", dimensions=123))
+    dataset.settings.metadata.add(
+        rg.TermsMetadataProperty(
+            name="my_new_metadata",
+            options=["option_1", "option_2", "option_3"],
+        ),
+    )
+    dataset.update()
+    ```
+
+=== "Delete"
+
+    ```python
+    import argilla as rg
+
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    dataset = client.datasets("my_dataset")
+
+    dataset.settings.vectors["my_old_vector"].delete()
+    dataset.settings.metadata["my_old_metadata"].delete()
+
+    dataset.update()
+    ```
 
 ## Delete a dataset
 
