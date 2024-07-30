@@ -22,7 +22,7 @@ from argilla import Argilla, Workspace
 
 
 def test_create_dataset(client):
-    workspace = client.workspaces[0]
+    workspace = client.workspaces.default
     mock_dataset_name = f"test_create_dataset{datetime.now().strftime('%Y%m%d%H%M%S')}"
     dataset = rg.Dataset(
         name=mock_dataset_name,

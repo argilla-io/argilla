@@ -6,7 +6,7 @@ description: Quickstart of Argilla on how to create your first dataset.
 
 This guide provides a quick overview of the Argilla SDK and how to create your first dataset.
 
-## Setting up your Argilla project
+## Set up your Argilla project
 
 ### Run the Argilla server
 
@@ -24,7 +24,7 @@ After succesfully running this step, you should be able to see Argilla's UI sign
 
 !!! tip "Default user credentials to log into the UI"
 
-    This type of deployment automatically sets up some default users for you. Check [this guide](../how-to-guides/user.md) to log in for the first time in the UI.
+    This type of deployment automatically sets up some default users for you. Check [this guide](../how_to_guides/user.md) to log in for the first time in the UI.
 
 ### Install the SDK with pip
 

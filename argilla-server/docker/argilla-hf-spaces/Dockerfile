@@ -7,7 +7,6 @@ USER root
 
 # Copy Argilla distribution files
 COPY scripts/start.sh /home/argilla
-COPY scripts/start_argilla_server.sh /home/argilla
 COPY Procfile /home/argilla
 COPY requirements.txt /packages/requirements.txt
 
@@ -52,9 +51,7 @@ USER argilla
 ENV ELASTIC_CONTAINER=true
 ENV ES_JAVA_OPTS="-Xms1g -Xmx1g"
 
-ENV USERNAME=""
-ENV PASSWORD=""
-
 ENV ARGILLA_HOME_PATH=/data/argilla
+ENV REINDEX_DATASETS=1
 
 CMD ["/bin/bash", "start.sh"]

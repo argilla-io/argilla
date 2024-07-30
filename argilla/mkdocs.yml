@@ -132,6 +132,7 @@ nav:
   - Getting started:
       - Quickstart: getting_started/quickstart.md
       - Installation: getting_started/installation.md
+      - Set up in Hugging Face Spaces: getting_started/huggingface-spaces.md
       - FAQ: getting_started/faq.md
   - How-to guides:
       - how_to_guides/index.md
@@ -149,9 +150,14 @@ nav:
         - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:
       - tutorials/index.md
-      - Text classification task: tutorials/text_classification.ipynb
+      - Text classification: tutorials/text_classification.ipynb
+      - Token classification: tutorials/token_classification.ipynb
   - API Reference:
       - Python SDK: reference/argilla/
+      - FastAPI Server:
+        - Server configuration: reference/argilla-server/configuration.md
+      - Telemetry:
+        - Server Telemetry: reference/argilla-server/telemetry.md
   - Community:
       - community/index.md
       - How to contribute?: community/contributor.md

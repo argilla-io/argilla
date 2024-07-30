@@ -4,9 +4,24 @@ set -e
 # Run database migrations
 python -m argilla_server database migrate
 
-# Create default user
-if [ "$DEFAULT_USER_ENABLED" = "true" ] || [ "$DEFAULT_USER_ENABLED" = "1" ]; then
-	python -m argilla_server database users create_default --password $DEFAULT_USER_PASSWORD --api-key $DEFAULT_USER_API_KEY
+if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
+  echo "Creating owner user with username ${USERNAME}"
+  if [ -n "$API_KEY" ]; then
+    python -m argilla_server database users create \
+    --first-name "$USERNAME" \
+    --username "$USERNAME" \
+    --password "$PASSWORD" \
+    --api-key "$API_KEY" \
+    --role owner
+  else
+    python -m argilla_server database users create \
+    --first-name "$USERNAME" \
+    --username "$USERNAME" \
+    --password "$PASSWORD" \
+    --role owner
+  fi
+else
+  echo "No username and password was provided. Skipping user creation"
 fi
 
 # Reindexing data into search engine
