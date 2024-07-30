@@ -41,7 +41,6 @@ If everything went well, you should see the Argilla sign in page that looks like
 
 
 In the sign in page:
-=======
 
 1. Click on **Sign in with Hugging Face**
 2. **Authorize the application** and you will be logged in into Argilla as an `owner`.
@@ -82,9 +81,6 @@ client = rg.Argilla(
         1. Click on the three points menu at the top of the Space, select "Embed this Space", and open the direct URL.
         2. Use this pattern: `https://[your-owner-name]-[your_space_name].hf.space`.
 
-
-## Create your first dataset
-
 To create a dataset with a simple text classification task, first, you need to **define the dataset settings**.
 
 ```python
@@ -112,7 +108,7 @@ Now you can **create the dataset with these settings**. Publish the dataset to m
 !!! info "About workspaces"
     Workspaces in Argilla group datasets and user access rights. The `workspace` parameter is optional in this case. If you don't specify it, the dataset will be created in the default workspace `argilla`.
 
-    By default, **this workspace will be visible to users joining with the Sign in with Hugging Face button**. You can create other workspaces and decide to grant access to users either with the SDK or the [changing the OAuth configuration](getting_started/how-to-configure-argilla-on-huggingface.md).
+    By default, **this workspace will be visible to users joining with the Sign in with Hugging Face button**. You can create other workspaces and decide to grant access to users either with the SDK or the [changing the OAuth configuration](how-to-configure-argilla-on-huggingface.md).
 
 ```python
 dataset = rg.Dataset(
