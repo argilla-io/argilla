@@ -48,7 +48,11 @@ class DatasetUpdateValidator:
 
     @classmethod
     async def _validate_distribution(cls, dataset: Dataset, dataset_attrs: dict) -> None:
-        if dataset_attrs.get("distribution") is not None and (await dataset.responses_count) > 0:
+        if (
+            dataset_attrs.get("distribution") is not None
+            and dataset.distribution != dataset_attrs.get("distribution")
+            and (await dataset.responses_count) > 0
+        ):
             raise UpdateDistributionWithExistingResponsesError(
                 "Distribution settings can't be modified for a dataset containing user responses"
             )
