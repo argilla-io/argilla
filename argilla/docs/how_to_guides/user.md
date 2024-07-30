@@ -48,14 +48,6 @@ A **user** in Argilla is an authorized person, who depending on their role, can 
 
     Only users with the `owner` role can manage (create, retrieve, delete) other users.
 
-## Default users and credentials
-
-Argilla provides a default user with the `owner` role to help you get started in Python and the UI. The credentials for this user vary depending on the server configuration.
-
-| Environment                   | Username | Password    | API Key        |
-|-------------------------------|----------|-------------|----------------|
-| Quickstart Docker and HF Space | owner    | 12345678    | owner.apikey   |
-| Server image                  | argilla  | 1234        | argilla.apikey |
 
 For the new users, the username and password are set during the creation process. The API key is automatically generated and can be copied from the "Settings" section of the UI.
 
