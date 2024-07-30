@@ -6,34 +6,34 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="These are the how-to guides for the Argilla SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples.">
+        <meta name="description" content="The Argilla python server SDK">
       
       
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/how_to_guides/">
+        <link rel="canonical" href="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/reference/argilla-server/configuration/">
       
       
-        <link rel="prev" href="../getting_started/faq/">
+        <link rel="prev" href="../../argilla/markdown/">
       
       
-        <link rel="next" href="user/">
+        <link rel="next" href="../telemetry/">
       
       
-      <link rel="icon" href="../assets/favicon.ico">
+      <link rel="icon" href="../../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.26">
     
     
       
-        <title>How-to guides - Argilla Docs</title>
+        <title>Server configuration - Argilla Docs</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.6543a935.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,17 +52,17 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-      <link rel="stylesheet" href="../css/ansi-colours.css">
+      <link rel="stylesheet" href="../../../css/ansi-colours.css">
     
-      <link rel="stylesheet" href="../css/jupyter-cells.css">
+      <link rel="stylesheet" href="../../../css/jupyter-cells.css">
     
-      <link rel="stylesheet" href="../css/pandas-dataframe.css">
+      <link rel="stylesheet" href="../../../css/pandas-dataframe.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -71,11 +71,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="How-to guides - Argilla Docs" >
+        <meta  property="og:title"  content="Server configuration - Argilla Docs" >
       
-        <meta  property="og:description"  content="These are the how-to guides for the Argilla SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples." >
+        <meta  property="og:description"  content="The Argilla python server SDK" >
       
-        <meta  property="og:image"  content="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/assets/images/social/how_to_guides/index.png" >
+        <meta  property="og:image"  content="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/assets/images/social/reference/argilla-server/configuration.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,15 +83,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/how_to_guides/" >
+        <meta  property="og:url"  content="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/reference/argilla-server/configuration/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="How-to guides - Argilla Docs" >
+        <meta  name="twitter:title"  content="Server configuration - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="These are the how-to guides for the Argilla SDK. They provide step-by-step instructions for common scenarios, including detailed explanations and code samples." >
+        <meta  name="twitter:description"  content="The Argilla python server SDK" >
       
-        <meta  name="twitter:image"  content="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/assets/images/social/how_to_guides/index.png" >
+        <meta  name="twitter:image"  content="https://docs.argilla.io/docs_5327-docs-deploy-docs-in-custom-subdomain/assets/images/social/reference/argilla-server/configuration.png" >
       
     
     
@@ -114,7 +114,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-guides" class="md-skip">
+        <a href="#server-configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -132,9 +132,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../../.." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -151,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              How-to guides
+              Server configuration
             
           </span>
         </div>
@@ -275,7 +275,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../../.." class="md-tabs__link">
         
   
     
@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../getting_started/quickstart/" class="md-tabs__link">
+        <a href="../../../getting_started/quickstart/" class="md-tabs__link">
           
   
   Getting started
@@ -308,11 +308,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../../how_to_guides/" class="md-tabs__link">
         
   
     
@@ -329,7 +327,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../tutorials/" class="md-tabs__link">
+      <a href="../../../tutorials/" class="md-tabs__link">
         
   
     
@@ -344,17 +342,21 @@
         
   
   
+    
+  
   
     
     
       
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../reference/argilla/client/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../argilla/client/" class="md-tabs__link">
           
   
   API Reference
@@ -373,7 +375,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../community/" class="md-tabs__link">
+      <a href="../../../community/" class="md-tabs__link">
         
   
     
@@ -414,8 +416,6 @@
           
             
               
-                
-              
               <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
@@ -427,9 +427,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../../.." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../../../assets/logo.svg" alt="logo">
 
     </a>
     Argilla Docs
@@ -456,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -516,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/quickstart/" class="md-nav__link">
+      <a href="../../../getting_started/quickstart/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -537,7 +537,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/installation/" class="md-nav__link">
+      <a href="../../../getting_started/installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -558,7 +558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/huggingface-spaces/" class="md-nav__link">
+      <a href="../../../getting_started/huggingface-spaces/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -579,7 +579,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/faq/" class="md-nav__link">
+      <a href="../../../getting_started/faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -604,32 +604,27 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../../../how_to_guides/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -640,13 +635,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_3" id="__nav_3_label" tabindex="">
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             How-to guides
@@ -665,20 +660,17 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -703,7 +695,7 @@
   
   
     <li class="md-nav__item">
-      <a href="user/" class="md-nav__link">
+      <a href="../../../how_to_guides/user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -724,7 +716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="workspace/" class="md-nav__link">
+      <a href="../../../how_to_guides/workspace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -745,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="dataset/" class="md-nav__link">
+      <a href="../../../how_to_guides/dataset/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -766,7 +758,7 @@
   
   
     <li class="md-nav__item">
-      <a href="record/" class="md-nav__link">
+      <a href="../../../how_to_guides/record/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -787,7 +779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="distribution/" class="md-nav__link">
+      <a href="../../../how_to_guides/distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -808,7 +800,7 @@
   
   
     <li class="md-nav__item">
-      <a href="annotate/" class="md-nav__link">
+      <a href="../../../how_to_guides/annotate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -829,7 +821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="query/" class="md-nav__link">
+      <a href="../../../how_to_guides/query/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -850,7 +842,7 @@
   
   
     <li class="md-nav__item">
-      <a href="import_export/" class="md-nav__link">
+      <a href="../../../how_to_guides/import_export/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -884,20 +876,17 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -922,7 +911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="use_markdown_to_format_rich_content/" class="md-nav__link">
+      <a href="../../../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -943,7 +932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="migrate_from_legacy_datasets/" class="md-nav__link">
+      <a href="../../../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -996,7 +985,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../tutorials/" class="md-nav__link ">
+            <a href="../../../tutorials/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1027,7 +1016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/text_classification/" class="md-nav__link">
+      <a href="../../../tutorials/text_classification/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1048,7 +1037,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/token_classification/" class="md-nav__link">
+      <a href="../../../tutorials/token_classification/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1073,25 +1062,30 @@
       
   
   
+    
   
   
+  
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1102,7 +1096,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             API Reference
@@ -1121,17 +1115,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_1" >
         
           
-          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_1" id="__nav_5_1_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1156,7 +1153,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/client/" class="md-nav__link">
+      <a href="../../argilla/client/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1177,7 +1174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/workspaces/" class="md-nav__link">
+      <a href="../../argilla/workspaces/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1198,7 +1195,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/users/" class="md-nav__link">
+      <a href="../../argilla/users/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1236,7 +1233,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/argilla/datasets/datasets/" class="md-nav__link ">
+            <a href="../../argilla/datasets/datasets/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1267,7 +1264,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/datasets/dataset_records/" class="md-nav__link">
+      <a href="../../argilla/datasets/dataset_records/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1313,7 +1310,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/argilla/settings/settings/" class="md-nav__link ">
+            <a href="../../argilla/settings/settings/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1344,7 +1341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/fields/" class="md-nav__link">
+      <a href="../../argilla/settings/fields/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1365,7 +1362,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/questions/" class="md-nav__link">
+      <a href="../../argilla/settings/questions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1386,7 +1383,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/metadata_property/" class="md-nav__link">
+      <a href="../../argilla/settings/metadata_property/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1407,7 +1404,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/vectors/" class="md-nav__link">
+      <a href="../../argilla/settings/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1428,7 +1425,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/task_distribution/" class="md-nav__link">
+      <a href="../../argilla/settings/task_distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1474,7 +1471,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/argilla/records/records/" class="md-nav__link ">
+            <a href="../../argilla/records/records/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1505,7 +1502,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/responses/" class="md-nav__link">
+      <a href="../../argilla/records/responses/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1526,7 +1523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/suggestions/" class="md-nav__link">
+      <a href="../../argilla/records/suggestions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1547,7 +1544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/vectors/" class="md-nav__link">
+      <a href="../../argilla/records/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1568,7 +1565,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/metadata/" class="md-nav__link">
+      <a href="../../argilla/records/metadata/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1597,7 +1594,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/search/" class="md-nav__link">
+      <a href="../../argilla/search/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1618,7 +1615,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/markdown/" class="md-nav__link">
+      <a href="../../argilla/markdown/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1644,25 +1641,30 @@
                 
   
   
+    
   
   
+  
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1673,7 +1675,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5_2">
             <span class="md-nav__icon md-icon"></span>
             FastAPI Server
@@ -1684,10 +1686,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../reference/argilla-server/configuration/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Server configuration
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1696,6 +1718,176 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#launching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Launching
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Launching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-a-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using a proxy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      FastAPI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sqlite" class="md-nav__link">
+    <span class="md-ellipsis">
+      SQLite
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql" class="md-nav__link">
+    <span class="md-ellipsis">
+      PostgreSQL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search engine
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Datasets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hugging-face" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hugging Face
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-images-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker images only
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rest-api-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      REST API docs
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1721,17 +1913,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -1756,7 +1951,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla-server/telemetry/" class="md-nav__link">
+      <a href="../telemetry/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1809,7 +2004,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../community/" class="md-nav__link ">
+            <a href="../../../community/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1840,7 +2035,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../community/contributor/" class="md-nav__link">
+      <a href="../../../community/contributor/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1861,7 +2056,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../community/popular_issues.md" class="md-nav__link">
+      <a href="../../../community/popular_issues.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1882,7 +2077,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../community/changelog/" class="md-nav__link">
+      <a href="../../../community/changelog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1979,9 +2174,7 @@
             
             
               
-                
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -2000,18 +2193,150 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#basic" class="md-nav__link">
+  <a href="#launching" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic
+      Launching
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Launching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-a-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using a proxy
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#advanced" class="md-nav__link">
+  <a href="#environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
-      Advanced
+      Environment variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server" class="md-nav__link">
+    <span class="md-ellipsis">
+      Server
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      FastAPI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sqlite" class="md-nav__link">
+    <span class="md-ellipsis">
+      SQLite
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql" class="md-nav__link">
+    <span class="md-ellipsis">
+      PostgreSQL
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search engine
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#datasets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Datasets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hugging-face" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hugging Face
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-images-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker images only
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rest-api-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      REST API docs
     </span>
   </a>
   
@@ -2032,7 +2357,7 @@
                   
 
   
-    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/how_to_guides/index.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/reference/argilla-server/configuration.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -2040,78 +2365,119 @@
   
 
 
-<h1 id="how-to-guides">How-to guides<a class="headerlink" href="#how-to-guides" title="Permanent link">&para;</a></h1>
-<p>These guides provide step-by-step instructions for common scenarios, including detailed explanations and code samples. They are divided into two categories: basic and advanced. The basic guides will help you get started with the core concepts of Argilla, while the advanced guides will help you explore more advanced features.</p>
-<h2 id="basic">Basic<a class="headerlink" href="#basic" title="Permanent link">&para;</a></h2>
-<div class="grid cards">
+<h1 id="server-configuration">Server configuration<a class="headerlink" href="#server-configuration" title="Permanent link">&para;</a></h1>
+<p>This section explains advanced operations and settings for running the Argilla Server and Argilla Python Client.</p>
+<p>By default, the Argilla Server will look for your Elasticsearch (ES) endpoint at <code>http://localhost:9200</code>. You can customize this by setting the <code>ARGILLA_ELASTICSEARCH</code> environment variable. Have a look at the list of available <a href="#environment-variables">environment variables</a> to further configure the Argilla server.</p>
+<p>From the Argilla version <code>1.19.0</code>, you must set up the search engine manually to work with datasets. You should set the
+environment variable <code>ARGILLA_SEARCH_ENGINE=opensearch</code> or <code>ARGILLA_SEARCH_ENGINE=elasticsearch</code> depending on the backend you're using
+The default value for this variable is set to <code>elasticsearch</code>. The minimal version for Elasticsearch is <code>8.5.0</code>, and for Opensearch is <code>2.4.0</code>.
+Please, review your backend and upgrade it if necessary.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For vector search in OpenSearch, the filtering applied is using a <code>post_filter</code> step, since there is a bug that makes queries fail using filtering + knn from Argilla.
+See https://github.com/opensearch-project/k-NN/issues/1286</p>
+<p>This may result in unexpected results when combining filtering with vector search with this engine.</p>
+</div>
+<h2 id="launching">Launching<a class="headerlink" href="#launching" title="Permanent link">&para;</a></h2>
+<h3 id="using-a-proxy">Using a proxy<a class="headerlink" href="#using-a-proxy" title="Permanent link">&para;</a></h3>
+<p>If you run Argilla behind a proxy by adding some extra prefix to expose the service, you should set the <code>ARGILLA_BASE_URL</code>
+environment variable to properly route requests to the server application.</p>
+<p>For example, if your proxy exposes Argilla in the URL <code>https://my-proxy/custom-path-for-argilla</code>, you should launch the
+Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
+<p>NGINX and Traefik have been tested and are known to work with Argilla:</p>
+<ul>
+<li><a href="https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/nginx">NGINX example</a></li>
+<li><a href="https://github.com/argilla-io/argilla/tree/main/examples/deployments/docker/traefik">Traefik example</a></li>
+</ul>
+<h2 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<p>You can set the following environment variables to further configure your server and client.</p>
+<h3 id="server">Server<a class="headerlink" href="#server" title="Permanent link">&para;</a></h3>
+<h4 id="fastapi">FastAPI<a class="headerlink" href="#fastapi" title="Permanent link">&para;</a></h4>
 <ul>
 <li>
-<p><strong>Manage users and credentials</strong></p>
-<hr />
-<p>Learn what they are and how to manage (create, read and delete) <a href="user/"><code>Users</code></a> in Argilla.</p>
-<p><a href="user/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
+<p><code>ARGILLA_HOME_PATH</code>: The directory where Argilla will store all the files needed to run. If the path doesn't exist it will be automatically created (Default: <code>~/.argilla</code>).</p>
 </li>
 <li>
-<p><strong>Manage workspaces</strong></p>
-<hr />
-<p>Learn what they are and how to manage (create, read and delete) <a href="workspace/"><code>Workspaces</code></a> in Argilla.</p>
-<p><a href="workspace/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
+<p><code>ARGILLA_BASE_URL</code>: If you want to launch the Argilla server in a specific base path other than /, you should set up this environment variable. This can be useful when running Argilla behind a proxy that adds a prefix path to route the service (Default: "/").</p>
 </li>
 <li>
-<p><strong>Create, update, and delete datasets</strong></p>
-<hr />
-<p>Learn what they are and how to manage (create, read and delete) <a href="dataset/"><code>Datasets</code></a> and customize them using the <code>Settings</code> for <code>Fields</code>, <code>Questions</code>,  <code>Metadata</code> and <code>Vectors</code>.</p>
-<p><a href="dataset/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
+<p><code>ARGILLA_CORS_ORIGINS</code>: List of host patterns for CORS origin access.</p>
 </li>
 <li>
-<p><strong>Add, update, and delete records</strong></p>
-<hr />
-<p>Learn what they are and how to add, update and delete the values for a <a href="record/"><code>Record</code></a>, which are made up of <code>Metadata</code>, <code>Vectors</code>, <code>Suggestions</code> and <code>Responses</code>.</p>
-<p><a href="record/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
+<p><code>ARGILLA_DOCS_ENABLED</code>: If False, disables openapi docs endpoint at <em>/api/docs</em>.</p>
 </li>
 <li>
-<p><strong>Distribute the annotation</strong></p>
-<hr />
-<p>Learn how to use Argilla's automatic task distribution to annotate as a team efficiently.</p>
-<p><a href="distribution/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
-</li>
-<li>
-<p><strong>Annotate a dataset</strong></p>
-<hr />
-<p>Learn how to use the Argilla UI to navigate datasets and submit responses.</p>
-<p><a href="annotate/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
-</li>
-<li>
-<p><strong>Query and filter a dataset</strong></p>
-<hr />
-<p>Learn how to query and filter a <code>Dataset</code>.</p>
-<p><a href="query/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
-</li>
-<li>
-<p><strong>Import and export datasets and records</strong></p>
-<hr />
-<p>Learn how to export your dataset or its records to Python, your local disk, or the Hugging face Hub.</p>
-<p><a href="import_export/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
+<p><code>ARGILLA_ENABLE_TELEMETRY</code>: If False, disables telemetry for usage metrics.</p>
 </li>
 </ul>
-</div>
-<h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
-<div class="grid cards">
+<h4 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>ARGILLA_AUTH_SECRET_KEY</code>: The secret key used to sign the API token data. You can use <code>openssl rand -hex 32</code> to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.</li>
+</ul>
+<h4 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>ARGILLA_DATABASE_URL</code>: A URL string that contains the necessary information to connect to a database. Argilla uses SQLite by default, PostgreSQL is also officially supported (Default: <code>sqlite:///$ARGILLA_HOME_PATH/argilla.db?check_same_thread=False</code>).</li>
+</ul>
+<h5 id="sqlite">SQLite<a class="headerlink" href="#sqlite" title="Permanent link">&para;</a></h5>
+<p>The following environment variables are useful only when SQLite is used:</p>
+<ul>
+<li><code>ARGILLA_DATABASE_SQLITE_TIMEOUT</code>: How many seconds the connection should wait before raising an <code>OperationalError</code> when a table is locked. If another connection opens a transaction to modify a table, that table will be locked until the transaction is committed. (Defaut: <code>15</code> seconds).</li>
+</ul>
+<h5 id="postgresql">PostgreSQL<a class="headerlink" href="#postgresql" title="Permanent link">&para;</a></h5>
+<p>The following environment variables are useful only when PostgreSQL is used:</p>
 <ul>
 <li>
-<p><strong>Use Markdown to format rich content</strong></p>
-<hr />
-<p>Learn how to use Markdown and HTML in TextFields to format chat conversations and allow for basic multi-modal support for images, audio, video and PDFs.</p>
-<p><a href="use_markdown_to_format_rich_content/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
+<p><code>ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE</code>: The number of connections to keep open inside the database connection pool (Default: <code>15</code>).</p>
 </li>
 <li>
-<p><strong>Migrate to Argilla V2</strong></p>
-<hr />
-<p>Learn how to migrate your legacy datasets from Argilla 1.x to 2.x.</p>
-<p><a href="migrate_from_legacy_datasets/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> How-to guide</a></p>
+<p><code>ARGILLA_DATABASE_POSTGRESQL_MAX_OVERFLOW</code>: The number of connections that can be opened above and beyond <code>ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE</code> setting (Default: <code>10</code>).</p>
 </li>
 </ul>
-</div>
+<h4 id="search-engine">Search engine<a class="headerlink" href="#search-engine" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><code>ARGILLA_ELASTICSEARCH</code>: URL of the connection endpoint of the Elasticsearch instance (Default: <code>http://localhost:9200</code>).</p>
+</li>
+<li>
+<p><code>ARGILLA_SEARCH_ENGINE</code>: Search engine to use. Valid values are "elasticsearch" and "opensearch" (Default: "elasticsearch").</p>
+</li>
+<li>
+<p><code>ARGILLA_ELASTICSEARCH_SSL_VERIFY</code>: If "False", disables SSL certificate verification when connecting to the Elasticsearch backend.</p>
+</li>
+<li>
+<p><code>ARGILLA_ELASTICSEARCH_CA_PATH</code>: Path to CA cert for ES host. For example: <code>/full/path/to/root-ca.pem</code> (Optional)</p>
+</li>
+</ul>
+<h3 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS</code>: Set the number of maximum items to be allowed by label and multi label questions (Default: <code>500</code>).</p>
+</li>
+<li>
+<p><code>ARGILLA_SPAN_OPTIONS_MAX_ITEMS</code>: Set the number of maximum items to be allowed by span questions (Default: <code>500</code>).</p>
+</li>
+</ul>
+<h3 id="hugging-face">Hugging Face<a class="headerlink" href="#hugging-face" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING</code>: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: <code>true</code>).</li>
+</ul>
+<h3 id="docker-images-only">Docker images only<a class="headerlink" href="#docker-images-only" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><code>REINDEX_DATASET</code>: If <code>true</code> or <code>1</code>, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: <code>0</code>).</p>
+</li>
+<li>
+<p><code>USERNAME</code>: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: <code>""</code>).</p>
+</li>
+<li>
+<p><code>PASSWORD</code>: If provided, the owner password. If <code>USERNAME</code> and <code>PASSWORD</code> are provided, the owner user will be created with these credentials on the server startup (Default: <code>""</code>).</p>
+</li>
+<li>
+<p><code>API_KEY</code>: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: <code>""</code>).</p>
+</li>
+</ul>
+<h2 id="rest-api-docs">REST API docs<a class="headerlink" href="#rest-api-docs" title="Permanent link">&para;</a></h2>
+<p>FastAPI also provides beautiful REST API docs that you can check at <a href="http://localhost:6900/api/v1/docs">http://localhost:6900/api/v1/docs</a>.</p>
 
 
 
@@ -2124,8 +2490,6 @@
 
 
 
-
-  
 
 
 
@@ -2149,12 +2513,10 @@
   
     
       
-        
-      
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../getting_started/faq/" class="md-footer__link md-footer__link--prev" aria-label="Previous: FAQ">
+          <a href="../../argilla/markdown/" class="md-footer__link md-footer__link--prev" aria-label="Previous: rg.markdown">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -2164,20 +2526,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                FAQ
+                rg.markdown
               </div>
             </div>
           </a>
         
         
           
-          <a href="user/" class="md-footer__link md-footer__link--next" aria-label="Next: Manage users and credentials">
+          <a href="../telemetry/" class="md-footer__link md-footer__link--next" aria-label="Next: Server Telemetry">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Manage users and credentials
+                Server Telemetry
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2263,12 +2625,12 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.ad660dcc.min.js"></script>
       
-        <script src="../js/open_in_new_tab.js"></script>
+        <script src="../../../js/open_in_new_tab.js"></script>
       
     
   </body>
