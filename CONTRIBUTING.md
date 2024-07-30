@@ -17,5 +17,5 @@ We understand that getting started might be a bit difficult, therefore, you can 
 
 ## Want to work on your own?
 
-For more seasoned contributors, we recommend taking a look at the [contributor section](https://docs.v1.argilla.io/en/latest/community/contributing.html) in our docs.
+For more seasoned contributors, we recommend taking a look at the [contributor section](https://docs.argilla.io/latest/community/contributor/) in our docs.
 
