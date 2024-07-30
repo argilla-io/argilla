@@ -52,7 +52,8 @@ A **dataset** is a collection of records that you can configure for labelers to 
 
 To create a dataset, you can define it in the `Dataset` class and then call the `create` method that will send the dataset to the server so that it can be visualized in the UI. If the dataset does not appear in the UI, you may need to click the refresh button to update the view. For further configuration of the dataset, you can refer to the [settings section](#define-dataset-settings).
 
-> The created dataset will be empty, to add the records refer to this [how-to guide](record.md).
+!!! info
+    If you have deployed Argilla with Hugging Face Spaces and HF Sign in, you can use `argilla` as a workspace name. Otherwise, you might need to create a workspace following [this guide](../workspace/#create-a-new-workspace). 
 
 ```python
 import argilla as rg
@@ -82,6 +83,8 @@ dataset = rg.Dataset(
 
 dataset.create()
 ```
+> The created dataset will be empty, to add records go to this [how-to guide](record.md).
+
 !!! tip "Accessing attributes"
     Access the attributes of a dataset by calling them directly on the `dataset` object. For example, `dataset.id`, `dataset.name` or `dataset.settings`. You can similarly access the fields, questions, metadata, vectors and guidelines. For instance, `dataset.fields` or `dataset.questions`.
 
