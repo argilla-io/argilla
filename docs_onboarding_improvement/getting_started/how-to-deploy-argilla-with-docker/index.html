@@ -2015,12 +2015,15 @@
 <p>Download <code>docker-compose.yaml</code>:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/examples/deployments/docker/docker-compose.yaml</span>
 </span></code></pre></div>
+<p>or using curl:
+<div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">curl https://raw.githubusercontent.com/argilla-io/argilla/main/examples/deployments/docker/docker-compose.yaml -o docker-compose.yaml</span>
+</span></code></pre></div></p>
 <p>Run to deploy the server on <code>http://localhost:6900</code>:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">docker compose up -d</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">docker compose up -d</span>
 </span></code></pre></div>
 <p>Once is completed, go to this URL with your browser: <a href="http://localhost:6900">http://localhost:6900</a> and you should see the Argilla login page.</p>
 <p>If it's not available, check the logs:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">docker compose logs -f</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="go">docker compose logs -f</span>
 </span></code></pre></div>
 <p>Most of the deployment issues are related to ElasticSearch. <a href="http://hf.co/join/discord">Join Hugging Face Discord's server</a> and ask for support on the Argilla channel.</p>
 
