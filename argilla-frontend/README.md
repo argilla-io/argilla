@@ -32,7 +32,8 @@
 </p>
 
 Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/latest/).
+
+If you just want to get started, deploy Argilla with [Hugging Face Spaces](https://docs.v2.argilla.io/latest/getting_started/quickstart/). Curious, and want to know more? Read our [documentation](https://docs.v2.argilla.io).
 
 This repository only contains developer info about the front end. If you want to get started, we recommend taking a
 look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://docs.argilla.io/latest/).
