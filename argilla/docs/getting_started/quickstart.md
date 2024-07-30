@@ -41,7 +41,6 @@ If everything went well, you should see the Argilla sign in page that looks like
 
 
 In the sign in page:
-=======
 
 1. Click on **Sign in with Hugging Face**
 2. **Authorize the application** and you will be logged in into Argilla as an `owner`.
