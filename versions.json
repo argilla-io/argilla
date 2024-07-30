@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_5057-enhancement-include-how-to-update-suggestions-and-responses-in-docs",
-    "title": "docs_5057-enhancement-include-how-to-update-suggestions-and-responses-in-docs",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_2.0.0",
     "title": "docs_2.0.0",
     "aliases": [],
