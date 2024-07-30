@@ -29,7 +29,7 @@ To get started:
 
 </div>
 
-Or, play with the Argilla UI signing in with you Hugging Face account:
+Or, play with the Argilla UI by signing in with your Hugging Face account:
 
 <div class="iframe-wrapper">
 <iframe
