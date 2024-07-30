@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_5178-docs-add-from_diskto_disk-methods-to-docs",
-    "title": "docs_5178-docs-add-from_diskto_disk-methods-to-docs",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk",
     "title": "docs_5177-feature-migrate-media-to-html-utility-methods-to-v2-sdk",
     "aliases": [],
