@@ -28,7 +28,7 @@ RUN \
     apt-get update && apt-get install -y elasticsearch=8.8.2 && \
     chown -R argilla:argilla /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
     chown argilla:argilla /etc/default/elasticsearch && \
-    # Install quickstart image dependencies
+    # Install image dependencies
     pip install -r /packages/requirements.txt && \
     chmod +x /home/argilla/start.sh && \
     chmod +x /home/argilla/start_argilla_server.sh && \
