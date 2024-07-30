@@ -1,227 +1,227 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/community/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/community/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/community/changelog/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/community/changelog/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/community/contributor/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/community/contributor/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/getting_started/faq/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/getting_started/faq/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/getting_started/how-to-configure-argilla-on-huggingface/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/getting_started/how-to-configure-argilla-on-huggingface/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/getting_started/how-to-deploy-argilla-with-docker/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/getting_started/how-to-deploy-argilla-with-docker/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/getting_started/huggingface-spaces/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/getting_started/huggingface-spaces/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/getting_started/installation/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/getting_started/installation/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/getting_started/quickstart/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/getting_started/quickstart/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/annotate/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/annotate/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/dataset/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/dataset/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/distribution/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/distribution/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/import_export/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/import_export/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/migrate_from_legacy_datasets/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/migrate_from_legacy_datasets/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/query/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/query/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/record/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/record/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/use_markdown_to_format_rich_content/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/use_markdown_to_format_rich_content/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/user/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/user/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/how_to_guides/workspace/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/how_to_guides/workspace/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/SUMMARY/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/SUMMARY/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/client/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/client/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/markdown/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/markdown/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/search/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/search/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/users/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/users/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/workspaces/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/workspaces/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/datasets/dataset_records/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/datasets/dataset_records/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/datasets/datasets/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/datasets/datasets/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/records/metadata/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/records/metadata/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/records/records/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/records/records/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/records/responses/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/records/responses/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/records/suggestions/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/records/suggestions/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/records/vectors/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/records/vectors/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/settings/fields/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/settings/fields/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/settings/metadata_property/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/settings/metadata_property/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/settings/questions/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/settings/questions/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/settings/settings/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/settings/settings/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/settings/task_distribution/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/settings/task_distribution/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla/settings/vectors/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla/settings/vectors/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla-server/configuration/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla-server/configuration/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/reference/argilla-server/telemetry/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/reference/argilla-server/telemetry/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/tutorials/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/tutorials/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/tutorials/text_classification/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/tutorials/text_classification/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://argilla-io.github.io/argilla/docs_2.0.0/tutorials/token_classification/</loc>
+         <loc>https://docs.argilla.io/docs_2.0.0/tutorials/token_classification/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
