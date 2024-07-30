@@ -4,7 +4,7 @@ description: Get started with Argilla in less 10 minutes
 
 # Quickstart
 
-Argilla is a free, open-source, self-hosted tool. This means you need to deploy its server to start using it. There is two main ways to deploy Argilla:
+Argilla is a free, open-source, self-hosted tool. This means you need to deploy its UI to start using it. There is two main ways to deploy Argilla:
 
 !!! huggingface "Deploy on the Hugging Face Hub"
 
@@ -24,14 +24,12 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
     - Click create Space to launch Argilla 🚀.
     - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
 
-    !!! warning "Persistent storage"
-        Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings.
-
-        If you plan to **use the Argilla Space beyond testing**, it's highly recommended to **set persistent storage to `Small`**.
+    !!! warning "Persistent storage `SMALL`"
+        Not setting persistent storage to `SMALL` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. If you want to **use the Space just for testing** you can use `FREE` temporarily.
     If you want to deploy Argilla within a Hugging Face organization, setup a more stable Space, or understand the settings, [check out the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
 
 !!! docker "Deploy with Docker"
-     If you want to run Argilla locally on your machine or a server, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
+     If you want to **run Argilla locally on your machine or a server**, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
 
 ## Sign in into the Argilla UI
 If everything went well, you should see the Argilla sign in page that looks like this:
