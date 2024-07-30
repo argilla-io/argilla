@@ -8,14 +8,14 @@ This guide explains how you can use Argilla’s **automatic task distribution** 
 
 Owners and admins can define the minimum number of submitted responses expected for each record. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of all users with access to the dataset.
 
-When a record has met the minimum number of submissions, the status of the record will change to `completed` and the record will be removed from the `Pending` queue of all team members, so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the `completed` status.
+When a record has met the minimum number of submissions, the status of the record will change to `completed`, and the record will be removed from the `Pending` queue of all team members so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the `completed` status.
 
 ![Task Distribution diagram](../assets/images/how_to_guides/distribution/taskdistribution.svg)
 
 !!! note
     The status of a record can be either `completed`, when it has the required number of responses with `submitted` status, or `pending`, when it doesn’t meet this requirement.
 
-    Each record can have multiple responses and each of those can have the status `submitted`, `discarded` or `draft`.
+    Each record can have multiple responses, and each of those can have the status `submitted`, `discarded`, or `draft.`
 
 !!! info "Main Class"
 
@@ -63,12 +63,16 @@ settings = rg.Settings(
 
 ## Change task distribution settings
 
-If you wish to change the minimum submitted responses required in a dataset you can do so as long as the annotation hasn’t started, i.e. the dataset has no responses for any records.
+If you wish to change the minimum submitted responses required in a dataset, you can do so as long as the annotation hasn’t started, i.e., the dataset has no responses for any records.
 
 Admins and owners can change this value from the dataset settings page in the UI or from the SDK:
 
 ```python
-dataset = client.datasets(...)
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets("my_dataset")
 
 dataset.settings.distribution.min_submitted = 4
 
