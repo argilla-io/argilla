@@ -21,6 +21,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.argilla.io/docs_2.0.0/community/popular_issues/</loc>
+         <lastmod>2024-07-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.argilla.io/docs_2.0.0/getting_started/faq/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
@@ -32,11 +37,6 @@
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_2.0.0/getting_started/how-to-deploy-argilla-with-docker/</loc>
-         <lastmod>2024-07-30</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://docs.argilla.io/docs_2.0.0/getting_started/huggingface-spaces/</loc>
          <lastmod>2024-07-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
