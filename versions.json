@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_guide-for-exporting",
-    "title": "docs_guide-for-exporting",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_fix-migration-docs",
     "title": "docs_fix-migration-docs",
     "aliases": [],
