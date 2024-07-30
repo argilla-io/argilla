@@ -52,6 +52,7 @@ jobs:
             echo "HF_SPACES_DOCKER_IMAGE=argilla/argilla-hf-spaces" >> $GITHUB_ENV
             echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> $GITHUB_ENV
             echo "DOCKER_PASSWORD=$DOCKER_PASSWORD" >> $GITHUB_ENV
+            echo "PUBLISH_LATEST=$PUBLISH_LATEST" >> $GITHUB_ENV
           else
             echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
             echo "IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
@@ -59,9 +60,11 @@ jobs:
             echo "HF_SPACES_DOCKER_IMAGE=argilladev/argilla-hf-spaces" >> $GITHUB_ENV
             echo "DOCKER_USERNAME=$DOCKER_USERNAME_DEV" >> $GITHUB_ENV
             echo "DOCKER_PASSWORD=$DOCKER_PASSWORD_DEV" >> $GITHUB_ENV
+            echo "PUBLISH_LATEST=true" >> $GITHUB_ENV
           fi
         env:
           IS_RELEASE: ${{ inputs.is_release }}
+          PUBLISH_LATEST: ${{ inputs.publish_latest }}
           PACKAGE_VERSION: ${{ steps.package-info.outputs.PACKAGE_VERSION }}
           DOCKER_IMAGE_TAG: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
           DOCKER_USERNAME: ${{ secrets.AR_DOCKER_USERNAME }}
@@ -98,7 +101,7 @@ jobs:
           push: true
 
       - name: Push latest `argilla-server` image
-        if: ${{ inputs.is_release && inputs.publish_latest }}
+        if: ${{ env.PUBLISH_LATEST == 'true' }}
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/server
@@ -120,7 +123,7 @@ jobs:
           push: true
 
       - name: Push latest `argilla-hf-spaces` image
-        if: ${{ inputs.is_release && inputs.publish_latest }}
+        if: ${{ env.PUBLISH_LATEST == 'true' }}
         uses: docker/build-push-action@v5
         with:
           context: argilla-server/docker/argilla-hf-spaces
@@ -131,21 +134,21 @@ jobs:
             ARGILLA_SERVER_IMAGE=${{ env.SERVER_DOCKER_IMAGE }}
             ARGILLA_VERSION=${{ env.IMAGE_TAG }}
           push: true
-
-      - name: Docker Hub Description for `argilla-server`
-        uses: peter-evans/dockerhub-description@v4
-        if: ${{ inputs.is_release && inputs.publish_latest }}
-        with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-          repository: $${{ env.SERVER_DOCKER_IMAGE }}
-          readme-filepath: argilla-server/docker/server/README.md
-
-      - name: Docker Hub Description for `argilla-hf-spaces`
-        uses: peter-evans/dockerhub-description@v4
-        if: ${{ inputs.is_release && inputs.publish_latest }}
-        with:
-          username: ${{ secrets.AR_DOCKER_USERNAME }}
-          password: ${{ secrets.AR_DOCKER_PASSWORD }}
-          repository: $${{ env.HF_SPACES_DOCKER_IMAGE }}
-          readme-filepath: argilla-server/docker/argilla-hf-spaces/README.md
+      # TODO: uncomment this once the step works again
+      # - name: Docker Hub Description for `argilla-server`
+      #   uses: peter-evans/dockerhub-description@v4
+      #   if: ${{ env.PUBLISH_LATEST == 'true' }}
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     repository: $${{ env.SERVER_DOCKER_IMAGE }}
+      #     readme-filepath: argilla-server/docker/server/README.md
+      # TODO: uncomment this once the step works again
+      # - name: Docker Hub Description for `argilla-hf-spaces`
+      #   uses: peter-evans/dockerhub-description@v4
+      #   if: ${{ env.PUBLISH_LATEST == 'true' }}
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     repository: $${{ env.HF_SPACES_DOCKER_IMAGE }}
+      #     readme-filepath: argilla-server/docker/argilla-hf-spaces/README.md
