@@ -449,7 +449,7 @@ import argilla as rg
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 for dataset in client.datasets:
-    dataset.settings.get() # this will fetch the dataset settings
+    dataset.settings.get() # this will get the dataset settings from the server
     print(dataset.settings)
 ```
 
