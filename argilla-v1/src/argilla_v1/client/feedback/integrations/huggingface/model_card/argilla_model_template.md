@@ -9,7 +9,7 @@ should probably proofread and complete it, then remove this comment. -->
 
 # Model Card for *{{ model_name | default("Model ID", true) }}*
 
-This model has been created with [Argilla](https://docs.argilla.io), trained with *{{ library_name }}*.
+This model has been created with [Argilla](https://docs.v1.argilla.io), trained with *{{ library_name }}*.
 
 <!-- Provide a quick summary of what the model is/does. -->
 

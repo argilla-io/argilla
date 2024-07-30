@@ -150,7 +150,7 @@ These are the section headers that we use:
 
 > [!IMPORTANT]
 > This version include changes related to the search index. So, a reindex is needed.
-> Visit the [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets) for more info.
+> Visit the [docs](https://docs.v1.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets) for more info.
 
 ### Added
 
@@ -161,8 +161,8 @@ These are the section headers that we use:
 
 ### Changed
 
-- Changed indexing responses for search to use user `id` instead of `username`. **[Reindex needed](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets)** ([#26](https://github.com/argilla-io/argilla-server/pull/26))
-- Changed search index mappings definition to optimize the number of fields. **[Reindex needed](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets)** ([#31](https://github.com/argilla-io/argilla-server/pull/31))
+- Changed indexing responses for search to use user `id` instead of `username`. **[Reindex needed](https://docs.v1.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets)** ([#26](https://github.com/argilla-io/argilla-server/pull/26))
+- Changed search index mappings definition to optimize the number of fields. **[Reindex needed](https://docs.v1.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#feedback-datasets)** ([#31](https://github.com/argilla-io/argilla-server/pull/31))
 
 ### Removed
 
@@ -649,7 +649,7 @@ These are the section headers that we use:
 - Added Telemetry support for `ArgillaTrainer` (closes [#3325](https://github.com/argilla-io/argilla/issues/3325))
 - `User.workspaces` is no longer an attribute but a property, and is calling `list_user_workspaces` to list all the workspace names for a given user ID ([#3334](https://github.com/argilla-io/argilla/pull/3334))
 - Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
-- The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
+- The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.v1.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
 - Updated `Dockerfile` parent image from `python:3.9.16-slim` to `python:3.10.12-slim` ([#3425](https://github.com/argilla-io/argilla/pull/3425)).
 - Updated `quickstart.Dockerfile` parent image from `elasticsearch:8.5.3` to `argilla/argilla-server:${ARGILLA_VERSION}` ([#3425](https://github.com/argilla-io/argilla/pull/3425)).
 

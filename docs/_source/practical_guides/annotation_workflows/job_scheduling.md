@@ -35,7 +35,7 @@ from argilla.listeners import listener
 
 @listener(
     dataset="my_dataset", # dataset to get record from
-    query="lucene query", # https://docs.argilla.io/en/latest/guides/query_datasets.html
+    query="lucene query", # https://docs.v1.argilla.io/en/latest/guides/query_datasets.html
     execution_interval_in_seconds=3, # interval to check execution of `update_records`
 )
 def update_records(records, ctx):
