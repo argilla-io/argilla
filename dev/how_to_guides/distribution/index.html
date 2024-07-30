@@ -12,7 +12,7 @@
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/dev/how_to_guides/distribution/">
+        <link rel="canonical" href="https://docs.argilla.io/dev/how_to_guides/distribution/">
       
       
         <link rel="prev" href="../record/">
@@ -75,7 +75,7 @@
       
         <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to show how to distribute the annotation task among team members." >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/how_to_guides/distribution.png" >
+        <meta  property="og:image"  content="https://docs.argilla.io/dev/assets/images/social/how_to_guides/distribution.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,7 +83,7 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/dev/how_to_guides/distribution/" >
+        <meta  property="og:url"  content="https://docs.argilla.io/dev/how_to_guides/distribution/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
@@ -91,7 +91,7 @@
       
         <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to show how to distribute the annotation task among team members." >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/dev/assets/images/social/how_to_guides/distribution.png" >
+        <meta  name="twitter:image"  content="https://docs.argilla.io/dev/assets/images/social/how_to_guides/distribution.png" >
       
     
     
@@ -535,11 +535,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/installation/" class="md-nav__link">
+      <a href="../../getting_started/how-to-deploy-argilla-with-docker/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Installation
+    Deploy with Docker
   </span>
   
 
@@ -556,11 +556,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/huggingface-spaces/" class="md-nav__link">
+      <a href="../../getting_started/how-to-configure-argilla-on-huggingface/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Set up in Hugging Face Spaces
+    Hugging Face Spaces settings
   </span>
   
 
@@ -1919,7 +1919,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../community/popular_issues.md" class="md-nav__link">
+      <a href="../../community/popular_issues/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2099,12 +2099,12 @@
 <h1 id="distribute-the-annotation-task-among-the-team">Distribute the annotation task among the team<a class="headerlink" href="#distribute-the-annotation-task-among-the-team" title="Permanent link">&para;</a></h1>
 <p>This guide explains how you can use Argilla’s <strong>automatic task distribution</strong> to efficiently divide the task of annotating a dataset among multiple team members.</p>
 <p>Owners and admins can define the minimum number of submitted responses expected for each record. Argilla will use this setting to handle automatically the records that will be shown in the pending queues of all users with access to the dataset.</p>
-<p>When a record has met the minimum number of submissions, the status of the record will change to <code>completed</code> and the record will be removed from the <code>Pending</code> queue of all team members, so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the <code>completed</code> status.</p>
+<p>When a record has met the minimum number of submissions, the status of the record will change to <code>completed</code>, and the record will be removed from the <code>Pending</code> queue of all team members so they can focus on providing responses where they are most needed. The dataset’s annotation task will be fully completed once all records have the <code>completed</code> status.</p>
 <p><img alt="Task Distribution diagram" src="../../assets/images/how_to_guides/distribution/taskdistribution.svg" /></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The status of a record can be either <code>completed</code>, when it has the required number of responses with <code>submitted</code> status, or <code>pending</code>, when it doesn’t meet this requirement.</p>
-<p>Each record can have multiple responses and each of those can have the status <code>submitted</code>, <code>discarded</code> or <code>draft</code>.</p>
+<p>Each record can have multiple responses, and each of those can have the status <code>submitted</code>, <code>discarded</code>, or <code>draft.</code></p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">Main Class</p>
@@ -2151,13 +2151,17 @@
 <p>Note that some records may have more responses than expected if multiple team members submit responses on the same record simultaneously.</p>
 </div>
 <h2 id="change-task-distribution-settings">Change task distribution settings<a class="headerlink" href="#change-task-distribution-settings" title="Permanent link">&para;</a></h2>
-<p>If you wish to change the minimum submitted responses required in a dataset you can do so as long as the annotation hasn’t started, i.e. the dataset has no responses for any records.</p>
+<p>If you wish to change the minimum submitted responses required in a dataset, you can do so as long as the annotation hasn’t started, i.e., the dataset has no responses for any records.</p>
 <p>Admins and owners can change this value from the dataset settings page in the UI or from the SDK:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">min_submitted</span> <span class="o">=</span> <span class="mi">4</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">dataset</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">min_submitted</span> <span class="o">=</span> <span class="mi">4</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">dataset</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 </span></code></pre></div>
 
 
