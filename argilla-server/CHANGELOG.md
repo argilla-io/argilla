@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.0.0](https://github.com/argilla-io/argilla/compare/v2.0.0rc1...v2.0.0)
+
 > [!IMPORTANT]
 > This version includes changes related to the search index. So, a reindex is needed.
 
