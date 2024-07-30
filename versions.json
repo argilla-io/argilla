@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_working-with-settings-when-listing-datasets",
-    "title": "docs_working-with-settings-when-listing-datasets",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_update-settings",
     "title": "docs_update-settings",
     "aliases": [],
