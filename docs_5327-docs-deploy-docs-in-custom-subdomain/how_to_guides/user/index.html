@@ -535,11 +535,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/installation/" class="md-nav__link">
+      <a href="../../getting_started/how-to-deploy-argilla-with-docker/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Installation
+    Deploy with Docker
   </span>
   
 
@@ -556,11 +556,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting_started/huggingface-spaces/" class="md-nav__link">
+      <a href="../../getting_started/how-to-configure-argilla-on-huggingface/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Set up in Hugging Face Spaces
+    Hugging Face Spaces settings
   </span>
   
 
@@ -747,15 +747,6 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#default-users-and-credentials" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default users and credentials
-    </span>
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#get-current-user" class="md-nav__link">
@@ -2119,15 +2110,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#default-users-and-credentials" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default users and credentials
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#get-current-user" class="md-nav__link">
     <span class="md-ellipsis">
       Get current user
@@ -2308,32 +2290,6 @@
 <summary>Question: Who can manage users?</summary>
 <p>Only users with the <code>owner</code> role can manage (create, retrieve, delete) other users.</p>
 </details>
-<h2 id="default-users-and-credentials">Default users and credentials<a class="headerlink" href="#default-users-and-credentials" title="Permanent link">&para;</a></h2>
-<p>Argilla provides a default user with the <code>owner</code> role to help you get started in Python and the UI. The credentials for this user vary depending on the server configuration.</p>
-<table>
-<thead>
-<tr>
-<th>Environment</th>
-<th>Username</th>
-<th>Password</th>
-<th>API Key</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Quickstart Docker and HF Space</td>
-<td>owner</td>
-<td>12345678</td>
-<td>owner.apikey</td>
-</tr>
-<tr>
-<td>Server image</td>
-<td>argilla</td>
-<td>1234</td>
-<td>argilla.apikey</td>
-</tr>
-</tbody>
-</table>
 <p>For the new users, the username and password are set during the creation process. The API key is automatically generated and can be copied from the "Settings" section of the UI.</p>
 <div class="admonition info">
 <p class="admonition-title">Main Class</p>
