@@ -39,7 +39,7 @@ CHAT_CSS_STYLE = """
         .message-content {
             padding: 10px;
             border-radius: 10px;
-            max-width: fit-content;
+            max-width: 80%;
         }
     </style>
     """
