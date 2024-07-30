@@ -476,7 +476,7 @@ dataset.records.log(records=updated_data)
     for record in dataset.records(with_vectors=True):
 
         record.vectors["my_vector"] = [ 0, 1, 2, 3, 4, 5 ]
-        record.metadata["my_new_vector"] = [ 0, 1, 2, 3, 4, 5 ]
+        record.vectors["my_new_vector"] = [ 0, 1, 2, 3, 4, 5 ]
 
         updated_records.append(record)
 
