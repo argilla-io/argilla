@@ -2,7 +2,7 @@
 
 # Welcome to
 
-## Argilla is a platform for building high-quality AI datasets
+## Argilla is a collaboration tool for building high-quality AI datasets
 
 If you need support join the [Argilla Discord community](http://hf.co/join/discord)
 
