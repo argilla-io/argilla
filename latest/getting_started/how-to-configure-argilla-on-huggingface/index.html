@@ -6,16 +6,16 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="In this section, we will provide a step-by-step guide for setting up Argilla in Hugging Face Spaces.">
+        <meta name="description" content="Configure Argilla on Hugging Face Spaces">
       
       
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/latest/getting_started/huggingface-spaces/">
+        <link rel="canonical" href="https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/">
       
       
-        <link rel="prev" href="../installation/">
+        <link rel="prev" href="../how-to-deploy-argilla-with-docker/">
       
       
         <link rel="next" href="../faq/">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Set up in Hugging Face Spaces - Argilla Docs</title>
+        <title>Hugging Face Spaces Settings - Argilla Docs</title>
       
     
     
@@ -71,11 +71,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Set up in Hugging Face Spaces - Argilla Docs" >
+        <meta  property="og:title"  content="Hugging Face Spaces Settings - Argilla Docs" >
       
-        <meta  property="og:description"  content="In this section, we will provide a step-by-step guide for setting up Argilla in Hugging Face Spaces." >
+        <meta  property="og:description"  content="Configure Argilla on Hugging Face Spaces" >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/latest/assets/images/social/getting_started/huggingface-spaces.png" >
+        <meta  property="og:image"  content="https://docs.argilla.io/latest/assets/images/social/getting_started/how-to-configure-argilla-on-huggingface.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,15 +83,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/latest/getting_started/huggingface-spaces/" >
+        <meta  property="og:url"  content="https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Set up in Hugging Face Spaces - Argilla Docs" >
+        <meta  name="twitter:title"  content="Hugging Face Spaces Settings - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide for setting up Argilla in Hugging Face Spaces." >
+        <meta  name="twitter:description"  content="Configure Argilla on Hugging Face Spaces" >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/latest/assets/images/social/getting_started/huggingface-spaces.png" >
+        <meta  name="twitter:image"  content="https://docs.argilla.io/latest/assets/images/social/getting_started/how-to-configure-argilla-on-huggingface.png" >
       
     
     
@@ -114,7 +114,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#set-up-in-hugging-face-spaces" class="md-skip">
+        <a href="#persistent-storage" class="md-skip">
           Skip to content
         </a>
       
@@ -151,7 +151,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Set up in Hugging Face Spaces
+              Hugging Face Spaces Settings
             
           </span>
         </div>
@@ -540,11 +540,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../installation/" class="md-nav__link">
+      <a href="../how-to-deploy-argilla-with-docker/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Installation
+    Deploy with Docker
   </span>
   
 
@@ -567,14 +567,12 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
-        
-      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
   <span class="md-ellipsis">
-    Set up in Hugging Face Spaces
+    Hugging Face Spaces settings
   </span>
   
 
@@ -585,7 +583,7 @@
         
   
   <span class="md-ellipsis">
-    Set up in Hugging Face Spaces
+    Hugging Face Spaces settings
   </span>
   
 
@@ -597,8 +595,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -607,36 +603,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#deploy-argilla-on-spaces" class="md-nav__link">
+  <a href="#persistent-storage" class="md-nav__link">
     <span class="md-ellipsis">
-      Deploy Argilla on Spaces
+      Persistent storage
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#enable-persistent-storage" class="md-nav__link">
+  <a href="#how-to-configure-and-disable-oauth-access" class="md-nav__link">
     <span class="md-ellipsis">
-      Enable persistent storage
+      How to configure and disable OAuth access
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#configure-the-space-secrets" class="md-nav__link">
+  <a href="#how-to-deploy-argilla-under-a-hugging-face-organization" class="md-nav__link">
     <span class="md-ellipsis">
-      Configure the Space secrets
+      How to deploy Argilla under a Hugging Face Organization
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#sign-in-with-hugging-face" class="md-nav__link">
+  <a href="#how-to-use-private-spaces" class="md-nav__link">
     <span class="md-ellipsis">
-      Sign in with Hugging Face
+      How to use Private Spaces
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#space-secrets-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Space Secrets overview
     </span>
   </a>
   
@@ -733,6 +738,46 @@
   
   
   
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Basic
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            Basic
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../how_to_guides/user/" class="md-nav__link">
         
@@ -780,7 +825,7 @@
         
   
   <span class="md-ellipsis">
-    Manage and create datasets
+    Create, update and delete datasets
   </span>
   
 
@@ -818,11 +863,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how_to_guides/query_export/" class="md-nav__link">
+      <a href="../../how_to_guides/distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Query, filter, and export records
+    Distribute the annotation task
   </span>
   
 
@@ -843,7 +888,118 @@
         
   
   <span class="md-ellipsis">
-    Annotate a dataset
+    Annotate datasets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how_to_guides/query/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Query and filter records
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how_to_guides/import_export/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Import and export datasets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Use Markdown to format rich content
   </span>
   
 
@@ -869,6 +1025,14 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1330,6 +1494,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/argilla/settings/task_distribution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Distribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1490,6 +1675,165 @@
   
   <span class="md-ellipsis">
     rg.Query
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/argilla/markdown/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    rg.markdown
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    FastAPI Server
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            FastAPI Server
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/argilla-server/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Server configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Telemetry
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            Telemetry
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/argilla-server/telemetry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Server Telemetry
   </span>
   
 
@@ -1717,8 +2061,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1727,36 +2069,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#deploy-argilla-on-spaces" class="md-nav__link">
+  <a href="#persistent-storage" class="md-nav__link">
     <span class="md-ellipsis">
-      Deploy Argilla on Spaces
+      Persistent storage
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#enable-persistent-storage" class="md-nav__link">
+  <a href="#how-to-configure-and-disable-oauth-access" class="md-nav__link">
     <span class="md-ellipsis">
-      Enable persistent storage
+      How to configure and disable OAuth access
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#configure-the-space-secrets" class="md-nav__link">
+  <a href="#how-to-deploy-argilla-under-a-hugging-face-organization" class="md-nav__link">
     <span class="md-ellipsis">
-      Configure the Space secrets
+      How to deploy Argilla under a Hugging Face Organization
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#sign-in-with-hugging-face" class="md-nav__link">
+  <a href="#how-to-use-private-spaces" class="md-nav__link">
     <span class="md-ellipsis">
-      Sign in with Hugging Face
+      How to use Private Spaces
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#space-secrets-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Space Secrets overview
     </span>
   </a>
   
@@ -1777,7 +2128,7 @@
                   
 
   
-    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/getting_started/huggingface-spaces.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/getting_started/how-to-configure-argilla-on-huggingface.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -1785,244 +2136,120 @@
   
 
 
-<h1 id="set-up-in-hugging-face-spaces">Set up in Hugging Face Spaces<a class="headerlink" href="#set-up-in-hugging-face-spaces" title="Permanent link">&para;</a></h1>
-<p>This guide explains how to deploy your Argilla app in a Hugging Face Space and configure it according to your preferences.</p>
-<blockquote>
-<p>For more information about Hugging Face Spaces, check the <a href="https://huggingface.co/docs/hub/en/spaces-overview">documentation</a>.</p>
-</blockquote>
-<h2 id="deploy-argilla-on-spaces">Deploy Argilla on Spaces<a class="headerlink" href="#deploy-argilla-on-spaces" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Access the <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">Hugging Face template</a>. The template will show the Argilla Space SDK preselected.</li>
-<li>
-<p>Fill in the template. Take into account the following:</p>
+  <h1>Hugging Face Spaces settings</h1>
+
+<p>This section details how to configure and deploy Argilla on Hugging Face Spaces. It covers:</p>
 <ul>
-<li>Enable <strong>Persistent Storage</strong> not to lose your data. Unless you’re using a paid Space upgrade, any Space will be shut down after 48 hours of inactivity, resulting in data loss. You can do it later as detailed in <a href="#enable-persistent-storage">"Enable persistent storage"</a>, but all the data previous to the set up will be lost.</li>
-<li>Configure the <strong>Space secrets</strong> to manage the credentials. The default credentials and instructions for adding them later are described in <a href="#configure-the-space-secrets">"Configure the Space secrets"</a>.</li>
-<li>Set up the <strong>visibility</strong> to make your Space <code>public</code> or <code>private</code>. To access your private Space from the Argilla SDK, you will need to <a href="https://huggingface.co/settings/tokens">configure and provide a <code>HF_TOKEN</code></a></li>
+<li>Persistent storage</li>
+<li>How to deploy Argilla under a Hugging Face Organization</li>
+<li>How to configure and disable HF OAuth access</li>
+<li>How to use Private Spaces</li>
 </ul>
-</li>
-<li>
-<p>Click "Create Space". The status will change to <code>Building</code> and, once it switches to <code>Running</code>, your Space will be ready. If you don't see the Argilla login UI, refresh the page.</p>
-</li>
-</ol>
-<div class="admonition note">
-<p class="admonition-title">Argilla Space direct URL</p>
-<p>The Argilla Space direct URL provides access to a full-screen, stable Argilla instance.</p>
-<p>It also serves as the <code>api_url</code> for reading and writing datasets using the Argilla SDK.</p>
-<p>This URL is constructed as follows: <code>https://[your-owner-name]-[your_space_name].hf.space</code>. For instance, if the owner of the Space is <code>argilla</code> and your Space name is <code>demo</code>, it will be <code>https://argilla-demo.hf.space</code>.</p>
-</div>
-<h2 id="enable-persistent-storage">Enable persistent storage<a class="headerlink" href="#enable-persistent-storage" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Activate persistent storage not to loose your data. If you are not using a paid Space upgrade, any Space will be shut down after 48 hours of inactivity. When restarted, it will undergo a factory reset, resulting in the loss of all your data.</p>
-<p>Make sure to enable persistent storage before adding any data, as the Space will restart, removing all the previous data.</p>
-<p>If you haven’t enabled persistent storage, Argilla will display a warning message by default. To prevent this warning from appearing if you don’t need persistent storage, set the environment variable <code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING</code> to <code>false</code> in "Settings" &gt; "New variable". This will suppress the warning message.</p>
-</div>
-<p>To enable <a href="https://huggingface.co/docs/hub/spaces-storage#persistent-storage">persistent storage</a>, go to the "Settings" tab on your created Space and click on the desired plan on the "Persistent Storage" section.</p>
-<h2 id="configure-the-space-secrets">Configure the Space secrets<a class="headerlink" href="#configure-the-space-secrets" title="Permanent link">&para;</a></h2>
-<p><a href="https://huggingface.co/docs/hub/spaces-overview#managing-secrets">Secrets</a> can be configured as optional settings to secure your Argilla Space.</p>
-<p>The Argilla template allows you to configure the credentials for the default users: <code>owner</code>, <code>admin</code> and <code>annotator</code>. It will also allow you to configure the name of the default workspace.</p>
-<blockquote>
-<p>Check this <a href="../../how_to_guides/user/">guide</a> to learn more about users, and refer to this <a href="../../how_to_guides/workspace/">guide</a> for more information about workspaces in Argilla.</p>
-</blockquote>
-<p>Moreover, it provides two secrets to configure the Hugging Face Oauth. For more information, check the <a href="#sign-in-with-hugging-face">next section</a>.</p>
-<p>You can add the available secrets in "Settings" &gt; "New secret".</p>
-<details class="note">
-<summary>Available secrets</summary>
-<table>
-<thead>
-<tr>
-<th>Secret name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>OWNER_USERNAME</code></td>
-<td>string</td>
-<td>A username to log in with owner permissions</td>
-<td>owner</td>
-</tr>
-<tr>
-<td><code>OWNER_PASSWORD</code></td>
-<td>string</td>
-<td>A password for the <code>OWNER_USERNAME</code></td>
-<td>12345678</td>
-</tr>
-<tr>
-<td><code>OWNER_API_KEY</code></td>
-<td>string or online generator</td>
-<td>An <code>api_key</code> to interact with the SDK with owner permissions</td>
-<td>owner.apikey</td>
-</tr>
-<tr>
-<td><code>ADMIN_USERNAME</code></td>
-<td>string</td>
-<td>A username to log in with admin permissions</td>
-<td>admin</td>
-</tr>
-<tr>
-<td><code>ADMIN_PASSWORD</code></td>
-<td>string</td>
-<td>A password for the <code>ADMIN_USERNAME</code></td>
-<td>12345678</td>
-</tr>
-<tr>
-<td><code>ADMIN_API_KEY</code></td>
-<td>string or online generator</td>
-<td>An <code>api_key</code> to interact with the SDK with admin permissions</td>
-<td>admin.apikey</td>
-</tr>
-<tr>
-<td><code>ANNOTATOR_USERNAME</code></td>
-<td>string</td>
-<td>A username to log in with annotator permissions</td>
-<td>argilla</td>
-</tr>
-<tr>
-<td><code>ANNOTATOR_PASSWORD</code></td>
-<td>string</td>
-<td>A password for the <code>ANNOTATOR_PASSWORD</code></td>
-<td>12345678</td>
-</tr>
-<tr>
-<td><code>ARGILLA_WORKSPACE</code></td>
-<td>string</td>
-<td>The name of the default workspace</td>
-<td>admin</td>
-</tr>
-<tr>
-<td><code>OAUTH2_HUGGINGFACE_CLIENT_ID</code></td>
-<td>ID</td>
-<td>The Client ID of your connected app</td>
-<td></td>
-</tr>
-<tr>
-<td><code>OAUTH2_HUGGINGFACE_CLIENT_SECRET</code></td>
-<td>ID</td>
-<td>The app secret of your connected app</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</details>
-<h2 id="sign-in-with-hugging-face">Sign in with Hugging Face<a class="headerlink" href="#sign-in-with-hugging-face" title="Permanent link">&para;</a></h2>
-<p>The Hugging Face authentication allows you to give access to your Argilla Space to users that are logged in to the Hugging Face Hub.</p>
 <div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>This feature is especially helpful for public crowdsourcing projects. The users logging in with OAuth will have the annotator role.</p>
-<p>To have more control over who can log in to the Space, you can set this up in a private Space so that only members of your organization can sign in.</p>
-<p>To create users with admin or owner roles, you can <a href="../../how_to_guides/user/">create users</a> and access with their credentials.</p>
+<p class="admonition-title">Looking to get started easily?</p>
+<p>If you just discovered Argilla and want to get started quickly, go to the <a href="../quickstart/">Quickstart guide</a>.</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you duplicated an Argilla Space with OAuth instead of creating one from the template, make sure to also follow the next steps.</p>
-</div>
+<h2 id="persistent-storage">Persistent storage<a class="headerlink" href="#persistent-storage" title="Permanent link">&para;</a></h2>
+<p>In the Space creation UI, persistent storage is set to <code>Small PAID</code>, which is a paid service, charged per hour of usage.</p>
+<p><strong>Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings</strong>. Persistent storage enables Argilla to save to disk your datasets and configurations across restarts.</p>
 <div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>If persistent storage is not enabled, make sure to activate the Hugging Face authentication before adding any data, as the Space will need to be restarted with a "Factory build", removing all the previous data.</p>
+<p class="admonition-title">Ephimeral FREE persistent storage</p>
+<p>Not setting persistent storage to <code>Small</code> means that <strong>you will loose your data when the Space restarts</strong>.</p>
+<p>If you plan to <strong>use the Argilla Space beyond testing</strong>, it's highly recommended to <strong>set persistent storage to <code>Small</code></strong>.</p>
 </div>
-<ol>
-<li>
-<p><a href="https://huggingface.co/settings/applications/new">Create an OAuth App in Hugging Face</a> and fill in the information:</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Homepage URL</td>
-<td><a href="#deploy-argilla-on-spaces"><code>[Your Argilla Space direct URL]</code></a></td>
-</tr>
-<tr>
-<td>Logo URL</td>
-<td><code>[Your Argilla Space direct URL]/favicon.ico</code></td>
-</tr>
-<tr>
-<td>Scopes</td>
-<td><code>openid</code> and <code>profile</code></td>
-</tr>
-<tr>
-<td>Redirect URL</td>
-<td><code>[Your Argilla Space Direct URL]/oauth/huggingface/callback</code></td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>Add the created Client ID and App Secret to your Space. It can be done in two different ways.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">As secrets</label><label for="__tabbed_1_2">As environment variables in <code>.oauth.yaml</code></label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p>Add them to your Space in "Settings" &gt; "New secret".</p>
-<table>
-<thead>
-<tr>
-<th>Secret name</th>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>OAUTH2_HUGGINGFACE_CLIENT_ID</code></td>
-<td>[Your Client ID]</td>
-</tr>
-<tr>
-<td><code>OAUTH2_HUGGINGFACE_CLIENT_SECRET</code></td>
-<td>[Your App Secret]</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="tabbed-block">
-<p>Add them to your Space in "Files" &gt; <code>.oauth.yaml</code>.</p>
+<p>If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose <code>Ephemeral FREE</code>. <code>Ephemeral FREE</code> means your datasets and configuration will not be saved to disk, when the Space is restarted your datasets, workspaces, and users will be lost.</p>
+<p>If you want to disable the persistence storage warning, you can set the environment variable <code>ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING=false</code></p>
 <div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Be aware that the <code>.oauth.yaml</code> file is public in public spaces or may be accessible by other members of your organization in private spaces.</p>
-<p>Therefore, we recommend setting these variables as environment secrets.</p>
+<p class="admonition-title">Read this if you have datasets and want to enable persistent storage</p>
+<p>If you want to enable persistent storage <code>Small PAID</code> and you have created datasets, users, or workspaces, follow this process:</p>
+<ul>
+<li>First, <strong>make a local or remote copy of your datasets</strong>, following the <a href="../../how_to_guides/import_export/">Import and Export guide</a>. This is the most important step, because changing the settings of your Space leads to a restart and thus a data loss.</li>
+<li>If you have created users (not signed in with Hugging Face login), <strong>consider storing a copy of users</strong> following the <a href="../../how_to_guides/user/">manage users guide</a>.</li>
+<li><strong>Once you have stored all your data safely, go to you Space Settings Tab</strong> and select <code>Small</code>.</li>
+<li><strong>Your Space will be restarted and existing data will be lost</strong>. From now on, all the new data you create in Argilla will be kept safely</li>
+<li><strong>Recover your data</strong>, by following the above mentioned guides.</li>
+</ul>
 </div>
-<details class="quote">
-<summary>Example code in <code>.oauth.yaml</code></summary>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># This attribute will enable or disable the Hugging Face authentication</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<h2 id="how-to-configure-and-disable-oauth-access">How to configure and disable OAuth access<a class="headerlink" href="#how-to-configure-and-disable-oauth-access" title="Permanent link">&para;</a></h2>
+<p>By default, Argilla Spaces are configured with Hugging Face OAuth, in the following way:</p>
+<ul>
+<li>Any Hugging Face user that can see your Space, can use the Sign in button, join as an <code>annotator</code>, and contribute to the datasets available under the <code>argilla</code> workspace. This workspace is created during the deployment process.</li>
+<li>These users can only explore and annotate datasets in the <code>argilla</code> workspace but can't perform any critical operation like create, delete, update, or configure datasets. By default, any other workspace you create, won't be visible to these users.</li>
+</ul>
+<p>To restrict access or change the default behaviour, there's two options:</p>
+<p><strong>Set your Space to private</strong>. This is especially useful if your Space is under an organization. This will <strong>only allow members within your organization to see and join your Argilla space</strong>. It can also be used for personal, solo projects.</p>
+<p><strong>Modify the <code>.oauth.yml</code> configuration file</strong>. You can find and modify this file under the <code>Files</code> tab of your Space. The default file looks like this:</p>
+<p><div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Change to `false` to disable HF oauth integration</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">#enabled: false</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nt">providers</span><span class="p">:</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># The OAuth provider setup</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># For now, only Hugging Face is supported</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">huggingface</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="c1"># This is the client ID of the OAuth app. You can find it in your Hugging Face settings.</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="c1"># see https://huggingface.co/docs/hub/oauth#creating-an-oauth-app for more info.</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="c1"># You can also provide it by using the env variable `OAUTH2_HUGGINGFACE_CLIENT_ID`</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXX</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="c1"># This is the client secret of the OAuth app. You can find it in your Hugging Face settings.</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="c1"># See https://huggingface.co/docs/hub/oauth#creating-an-oauth-app for more info.</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="c1"># We encourage you to provide it by using the env variable `OAUTH2_HUGGINGFACE_CLIENT_SECRET`</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXX</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="c1"># The scope of the OAuth app. At least `openid` and `profile` are required.</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openid profile</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="c1"># This section defines the allowed workspaces for the oauth users.</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Workspaces defined here must exist in Argilla.</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="nt">allowed_workspaces</span><span class="p">:</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">huggingface</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Allowed workspaces must exists</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nt">allowed_workspaces</span><span class="p">:</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argilla</span>
 </span></code></pre></div>
-</details>
+You can modify two things:</p>
+<ul>
+<li>Uncomment <code>enabled: false</code> to completely disable the Sign in with Hugging Face. If you disable it make sure to set the <code>USERNAME</code> and <code>PASSWORD</code> Space secrets to be able to login as an <code>owner</code>.</li>
+<li>Change the list of <code>allowed</code> workspaces.</li>
+</ul>
+<p>For example if you want to let users join a new workspace <code>community-initiative</code>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">allowed_workspaces</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argilla</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">community-initiative</span>
+</span></code></pre></div>
+<h2 id="how-to-deploy-argilla-under-a-hugging-face-organization">How to deploy Argilla under a Hugging Face Organization<a class="headerlink" href="#how-to-deploy-argilla-under-a-hugging-face-organization" title="Permanent link">&para;</a></h2>
+<p>Creating an Argilla Space within an organization is useful for several scenarios:</p>
+<ul>
+<li><strong>You want to only enable members of your organization to join your Space</strong>. You can achieve this by setting your Space to private.</li>
+<li><strong>You want manage the Space together with other users</strong> (e.g., Space settings, etc.). Note that if you just want to manage your Argilla datasets, workspaces, you can achieve this by adding other Argilla <code>owner</code> roles to your Argilla Server.</li>
+<li><strong>More generally, you want to make available your space under an organization/community umbrella</strong>.</li>
+</ul>
+<p>The steps are very similar the <a href="../quickstart/">Quickstart guide</a> with two important differences:</p>
+<div class="admonition tip">
+<p class="admonition-title">Setup USERNAME</p>
+<p>You need to <strong>set up the <code>USERNAME</code> Space Secret with your Hugging Face username</strong>. This way, the first time you enter with the <code>Hugging Face Sign in</code> button, you'll be granted the <code>owner</code> role.</p>
 </div>
+<div class="admonition tip">
+<p class="admonition-title">Enable Persistent Storage <code>SMALL</code></p>
+<p>Not setting persistent storage to <code>Small</code> means that <strong>you will loose your data when the Space restarts</strong>.</p>
+<p>For Argilla Spaces with many users, it's strongly recommended to <strong>set persistent storage to <code>Small</code></strong>.</p>
 </div>
+<h2 id="how-to-use-private-spaces">How to use Private Spaces<a class="headerlink" href="#how-to-use-private-spaces" title="Permanent link">&para;</a></h2>
+<p>Setting your Space visibility to private can be useful if:</p>
+<ul>
+<li>You want to work on your personal, solo project.</li>
+<li>You want your Argilla to be available only to members of the organization where you deploy the Argilla Space.</li>
+</ul>
+<p>You can set the visibility of the Space during the Space creation process or afterwards under the <code>Settings</code> Tab.</p>
+<p>To use the Python SDK with private Spaces you need to specify your <code>HF_TOKEN</code> which can be found <a href="https://huggingface.co/settings/tokens">here</a>, when creating the client:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">HF_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">HF_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="space-secrets-overview">Space Secrets overview<a class="headerlink" href="#space-secrets-overview" title="Permanent link">&para;</a></h2>
+<p>There's two optional secrets to set up the <code>USERNAME</code> and <code>PASSWORD</code> of the <code>owner</code> of the Argilla Space. Remember that, by default Argilla Spaces are configured with a <em>Sign in with Hugging Face</em> button, which is also used to grant an <code>owner</code> to the creator of the Space for personal spaces.</p>
+<p>The <code>USERNAME</code> and <code>PASSWORD</code> are only useful in a couple of scenarios:</p>
+<ul>
+<li>You have <a href="#how-to-configure-and-disable-oauth-access">disabled Hugging Face OAuth</a>.</li>
+<li>You want to <a href="#how-to-deploy-argilla-under-a-hugging-face-organization">set up Argilla under an organization</a> and want your Hugging Face username to be granted the <code>owner</code> role.</li>
+</ul>
+<p>In summary, when setting up a Space:</p>
+<div class="admonition info">
+<p class="admonition-title">Creating a Space under your personal account</p>
+<p>If you are creating the Space under your personal account, <strong>don't insert any value for <code>USERNAME</code> and <code>PASSWORD</code></strong>. Once you launch the Space you will be able to Sign in with your Hugging Face username and the <code>owner</code> role.</p>
 </div>
-</li>
-<li>
-<p>Check that the <code>enabled</code> parameter is set to <code>true</code> in "Files" &gt; <code>.oauth.yaml</code>.</p>
-</li>
-<li>Go back to "Settings" and do a "Factory rebuild". Once the Space is restarted, you and your collaborators can sign and log in to your Space using their Hugging Face accounts.</li>
-</ol>
+<div class="admonition info">
+<p class="admonition-title">Creating a Space under an organization</p>
+<p>If you are creating the Space under an organization <strong>make sure to insert your Hugging Face username in the secret <code>USERNAME</code></strong>. In this way, you'll be able to Sign in with your Hugging Face user.</p>
+</div>
 
 
 
@@ -2061,7 +2288,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../installation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Installation">
+          <a href="../how-to-deploy-argilla-with-docker/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Deploy with Docker">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
@@ -2071,7 +2298,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Installation
+                Deploy with Docker
               </div>
             </div>
           </a>

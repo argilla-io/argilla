@@ -79,6 +79,11 @@ def fetch_data_from_github(repository, auth_token):
 with mkdocs_gen_files.open(DATA_PATH, "w") as f:
     df = fetch_data_from_github(REPOSITORY, GITHUB_ACCESS_TOKEN)
 
+    df["Milestone"] = df["Milestone"].astype(str).fillna("")
+    planned_issues = df[
+        ((df["Milestone"].str.startswith("v2")) & (df["State"] == "open"))
+        | ((df["Milestone"].str.startswith("2")) & (df["State"] == "open"))
+    ]
     open_issues = df.loc[df["State"] == "open"]
     engagement_df = (
         open_issues[["URL", "Issue", "Reactions", "Comments"]]
