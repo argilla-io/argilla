@@ -592,15 +592,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-your-first-dataset_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create your first dataset
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       Next steps
@@ -2102,15 +2093,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-your-first-dataset_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create your first dataset
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#next-steps" class="md-nav__link">
     <span class="md-ellipsis">
       Next steps
@@ -2215,7 +2197,6 @@ You can use the default values following these steps:</p>
     1. Click on the three points menu at the top of the Space, select "Embed this Space", and open the direct URL.
     2. Use this pattern: <code>https://[your-owner-name]-[your_space_name].hf.space</code>.</p>
 </div>
-<h2 id="create-your-first-dataset_1">Create your first dataset<a class="headerlink" href="#create-your-first-dataset_1" title="Permanent link">&para;</a></h2>
 <p>To create a dataset with a simple text classification task, first, you need to <strong>define the dataset settings</strong>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;Classify the reviews as positive or negative.&quot;</span><span class="p">,</span>
@@ -2239,7 +2220,7 @@ You can use the default values following these steps:</p>
 <div class="admonition info">
 <p class="admonition-title">About workspaces</p>
 <p>Workspaces in Argilla group datasets and user access rights. The <code>workspace</code> parameter is optional in this case. If you don't specify it, the dataset will be created in the default workspace <code>argilla</code>.</p>
-<p>By default, <strong>this workspace will be visible to users joining with the Sign in with Hugging Face button</strong>. You can create other workspaces and decide to grant access to users either with the SDK or the <a href="getting_started/how-to-configure-argilla-on-huggingface.md">changing the OAuth configuration</a>.</p>
+<p>By default, <strong>this workspace will be visible to users joining with the Sign in with Hugging Face button</strong>. You can create other workspaces and decide to grant access to users either with the SDK or the <a href="../how-to-configure-argilla-on-huggingface/">changing the OAuth configuration</a>.</p>
 </div>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;my_first_dataset&quot;</span><span class="p">,</span>
