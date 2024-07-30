@@ -77,6 +77,14 @@
     }
   },
   {
+    "version": "docs_2.0.0",
+    "title": "docs_2.0.0",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_2_0_minor_fixes",
     "title": "docs_2_0_minor_fixes",
     "aliases": [],
