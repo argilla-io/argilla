@@ -48,8 +48,14 @@ A **user** in Argilla is an authorized person who, depending on their role, can 
 
     Only users with the `owner` role can manage (create, retrieve, delete) other users.
 
+## Initial users and credentials
 
-For the new users, the username and password are set during the creation process. The API key is automatically generated and can be copied from the "Settings" section of the UI.
+Depending on [your Argilla deployment](../getting_started/quickstart.md), the initial user with the `owner` role will vary.
+
+* If you deploy on the Hugging Face Hub, the initial user will correspond to the Space owner (your personal account). The API key is automatically generated and can be copied from the "Settings" section of the UI.
+* If you deploy with Docker, the default values for the environment variables are: USERNAME: argilla, PASSWORD: 12345678, API_KEY: argilla.apikey.
+
+For the new users, the username and password are set during the creation process. The API key can be copied from the "Settings" section of the UI.
 
 !!! info "Main Class"
 

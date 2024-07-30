@@ -14,14 +14,12 @@ A **workspace** is a *space* inside your Argilla instance where authorized users
 
     A user with the `admin` role can only read the workspace to which it belongs.
 
-## Default workspaces
+## Initial workspaces
 
-Argilla provides a default workspace to help you get started in Python and the UI. The name of this workspace varies depending on the server configuration.
+Depending on [your Argilla deployment](../getting_started/quickstart.md), the initial workspace will vary.
 
-| Environment                   | Name     |
-|-------------------------------|----------|
-| Docker and HF Spaces          | admin    |
-| Server image                  | argilla  |
+* If you deploy on the Hugging Face Hub, the initial workspace will be the one indicated in the `.oauth.yaml` file. By default, `argilla`.
+* If you deploy with Docker, you will need to create a workspace as shown [in the next section](#create-a-new-workspace).
 
 !!! info "Main Class"
 
