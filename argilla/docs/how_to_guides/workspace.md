@@ -14,14 +14,12 @@ A **workspace** is a *space* inside your Argilla instance where authorized users
 
     A user with the `admin` role can only read the workspace to which it belongs.
 
-## Default workspaces
+## Initial workspaces
 
-Argilla provides a default workspace to help you get started in Python and the UI. The name of this workspace varies depending on the server configuration.
+Depending on [your Argilla deployment](../getting_started/quickstart.md), the initial workspace will vary.
 
-| Environment                   | Name     |
-|-------------------------------|----------|
-| Docker and HF Spaces          | admin    |
-| Server image                  | argilla  |
+* If you deploy on the Hugging Face Hub, the initial workspace will be the one indicated in the `.oauth.yaml` file. By default, `argilla`.
+* If you deploy with Docker, you will need to create a workspace as shown [in the next section](#create-a-new-workspace).
 
 !!! info "Main Class"
 
@@ -44,13 +42,9 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-workspace_to_create = rg.Workspace(
-    name="my_workspace",
-    client=client
-)
+workspace_to_create = rg.Workspace(name="my_workspace")
 
 created_workspace = workspace_to_create.create()
-created_workspace
 ```
 !!! tip "Accessing attributes"
     Access the attributes of a workspace by calling them directly on the `Workspace` object. For example, `workspace.id` or `workspace.name`.
@@ -74,30 +68,31 @@ for workspace in workspaces:
 
 ## Retrieve a workspace
 
-You can retrieve a workspace by accessing the `workspaces` method on the `Argilla` class and passing the name of the workspace as an argument.
+You can retrieve a workspace by accessing the `workspaces` method on the `Argilla` class and passing the `name` or `id` of the workspace as an argument. If the workspace does not exist, a warning message will be raised and `None` will be returned.
 
-```python
-import argilla as rg
+=== "By name"
 
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+    ```python
+    import argilla as rg
 
-retrieved_workspace = client.workspaces("my_workspace")
-```
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-You can also use the user `id` to fetch the workspace:
-```python
-import argilla as rg
+    retrieved_workspace = client.workspaces("my_workspace")
+    ```
 
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+=== "By id"
 
-workspace = client.workspaces(id="<uuid-or-uuid-string>")
-```
+    ```python
+    import argilla as rg
 
-If the workspace does not exist for the given id, the call will return `None`.
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    retrieved_workspace = client.workspaces(id="<uuid-or-uuid-string>")
+    ```
 
 ## Check workspace existence
 
-You can check if a workspace exists. The `client.workspaces` method will return `None` if the workspace was not found.
+You can check if a workspace exists. The `client.workspaces` method will return `None` if the workspace is not found.
 
 ```python
 import argilla as rg
@@ -106,7 +101,8 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 workspace = client.workspaces("my_workspace")
 
-workspace_exists = workspace is not None
+if workspace is not None:
+    pass
 ```
 
 ## List users in a workspace

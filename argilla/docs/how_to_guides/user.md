@@ -6,7 +6,7 @@ description: In this section, we will provide a step-by-step guide to show how t
 
 This guide provides an overview of user roles and credentials, explaining how to set up and manage users in Argilla.
 
-A **user** in Argilla is an authorized person, who depending on their role, can use the Python SDK and access the UI in a running Argilla instance. We differentiate between three types of users depending on their role, permissions and needs: `owner`, `admin` and `annotator`.
+A **user** in Argilla is an authorized person who, depending on their role, can use the Python SDK and access the UI in a running Argilla instance. We differentiate between three types of users depending on their role, permissions and needs: `owner`, `admin` and `annotator`.
 
 === "Overview"
     |                    | Owner      | Admin                     | Annotator |
@@ -48,8 +48,14 @@ A **user** in Argilla is an authorized person, who depending on their role, can 
 
     Only users with the `owner` role can manage (create, retrieve, delete) other users.
 
+## Initial users and credentials
 
-For the new users, the username and password are set during the creation process. The API key is automatically generated and can be copied from the "Settings" section of the UI.
+Depending on [your Argilla deployment](../getting_started/quickstart.md), the initial user with the `owner` role will vary.
+
+* If you deploy on the Hugging Face Hub, the initial user will correspond to the Space owner (your personal account). The API key is automatically generated and can be copied from the "Settings" section of the UI.
+* If you deploy with Docker, the default values for the environment variables are: USERNAME: argilla, PASSWORD: 12345678, API_KEY: argilla.apikey.
+
+For the new users, the username and password are set during the creation process. The API key can be copied from the "Settings" section of the UI.
 
 !!! info "Main Class"
 
@@ -89,7 +95,6 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 user_to_create = rg.User(
     username="my_username",
     password="12345678",
-    client=client
 )
 
 created_user = user_to_create.create()
@@ -116,26 +121,42 @@ for user in users:
 
 ## Retrieve a user
 
-You can retrieve an existing user from Argilla by accessing the `users` attribute on the `Argilla` class and passing the `username` as an argument.
+You can retrieve an existing user from Argilla by accessing the `users` attribute on the `Argilla` class and passing the `username` or `id` as an argument. If the user does not exist, a warning message will be raised and `None` will be returned.
+
+=== "By username"
+
+    ```python
+    import argilla as rg
+
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    retrieved_user = client.users("my_username")
+    ```
+
+=== "By id"
+
+    ```python
+    import argilla as rg
+
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    retrieved_user = client.users(id="<uuid-or-uuid-string>")
+    ```
+
+## Check user existence
+
+You can check if a user exists. The `client.users` method will return `None` if the user was not found.
 
 ```python
 import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-retrieved_user = client.users("my_username")
+user = client.users("my_username")
+
+if user is not None:
+    pass
 ```
-
-You can also use the user `id` to fetch the user:
-```python
-import argilla as rg
-
-client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
-
-user = client.users(id="<uuid-or-uuid-string>")
-```
-
-If the user does not exist for the given id, the call will return `None`
 
 ## List users in a workspace
 
