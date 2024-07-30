@@ -232,5 +232,10 @@
     "version": "dev",
     "title": "dev",
     "aliases": []
+  },
+  {
+    "version": "v2.0",
+    "title": "v2.0",
+    "aliases": []
   }
 ]
