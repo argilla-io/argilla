@@ -123,9 +123,9 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-existing_dataset = client.datasets("sentiment_analysis")
+existing_dataset = client.datasets("my_dataset")
 
-new_dataset = rg.Dataset(name="sentiment_analysis_copy", settings=existing_dataset.settings)
+new_dataset = rg.Dataset(name="my_dataset_copy", settings=existing_dataset.settings)
 
 new_dataset.create()
 ```
