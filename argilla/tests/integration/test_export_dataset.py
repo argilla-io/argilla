@@ -139,7 +139,7 @@ class TestDiskImportExportMixin:
 
 
 @pytest.mark.flaky(
-    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError]
+    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError, OSError]
 )  # Hub consistency CICD pipline
 @pytest.mark.skipif(
     not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"),
