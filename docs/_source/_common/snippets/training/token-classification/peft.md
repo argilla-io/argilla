@@ -3,7 +3,7 @@ title: PEFT
 description: The ArgillaPeftTrainer leverages the base features of transformers and uses the Low Rank Adaptation (LoRA) implementation of Parameter Efficient Fine-Tuning (PEFT).
 links:
   - linkText: Argilla docs
-    linkLink: https://docs.argilla.io/en/practical_guides/fine_tune.html#token-classification
+    linkLink: https://docs.v1.argilla.io/en/practical_guides/fine_tune.html#token-classification
   - linkText: Transformers blog
     linkLink: https://huggingface.co/blog/peft
   - linkText: Transformers docs

@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
+import { NuxtConfig } from "@nuxt/types";
 import pkg from "./package.json";
 
 const LOCAL_ENVIRONMENT = "http://0.0.0.0:6900";
@@ -204,14 +204,8 @@ const config: NuxtConfig = {
   publicRuntimeConfig: {
     clientVersion: pkg.version,
     documentationSite: "https://docs.argilla.io/",
-    documentationSiteSemanticSearch:
-      "https://docs.argilla.io/en/latest/reference/webapp/features.html#semantic-search",
-    documentationSiteLabelScheme:
-      "https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#define-a-labeling-schema",
-    documentationSiteQueryDatasets:
-      "https://docs.argilla.io/en/latest/guides/query_datasets.html",
     documentationPersistentStorage:
-      "https://docs.argilla.io/en/latest/getting_started/installation/deployments/huggingface-spaces.html#setting-up-persistent-storage",
+      "https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#persistent-storage",
   },
 };
 export default config;

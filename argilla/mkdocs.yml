@@ -1,6 +1,6 @@
 # Project information
 site_name: Argilla Docs
-site_url: https://argilla-io.github.io/argilla/
+site_url: https://docs.argilla.io/
 site_author: Argilla, Inc.
 site_description: Data-centric tool for AI builders
 copyright: Copyright &copy; 2017 - 2024 Argilla
@@ -103,7 +103,7 @@ plugins:
   - gen-files:
       scripts:
         - docs/scripts/gen_changelog.py
-        # - docs/scripts/gen_popular_issues.py
+        - docs/scripts/gen_popular_issues.py
         # - docs/scripts/gen_ref_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
