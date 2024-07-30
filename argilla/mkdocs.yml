@@ -2,7 +2,7 @@
 site_name: Argilla Docs
 site_url: https://docs.argilla.io/
 site_author: Argilla, Inc.
-site_description: The Argilla python server SDK
+site_description: Data-centric tool for AI builders
 copyright: Copyright &copy; 2017 - 2024 Argilla
 
 # Repository
@@ -131,8 +131,8 @@ nav:
   - Argilla: index.md
   - Getting started:
       - Quickstart: getting_started/quickstart.md
-      - Installation: getting_started/installation.md
-      - Set up in Hugging Face Spaces: getting_started/huggingface-spaces.md
+      - Deploy with Docker: getting_started/how-to-deploy-argilla-with-docker.md
+      - Hugging Face Spaces settings: getting_started/how-to-configure-argilla-on-huggingface.md
       - FAQ: getting_started/faq.md
   - How-to guides:
       - how_to_guides/index.md

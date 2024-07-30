@@ -27,12 +27,14 @@ from argilla._api._records import RecordsAPI
 from argilla._api._users import UsersAPI
 from argilla._api._vectors import VectorsAPI
 from argilla._api._workspaces import WorkspacesAPI
-from argilla._constants import _DEFAULT_API_KEY, _DEFAULT_API_URL
+from argilla._constants import _DEFAULT_API_URL
+from argilla._exceptions import ArgillaError
 
 __all__ = ["APIClient"]
 
 ARGILLA_API_URL = os.getenv(key="ARGILLA_API_URL", default=_DEFAULT_API_URL)
-ARGILLA_API_KEY = os.getenv(key="ARGILLA_API_KEY", default=_DEFAULT_API_KEY)
+ARGILLA_API_KEY = os.getenv(key="ARGILLA_API_KEY")
+
 DEFAULT_HTTP_CONFIG = HTTPClientConfig(api_url=ARGILLA_API_URL, api_key=ARGILLA_API_KEY)
 
 
@@ -101,10 +103,16 @@ class APIClient:
     def __init__(
         self,
         api_url: Optional[str] = DEFAULT_HTTP_CONFIG.api_url,
-        api_key: Optional[str] = DEFAULT_HTTP_CONFIG.api_key,
+        api_key: str = DEFAULT_HTTP_CONFIG.api_key,
         timeout: int = DEFAULT_HTTP_CONFIG.timeout,
         **http_client_args,
     ):
+        if not api_url:
+            raise ArgillaError("Missing api_url. You must provide a valid API url")
+
+        if not api_key:
+            raise ArgillaError("Missing api_key. You must provide a valid API key.")
+
         self.api_url = api_url
         self.api_key = api_key
 

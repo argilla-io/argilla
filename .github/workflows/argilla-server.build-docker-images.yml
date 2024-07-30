@@ -139,7 +139,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
           repository: $${{ env.SERVER_DOCKER_IMAGE }}
-          readme-filepath: argilla-server/README.md
+          readme-filepath: argilla-server/docker/server/README.md
 
       - name: Docker Hub Description for `argilla-hf-spaces`
         uses: peter-evans/dockerhub-description@v4
