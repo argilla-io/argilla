@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_5327-docs-deploy-docs-in-custom-subdomain",
-    "title": "docs_5327-docs-deploy-docs-in-custom-subdomain",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_5284-docs-phrasing-and-structure-importexport-docs",
     "title": "docs_5284-docs-phrasing-and-structure-importexport-docs",
     "aliases": [],
