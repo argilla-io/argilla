@@ -18,7 +18,21 @@ These are the section headers that we use:
 
 ## [2.0.0](https://github.com/argilla-io/argilla/compare/v2.0.0rc1...v2.0.0)
 
-TBD
+### Added
+
+- Added core class refactors. For an overview, see [this blog post](https://argilla.io/blog/introducing-argilla-new-sdk/)
+- Added `TaskDistribution` to define distribution of records to users .
+- Added new [documentation site](docs.argilla.io) and structure and migrated [legacy documentation](http://docs.v1.argilla.io/).
+
+### Changed
+
+- Changed `FeedbackDataset` to `Dataset`.
+- Changed `rg.init` into `rg.Argilla` class to interact with Argilla server.
+
+### Deprecated
+
+- Deprecated task specific dataset classes like `TextClassification` and `TokenClassification`. To migrate legacy datasets to `rg.Dataset` class, see the [how-to-guide](https://docs.v2.argilla.io/dev/how_to_guides/migrate_from_legacy_datasets/).
+- Deprecated use case extensions like `listeners` and `ArgillaTrainer`.
 
 ## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
 
