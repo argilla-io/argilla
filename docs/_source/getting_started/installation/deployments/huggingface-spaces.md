@@ -118,7 +118,7 @@ dataset = rg.FeedbackDataset.from_argilla("my-first-dataset", workspace="admin")
 dataset.push_to_huggingface("my-repo/my-first-dataset")
 ```
 
-As a next step, you can check the [Argilla Tutorials](https://docs.argilla.io/en/latest/tutorials/tutorials.html) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
+As a next step, you can check the [Argilla Tutorials](https://docs.v1.argilla.io/en/latest/tutorials/tutorials.html) section. All the tutorials can be run using Colab or local Jupyter Notebooks, so you can start building datasets with Argilla and Spaces!
 
 ## Feedback and support
 

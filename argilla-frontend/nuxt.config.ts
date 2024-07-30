@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
+import { NuxtConfig } from "@nuxt/types";
 import pkg from "./package.json";
 
 const LOCAL_ENVIRONMENT = "http://0.0.0.0:6900";

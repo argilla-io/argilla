@@ -1,6 +1,6 @@
 # Project information
 site_name: Argilla Docs
-site_url: https://argilla-io.github.io/argilla/
+site_url: https://docs.argilla.io/
 site_author: Argilla, Inc.
 site_description: The Argilla python server SDK
 copyright: Copyright &copy; 2017 - 2024 Argilla

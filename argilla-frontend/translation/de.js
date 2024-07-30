@@ -224,6 +224,10 @@ export default {
       missing_vector: {
         message: "Vektor nicht im ausgewählten Datensatz gefunden",
       },
+      update_distribution_with_existing_responses: {
+        message:
+          "Die Verteilungseinstellungen können für einen Datensatz mit Benutzerantworten nicht geändert werden",
+      },
     },
     http: {
       401: {

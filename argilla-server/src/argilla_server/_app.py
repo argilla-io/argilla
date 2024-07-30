@@ -171,7 +171,7 @@ def show_telemetry_warning():
         message += inspect.cleandoc(
             "Argilla uses telemetry to report anonymous usage and error information. You\n"
             "can know more about what information is reported at:\n\n"
-            "    https://docs.argilla.io/en/latest/reference/telemetry.html\n\n"
+            "    https://docs.v1.argilla.io/en/latest/reference/telemetry.html\n\n"
             "Telemetry is currently enabled. If you want to disable it, you can configure\n"
             "the environment variable before relaunching the server:\n\n"
             f'{"#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"}'

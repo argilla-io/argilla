@@ -238,7 +238,7 @@ export default {
       },
       update_distribution_with_existing_responses: {
         message:
-          "This dataset has responses. Task distribution settings cannot be modified",
+          "Distribution settings can't be modified for a dataset containing user responses",
       },
     },
     http: {

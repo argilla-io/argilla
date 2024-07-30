@@ -66,47 +66,41 @@ describe("Dataset", () => {
   });
 
   describe("restore", () => {
-    describe("restoreDistribution should", () => {
-      test("restore only the distribution based on original values", () => {
-        const dataset = createEmptyDataset();
-        dataset.distribution.minSubmitted = 20;
+    test("restore only the distribution based on original values", () => {
+      const dataset = createEmptyDataset();
+      dataset.distribution.minSubmitted = 20;
 
-        expect(dataset.distribution).not.toEqual(dataset.original.distribution);
+      expect(dataset.distribution).not.toEqual(dataset.original.distribution);
 
-        dataset.restoreDistribution();
+      dataset.restore("distribution");
 
-        expect(dataset.distribution).toEqual(dataset.original.distribution);
-      });
+      expect(dataset.distribution).toEqual(dataset.original.distribution);
     });
 
-    describe("restoreMetadata should", () => {
-      test("restore only the metadata info based on original values", () => {
-        const dataset = createEmptyDataset();
-        dataset.allowExtraMetadata = true;
+    test("restore only the metadata info based on original values", () => {
+      const dataset = createEmptyDataset();
+      dataset.allowExtraMetadata = true;
 
-        expect(dataset.allowExtraMetadata).not.toEqual(
-          dataset.original.allowExtraMetadata
-        );
+      expect(dataset.allowExtraMetadata).not.toEqual(
+        dataset.original.allowExtraMetadata
+      );
 
-        dataset.restoreMetadata();
+      dataset.restore("metadata");
 
-        expect(dataset.allowExtraMetadata).toEqual(
-          dataset.original.allowExtraMetadata
-        );
-      });
+      expect(dataset.allowExtraMetadata).toEqual(
+        dataset.original.allowExtraMetadata
+      );
     });
 
-    describe("restoreGuidelines should", () => {
-      test("restore only the guidelines based on original values", () => {
-        const dataset = createEmptyDataset();
-        dataset.guidelines = "NEW GUIDELINES";
+    test("restore only the guidelines based on original values", () => {
+      const dataset = createEmptyDataset();
+      dataset.guidelines = "NEW GUIDELINES";
 
-        expect(dataset.guidelines).not.toEqual(dataset.original.guidelines);
+      expect(dataset.guidelines).not.toEqual(dataset.original.guidelines);
 
-        dataset.restoreGuidelines();
+      dataset.restore("guidelines");
 
-        expect(dataset.guidelines).toEqual(dataset.original.guidelines);
-      });
+      expect(dataset.guidelines).toEqual(dataset.original.guidelines);
     });
   });
 
