@@ -12,7 +12,7 @@
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/docs_review-code-snippets/getting_started/quickstart/">
+        <link rel="canonical" href="https://docs.argilla.io/docs_review-code-snippets/getting_started/quickstart/">
       
       
         <link rel="prev" href="../..">
@@ -75,7 +75,7 @@
       
         <meta  property="og:description"  content="Get started with Argilla in less 10 minutes" >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/docs_review-code-snippets/assets/images/social/getting_started/quickstart.png" >
+        <meta  property="og:image"  content="https://docs.argilla.io/docs_review-code-snippets/assets/images/social/getting_started/quickstart.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,7 +83,7 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/docs_review-code-snippets/getting_started/quickstart/" >
+        <meta  property="og:url"  content="https://docs.argilla.io/docs_review-code-snippets/getting_started/quickstart/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
@@ -91,7 +91,7 @@
       
         <meta  name="twitter:description"  content="Get started with Argilla in less 10 minutes" >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/docs_review-code-snippets/assets/images/social/getting_started/quickstart.png" >
+        <meta  name="twitter:image"  content="https://docs.argilla.io/docs_review-code-snippets/assets/images/social/getting_started/quickstart.png" >
       
     
     
@@ -568,6 +568,33 @@
   <a href="#sign-in-into-the-argilla-ui" class="md-nav__link">
     <span class="md-ellipsis">
       Sign in into the Argilla UI
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-the-python-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install the Python SDK
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-your-first-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create your first dataset
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next steps
     </span>
   </a>
   
@@ -2047,6 +2074,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#install-the-python-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install the Python SDK
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-your-first-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create your first dataset
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next steps
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2105,7 +2159,7 @@ You can use the default values following these steps:</p>
 <p class="admonition-title">Building errors</p>
 <p>If you get a build error, sometimes restarting the Space from the Settings page works, otherwise <a href="../how-to-configure-argilla-on-huggingface/">check the HF Spaces settings guide</a>.</p>
 </div>
-<h1 id="in-the-sign-in-page">In the sign in page:<a class="headerlink" href="#in-the-sign-in-page" title="Permanent link">&para;</a></h1>
+<p>In the sign in page:</p>
 <ol>
 <li>Click on <strong>Sign in with Hugging Face</strong></li>
 <li><strong>Authorize the application</strong> and you will be logged in into Argilla as an <code>owner</code>.</li>
@@ -2143,7 +2197,6 @@ You can use the default values following these steps:</p>
     1. Click on the three points menu at the top of the Space, select "Embed this Space", and open the direct URL.
     2. Use this pattern: <code>https://[your-owner-name]-[your_space_name].hf.space</code>.</p>
 </div>
-<h2 id="create-your-first-dataset_1">Create your first dataset<a class="headerlink" href="#create-your-first-dataset_1" title="Permanent link">&para;</a></h2>
 <p>To create a dataset with a simple text classification task, first, you need to <strong>define the dataset settings</strong>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;Classify the reviews as positive or negative.&quot;</span><span class="p">,</span>
@@ -2167,7 +2220,7 @@ You can use the default values following these steps:</p>
 <div class="admonition info">
 <p class="admonition-title">About workspaces</p>
 <p>Workspaces in Argilla group datasets and user access rights. The <code>workspace</code> parameter is optional in this case. If you don't specify it, the dataset will be created in the default workspace <code>argilla</code>.</p>
-<p>By default, <strong>this workspace will be visible to users joining with the Sign in with Hugging Face button</strong>. You can create other workspaces and decide to grant access to users either with the SDK or the <a href="getting_started/how-to-configure-argilla-on-huggingface.md">changing the OAuth configuration</a>.</p>
+<p>By default, <strong>this workspace will be visible to users joining with the Sign in with Hugging Face button</strong>. You can create other workspaces and decide to grant access to users either with the SDK or the <a href="../how-to-configure-argilla-on-huggingface/">changing the OAuth configuration</a>.</p>
 </div>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;my_first_dataset&quot;</span><span class="p">,</span>

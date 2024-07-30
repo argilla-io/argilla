@@ -12,7 +12,7 @@
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://argilla-io.github.io/argilla/docs_review-code-snippets/tutorials/token_classification/">
+        <link rel="canonical" href="https://docs.argilla.io/docs_review-code-snippets/tutorials/token_classification/">
       
       
         <link rel="prev" href="../text_classification/">
@@ -75,7 +75,7 @@
       
         <meta  property="og:description"  content="Data-centric tool for AI builders" >
       
-        <meta  property="og:image"  content="https://argilla-io.github.io/argilla/docs_review-code-snippets/assets/images/social/tutorials/token_classification.png" >
+        <meta  property="og:image"  content="https://docs.argilla.io/docs_review-code-snippets/assets/images/social/tutorials/token_classification.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -83,7 +83,7 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://argilla-io.github.io/argilla/docs_review-code-snippets/tutorials/token_classification/" >
+        <meta  property="og:url"  content="https://docs.argilla.io/docs_review-code-snippets/tutorials/token_classification/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
@@ -91,7 +91,7 @@
       
         <meta  name="twitter:description"  content="Data-centric tool for AI builders" >
       
-        <meta  name="twitter:image"  content="https://argilla-io.github.io/argilla/docs_review-code-snippets/assets/images/social/tutorials/token_classification.png" >
+        <meta  name="twitter:image"  content="https://docs.argilla.io/docs_review-code-snippets/assets/images/social/tutorials/token_classification.png" >
       
     
     
@@ -2284,14 +2284,14 @@
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>If you have already deployed Argilla Server, you can skip this step. Otherwise, you can quickly deploy it in two different ways:</p>
 <ul>
-<li>Remotely using a <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">HF Space</a>. ⚠️ If persistent storage is not enabled, you will lose your data when the server is stopped.</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>As this is a release candidate version, you'll need to manually change the version in the HF Space Files &gt; Dockerfile to <code>argilla/argilla-quickstart:v2.0.0rc2</code>.</p>
-</div>
+<li>
+<p>Remotely using a <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">HF Space</a>. ⚠️ If persistent storage is not enabled, you will lose your data when the server is stopped.</p>
+</li>
+<li>
 <ul>
-<li>Locally using Docker: <code>docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2</code></li>
+<li><a href="../../getting_started/how-to-deploy-argilla-with-docker/">Locally using Docker</a>.</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -2313,7 +2313,7 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">argilla</span> <span class="o">--</span><span class="n">pre</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">argilla</span>
 </span></code></pre></div>
 
 </div>
@@ -2616,7 +2616,7 @@
 <p>After the annotation, we will have a robust dataset to train our model for entity recognition. For our case, we will train a SpanMarker model, but you can select any model of your choice. So, let's start by retrieving the annotated records.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Check this <a href="../how_to_guides/query_export.md">how-to guide</a> to learn more about filtering and querying in Argilla.</p>
+<p>Check this <a href="../../how_to_guides/query/">how-to guide</a> to learn more about filtering and querying in Argilla.</p>
 </div>
 </div>
 </div>
