@@ -441,6 +441,18 @@ datasets = workspace.datasets
 for dataset in datasets:
     print(dataset)
 ```
+
+When you list datasets, dataset settings are not preloaded, since this can introduce extra requests to the server. If you want to work with settings when listing datasets, you need to load them:
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+for dataset in client.datasets:
+    dataset.settings.get() # this will fetch the dataset settings
+    print(dataset.settings)
+```
+
 !!! tip "Notebooks"
     When using a notebook, executing `client.datasets` will display a table with the `name`of the existing datasets, the `id`, `workspace_id` to which they belong, and the last update as `updated_at`. .
 
