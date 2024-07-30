@@ -17,6 +17,11 @@ Download `docker-compose.yaml`:
 wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/examples/deployments/docker/docker-compose.yaml
 ```
 
+or using curl:
+```console
+curl https://raw.githubusercontent.com/argilla-io/argilla/main/examples/deployments/docker/docker-compose.yaml -o docker-compose.yaml
+```
+
 Run to deploy the server on `http://localhost:6900`:
 
 ```console
