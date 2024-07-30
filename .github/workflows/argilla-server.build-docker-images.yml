@@ -134,21 +134,21 @@ jobs:
             ARGILLA_SERVER_IMAGE=${{ env.SERVER_DOCKER_IMAGE }}
             ARGILLA_VERSION=${{ env.IMAGE_TAG }}
           push: true
-
-      - name: Docker Hub Description for `argilla-server`
-        uses: peter-evans/dockerhub-description@v4
-        if: ${{ env.PUBLISH_LATEST == 'true' }}
-        with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
-          repository: $${{ env.SERVER_DOCKER_IMAGE }}
-          readme-filepath: argilla-server/docker/server/README.md
-
-      - name: Docker Hub Description for `argilla-hf-spaces`
-        uses: peter-evans/dockerhub-description@v4
-        if: ${{ env.PUBLISH_LATEST == 'true' }}
-        with:
-          username: ${{ secrets.AR_DOCKER_USERNAME }}
-          password: ${{ secrets.AR_DOCKER_PASSWORD }}
-          repository: $${{ env.HF_SPACES_DOCKER_IMAGE }}
-          readme-filepath: argilla-server/docker/argilla-hf-spaces/README.md
+      # TODO: uncomment this once the step works again
+      # - name: Docker Hub Description for `argilla-server`
+      #   uses: peter-evans/dockerhub-description@v4
+      #   if: ${{ env.PUBLISH_LATEST == 'true' }}
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     repository: $${{ env.SERVER_DOCKER_IMAGE }}
+      #     readme-filepath: argilla-server/docker/server/README.md
+      # TODO: uncomment this once the step works again
+      # - name: Docker Hub Description for `argilla-hf-spaces`
+      #   uses: peter-evans/dockerhub-description@v4
+      #   if: ${{ env.PUBLISH_LATEST == 'true' }}
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     repository: $${{ env.HF_SPACES_DOCKER_IMAGE }}
+      #     readme-filepath: argilla-server/docker/argilla-hf-spaces/README.md
