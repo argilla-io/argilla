@@ -770,9 +770,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#default-workspaces" class="md-nav__link">
+  <a href="#initial-workspaces" class="md-nav__link">
     <span class="md-ellipsis">
-      Default workspaces
+      Initial workspaces
     </span>
   </a>
   
@@ -2119,9 +2119,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#default-workspaces" class="md-nav__link">
+  <a href="#initial-workspaces" class="md-nav__link">
     <span class="md-ellipsis">
-      Default workspaces
+      Initial workspaces
     </span>
   </a>
   
@@ -2230,26 +2230,12 @@
 <p>Only users with the <code>owner</code> role can manage (create, read and delete) workspaces.</p>
 <p>A user with the <code>admin</code> role can only read the workspace to which it belongs.</p>
 </details>
-<h2 id="default-workspaces">Default workspaces<a class="headerlink" href="#default-workspaces" title="Permanent link">&para;</a></h2>
-<p>Argilla provides a default workspace to help you get started in Python and the UI. The name of this workspace varies depending on the server configuration.</p>
-<table>
-<thead>
-<tr>
-<th>Environment</th>
-<th>Name</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Docker and HF Spaces</td>
-<td>admin</td>
-</tr>
-<tr>
-<td>Server image</td>
-<td>argilla</td>
-</tr>
-</tbody>
-</table>
+<h2 id="initial-workspaces">Initial workspaces<a class="headerlink" href="#initial-workspaces" title="Permanent link">&para;</a></h2>
+<p>Depending on <a href="../../getting_started/quickstart/">your Argilla deployment</a>, the initial workspace will vary.</p>
+<ul>
+<li>If you deploy on the Hugging Face Hub, the initial workspace will be the one indicated in the <code>.oauth.yaml</code> file. By default, <code>argilla</code>.</li>
+<li>If you deploy with Docker, you will need to create a workspace as shown <a href="#create-a-new-workspace">in the next section</a>.</li>
+</ul>
 <div class="admonition info">
 <p class="admonition-title">Main Class</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">Workspace</span><span class="p">(</span>

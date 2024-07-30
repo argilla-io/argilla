@@ -749,6 +749,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#initial-users-and-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initial users and credentials
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-current-user" class="md-nav__link">
     <span class="md-ellipsis">
       Get current user
@@ -2119,6 +2128,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#initial-users-and-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initial users and credentials
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-current-user" class="md-nav__link">
     <span class="md-ellipsis">
       Get current user
@@ -2308,7 +2326,13 @@
 <summary>Question: Who can manage users?</summary>
 <p>Only users with the <code>owner</code> role can manage (create, retrieve, delete) other users.</p>
 </details>
-<p>For the new users, the username and password are set during the creation process. The API key is automatically generated and can be copied from the "Settings" section of the UI.</p>
+<h2 id="initial-users-and-credentials">Initial users and credentials<a class="headerlink" href="#initial-users-and-credentials" title="Permanent link">&para;</a></h2>
+<p>Depending on <a href="../../getting_started/quickstart/">your Argilla deployment</a>, the initial user with the <code>owner</code> role will vary.</p>
+<ul>
+<li>If you deploy on the Hugging Face Hub, the initial user will correspond to the Space owner (your personal account). The API key is automatically generated and can be copied from the "Settings" section of the UI.</li>
+<li>If you deploy with Docker, the default values for the environment variables are: USERNAME: argilla, PASSWORD: 12345678, API_KEY: argilla.apikey.</li>
+</ul>
+<p>For the new users, the username and password are set during the creation process. The API key can be copied from the "Settings" section of the UI.</p>
 <div class="admonition info">
 <p class="admonition-title">Main Class</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">User</span><span class="p">(</span>
