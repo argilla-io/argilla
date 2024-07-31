@@ -15,7 +15,6 @@
 import re
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union, Tuple
 from uuid import UUID
-import warnings
 
 from argilla._exceptions import RecordsIngestionError
 from argilla.records._resource import Record
