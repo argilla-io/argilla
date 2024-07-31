@@ -101,4 +101,4 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
         with:
           message: |
-            Docs for this PR have been deployed hidden from versioning: [https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }}](https://argilla-io.github.io/argilla/${{ steps.extract_branch_name.outputs.branch_name }})
+            Docs for this PR have been deployed hidden from versioning: [https://docs.argilla.io/${{ steps.extract_branch_name.outputs.branch_name }}](https://docs.argilla.io/${{ steps.extract_branch_name.outputs.branch_name }})

@@ -16,11 +16,8 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 
 * Using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
 
-* Locally with Docker.
+* [Locally with Docker](./how-to-deploy-argilla-with-docker.md).
 
-```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2
-```
 
 ## Connect to the Argilla server
 

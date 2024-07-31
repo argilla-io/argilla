@@ -16,7 +16,7 @@ import warnings
 from abc import abstractmethod
 from collections.abc import Sequence
 from functools import cached_property
-from typing import TYPE_CHECKING, overload, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union, overload
 from uuid import UUID
 
 from argilla import _api
@@ -25,12 +25,10 @@ from argilla._api._client import DEFAULT_HTTP_CONFIG
 from argilla._exceptions import ArgillaError, NotFoundError
 from argilla._helpers import GenericIterator
 from argilla._helpers._resource_repr import ResourceHTMLReprMixin
-from argilla._models import UserModel, WorkspaceModel, DatasetModel, ResourceModel
+from argilla._models import DatasetModel, ResourceModel, UserModel, WorkspaceModel
 
 if TYPE_CHECKING:
-    from argilla import Workspace
-    from argilla import Dataset
-    from argilla import User
+    from argilla import Dataset, User, Workspace
 
 __all__ = ["Argilla"]
 
@@ -160,7 +158,7 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
         return len(self._api.list())
 
     def add(self, user: "User") -> "User":
-        """Add a new user to the Argilla platform.
+        """Add a new user to Argilla.
 
         Args:
             user: User object.
@@ -277,6 +275,8 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
     @property
     def default(self) -> "Workspace":
         """The default workspace."""
+        if len(self) == 0:
+            raise ArgillaError("There are no workspaces created. Please create a new workspace first")
         return self[0]
 
     ############################

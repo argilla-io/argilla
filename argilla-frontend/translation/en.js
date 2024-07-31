@@ -238,7 +238,7 @@ export default {
       },
       update_distribution_with_existing_responses: {
         message:
-          "Distribution settings cannot be modified for a published dataset",
+          "Distribution settings can't be modified for a dataset containing user responses",
       },
     },
     http: {

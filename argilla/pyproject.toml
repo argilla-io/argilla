@@ -62,10 +62,11 @@ dev = [
     "CairoSVG >= 2.7.1",
     "mknotebooks >= 0.8.0",
     "argilla-v1[listeners] @ file:///${PROJECT_ROOT}/../argilla-v1",
+    "pytest-retry>=1.5",
 ]
 
 [tool.pdm.scripts]
-test = "pytest tests"
+test = { cmd = "pytest tests", env_file = ".env.test" }
 lint = "ruff check"
 format = "black ."
 all = {composite = ["format", "lint", "test"]}

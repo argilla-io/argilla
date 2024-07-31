@@ -20,16 +20,24 @@ on:
 jobs:
   build:
     services:
-      argilla-quickstart:
-        image: argilladev/argilla-quickstart:develop
+      argilla-server:
+        image: argilladev/argilla-server:develop
         ports:
           - 6900:6900
         env:
-          ANNOTATOR_USERNAME: annotator
-          OWNER_USERNAME: argilla
-          OWNER_API_KEY: argilla.apikey
-          ADMIN_USERNAME: admin
-          ADMIN_API_KEY: admin.apikey
+          ARGILLA_ENABLE_TELEMETRY: 0
+          ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+          # Set credentials
+          USERNAME: argilla
+          PASSWORD: 12345678
+          API_KEY: argilla.apikey
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -50,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           pdm install
-      - name: Wait for argilla-quickstart to start
+      - name: Wait for argilla server to start
         run: |
           while ! curl -XGET http://localhost:6900/api/_status; do sleep 5; done
       - name: Set huggingface hub credentials

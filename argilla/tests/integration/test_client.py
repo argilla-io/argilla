@@ -88,3 +88,17 @@ class TestClient:
 
         with pytest.raises(ArgillaError):
             client.users()
+
+    def test_init_with_missing_api_url(self):
+        with pytest.raises(ArgillaError):
+            Argilla(api_url=None)
+
+        with pytest.raises(ArgillaError):
+            Argilla(api_url="")
+
+    def test_init_with_missing_api_key(self):
+        with pytest.raises(ArgillaError):
+            Argilla(api_key=None)
+
+        with pytest.raises(ArgillaError):
+            Argilla(api_key="")

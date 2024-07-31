@@ -6,8 +6,7 @@ FROM ${ARGILLA_SERVER_IMAGE}:${ARGILLA_VERSION}
 USER root
 
 # Copy Argilla distribution files
-COPY scripts/start_quickstart_argilla.sh /home/argilla
-COPY scripts/start_argilla_server.sh /home/argilla
+COPY scripts/start.sh /home/argilla
 COPY Procfile /home/argilla
 COPY requirements.txt /packages/requirements.txt
 
@@ -29,9 +28,9 @@ RUN \
     apt-get update && apt-get install -y elasticsearch=8.8.2 && \
     chown -R argilla:argilla /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
     chown argilla:argilla /etc/default/elasticsearch && \
-    # Install quickstart image dependencies
+    # Install image dependencies
     pip install -r /packages/requirements.txt && \
-    chmod +x /home/argilla/start_quickstart_argilla.sh && \
+    chmod +x /home/argilla/start.sh && \
     chmod +x /home/argilla/start_argilla_server.sh && \
     # Give ownership of the data directory to the argilla user
     chown -R argilla:argilla /data && \
@@ -52,20 +51,7 @@ USER argilla
 ENV ELASTIC_CONTAINER=true
 ENV ES_JAVA_OPTS="-Xms1g -Xmx1g"
 
-ENV OWNER_USERNAME=owner
-ENV OWNER_PASSWORD=12345678
-ENV OWNER_API_KEY=owner.apikey
-
-ENV ADMIN_USERNAME=admin
-ENV ADMIN_PASSWORD=12345678
-ENV ADMIN_API_KEY=admin.apikey
-
-ENV ANNOTATOR_USERNAME=argilla
-ENV ANNOTATOR_PASSWORD=12345678
-
 ENV ARGILLA_HOME_PATH=/data/argilla
-ENV ARGILLA_WORKSPACE=$ADMIN_USERNAME
+ENV REINDEX_DATASETS=1
 
-ENV UVICORN_PORT=6900
-
-CMD ["/bin/bash", "start_quickstart_argilla.sh"]
+CMD ["/bin/bash", "start.sh"]

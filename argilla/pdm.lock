@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
-lock_version = "4.4.1"
-content_hash = "sha256:106793ca83dbd9b4c7125bf4bf3c466284aa245672ed7641c94a71308e549255"
+lock_version = "4.4.2"
+content_hash = "sha256:80432e7b8d98d1ac852cc1fa0b571731462229737f0432103ec05c8ffd71578b"
 
 [[package]]
 name = "aiohttp"
@@ -2093,6 +2093,20 @@ dependencies = [
 files = [
     {file = "pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0"},
     {file = "pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f"},
+]
+
+[[package]]
+name = "pytest-retry"
+version = "1.6.3"
+requires_python = ">=3.9"
+summary = "Adds the ability to retry flaky tests in CI environments"
+groups = ["dev"]
+dependencies = [
+    "pytest>=7.0.0",
+]
+files = [
+    {file = "pytest_retry-1.6.3-py3-none-any.whl", hash = "sha256:e96f7df77ee70b0838d1085f9c3b8b5b7d74bf8947a0baf32e2b8c71b27683c8"},
+    {file = "pytest_retry-1.6.3.tar.gz", hash = "sha256:36ccfa11c8c8f9ddad5e20375182146d040c20c4a791745139c5a99ddf1b557d"},
 ]
 
 [[package]]

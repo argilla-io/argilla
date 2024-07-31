@@ -23,7 +23,6 @@ The guide will take you through three steps:
 2. **Define the new dataset** in the Argilla V2 format.
 3. **Upload the dataset records** to the new Argilla V2 dataset format and attributes.
 
-
 ### Step 1: Retrieve the legacy dataset
 
 Connect to the Argilla V1 server via the new `argilla` package. First, you should install an extra dependency:
@@ -32,6 +31,7 @@ pip install "argilla[legacy]"
 ```
 
 Now, you can use the `v1` module to connect to the Argilla V1 server.
+
 ```python
 import argilla.v1 as rg_v1
 
@@ -68,30 +68,101 @@ client = rg.Argilla()
 
 Next, define the new dataset settings:
 
-```python
-settings = rg.Settings(
-    fields=[
-        rg.TextField(name="text"), # (1)
-    ],
-    questions=[
-        rg.LabelQuestion(name="label", labels=settings_v1.label_schema), # (2)
-    ],
-    metadata=[
-        rg.TermsMetadataProperty(name="split"), # (3)
-    ],
-    vectors=[
-        rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (4)
-    ],
-)
-```
+=== "For single-label classification"
 
-1. The default name for text classification is `text`, but we should provide all names included in `record.inputs`.
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"), # (1)
+        ],
+        questions=[
+            rg.LabelQuestion(name="label", labels=settings_v1.label_schema),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (2)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (3)
+        ],
+    )
+    ```
 
-2. The basis question for text classification is a `LabelQuestion` for single-label or `MultiLabelQuestion` for multi-label classification.
+    1. The default field in `DatasetForTextClassification` is `text`, but make sure you provide all fields included in `record.inputs`.
 
-3. Here, we need to provide all relevant metadata fields.
+    2. Make sure you provide all relevant metadata fields available in the dataset.
 
-4. The vectors fields available in the dataset.
+    3. Make sure you provide all relevant vectors available in the dataset.
+
+=== "For multi-label classification"
+
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"), # (1)
+        ],
+        questions=[
+            rg.MultiLabelQuestion(name="labels", labels=settings_v1.label_schema),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (2)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (3)
+        ],
+    )
+    ```
+
+    1. The default field in `DatasetForTextClassification` is `text`, but we should provide all fields included in `record.inputs`.
+
+    2. Make sure you provide all relevant metadata fields available in the dataset.
+
+    3. Make sure you provide all relevant vectors available in the dataset.
+
+=== "For token classification"
+
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"),
+        ],
+        questions=[
+            rg.SpanQuestion(name="spans", labels=settings_v1.label_schema),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (1)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (2)
+        ],
+    )
+    ```
+
+    1. Make sure you provide all relevant metadata fields available in the dataset.
+
+    2. Make sure you provide all relevant vectors available in the dataset.
+
+=== "For text generation"
+
+    ```python
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"),
+        ],
+        questions=[
+            rg.TextQuestion(name="text_generation"),
+        ],
+        metadata=[
+            rg.TermsMetadataProperty(name="split"), # (1)
+        ],
+        vectors=[
+            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (2)
+        ],
+    )
+    ```
+
+    1. We should provide all relevant metadata fields available in the dataset.
+
+    2. We should provide all relevant vectors available in the dataset.
 
 Finally, create the new dataset on the Argilla V2 server:
 
@@ -127,24 +198,40 @@ Here are a set of example functions to convert the records for single-label and 
         if prediction := data.get("prediction"):
             label, score = prediction[0].values()
             agent = data["prediction_agent"]
-            suggestions.append(rg.Suggestion(question_name="label", value=label, score=score, agent=agent))
+            suggestions.append(
+                rg.Suggestion(
+                    question_name="label", # (1)
+                    value=label,
+                    score=score,
+                    agent=agent
+                )
+            )
 
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="label", # (2)
+                    value=annotation,
+                    user_id=user_id
+                )
+            )
 
-        vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
             fields=data["inputs"],
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             suggestions=suggestions,
             responses=responses,
         )
     ```
+
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
 
 === "For multi-label classification"
 
@@ -157,24 +244,40 @@ Here are a set of example functions to convert the records for single-label and 
         if prediction := data.get("prediction"):
             labels, scores = zip(*[(pred["label"], pred["score"]) for pred in prediction])
             agent = data["prediction_agent"]
-            suggestions.append(rg.Suggestion(question_name="labels", value=labels, score=scores, agent=agent))
+            suggestions.append(
+                rg.Suggestion(
+                    question_name="labels", # (1)
+                    value=labels,
+                    score=scores,
+                    agent=agent
+                )
+            )
 
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="label", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="labels", # (2)
+                    value=annotation,
+                    user_id=user_id
+                )
+            )
 
-        vectors = data.get("vectors") or {}
         return rg.Record(
             id=data["id"],
             fields=data["inputs"],
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             suggestions=suggestions,
             responses=responses,
         )
     ```
+
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
 
 === "For token classification"
 
@@ -187,27 +290,43 @@ Here are a set of example functions to convert the records for single-label and 
         if prediction := data.get("prediction"):
             scores = [span["score"] for span in prediction]
             agent = data["prediction_agent"]
-            suggestions.append(rg.Suggestion(question_name="spans", value=prediction, score=scores, agent=agent))
+            suggestions.append(
+                rg.Suggestion(
+                    question_name="spans", # (1)
+                    value=prediction,
+                    score=scores,
+                    agent=agent
+                )
+            )
 
         if annotation := data.get("annotation"):
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="spans", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="spans", # (2)
+                    value=annotation,
+                    user_id=user_id
+                )
+            )
 
-        vectors = data.get("vectors") or {}
         return rg.Record(
             id=data["id"],
             fields={"text": data["text"]},
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             # The vectors field should be a dictionary with the same keys as the `vectors` in the settings
             suggestions=suggestions,
             responses=responses,
         )
     ```
 
-=== "For Text generation"
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
+
+=== "For text generation"
 
     ```python
     def map_to_record_for_text_generation(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
@@ -219,32 +338,45 @@ Here are a set of example functions to convert the records for single-label and 
             first = prediction[0]
             agent = data["prediction_agent"]
             suggestions.append(
-                rg.Suggestion(question_name="text_generation", value=first["text"], score=first["score"], agent=agent)
+                rg.Suggestion(
+                    question_name="text_generation", # (1)
+                    value=first["text"],
+                    score=first["score"],
+                    agent=agent
+                )
             )
 
         if annotation := data.get("annotation"):
             # From data[annotation]
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
-            responses.append(rg.Response(question_name="text_generation", value=annotation, user_id=user_id))
+            responses.append(
+                rg.Response(
+                    question_name="text_generation", # (2)
+                    value=annotation,
+                    user_id=user_id
+                )
+            )
 
-        vectors = (data.get("vectors") or {})
         return rg.Record(
             id=data["id"],
             fields={"text": data["text"]},
             # The inputs field should be a dictionary with the same keys as the `fields` in the settings
             metadata=data["metadata"],
             # The metadata field should be a dictionary with the same keys as the `metadata` in the settings
-            vectors=[rg.Vector(name=name, values=value) for name, value in vectors.items()],
+            vectors=data.get("vectors") or {},
             # The vectors field should be a dictionary with the same keys as the `vectors` in the settings
             suggestions=suggestions,
             responses=responses,
         )
     ```
 
+    1. Make sure the `question_name` matches the name of the question in question settings.
+
+    2. Make sure the `question_name` matches the name of the question in question settings.
+
 The functions above depend on the `users_by_name` dictionary and the `current_user` object to assign responses to users, we need to load the existing users. You can retrieve the users from the Argilla V2 server and the current user as follows:
 
 ```python
-# For
 users_by_name = {user.username: user for user in client.users}
 current_user = client.me
 ```
@@ -260,5 +392,5 @@ for data in hf_records:
 # Upload the records to the new dataset
 dataset.records.log(records)
 ```
-You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the [How to guides](index.md).
 
+You have now successfully migrated your legacy dataset to Argilla V2. For more guides on how to use the Argilla SDK, please refer to the [How to guides](index.md).

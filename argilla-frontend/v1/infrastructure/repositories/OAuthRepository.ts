@@ -1,5 +1,4 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
-import { Auth } from "@nuxtjs/auth-next";
 import { Response } from "../types";
 import { useRunningEnvironment } from "../services/useRunningEnvironment";
 import { largeCache } from "./AxiosCache";
@@ -24,8 +23,7 @@ export class OAuthRepository implements IOAuthRepository {
   private readonly axios: NuxtAxiosInstance;
   constructor(
     axios: NuxtAxiosInstance,
-    private readonly router: RouterService,
-    private readonly auth: Auth
+    private readonly router: RouterService
   ) {
     this.axios = axios.create({
       withCredentials: false,
@@ -74,7 +72,7 @@ export class OAuthRepository implements IOAuthRepository {
         params,
       });
 
-      if (data.access_token) await this.auth.setUserToken(data.access_token);
+      return data.access_token;
     } catch (error) {
       throw {
         response: OAUTH_API_ERRORS.ERROR_FETCHING_OAUTH_ACCESS_TOKEN,
