@@ -1,4 +1,5 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
+import { PublicNuxtAxiosInstance } from "../services/useAxiosExtension";
 import { IUserRepository } from "~/v1/domain/services/IUserRepository";
 
 const USER_API_ERRORS = {
@@ -6,7 +7,11 @@ const USER_API_ERRORS = {
 };
 
 export class UserRepository implements IUserRepository {
-  constructor(private readonly axios: NuxtAxiosInstance) {}
+  private readonly axios: NuxtAxiosInstance;
+
+  constructor(axios: PublicNuxtAxiosInstance) {
+    this.axios = axios.makePublic();
+  }
 
   async getUser() {
     try {

@@ -1,12 +1,11 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
+import { PublicNuxtAxiosInstance } from "../services/useAxiosExtension";
 import { IAuthRepository } from "~/v1/domain/services/IAuthRepository";
 
 export class AuthRepository implements IAuthRepository {
   private readonly axios: NuxtAxiosInstance;
-  constructor(axios: NuxtAxiosInstance) {
-    this.axios = axios.create({
-      withCredentials: false,
-    });
+  constructor(axios: PublicNuxtAxiosInstance) {
+    this.axios = axios.makePublic();
   }
 
   async login(username: string, password: string) {

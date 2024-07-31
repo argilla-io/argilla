@@ -9,6 +9,8 @@ import {
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
 import { LoadUserUseCase } from "../domain/usecases/load-user-use-case";
+import { useAxiosExtension } from "@/v1/infrastructure/services/useAxiosExtension";
+
 import {
   DatasetRepository,
   RecordRepository,
@@ -61,13 +63,12 @@ import { GetDatasetQuestionsGroupedUseCase } from "@/v1/domain/usecases/get-data
 import { AuthLoginUseCase } from "@/v1/domain/usecases/auth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
-  const useAxios = () => context.$axios;
+  const useAxios = useAxiosExtension(() => context.$axios);
   const useAuth = () => context.$auth;
 
   const dependencies = [
     register(UpdateMetricsEventHandler).build(),
     register(UpdateTeamProgressEventHandler).build(),
-
     register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
@@ -76,9 +77,10 @@ export const loadDependencyContainer = (context: Context) => {
     register(MetadataRepository).withDependency(useAxios).build(),
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
-    register(EnvironmentRepository).withDependency(useAxios).build(),
-    register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
     register(WorkspaceRepository).withDependency(useAxios).build(),
+
+    register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
+    register(EnvironmentRepository).withDependency(useAxios).build(),
     register(AuthRepository).withDependency(useAxios).build(),
     register(UserRepository).withDependency(useAxios).build(),
 
