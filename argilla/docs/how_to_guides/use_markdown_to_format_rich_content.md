@@ -42,7 +42,7 @@ Argilla has basic multi-modal support in different ways, each with pros and cons
 
 ### Local content through DataURLs
 
-A DataURL is a scheme that allows data to be encoded into a base64-encoded string, and then embedded directly into HTML. To facilitate this, we offer some functions: `image_to_html`, `audio_to_html`, `video_to_thml` and `pdf_to_html`. These functions accept either the file path or the file's byte data and return the corresponding HTMurl to render the media file within the Argilla user interface. Additionally, you can also set the `width` and `height` in pixel or percentage for video and image (defaults to the original dimensions) and the autoplay and loop attributes to True for audio and video (defaults to False).
+A DataURL is a scheme that allows data to be encoded into a base64-encoded string and then embedded directly into HTML. To facilitate this, we offer some functions: `image_to_html`, `audio_to_html`, `video_to_thml`, and `pdf_to_html`. These functions accept either the file path or the file's byte data and return the corresponding HTMurl to render the media file within the Argilla user interface. Additionally, you can also set the `width` and `height` in pixel or percentage for video and image (defaults to the original dimensions) and the autoplay and loop attributes to True for audio and video (defaults to False).
 
 !!! warning
     DataURLs increase the memory usage of the original filesize. Additionally, different browsers enforce different size limitations for rendering DataURLs which might block the visualization experience per user.
@@ -87,7 +87,7 @@ A DataURL is a scheme that allows data to be encoded into a base64-encoded strin
     from argilla.markdown import video_to_thml
 
     html = video_to_html(
-        "my_video.mp4",
+        "local_video_file.mp4",
         width="300px",
         height="300px",
         autoplay=True,
@@ -105,7 +105,7 @@ A DataURL is a scheme that allows data to be encoded into a base64-encoded strin
     from argilla.markdown import pdf_to_html
 
     html = pdf_to_html(
-        "local_pdf.pdf",
+        "local_pdf_file.pdf",
         width="300px",
         height="300px"
     )

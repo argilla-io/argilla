@@ -26,7 +26,7 @@ dataset = rg.Dataset(
 dataset.create()
 ```
 
-For a detail guide of the dataset creation and publication process, see the [Dataset how to guide](/argilla-python/how_to_guides/dataset).
+For a detail guide of the dataset creation and publication process, see the [Dataset how to guide](../../../how_to_guides/dataset.md).
 
 ### Retrieving an existing Dataset
 

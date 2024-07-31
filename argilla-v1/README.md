@@ -36,7 +36,7 @@ Argilla is a collaboration tool for AI engineers and domain experts who need to 
 > [!NOTE]
 > This README represents the 1.29 SDK version. We have stopped development for the 1.x SDK version, while still committing to bug fixes. If you are looking for the README of the 2.x SDK version take a look [here](../README.md).
 
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
+If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.v1.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.v1.argilla.io/).
 
 ## Why use Argilla?
 
@@ -84,10 +84,10 @@ AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](ht
 ## 👨‍💻 Getting started
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">pip install argilla</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/installation/deployments/docker.html">pip install argilla</a></summary>
 <p>
 
-First things first! You can <a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/python.html">install Argilla</a> from pypi.
+First things first! You can <a href="https://docs.v1.argilla.io/en/develop/getting_started/installation/deployments/python.html">install Argilla</a> from pypi.
 
 ```bash
 pip install argilla
@@ -97,7 +97,7 @@ pip install argilla
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">Deploy Locally</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/installation/deployments/docker.html">Deploy Locally</a></summary>
 <p>
 
 ```bash
@@ -108,20 +108,20 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html">Deploy on Hugging Face Hub</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html">Deploy on Hugging Face Hub</a></summary>
 <p>
 
 HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
 
 After this, we can connect to our server.
 
-<a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#connect-to-argilla">Connect to the Server</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/cheatsheet.html#connect-to-argilla">Connect to the Server</a></summary>
 <p>
 Once you have deployed Argilla, we will connect to the server.
 
@@ -135,13 +135,13 @@ workspace = "argilla-workspace"  # e.g. "admin"
 )
 ```
 
-After this, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
+After this, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.v1.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html#create-a-new-workspace">Create workspace</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html#create-a-new-workspace">Create workspace</a></summary>
 <p>
 Once you have connected to the server, we will create a workspace for datasets.
 
@@ -161,7 +161,7 @@ for user in users:
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
 <p>
 
 ```python
@@ -189,13 +189,13 @@ dataset = rg.FeedbackDataset(
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/create_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/snapshot-feedback-demo.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/create_dataset.html"><img src="https://docs.v1.argilla.io/en/latest/_images/snapshot-feedback-demo.png" width="100%"></a>
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/records.html">Add records</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/records.html">Add records</a></summary>
 <p>
 
 ```python
@@ -214,14 +214,14 @@ remote_dataset.add_records(record)
 
 And that's it, you now have your first dataset ready. You can begin annotating it or embark on other related tasks.
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/records.html"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/records.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
 
 </p>
 </details>
 
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></summary>
 <p>
 
 ```python
@@ -230,13 +230,13 @@ import argilla_v1 as rg
 filtered_dataset = dataset.filter_by(response_status="submitted")
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-search.png" width="100%">
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Semantic search</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html">Semantic search</a></summary>
 <p>
 
 ```python
@@ -257,13 +257,13 @@ similar_records = ds.find_similar_records(
 )
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html">Weak supervision</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/tutorials/techniques/weak_supervision.html">Weak supervision</a></summary>
 <p>
 
 ```python
@@ -273,7 +273,7 @@ rule = Rule(query="positive impact", label="optimism")
 add_rules(dataset="go_emotion", rules=[rule])
 ```
 
-<a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/tutorials/techniques/weak_supervision.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
 
 <!-- <tr>
 <td>
@@ -296,7 +296,7 @@ plugin.start()
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html">Train models</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/fine_tune.html">Train models</a></summary>
 <p>
 
 ```python
@@ -317,14 +317,14 @@ trainer.train()
 records = trainer.predict(["my-text"], as_argilla_records=True)
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/fine_tune.html"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
 
 </p>
 </details>
 
 ## 🥇 Contributors
 
-To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [developer](https://docs.v1.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.v1.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 

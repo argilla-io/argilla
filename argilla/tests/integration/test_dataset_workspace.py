@@ -20,17 +20,6 @@ import argilla as rg
 from argilla._exceptions import NotFoundError
 
 
-@pytest.fixture(autouse=True, scope="session")
-def clean_test_datasets(client: rg.Argilla):
-    for dataset in client.datasets:
-        if dataset.name.startswith("test_"):
-            dataset.delete()
-    yield
-    for dataset in client.datasets:
-        if dataset.name.startswith("test_"):
-            dataset.delete()
-
-
 @pytest.fixture
 def dataset(client: rg.Argilla):
     ws = client.workspaces[0]

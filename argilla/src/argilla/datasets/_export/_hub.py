@@ -68,8 +68,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             hf_api.create_repo(repo_id=repo_id, repo_type="dataset", exist_ok=kwargs.get("exist_ok") or True)
 
         with TemporaryDirectory() as tmpdirname:
-            config_dir = os.path.join(tmpdirname, self._DEFAULT_CONFIG_REPO_DIR)
-            os.makedirs(config_dir)
+            config_dir = os.path.join(tmpdirname)
             self.to_disk(path=config_dir, with_records=False)
 
             if generate_card:
@@ -113,7 +112,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         with_records: bool = True,
         **kwargs: Any,
     ):
-        """Loads a `FeedbackDataset` from the Hugging Face Hub.
+        """Loads a `Dataset` from the Hugging Face Hub.
 
         Parameters:
             repo_id: the ID of the Hugging Face Hub repo to load the `Dataset` from.

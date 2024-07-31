@@ -33,7 +33,7 @@
 </p>
 
 Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space). Curious, and want to know more? Read our [documentation](https://argilla-io.github.io/argilla/latest/).
+If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/latest/).
 
 ## Why use Argilla?
 
@@ -142,11 +142,11 @@ dataset.records.log(records=data, mapping={"text": "review"})
 ```
 
 🎉 You have successfully created your first dataset with Argilla. You can now access it in the Argilla UI and start annotating the records.
-Need more info, check out [our docs](https://argilla-io.github.io/argilla/latest/).
+Need more info, check out [our docs](https://docs.argilla.io/latest/).
 
 ## 🥇 Contributors
 
-To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [community](https://docs.argilla.io/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 
