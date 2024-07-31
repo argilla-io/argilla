@@ -89,9 +89,7 @@ class MetadataPropertyBase(Resource):
         self._with_client(self._dataset._client)
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(name={self.name}, title={self.title}, dimensions={self.visible_for_annotators})"
-        )
+        return f"{self.__class__.__name__}(name={self.name}, title={self.title}, visible_for_annotators={self.visible_for_annotators})"
 
     def _with_client(self, client: "Argilla") -> "Self":
         # TODO: Review and simplify. Maybe only one of them is required
