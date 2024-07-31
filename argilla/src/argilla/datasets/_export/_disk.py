@@ -98,18 +98,21 @@ class DiskImportExportMixin(ABC):
             workspace_id = client.workspaces.default.id
         dataset_model.workspace_id = workspace_id
 
-        # Get a relevant and unique name for the incoming dataset.
         if name:
             logging.warning(f"Changing dataset name from {dataset_model.name} to {name}")
             dataset_model.name = name
-        elif client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
-            logging.warning(f"Loaded dataset name {dataset_model.name} already exists. Changing to unique UUID.")
-            dataset_model.name = f"{dataset_model.name}_{uuid4()}"
+            
+        if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
+            logging.warning(
+                f"Loaded dataset name {dataset_model.name} already exists so using it. To create a new dataset, provide a unique name to the `name` parameter."
+            )
+            dataset = client.datasets(name=dataset_model.name)
+        else:
+            # Create the dataset and load the settings and records
+            dataset = cls.from_model(model=dataset_model, client=client)
+            dataset.settings = Settings.from_json(path=settings_path)
+            dataset.create()
 
-        # Create the dataset and load the settings and records
-        dataset = cls.from_model(model=dataset_model, client=client)
-        dataset.settings = Settings.from_json(path=settings_path)
-        dataset.create()
         if os.path.exists(records_path) and with_records:
             dataset.records.from_json(path=records_path)
         return dataset
