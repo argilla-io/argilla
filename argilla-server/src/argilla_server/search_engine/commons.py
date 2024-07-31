@@ -150,6 +150,13 @@ def es_mapping_for_field(field: Field) -> dict:
 
     if field_type == FieldType.text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
+    elif field_type == FieldType.image:
+        return {
+            es_field_for_record_field(field.name): {
+                "type": "object",
+                "enabled": False,
+            }
+        }
     else:
         raise Exception(f"Index configuration for field of type {field_type} cannot be generated")
 
@@ -578,6 +585,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return {
             # See https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html#dynamic-parameters
             "dynamic": "strict",
+            "_source": {
+                # Excluding image fields, which means they won't be even stored. See https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-source-field.html#include-exclude
+                "excludes": [es_field_for_record_field(field.name) for field in dataset.fields if field.is_image],
+            },
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
