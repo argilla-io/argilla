@@ -3593,6 +3593,8 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
+            filter=None,
+            sort=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             user_id=owner.id,
@@ -3754,6 +3756,7 @@ class TestSuiteDatasets:
             filter=AndFilter(filters=[expected_filter]),
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
+            sort=None,
             user_id=owner.id,
         )
 
@@ -3832,6 +3835,7 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
+            filter=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             sort=expected_sort,
@@ -4037,6 +4041,8 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
+            filter=None,
+            sort=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             user_id=owner.id,
@@ -4268,6 +4274,7 @@ class TestSuiteDatasets:
                     )
                 ]
             ),
+            sort=None,
             offset=0,
             limit=LIST_DATASET_RECORDS_LIMIT_DEFAULT,
             user_id=owner.id,
@@ -4308,6 +4315,7 @@ class TestSuiteDatasets:
             dataset=dataset,
             vector_settings=vector_settings,
             record=records[0],
+            filter=None,
             value=None,
             query=None,
             order=SimilarityOrder.most_similar,
@@ -4352,6 +4360,7 @@ class TestSuiteDatasets:
             record=None,
             value=selected_vector.value,
             query=None,
+            filter=None,
             order=SimilarityOrder.most_similar,
             max_results=10,
         )
@@ -4399,6 +4408,7 @@ class TestSuiteDatasets:
             record=None,
             value=selected_vector.value,
             query=TextQuery(q="Test query"),
+            filter=None,
             order=SimilarityOrder.most_similar,
             max_results=10,
         )
@@ -4492,6 +4502,8 @@ class TestSuiteDatasets:
         mock_search_engine.search.assert_called_once_with(
             dataset=dataset,
             query=TextQuery(q="Hello", field="input"),
+            filter=None,
+            sort=None,
             offset=0,
             limit=5,
             user_id=owner.id,

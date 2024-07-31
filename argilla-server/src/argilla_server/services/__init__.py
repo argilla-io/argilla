@@ -12,18 +12,3 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from uuid import UUID
-
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from argilla_server.database import get_async_db
-from argilla_server.models import Dataset
-
-
-class DatasetsRepository:
-    def __init__(self, db: AsyncSession = Depends(get_async_db)):
-        self.db = db
-
-    async def get(self, dataset_id: UUID, options: list = None) -> Dataset:
-        return await Dataset.get_or_raise(db=self.db, id=dataset_id, options=options or [])

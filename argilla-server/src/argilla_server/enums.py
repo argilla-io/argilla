@@ -81,6 +81,7 @@ class MetadataPropertyType(str, Enum):
 class RecordSortField(str, Enum):
     inserted_at = "inserted_at"
     updated_at = "updated_at"
+    status = "status"
 
 
 class SortOrder(str, Enum):
