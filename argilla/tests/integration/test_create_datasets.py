@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-
 from argilla import (
     Argilla,
     Dataset,
@@ -26,15 +24,6 @@ from argilla import (
     TermsMetadataProperty,
 )
 from argilla.settings._task_distribution import TaskDistribution
-
-
-@pytest.fixture(scope="session", autouse=True)
-def clean_datasets(client: Argilla):
-    datasets = client.datasets
-    for dataset in datasets:
-        if dataset.name.startswith("test_"):
-            dataset.delete()
-    yield
 
 
 class TestCreateDatasets:

@@ -60,7 +60,7 @@
           <BaseButton
             type="button"
             class="secondary light small"
-            @on-click="settings.dataset.restoreMetadata()"
+            @on-click="settings.dataset.restore('metadata')"
             :disabled="!settings.dataset.isModifiedExtraMetadata"
           >
             <span v-text="$t('cancel')" />

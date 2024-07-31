@@ -97,12 +97,15 @@ export class Question {
     return this.type.isRatingType;
   }
 
+  public get isAnswerModified(): boolean {
+    return !this.answer.isEqual(this.original.answer);
+  }
+
   public get isModified(): boolean {
     return (
       this.title !== this.original.title ||
       this.description !== this.original.description ||
-      !this.settings.isEqual(this.original.settings) ||
-      !this.answer.isEqual(this.original.answer)
+      !this.settings.isEqual(this.original.settings)
     );
   }
 

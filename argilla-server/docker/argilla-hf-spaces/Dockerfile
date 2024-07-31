@@ -7,7 +7,6 @@ USER root
 
 # Copy Argilla distribution files
 COPY scripts/start.sh /home/argilla
-COPY scripts/start_argilla_server.sh /home/argilla
 COPY Procfile /home/argilla
 COPY requirements.txt /packages/requirements.txt
 
@@ -29,7 +28,7 @@ RUN \
     apt-get update && apt-get install -y elasticsearch=8.8.2 && \
     chown -R argilla:argilla /usr/share/elasticsearch /etc/elasticsearch /var/lib/elasticsearch /var/log/elasticsearch && \
     chown argilla:argilla /etc/default/elasticsearch && \
-    # Install quickstart image dependencies
+    # Install image dependencies
     pip install -r /packages/requirements.txt && \
     chmod +x /home/argilla/start.sh && \
     chmod +x /home/argilla/start_argilla_server.sh && \
@@ -52,9 +51,7 @@ USER argilla
 ENV ELASTIC_CONTAINER=true
 ENV ES_JAVA_OPTS="-Xms1g -Xmx1g"
 
-ENV USERNAME=""
-ENV PASSWORD=""
-
 ENV ARGILLA_HOME_PATH=/data/argilla
+ENV REINDEX_DATASETS=1
 
 CMD ["/bin/bash", "start.sh"]

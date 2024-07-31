@@ -142,8 +142,26 @@ class TestUpdateDataset:
 
         assert response.json() == {
             "code": "update_distribution_with_existing_responses",
-            "message": "Distribution settings cannot be modified for a dataset with records including responses",
+            "message": "Distribution settings can't be modified for a dataset containing user responses",
         }
+
+    async def test_update_dataset_distribution_with_the_same_value_for_dataset_with_responses(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        records = await RecordFactory.create_batch(10, dataset=dataset)
+
+        for record in records:
+            await ResponseFactory.create(record=record)
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"distribution": dataset.distribution},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["distribution"] == dataset.distribution
 
     async def test_update_dataset_distribution_with_invalid_strategy(
         self, async_client: AsyncClient, owner_auth_header: dict

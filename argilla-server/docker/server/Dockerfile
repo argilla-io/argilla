@@ -17,11 +17,12 @@ RUN apt-get update && \
 FROM python:3.10.12-slim
 
 # Environment Variables
+ENV USERNAME=""
+ENV PASSWORD=""
+ENV API_KEY=""
+## Argilla home path
 ENV ARGILLA_HOME_PATH=/var/lib/argilla
-ENV DEFAULT_USER_ENABLED=true
-ENV DEFAULT_USER_PASSWORD=1234
-ENV DEFAULT_USER_API_KEY=argilla.apikey
-ENV USERS_DB=/config/.users.yml
+## Uvicorn defaults
 ENV UVICORN_PORT=6900
 
 RUN useradd -ms /bin/bash argilla
