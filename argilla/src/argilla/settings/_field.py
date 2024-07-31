@@ -45,7 +45,7 @@ class TextField(SettingsPropertyBase):
         name: str,
         title: Optional[str] = None,
         use_markdown: Optional[bool] = False,
-        required: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         client: Optional[Argilla] = None,
     ) -> None:
@@ -54,16 +54,13 @@ class TextField(SettingsPropertyBase):
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
             use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to False.
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
 
         """
         client = client or Argilla._get_default()
 
         super().__init__(api=client.api.fields, client=client)
-
-        if required is None:
-            required = True
 
         self._model = FieldModel(
             name=name,
