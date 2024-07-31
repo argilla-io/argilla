@@ -21,7 +21,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 
 from argilla._exceptions import RecordsIngestionError
-from argilla._exceptions._base import ArgillaError
 from argilla._models import DatasetModel
 from argilla.client import Argilla
 from argilla.settings import Settings
