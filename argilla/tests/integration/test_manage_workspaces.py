@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import uuid
 
 from argilla import Argilla, Workspace, User
 
 
 class TestWorkspacesManagement:
     def test_create_workspace(self, client: Argilla):
-        workspace = Workspace(name="test_workspace")
+        workspace = Workspace(name=f"test_workspace{uuid.uuid4()}")
         client.workspaces.add(workspace)
 
         assert workspace in client.workspaces

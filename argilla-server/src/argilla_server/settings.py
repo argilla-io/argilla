@@ -102,40 +102,13 @@ class Settings(BaseSettings):
 
     docs_enabled: bool = True
 
-    enable_migration: bool = Field(
-        default=False,
-        description="If enabled, try to migrate data from old rubrix installation",
-    )
-
     # Analyzer configuration
-    default_es_search_analyzer: str = "standard"
-    exact_es_search_analyzer: str = "whitespace"
-    # This line will be enabled once words field won't be used anymore
-    # wordcloud_es_search_analyzer: str = "multilingual_stop_analyzer"
-
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
 
     es_mapping_total_fields_limit: int = 2000
 
     search_engine: str = SEARCH_ENGINE_ELASTICSEARCH
-
-    vectors_fields_limit: int = Field(
-        default=5,
-        description="Max number of supported vectors per record",
-    )
-
-    metadata_fields_limit: int = Field(
-        default=50,
-        gt=0,
-        le=100,
-        description="Max number of fields in metadata",
-    )
-    metadata_field_length: int = Field(
-        default=DEFAULT_MAX_KEYWORD_LENGTH,
-        description="Max length supported for the string metadata fields."
-        " Values containing higher than this will be truncated",
-    )
 
     # Questions settings
     label_selection_options_max_items: int = Field(

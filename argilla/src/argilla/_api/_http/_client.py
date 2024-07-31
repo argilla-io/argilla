@@ -13,24 +13,21 @@
 # limitations under the License.
 
 from dataclasses import dataclass
-from typing import Optional
 
 import httpx
-
-from argilla._constants import _DEFAULT_API_URL, _DEFAULT_API_KEY
 
 
 @dataclass
 class HTTPClientConfig:
     """Basic configuration for the HTTP client."""
 
-    api_url: Optional[str] = None
-    api_key: Optional[str] = None
+    api_url: str
+    api_key: str
     timeout: int = None
 
     def __post_init__(self):
-        self.api_url = self.api_url or _DEFAULT_API_URL
-        self.api_key = self.api_key or _DEFAULT_API_KEY
+        self.api_url = self.api_url
+        self.api_key = self.api_key
         self.timeout = self.timeout or 60
 
 

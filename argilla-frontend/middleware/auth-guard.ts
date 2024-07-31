@@ -24,7 +24,9 @@ export default ({ $auth, route, redirect }: Context) => {
   switch (route.name) {
     case "sign-in":
       if ($auth.loggedIn) return redirect("/");
+
       if (route.params.omitCTA) return;
+
       if (isRunningOnHuggingFace()) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { redirect: _, ...query } = route.query;
@@ -36,12 +38,15 @@ export default ({ $auth, route, redirect }: Context) => {
       }
       break;
     case "oauth-provider-callback":
-      if (!Object.keys(route.query).length) redirect("/");
+      if (!Object.keys(route.query).length) return redirect("/");
+
       break;
     case "welcome-hf-sign-in":
-      if (!isRunningOnHuggingFace()) redirect("/");
-      break;
+      if ($auth.loggedIn) return redirect("/");
 
+      if (!isRunningOnHuggingFace()) return redirect("/");
+
+      break;
     default:
       if (!$auth.loggedIn) {
         if (route.path !== "/") {

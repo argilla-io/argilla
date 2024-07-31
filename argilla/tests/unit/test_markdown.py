@@ -131,7 +131,7 @@ def test_chat_to_html_multiple_messages():
         .message-content {
             padding: 10px;
             border-radius: 10px;
-            max-width: fit-content;
+            max-width: 80%;
         }
     </style>
     <div class="user-message"><div class="message-content"><p>hello</p></div></div><div class="system-message"><div class="message-content"><p>hi there</p></div></div><div class="system-message"><div class="message-content"><p>system message</p></div></div></body>"""
