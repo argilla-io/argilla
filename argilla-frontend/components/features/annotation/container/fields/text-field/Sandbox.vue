@@ -16,6 +16,10 @@ export default {
       type: String,
       required: true,
     },
+    record: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
     isHTML() {
@@ -31,6 +35,15 @@ export default {
   },
   mounted() {
     this.$refs.iframe.addEventListener("load", this.resize);
+
+    setTimeout(() => {
+      this.$refs.iframe.contentWindow.postMessage(
+        JSON.stringify({
+          ...this.record,
+        }),
+        "*"
+      );
+    }, 200);
 
     window.addEventListener("resize", this.resize);
   },
