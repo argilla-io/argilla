@@ -89,7 +89,7 @@ export default {
     formattedError() {
       if (this.error) {
         return this.error.toString().includes("401")
-          ? "Wrong username or password. Try again"
+          ? this.$t("login.error")
           : this.error;
       }
     },

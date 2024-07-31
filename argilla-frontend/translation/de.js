@@ -178,6 +178,7 @@ export default {
     hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
+    error: "Falscher Benutzername oder Passwort. Versuchen Sie es erneut",
     hf: {
       title: "Willkommen bei {space}",
       subtitle:
