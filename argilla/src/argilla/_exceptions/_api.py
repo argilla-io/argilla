@@ -19,6 +19,8 @@ from argilla._exceptions._base import ArgillaError
 
 
 class ArgillaAPIError(ArgillaError):
+    message = "Server error"
+
     def __init__(self, message: Optional[str] = None, status_code: int = 500):
         """Base class for all Argilla API exceptions
         Args:
