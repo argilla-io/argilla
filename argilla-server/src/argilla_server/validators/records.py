@@ -27,6 +27,9 @@ from argilla_server.contexts import records
 from argilla_server.errors.future.base_errors import UnprocessableEntityError
 from argilla_server.models import Dataset, Record
 
+IMAGE_FIELD_WEB_URL_MAX_LENGTH = 2038
+IMAGE_FIELD_DATA_URL_MAX_LENGTH = 5_000_000
+
 
 class RecordValidatorBase(ABC):
     def __init__(self, record_change: Union[RecordCreate, RecordUpdate]):
@@ -76,24 +79,45 @@ class RecordValidatorBase(ABC):
 
     def _validate_image_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in filter(lambda field: field.is_image, dataset.fields):
-            if fields.get(field.name) is not None and not self._is_valid_url(fields.get(field.name)):
-                raise UnprocessableEntityError(
-                    f"image field {field.name!r} has an invalid URL value: {fields.get(field.name)!r}"
-                )
+            self._validate_image_field(field.name, fields.get(field.name))
 
-    def _is_valid_url(self, url: Union[str, None]) -> bool:
+    def _validate_image_field(self, field_name: str, field_value: Union[str, None]) -> None:
+        if field_value is None:
+            return
+
         try:
-            parse_result = urlparse(url)
+            parse_result = urlparse(field_value)
         except ValueError:
-            return False
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
 
-        return self._is_valid_web_url(parse_result) or self._is_valid_data_url(parse_result)
+        if parse_result.scheme in ["http", "https"]:
+            return self._validate_web_url(field_name, field_value, parse_result)
+        elif parse_result.scheme in ["data"]:
+            return self._validate_data_url(field_name, field_value, parse_result)
+        else:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
 
-    def _is_valid_web_url(self, parse_result: Union[ParseResult, ParseResultBytes]) -> bool:
-        return all([parse_result.scheme in ["http", "https"], parse_result.netloc, parse_result.path])
+    def _validate_web_url(
+        self, field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+    ) -> None:
+        if not parse_result.netloc or not parse_result.path:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
 
-    def _is_valid_data_url(self, parse_result: Union[ParseResult, ParseResultBytes]) -> bool:
-        return all([parse_result.scheme == "data", parse_result.path])
+        if len(field_value) > IMAGE_FIELD_WEB_URL_MAX_LENGTH:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_WEB_URL_MAX_LENGTH} characters for Web URLs"
+            )
+
+    def _validate_data_url(
+        self, field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+    ) -> None:
+        if not parse_result.path:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+        if len(field_value) > IMAGE_FIELD_DATA_URL_MAX_LENGTH:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_DATA_URL_MAX_LENGTH} characters for Data URLs"
+            )
 
 
 class RecordCreateValidator(RecordValidatorBase):
