@@ -61,10 +61,14 @@ class TextField(SettingsPropertyBase):
         client = client or Argilla._get_default()
 
         super().__init__(api=client.api.fields, client=client)
+
+        if required is None:
+            required = True
+
         self._model = FieldModel(
             name=name,
             title=title,
-            required=required or True,
+            required=required,
             description=description,
             settings=TextFieldSettings(use_markdown=use_markdown),
         )
