@@ -21,6 +21,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 from uuid import uuid4
 
+from argilla._exceptions import RecordsIngestionError
+from argilla._exceptions._base import ArgillaError
 from argilla._models import DatasetModel
 from argilla.client import Argilla
 from argilla.settings import Settings
@@ -114,7 +116,10 @@ class DiskImportExportMixin(ABC):
             dataset.create()
 
         if os.path.exists(records_path) and with_records:
-            dataset.records.from_json(path=records_path)
+            try:
+                dataset.records.from_json(path=records_path)
+            except RecordsIngestionError as e:
+                raise ArgillaError(message="Error importing dataset records from disk. Records and datasets settings are not compatible.") from e
         return dataset
 
     ############################
