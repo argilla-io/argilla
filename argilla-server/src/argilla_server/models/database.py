@@ -17,12 +17,25 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
-from sqlalchemy import JSON, ForeignKey, String, Text, UniqueConstraint, and_, sql, select, func, text
+from sqlalchemy import (
+    JSON,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+    and_,
+    sql,
+    select,
+    func,
+    text,
+    Select,
+    ColumnExpressionArgument,
+)
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, selectinload, contains_eager
 
 from argilla_server.api.schemas.v1.questions import QuestionSettings
 from argilla_server.enums import (
@@ -235,6 +248,47 @@ class Record(DatabaseModel):
             f"Record(id={str(self.id)!r}, external_id={self.external_id!r}, dataset_id={str(self.dataset_id)!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
+
+    class Select:
+        @classmethod
+        def count(cls, **filters) -> Select:
+            return select(func.count(Record.id)).filter_by(**filters)
+
+        @classmethod
+        def by_dataset_id(
+            cls,
+            dataset_id: UUID,
+            offset: Optional[int] = None,
+            limit: Optional[int] = None,
+            with_responses: bool = False,
+            with_suggestions: bool = False,
+            with_vectors: Union[bool, List[str]] = False,
+        ) -> Select:
+            query = select(Record).filter_by(dataset_id=dataset_id)
+
+            if with_responses:
+                query = query.options(selectinload(Record.responses))
+
+            if with_suggestions:
+                query = query.options(selectinload(Record.suggestions))
+
+            if with_vectors is True:
+                query = query.options(selectinload(Record.vectors))
+            elif isinstance(with_vectors, list):
+                subquery = select(VectorSettings.id).filter(
+                    and_(VectorSettings.dataset_id == dataset_id, VectorSettings.name.in_(with_vectors))
+                )
+                query = query.outerjoin(
+                    Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(subquery))
+                ).options(contains_eager(Record.vectors))
+
+            if offset is not None:
+                query = query.offset(offset)
+
+            if limit is not None:
+                query = query.limit(limit)
+
+            return query.order_by(Record.inserted_at)
 
 
 class Question(DatabaseModel):

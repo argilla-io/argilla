@@ -31,25 +31,18 @@ async def list_records_by_dataset_id(
     with_suggestions: bool = False,
     with_vectors: Union[bool, List[str]] = False,
 ) -> Tuple[Sequence[Record], int]:
-    query = select(Record).filter_by(dataset_id=dataset_id)
-
-    if with_responses:
-        query = query.options(selectinload(Record.responses))
-    if with_suggestions:
-        query = query.options(selectinload(Record.suggestions))
-    if with_vectors is True:
-        query = query.options(selectinload(Record.vectors))
-    elif isinstance(with_vectors, list):
-        subquery = select(VectorSettings.id).filter(
-            and_(VectorSettings.dataset_id == dataset_id, VectorSettings.name.in_(with_vectors))
-        )
-        query = query.outerjoin(
-            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(subquery))
-        ).options(contains_eager(Record.vectors))
+    query = Record.Select.by_dataset_id(
+        dataset_id=dataset_id,
+        offset=offset,
+        limit=limit,
+        with_responses=with_responses,
+        with_suggestions=with_suggestions,
+        with_vectors=with_vectors,
+    )
 
     async for db in get_async_db():
-        records = (await db.scalars(query.offset(offset).limit(limit).order_by(Record.inserted_at))).unique().all()
-        total = await db.scalar(select(func.count(Record.id)).filter_by(dataset_id=dataset_id))
+        records = (await db.scalars(query)).unique().all()
+        total = await db.scalar(Record.Select.count(dataset_id=dataset_id))
 
         return records, total
 
@@ -57,19 +50,20 @@ async def list_records_by_dataset_id(
 async def list_dataset_records_by_ids(
     db: AsyncSession, dataset_id: UUID, record_ids: Sequence[UUID]
 ) -> Sequence[Record]:
-    query = select(Record).filter(Record.id.in_(record_ids), Record.dataset_id == dataset_id)
-    return (await db.execute(query)).unique().scalars().all()
+    query = Record.Select.by_dataset_id(dataset_id=dataset_id).where(Record.id.in_(record_ids))
+    return (await db.scalars(query)).unique().all()
 
 
 async def list_dataset_records_by_external_ids(
     db: AsyncSession, dataset_id: UUID, external_ids: Sequence[str]
 ) -> Sequence[Record]:
     query = (
-        select(Record)
-        .filter(Record.external_id.in_(external_ids), Record.dataset_id == dataset_id)
+        Record.Select.by_dataset_id(dataset_id=dataset_id)
+        .where(Record.external_id.in_(external_ids))
         .options(selectinload(Record.dataset))
     )
-    return (await db.execute(query)).unique().scalars().all()
+
+    return (await db.scalars(query)).unique().all()
 
 
 async def fetch_records_by_ids_as_dict(
