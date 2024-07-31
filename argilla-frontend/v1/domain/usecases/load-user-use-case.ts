@@ -11,10 +11,8 @@ export class LoadUserUseCase {
     if (!this.auth.loggedIn) return;
     if (this.auth.user?.id) return;
 
-    try {
-      const user = await this.userRepository.getUser();
+    const user = await this.userRepository.getUser();
 
-      this.auth.setUser(user);
-    } catch {}
+    this.auth.setUser(user);
   }
 }
