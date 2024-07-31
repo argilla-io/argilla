@@ -8,6 +8,7 @@ import {
   UpdateMetricsEventHandler,
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
+import { LoadUserUseCase } from "../domain/usecases/load-user-use-case";
 import {
   DatasetRepository,
   RecordRepository,
@@ -20,6 +21,8 @@ import {
   OAuthRepository,
   EnvironmentRepository,
   WorkspaceRepository,
+  AuthRepository,
+  UserRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -55,6 +58,7 @@ import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
 import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-case";
 import { GetDatasetQuestionsGroupedUseCase } from "@/v1/domain/usecases/get-dataset-questions-grouped-use-case";
+import { AuthLoginUseCase } from "@/v1/domain/usecases/auth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
   const useAxios = () => context.$axios;
@@ -75,6 +79,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(EnvironmentRepository).withDependency(useAxios).build(),
     register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
     register(WorkspaceRepository).withDependency(useAxios).build(),
+    register(AuthRepository).withDependency(useAxios).build(),
+    register(UserRepository).withDependency(useAxios).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
@@ -182,8 +188,14 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependency(EnvironmentRepository)
       .build(),
 
+    register(LoadUserUseCase).withDependencies(useAuth, UserRepository).build(),
+
     register(OAuthLoginUseCase)
-      .withDependencies(OAuthRepository, useAuth)
+      .withDependencies(useAuth, OAuthRepository, LoadUserUseCase)
+      .build(),
+
+    register(AuthLoginUseCase)
+      .withDependencies(useAuth, AuthRepository, LoadUserUseCase)
       .build(),
   ];
 
