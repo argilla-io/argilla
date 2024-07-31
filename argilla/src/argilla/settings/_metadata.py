@@ -158,6 +158,7 @@ class FloatMetadataProperty(MetadataPropertyBase):
         min: Optional[float] = None,
         max: Optional[float] = None,
         title: Optional[str] = None,
+        visible_for_annotators: Optional[bool] = True,
         client: Optional[Argilla] = None,
     ) -> None:
         """Create a metadata field with float settings.
@@ -167,6 +168,7 @@ class FloatMetadataProperty(MetadataPropertyBase):
             min (Optional[float]): The minimum value
             max (Optional[float]): The maximum value
             title (Optional[str]): The title of the metadata field
+            visible_for_annotators (Optional[bool]): Whether the metadata field is visible for annotators
             client (Optional[Argilla]): The client to use for API requests
         Raises:
             MetadataError: If an error occurs while defining metadata settings
@@ -185,6 +187,7 @@ class FloatMetadataProperty(MetadataPropertyBase):
             type=MetadataPropertyType.float,
             title=title,
             settings=settings,
+            visible_for_annotators=visible_for_annotators,
         )
 
     @property
@@ -218,6 +221,7 @@ class IntegerMetadataProperty(MetadataPropertyBase):
         min: Optional[int] = None,
         max: Optional[int] = None,
         title: Optional[str] = None,
+        visible_for_annotators: Optional[bool] = True,
         client: Optional[Argilla] = None,
     ) -> None:
         """Create a metadata field with integer settings.
@@ -227,6 +231,7 @@ class IntegerMetadataProperty(MetadataPropertyBase):
             min (Optional[int]): The minimum value
             max (Optional[int]): The maximum value
             title (Optional[str]): The title of the metadata field
+            visible_for_annotators (Optional[bool]): Whether the metadata field is visible for annotators
         Raises:
             MetadataError: If an error occurs while defining metadata settings
         """
@@ -242,6 +247,7 @@ class IntegerMetadataProperty(MetadataPropertyBase):
             type=MetadataPropertyType.integer,
             title=title,
             settings=settings,
+            visible_for_annotators=visible_for_annotators,
         )
 
     @property
