@@ -182,7 +182,7 @@ const config: NuxtConfig = {
   },
 
   router: {
-    middleware: ["auth-guard", "user"],
+    middleware: ["route-guard", "me"],
     base: process.env.BASE_URL ?? "/",
   },
 
