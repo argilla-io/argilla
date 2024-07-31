@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_5352-docs-add-404-redirect-page",
+    "title": "docs_5352-docs-add-404-redirect-page",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
