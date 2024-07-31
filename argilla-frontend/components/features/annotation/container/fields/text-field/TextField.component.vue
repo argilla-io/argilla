@@ -18,7 +18,7 @@
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
       <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
-      <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
+      <Sandbox v-else :fieldText="mock" />
       <template>
         <style :key="name" scoped>
           ::highlight(search-text-highlight-{{name}}) {
@@ -56,6 +56,107 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  data() {
+    return {
+      mock: `<link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+
+<style>
+body {
+ background-color: #E20074
+}
+    .bg-telekom-magenta {
+        background-color: #E20074
+    }
+
+</style>
+<div class="flex-1 p:2 sm:p-6 justify-between flex flex-col">
+<div id="messages" class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
+
+<div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+<div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+      <div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+      <div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+      <div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+      <div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+      <div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+      <div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+      <div class="chat-message">
+         <div class="flex items-end ">
+            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
+            </div>
+            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
+         </div>
+      </div>
+
+</div>
+</div>`,
+    };
   },
   computed: {
     classes() {
