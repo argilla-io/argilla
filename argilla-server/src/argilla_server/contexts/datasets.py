@@ -59,6 +59,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.contexts import accounts, distribution
+from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole, RecordStatus
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.models import (
@@ -112,6 +113,12 @@ async def list_datasets_by_workspace_id(db: AsyncSession, workspace_id: UUID) ->
         select(Dataset).where(Dataset.workspace_id == workspace_id).order_by(Dataset.inserted_at.asc())
     )
     return result.scalars().all()
+
+
+async def get_or_raise(dataset_id: UUID) -> Dataset:
+    """Get a dataset by ID or raise a NotFoundError"""
+    async for db in get_async_db():
+        return await Dataset.get_or_raise(db, id=dataset_id)
 
 
 async def create_dataset(db: AsyncSession, dataset_attrs: dict):
