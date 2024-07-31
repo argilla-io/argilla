@@ -21,7 +21,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 
 from argilla._exceptions import RecordsIngestionError
-from argilla._exceptions._base import ArgillaError
 from argilla._models import DatasetModel
 from argilla.client import Argilla
 from argilla.settings import Settings
@@ -100,11 +99,11 @@ class DiskImportExportMixin(ABC):
         dataset_model.workspace_id = workspace_id
 
         if name:
-            logging.warning(f"Changing dataset name from {dataset_model.name} to {name}")
+            logging.info(f"Changing dataset name from {dataset_model.name} to {name}")
             dataset_model.name = name
 
         if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
-            logging.warning(
+            warnings.warn(
                 f"Loaded dataset name {dataset_model.name} already exists in the workspace so using it. To create a new dataset, provide a unique name to the `name` parameter."
             )
             dataset_model = client.api.datasets.get_by_name_and_workspace_id(
