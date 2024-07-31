@@ -19,7 +19,6 @@ import warnings
 from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
-from uuid import uuid4
 
 from argilla._exceptions import RecordsIngestionError
 from argilla._exceptions._base import ArgillaError
@@ -103,7 +102,7 @@ class DiskImportExportMixin(ABC):
         if name:
             logging.warning(f"Changing dataset name from {dataset_model.name} to {name}")
             dataset_model.name = name
-            
+
         if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
             logging.warning(
                 f"Loaded dataset name {dataset_model.name} already exists so using it. To create a new dataset, provide a unique name to the `name` parameter."
