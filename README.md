@@ -39,7 +39,7 @@ If you just want to get started, [deploy Argilla on Hugging Face Spaces](https:/
 Or, play with the Argilla UI by signing in with your Hugging Face account:
 
 <p>
-  <a href="[http://commonmark.org](https://huggingface.co/spaces/argilla/argilla-template-space)" title="Redirect to homepage">
+  <a href="https://huggingface.co/spaces/argilla/argilla-template-space" title="Redirect to homepage">
     <img src="https://github.com/user-attachments/assets/b9f34620-dd5e-4738-9750-0a85a4caae00" alt="homepage" />
   </a>
 </p>
