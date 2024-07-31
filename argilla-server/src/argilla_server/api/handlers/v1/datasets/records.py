@@ -15,7 +15,7 @@
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Security, status
+from fastapi import APIRouter, Depends, Query, Security, status, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -43,19 +43,16 @@ from argilla_server.api.schemas.v1.suggestions import (
     SearchSuggestionsOptions,
     SuggestionFilterScope,
 )
-from argilla_server.contexts import datasets, search
+from argilla_server.contexts import datasets, search, records
 from argilla_server.database import get_async_db
 from argilla_server.enums import RecordSortField
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, Record, User, VectorSettings
-from argilla_server.repositories import DatasetsRepository, RecordsRepository
-from argilla_server.models import Dataset, Field, Record, User, VectorSettings
 from argilla_server.search_engine import (
     AndFilter,
     SearchEngine,
     SearchResponses,
-    UserResponseStatusFilter,
     get_search_engine,
 )
 from argilla_server.security import auth
@@ -80,7 +77,7 @@ def _to_search_engine_filter_scope(scope: FilterScope, user: Optional[User]) -> 
     elif isinstance(scope, MetadataFilterScope):
         return search_engine.MetadataFilterScope(metadata_property=scope.metadata_property)
     elif isinstance(scope, SuggestionFilterScope):
-        return search_engine.SuggestionFilterScope(question=scope.question, property=scope.property)
+        return search_engine.SuggestionFilterScope(question=scope.question, property=str(scope.property))
     elif isinstance(scope, ResponseFilterScope):
         return search_engine.ResponseFilterScope(question=scope.question, property=scope.property, user=user)
     else:
@@ -203,18 +200,19 @@ async def _validate_search_records_query(db: "AsyncSession", query: SearchRecord
         raise UnprocessableEntityError(str(e))
 
 
+async def get_dataset_or_raise(dataset_id: UUID = Path) -> Dataset:
+    return await datasets.get_or_raise(dataset_id)
+
+
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
     *,
-    datasets_repository: DatasetsRepository = Depends(),
-    records_repository: RecordsRepository = Depends(),
-    dataset_id: UUID,
+    dataset: Dataset = Depends(get_dataset_or_raise),
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await datasets_repository.get(dataset_id)
     await authorize(current_user, DatasetPolicy.list_records_with_all_responses(dataset))
 
     include_args = (
@@ -227,14 +225,14 @@ async def list_dataset_records(
         else {}
     )
 
-    records, total = await records_repository.list_by_dataset_id(
+    dataset_records, total = await records.list_records_by_dataset_id(
         dataset_id=dataset.id,
         offset=offset,
         limit=limit,
         **include_args,
     )
 
-    return Records(items=records, total=total)
+    return Records(items=dataset_records, total=total)
 
 
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
