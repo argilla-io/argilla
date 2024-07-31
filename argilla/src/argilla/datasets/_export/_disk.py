@@ -105,20 +105,21 @@ class DiskImportExportMixin(ABC):
 
         if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
             logging.warning(
-                f"Loaded dataset name {dataset_model.name} already exists so using it. To create a new dataset, provide a unique name to the `name` parameter."
+                f"Loaded dataset name {dataset_model.name} already exists in the workspace so using it. To create a new dataset, provide a unique name to the `name` parameter."
             )
-            dataset = client.datasets(name=dataset_model.name)
-        else:
-            # Create the dataset and load the settings and records
-            dataset = cls.from_model(model=dataset_model, client=client)
-            dataset.settings = Settings.from_json(path=settings_path)
-            dataset.create()
+            dataset_model = client.api.datasets.get_by_name_and_workspace_id(
+                name=dataset_model.name, workspace_id=workspace_id
+            )
+        # Create the dataset and load the settings and records
+        dataset = cls.from_model(model=dataset_model, client=client)
+        dataset.settings = Settings.from_json(path=settings_path)
+        dataset.create()
 
         if os.path.exists(records_path) and with_records:
             try:
                 dataset.records.from_json(path=records_path)
             except RecordsIngestionError as e:
-                raise ArgillaError(
+                raise RecordsIngestionError(
                     message="Error importing dataset records from disk. Records and datasets settings are not compatible."
                 ) from e
         return dataset
