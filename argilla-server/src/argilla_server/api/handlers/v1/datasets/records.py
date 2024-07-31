@@ -238,14 +238,12 @@ async def list_dataset_records(
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_dataset_records(
     *,
+    dataset: Dataset = Depends(get_dataset_or_raise),
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id)
-
     await authorize(current_user, DatasetPolicy.delete_records(dataset))
 
     record_ids = parse_uuids(ids)
@@ -392,12 +390,10 @@ async def search_dataset_records(
 )
 async def list_dataset_records_search_suggestions_options(
     *,
+    dataset: Dataset = Depends(get_dataset_or_raise),
     db: AsyncSession = Depends(get_async_db),
-    dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
-    dataset = await Dataset.get_or_raise(db, dataset_id)
-
     await authorize(current_user, DatasetPolicy.search_records(dataset))
 
     suggestion_agents_by_question = await search.get_dataset_suggestion_agents_by_question(db, dataset.id)
