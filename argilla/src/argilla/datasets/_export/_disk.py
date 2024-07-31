@@ -118,7 +118,9 @@ class DiskImportExportMixin(ABC):
             try:
                 dataset.records.from_json(path=records_path)
             except RecordsIngestionError as e:
-                raise ArgillaError(message="Error importing dataset records from disk. Records and datasets settings are not compatible.") from e
+                raise ArgillaError(
+                    message="Error importing dataset records from disk. Records and datasets settings are not compatible."
+                ) from e
         return dataset
 
     ############################
