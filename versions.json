@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_5365-docs-include-google-analytics",
+    "title": "docs_5365-docs-include-google-analytics",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_5352-docs-add-404-redirect-page",
     "title": "docs_5352-docs-add-404-redirect-page",
     "aliases": [],
