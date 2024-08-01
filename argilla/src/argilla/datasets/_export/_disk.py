@@ -109,10 +109,12 @@ class DiskImportExportMixin(ABC):
             dataset_model = client.api.datasets.get_by_name_and_workspace_id(
                 name=dataset_model.name, workspace_id=workspace_id
             )
-        # Create the dataset and load the settings and records
-        dataset = cls.from_model(model=dataset_model, client=client)
-        dataset.settings = Settings.from_json(path=settings_path)
-        dataset.create()
+            dataset = cls.from_model(model=dataset_model, client=client)
+        else:
+            # Create a new dataset and load the settings and records
+            dataset = cls.from_model(model=dataset_model, client=client)
+            dataset.settings = Settings.from_json(path=settings_path)
+            dataset.create()
 
         if os.path.exists(records_path) and with_records:
             try:
