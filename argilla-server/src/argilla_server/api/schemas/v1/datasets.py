@@ -88,6 +88,15 @@ class DatasetProgress(BaseModel):
     pending: int
 
 
+class AnnotatorProgress(BaseModel):
+    username: str
+    completed: int
+
+
+class AnnotatorsProgress(BaseModel):
+    annotators: List[AnnotatorProgress]
+
+
 class Dataset(BaseModel):
     id: UUID
     name: str
