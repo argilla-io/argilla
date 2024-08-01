@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added new endpoint `GET /api/v1/datsets/:dataset_id/users/progress` to compute the users progress. ([#5367](https://github.com/argilla-io/argilla/pull/5367))
+
 ## [2.0.0](https://github.com/argilla-io/argilla/compare/v2.0.0rc1...v2.0.0)
 
 > [!IMPORTANT]
