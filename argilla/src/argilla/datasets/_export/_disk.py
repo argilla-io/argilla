@@ -104,7 +104,7 @@ class DiskImportExportMixin(ABC):
 
         if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
             warnings.warn(
-                f"Loaded dataset name {dataset_model.name} already exists in the workspace so using it. To create a new dataset, provide a unique name to the `name` parameter."
+                f"Loaded dataset name {dataset_model.name} already exists in the workspace {workspace.name} so using it. To create a new dataset, provide a unique name to the `name` parameter."
             )
             dataset_model = client.api.datasets.get_by_name_and_workspace_id(
                 name=dataset_model.name, workspace_id=workspace_id
