@@ -92,7 +92,7 @@ class IngestedRecordMapper:
             raise RecordsIngestionError(
                 message=f"""Record has no identifiable keys. If keys in source dataset
                 do not match the names in `dataset.settings`, you should use a
-                `mapping` with `dataset.records.log`. 
+                `mapping` with `dataset.records.log`.
                 Available keys: {self.mapping.keys()}.
                 Unkown keys: {unknown_keys}. """
             )
