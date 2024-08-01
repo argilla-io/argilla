@@ -18,7 +18,7 @@
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
       <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
-      <Sandbox v-else :fieldText="example2" :record="record" />
+      <Sandbox v-else :fieldText="example3" :record="record" />
       <template>
         <style :key="name" scoped>
           ::highlight(search-text-highlight-{{name}}) {
@@ -202,12 +202,6 @@ export default {
 
 		<div id="container"></div>
 
-		<div id="info">
-			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - animation - keyframes<br/>
-			Model: <a href="https://artstation.com/artwork/1AGwX" target="_blank" rel="noopener">Littlest Tokyo</a> by
-			<a href="https://artstation.com/glenatron" target="_blank" rel="noopener">Glen Fox</a>, CC Attribution.
-		</div>
-
 <script type="importmap">
   {
     "imports": {
@@ -311,6 +305,116 @@ export default {
 
 
 
+`,
+
+      example3: `
+
+      <div id="container"></div>
+
+	  <script src="http://localhost:8082/bower_components/three.js/three.min.js"><\/script>
+		<script src="http://localhost:8082/STLLoader.js"><\/script>
+    <script src='http://localhost:8082/TrackballControls.js'><\/script>
+
+		<script>
+
+			
+
+			var camera, cameraTarget, scene, renderer;
+
+			init();
+			animate();
+
+			function init() {
+
+        const container = document.getElementById( 'container' );
+
+				camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 1, 15);
+				camera.position.set(3, 5, 3);
+
+        // MOUSE CONTROLS
+        controls = new THREE.TrackballControls(camera);
+	      controls.rotateSpeed = 2.0;
+				controls.zoomSpeed = 2.2;
+				controls.panSpeed = 0.8;
+				controls.noZoom = false;
+				controls.noPan = false;
+				controls.staticMoving = true;
+				controls.dynamicDampingFactor = 0.3;
+				controls.keys = [65, 83, 68];
+				controls.addEventListener('change', render);
+				cameraTarget = new THREE.Vector3(0, -0.25, 0);
+
+				scene = new THREE.Scene();
+
+				var loader = new THREE.STLLoader();
+				var material = new THREE.MeshPhongMaterial({color: 0xAAAAAA, specular: 0xffffff, shininess: 100});
+
+				loader.load('http://localhost:8082/stl/STEP3.stl', function (geometry) {
+					var mesh = new THREE.Mesh(geometry, material);
+					mesh.scale.set(0.02, 0.02, 0.02);
+					scene.add(mesh);
+				});
+
+				// LIGHTS
+				scene.add( new THREE.HemisphereLight(0xffffff, 0x111122));
+
+				// RENDERER
+				renderer = new THREE.WebGLRenderer({antialias: true});
+				renderer.setPixelRatio(window.devicePixelRatio);
+				renderer.setSize(window.innerWidth, window.innerHeight);
+
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+
+				container.appendChild(renderer.domElement);
+
+
+				window.addEventListener('resize', onWindowResize, false);
+
+			}
+
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+        controls.handleResize();
+			}
+
+			function animate() {
+				requestAnimationFrame(animate);
+				render();
+        controls.update();
+			}
+
+			var debugaxis = function(axisLength){
+			    //Shorten the vertex function
+			    function v(x,y,z){
+			            return new THREE.Vertex(new THREE.Vector3(x,y,z));
+			    }
+
+			    //Create axis (point1, point2, colour)
+			    function createAxis(p1, p2, color){
+			            var line, lineGeometry = new THREE.Geometry(),
+			            lineMat = new THREE.LineBasicMaterial({color: color, lineWidth: 1});
+			            lineGeometry.vertices.push(p1, p2);
+			            line = new THREE.Line(lineGeometry, lineMat);
+			            scene.add(line);
+			    }
+
+			    createAxis(v(-axisLength, 0, 0), v(axisLength, 0, 0), 0xFF0000);
+			    createAxis(v(0, -axisLength, 0), v(0, axisLength, 0), 0x00FF00);
+			    createAxis(v(0, 0, -axisLength), v(0, 0, axisLength), 0x0000FF);
+			};
+
+			//To use enter the axis length
+			debugaxis(100);
+
+			function render() {
+				camera.lookAt(cameraTarget);
+				renderer.render(scene, camera);
+			}
+
+		<\/script>
 `,
     };
   },
