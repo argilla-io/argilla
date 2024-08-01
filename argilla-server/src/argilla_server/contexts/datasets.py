@@ -14,6 +14,8 @@
 
 import asyncio
 import copy
+from collections import defaultdict
+
 import sqlalchemy
 
 from datetime import datetime
@@ -432,15 +434,19 @@ async def get_user_dataset_metrics(db: AsyncSession, user_id: UUID, dataset_id: 
 async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
     records_completed, records_pending = await asyncio.gather(
         db.execute(
-            select(func.count(Record.id)).filter(
-                Record.dataset_id == dataset_id,
-                Record.status == RecordStatus.completed,
+            select(func.count(Record.id)).where(
+                and_(
+                    Record.dataset_id == dataset_id,
+                    Record.status == RecordStatus.completed,
+                )
             ),
         ),
         db.execute(
-            select(func.count(Record.id)).filter(
-                Record.dataset_id == dataset_id,
-                Record.status == RecordStatus.pending,
+            select(func.count(Record.id)).where(
+                and_(
+                    Record.dataset_id == dataset_id,
+                    Record.status == RecordStatus.pending,
+                )
             ),
         ),
     )
@@ -454,6 +460,25 @@ async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
         "completed": records_completed,
         "pending": records_pending,
     }
+
+
+async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:
+    query = (
+        select(User.username, Record.status, Response.status, func.count(Response.id))
+        .join(Record)
+        .join(User)
+        .where(Record.dataset_id == dataset_id)
+        .group_by(User.username, Record.status, Response.status)
+    )
+
+    async for session in get_async_db():
+        annotators_progress = defaultdict(lambda: defaultdict(dict))
+        results = (await session.execute(query)).all()
+
+        for username, record_status, response_status, count in results:
+            annotators_progress[username][record_status][response_status] = count
+
+        return [{"username": username, **progress} for username, progress in annotators_progress.items()]
 
 
 _EXTRA_METADATA_FLAG = "extra"

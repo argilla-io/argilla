@@ -111,3 +111,14 @@ class RecordAttributesMap(BaseModel):
             self.id = attribute_route
         else:
             self._get_routes_group_by_type(attribute_route.type)[attribute_route.name] = attribute_route
+
+    def keys(self) -> List[str]:
+        """Utility method to get all the keys in the mapping"""
+        return (
+            list(self.suggestion.keys())
+            + list(self.response.keys())
+            + list(self.field.keys())
+            + list(self.metadata.keys())
+            + list(self.vector.keys())
+            + ["id"]
+        )
