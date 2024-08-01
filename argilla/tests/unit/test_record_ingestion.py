@@ -17,6 +17,7 @@ from uuid import uuid4
 import pytest
 
 import argilla as rg
+from argilla._exceptions import RecordsIngestionError
 
 
 @pytest.fixture
@@ -48,6 +49,18 @@ def test_ingest_record_from_dict(dataset):
     record = record_api_models[0]
     assert record.fields["prompt"] == "What is the capital of France?"
     assert record.suggestions[0].value == "positive"
+
+def test_ingest_record_from_empty_dict_raises(dataset):
+    with pytest.raises(RecordsIngestionError):
+        dataset.records._ingest_records(
+            records=[
+                {
+                    "prompt": "What is the capital of France?",
+                    "label": "positive",
+                },
+                {},
+            ],
+        )
 
 
 def test_ingest_record_from_dict_with_mapped_suggestions(dataset):
