@@ -15,6 +15,7 @@
 import re
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union, Tuple
 from uuid import UUID
+import warnings
 
 from argilla._exceptions import RecordsIngestionError
 from argilla.records._resource import Record
@@ -83,11 +84,17 @@ class IngestedRecordMapper:
         metadata = self._map_attributes(data=data, mapping=self.mapping.metadata)
         vectors = self._map_attributes(data=data, mapping=self.mapping.vector)
 
-        if data and not record_id and not suggestions and not responses and not fields and not metadata and not vectors:
+        unknown_keys = [key for key in data.keys() if key not in self.mapping.keys()]
+        if unknown_keys:
+            warnings.warn(f"Keys {unknown_keys} in data are not present in the mapping and will be ignored.")
+
+        if data and not (record_id or suggestions or responses or fields or metadata or vectors):
             raise RecordsIngestionError(
-                message="""Record has no identifiable keys. If keys in source dataset
+                message=f"""Record has no identifiable keys. If keys in source dataset
                 do not match the names in `dataset.settings`, you should use a
-                `mapping` with `dataset.records.log`."""
+                `mapping` with `dataset.records.log`. 
+                Available keys: {self.mapping.keys()}.
+                Unkown keys: {unknown_keys}. """
             )
 
         return Record(
