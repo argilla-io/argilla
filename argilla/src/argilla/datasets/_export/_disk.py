@@ -90,24 +90,24 @@ class DiskImportExportMixin(ABC):
 
         # Get the relevant workspace_id of the incoming dataset
         if isinstance(workspace, str):
-            workspace_id = client.workspaces(workspace).id
-        elif isinstance(workspace, Workspace):
-            workspace_id = workspace.id
+            workspace = client.workspaces(workspace)
+            if not workspace:
+                raise ValueError(f"Workspace {workspace} not found.")
         else:
             warnings.warn("Workspace not provided. Using default workspace.")
-            workspace_id = client.workspaces.default.id
-        dataset_model.workspace_id = workspace_id
+            workspace = client.workspaces.default
+        dataset_model.workspace_id = workspace.id
 
         if name and (name != dataset_model.name):
             logging.info(f"Changing dataset name from {dataset_model.name} to {name}")
             dataset_model.name = name
 
-        if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
+        if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace.id):
             warnings.warn(
                 f"Loaded dataset name {dataset_model.name} already exists in the workspace {workspace.name} so using it. To create a new dataset, provide a unique name to the `name` parameter."
             )
             dataset_model = client.api.datasets.get_by_name_and_workspace_id(
-                name=dataset_model.name, workspace_id=workspace_id
+                name=dataset_model.name, workspace_id=workspace.id
             )
             dataset = cls.from_model(model=dataset_model, client=client)
         else:
