@@ -2,10 +2,13 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "test", "postgresql"]
-strategy = ["cross_platform", "inherit_metadata"]
-lock_version = "4.4.2"
-content_hash = "sha256:571c1337c3d726b1c0e1ba7343cbc46ba47b3ed47e8e1f9aa4d3655004908120"
+groups = ["default", "postgresql", "test"]
+strategy = ["inherit_metadata"]
+lock_version = "4.5.0"
+content_hash = "sha256:75f9bd17ad71921cd4751212c10febf43b14ddc885b1b6d50852844e776b440d"
+
+[[metadata.targets]]
+requires_python = ">=3.8,<3.11"
 
 [[package]]
 name = "aiofiles"
@@ -136,6 +139,7 @@ dependencies = [
     "exceptiongroup; python_version < \"3.11\"",
     "idna>=2.8",
     "sniffio>=1.1",
+    "typing-extensions; python_version < \"3.8\"",
 ]
 files = [
     {file = "anyio-3.7.1-py3-none-any.whl", hash = "sha256:91dee416e570e92c64041bd18b900d1d6fa78dff7048769ce5ac5ddad004fbb5"},
@@ -148,7 +152,9 @@ version = "4.0.3"
 requires_python = ">=3.7"
 summary = "Timeout context manager for asyncio programs"
 groups = ["default", "postgresql", "test"]
-marker = "python_version < \"3.12.0\""
+dependencies = [
+    "typing-extensions>=3.6.5; python_version < \"3.8\"",
+]
 files = [
     {file = "async-timeout-4.0.3.tar.gz", hash = "sha256:4640d96be84d82d02ed59ea2b7105a0f7b33abe8703703cd0ab0bf87c427522f"},
     {file = "async_timeout-4.0.3-py3-none-any.whl", hash = "sha256:7405140ff1230c310e51dc27b3145b9092d659ce68ff733fb0cefe3ee42be028"},
@@ -197,6 +203,9 @@ version = "23.2.0"
 requires_python = ">=3.7"
 summary = "Classes Without Boilerplate"
 groups = ["default", "test"]
+dependencies = [
+    "importlib-metadata; python_version < \"3.8\"",
+]
 files = [
     {file = "attrs-23.2.0-py3-none-any.whl", hash = "sha256:99b87a485a5820b23b879f04c2305b44b951b502fd64be915879d77a7e8fc6f1"},
     {file = "attrs-23.2.0.tar.gz", hash = "sha256:935dc3b529c262f6cf76e50877d35a4bd3c1de194fd41f47a2b7ae8f19971f30"},
@@ -343,6 +352,10 @@ version = "2.0.10"
 requires_python = ">=3.6"
 summary = "Super lightweight function registries for your library"
 groups = ["test"]
+dependencies = [
+    "typing-extensions>=3.6.4; python_version < \"3.8\"",
+    "zipp>=0.5; python_version < \"3.8\"",
+]
 files = [
     {file = "catalogue-2.0.10-py3-none-any.whl", hash = "sha256:58c2de0020aa90f4a2da7dfad161bf7b3b054c86a5f09fcedc0b2b740c109a9f"},
     {file = "catalogue-2.0.10.tar.gz", hash = "sha256:4f56daa940913d3f09d589c191c74e5a6d51762b3a9e37dd53b7437afd6cda15"},
@@ -466,6 +479,7 @@ summary = "Composable command line interface toolkit"
 groups = ["default", "test"]
 dependencies = [
     "colorama; platform_system == \"Windows\"",
+    "importlib-metadata; python_version < \"3.8\"",
 ]
 files = [
     {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
@@ -493,6 +507,7 @@ groups = ["test"]
 dependencies = [
     "pydantic!=1.8,!=1.8.1,<3.0.0,>=1.7.4",
     "srsly<3.0.0,>=2.4.0",
+    "typing-extensions<4.5.0,>=3.7.4.1; python_version < \"3.8\"",
 ]
 files = [
     {file = "confection-0.1.4-py3-none-any.whl", hash = "sha256:a658818d004939069c3e2b3db74a2cb9d956a5e61a1c9ad61788e0ee09a7090f"},
@@ -717,6 +732,8 @@ summary = "Transport classes and utilities shared among Python Elastic client li
 groups = ["default"]
 dependencies = [
     "certifi",
+    "dataclasses; python_version < \"3.7\"",
+    "importlib-metadata; python_version < \"3.8\"",
     "urllib3<3,>=1.26.2",
 ]
 files = [
@@ -760,7 +777,6 @@ version = "1.2.0"
 requires_python = ">=3.7"
 summary = "Backport of PEP 654 (exception groups)"
 groups = ["default", "test"]
-marker = "python_version < \"3.11\""
 files = [
     {file = "exceptiongroup-1.2.0-py3-none-any.whl", hash = "sha256:4bfd3996ac73b41e9b9628b04e079f193850720ea5945fc96a08633c66912f14"},
     {file = "exceptiongroup-1.2.0.tar.gz", hash = "sha256:91f5c769735f051a4290d52edd0858999b57e5876e9f85937691bd4c9fa3ed68"},
@@ -951,6 +967,9 @@ version = "0.14.0"
 requires_python = ">=3.7"
 summary = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
 groups = ["default", "test"]
+dependencies = [
+    "typing-extensions; python_version < \"3.8\"",
+]
 files = [
     {file = "h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"},
     {file = "h11-0.14.0.tar.gz", hash = "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"},
@@ -1059,6 +1078,7 @@ summary = "Read metadata from Python packages"
 groups = ["default", "test"]
 marker = "python_version < \"3.10\""
 dependencies = [
+    "typing-extensions>=3.6.4; python_version < \"3.8\"",
     "zipp>=0.5",
 ]
 files = [
@@ -1401,6 +1421,7 @@ groups = ["test"]
 dependencies = [
     "numpy>=1.20.3; python_version < \"3.10\"",
     "numpy>=1.21.0; python_version >= \"3.10\"",
+    "numpy>=1.23.2; python_version >= \"3.11\"",
     "python-dateutil>=2.8.2",
     "pytz>=2020.1",
     "tzdata>=2022.1",
@@ -1470,6 +1491,7 @@ requires_python = ">= 3.8"
 summary = "pathlib.Path subclasses for local and cloud bucket storage"
 groups = ["test"]
 dependencies = [
+    "dataclasses<1.0,>=0.6; python_version < \"3.7\"",
     "pathlib-abc==0.1.1",
     "smart-open<7.0.0,>=5.2.1",
     "typer<1.0.0,>=0.3.0",
@@ -1670,6 +1692,9 @@ version = "2.8.0"
 requires_python = ">=3.7"
 summary = "JSON Web Token implementation in Python"
 groups = ["default"]
+dependencies = [
+    "typing-extensions; python_version <= \"3.7\"",
+]
 files = [
     {file = "PyJWT-2.8.0-py3-none-any.whl", hash = "sha256:59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320"},
     {file = "PyJWT-2.8.0.tar.gz", hash = "sha256:57e28d156e3d5c10088e0c68abb90bfac3df82b40a71bd0daa20c65ccd5c23de"},
@@ -1684,6 +1709,7 @@ groups = ["test"]
 dependencies = [
     "colorama; sys_platform == \"win32\"",
     "exceptiongroup>=1.0.0rc8; python_version < \"3.11\"",
+    "importlib-metadata>=0.12; python_version < \"3.8\"",
     "iniconfig",
     "packaging",
     "pluggy<2.0,>=0.12",
@@ -1702,6 +1728,7 @@ summary = "Pytest support for asyncio"
 groups = ["test"]
 dependencies = [
     "pytest>=7.0.0",
+    "typing-extensions>=3.7.2; python_version < \"3.8\"",
 ]
 files = [
     {file = "pytest-asyncio-0.21.1.tar.gz", hash = "sha256:40a7eae6dded22c7b604986855ea48400ab15b069ae38116e8c01238e9eeb64d"},
@@ -1890,6 +1917,22 @@ files = [
 ]
 
 [[package]]
+name = "redis"
+version = "5.0.8"
+requires_python = ">=3.7"
+summary = "Python client for Redis database and key-value store"
+groups = ["default"]
+dependencies = [
+    "async-timeout>=4.0.3; python_full_version < \"3.11.3\"",
+    "importlib-metadata>=1.0; python_version < \"3.8\"",
+    "typing-extensions; python_version < \"3.8\"",
+]
+files = [
+    {file = "redis-5.0.8-py3-none-any.whl", hash = "sha256:56134ee08ea909106090934adc36f65c9bcbbaecea5b21ba704ba6fb561f8eb4"},
+    {file = "redis-5.0.8.tar.gz", hash = "sha256:0c5b10d387568dfe0698c6fad6615750c24170e548ca2deac10c649d463e9870"},
+]
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 requires_python = ">=3.7"
@@ -1935,6 +1978,21 @@ dependencies = [
 files = [
     {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
     {file = "rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
+]
+
+[[package]]
+name = "rq"
+version = "1.16.2"
+requires_python = ">=3.7"
+summary = "RQ is a simple, lightweight, library for creating background jobs, and processing them."
+groups = ["default"]
+dependencies = [
+    "click>=5",
+    "redis>=3.5",
+]
+files = [
+    {file = "rq-1.16.2-py3-none-any.whl", hash = "sha256:52e619f6cb469b00e04da74305045d244b75fecb2ecaa4f26422add57d3c5f09"},
+    {file = "rq-1.16.2.tar.gz", hash = "sha256:5c5b9ad5fbaf792b8fada25cc7627f4d206a9a4455aced371d4f501cc3f13b34"},
 ]
 
 [[package]]
@@ -2117,6 +2175,7 @@ dependencies = [
     "thinc<8.2.0,>=8.1.8",
     "tqdm<5.0.0,>=4.38.0",
     "typer<0.10.0,>=0.3.0",
+    "typing-extensions<4.5.0,>=3.7.4.1; python_version < \"3.8\"",
     "wasabi<1.2.0,>=0.9.1",
 ]
 files = [
@@ -2168,6 +2227,7 @@ summary = "Database Abstraction Library"
 groups = ["default"]
 dependencies = [
     "greenlet!=0.4.17; (platform_machine == \"win32\" or platform_machine == \"WIN32\" or platform_machine == \"AMD64\" or platform_machine == \"amd64\" or platform_machine == \"x86_64\" or platform_machine == \"ppc64le\" or platform_machine == \"aarch64\") and python_version < \"3.13\"",
+    "importlib-metadata; python_version < \"3.8\"",
     "typing-extensions>=4.6.0",
 ]
 files = [
@@ -2252,7 +2312,9 @@ dependencies = [
     "blis<0.8.0,>=0.7.8",
     "catalogue<2.1.0,>=2.0.4",
     "confection<1.0.0,>=0.0.1",
+    "contextvars<3,>=2.4; python_version < \"3.7\"",
     "cymem<2.1.0,>=2.0.2",
+    "dataclasses<1.0,>=0.6; python_version < \"3.7\"",
     "murmurhash<1.1.0,>=1.0.2",
     "numpy>=1.15.0; python_version < \"3.9\"",
     "numpy>=1.19.0; python_version >= \"3.9\"",
@@ -2261,6 +2323,7 @@ dependencies = [
     "pydantic!=1.8,!=1.8.1,<3.0.0,>=1.7.4",
     "setuptools",
     "srsly<3.0.0,>=2.4.0",
+    "typing-extensions<4.5.0,>=3.7.4.1; python_version < \"3.8\"",
     "wasabi<1.2.0,>=0.8.1",
 ]
 files = [
@@ -2299,7 +2362,6 @@ version = "2.0.1"
 requires_python = ">=3.7"
 summary = "A lil' TOML parser"
 groups = ["test"]
-marker = "python_version < \"3.11\""
 files = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
@@ -2442,6 +2504,7 @@ summary = "A lightweight console printing and formatting toolkit"
 groups = ["test"]
 dependencies = [
     "colorama>=0.4.6; sys_platform == \"win32\" and python_version >= \"3.7\"",
+    "typing-extensions<4.5.0,>=3.7.4.1; python_version < \"3.8\"",
 ]
 files = [
     {file = "wasabi-1.1.2-py3-none-any.whl", hash = "sha256:0a3f933c4bf0ed3f93071132c1b87549733256d6c8de6473c5f7ed2e171b5cf9"},
@@ -2651,6 +2714,7 @@ groups = ["default", "test"]
 dependencies = [
     "idna>=2.0",
     "multidict>=4.0",
+    "typing-extensions>=3.7.4; python_version < \"3.8\"",
 ]
 files = [
     {file = "yarl-1.9.4-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:a8c1df72eb746f4136fe9a2e72b0c9dc1da1cbd23b5372f94b5820ff8ae30e0e"},
