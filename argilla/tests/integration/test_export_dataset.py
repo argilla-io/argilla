@@ -187,11 +187,19 @@ class TestHubImportExportMixin:
                 match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
             ):
                 new_dataset = rg.Dataset.from_hub(
-                    repo_id=repo_id, client=client, with_records=with_records_import, token=token, name=f"test_{uuid.uuid4()}"
+                    repo_id=repo_id,
+                    client=client,
+                    with_records=with_records_import,
+                    token=token,
+                    name=f"test_{uuid.uuid4()}",
                 )
         else:
             new_dataset = rg.Dataset.from_hub(
-                repo_id=repo_id, client=client, with_records=with_records_import, token=token, name=f"test_{uuid.uuid4()}"
+                repo_id=repo_id,
+                client=client,
+                with_records=with_records_import,
+                token=token,
+                name=f"test_{uuid.uuid4()}",
             )
 
         if with_records_import and with_records_export:
