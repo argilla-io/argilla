@@ -88,8 +88,10 @@ class IngestedRecordMapper:
         if unknown_keys:
             warnings.warn(f"Keys {unknown_keys} in data are not present in the mapping and will be ignored.")
 
-        if len([k for k in data if k != self.mapping.id.source ]) == 0:
-            raise RecordsIngestionError(message=f"Record has no data. All records must have at least one attribute. Record id: {record_id}.")
+        if len([k for k in data if k != self.mapping.id.source]) == 0:
+            raise RecordsIngestionError(
+                message=f"Record has no data. All records must have at least one attribute. Record id: {record_id}."
+            )
 
         if data and not (record_id or suggestions or responses or fields or metadata or vectors):
             raise RecordsIngestionError(

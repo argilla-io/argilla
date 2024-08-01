@@ -50,6 +50,7 @@ def test_ingest_record_from_dict(dataset):
     assert record.fields["prompt"] == "What is the capital of France?"
     assert record.suggestions[0].value == "positive"
 
+
 def test_ingest_record_from_empty_dict_raises(dataset):
     with pytest.raises(RecordsIngestionError):
         dataset.records._ingest_records(
