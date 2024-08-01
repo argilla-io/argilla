@@ -30,6 +30,7 @@ export default {
     resize() {
       this.$refs.iframe.style.height =
         this.$refs.iframe.contentWindow.document.documentElement.scrollHeight +
+        450 +
         "px";
     },
   },
