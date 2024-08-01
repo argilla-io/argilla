@@ -22,7 +22,23 @@ extra:
       link: https://www.youtube.com/channel/UCAIz8TmvQQrLqbD7sd-5S2A
     - icon: fontawesome/brands/discord
       link: http://hf.co/join/discord
-
+  analytics:
+    provider: google
+    property: G-T5RMYPJ1B2
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/thumb-up-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/thumb-down-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback! Help us improve this page by
+            <a href="https://github.com/argilla-io/argilla/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">opening a GitHub issue</a>.
 extra_css:
   - stylesheets/extra.css
 
