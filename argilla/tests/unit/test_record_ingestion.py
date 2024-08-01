@@ -55,10 +55,12 @@ def test_ingest_record_from_empty_dict_raises(dataset):
     with pytest.raises(RecordsIngestionError):
         dataset.records._ingest_records(
             records=[
-                {
-                    "prompt": "What is the capital of France?",
-                    "label": "positive",
-                },
+                {"id": "record_id"},
+            ],
+        )
+    with pytest.raises(RecordsIngestionError):
+        dataset.records._ingest_records(
+            records=[
                 {},
             ],
         )
