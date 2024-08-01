@@ -98,7 +98,7 @@ class DiskImportExportMixin(ABC):
             workspace_id = client.workspaces.default.id
         dataset_model.workspace_id = workspace_id
 
-        if name:
+        if name and (name != dataset_model.name):
             logging.info(f"Changing dataset name from {dataset_model.name} to {name}")
             dataset_model.name = name
 
