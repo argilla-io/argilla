@@ -207,11 +207,11 @@ async def get_dataset_or_raise(dataset_id: UUID = Path) -> Dataset:
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
     *,
-    dataset: Dataset = Depends(get_dataset_or_raise),
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
+    dataset: Dataset = Depends(get_dataset_or_raise),
 ):
     await authorize(current_user, DatasetPolicy.list_records_with_all_responses(dataset))
 
@@ -238,10 +238,10 @@ async def list_dataset_records(
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_dataset_records(
     *,
-    dataset: Dataset = Depends(get_dataset_or_raise),
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
+    dataset: Dataset = Depends(get_dataset_or_raise),
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
 ):
     await authorize(current_user, DatasetPolicy.delete_records(dataset))
@@ -390,9 +390,9 @@ async def search_dataset_records(
 )
 async def list_dataset_records_search_suggestions_options(
     *,
-    dataset: Dataset = Depends(get_dataset_or_raise),
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
+    dataset: Dataset = Depends(get_dataset_or_raise),
 ):
     await authorize(current_user, DatasetPolicy.search_records(dataset))
 
