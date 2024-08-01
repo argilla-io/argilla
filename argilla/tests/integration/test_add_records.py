@@ -205,7 +205,7 @@ def test_add_records_with_suggestions(client) -> None:
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8, 0.7]
 
 
-def test_add_records_with_responses(client) -> None:
+def test_add_records_with_responses(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -238,7 +238,7 @@ def test_add_records_with_responses(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -263,7 +263,7 @@ def test_add_records_with_responses(client) -> None:
         assert record.responses["label"][0].user_id == user.id
 
 
-def test_add_records_with_responses_and_suggestions(client) -> None:
+def test_add_records_with_responses_and_suggestions(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -299,7 +299,7 @@ def test_add_records_with_responses_and_suggestions(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -325,7 +325,7 @@ def test_add_records_with_responses_and_suggestions(client) -> None:
     assert dataset_records[2].responses["label"][0].user_id == user.id
 
 
-def test_add_records_with_fields_mapped(client) -> None:
+def test_add_records_with_fields_mapped(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -364,7 +364,7 @@ def test_add_records_with_fields_mapped(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -394,7 +394,7 @@ def test_add_records_with_fields_mapped(client) -> None:
     assert dataset_records[2].responses["label"][0].user_id == user.id
 
 
-def test_add_records_with_id_mapped(client) -> None:
+def test_add_records_with_id_mapped(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -430,7 +430,7 @@ def test_add_records_with_id_mapped(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -525,7 +525,7 @@ def test_add_record_resources(client):
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8]
 
 
-def test_add_records_with_responses_and_same_schema_name(client: Argilla):
+def test_add_records_with_responses_and_same_schema_name(client: Argilla, username: str):
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -555,7 +555,7 @@ def test_add_records_with_responses_and_same_schema_name(client: Argilla):
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -576,7 +576,7 @@ def test_add_records_with_responses_and_same_schema_name(client: Argilla):
     assert dataset_records[1].responses["label"][0].user_id == user.id
 
 
-def test_add_records_objects_with_responses(client: Argilla):
+def test_add_records_objects_with_responses(client: Argilla, username: str):
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
 
     settings = rg.Settings(
@@ -594,7 +594,7 @@ def test_add_records_objects_with_responses(client: Argilla):
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
