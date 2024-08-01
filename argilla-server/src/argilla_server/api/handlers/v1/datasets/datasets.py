@@ -174,9 +174,11 @@ async def get_dataset_annotators_progress(
     db: AsyncSession = Depends(get_async_db),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
+
     await authorize(current_user, DatasetPolicy.get(dataset))
 
     progress = await datasets.get_dataset_annotators_progress(dataset.id)
+
     return AnnotatorsProgress(annotators=progress)
 
 
