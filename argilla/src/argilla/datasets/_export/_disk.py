@@ -20,7 +20,7 @@ from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 
-from argilla._exceptions import RecordsIngestionError
+from argilla._exceptions import RecordsIngestionError, ArgillaError
 from argilla._models import DatasetModel
 from argilla.client import Argilla
 from argilla.settings import Settings
@@ -92,7 +92,7 @@ class DiskImportExportMixin(ABC):
         if isinstance(workspace, str):
             workspace = client.workspaces(workspace)
             if not workspace:
-                raise ValueError(f"Workspace {workspace} not found.")
+                raise ArgillaError(f"Workspace {workspace} not found on the server.")
         else:
             warnings.warn("Workspace not provided. Using default workspace.")
             workspace = client.workspaces.default
