@@ -92,14 +92,14 @@ class RecordResponseDistribution(BaseModel):
     draft: Optional[int]
 
 
-class AnnotatorProgress(BaseModel):
+class UserProgress(BaseModel):
     username: str
     completed: RecordResponseDistribution
     pending: RecordResponseDistribution
 
 
-class AnnotatorsProgress(BaseModel):
-    annotators: List[AnnotatorProgress]
+class UsersProgress(BaseModel):
+    users: List[UserProgress]
 
 
 class Dataset(BaseModel):

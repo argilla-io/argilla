@@ -23,11 +23,11 @@ from tests.factories import DatasetFactory, RecordFactory, AnnotatorFactory, Res
 
 
 @pytest.mark.asyncio
-class TestGetDatasetAnnotatorsProgress:
+class TestGetDatasetUsersProgress:
     def url(self, dataset_id: UUID) -> str:
-        return f"/api/v1/datasets/{dataset_id}/progress/annotators"
+        return f"/api/v1/datasets/{dataset_id}/users/progress"
 
-    async def test_get_dataset_progress(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_users_progress(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
 
         user_with_submitted = await AnnotatorFactory.create()
@@ -46,7 +46,7 @@ class TestGetDatasetAnnotatorsProgress:
 
         assert response.status_code == 200, response.json()
         assert response.json() == {
-            "annotators": [
+            "users": [
                 {
                     "username": user_with_submitted.username,
                     "completed": {"submitted": 3},
@@ -65,18 +65,18 @@ class TestGetDatasetAnnotatorsProgress:
             ]
         }
 
-    async def test_get_dataset_progress_with_empty_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_users_progress_with_empty_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
         assert response.status_code == 200
-        assert response.json() == {"annotators": []}
+        assert response.json() == {"users": []}
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])
-    async def test_get_dataset_annotators_progress_as_restricted_user(
-        self, async_client: AsyncClient, user_role: UserRole
-    ):
+    async def test_get_dataset_users_progress_as_restricted_user(self, async_client: AsyncClient, user_role: UserRole):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=user_role)
 
@@ -85,7 +85,7 @@ class TestGetDatasetAnnotatorsProgress:
         assert response.status_code == 200
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])
-    async def test_get_dataset_annotators_progress_as_restricted_user_from_different_workspace(
+    async def test_get_dataset_users_progress_as_restricted_user_from_different_workspace(
         self, async_client: AsyncClient, user_role: UserRole
     ):
         dataset = await DatasetFactory.create()
@@ -103,7 +103,7 @@ class TestGetDatasetAnnotatorsProgress:
             },
         }
 
-    async def test_get_dataset_annotators_progress_without_authentication(self, async_client: AsyncClient):
+    async def test_get_dataset_users_progress_without_authentication(self, async_client: AsyncClient):
         response = await async_client.get(self.url(uuid4()))
 
         assert response.status_code == 401
@@ -114,7 +114,7 @@ class TestGetDatasetAnnotatorsProgress:
             },
         }
 
-    async def test_get_dataset_annotators_progress_with_nonexistent_dataset_id(
+    async def test_get_dataset_users_progress_with_nonexistent_dataset_id(
         self, async_client: AsyncClient, owner_auth_header: dict
     ):
         dataset_id = uuid4()

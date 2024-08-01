@@ -456,7 +456,7 @@ async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
     }
 
 
-async def get_dataset_annotators_progress(dataset_id: UUID) -> List[dict]:
+async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:
     query = (
         select(User.username, Record.status, Response.status, func.count(Response.id))
         .join(Record)

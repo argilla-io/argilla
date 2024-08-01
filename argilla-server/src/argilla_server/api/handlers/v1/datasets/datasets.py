@@ -22,7 +22,7 @@ from sqlalchemy.orm import selectinload
 from argilla_server.api.policies.v1 import DatasetPolicy, MetadataPropertyPolicy, authorize, is_authorized
 from argilla_server.api.schemas.v1.datasets import (
     Dataset as DatasetSchema,
-    AnnotatorsProgress,
+    UsersProgress,
 )
 from argilla_server.api.schemas.v1.datasets import (
     DatasetCreate,
@@ -164,10 +164,8 @@ async def get_dataset_progress(
     return await datasets.get_dataset_progress(db, dataset.id)
 
 
-@router.get(
-    "/datasets/{dataset_id}/progress/annotators", response_model=AnnotatorsProgress, response_model_exclude_unset=True
-)
-async def get_dataset_annotators_progress(
+@router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress, response_model_exclude_unset=True)
+async def get_dataset_users_progress(
     *,
     current_user: User = Security(auth.get_current_user),
     dataset_id: UUID,
@@ -177,9 +175,9 @@ async def get_dataset_annotators_progress(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    progress = await datasets.get_dataset_annotators_progress(dataset.id)
+    progress = await datasets.get_dataset_users_progress(dataset.id)
 
-    return AnnotatorsProgress(annotators=progress)
+    return UsersProgress(users=progress)
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=DatasetSchema)
