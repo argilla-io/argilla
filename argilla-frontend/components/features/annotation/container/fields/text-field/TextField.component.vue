@@ -199,7 +199,7 @@ export default {
 				color: #2983ff;
 			}
 		</style>
-	
+
 		<div id="container"></div>
 
 		<div id="info">
