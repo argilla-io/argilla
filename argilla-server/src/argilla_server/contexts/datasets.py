@@ -458,27 +458,19 @@ async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
 
 async def get_dataset_annotators_progress(dataset_id: UUID) -> List[dict]:
     query = (
-        select(User.username, Record.status, func.count(Response.id))
+        select(User.username, Record.status, Response.status, func.count(Response.id))
         .join(Record)
         .join(User)
-        .where(
-            and_(
-                Record.dataset_id == dataset_id,
-                # We compute completed only.
-                # Since some of the pending records may not have response, the progress
-                # could be confusing for pending records.
-                Record.status == RecordStatus.completed,
-            )
-        )
-        .group_by(User.username, Record.status)
+        .where(Record.dataset_id == dataset_id)
+        .group_by(User.username, Record.status, Response.status)
     )
 
     async for session in get_async_db():
-        annotators_progress = defaultdict(dict)
+        annotators_progress = defaultdict(lambda: defaultdict(dict))
         results = (await session.execute(query)).all()
 
-        for username, status, count in results:
-            annotators_progress[username][status] = count
+        for username, record_status, response_status, count in results:
+            annotators_progress[username][record_status][response_status] = count
 
         return [{"username": username, **progress} for username, progress in annotators_progress.items()]
 
