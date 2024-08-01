@@ -84,7 +84,7 @@ def api_error_handler(func):
             500: InternalServerError,
         }
         exception_class = switch.get(status_code, ArgillaAPIError)
-        raise exception_class(f"{exception_class.message}. Details: {error_detail}")
+        raise exception_class(f"{exception_class.message}. Details: {error_detail}", status_code=status_code)
 
     def _handler_wrapper(*args, **kwargs):
         try:
