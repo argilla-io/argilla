@@ -589,7 +589,7 @@ async def _build_record_responses(
         try:
             cache = await validate_user_exists(db, response_create.user_id, cache)
 
-            ResponseCreateValidator(response_create).validate_for(record)
+            ResponseCreateValidator.validate(response_create, record)
 
             responses.append(
                 Response(
@@ -630,7 +630,7 @@ async def _build_record_suggestions(
                     raise UnprocessableEntityError(f"question_id={str(suggestion_create.question_id)} does not exist")
                 questions_cache[suggestion_create.question_id] = question
 
-            SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
+            SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
 
             suggestions.append(
                 Suggestion(
@@ -814,7 +814,7 @@ async def create_response(
             f"Response already exists for record with id `{record.id}` and by user with id `{user.id}`"
         )
 
-    ResponseCreateValidator(response_create).validate_for(record)
+    ResponseCreateValidator.validate(response_create, record)
 
     async with db.begin_nested():
         response = await Response.create(
@@ -840,7 +840,7 @@ async def create_response(
 async def update_response(
     db: AsyncSession, search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
 ):
-    ResponseUpdateValidator(response_update).validate_for(response.record)
+    ResponseUpdateValidator.validate(response_update, response.record)
 
     async with db.begin_nested():
         response = await response.update(
@@ -864,7 +864,7 @@ async def update_response(
 async def upsert_response(
     db: AsyncSession, search_engine: SearchEngine, record: Record, user: User, response_upsert: ResponseUpsert
 ) -> Response:
-    ResponseUpsertValidator(response_upsert).validate_for(record)
+    ResponseUpsertValidator.validate(response_upsert, record)
 
     async with db.begin_nested():
         response = await Response.upsert(
@@ -937,7 +937,7 @@ async def upsert_suggestion(
     question: Question,
     suggestion_create: "SuggestionCreate",
 ) -> Suggestion:
-    SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
+    SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
 
     async with db.begin_nested():
         suggestion = await Suggestion.upsert(
