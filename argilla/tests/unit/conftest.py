@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pytest
+
+import argilla as rg
 
 
 # @pytest.fixture(scope="function", autouse=True)
@@ -19,3 +22,10 @@
 #     argilla.DEFAULT_HTTP_CLIENT = mock_client
 
 #     return mock_client
+
+
+@pytest.fixture(autouse=True)
+def mock_client():
+    # TODO: Mock the http layer
+    client = rg.Argilla(api_url="http://test_url", api_key="mock")
+    return client
