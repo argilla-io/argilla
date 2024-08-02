@@ -193,7 +193,6 @@ async def _get_search_responses(
         return await search_engine.search(**search_params)
 
 
-
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
     try:
         await search.validate_search_records_query(db, query, dataset)
