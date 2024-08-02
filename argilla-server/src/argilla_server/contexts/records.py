@@ -12,32 +12,58 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict, Sequence
+from typing import Dict, Sequence, Union, List, Tuple
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, contains_eager
 
-from argilla_server.models import Dataset, Record
+from argilla_server.database import get_async_db
+from argilla_server.models import Dataset, Record, VectorSettings, Vector
+
+
+async def list_records_by_dataset_id(
+    dataset_id: UUID,
+    offset: int,
+    limit: int,
+    with_responses: bool = False,
+    with_suggestions: bool = False,
+    with_vectors: Union[bool, List[str]] = False,
+) -> Tuple[Sequence[Record], int]:
+    query = Record.Select.by_dataset_id(
+        dataset_id=dataset_id,
+        offset=offset,
+        limit=limit,
+        with_responses=with_responses,
+        with_suggestions=with_suggestions,
+        with_vectors=with_vectors,
+    )
+
+    async for db in get_async_db():
+        records = (await db.scalars(query)).unique().all()
+        total = await db.scalar(Record.Select.count(dataset_id=dataset_id))
+
+        return records, total
 
 
 async def list_dataset_records_by_ids(
     db: AsyncSession, dataset_id: UUID, record_ids: Sequence[UUID]
 ) -> Sequence[Record]:
-    query = select(Record).filter(Record.id.in_(record_ids), Record.dataset_id == dataset_id)
-    return (await db.execute(query)).unique().scalars().all()
+    query = Record.Select.by_dataset_id(dataset_id=dataset_id).where(Record.id.in_(record_ids))
+    return (await db.scalars(query)).unique().all()
 
 
 async def list_dataset_records_by_external_ids(
     db: AsyncSession, dataset_id: UUID, external_ids: Sequence[str]
 ) -> Sequence[Record]:
     query = (
-        select(Record)
-        .filter(Record.external_id.in_(external_ids), Record.dataset_id == dataset_id)
+        Record.Select.by_dataset_id(dataset_id=dataset_id)
+        .where(Record.external_id.in_(external_ids))
         .options(selectinload(Record.dataset))
     )
-    return (await db.execute(query)).unique().scalars().all()
+
+    return (await db.scalars(query)).unique().all()
 
 
 async def fetch_records_by_ids_as_dict(
