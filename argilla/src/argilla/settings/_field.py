@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC
-from typing import Optional, Union, TYPE_CHECKING, TypeAlias
+from typing import Optional, Union, TYPE_CHECKING
 
 from argilla import Argilla
 from argilla._api import FieldsAPI
@@ -158,7 +158,7 @@ class ImageField(AbstractField):
         )
 
 
-Field: TypeAlias = Union[TextField, ImageField]
+Field = Union[TextField, ImageField]
 
 
 def _field_from_model(model: FieldModel) -> Field:
