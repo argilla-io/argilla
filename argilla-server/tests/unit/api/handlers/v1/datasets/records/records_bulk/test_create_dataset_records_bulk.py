@@ -355,6 +355,35 @@ class TestCreateDatasetRecordsBulk:
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
+    async def test_create_dataset_records_bulk_with_image_field_data_url_using_invalid_mime_type(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "image": "data:image/invalid;base64,UklGRhgCAABXRUJQVlA4WAoAAAAIAAAAHwAAFwA",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
     async def test_create_dataset_records_bulk_with_image_field_data_url_exceeding_maximum_length(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):
