@@ -10,9 +10,24 @@ declare namespace CSS {
   };
 }
 
+const DSLChars = ["|", "+", "-", "*"];
+
 export const useSearchTextHighlight = (fieldId: string) => {
   const FIELD_ID_TO_HIGHLIGHT = `fields-content-${fieldId}`;
   const HIGHLIGHT_CLASS = `search-text-highlight-${fieldId}`;
+
+  const scapeDSLChars = (value: string) => {
+    let output = value;
+
+    for (const char of DSLChars) {
+      output = output.replaceAll(char, " ");
+    }
+
+    return output
+      .split(" ")
+      .map((w) => w.trim())
+      .filter(Boolean);
+  };
 
   const createRangesToHighlight = (
     fieldComponent: HTMLElement,
@@ -89,7 +104,7 @@ export const useSearchTextHighlight = (fieldId: string) => {
     };
 
     const textNodes = getTextNodesUnder(fieldComponent);
-    const words = searchText.split(" ");
+    const words = scapeDSLChars(searchText);
 
     for (const textNode of textNodes) {
       for (const word of words) {
