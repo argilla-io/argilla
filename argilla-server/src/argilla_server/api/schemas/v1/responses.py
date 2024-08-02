@@ -102,10 +102,6 @@ class ResponseCreate(BaseModel):
     values: Optional[ResponseValuesCreate]
     status: ResponseStatus
 
-    @property
-    def is_submitted(self):
-        return self.status == ResponseStatus.submitted
-
 
 class ResponseFilterScope(BaseModel):
     entity: Literal["response"]
