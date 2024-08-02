@@ -18,12 +18,10 @@ from argilla_server.models import VectorSettings
 
 
 class VectorValidator:
-    def __init__(self, value: List[float]):
-        self._value = value
-
-    def validate_for(self, vector_settings: VectorSettings):
-        if len(self._value) != vector_settings.dimensions:
+    @classmethod
+    def validate(cls, value: List[float], vector_settings: VectorSettings):
+        if len(value) != vector_settings.dimensions:
             raise ValueError(
                 f"vector value for vector name={vector_settings.name} must have {vector_settings.dimensions} elements, "
-                f"got {len(self._value)} elements"
+                f"got {len(value)} elements"
             )
