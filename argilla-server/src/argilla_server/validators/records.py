@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import copy
+import mimetypes
 
 from abc import ABC, abstractmethod
 from typing import Dict, List, Union
@@ -29,6 +30,16 @@ from argilla_server.models import Dataset, Record
 
 IMAGE_FIELD_WEB_URL_MAX_LENGTH = 2038
 IMAGE_FIELD_DATA_URL_MAX_LENGTH = 5_000_000
+IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES = [
+    "image/avif",
+    "image/gif",
+    "image/ico",
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/svg",
+    "image/webp",
+]
 
 
 class RecordValidatorBase(ABC):
@@ -117,6 +128,12 @@ class RecordValidatorBase(ABC):
         if len(field_value) > IMAGE_FIELD_DATA_URL_MAX_LENGTH:
             raise UnprocessableEntityError(
                 f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_DATA_URL_MAX_LENGTH} characters for Data URLs"
+            )
+
+        type, encoding = mimetypes.guess_type(field_value)
+        if type not in IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is using an unsupported MIME type, supported MIME types are: {IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES!r}"
             )
 
 
