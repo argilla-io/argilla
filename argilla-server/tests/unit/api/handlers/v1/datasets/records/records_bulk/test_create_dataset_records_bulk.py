@@ -31,6 +31,7 @@ from tests.factories import (
     TextFieldFactory,
     ImageFieldFactory,
     TextQuestionFactory,
+    ChatFieldFactory,
 )
 
 
@@ -409,6 +410,132 @@ class TestCreateDatasetRecordsBulk:
         assert response.status_code == 422
         assert response.json() == {
             "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                    "content": "Hello!",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
+
+    async def test_create_dataset_records_bulk_with_chat_field_with_non_dicts(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": "invalid",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because chat field 'chat' value is not a list of dictionaries",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_without_role_key(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "content": "Hello!",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because chat field 'chat' value at position 0 is missing the 'role' key",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_without_content_key(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because chat field 'chat' value at position 0 is missing the 'content' key",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0

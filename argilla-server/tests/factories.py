@@ -266,6 +266,11 @@ class ImageFieldFactory(FieldFactory):
         "type": FieldType.image,
     }
 
+class ChatFieldFactory(FieldFactory):
+    settings = {
+        "type": FieldType.chat,
+    }
+
 
 class MetadataPropertyFactory(BaseFactory):
     class Meta:
