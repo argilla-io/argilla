@@ -24,7 +24,7 @@ from argilla._models._resource import ResourceModel
 
 __all__ = ["RecordModel", "FieldValue"]
 
-FieldValue = Union[str, None]
+FieldValue = Union[str, None, List[Dict[str, str]]]
 
 
 class RecordModel(ResourceModel):
