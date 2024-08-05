@@ -579,6 +579,7 @@ def test_add_record_with_chat_field(client):
 
     assert dataset.name == mock_dataset_name
 
+
 def test_add_records_with_responses_and_same_schema_name(client: Argilla, username: str):
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
