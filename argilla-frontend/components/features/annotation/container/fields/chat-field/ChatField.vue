@@ -2,8 +2,17 @@
   <div class="chat-field" :key="fieldText">
     <span class="chat-field_title" v-text="title" />
 
-    <div class="container" v-for="{ role, content } in content">
-      <span :class="['message', role === 'user' ? 'user' : 'agent']">
+    <div
+      class="chat-field_container"
+      v-for="({ role, content }, index) in content"
+      :key="index"
+    >
+      <span
+        :class="[
+          'chat-field_message',
+          role === 'user' ? 'chat-field_user' : 'chat-field_agent',
+        ]"
+      >
         <span v-text="role" />
 
         <p v-text="content" />
@@ -45,34 +54,36 @@ export default {
     word-break: break-word;
     width: calc(100% - 30px);
   }
-}
 
-.container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.user {
-  align-items: flex-end;
-  background-color: #f5f5f5;
-}
-
-.agent {
-  background-color: #c2e3f7;
-  align-items: flex-start;
-}
-
-.message {
-  & > span {
-    font-weight: bold;
+  &_container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
 
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-  max-width: 80%;
-  border-radius: 10px;
-  padding: 10px;
+  &_user {
+    background-color: #f5f5f5;
+    align-items: flex-end;
+    align-self: flex-end;
+  }
+
+  &_agent {
+    background-color: #c2e3f7;
+    align-items: flex-start;
+    align-self: flex-start;
+  }
+
+  &_message {
+    & > span {
+      font-weight: bold;
+    }
+
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    max-width: 80%;
+    border-radius: 10px;
+    padding: 10px;
+  }
 }
 </style>
