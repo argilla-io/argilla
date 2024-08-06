@@ -132,7 +132,7 @@ class APIClient:
         try:
             self._log_user_message()
         except UnauthorizedError as e:
-            raise ArgillaCredentialsError(message=f"Failed to log in with provided api_url and api_key.") from e
+            raise ArgillaCredentialsError(message="Failed to log in with provided api_url and api_key.") from e
 
     ##############################
     # Utility methods
