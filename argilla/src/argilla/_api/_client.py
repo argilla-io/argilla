@@ -17,6 +17,8 @@ import os
 from typing import Optional
 
 import httpx
+from argilla._exceptions._api import UnauthorizedError
+from argilla._exceptions._client import ArgillaCredentialsError
 
 from argilla._api import HTTPClientConfig, create_http_client
 from argilla._api._datasets import DatasetsAPI
@@ -127,6 +129,11 @@ class APIClient:
 
         self.api = ArgillaAPI(self.http_client)
 
+        try:
+            self._log_user_message()
+        except UnauthorizedError as e:
+            raise ArgillaCredentialsError(message=f"Failed to log in with provided api_url and api_key.") from e
+
     ##############################
     # Utility methods
     ##############################
@@ -135,3 +142,8 @@ class APIClient:
         class_name = self.__class__.__name__
         message = f"{class_name}: {message}"
         logging.log(level=level, msg=message)
+
+    def _log_user_message(self) -> None:
+        user = self.api.users.get_me()
+        message = f"Logged in as {user.username} with the role {user.role}"
+        self.log(message=message, level=logging.INFO)
