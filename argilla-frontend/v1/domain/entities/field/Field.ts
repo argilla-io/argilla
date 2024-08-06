@@ -14,10 +14,15 @@ export class Field {
     public settings: any
   ) {
     this.initializeOriginal();
+    console.log(this);
   }
 
   public get isTextType() {
     return this.fieldType === "text";
+  }
+
+  public get isChatType() {
+    return this.fieldType === "chat";
   }
 
   private get fieldType() {

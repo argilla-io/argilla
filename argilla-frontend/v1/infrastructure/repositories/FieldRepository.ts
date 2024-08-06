@@ -18,7 +18,17 @@ export class FieldRepository {
         mediumCache()
       );
 
-      return data.items;
+      return [
+        {
+          id: "db98dda8-9ab4-4929-a9d0-61300f18dbe2",
+          name: "chat",
+          title: "string",
+          required: true,
+          settings: {
+            type: "chat",
+          },
+        },
+      ];
     } catch (err) {
       throw {
         response: FIELD_API_ERRORS.GET_QUESTIONS,

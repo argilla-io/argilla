@@ -440,7 +440,30 @@ export class RecordRepository {
       });
 
       return {
-        records,
+        records: [
+          {
+            id: "6ac890dd-908e-4e0d-8510-49a7bf3a8b90",
+            status: "pending",
+            fields: {
+              chat: [
+                {
+                  role: "user",
+                  content: "Hello World, how are you?",
+                },
+                {
+                  role: "bot",
+                  content: "I'm doing great, thank you!",
+                },
+              ],
+            },
+            metadata: {},
+            query_score: 0,
+            responses: [],
+            suggestions: [],
+            inserted_at: new Date("2024-08-05T11:28:41.337971"),
+            updated_at: new Date("2024-08-05T11:28:41.337971"),
+          },
+        ],
         total,
       };
     } catch (err) {
