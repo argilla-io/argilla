@@ -130,7 +130,7 @@ class APIClient:
         self.api = ArgillaAPI(self.http_client)
 
         try:
-            self._log_user_message()
+            self._validate_connection()
         except UnauthorizedError as e:
             raise ArgillaCredentialsError() from e
 
@@ -143,7 +143,7 @@ class APIClient:
         message = f"{class_name}: {message}"
         logging.log(level=level, msg=message)
 
-    def _log_user_message(self) -> None:
+    def _validate_connection(self) -> None:
         user = self.api.users.get_me()
         message = f"Logged in as {user.username} with the role {user.role}"
         self.log(message=message, level=logging.INFO)
