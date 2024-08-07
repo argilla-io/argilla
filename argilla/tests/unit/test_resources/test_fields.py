@@ -19,9 +19,8 @@ import httpx
 from pytest_httpx import HTTPXMock
 
 import argilla as rg
-from argilla._models import FieldModel
-from argilla._models._settings._fields import ImageFieldSettings, ChatFieldSettings
-from argilla.settings._field import ImageField
+from argilla._models import FieldModel, ImageFieldSettings, ChatFieldSettings
+from argilla.settings._field import ImageField, ChatField
 
 
 class TestImageField:
@@ -53,7 +52,7 @@ class TestImageField:
 
 class TestChatField:
     def test_create_chat_field_ony_with_required_arguments(self):
-        field = ImageField(name="chat")
+        field = ChatField(name="chat")
 
         assert field.name == "chat"
         assert field.title == "chat"
@@ -61,7 +60,7 @@ class TestChatField:
         assert field.description is None
 
     def test_create_chat_field_from_dict(self):
-        field = ImageField.from_dict(
+        field = ChatField.from_dict(
             {
                 "name": "chat",
                 "title": "Chat title",

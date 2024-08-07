@@ -17,8 +17,7 @@ from typing import Optional, Union, TYPE_CHECKING
 from argilla import Argilla
 from argilla._api import FieldsAPI
 from argilla._exceptions import ArgillaError
-from argilla._models import FieldModel, TextFieldSettings, ChatFieldSettings
-from argilla._models._settings._fields import ImageFieldSettings, FieldSettings
+from argilla._models import FieldModel, TextFieldSettings, ChatFieldSettings, ImageFieldSettings, FieldSettings
 from argilla.settings._common import SettingsPropertyBase
 from argilla.settings._metadata import MetadataField, MetadataType
 from argilla.settings._vector import VectorField
