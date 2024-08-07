@@ -40,7 +40,7 @@ IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES = [
     "image/svg",
     "image/webp",
 ]
-
+CHAT_FIELD_MAX_LENGTH = 500
 
 class RecordValidatorBase(ABC):
     def __init__(self, record_change: Union[RecordCreate, RecordUpdate]):
@@ -117,7 +117,7 @@ class RecordValidatorBase(ABC):
         if field_value is None:
             return
 
-        if len(field_value) > 5000:
+        if len(field_value) > CHAT_FIELD_MAX_LENGTH:
             raise UnprocessableEntityError(
                 f"chat field {field_name!r} value is exceeding the maximum length of 5000 characters"
             )
@@ -128,15 +128,15 @@ class RecordValidatorBase(ABC):
         for i, value in enumerate(field_value):
             if not isinstance(value, dict):
                 raise UnprocessableEntityError(
-                    f"chat field {field_name!r} value must be a list of dictionaries. Found a non-dictionary value at index {i}"
+                    f"chat field {field_name!r} value must be a list of dictionaries. Found a non-dictionary value at index {i}. Value is {value}"
                 )
             if "content" not in value:
                 raise UnprocessableEntityError(
-                    f"chat field {field_name!r} value must be a list of dictionaries with a 'content' key. Missing 'content' key at index {i}"
+                    f"chat field {field_name!r} value must be a list of dictionaries with a 'content' key. Missing 'content' key at index {i}. Value is {value}"
                 )
             if "role" not in value:
                 raise UnprocessableEntityError(
-                    f"chat field {field_name!r} value must be a list of dictionaries with a 'role' key. Missing 'role' key at index {i}"
+                    f"chat field {field_name!r} value must be a list of dictionaries with a 'role' key. Missing 'role' key at index {i}. Value is {value}"
                 )
 
     def _validate_web_url(
