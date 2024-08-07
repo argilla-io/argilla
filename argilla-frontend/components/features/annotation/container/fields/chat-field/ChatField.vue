@@ -12,6 +12,9 @@
           'chat-field_message',
           role === 'user' ? 'chat-field_user' : 'chat-field_agent',
         ]"
+        :style="{
+          backgroundColor: $color.generate(role),
+        }"
       >
         <span v-text="role" />
 
