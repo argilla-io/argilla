@@ -19,7 +19,8 @@
   <div class="my-progress__container">
     <TeamProgress :datasetId="datasetId" />
 
-    <li class="my-progress__item">
+    <BaseBadgeSkeleton v-if="!metrics.hasMetrics" />
+    <li v-else class="my-progress__item">
       <span>
         <span
           class="color-bullet"
