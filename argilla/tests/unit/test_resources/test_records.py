@@ -15,8 +15,7 @@
 import uuid
 
 import pytest
-
-from argilla import Record, Suggestion, Response
+from argilla import Record, Response, Suggestion
 from argilla._exceptions import ArgillaError
 from argilla._models import MetadataModel
 
@@ -40,6 +39,10 @@ class TestRecords:
             "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
             f"responses={{'question': [{{'value': 'answer'}}]}})"
         )
+
+    def test_record_with_external_id(self):
+        record = Record(id=0)
+        assert record.id == 0
 
     def test_update_record_metadata_by_key(self):
         record = Record(fields={"name": "John", "age": "30"}, metadata={"key": "value"})
