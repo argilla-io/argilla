@@ -14,7 +14,7 @@
 
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from argilla._exceptions import ArgillaError
 from argilla._models import (
@@ -87,7 +87,7 @@ class Record(Resource):
             raise ValueError("If fields are an empty dictionary, an id must be provided.")
 
         self._dataset = _dataset
-        self._model = RecordModel(external_id=uuid4() if id is None else id, id=_server_id)
+        self._model = RecordModel(external_id=id, id=_server_id)
         self.__fields = RecordFields(fields=fields)
         self.__vectors = RecordVectors(vectors=vectors)
         self.__metadata = RecordMetadata(metadata=metadata)

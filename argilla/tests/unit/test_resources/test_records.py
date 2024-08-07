@@ -40,9 +40,14 @@ class TestRecords:
             f"responses={{'question': [{{'value': 'answer'}}]}})"
         )
 
-    def test_record_with_external_id(self):
-        record = Record(id=0)
-        assert record.id == 0
+    def test_record_external_id(self):
+        for id in [0, "1", "0"]:
+            record = Record(id=id, fields={"name": "John", "age": "30"})
+            assert record.id == id
+        record = Record(id=id, fields={"name": "John", "age": "30"})
+        assert record.id
+        record = Record(fields={"name": "John", "age": "30"})
+        assert record.id
 
     def test_update_record_metadata_by_key(self):
         record = Record(fields={"name": "John", "age": "30"}, metadata={"key": "value"})
