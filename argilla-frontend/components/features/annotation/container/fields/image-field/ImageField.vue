@@ -3,7 +3,7 @@
     <span class="image_field_title" v-text="title" />
     <img v-if="!hasError" :src="content" @error="handleError()" />
     <div v-else class="image_field_placeholder">
-      <img src="~/assets/image/placeholder.svg" />
+      <img src="images/img-placeholder.svg" />
       <p v-text="$t('couldNotLoadImage')" />
     </div>
   </div>
@@ -54,6 +54,7 @@ export default {
     flex-direction: column;
     width: 100%;
     align-items: center;
+    color: $black-37;
   }
 
   img {
