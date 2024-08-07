@@ -19,6 +19,8 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
 from uuid import UUID
 
+from argilla._exceptions._records import RecordsIngestionError
+from argilla._exceptions._settings import SettingsError
 from datasets.data_files import EmptyDatasetError
 
 from argilla.datasets._export._disk import DiskImportExportMixin
@@ -110,6 +112,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
         with_records: bool = True,
+        settings: Optional["Settings"] = None,
         **kwargs: Any,
     ):
         """Loads a `Dataset` from the Hugging Face Hub.
@@ -128,17 +131,21 @@ class HubImportExportMixin(DiskImportExportMixin):
         from datasets import Dataset, DatasetDict, load_dataset
         from huggingface_hub import snapshot_download
 
-        # download both files in parallel
-        folder_path = snapshot_download(
-            repo_id=repo_id,
-            repo_type="dataset",
-            allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
-            token=kwargs.get("token"),
-        )
+        if settings is not None:
+            dataset = cls(name=name, settings=settings)
+            dataset.create()
+        else:
+            # download configuration files from the hub
+            folder_path = snapshot_download(
+                repo_id=repo_id,
+                repo_type="dataset",
+                allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
+                token=kwargs.get("token"),
+            )
 
-        dataset = cls.from_disk(
-            path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
-        )
+            dataset = cls.from_disk(
+                path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
+            )
 
         if with_records:
             try:
@@ -150,8 +157,15 @@ class HubImportExportMixin(DiskImportExportMixin):
                             f" are: {', '.join(hf_dataset.keys())}."
                         )
                     hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
-
-                cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
+                try:
+                    cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
+                except RecordsIngestionError as e:
+                    if settings is not None:
+                        raise SettingsError(
+                            message=f"Failed to load records from Hugging Face dataset. Defined settings do not match dataset schema {hf_dataset.features}"
+                        ) from e
+                    else:
+                        raise e
             except EmptyDatasetError:
                 warnings.warn(
                     message="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
