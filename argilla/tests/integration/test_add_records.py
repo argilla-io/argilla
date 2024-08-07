@@ -575,7 +575,7 @@ def test_add_record_with_chat_field(client):
     dataset.create()
     dataset.records.log(records=mock_resources)
 
-    dataset_records = list(dataset.records(with_suggestions=True))
+    dataset_records = list(dataset.records)
 
     assert dataset.name == mock_dataset_name
 
