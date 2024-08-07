@@ -42,6 +42,7 @@ IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES = [
 ]
 CHAT_FIELD_MAX_LENGTH = 500
 
+
 class RecordValidatorBase(ABC):
     def __init__(self, record_change: Union[RecordCreate, RecordUpdate]):
         self._record_change = record_change
