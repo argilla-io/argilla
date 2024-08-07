@@ -44,7 +44,7 @@ class TestRecords:
         for id in [0, "1", "0"]:
             record = Record(id=id, fields={"name": "John", "age": "30"})
             assert record.id == id
-        record = Record(id=id, fields={"name": "John", "age": "30"})
+        record = Record(id=None, fields={"name": "John", "age": "30"})
         assert record.id
         record = Record(fields={"name": "John", "age": "30"})
         assert record.id
