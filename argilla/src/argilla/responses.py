@@ -186,7 +186,7 @@ class UserResponse(Resource):
             question = self._record.dataset.settings.questions[question_name]
             if question is None:
                 raise ResponsesError(
-                    f"response invalid because targeted question with name={question_name} does not exist. Available questions are: {list(self._record.dataset.settings.questions._properties_by_name.keys())}"
+                    f"Record response is invalid because question with name={question_name} does not exist in the dataset ({self._record.dataset.name}). Available questions are: {list(self._record.dataset.settings.questions._properties_by_name.keys())}"
                 )
             if isinstance(question, RankingQuestion):
                 value["value"] = self.__ranking_to_model_value(value["value"])

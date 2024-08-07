@@ -132,7 +132,7 @@ class Suggestion(Resource):
             )
         else:
             raise SuggestionsError(
-                f"suggestion invalid because targeted question with name={self.question_name} does not exist. Available questions are: {list(self.record.dataset.settings.questions._properties_by_name.keys())}"
+                f"Record suggestion is invalid because question with name={self.question_name} does not exist in the dataset ({self._record.dataset.name}). Available questions are: {list(self.record.dataset.settings.questions._properties_by_name.keys())}"
             )
 
     @classmethod
