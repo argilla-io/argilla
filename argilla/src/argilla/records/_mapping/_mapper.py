@@ -95,7 +95,7 @@ class IngestedRecordMapper:
 
         if data and not (record_id or suggestions or responses or fields or metadata or vectors):
             raise RecordsIngestionError(
-                message=f"""Record has no known keys from `Dataset.settings` or `mapping`. 
+                message=f"""Record has no known keys from `Dataset.settings` or `mapping`.
                 If keys in source dataset do not match the names in `Dataset.settings`, you should use the `mapping` parameter of the `dataset.records.log` method.
                 Available keys in `Dataset.settings` and `mapping`: {self.mapping.keys()}.
                 Unkown keys in Record: {unknown_keys}. """
