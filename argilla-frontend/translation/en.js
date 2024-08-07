@@ -39,6 +39,7 @@ export default {
   taskDistributionTooltip:
     "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
+  required: "Required",
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",
