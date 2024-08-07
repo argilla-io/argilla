@@ -16,22 +16,33 @@
   -->
 
 <template>
-  <div v-if="metrics.hasMetrics">
+  <div>
     <ul class="my-progress__list">
-      <li
-        v-for="(status, index) in progressItems"
-        :key="index"
-        class="my-progress__list__item"
-      >
-        <span>
-          <span
-            class="color-bullet"
-            :style="{ backgroundColor: status.color }"
-          ></span>
-          <label class="my-progress__list__name" v-text="status.name" />
-        </span>
-        <span class="my-progress__list__counter" v-text="status.value" />
-      </li>
+      <template v-if="!metrics.hasMetrics">
+        <li
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="my-progress__list__item"
+        >
+          <BaseBadgeSkeleton />
+        </li>
+      </template>
+      <template v-else>
+        <li
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="my-progress__list__item"
+        >
+          <span>
+            <span
+              class="color-bullet"
+              :style="{ backgroundColor: status.color }"
+            ></span>
+            <label class="my-progress__list__name" v-text="status.name" />
+          </span>
+          <span class="my-progress__list__counter" v-text="status.value" />
+        </li>
+      </template>
     </ul>
     <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
     <TeamProgress
