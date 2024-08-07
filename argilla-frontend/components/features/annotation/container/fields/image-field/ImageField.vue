@@ -3,7 +3,7 @@
     <span class="image_field_title" v-text="title" />
     <img v-if="!hasError" :src="content" @error="handleError()" />
     <div v-else class="image_field_placeholder">
-      <img src="~/assets/image/placeholeder.svg" />
+      <img src="~/assets/image/placeholder.svg" />
       <p v-text="$t('couldNotLoadImage')" />
     </div>
   </div>
