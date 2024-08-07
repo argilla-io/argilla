@@ -148,9 +148,9 @@ def es_field_for_response_property(property: str) -> str:
 def es_mapping_for_field(field: Field) -> dict:
     field_type = field.settings["type"]
 
-    if field_type == FieldType.text:
+    if field.is_text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
-    if field_type == FieldType.chat:
+    if field.is_chat:
         es_field = {
             "type": "object",
             "properties": {
@@ -159,7 +159,7 @@ def es_mapping_for_field(field: Field) -> dict:
             },
         }
         return {es_field_for_record_field(field.name): es_field}
-    elif field_type == FieldType.image:
+    elif field.is_image:
         return {
             es_field_for_record_field(field.name): {
                 "type": "object",
