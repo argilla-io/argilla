@@ -15,5 +15,5 @@
 from argilla._exceptions._base import ArgillaError
 
 
-class ResponsesError(ArgillaError):
+class RecordResponsesError(ArgillaError):
     pass

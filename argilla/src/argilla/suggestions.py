@@ -13,7 +13,7 @@
 # limitations under the License.
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
-from argilla._exceptions._suggestions import SuggestionsError
+from argilla._exceptions._suggestions import RecordSuggestionsError
 from argilla._models import SuggestionModel
 from argilla._resource import Resource
 from argilla.settings import RankingQuestion
@@ -131,7 +131,7 @@ class Suggestion(Resource):
                 id=self._model.id,
             )
         else:
-            raise SuggestionsError(
+            raise RecordSuggestionsError(
                 f"Record suggestion is invalid because question with name={self.question_name} does not exist in the dataset ({self._record.dataset.name}). Available questions are: {list(self.record.dataset.settings.questions._properties_by_name.keys())}"
             )
 

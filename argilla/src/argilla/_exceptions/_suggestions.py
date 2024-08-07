@@ -15,5 +15,5 @@
 from argilla._exceptions._base import ArgillaError
 
 
-class SuggestionsError(ArgillaError):
+class RecordSuggestionsError(ArgillaError):
     pass

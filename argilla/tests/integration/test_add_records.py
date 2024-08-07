@@ -18,8 +18,8 @@ from datetime import datetime
 import argilla as rg
 import pytest
 from argilla import Argilla, Workspace
-from argilla._exceptions._responses import ResponsesError
-from argilla._exceptions._suggestions import SuggestionsError
+from argilla._exceptions._responses import RecordResponsesError
+from argilla._exceptions._suggestions import RecordSuggestionsError
 
 
 def test_add_records(client):
@@ -207,7 +207,7 @@ def test_add_records_with_suggestions_non_existent_question(client) -> None:
         client=client,
     )
     dataset.create()
-    with pytest.raises(SuggestionsError, match="suggestion invalid because targeted question with name"):
+    with pytest.raises(RecordSuggestionsError, match="suggestion invalid because targeted question with name"):
         dataset.records.log(mock_data)
 
 
@@ -301,7 +301,7 @@ def test_add_records_with_responses_non_existent_question(client, username: str)
             responses=[rg.Response(question_name="non_existent_question", value="mock", user_id=user.id)],
         )
     ]
-    with pytest.raises(ResponsesError, match="response invalid because targeted question with name"):
+    with pytest.raises(RecordResponsesError, match="response invalid because targeted question with name"):
         dataset.records.log(mock_data)
 
 

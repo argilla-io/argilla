@@ -16,7 +16,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-from argilla._exceptions._responses import ResponsesError
+from argilla._exceptions._responses import RecordResponsesError
 from argilla._models import ResponseStatus as ResponseStatusModel
 from argilla._models import UserResponseModel
 from argilla._resource import Resource
@@ -185,7 +185,7 @@ class UserResponse(Resource):
         for question_name, value in values.items():
             question = self._record.dataset.settings.questions[question_name]
             if question is None:
-                raise ResponsesError(
+                raise RecordResponsesError(
                     f"Record response is invalid because question with name={question_name} does not exist in the dataset ({self._record.dataset.name}). Available questions are: {list(self._record.dataset.settings.questions._properties_by_name.keys())}"
                 )
             if isinstance(question, RankingQuestion):
