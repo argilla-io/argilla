@@ -21,7 +21,7 @@
         :useMarkdown="settings.use_markdown"
         :searchText="recordCriteria.committed.searchText.value.text"
       />
-      <ImageField :name="name" :title="title" :content="content" />
+      <ImageField v-else :name="name" :title="title" :content="content" />
     </div>
   </div>
 </template>
