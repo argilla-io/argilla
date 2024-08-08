@@ -27,6 +27,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 from argilla_server.api.schemas.v1.questions import QuestionSettings
 from argilla_server.enums import (
     DatasetStatus,
+    FieldType,
     MetadataPropertyType,
     QuestionType,
     RecordStatus,
@@ -72,6 +73,18 @@ class Field(DatabaseModel):
     dataset: Mapped["Dataset"] = relationship(back_populates="fields")
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="field_name_dataset_id_uq"),)
+
+    @property
+    def is_text(self):
+        return self.settings.get("type") == FieldType.text
+
+    @property
+    def is_image(self):
+        return self.settings.get("type") == FieldType.image
+
+    @property
+    def is_chat(self):
+        return self.settings.get("type") == FieldType.chat
 
     def __repr__(self):
         return (

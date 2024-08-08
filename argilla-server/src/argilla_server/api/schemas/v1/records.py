@@ -82,7 +82,7 @@ class Record(BaseModel):
 
 
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[StrictStr, None]]
+    fields: Dict[str, Union[StrictStr, None, List[Dict[StrictStr, StrictStr]]]]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
@@ -148,7 +148,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[StrictStr, None]]]
+    fields: Optional[Dict[str, Union[StrictStr, None, List[Dict[StrictStr, StrictStr]]]]]
 
 
 class RecordIncludeParam(BaseModel):

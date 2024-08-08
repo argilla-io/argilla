@@ -255,7 +255,22 @@ class FieldFactory(BaseFactory):
 
 
 class TextFieldFactory(FieldFactory):
-    settings = {"type": FieldType.text.value, "use_markdown": False}
+    settings = {
+        "type": FieldType.text,
+        "use_markdown": False,
+    }
+
+
+class ImageFieldFactory(FieldFactory):
+    settings = {
+        "type": FieldType.image,
+    }
+
+
+class ChatFieldFactory(FieldFactory):
+    settings = {
+        "type": FieldType.chat,
+    }
 
 
 class MetadataPropertyFactory(BaseFactory):

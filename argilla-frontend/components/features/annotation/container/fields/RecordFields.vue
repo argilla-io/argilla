@@ -9,7 +9,7 @@
         settings,
         isTextType,
         isChatType,
-      } in fields"
+     , isTextType } in fields"
       :key="id"
     >
       <SpanAnnotationTextField
@@ -21,7 +21,7 @@
         :spanQuestion="getSpanQuestion(name)"
         :searchText="recordCriteria.committed.searchText.value.text"
       />
-      <TextFieldComponent
+      <TextField
         v-else-if="isTextType"
         :name="name"
         :title="title"
@@ -35,6 +35,7 @@
         :title="title"
         :content="content"
       />
+      <ImageField v-else :name="name" :title="title" :content="content" />
     </div>
   </div>
 </template>
