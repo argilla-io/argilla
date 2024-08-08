@@ -53,7 +53,9 @@ class RecordModel(ResourceModel):
         return {metadata.name: metadata.value for metadata in value}
 
     @field_serializer("fields", when_used="always")
-    def serialize_empty_fields(self, value: Dict[str, Union[str, None]]) -> Optional[Dict[str, Union[str, None]]]:
+    def serialize_empty_fields(
+        self, value: Dict[str, Union[str, None, List[Dict[str, str]]]]
+    ) -> Optional[Dict[str, Union[str, None, List[Dict[str, str]]]]]:
         """Serialize empty fields to None."""
         if isinstance(value, dict) and len(value) == 0:
             return None
