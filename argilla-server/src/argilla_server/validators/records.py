@@ -52,9 +52,9 @@ class RecordValidatorBase(ABC):
     def _validate_fields(cls, record: Union[RecordCreate, RecordUpdate], dataset: Dataset) -> None:
         fields = record.fields or {}
 
-        self._validate_required_fields(dataset, fields)
-        self._validate_extra_fields(dataset, fields)
-        self._validate_image_fields(dataset, fields)
+        cls._validate_required_fields(dataset, fields)
+        cls._validate_extra_fields(dataset, fields)
+        cls._validate_image_fields(dataset, fields)
 
     @staticmethod
     def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
@@ -90,23 +90,27 @@ class RecordValidatorBase(ABC):
                     "and extra metadata is not allowed for this dataset"
                 )
 
-    def _validate_required_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
+    @staticmethod
+    def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in dataset.fields:
             if field.required and not (field.name in fields and fields.get(field.name) is not None):
                 raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
 
-    def _validate_extra_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
+    @staticmethod
+    def _validate_extra_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
         fields_copy = copy.copy(fields)
         for field in dataset.fields:
             fields_copy.pop(field.name, None)
         if fields_copy:
             raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
 
-    def _validate_image_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
+    @staticmethod
+    def _validate_image_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in filter(lambda field: field.is_image, dataset.fields):
             self._validate_image_field(field.name, fields.get(field.name))
 
-    def _validate_image_field(self, field_name: str, field_value: Union[str, None]) -> None:
+    @staticmethod
+    def _validate_image_field(field_name: str, field_value: Union[str, None]) -> None:
         if field_value is None:
             return
 
@@ -122,8 +126,9 @@ class RecordValidatorBase(ABC):
         else:
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
 
+    @staticmethod
     def _validate_web_url(
-        self, field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
     ) -> None:
         if not parse_result.netloc or not parse_result.path:
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
@@ -133,8 +138,9 @@ class RecordValidatorBase(ABC):
                 f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_WEB_URL_MAX_LENGTH} characters for Web URLs"
             )
 
+    @staticmethod
     def _validate_data_url(
-        self, field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
     ) -> None:
         if not parse_result.path:
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
