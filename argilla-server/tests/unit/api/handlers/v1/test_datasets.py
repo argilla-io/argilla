@@ -2065,6 +2065,7 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
+        print(response.json())
         assert response.json() == {
             "detail": {
                 "code": "argilla.api.errors::ValidationError",
@@ -2074,6 +2075,11 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid list",
+                            "type": "type_error.list",
                         },
                     ]
                 },
@@ -2174,6 +2180,11 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid list",
+                            "type": "type_error.list",
                         },
                     ]
                 },

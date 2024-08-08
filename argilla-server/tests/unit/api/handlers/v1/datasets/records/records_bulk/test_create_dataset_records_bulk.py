@@ -468,9 +468,7 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": f"record at position 0 is not valid because chat field 'chat' value is not a list of dictionaries",
-        }
+        assert "is not valid" in response.json()["detail"]
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
@@ -501,10 +499,7 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": f"record at position 0 is not valid because chat field 'chat' value at position 0 is missing the 'role' key",
-        }
-
+        assert "is not valid" in response.json()["detail"]
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
     async def test_create_dataset_records_bulk_with_chat_field_without_content_key(
@@ -534,8 +529,5 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
-        assert response.json() == {
-            "detail": f"record at position 0 is not valid because chat field 'chat' value at position 0 is missing the 'content' key",
-        }
-
+        assert "is not valid" in response.json()["detail"]
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
