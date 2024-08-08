@@ -31,6 +31,7 @@ export default {
   annotationGuidelines: "Annotationsrichtlinien",
   guidelines: "Richtlinien",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
+  required: "Erforderlich",
   breadcrumbs: {
     home: "start",
     datasetSettings: "einstellungen",

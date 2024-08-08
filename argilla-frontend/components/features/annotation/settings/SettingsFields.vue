@@ -25,6 +25,13 @@
             >{{ $t("useMarkdown") }}</BaseSwitch
           >
 
+          <BaseSwitch
+            class="settings__edition-form__switch"
+            v-model="field.isRequired"
+            disabled="false"
+            >{{ $t("required") }}</BaseSwitch
+          >
+
           <div class="settings__edition-form__footer">
             <BaseButton
               type="button"
@@ -135,10 +142,8 @@ export default {
     }
 
     &__switch {
-      @include media(">desktop") {
-        :deep(label) {
-          min-width: 140px;
-        }
+      :deep(label) {
+        min-width: 140px;
       }
     }
 

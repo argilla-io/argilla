@@ -101,6 +101,13 @@
               >{{ $t("useMarkdown") }}</BaseSwitch
             >
 
+            <BaseSwitch
+              class="settings__edition-form__switch"
+              v-model="question.isRequired"
+              disabled="false"
+              >{{ $t("required") }}</BaseSwitch
+            >
+
             <div class="settings__edition-form__footer">
               <BaseButton
                 type="button"
