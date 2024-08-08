@@ -1,9 +1,17 @@
 <template>
   <div class="image_field" :key="content">
     <span class="image_field_title" v-text="title" />
-    <img v-if="!hasError" :src="content" @error="handleError()" />
+    <template v-if="!hasError">
+      <BaseSpinner v-if="!isLoaded" />
+      <img
+        v-show="isLoaded"
+        :src="content"
+        @error="handleError()"
+        @load="onLoad()"
+      />
+    </template>
     <div v-else class="image_field_placeholder">
-      <img src="~/assets/image/placeholder.svg" />
+      <img src="images/img-placeholder.svg" />
       <p v-text="$t('couldNotLoadImage')" />
     </div>
   </div>
@@ -28,11 +36,15 @@ export default {
   data() {
     return {
       hasError: false,
+      isLoaded: false,
     };
   },
   methods: {
     handleError() {
       this.hasError = true;
+    },
+    onLoad() {
+      this.isLoaded = true;
     },
   },
 };
@@ -54,6 +66,7 @@ export default {
     flex-direction: column;
     width: 100%;
     align-items: center;
+    color: $black-37;
   }
 
   img {
