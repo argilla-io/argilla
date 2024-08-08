@@ -445,6 +445,39 @@ class TestCreateDatasetRecordsBulk:
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
 
+    async def test_create_dataset_records_bulk_with_chat_field_with_value_exceeding_maximum_length(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                    "content": "a",
+                                }
+                            ]
+                            * 1000,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert "is not valid" in response.json()["detail"]
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
     async def test_create_dataset_records_bulk_with_chat_field_with_non_dicts(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):
