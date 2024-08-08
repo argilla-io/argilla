@@ -64,7 +64,9 @@ export default {
   &_placeholder {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 300px;
+    max-width: 100%;
+    margin: auto;
     align-items: center;
     color: $black-37;
   }
