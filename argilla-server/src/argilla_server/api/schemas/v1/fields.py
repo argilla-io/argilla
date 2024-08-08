@@ -75,29 +75,36 @@ class ImageFieldSettingsUpdate(BaseModel):
     type: Literal[FieldType.image]
 
 
+class ChatFieldSettings(BaseModel):
+    type: Literal[FieldType.chat]
+
+
+class ChatFieldSettingsCreate(BaseModel):
+    type: Literal[FieldType.chat]
+
+
+class ChatFieldSettingsUpdate(BaseModel):
+    type: Literal[FieldType.chat]
+
+
 FieldSettings = Annotated[
     Union[
         TextFieldSettings,
         ImageFieldSettings,
+        ChatFieldSettings,
     ],
     PydanticField(..., discriminator="type"),
 ]
 
 
 FieldSettingsCreate = Annotated[
-    Union[
-        TextFieldSettingsCreate,
-        ImageFieldSettingsCreate,
-    ],
+    Union[TextFieldSettingsCreate, ImageFieldSettingsCreate, ChatFieldSettingsCreate],
     PydanticField(..., discriminator="type"),
 ]
 
 
 FieldSettingsUpdate = Annotated[
-    Union[
-        TextFieldSettingsUpdate,
-        ImageFieldSettingsUpdate,
-    ],
+    Union[TextFieldSettingsUpdate, ImageFieldSettingsUpdate, ChatFieldSettingsUpdate],
     PydanticField(..., discriminator="type"),
 ]
 

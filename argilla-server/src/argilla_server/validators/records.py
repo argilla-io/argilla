@@ -40,6 +40,7 @@ IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES = [
     "image/svg",
     "image/webp",
 ]
+CHAT_FIELD_MAX_LENGTH = 500
 
 
 class RecordValidatorBase(ABC):
@@ -56,6 +57,7 @@ class RecordValidatorBase(ABC):
         self._validate_required_fields(dataset, fields)
         self._validate_extra_fields(dataset, fields)
         self._validate_image_fields(dataset, fields)
+        self._validate_chat_fields(dataset, fields)
 
     def _validate_metadata(self, dataset: Dataset) -> None:
         metadata = self._record_change.metadata or {}
@@ -107,6 +109,36 @@ class RecordValidatorBase(ABC):
             return self._validate_data_url(field_name, field_value, parse_result)
         else:
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+    def _validate_chat_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
+        for field in filter(lambda field: field.is_chat, dataset.fields):
+            self._validate_chat_field(field.name, fields.get(field.name))
+
+    def _validate_chat_field(self, field_name: str, field_value: Union[str, None]) -> None:
+        if field_value is None:
+            return
+
+        if len(field_value) > CHAT_FIELD_MAX_LENGTH:
+            raise UnprocessableEntityError(
+                f"chat field {field_name!r} value is exceeding the maximum length of {CHAT_FIELD_MAX_LENGTH} characters"
+            )
+
+        if not isinstance(field_value, list):
+            raise UnprocessableEntityError(f"chat field {field_name!r} value must be a list of dictionaries")
+
+        for i, value in enumerate(field_value):
+            if not isinstance(value, dict):
+                raise UnprocessableEntityError(
+                    f"chat field {field_name!r} value must be a list of dictionaries. Found a non-dictionary value at index {i}. Value is {value}"
+                )
+            if "content" not in value:
+                raise UnprocessableEntityError(
+                    f"chat field {field_name!r} value must be a list of dictionaries with a 'content' key. Missing 'content' key at index {i}. Value is {value}"
+                )
+            if "role" not in value:
+                raise UnprocessableEntityError(
+                    f"chat field {field_name!r} value must be a list of dictionaries with a 'role' key. Missing 'role' key at index {i}. Value is {value}"
+                )
 
     def _validate_web_url(
         self, field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]

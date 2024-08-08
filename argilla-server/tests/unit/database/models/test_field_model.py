@@ -23,9 +23,17 @@ class TestFieldModel:
     def test_is_text_property(self):
         assert Field(settings={"type": FieldType.text}).is_text == True
         assert Field(settings={"type": FieldType.image}).is_text == False
+        assert Field(settings={"type": FieldType.chat}).is_text == False
         assert Field(settings={}).is_text == False
 
     def test_is_image_property(self):
         assert Field(settings={"type": FieldType.image}).is_image == True
         assert Field(settings={"type": FieldType.text}).is_image == False
+        assert Field(settings={"type": FieldType.chat}).is_image == False
         assert Field(settings={}).is_image == False
+
+    def test_is_chat_property(self):
+        assert Field(settings={"type": FieldType.chat}).is_chat == True
+        assert Field(settings={"type": FieldType.text}).is_chat == False
+        assert Field(settings={"type": FieldType.image}).is_chat == False
+        assert Field(settings={}).is_chat == False
