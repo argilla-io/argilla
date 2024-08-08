@@ -15,10 +15,10 @@
 import uuid
 from datetime import datetime
 
+import pytest
 
 import argilla as rg
 from argilla import Argilla, Workspace
-import py
 
 
 def test_create_dataset(client):
