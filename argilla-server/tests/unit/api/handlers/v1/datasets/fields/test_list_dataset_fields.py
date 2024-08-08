@@ -59,6 +59,7 @@ class TestListDatasetFields:
                 },
             ]
         }
+
     async def test_list_dataset_fields_with_chat_field(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         chat_field_a = await ChatFieldFactory.create(dataset=dataset)
