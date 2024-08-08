@@ -120,7 +120,7 @@ class RecordValidatorBase(ABC):
 
         if len(field_value) > CHAT_FIELD_MAX_LENGTH:
             raise UnprocessableEntityError(
-                f"chat field {field_name!r} value is exceeding the maximum length of 5000 characters"
+                f"chat field {field_name!r} value is exceeding the maximum length of {CHAT_FIELD_MAX_LENGTH} characters"
             )
 
         if not isinstance(field_value, list):
