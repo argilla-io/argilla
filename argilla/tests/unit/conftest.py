@@ -15,17 +15,23 @@ import pytest
 
 import argilla as rg
 
-
-# @pytest.fixture(scope="function", autouse=True)
-# def mock_httpx_client(mocker) -> Generator[httpx.Client, None, None]:
-#     mock_client = mocker.Mock(httpx.Client)
-#     argilla.DEFAULT_HTTP_CLIENT = mock_client
-
-#     return mock_client
+import pytest
+from unittest.mock import patch
+from httpx import Timeout
+from argilla import Argilla
 
 
 @pytest.fixture(autouse=True)
-def mock_client():
-    # TODO: Mock the http layer
-    client = rg.Argilla(api_url="http://test_url", api_key="mock")
-    return client
+def mock_validate_connection():
+    with patch("argilla._api._client.APIClient._validate_connection") as mocked_validator:
+        yield mocked_validator
+
+
+# Example usage in a test module
+def test_create_default_client(mock_validate_connection):
+    http_client = Argilla().http_client
+
+    assert http_client is not None
+    assert http_client.base_url == "http://localhost:6900"
+    assert http_client.timeout == Timeout(60)
+    assert http_client.headers["X-Argilla-Api-Key"] == "argilla.apikey"

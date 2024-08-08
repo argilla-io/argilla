@@ -22,6 +22,7 @@ from typing import Any, List
 
 import argilla as rg
 import pytest
+from argilla._exceptions import ConflictError
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -130,7 +131,9 @@ class TestDiskImportExportMixin:
 
         with TemporaryDirectory() as temp_dir:
             output_dir = dataset.to_disk(path=temp_dir, with_records=with_records_export)
-            new_dataset = rg.Dataset.from_disk(output_dir, client=client, with_records=with_records_import)
+            new_dataset = rg.Dataset.from_disk(
+                output_dir, client=client, with_records=with_records_import, name=f"test_{uuid.uuid4()}"
+            )
 
         if with_records_export and with_records_import:
             for i, record in enumerate(new_dataset.records(with_suggestions=True)):
@@ -182,11 +185,19 @@ class TestHubImportExportMixin:
                 match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
             ):
                 new_dataset = rg.Dataset.from_hub(
-                    repo_id=repo_id, client=client, with_records=with_records_import, token=token
+                    repo_id=repo_id,
+                    client=client,
+                    with_records=with_records_import,
+                    token=token,
+                    name=f"test_{uuid.uuid4()}",
                 )
         else:
             new_dataset = rg.Dataset.from_hub(
-                repo_id=repo_id, client=client, with_records=with_records_import, token=token
+                repo_id=repo_id,
+                client=client,
+                with_records=with_records_import,
+                token=token,
+                name=f"test_{uuid.uuid4()}",
             )
 
         if with_records_import and with_records_export:
