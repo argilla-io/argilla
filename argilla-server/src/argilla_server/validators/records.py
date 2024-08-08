@@ -52,9 +52,9 @@ class RecordValidatorBase(ABC):
     def _validate_fields(cls, record: Union[RecordCreate, RecordUpdate], dataset: Dataset) -> None:
         fields = record.fields or {}
 
-        self._validate_required_fields(dataset, fields)
-        self._validate_extra_fields(dataset, fields)
-        self._validate_image_fields(dataset, fields)
+        cls._validate_required_fields(dataset, fields)
+        cls._validate_extra_fields(dataset, fields)
+        cls._validate_image_fields(dataset, fields)
 
     @staticmethod
     def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
