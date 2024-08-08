@@ -104,13 +104,13 @@ class RecordValidatorBase(ABC):
         if fields_copy:
             raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
 
-    @staticmethod
-    def _validate_image_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
+    @classmethod
+    def _validate_image_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in filter(lambda field: field.is_image, dataset.fields):
             cls._validate_image_field(field.name, fields.get(field.name))
 
-    @staticmethod
-    def _validate_image_field(field_name: str, field_value: Union[str, None]) -> None:
+    @classmethod
+    def _validate_image_field(cls, field_name: str, field_value: Union[str, None]) -> None:
         if field_value is None:
             return
 
