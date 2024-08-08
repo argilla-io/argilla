@@ -15,8 +15,6 @@
 import uuid
 from datetime import datetime
 
-import pytest
-
 import argilla as rg
 from argilla import Argilla, Workspace
 
@@ -527,7 +525,6 @@ def test_add_record_resources(client):
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8]
 
 
-@pytest.mark.skip(reason="Check if this test is still valid")
 def test_add_record_with_chat_field(client):
     user_id = client.users[0].id
     mock_dataset_name = f"test_add_record_with_chat_field{datetime.now().strftime('%Y%m%d%H%M%S')}"

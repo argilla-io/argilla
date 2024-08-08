@@ -2065,7 +2065,6 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
-        print(response.json())
         assert response.json() == {
             "detail": {
                 "code": "argilla.api.errors::ValidationError",
