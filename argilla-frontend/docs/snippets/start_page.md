@@ -17,12 +17,12 @@ Get started by publishing your first dataset.
 To work with Argilla datasets, you need to use the Argilla SDK. You can install the SDK with pip as follows:
 
 ```sh
-pip install argilla -U --pre
+pip install argilla
 ```
 
 ### 2. Connect to your Argilla server
 
-[hf_] You need to specify your `HF_TOKEN` which can be found [here](https://huggingface.co/settings/tokens).
+[hf_] If you're using a private space, check the [HF docs](https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces).
 
 ```python
 import argilla as rg

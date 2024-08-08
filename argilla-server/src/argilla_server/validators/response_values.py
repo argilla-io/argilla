@@ -36,24 +36,26 @@ from argilla_server.models import Record
 
 
 class ResponseValueValidator:
-    def __init__(self, response_value: ResponseValueTypes):
-        self._response_value = response_value
-
-    def validate_for(
-        self, question_settings: QuestionSettings, record: Record, response_status: Optional[ResponseStatus] = None
+    @classmethod
+    def validate(
+        cls,
+        response_value: ResponseValueTypes,
+        question_settings: QuestionSettings,
+        record: Record,
+        response_status: Optional[ResponseStatus] = None,
     ) -> None:
         if question_settings.type == QuestionType.text:
-            TextQuestionResponseValueValidator(self._response_value).validate()
+            TextQuestionResponseValueValidator(response_value).validate()
         elif question_settings.type == QuestionType.label_selection:
-            LabelSelectionQuestionResponseValueValidator(self._response_value).validate_for(question_settings)
+            LabelSelectionQuestionResponseValueValidator(response_value).validate_for(question_settings)
         elif question_settings.type == QuestionType.multi_label_selection:
-            MultiLabelSelectionQuestionResponseValueValidator(self._response_value).validate_for(question_settings)
+            MultiLabelSelectionQuestionResponseValueValidator(response_value).validate_for(question_settings)
         elif question_settings.type == QuestionType.rating:
-            RatingQuestionResponseValueValidator(self._response_value).validate_for(question_settings)
+            RatingQuestionResponseValueValidator(response_value).validate_for(question_settings)
         elif question_settings.type == QuestionType.ranking:
-            RankingQuestionResponseValueValidator(self._response_value).validate_for(question_settings, response_status)
+            RankingQuestionResponseValueValidator(response_value).validate_for(question_settings, response_status)
         elif question_settings.type == QuestionType.span:
-            SpanQuestionResponseValueValidator(self._response_value).validate_for(question_settings, record)
+            SpanQuestionResponseValueValidator(response_value).validate_for(question_settings, record)
         else:
             raise UnprocessableEntityError(f"unknown question type f{question_settings.type!r}")
 
