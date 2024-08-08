@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
 import { AxiosError } from "axios";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
@@ -37,12 +36,6 @@ export default ({ $axios, app }) => {
     const t = (key: string) => app.i18n.t(key);
 
     notification.clear();
-
-    switch (status) {
-      case 401: {
-        if (error instanceof ExpiredAuthSessionError) app.$auth.logout();
-      }
-    }
 
     const errorHandledKey = `validations.http.${status}.message`;
     const handledTranslatedError = t(errorHandledKey);
