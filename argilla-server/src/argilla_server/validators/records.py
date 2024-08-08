@@ -107,7 +107,7 @@ class RecordValidatorBase(ABC):
     @staticmethod
     def _validate_image_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in filter(lambda field: field.is_image, dataset.fields):
-            self._validate_image_field(field.name, fields.get(field.name))
+            cls._validate_image_field(field.name, fields.get(field.name))
 
     @staticmethod
     def _validate_image_field(field_name: str, field_value: Union[str, None]) -> None:
@@ -120,9 +120,9 @@ class RecordValidatorBase(ABC):
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
 
         if parse_result.scheme in ["http", "https"]:
-            return self._validate_web_url(field_name, field_value, parse_result)
+            return cls._validate_web_url(field_name, field_value, parse_result)
         elif parse_result.scheme in ["data"]:
-            return self._validate_data_url(field_name, field_value, parse_result)
+            return cls._validate_data_url(field_name, field_value, parse_result)
         else:
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
 
@@ -174,8 +174,7 @@ class RecordUpdateValidator(RecordValidatorBase):
     def _validate_duplicated_suggestions(record: RecordUpdate):
         if not record.suggestions:
             return
-
-        question_ids = [s.question_id for s in self._record_change.suggestions]
+        question_ids = [s.question_id for s in record.suggestions]
         if len(question_ids) != len(set(question_ids)):
             raise UnprocessableEntityError("found duplicate suggestions question IDs")
 
