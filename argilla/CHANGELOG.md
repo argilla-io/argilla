@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added test mock for ArgillaAPI validation step so that the validation method is mocked instead of the entire API.
+
 ## [2.0.0](https://github.com/argilla-io/argilla/compare/v2.0.0rc1...v2.0.0)
 
 ### Added

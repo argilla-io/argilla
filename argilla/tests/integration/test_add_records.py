@@ -48,16 +48,19 @@ def test_add_records(client):
     mock_data = [
         {
             "text": "Hello World, how are you?",
+            "image": "http://mock.image.url/image",
             "label": "positive",
             "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
+            "image": "http://mock.image.url/image",
             "label": "negative",
             "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
+            "image": "http://mock.image.url/image",
             "label": "positive",
             "id": uuid.uuid4(),
         },
@@ -65,6 +68,7 @@ def test_add_records(client):
     settings = rg.Settings(
         fields=[
             rg.TextField(name="text"),
+            rg.ImageField(name="image", required=True),
         ],
         questions=[
             rg.TextQuestion(name="comment", use_markdown=False),
@@ -286,9 +290,7 @@ def test_add_records_with_responses_and_suggestions(client, username: str) -> No
         },
     ]
     settings = rg.Settings(
-        fields=[
-            rg.TextField(name="text"),
-        ],
+        fields=[rg.TextField(name="text")],
         questions=[
             rg.LabelQuestion(name="label", labels=["positive", "negative"]),
         ],

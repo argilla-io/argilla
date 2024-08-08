@@ -34,7 +34,6 @@
 import { useTextFieldViewModel } from "./useTextFieldViewModel";
 
 export default {
-  name: "TextFieldComponent",
   props: {
     name: {
       type: String,

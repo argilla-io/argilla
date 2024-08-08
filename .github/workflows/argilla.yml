@@ -21,7 +21,7 @@ jobs:
   build:
     services:
       argilla-server:
-        image: argilladev/argilla-server:develop
+        image: argilladev/argilla-server:pr-5279
         ports:
           - 6900:6900
         env:

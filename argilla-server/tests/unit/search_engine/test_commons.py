@@ -65,6 +65,7 @@ from tests.factories import (
     UserFactory,
     VectorFactory,
     VectorSettingsFactory,
+    ImageFieldFactory,
 )
 
 
@@ -362,8 +363,10 @@ class TestBaseElasticAndOpenSearchEngine:
         opensearch: OpenSearch,
         db: Session,
     ):
-        text_fields = await TextFieldFactory.create_batch(5)
-        dataset = await DatasetFactory.create(fields=text_fields)
+        text_fields = await TextFieldFactory.create_batch(2)
+        image_fields = await ImageFieldFactory.create_batch(2)
+
+        dataset = await DatasetFactory.create(fields=text_fields + image_fields)
 
         await refresh_dataset(dataset)
 
@@ -375,12 +378,18 @@ class TestBaseElasticAndOpenSearchEngine:
         index = opensearch.indices.get(index=index_name)[index_name]
         assert index["mappings"] == {
             "dynamic": "strict",
+            "_source": {"excludes": [f"fields.{field.name}" for field in image_fields]},
             "properties": {
                 "id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
-                "fields": {"properties": {field.name: {"type": "text"} for field in dataset.fields}},
+                "fields": {
+                    "properties": {
+                        **{field.name: {"type": "text"} for field in text_fields},
+                        **{field.name: {"type": "object", "enabled": False} for field in image_fields},
+                    }
+                },
                 "metadata": {"dynamic": "false", "type": "object"},
                 "responses": {
                     "dynamic": "strict",
@@ -872,11 +881,20 @@ class TestBaseElasticAndOpenSearchEngine:
 
     async def test_index_records(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
-        dataset = await DatasetFactory.create(fields=text_fields, questions=[])
+        image_fields = await ImageFieldFactory.create_batch(5)
+
+        dataset = await DatasetFactory.create(fields=text_fields + image_fields, questions=[])
+
+        record_text_fields = {field.name: f"This is the value for {field.name}" for field in text_fields}
+        record_image_fields = {field.name: f"https://random.url/{field.name}" for field in image_fields}
+
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
-            fields={field.name: f"This is the value for {field.name}" for field in text_fields},
+            fields={
+                **record_text_fields,
+                **record_image_fields,
+            },
             responses=[],
         )
 
@@ -893,7 +911,7 @@ class TestBaseElasticAndOpenSearchEngine:
             {
                 "id": str(record.id),
                 "status": RecordStatus.pending,
-                "fields": record.fields,
+                "fields": record_text_fields,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
             }
