@@ -9,7 +9,7 @@
         settings,
         isTextType,
         isChatType,
-     , isTextType } in fields"
+      } in fields"
       :key="id"
     >
       <SpanAnnotationTextField
