@@ -18,7 +18,7 @@
       >
         <span v-text="role" />
 
-        <p v-text="content" />
+        <MarkdownRenderer :markdown="content" />
       </span>
     </div>
   </div>
