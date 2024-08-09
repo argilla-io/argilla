@@ -25,15 +25,15 @@
             <div class="wrapper__records__header">
               <PaginationFeedbackTask :recordCriteria="recordCriteria" />
             </div>
+            <div v-if="recordsMessage" class="wrapper--empty">
+              <p class="wrapper__text --heading3" v-text="recordsMessage" />
+            </div>
             <Record
-              v-if="records.hasRecordsToAnnotate"
+              v-else
               :datasetVectors="datasetVectors"
               :recordCriteria="recordCriteria"
               :record="record"
             />
-            <div v-else class="wrapper--empty">
-              <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-            </div>
           </section>
         </template>
         <template #downHeader>
@@ -119,7 +119,7 @@ export default {
     record: {
       type: Object,
     },
-    noRecordsMessage: {
+    recordsMessage: {
       type: String,
       required: true,
     },

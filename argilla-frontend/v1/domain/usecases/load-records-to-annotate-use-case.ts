@@ -10,7 +10,7 @@ export class LoadRecordsToAnnotateUseCase {
     private readonly recordsStorage: IRecordStorage
   ) {}
 
-  async load(criteria: RecordCriteria): Promise<void> {
+  async load(criteria: RecordCriteria) {
     const { page } = criteria;
 
     let newRecords = await this.getRecords.execute(criteria);
@@ -33,6 +33,8 @@ export class LoadRecordsToAnnotateUseCase {
     criteria.commit();
 
     this.recordsStorage.save(newRecords);
+
+    return newRecords;
   }
 
   async paginate(criteria: RecordCriteria) {
