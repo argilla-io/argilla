@@ -28,4 +28,3 @@ workspace = client.workspaces("my_workspace")
 ::: src.argilla.workspaces._resource.Workspace
     options:
         heading_level: 4
-        show_root_toc_entry: false
