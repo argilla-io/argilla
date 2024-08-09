@@ -42,9 +42,9 @@ class VectorField(Resource):
         """Vector field for use in Argilla `Dataset` `Settings`
 
         Parameters:
-            name (str): The name of the field
+            name (str): The name of the vector field
             dimensions (int): The number of dimensions in the vector
-            title (Optional[str], optional): The title of the field. Defaults to None.
+            title (Optional[str]): The title of the vector to be shown in the UI.
         """
         client = _client or Argilla._get_default()
         super().__init__(api=client.api.vectors, client=client)

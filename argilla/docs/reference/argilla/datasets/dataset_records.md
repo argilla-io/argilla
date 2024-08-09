@@ -218,6 +218,3 @@ Check out the [`rg.Record`](../records/records.md) class reference for more info
 ##  `rg.Dataset.records`
 
 ::: src.argilla.records._dataset_records.DatasetRecords
-    options:
-        heading_level: 3
-        show_root_toc_entry: false

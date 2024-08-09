@@ -53,6 +53,7 @@ class Workspace(Resource):
             client (Argilla): The client used to interact with Argilla
             name (str): The name of the workspace
             id (UUID): The id of the workspace
+
         Returns:
             Workspace: The initialized workspace object
         """
@@ -126,7 +127,6 @@ class Workspace(Resource):
 
         Returns:
             WorkspaceUsers: A list of all users in the workspace
-
         """
         return WorkspaceUsers(workspace=self)
 

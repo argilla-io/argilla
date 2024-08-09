@@ -23,8 +23,8 @@ class OverlapTaskDistribution:
 
     This task distribution defines a number of submitted responses required to complete a record.
 
-    Args:
-         min_submitted (int): The number of min. submitted responses to complete the record
+    Parameters:
+        min_submitted (int): The number of min. submitted responses to complete the record
     """
 
     strategy: Literal["overlap"] = "overlap"

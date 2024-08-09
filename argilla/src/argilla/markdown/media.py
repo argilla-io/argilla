@@ -175,8 +175,10 @@ def video_to_html(
         The HTML tag with embedded base64 data.
 
     Examples:
-        >>> from argilla.markdown import video_to_html
-        >>> html = video_to_html("my_video.mp4", width="300px", height="300px", autoplay=True, loop=True)
+        ```python
+        from argilla.markdown import video_to_html
+        html = video_to_html("my_video.mp4", width="300px", height="300px", autoplay=True, loop=True)
+        ```
     """
     return _media_to_html("video", file_source, file_type, width, height, autoplay, loop)
 
@@ -204,8 +206,10 @@ def audio_to_html(
         The HTML tag with embedded base64 data.
 
     Examples:
-        >>> from argilla.markdown import audio_to_html
-        >>> html = audio_to_html("my_audio.mp3", width="300px", height="300px", autoplay=True, loop=True)
+        ```python
+        from argilla.markdown import audio_to_html
+        html = audio_to_html("my_audio.mp3", width="300px", height="300px", autoplay=True, loop=True)
+        ```
     """
     return _media_to_html("audio", file_source, file_type, width, height, autoplay, loop)
 
@@ -229,8 +233,10 @@ def image_to_html(
         The HTML tag with embedded base64 data.
 
     Examples:
-        >>> from argilla.markdown import image_to_html
-        >>> html = image_to_html("my_image.png", width="300px", height="300px")
+        ```python
+        from argilla.markdown import image_to_html
+        html = image_to_html("my_image.png", width="300px", height="300px")
+        ```
     """
     return _media_to_html("image", file_source, file_type, width, height)
 
@@ -253,8 +259,10 @@ def pdf_to_html(
         ValueError: If the width and height are not pixel or percentage.
 
     Examples:
-        >>> from argilla.markdown import pdf_to_html
-        >>> html = pdf_to_html("my_pdf.pdf", width="300px", height="300px")
+        ```python
+        from argilla.markdown import pdf_to_html
+        html = pdf_to_html("my_pdf.pdf", width="300px", height="300px")
+        ```
     """
     if not _is_valid_dimension(width) or not _is_valid_dimension(height):
         raise ValueError("Width and height must be valid pixel (e.g., '300px') or percentage (e.g., '50%') values.")
