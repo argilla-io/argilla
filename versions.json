@@ -37,6 +37,14 @@
     }
   },
   {
+    "version": "docs_add-llamaindex-tutorial",
+    "title": "docs_add-llamaindex-tutorial",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
