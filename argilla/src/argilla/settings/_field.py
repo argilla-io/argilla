@@ -17,8 +17,7 @@ from typing import Optional, Union, TYPE_CHECKING
 from argilla import Argilla
 from argilla._api import FieldsAPI
 from argilla._exceptions import ArgillaError
-from argilla._models import FieldModel, TextFieldSettings
-from argilla._models._settings._fields import ImageFieldSettings, FieldSettings
+from argilla._models import FieldModel, TextFieldSettings, ChatFieldSettings, ImageFieldSettings, FieldSettings
 from argilla.settings._common import SettingsPropertyBase
 from argilla.settings._metadata import MetadataField, MetadataType
 from argilla.settings._vector import VectorField
@@ -31,7 +30,7 @@ except ImportError:
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-__all__ = ["Field", "TextField", "ImageField"]
+__all__ = ["Field", "TextField", "ImageField", "ChatField"]
 
 
 class AbstractField(ABC, SettingsPropertyBase):
@@ -158,7 +157,38 @@ class ImageField(AbstractField):
         )
 
 
-Field = Union[TextField, ImageField]
+class ChatField(AbstractField):
+    """Chat field for use in Argilla `Dataset` `Settings`"""
+
+    def __init__(
+        self,
+        name: str,
+        title: Optional[str] = None,
+        required: Optional[bool] = True,
+        description: Optional[str] = None,
+        _client: Optional[Argilla] = None,
+    ) -> None:
+        """
+        Chat field for use in Argilla `Dataset` `Settings`
+
+        Parameters:
+            name (str): The name of the field
+            title (Optional[str], optional): The title of the field. Defaults to None.
+            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            description (Optional[str], optional): The description of the field. Defaults to None.
+        """
+
+        super().__init__(
+            name=name,
+            title=title,
+            required=required,
+            description=description,
+            settings=ChatFieldSettings(),
+            _client=_client,
+        )
+
+
+Field = Union[TextField, ImageField, ChatField]
 
 
 def _field_from_model(model: FieldModel) -> Field:
@@ -166,6 +196,8 @@ def _field_from_model(model: FieldModel) -> Field:
         return TextField.from_model(model)
     elif model.settings.type == "image":
         return ImageField.from_model(model)
+    elif model.settings.type == "chat":
+        return ChatField.from_model(model)
     else:
         raise ArgillaError(f"Unsupported field type: {model.settings.type}")
 
@@ -178,6 +210,8 @@ def _field_from_dict(data: dict) -> Union[Field, VectorField, MetadataType]:
         return TextField.from_dict(data)
     elif field_type == "image":
         return ImageField.from_dict(data)
+    elif field_type == "chat":
+        return ChatField.from_dict(data)
     elif field_type == "vector":
         return VectorField.from_dict(data)
     elif field_type == "metadata":
