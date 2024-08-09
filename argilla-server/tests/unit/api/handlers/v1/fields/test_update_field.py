@@ -22,7 +22,7 @@ from uuid import UUID
 
 from argilla_server.enums import FieldType
 
-from tests.factories import ImageFieldFactory
+from tests.factories import ImageFieldFactory, ChatFieldFactory
 
 
 @pytest.mark.asyncio
@@ -51,4 +51,27 @@ class TestUpdateField:
             "dataset_id": str(image_field.dataset_id),
             "inserted_at": image_field.inserted_at.isoformat(),
             "updated_at": image_field.updated_at.isoformat(),
+        }
+
+    async def test_update_chat_field(self, async_client: AsyncClient, owner_auth_header: dict):
+        chat_field = await ChatFieldFactory.create()
+
+        response = await async_client.patch(
+            self.url(chat_field.id),
+            headers=owner_auth_header,
+            json={
+                "title": "Updated title",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(chat_field.id),
+            "name": chat_field.name,
+            "title": "Updated title",
+            "required": False,
+            "settings": {"type": FieldType.chat},
+            "dataset_id": str(chat_field.dataset_id),
+            "inserted_at": chat_field.inserted_at.isoformat(),
+            "updated_at": chat_field.updated_at.isoformat(),
         }

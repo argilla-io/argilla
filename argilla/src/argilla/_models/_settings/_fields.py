@@ -31,11 +31,12 @@ class ImageFieldSettings(BaseModel):
     type: Literal["image"] = "image"
 
 
+class ChatFieldSettings(BaseModel):
+    type: Literal["chat"] = "chat"
+
+
 FieldSettings = Annotated[
-    Union[
-        TextFieldSettings,
-        ImageFieldSettings,
-    ],
+    Union[TextFieldSettings, ImageFieldSettings, ChatFieldSettings],
     Field(..., discriminator="type"),
 ]
 

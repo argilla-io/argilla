@@ -3,7 +3,7 @@ import DatasetDescriptionReadOnly from "./DatasetDescriptionReadOnly";
 
 let wrapper = null;
 const options = {
-  stubs: ["RenderMarkdownBaseComponent"],
+  stubs: ["MarkdownRenderer"],
   propsData: {
     guidelines: "Lorem ipsum",
   },

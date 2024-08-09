@@ -7,7 +7,7 @@
     :tabindex="isEditionModeActive ? '-1' : '0'"
     @keydown.shift.enter.exact.prevent="onEditMode"
   >
-    <RenderMarkdownBaseComponent
+    <MarkdownRenderer
       v-if="question.settings.use_markdown && !isEditionModeActive"
       class="textarea--markdown"
       :markdown="question.answer.value"

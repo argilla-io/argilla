@@ -34,7 +34,9 @@ from argilla._models._search import (
 from argilla._models._settings._fields import (
     FieldModel,
     TextFieldSettings,
-    FieldModel,
+    ImageFieldSettings,
+    ChatFieldSettings,
+    FieldSettings,
 )
 from argilla._models._settings._questions import (
     LabelQuestionModel,

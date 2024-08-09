@@ -34,7 +34,7 @@ export default {
     return {
       tabs: [
         { id: "0", name: "Write", component: "ContentEditableFeedbackTask" },
-        { id: "1", name: "Preview", component: "RenderMarkdownBaseComponent" },
+        { id: "1", name: "Preview", component: "MarkdownRenderer" },
       ],
     };
   },

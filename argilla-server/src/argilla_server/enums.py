@@ -18,6 +18,7 @@ from enum import Enum
 class FieldType(str, Enum):
     text = "text"
     image = "image"
+    chat = "chat"
 
 
 class ResponseStatus(str, Enum):

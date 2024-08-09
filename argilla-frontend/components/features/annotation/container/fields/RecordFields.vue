@@ -1,7 +1,15 @@
 <template>
   <div class="fields">
     <div
-      v-for="{ id, name, title, content, settings, isTextType } in fields"
+      v-for="{
+        id,
+        name,
+        title,
+        content,
+        settings,
+        isTextType,
+        isChatType,
+      } in fields"
       :key="id"
     >
       <SpanAnnotationTextField
@@ -20,6 +28,12 @@
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
         :searchText="recordCriteria.committed.searchText.value.text"
+      />
+      <ChatField
+        v-else-if="isChatType"
+        :name="name"
+        :title="title"
+        :content="content"
       />
       <ImageField v-else :name="name" :title="title" :content="content" />
     </div>

@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 import uuid
 from datetime import datetime
-
 
 import argilla as rg
 from argilla import Argilla, Workspace
@@ -525,6 +523,60 @@ def test_add_record_resources(client):
     assert dataset_records[2].suggestions["label"].score == 0.9
     assert dataset_records[2].suggestions["topics"].value == ["topic1", "topic2"]
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8]
+
+
+def test_add_record_with_chat_field(client):
+    user_id = client.users[0].id
+    mock_dataset_name = f"test_add_record_with_chat_field{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    mock_resources = [
+        rg.Record(
+            fields={
+                "chat": [
+                    {
+                        "role": "user",
+                        "content": "Hello World, how are you?",
+                    },
+                    {
+                        "role": "bot",
+                        "content": "I'm doing great, thank you!",
+                    },
+                ]
+            },
+        ),
+        rg.Record(
+            fields={
+                "chat": [
+                    {
+                        "role": "user",
+                        "content": "Hello World, how are you?",
+                    },
+                    {
+                        "role": "bot",
+                        "content": "I'm doing great, thank you!",
+                    },
+                ]
+            },
+        ),
+    ]
+    settings = rg.Settings(
+        fields=[
+            rg.ChatField(name="chat", required=True),
+        ],
+        questions=[
+            rg.TextQuestion(name="comment", use_markdown=False),
+        ],
+    )
+    dataset = rg.Dataset(
+        name=mock_dataset_name,
+        settings=settings,
+        client=client,
+    )
+    dataset.create()
+    dataset.records.log(records=mock_resources)
+
+    dataset_records = list(dataset.records)
+
+    assert dataset.name == mock_dataset_name
 
 
 def test_add_records_with_responses_and_same_schema_name(client: Argilla, username: str):

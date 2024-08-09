@@ -4,7 +4,7 @@
       class="--heading5 --medium description__title"
       v-text="$t('annotationGuidelines')"
     />
-    <RenderMarkdownBaseComponent
+    <MarkdownRenderer
       class="--body1 description__text"
       :class="{ '--light': isColorLight }"
       :markdown="sanitizedDescription"
