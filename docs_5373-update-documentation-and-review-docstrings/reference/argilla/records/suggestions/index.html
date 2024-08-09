@@ -1637,9 +1637,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.argilla.suggestions.Suggestion.agent" class="md-nav__link">
+  <a href="#src.argilla.suggestions.Suggestion.value" class="md-nav__link">
     <span class="md-ellipsis">
-      agent
+      value
     </span>
   </a>
   
@@ -1655,15 +1655,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.argilla.suggestions.Suggestion.score" class="md-nav__link">
-    <span class="md-ellipsis">
-      score
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#src.argilla.suggestions.Suggestion.type" class="md-nav__link">
     <span class="md-ellipsis">
       type
@@ -1673,9 +1664,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.argilla.suggestions.Suggestion.value" class="md-nav__link">
+  <a href="#src.argilla.suggestions.Suggestion.score" class="md-nav__link">
     <span class="md-ellipsis">
-      value
+      score
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.argilla.suggestions.Suggestion.agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      agent
     </span>
   </a>
   
@@ -2213,9 +2213,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#src.argilla.suggestions.Suggestion.agent" class="md-nav__link">
+  <a href="#src.argilla.suggestions.Suggestion.value" class="md-nav__link">
     <span class="md-ellipsis">
-      agent
+      value
     </span>
   </a>
   
@@ -2231,15 +2231,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.argilla.suggestions.Suggestion.score" class="md-nav__link">
-    <span class="md-ellipsis">
-      score
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#src.argilla.suggestions.Suggestion.type" class="md-nav__link">
     <span class="md-ellipsis">
       type
@@ -2249,9 +2240,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#src.argilla.suggestions.Suggestion.value" class="md-nav__link">
+  <a href="#src.argilla.suggestions.Suggestion.score" class="md-nav__link">
     <span class="md-ellipsis">
-      value
+      score
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.argilla.suggestions.Suggestion.agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      agent
     </span>
   </a>
   
@@ -2756,20 +2756,19 @@ Suggestions are rendered in the user interfaces as 'hints' or 'suggestions' for 
 
 
 
-<h3 id="src.argilla.suggestions.Suggestion.agent" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">agent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
+<h3 id="src.argilla.suggestions.Suggestion.value" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">value</span><span class="p">:</span> <span class="n">Any</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-property"><code>property</code></small>
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
-<a href="#src.argilla.suggestions.Suggestion.agent" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.suggestions.Suggestion.value" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>The agent that created the suggestion.</p>
+      <p>The value of the suggestion.</p>
     </div>
 
 </div>
@@ -2800,6 +2799,27 @@ Suggestions are rendered in the user interfaces as 'hints' or 'suggestions' for 
 
 
 
+<h3 id="src.argilla.suggestions.Suggestion.type" class="doc doc-heading">
+            <code class="highlight language-python"><span class="nb">type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;human&#39;</span><span class="p">]]</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#src.argilla.suggestions.Suggestion.type" class="headerlink" title="Permanent link">&para;</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+      <p>The type of suggestion, either 'model' or 'human'.</p>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h3 id="src.argilla.suggestions.Suggestion.score" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">score</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span></code>
 
@@ -2822,40 +2842,20 @@ Suggestions are rendered in the user interfaces as 'hints' or 'suggestions' for 
 
 
 
-<h3 id="src.argilla.suggestions.Suggestion.type" class="doc doc-heading">
-            <code class="highlight language-python"><span class="nb">type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;human&#39;</span><span class="p">]]</span></code>
+<h3 id="src.argilla.suggestions.Suggestion.agent" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">agent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
-<a href="#src.argilla.suggestions.Suggestion.type" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#src.argilla.suggestions.Suggestion.agent" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
     <div class="doc doc-contents ">
 
-      <p>The type of suggestion, either 'model' or 'human'.</p>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
-<h3 id="src.argilla.suggestions.Suggestion.value" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">value</span><span class="p">:</span> <span class="n">Any</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a href="#src.argilla.suggestions.Suggestion.value" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-      <p>The value of the suggestion.</p>
+      <p>The agent that created the suggestion.</p>
     </div>
 
 </div>
