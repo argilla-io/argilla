@@ -1,8 +1,8 @@
 import { shallowMount } from "@vue/test-utils";
-import RenderMarkdownBaseComponent from "./RenderMarkdown.base.component";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 const options = {
-  components: { RenderMarkdownBaseComponent },
+  components: { MarkdownRenderer },
   propsData: {
     markdown: "# example<script><TABLE> \n\n",
   },
@@ -13,17 +13,17 @@ const options = {
   },
 };
 
-describe("RenderMarkdownBaseComponent", () => {
+describe("MarkdownRenderer", () => {
   it("prevent render not allowed tags", async () => {
-    const wrapper = shallowMount(RenderMarkdownBaseComponent, options);
+    const wrapper = shallowMount(MarkdownRenderer, options);
     expect(wrapper.html().includes("<script>")).toBe(false);
   });
   it("prevent render unsanitized html", async () => {
-    const wrapper = shallowMount(RenderMarkdownBaseComponent, options);
+    const wrapper = shallowMount(MarkdownRenderer, options);
     expect(wrapper.html().includes("<TABLE>")).toBe(false);
   });
   it("render correct html", () => {
-    const wrapper = shallowMount(RenderMarkdownBaseComponent, options);
+    const wrapper = shallowMount(MarkdownRenderer, options);
     expect(wrapper.html()).toBe(
       `<div class="markdown-render --ltr">
   <h1>example</h1>
@@ -31,10 +31,11 @@ describe("RenderMarkdownBaseComponent", () => {
     );
   });
   it("add viewBox for svg", () => {
-    const wrapper = shallowMount(RenderMarkdownBaseComponent, {
+    const wrapper = shallowMount(MarkdownRenderer, {
       ...options,
       propsData: {
-        markdown: `<svg height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>`,
+        markdown:
+          '<svg height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>',
       },
     });
     expect(wrapper.html()).toBe(
@@ -46,10 +47,11 @@ describe("RenderMarkdownBaseComponent", () => {
     );
   });
   it("not add viewBox for svg if it has defined a viewport", () => {
-    const wrapper = shallowMount(RenderMarkdownBaseComponent, {
+    const wrapper = shallowMount(MarkdownRenderer, {
       ...options,
       propsData: {
-        markdown: `<svg height="100" width="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>`,
+        markdown:
+          '<svg height="100" width="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" /></svg>',
       },
     });
     expect(wrapper.html()).toBe(
@@ -62,10 +64,10 @@ describe("RenderMarkdownBaseComponent", () => {
   });
 
   it("open in other window if the node is a link", () => {
-    const wrapper = shallowMount(RenderMarkdownBaseComponent, {
+    const wrapper = shallowMount(MarkdownRenderer, {
       ...options,
       propsData: {
-        markdown: `[example](https://example.com)`,
+        markdown: "[example](https://example.com)",
       },
     });
     expect(wrapper.html()).toBe(
@@ -76,10 +78,10 @@ describe("RenderMarkdownBaseComponent", () => {
   });
 
   it("open in other window if the node already hace target blank", () => {
-    const wrapper = shallowMount(RenderMarkdownBaseComponent, {
+    const wrapper = shallowMount(MarkdownRenderer, {
       ...options,
       propsData: {
-        markdown: `<a href="https://example.com" target="_blank">example</a>`,
+        markdown: '<a href="https://example.com" target="_blank">example</a>',
       },
     });
     expect(wrapper.html()).toBe(

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <RenderMarkdownBaseComponent
+    <MarkdownRenderer
       class="textarea--markdown"
       :markdown="question.suggestion?.value"
     />
