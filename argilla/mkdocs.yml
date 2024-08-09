@@ -127,19 +127,27 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          selection:
-            inherited_members: true # Allow looking up inherited methods
-          rendering:
-            show_root_toc_entry: true
-            show_root_heading: true # actually display anything at all...
-            # show_root_full_path: true  # display "diffrax.asdf" not just "asdf"
-            show_if_no_docstring: true
-            show_signature_annotations: true
-            show_source: false # don't include source code
+          options:
+            show_inheritance_diagram: false
+            show_source: true # include source code
+            # Headings
+            heading_level: 3
+            show_root_heading: false # show the python path of the class
+            show_root_toc_entry: false # show the toc entry for the root class
+            show_root_full_path: false # display "diffrax.asdf" not just "asdf"
+            show_object_full_path: false # display "diffrax.asdf" not just "asdf"
+            show_symbol_type_heading: false
+            show_symbol_type_toc: false
+            # Members
+            inherited_members: true # allow looking up inherited methods
             members_order: source # order methods according to their order of definition in the source code, not alphabetical order
-            heading_level: 4
-            # hide private members
-            private: true
+            show_labels : true
+            # Docstring
+            docstring_style: google  # more info: https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+            show_if_no_docstring: false
+            # Signature
+            separate_signature: false
+            show_signature_annotations: false
   - social
   - mknotebooks
 
