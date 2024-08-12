@@ -37,6 +37,14 @@
     }
   },
   {
+    "version": "docs_image-field-docs",
+    "title": "docs_image-field-docs",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_add-llamaindex-tutorial",
     "title": "docs_add-llamaindex-tutorial",
     "aliases": [],
