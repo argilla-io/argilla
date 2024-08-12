@@ -20,6 +20,7 @@ These are the section headers that we use:
 
 - Fixed error when creating optional fields. ([#5362](https://github.com/argilla-io/argilla/pull/5362))
 - Fixed error creating integer and float metadata with `visible_for_annotators`. ([#5364](https://github.com/argilla-io/argilla/pull/5364))
+- Fixed error when logging records with `suggestions` or `responses` for non-existent questions. ([#5396](https://github.com/argilla-io/argilla/pull/5396))
 
 ### Changed
 
