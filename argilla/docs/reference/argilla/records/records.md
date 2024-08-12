@@ -29,7 +29,7 @@ To create records with image fields, pass the the remote url or data uri of the 
 dataset.records.log(
     records=[
         rg.Record(
-            fields={"image": "https://example.com/image.jpg"}, # (1) 
+            fields={"image": "https://example.com/image.jpg"}, # (1)
         ),
     ]
 )
