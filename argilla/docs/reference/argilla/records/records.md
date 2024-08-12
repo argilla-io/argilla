@@ -23,6 +23,21 @@ dataset.records.log(
 
 1. The Argilla dataset contains a field named `text` matching the key here.
 
+To create records with image fields, pass the the remote url or data uri of the image to records object. The field names must be defined as an `rg.ImageField`in the dataset's `Settings` object to be accepted.
+
+```python
+dataset.records.log(
+    records=[
+        rg.Record(
+            fields={"image": "https://example.com/image.jpg"}, # (1) 
+        ),
+    ]
+)
+```
+
+1. The image can be referenced as either a remote url or a data uri.
+
+
 ### Accessing Record Attributes
 
 The `Record` object has suggestions, responses, metadata, and vectors attributes that can be accessed directly whilst iterating over records in a dataset.
