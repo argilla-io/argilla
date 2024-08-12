@@ -39,6 +39,18 @@ export default {
   taskDistributionTooltip:
     "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
+  noRecordsMessages: {
+    datasetEmpty:
+      "The dataset is empty, start to upload records (include code snippet for admin/owner) / come back soon (annotator)",
+    taskDistributionCompleted: "🎉 The task is completed!",
+    noDraftRecords:
+      "You have no records with draft responses / You have no records in draft",
+    noSubmittedRecords: "You have not submitted any record yet",
+    noRecordsFound: "You have no {status} records matching your query",
+    noRecords: "You have no {status} records",
+    noPendingRecordsToAnnotate: "🎉 Your have no pending records to annotate",
+    noDraftRecordsToReview: "You have no draft records to review",
+  },
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",

@@ -4,6 +4,13 @@ import SvgIcon from "vue-svgicon";
 import { config } from "@vue/test-utils";
 import nuxtConfig from "./nuxt.config";
 
+const translationMock = (key, ...params) =>
+  params.length ? `#${key}.${params}#` : `#${key}#`;
+
+jest.mock("~/v1/infrastructure/services/useTranslate", () => ({
+  useTranslate: () => translationMock,
+}));
+
 Vue.use(SvgIcon);
 Vue.directive("click-outside", {});
 Vue.config.devtools = false;
@@ -53,7 +60,7 @@ const buildNuxt = async () => {
 };
 
 config.mocks = {
-  $t: (key) => `#${key}#`,
+  $t: translationMock,
   $language: {
     isRTL: () => false,
   },

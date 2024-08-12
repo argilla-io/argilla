@@ -76,7 +76,7 @@ describe("useRecordsMessages", () => {
       const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
       expect(getMessagesForLoading(records)).toBe(
-        "The dataset is empty, start to upload records (include code snippet for admin/owner) / come back soon (annotator)"
+        "#noRecordsMessages.datasetEmpty#"
       );
     });
 
@@ -90,7 +90,9 @@ describe("useRecordsMessages", () => {
 
       const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
-      expect(getMessagesForLoading(records)).toBe("🎉 The task is completed!");
+      expect(getMessagesForLoading(records)).toBe(
+        "#noRecordsMessages.taskDistributionCompleted#"
+      );
     });
 
     test.each(["pending", "draft", "submitted", "discarded"])(
@@ -106,7 +108,7 @@ describe("useRecordsMessages", () => {
         const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
         expect(getMessagesForLoading(records)).toBe(
-          `You have no ${status} records matching your query`
+          `#noRecordsMessages.noRecordsFound.${status}#`
         );
       }
     );
@@ -122,7 +124,7 @@ describe("useRecordsMessages", () => {
       const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
       expect(getMessagesForLoading(records)).toBe(
-        "You have no records with draft responses / You have no records in draft"
+        "#noRecordsMessages.noDraftRecords#"
       );
     });
 
@@ -137,7 +139,7 @@ describe("useRecordsMessages", () => {
       const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
       expect(getMessagesForLoading(records)).toBe(
-        "You have not submitted any record yet"
+        "#noRecordsMessages.noSubmittedRecords#"
       );
     });
 
@@ -154,7 +156,7 @@ describe("useRecordsMessages", () => {
         const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
         expect(getMessagesForLoading(records)).toBe(
-          `You have no ${status} records`
+          `#noRecordsMessages.noRecords.${status}#`
         );
       }
     );
@@ -183,7 +185,9 @@ describe("useRecordsMessages", () => {
 
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
-      expect(getMessageForPagination(true)).toBe("🎉 The task is completed!");
+      expect(getMessageForPagination(true)).toBe(
+        "#noRecordsMessages.taskDistributionCompleted#"
+      );
     });
 
     test("return 'No have pending records' when pending queue is empty", () => {
@@ -196,7 +200,7 @@ describe("useRecordsMessages", () => {
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
       expect(getMessageForPagination(false)).toBe(
-        "🎉 Your have no pending records to annotate"
+        "#noRecordsMessages.noPendingRecordsToAnnotate#"
       );
     });
 
@@ -210,7 +214,7 @@ describe("useRecordsMessages", () => {
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
       expect(getMessageForPagination(false)).toBe(
-        "Your have no draft records to review"
+        "#noRecordsMessages.noDraftRecordsToReview#"
       );
     });
 
@@ -224,7 +228,7 @@ describe("useRecordsMessages", () => {
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
       expect(getMessageForPagination(false)).toBe(
-        "You have no discarded records"
+        "#noRecordsMessages.noRecords.discarded#"
       );
     });
 
