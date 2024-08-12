@@ -28,6 +28,4 @@ settings = rg.Settings(
 
 ---
 
-## `rg.VectorField`
-
 ::: src.argilla.settings._vector.VectorField

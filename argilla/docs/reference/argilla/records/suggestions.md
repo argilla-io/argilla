@@ -152,8 +152,5 @@ Depending on the `Question` type, responses might need to be formatted in a slig
 
 ---
 
-## `rg.Suggestion`
-
 ::: src.argilla.suggestions.Suggestion
-    options:
-        heading_level: 3
+

@@ -44,6 +44,4 @@ for dataset in my_workspace.datasets:
 
 ---
 
-##  `rg.Argilla`
-
 ::: src.argilla.client.Argilla

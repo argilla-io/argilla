@@ -35,6 +35,5 @@ data = rg.Dataset(
 
 ---
 
-## `rg.TextField`
 
 ::: src.argilla.settings._field.TextField

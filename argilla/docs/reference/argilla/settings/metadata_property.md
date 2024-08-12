@@ -62,16 +62,8 @@ dataset = rg.Dataset(
 
 ---
 
-## `rg.FloatMetadataProperty`
-
 ::: src.argilla.settings._metadata.FloatMetadataProperty
 
-
-## `rg.IntegerMetadataProperty`
-
 ::: src.argilla.settings._metadata.IntegerMetadataProperty
-
-
-## `rg.TermsMetadataProperty`
 
 ::: src.argilla.settings._metadata.TermsMetadataProperty

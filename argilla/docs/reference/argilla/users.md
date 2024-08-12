@@ -28,6 +28,4 @@ client.me
 
 ---
 
-##  `rg.User`
-
 ::: src.argilla.users._resource.User

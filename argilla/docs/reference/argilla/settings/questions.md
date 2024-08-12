@@ -49,30 +49,14 @@ dataset = rg.Dataset(
 
 ---
 
-## `rg.LabelQuestion`
-
 ::: src.argilla.settings._question.LabelQuestion
-
-
-## `rg.MultiLabelQuestion`
 
 ::: src.argilla.settings._question.MultiLabelQuestion
 
-
-## `rg.RankingQuestion`
-
 ::: src.argilla.settings._question.RankingQuestion
-
-## `rg.TextQuestion`
 
 ::: src.argilla.settings._question.TextQuestion
 
-
-## `rg.RatingQuestion`
-
 ::: src.argilla.settings._question.RatingQuestion
-
-
-## `rg.SpanQuestion`
 
 ::: src.argilla.settings._question.SpanQuestion

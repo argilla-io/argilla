@@ -67,8 +67,5 @@ dataset.records.log(
 
 ---
 
-## `rg.Vector`
-
 ::: src.argilla.vectors.Vector
-    options:
-        heading_level: 3
+

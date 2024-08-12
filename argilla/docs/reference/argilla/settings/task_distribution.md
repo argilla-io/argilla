@@ -34,6 +34,4 @@ dataset = rg.Dataset(
 
 ---
 
-## `rg.TaskDistribution`
-
 ::: src.argilla.settings._task_distribution.OverlapTaskDistribution

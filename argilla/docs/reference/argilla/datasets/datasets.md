@@ -39,13 +39,9 @@ dataset = client.datasets("my_dataset")
 
 ---
 
-##  `rg.Dataset`
-
 ::: src.argilla.datasets._resource.Dataset
 
 ::: src.argilla.datasets._export._disk.DiskImportExportMixin
-    options:
-        show_root_heading: false
 
 ::: src.argilla.datasets._export._hub.HubImportExportMixin
 

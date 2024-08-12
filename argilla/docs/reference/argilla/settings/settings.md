@@ -34,8 +34,4 @@ dataset.create()
 
 ---
 
-## `rg.Settings`
-
 ::: src.argilla.settings._resource.Settings
-    options:
-        heading_level: 3
