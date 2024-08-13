@@ -64,7 +64,7 @@ export default {
     display: flex;
     align-items: center;
     flex-direction: row;
-    color: $black-37;
+    color: var(--fg-tertiary);
 
     &--bulk {
       align-items: center;

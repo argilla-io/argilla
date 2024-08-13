@@ -213,7 +213,7 @@ export default {
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
-  background: palette(grey, 800);
+  background: var(--bg-accent-grey-2);
   border-radius: $border-radius-m;
   &:hover {
     #{$this}__copy-button {
@@ -225,7 +225,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: $base-space;
-    color: $black-87;
+    color: var(--fg-primary);
   }
   &__area {
     position: relative;

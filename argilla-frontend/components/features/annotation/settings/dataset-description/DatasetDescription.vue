@@ -62,9 +62,9 @@ export default {
     background: palette(white);
     padding: $base-space;
     border-radius: $border-radius;
-    border: 1px solid $black-10;
+    border: 1px solid var(--bg-opacity-10);
     &:focus-within {
-      border-color: $primary-color;
+      border-color: var(--fg-cuaternary);
     }
 
     :deep(.content__text) {

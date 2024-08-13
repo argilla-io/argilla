@@ -130,12 +130,12 @@ export default {
       const toPosition = this.sliderTo - this.min;
       this.$refs.track.style.background = `linear-gradient(
       to right,
-      #ccc 0%,
-      #ccc ${(fromPosition / rangeDistance) * 100}%,
+      var(--bg-opacity-10) 0%,
+      var(--bg-opacity-10) ${(fromPosition / rangeDistance) * 100}%,
       #3e5cc9 ${(fromPosition / rangeDistance) * 100}%,
       #3e5cc9 ${(toPosition / rangeDistance) * 100}%,
-      #ccc ${(toPosition / rangeDistance) * 100}%,
-      #ccc 100%)`;
+      var(--bg-opacity-10) ${(toPosition / rangeDistance) * 100}%,
+      var(--bg-opacity-10) 100%)`;
 
       this.$refs.from.style.zIndex = 2;
       this.$refs.to.style.zIndex = 3;
@@ -164,7 +164,7 @@ export default {
   &__track {
     border-radius: 15px;
     height: 6px;
-    background: $black-10;
+    background: var(--bg-opacity-10);
   }
   &__inputs {
     display: flex;
@@ -175,9 +175,11 @@ export default {
       width: 110px;
       height: $base-space * 4;
       padding: $base-space;
-      border: 1px solid $black-10;
+      border: 1px solid var(--bg-opacity-10);
       border-radius: $border-radius;
       outline: none;
+      background: transparent;
+      color: var(--bg-primary);
     }
   }
   &__slider {
@@ -199,7 +201,7 @@ export default {
   &__separator {
     height: 1px;
     width: $base-space * 3;
-    background: $black-10;
+    background: var(--bg-opacity-10);
   }
 }
 
@@ -209,7 +211,7 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   height: 15px;
   width: 15px;
-  background-color: $primary-color;
+  background-color: var(--fg-cuaternary);
   border-radius: 50%;
   border: none;
   transition: 0.2s ease-in-out;
@@ -220,7 +222,7 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: all;
   height: 15px;
   width: 15px;
-  background-color: $primary-color;
+  background-color: var(--fg-cuaternary);
   border-radius: 50%;
   border: none;
   transition: 0.2s ease-in-out;

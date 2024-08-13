@@ -117,14 +117,14 @@ export default {
     display: flex;
     flex-direction: column;
     border-radius: $border-radius;
-    background-color: palette(white);
+    background-color: var(--bg-accent-grey-2);
     box-shadow: $shadow;
     z-index: 100;
     &__header {
       display: flex;
       flex-direction: column;
       gap: $base-space;
-      background: $black-4;
+      background: var(--bg-opacity-4);
       padding: calc($base-space / 2);
     }
     &__content {
@@ -140,7 +140,7 @@ export default {
       padding: calc($base-space / 2);
       border-radius: 4px;
       &.--preselected {
-        background-color: $black-4;
+        background-color: var(--bg-opacity-4);
       }
     }
   }
@@ -157,7 +157,7 @@ export default {
       outline: 0;
     }
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
 }

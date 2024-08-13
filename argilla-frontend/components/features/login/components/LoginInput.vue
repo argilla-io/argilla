@@ -145,7 +145,7 @@ export default {
     outline: 0;
     @include font-size(16px);
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
       @include font-size(16px);
     }
     &:focus {

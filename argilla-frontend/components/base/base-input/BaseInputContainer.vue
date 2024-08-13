@@ -115,10 +115,10 @@ input:-webkit-autofill {
     background: none;
     transition: $swift-ease-out;
     transition-property: font-size;
-    color: $black-87;
+    color: var(--fg-primary);
     line-height: normal;
     @include input-placeholder {
-      color: $black-54;
+      color: var(--fg-secondary);
       font-weight: 400;
     }
     &:focus {

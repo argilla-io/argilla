@@ -73,7 +73,7 @@ export default {
   align-items: center;
   gap: $base-space * 2;
   width: 100%;
-  color: $black-54;
+  color: var(--fg-secondary);
   @include font-size(12px);
   z-index: 1;
   &__bar {

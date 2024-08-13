@@ -71,38 +71,38 @@ export default {
   font-weight: 500;
 
   &.--discarded {
-    color: $discarded-color;
+    color: var(--fg-status-discarded);
     .bullet:before {
       @extend %bullet;
-      background: $discarded-color;
+      background: var(--fg-status-discarded);
     }
   }
   &.--submitted {
-    color: $submitted-color;
+    color: var(--fg-status-submitted);
     .bullet:before {
       @extend %bullet;
-      background: $submitted-color;
+      background: var(--fg-status-submitted);
     }
   }
   &.--pending {
-    color: $pending-color;
+    color: var(--fg-status-pending);
     .bullet:before {
       @extend %bullet;
-      background: $pending-color;
+      background: var(--fg-status-pending);
     }
   }
   &.--draft {
-    color: $draft-color;
+    color: var(--fg-status-draft);
     .bullet:before {
       @extend %bullet;
-      background: $draft-color;
+      background: var(--fg-status-draft);
     }
     .check {
-      color: $draft-color;
+      color: var(--fg-status-draft);
       flex-shrink: 0;
     }
     .circle {
-      border: 2px solid $draft-color;
+      border: 2px solid var(--fg-status-draft);
     }
   }
 }

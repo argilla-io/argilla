@@ -224,34 +224,34 @@ export default {
 }
 
 .secondary {
-  background-color: palette(grey, 600);
-  color: palette(grey, 200);
+  background-color: var(--bg-opacity-4);
+  color: var(--fg-secondary);
   .svg-icon {
-    fill: palette(grey, 200);
+    fill: var(--fg-secondary);
   }
   .spinner {
-    border-color: palette(grey, 200);
+    border-color: var(--fg-secondary);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: darken(palette(grey, 600), 5%);
+    background-color: var(--bg-opacity-6);
   }
   &.outline {
     background: none;
-    border: 1px solid $black-54;
-    color: palette(grey, 200);
+    border: 1px solid var(--fg-secondary);
+    color: var(--fg-secondary);
   }
   &.light {
     background: lighten($black-4, 50%);
-    color: $black-54;
+    color: var(--fg-secondary);
     &:hover,
     &:active,
     &.active {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
     .svg-icon {
-      fill: $black-54;
+      fill: var(--fg-secondary);
     }
   }
 
@@ -259,16 +259,16 @@ export default {
     padding-left: 0;
     padding-right: 0;
     background: none;
-    color: $black-54;
+    color: var(--fg-secondary);
     border-radius: 0;
     &:hover {
       background: none;
-      color: $black-87;
+      color: var(--fg-primary);
     }
   }
   &.link {
     background: none;
-    color: $black-54;
+    color: var(--fg-secondary);
     padding: 0;
     &:hover {
       text-decoration: underline;
@@ -302,12 +302,12 @@ export default {
     }
   }
   &.light {
-    background: lighten($black-4, 50%);
+    background: var(--bg-opacity-2);
     color: $danger;
     &:hover,
     &:active,
     &.active {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
   &.link {
@@ -325,7 +325,7 @@ export default {
   &:hover,
   &:active,
   &.active {
-    background: $black-4;
+    background: var(--bg-opacity-4);
   }
 }
 </style>

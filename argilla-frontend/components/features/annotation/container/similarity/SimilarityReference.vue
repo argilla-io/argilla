@@ -111,12 +111,12 @@ export default {
   max-width: 100%;
   margin-right: auto;
   border-radius: $border-radius;
-  color: $black-54;
-  background: $black-4;
+  color: var(--fg-secondary);
+  background: var(--bg-opacity-4);
   @include font-size(12px);
   transition: background 0.3s ease-in-out;
   &:hover {
-    background: $black-6;
+    background: var(--bg-opacity-6);
   }
   &__left {
     display: flex;
@@ -131,7 +131,7 @@ export default {
   }
   &__button-icon.button {
     padding: 0;
-    color: $black-54;
+    color: var(--fg-secondary);
   }
   &__preview {
     display: flex;

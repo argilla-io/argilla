@@ -40,7 +40,7 @@ export default {
 .filter-button--active {
   background: none;
   &:hover {
-    background: $black-4;
+    background: var(--bg-opacity-4);
   }
 }
 </style>

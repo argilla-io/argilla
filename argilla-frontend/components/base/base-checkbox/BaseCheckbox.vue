@@ -121,7 +121,7 @@ export default {
 <style lang="scss" scoped>
 $checkbox-size: 16px;
 $checkbox-touch-size: 16px;
-$checkbox-color: palette(grey, 600);
+$checkbox-color: var(--bg-solid-grey-3);
 $checkbox-color-dark: $primary-color;
 $checkbox-border-radius: 3px;
 $checkbox-decoration-circle-color: #6b87f8;
@@ -172,7 +172,7 @@ $checkbox-decoration-circle-color: #6b87f8;
   }
   &--dark {
     .checkbox__container {
-      border: 1px solid $black-20;
+      border: 1px solid var(--bg-opacity-20);
       &:after {
         background: $checkbox-color-dark;
       }

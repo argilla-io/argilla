@@ -107,7 +107,7 @@ export default {
     z-index: 1;
     position: fixed;
     transform: translate(-50%, calc(-50% - 30px));
-    color: $black-87;
+    color: var(--fg-primary);
     padding: calc($base-space / 2);
     border-radius: $border-radius;
     box-shadow: $shadow-100;
@@ -135,7 +135,7 @@ export default {
       bottom: $base-space * 2;
       transform: translate(-50%, -50%);
       left: 50%;
-      color: $black-87;
+      color: var(--fg-primary);
       padding: calc($base-space / 2);
       border-radius: $border-radius;
       box-shadow: $shadow-100;

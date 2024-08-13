@@ -81,7 +81,7 @@ export default {
 
 <style lang="scss" scoped>
 .loading {
-  background: $bg;
+  background: var(--bg-solid-grey-1);
   height: 100vh;
   width: 100vw;
   position: absolute;

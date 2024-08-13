@@ -84,7 +84,7 @@ $slider-thumb-size: 16px;
 label {
   width: fit-content;
   height: 14px;
-  color: $black-54;
+  color: var(--fg-secondary);
 }
 
 .range {
@@ -101,7 +101,7 @@ label {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    color: $black-37;
+    color: var(--fg-tertiary);
     @include font-size(12px);
   }
   &__progress-value {
@@ -134,7 +134,7 @@ label {
     outline: none;
     border-radius: 15px;
     height: 6px;
-    background: $black-10;
+    background: var(--bg-opacity-10);
   }
 }
 

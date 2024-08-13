@@ -353,9 +353,9 @@ export default {
     display: none;
     padding: 1px;
     border-radius: 0;
-    background: $black-54;
+    background: var(--bg-opacity-54);
     &:hover {
-      background: $black-87;
+      background: var(--bg-opacity-87);
     }
   }
   &--clickable {

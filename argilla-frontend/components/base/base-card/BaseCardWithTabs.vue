@@ -68,19 +68,20 @@ export default {
     list-style: none;
     border-top-right-radius: $border-radius;
     border-top-left-radius: $border-radius;
-    background: palette(white);
-    border-top: 1px solid palette(grey, 600);
-    border-left: 1px solid palette(grey, 600);
-    border-right: 1px solid palette(grey, 600);
+    background: var(--bg-accent-grey-2);
+    border-top: 1px solid var(--bg-solid-grey-3);
+    border-left: 1px solid var(--bg-solid-grey-3);
+    border-right: 1px solid var(--bg-solid-grey-3);
     &:not(.--active) {
-      background: palette(grey, 800);
+      background: var(--bg-solid-grey-1);
       .button {
-        color: $black-37;
+        color: var(--fg-tertiary);
       }
     }
     &.--active {
       margin-bottom: -1px;
-      border-bottom: 1px solid palette(white);
+      border-bottom: 1px solid var(--bg-accent-grey-2);
+      padding-bottom: 3px;
     }
     &:last-child:not(:first-child) {
       margin-left: -1px;
@@ -95,8 +96,8 @@ export default {
     border-top-right-radius: $border-radius;
     border-bottom-left-radius: $border-radius;
     border-bottom-right-radius: $border-radius;
-    background: palette(white);
-    border: 1px solid palette(grey, 600);
+    background: var(--bg-accent-grey-2);
+    border: 1px solid var(--bg-solid-grey-3);
   }
 }
 </style>

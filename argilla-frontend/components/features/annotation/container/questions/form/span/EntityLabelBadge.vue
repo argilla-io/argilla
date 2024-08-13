@@ -58,7 +58,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$label-color: palette(grey, 700);
+$label-color: var(--bg-solid-grey-2);
 
 input[type="checkbox"] {
   @extend %visuallyhidden;
@@ -110,7 +110,7 @@ input[type="checkbox"] {
   }
   &.label-active {
     background: v-bind(optionColor);
-    color: $black-87;
+    color: var(--fg-primary);
   }
 }
 
@@ -123,11 +123,11 @@ input[type="checkbox"] {
   aspect-ratio: 1;
   border-radius: $border-radius;
   border-width: 1px 1px 3px 1px;
-  border-color: $black-20;
+  border-color: var(--bg-opacity-20);
   border-style: solid;
   box-sizing: content-box;
-  color: $black-87;
-  background: palette(grey, 700);
+  color: var(--fg-primary);
+  background: var(--bg-solid-grey-2);
   @include font-size(11px);
   font-family: monospace, monospace;
 }

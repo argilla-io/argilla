@@ -307,7 +307,7 @@ $toast-colors: map-merge(
   box-shadow: $shadow;
   border-radius: 0.25em;
   pointer-events: auto;
-  background: palette(white) !important;
+  background: var(--bg-accent-grey-1) !important;
   min-height: 3em;
   .toast-text {
     margin: 0;
@@ -315,7 +315,7 @@ $toast-colors: map-merge(
     a {
       text-decoration: inherit;
       background: none;
-      color: $primary-color;
+      color: var(--fg-cuaternary);
       &:hover {
         text-decoration: underline;
         background: none;

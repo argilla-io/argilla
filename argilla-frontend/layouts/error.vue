@@ -48,7 +48,7 @@ export default {
   props: ["error"],
 };
 </script>
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 .error {
   position: relative;
   min-height: 100vh;
@@ -139,4 +139,4 @@ export default {
     }
   }
 }
-</styles>
+</style>

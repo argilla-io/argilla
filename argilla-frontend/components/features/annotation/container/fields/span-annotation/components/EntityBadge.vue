@@ -71,7 +71,7 @@ export default {
   padding: 2px calc($base-space / 2);
   border-radius: 2px;
   background-color: v-bind(color);
-  color: $black-87;
+  color: var(--fg-primary);
   font-family: "Roboto Condensed", sans-serif;
   font-weight: 500;
   @include font-size(12px);
