@@ -65,6 +65,8 @@ const config: NuxtConfig = {
 
     { src: "~/plugins/language" },
 
+    { src: "~/plugins/color-schema" },
+
     { src: "~/plugins/plugins/axios.ts" },
     { src: "~/plugins/plugins/axios-cache.ts" },
     { src: "~/plugins/plugins/svg-icon.js" },
