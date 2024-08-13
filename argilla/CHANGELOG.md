@@ -20,7 +20,7 @@ These are the section headers that we use:
 
 - Fixed error when creating optional fields. ([#5362](https://github.com/argilla-io/argilla/pull/5362))
 - Fixed error creating integer and float metadata with `visible_for_annotators`. ([#5364](https://github.com/argilla-io/argilla/pull/5364))
-- Fixed error when logging records with `suggestions` or `responses` for non-existent questions. ([#5396](https://github.com/argilla-io/argilla/pull/5396))
+- Fixed error when logging records with `suggestions` or `responses` for non-existent questions. ([#5396](https://github.com/argilla-io/argilla/pull/5396) by @maxserras)
 - Fixed error from conflicts in testing suite when running tests in parallel. ([#5349](https://github.com/argilla-io/argilla/commit/1119b164d0623170d44561c6b75d439d2dc96bd0))
 - Fixed error in response model when creating a response with a `None` value. ([#5343](https://github.com/argilla-io/argilla/commit/9e3705061a2dd88a7852288d9f6fd1aaeaa9b062))
 
