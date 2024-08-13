@@ -29,7 +29,7 @@ import argilla as rg
 
 client = rg.Argilla(
     [local_]api_url="[LOCAL_HOST]",
-    [hf_]api_url="https://[HF_OWNER]-[HF_SPACE_NAME].hf.space",
+    [hf_]api_url="https://[HF_HOST]",
     api_key="[USER_API_KEY]"
 )
 ```
