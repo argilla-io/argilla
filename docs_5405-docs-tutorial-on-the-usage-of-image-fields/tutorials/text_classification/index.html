@@ -2278,14 +2278,11 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this tutorial, we will show a standard workflow for a text classification task, in this case, using SetFit and Argilla.</p>
-<p>We will follow these steps:</p>
 <ul>
-<li>Configure the Argilla dataset</li>
-<li>Add initial model suggestions</li>
-<li>Evaluate with Argilla</li>
-<li>Train your model</li>
-<li>Update the suggestions with the new model</li>
+<li><strong>Goal</strong>: Show a standard workflow for a text classification task, including zero-shot suggestions and model fine-tuning.</li>
+<li><strong>Dataset</strong>: <a href="https://huggingface.co/datasets/stanfordnlp/imdb">IMDB</a>, a dataset of movie reviews that need to be classified as positive or negative.</li>
+<li><strong>Libraries</strong>: <a href="https://github.com/huggingface/datasets">datasets</a>, <a href="https://github.com/huggingface/transformers">transformers</a>, <a href="https://github.com/huggingface/setfit">setfit</a></li>
+<li><strong>Components</strong>: <a href="https://docs.argilla.io/latest/reference/argilla/settings/fields/#src.argilla.settings._field.TextField">TextField</a>, <a href="https://docs.argilla.io/latest/reference/argilla/settings/questions/#src.argilla.settings._question.LabelQuestion">LabelQuestion</a>, <a href="https://docs.argilla.io/latest/reference/argilla/records/suggestions/">Suggestion</a>, <a href="https://docs.argilla.io/dev/reference/argilla/search/#rgquery_1">Query</a>, <a href="https://docs.argilla.io/dev/reference/argilla/search/#rgfilter">Filter</a></li>
 </ul>
 </div>
 </div>

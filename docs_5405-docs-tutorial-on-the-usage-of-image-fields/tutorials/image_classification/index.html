@@ -2134,15 +2134,11 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this tutorial, we will show a standard workflow for a image classification task, in this case, using transformers, sentence-transformers and Argilla.</p>
-<p>We will follow these steps:</p>
 <ul>
-<li>Configure the Argilla dataset</li>
-<li>Add initial model suggestions</li>
-<li>Add vectors for image search</li>
-<li>Evaluate with Argilla</li>
-<li>Train your model</li>
-<li>Update the suggestions with the new model</li>
+<li><strong>Goal</strong>: Show a standard workflow for a image classification task.</li>
+<li><strong>Dataset</strong>: <a href="https://huggingface.co/datasets/ylecun/mnist">MNIST</a>, A dataset of 28x28 grayscale images that need to be classified as digits.</li>
+<li><strong>Libraries</strong>: <a href="https://github.com/huggingface/datasets">datasets</a>, <a href="https://github.com/huggingface/transformers">transformers</a></li>
+<li><strong>Components</strong>: <a href="https://docs.argilla.io/latest/reference/argilla/settings/fields/#src.argilla.settings._field.ImageField">ImageField</a>, <a href="https://docs.argilla.io/latest/reference/argilla/settings/questions/#src.argilla.settings._question.LabelQuestion">LabelQuestion</a>, <a href="https://docs.argilla.io/latest/reference/argilla/records/suggestions/">Suggestion</a></li>
 </ul>
 </div>
 </div>
@@ -2193,7 +2189,7 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">sentence</span><span class="o">-</span><span class="n">transformers</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">=</span><span class="mi">3</span> <span class="n">transformers</span><span class="o">==</span><span class="mf">4.40.2</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">transformers</span><span class="o">==</span><span class="mf">4.40.2</span>
 </span></code></pre></div>
 
 </div>
@@ -2213,7 +2209,7 @@
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span> <span class="nn">base64</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">import</span> <span class="nn">io</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Image</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span>
 </span></code></pre></div>
 
 </div>
@@ -2302,25 +2298,13 @@
 </span></code></pre></div>
 
 </div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>
-<code>/Users/davidberenstein/Documents/programming/argilla/argilla/argilla/src/argilla/datasets/_resource.py:203: UserWarning: Workspace not provided. Using default workspace: argilla id: fcdac196-1f8c-4634-bbc3-d6e490fcb481
-  warnings.warn(f"Workspace not provided. Using default workspace: {workspace.name} id: {workspace.id}")
-</code>
-</pre>
 </div>
-</div>
-<div class="output_area">
-<div class="output_text output_subarea output_execute_result">
-<pre>
-<code>Dataset(id=UUID('706d637a-9216-4c96-b28c-b273d6f1680f') inserted_at=datetime.datetime(2024, 8, 13, 15, 18, 28, 53048) updated_at=datetime.datetime(2024, 8, 13, 15, 18, 28, 221716) name='image_classification_datasets' status='ready' guidelines='The goal of this task is to classify a given image of a handwritten digit into one of 10 classes representing integer values from 0 to 9, inclusively.' allow_extra_metadata=False distribution=OverlapTaskDistributionModel(strategy='overlap', min_submitted=1) workspace_id=UUID('fcdac196-1f8c-4634-bbc3-d6e490fcb481') last_activity_at=datetime.datetime(2024, 8, 13, 15, 18, 28, 221716))</code>
-</pre>
-</div>
-</div>
-</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="s2">&quot;image_classification_datasets&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
@@ -2344,8 +2328,8 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;ylecun/mnist&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train[:100]&quot;</span><span class="p">)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">hf_dataset</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;ylecun/mnist&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train[:100]&quot;</span><span class="p">)</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">hf_dataset</span>
 </span></code></pre></div>
 
 </div>
@@ -2374,7 +2358,7 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">hf_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">hf_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span></code></pre></div>
 
 </div>
@@ -2394,48 +2378,27 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>As we can seem, the image is a 28x28 grayscale image. In order to use it in in Argilla, we need to convert it to a base64 string.</p>
+<p>As we can seem, the image is a 28x28 grayscale image. In order to use it in in Argilla, we need to convert them to a base64 string.</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span> <span class="nf">pil_to_data_uri</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">data_uri</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]:</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="n">buffered</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">buffered</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;PNG&quot;</span><span class="p">)</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="n">img_str</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">buffered</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="n">data_uri</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data:image/png;base64,</span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image_data_uri&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_uri</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="k">return</span> <span class="n">batch</span>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">hf_dataset</span><span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pil_to_data_uri</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="n">hf_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span> <span class="nf">pil_to_data_uri</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">data_uri</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]:</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        <span class="n">buffered</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>        <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">buffered</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;PNG&quot;</span><span class="p">)</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        <span class="n">img_str</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">buffered</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="n">data_uri</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data:image/png;base64,</span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image_data_uri&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_uri</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>    <span class="k">return</span> <span class="n">batch</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="n">hf_dataset</span><span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pil_to_data_uri</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="n">hf_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span></code></pre></div>
 
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>
-<code>Map: 100%|██████████| 100/100 [00:00&lt;00:00, 1203.15 examples/s]
-</code>
-</pre>
-</div>
-</div>
-<div class="output_area">
-<div class="output_text output_subarea output_execute_result">
-<pre>
-<code>{'image': &lt;PIL.PngImagePlugin.PngImageFile image mode=L size=28x28&gt;,
- 'label': 5,
- 'image_data_uri': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAABAElEQVR4nGNgGMyAWUhIqK5jvdSy/9/rGRgYGFhgEnJsVjYCwQwMDAxPJgV+vniQgYGBgREqZ7iXH8r6l/SV4dn7m8gmCt3++/fv37/Htn3/iMW+gDnZf/+e5WbQnoXNNXyMs/5GoQoxwVmf/n9kSGFiwAW49/11wynJoPzx4YIcRlyygR/+/i2XxCWru+vv32nSuGQFYv/83Y3b4p9/fzpAmSyoMnohpiwM1w5h06Q+5enfv39/bcMiJVF09+/fv39P+mFKiTtd/fv3799jgZiBJLT69t+/f/8eDuDEkDJf8+jv379/v7Ryo4qzMDAwMAQGMjBc3/y35wM2V1IfAABFF16Aa0wAOwAAAABJRU5ErkJggg=='}</code>
-</pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
@@ -2448,75 +2411,9 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">hf_dataset</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_data_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">})</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">hf_dataset</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_data_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">})</span>
 </span></code></pre></div>
 
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">RecordsIngestionError</span>                     Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[48], line 1</span>
-<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">dataset</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">records</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">log</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">records</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">hf_dataset</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">{</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">image_data_uri</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg">:</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">image</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg">}</span><span class="ansi-yellow-bg">)</span>
-
-File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla/src/argilla/records/_dataset_records.py:228</span>, in <span class="ansi-cyan-fg">DatasetRecords.log</span><span class="ansi-blue-fg">(self, records, mapping, user_id, batch_size)</span>
-<span class="ansi-green-intense-fg ansi-bold">    204</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">log</span>(
-<span class="ansi-green-intense-fg ansi-bold">    205</span>     <span style="color: rgb(0,135,0)">self</span>,
-<span class="ansi-green-intense-fg ansi-bold">    206</span>     records: Union[List[<span style="color: rgb(0,135,0)">dict</span>], List[Record], HFDataset],
-<span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    209</span>     batch_size: <span style="color: rgb(0,135,0)">int</span> <span style="color: rgb(98,98,98)">=</span> DEFAULT_BATCH_SIZE,
-<span class="ansi-green-intense-fg ansi-bold">    210</span> ) <span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">&gt;</span> <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">DatasetRecords</span><span style="color: rgb(175,0,0)">"</span>:
-<span class="ansi-green-intense-fg ansi-bold">    211</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">"""Add or update records in a dataset on the server using the provided records.</span>
-<span class="ansi-green-intense-fg ansi-bold">    212</span> <span style="color: rgb(175,0,0)">    If the record includes a known `id` field, the record will be updated.</span>
-<span class="ansi-green-intense-fg ansi-bold">    213</span> <span style="color: rgb(175,0,0)">    If the record does not include a known `id` field, the record will be added as a new record.</span>
-<span class="ansi-green-fg">   (...)</span>
-<span class="ansi-green-intense-fg ansi-bold">    226</span> <span style="color: rgb(175,0,0)">        A list of Record objects representing the updated records.</span>
-<span class="ansi-green-intense-fg ansi-bold">    227</span> <span style="color: rgb(175,0,0)">    """</span>
-<span class="ansi-green-fg">--&gt; 228</span>     record_models <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_ingest_records</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">records</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">records</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">user_id</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">user_id</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(175,0,255)">or</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">__client</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">me</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">id</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    229</span>     batch_size <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_normalize_batch_size(
-<span class="ansi-green-intense-fg ansi-bold">    230</span>         batch_size<span style="color: rgb(98,98,98)">=</span>batch_size,
-<span class="ansi-green-intense-fg ansi-bold">    231</span>         records_length<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(0,135,0)">len</span>(record_models),
-<span class="ansi-green-intense-fg ansi-bold">    232</span>         max_value<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_api<span style="color: rgb(98,98,98)">.</span>MAX_RECORDS_PER_UPSERT_BULK,
-<span class="ansi-green-intense-fg ansi-bold">    233</span>     )
-<span class="ansi-green-intense-fg ansi-bold">    235</span>     created_or_updated <span style="color: rgb(98,98,98)">=</span> []
-
-File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla/src/argilla/records/_dataset_records.py:390</span>, in <span class="ansi-cyan-fg">DatasetRecords._ingest_records</span><span class="ansi-blue-fg">(self, records, mapping, user_id)</span>
-<span class="ansi-green-intense-fg ansi-bold">    387</span>     records <span style="color: rgb(98,98,98)">=</span> HFDatasetsIO<span style="color: rgb(98,98,98)">.</span>_record_dicts_from_datasets(dataset<span style="color: rgb(98,98,98)">=</span>records)
-<span class="ansi-green-intense-fg ansi-bold">    389</span> ingested_records <span style="color: rgb(98,98,98)">=</span> []
-<span class="ansi-green-fg">--&gt; 390</span> record_mapper <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">IngestedRecordMapper</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">dataset</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">__dataset</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">user_id</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">user_id</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    391</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> record <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> records:
-<span class="ansi-green-intense-fg ansi-bold">    392</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">try</span>:
-
-File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla/src/argilla/records/_mapping/_mapper.py:66</span>, in <span class="ansi-cyan-fg">IngestedRecordMapper.__init__</span><span class="ansi-blue-fg">(self, dataset, user_id, mapping)</span>
-<span class="ansi-green-intense-fg ansi-bold">     64</span> mapping <span style="color: rgb(98,98,98)">=</span> mapping <span class="ansi-bold" style="color: rgb(175,0,255)">or</span> {}
-<span class="ansi-green-intense-fg ansi-bold">     65</span> default_mapping <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_schematize_default_attributes()
-<span class="ansi-green-fg">---&gt; 66</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>mapping <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_schematize_mapped_attributes</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">mapping</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">default_mapping</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">default_mapping</span><span class="ansi-yellow-bg">)</span>
-
-File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla/src/argilla/records/_mapping/_mapper.py:145</span>, in <span class="ansi-cyan-fg">IngestedRecordMapper._schematize_mapped_attributes</span><span class="ansi-blue-fg">(self, mapping, default_mapping)</span>
-<span class="ansi-green-intense-fg ansi-bold">    138</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-<span class="ansi-green-intense-fg ansi-bold">    139</span>             attr_route <span style="color: rgb(98,98,98)">=</span> AttributeRoute(
-<span class="ansi-green-intense-fg ansi-bold">    140</span>                 name<span style="color: rgb(98,98,98)">=</span>attr_name,
-<span class="ansi-green-intense-fg ansi-bold">    141</span>                 source<span style="color: rgb(98,98,98)">=</span>source_key,
-<span class="ansi-green-intense-fg ansi-bold">    142</span>                 <span style="color: rgb(0,135,0)">type</span><span style="color: rgb(98,98,98)">=</span>attr_type,
-<span class="ansi-green-intense-fg ansi-bold">    143</span>                 parameters<span style="color: rgb(98,98,98)">=</span>[parameter],
-<span class="ansi-green-intense-fg ansi-bold">    144</span>             )
-<span class="ansi-green-fg">--&gt; 145</span>             attr_route <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_select_attribute_type</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">attribute_route</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">attr_route</span><span class="ansi-yellow-bg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    146</span>             default_mapping<span style="color: rgb(98,98,98)">.</span>add_route(attr_route)
-<span class="ansi-green-intense-fg ansi-bold">    148</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> default_mapping
-
-File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla/src/argilla/records/_mapping/_mapper.py:196</span>, in <span class="ansi-cyan-fg">IngestedRecordMapper._select_attribute_type</span><span class="ansi-blue-fg">(self, attribute_route)</span>
-<span class="ansi-green-intense-fg ansi-bold">    194</span>     attribute_route<span style="color: rgb(98,98,98)">.</span>type <span style="color: rgb(98,98,98)">=</span> AttributeType<span style="color: rgb(98,98,98)">.</span>ID
-<span class="ansi-green-intense-fg ansi-bold">    195</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
-<span class="ansi-green-fg">--&gt; 196</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> RecordsIngestionError(<span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Mapped attribute is not a valid dataset attribute: </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>attribute_route<span style="color: rgb(98,98,98)">.</span>name<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">.</span><span style="color: rgb(175,0,0)">"</span>)
-<span class="ansi-green-intense-fg ansi-bold">    197</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> attribute_route
-
-<span class="ansi-red-fg">RecordsIngestionError</span>: Argilla SDK error: RecordsIngestionError: Mapped attribute is not a valid dataset attribute: image.</pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
@@ -2529,24 +2426,22 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The next step is to add suggestions to the dataset. This will make things easier and faster for the annotation team. Suggestions will appear as preselected options, so annotators will only need to correct them. In our case, we will generate them using a zero-shot SetFit model. However, you can use a framework or technique of your choice.</p>
+<p>The next step is to add suggestions to the dataset. This will make things easier and faster for the annotation team. Suggestions will appear as preselected options, so annotators will only need to correct them. In our case, we will generate them using <a href="https://huggingface.co/docs/transformers/en/tasks/zero_shot_image_classification">a zero-shot CLIP model</a>. However, you can use a framework or technique of your choice.</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We will start by defining an example training set with the required labels: <code>positive</code> and <code>negative</code>. Using <code>get_templated_dataset</code> will create sentences from the default template: "This sentence is {label}."</p>
+<p>We will start by loading the model using a <code>transformers</code> pipeline.</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">zero_ds</span> <span class="o">=</span> <span class="n">get_templated_dataset</span><span class="p">(</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="n">candidate_labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="n">sample_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">checkpoint</span> <span class="o">=</span> <span class="s2">&quot;openai/clip-vit-large-patch14&quot;</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">detector</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;zero-shot-image-classification&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;mps&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
@@ -2565,17 +2460,17 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">SetFitModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>        <span class="n">train_dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="p">)</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="k">return</span> <span class="n">model</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">dataset</span><span class="p">):</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">SetFitModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>        <span class="n">train_dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    <span class="p">)</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>    <span class="k">return</span> <span class="n">model</span>
 </span></code></pre></div>
 
 </div>
@@ -2590,7 +2485,7 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;TaylorAI/bge-micro-v2&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">zero_ds</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;TaylorAI/bge-micro-v2&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">zero_ds</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
@@ -2605,13 +2500,13 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Save and load locally</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="c1"># model.save_pretrained(&quot;text_classification_model&quot;)</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># model = SetFitModel.from_pretrained(&quot;text_classification_model&quot;)</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="c1"># Push and load in HF</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># model.push_to_hub(&quot;[username]/text_classification_model&quot;)</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># model = SetFitModel.from_pretrained(&quot;[username]/text_classification_model&quot;)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Save and load locally</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="c1"># model.save_pretrained(&quot;text_classification_model&quot;)</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1"># model = SetFitModel.from_pretrained(&quot;text_classification_model&quot;)</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="c1"># Push and load in HF</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="c1"># model.push_to_hub(&quot;[username]/text_classification_model&quot;)</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># model = SetFitModel.from_pretrained(&quot;[username]/text_classification_model&quot;)</span>
 </span></code></pre></div>
 
 </div>
@@ -2626,12 +2521,12 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="n">model</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="nb">input</span><span class="p">])</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="k">return</span> <span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>    <span class="n">model</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">prediction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="nb">input</span><span class="p">])</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="k">return</span> <span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span></code></pre></div>
 
 </div>
@@ -2646,15 +2541,15 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">updated_data</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="p">{</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>        <span class="s2">&quot;sentiment_label&quot;</span><span class="p">:</span> <span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="p">),</span>
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="p">}</span>
-</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">data</span>
-</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="p">]</span>
-</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_data</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">updated_data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="p">{</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>        <span class="s2">&quot;sentiment_label&quot;</span><span class="p">:</span> <span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="p">),</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>    <span class="p">}</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">data</span>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="p">]</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_data</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
@@ -2711,7 +2606,7 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="s2">&quot;text_classification_dataset&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="s2">&quot;text_classification_dataset&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
@@ -2719,9 +2614,9 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">status_filter</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Query</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">Filter</span><span class="p">((</span><span class="s2">&quot;response.status&quot;</span><span class="p">,</span> <span class="s2">&quot;==&quot;</span><span class="p">,</span> <span class="s2">&quot;submitted&quot;</span><span class="p">)))</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">submitted</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">status_filter</span><span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">status_filter</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Query</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">Filter</span><span class="p">((</span><span class="s2">&quot;response.status&quot;</span><span class="p">,</span> <span class="s2">&quot;==&quot;</span><span class="p">,</span> <span class="s2">&quot;submitted&quot;</span><span class="p">)))</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">submitted</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">status_filter</span><span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
@@ -2736,15 +2631,15 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">train_records</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="p">{</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">],</span>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;sentiment_label.responses&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="p">}</span>
-</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">submitted</span>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="p">]</span>
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">train_records</span><span class="p">)</span>
-</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">sample_dataset</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">label_column</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">train_records</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    <span class="p">{</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">],</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">&quot;sentiment_label.responses&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    <span class="p">}</span>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">submitted</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="p">]</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">train_records</span><span class="p">)</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">sample_dataset</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">label_column</span><span class="o">=</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
@@ -2759,7 +2654,7 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;TaylorAI/bge-micro-v2&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;TaylorAI/bge-micro-v2&quot;</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
@@ -2774,15 +2669,15 @@ File <span class="ansi-green-fg">~/Documents/programming/argilla/argilla/argilla
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">updated_data</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="p">{</span>
-</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>        <span class="s2">&quot;sentiment_label&quot;</span><span class="p">:</span> <span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="p">),</span>
-</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="p">}</span>
-</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">data</span>
-</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="p">]</span>
-</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_data</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="n">updated_data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>    <span class="p">{</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>        <span class="s2">&quot;sentiment_label&quot;</span><span class="p">:</span> <span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="p">),</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    <span class="p">}</span>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">data</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="p">]</span>
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_data</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
