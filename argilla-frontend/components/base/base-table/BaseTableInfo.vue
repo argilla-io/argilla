@@ -335,6 +335,12 @@ $borderColor: var(--bg-opacity-6);
       display: flex;
       align-items: center;
     }
+    :deep(button) {
+      color: var(--fg-primary);
+      .svg-icon {
+        fill: var(--fg-primary);
+      }
+    }
     button:not(.button) {
       cursor: pointer;
       border: 0;
@@ -365,7 +371,7 @@ $borderColor: var(--bg-opacity-6);
     #{$this}__item {
       &:hover,
       &:focus {
-        background: var(--bg-opacity-1);
+        background: var(--bg-accent-grey-3);
       }
     }
   }
