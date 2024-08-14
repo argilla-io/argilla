@@ -14,14 +14,14 @@ These are the tutorials for *the Argilla SDK*. They provide step-by-step instruc
 
     ---
 
-    Learn about a standard workflow to improve data quality for a text classification task.
+    Learn about a standard workflow for a text classification task with model fine-tuning.
     [:octicons-arrow-right-24: Tutorial](text_classification.ipynb)
 
 -   __Token classification__
 
     ---
 
-    Learn about a standard workflow to improve data quality for a token classification task.
+    Learn about a standard workflow for a token classification task with model fine-tuning.
     [:octicons-arrow-right-24: Tutorial](token_classification.ipynb)
 
 
@@ -29,14 +29,14 @@ These are the tutorials for *the Argilla SDK*. They provide step-by-step instruc
 
     ---
 
-    Learn about a standard workflow to improve data quality for an image classification task.
+    Learn about a standard workflow for an image classification task with model fine-tuning.
     [:octicons-arrow-right-24: Tutorial](image_classification.ipynb)
 
--   __Image preference optimization__
+-   __Image preference__
 
     ---
 
-    Learn about a standard workflow to improve the data quality of multi-modal preference datasets.
+    Learn about a standard workflow for multi-modal preference datasets like image question answering.
     [:octicons-arrow-right-24: Tutorial](image_preference.ipynb)
 
 </div>
