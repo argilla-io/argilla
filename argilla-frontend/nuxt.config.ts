@@ -65,8 +65,6 @@ const config: NuxtConfig = {
 
     { src: "~/plugins/language" },
 
-    { src: "~/plugins/color-schema" },
-
     { src: "~/plugins/plugins/axios.ts" },
     { src: "~/plugins/plugins/axios-cache.ts" },
     { src: "~/plugins/plugins/svg-icon.js" },
@@ -77,6 +75,7 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/vue-draggable.js" },
     { src: "~/plugins/plugins/platform.ts" },
     { src: "~/plugins/plugins/language.ts" },
+    { src: "~/plugins/plugins/color-schema" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
