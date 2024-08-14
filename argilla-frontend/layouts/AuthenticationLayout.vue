@@ -27,7 +27,7 @@ export default {
 .auth {
   &__wrapper {
     display: flex;
-    background: #ffffff;
+    background: var(--bg-accent-grey-1);
     min-height: 100vh;
   }
   &__info {
@@ -35,7 +35,7 @@ export default {
     display: none;
     overflow: hidden;
     @include media(">desktop") {
-      background: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
+      background: var(--bg-auth-gradient);
       padding: $base-space * 2;
       display: flex;
       align-items: flex-start;
@@ -45,7 +45,7 @@ export default {
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--fg-primary);
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
