@@ -2012,6 +2012,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#vibe-check-the-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vibe check the dataset
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-and-create-the-argilla-dataset" class="md-nav__link">
     <span class="md-ellipsis">
       Configure and create the Argilla dataset
@@ -2031,9 +2040,36 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#add-initial-model-suggestions" class="md-nav__link">
+  <a href="#convert-pil-image-to-base64" class="md-nav__link">
     <span class="md-ellipsis">
-      Add initial model suggestions
+      Convert PIL image to base64
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieve-values-nested-in-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      Retrieve values nested in JSON
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create vectors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-to-argilla" class="md-nav__link">
+    <span class="md-ellipsis">
+      Log to Argilla
     </span>
   </a>
   
@@ -2050,39 +2086,6 @@
       Evaluate with Argilla
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#train-your-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      Train your model
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Train your model">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#formatting-the-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Formatting the data
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-actual-training" class="md-nav__link">
-    <span class="md-ellipsis">
-      The actual training
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -2239,24 +2242,12 @@
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_metric</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span><span class="p">,</span> <span class="n">Dataset</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">AutoImageProcessor</span><span class="p">,</span> <span class="n">AutoModelForImageClassification</span><span class="p">,</span> <span class="n">Trainer</span><span class="p">,</span> <span class="n">TrainingArguments</span><span class="p">,</span> <span class="n">pipeline</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="kn">import</span> <span class="nn">json</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="kn">from</span> <span class="nn">sentence_transformers</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span><span class="p">,</span> <span class="n">Dataset</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">AutoImageProcessor</span><span class="p">,</span> <span class="n">AutoModelForImageClassification</span><span class="p">,</span> <span class="n">Trainer</span><span class="p">,</span> <span class="n">TrainingArguments</span><span class="p">,</span> <span class="n">pipeline</span>
 </span></code></pre></div>
 
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>
-<code>/Users/davidberenstein/Documents/programming/argilla/argilla/argilla/.env/lib/python3.10/site-packages/tqdm/auto.py:21: TqdmWarning: IProgress not found. Please update jupyter and ipywidgets. See https://ipywidgets.readthedocs.io/en/stable/user_install.html
-  from .autonotebook import tqdm as notebook_tqdm
-</code>
-</pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
@@ -2285,6 +2276,15 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="vibe-check-the-dataset">Vibe check the dataset<a class="headerlink" href="#vibe-check-the-dataset" title="Permanent link">&para;</a></h2>
+<p>We will have a look at <a href="https://huggingface.co/datasets/openbmb/RLAIF-V-Dataset">the dataset</a> to understand its structure and the kind of data it contains. We do this by using <a href="https://huggingface.co/docs/hub/main/en/datasets-viewer-embed">the embedded Hugging Face Dataset Viewer</a>.</p>
+<iframe frameborder="0" height="560px" src="https://huggingface.co/datasets/openbmb/RLAIF-V-Dataset/embed/viewer/default/train" width="100%"></iframe>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="configure-and-create-the-argilla-dataset">Configure and create the Argilla dataset<a class="headerlink" href="#configure-and-create-the-argilla-dataset" title="Permanent link">&para;</a></h2>
 </div>
 </div>
@@ -2292,7 +2292,7 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, we will need to configure the dataset. In the settings, we can specify the guidelines, fields, and questions. Because of the complexity of the task we will also add metadata and vectors. We will add one vector to represent the semantic meaning of the question. We will  be adding two metadata fields that store the original dataset and the type of task the question belongs to.</p>
+<p>Now, we will need to configure the dataset. In the settings, we can specify the guidelines, fields, and questions. Because of the complexity of the task we will also add metadata and vectors. We will add one vector to represent the semantic meaning of the <code>question</code>. We will be adding two metadata fields that store the <code>original_dataset</code> and the type of task the question belongs to which can be obtained from <code>origin_split</code>. </p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Check this <a href="../../how_to_guides/dataset/">how-to guide</a> to know more about configuring and creating a dataset.</p>
@@ -2303,87 +2303,38 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;The goal is to assess if the answers are correct and update them where needed.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">ImageField</span><span class="p">(</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;An image of a certain object, state or action.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="p">),</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;question&quot;</span><span class="p">,</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;A question about the image, intended to be answered.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="p">)</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="p">],</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextQuestion</span><span class="p">(</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;chosen&quot;</span><span class="p">,</span>
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;The chosen answer to the question.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>        <span class="p">),</span>
-</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextQuestion</span><span class="p">(</span>
-</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;rejected&quot;</span><span class="p">,</span>
-</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;The rejected answer to the question.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>        <span class="p">)</span>
-</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="p">],</span>
-</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    <span class="n">metadata</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TermsMetadataProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;origin_dataset&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Origin dataset&quot;</span><span class="p">),</span>
-</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TermsMetadataProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;task_type&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Task type&quot;</span><span class="p">),</span>
-</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>    <span class="p">],</span>
-</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="n">vectors</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">VectorField</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;question_vector&quot;</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">384</span><span class="p">),</span>
-</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>    <span class="p">]</span>
-</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;The goal is to assess if the answers are correct and update them where needed.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">ImageField</span><span class="p">(</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;An image of a certain object, state or action.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="p">),</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;question&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;A question about the image, intended to be answered.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="p">)</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="p">],</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextQuestion</span><span class="p">(</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;chosen&quot;</span><span class="p">,</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;The chosen answer to the question.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>        <span class="p">),</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextQuestion</span><span class="p">(</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;rejected&quot;</span><span class="p">,</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;The rejected answer to the question.&quot;</span><span class="p">,</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>        <span class="p">)</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    <span class="p">],</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="n">metadata</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TermsMetadataProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;origin_dataset&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Origin dataset&quot;</span><span class="p">),</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TermsMetadataProperty</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;task_type&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Task type&quot;</span><span class="p">),</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>    <span class="p">],</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>    <span class="n">vectors</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">VectorField</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;question_vector&quot;</span><span class="p">,</span> <span class="n">dimensions</span><span class="o">=</span><span class="mi">384</span><span class="p">),</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>    <span class="p">]</span>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="p">)</span>
 </span></code></pre></div>
 
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">TypeError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[4], line 16</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> labels <span style="color: rgb(98,98,98)">=</span> [<span style="color: rgb(0,135,0)">str</span>(x) <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> x <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> <span style="color: rgb(0,135,0)">range</span>(<span style="color: rgb(98,98,98)">10</span>)]
-<span class="ansi-green-intense-fg ansi-bold">      3</span> settings <span style="color: rgb(98,98,98)">=</span> rg<span style="color: rgb(98,98,98)">.</span>Settings(
-<span class="ansi-green-intense-fg ansi-bold">      4</span>     guidelines<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">The goal is to assess if the answers are correct and update them where needed.</span><span style="color: rgb(175,0,0)">"</span>,
-<span class="ansi-green-intense-fg ansi-bold">      5</span>     fields<span style="color: rgb(98,98,98)">=</span>[
-<span class="ansi-green-intense-fg ansi-bold">      6</span>         rg<span style="color: rgb(98,98,98)">.</span>ImageField(
-<span class="ansi-green-intense-fg ansi-bold">      7</span>             name<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">image</span><span style="color: rgb(175,0,0)">"</span>,
-<span class="ansi-green-intense-fg ansi-bold">      8</span>             title<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">An image of a certain object, state or action.</span><span style="color: rgb(175,0,0)">"</span>,
-<span class="ansi-green-intense-fg ansi-bold">      9</span>         ),
-<span class="ansi-green-intense-fg ansi-bold">     10</span>         rg<span style="color: rgb(98,98,98)">.</span>TextField(
-<span class="ansi-green-intense-fg ansi-bold">     11</span>             name<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">question</span><span style="color: rgb(175,0,0)">"</span>,
-<span class="ansi-green-intense-fg ansi-bold">     12</span>             title<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">A question about the image, intended to be answered.</span><span style="color: rgb(175,0,0)">"</span>,
-<span class="ansi-green-intense-fg ansi-bold">     13</span>         )
-<span class="ansi-green-intense-fg ansi-bold">     14</span>     ],
-<span class="ansi-green-intense-fg ansi-bold">     15</span>     questions<span style="color: rgb(98,98,98)">=</span>[
-<span class="ansi-green-fg">---&gt; 16</span>         <span class="ansi-yellow-bg">rg</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">TextQuestion</span><span class="ansi-yellow-bg">(</span>
-<span class="ansi-green-intense-fg ansi-bold">     17</span> <span class="ansi-yellow-bg">            </span><span class="ansi-yellow-bg">name</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">chosen</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">     18</span> <span class="ansi-yellow-bg">            </span><span class="ansi-yellow-bg">title</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">The chosen answer to the question.</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">     19</span> <span class="ansi-yellow-bg">            </span><span class="ansi-yellow-bg">labels</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">labels</span><span class="ansi-yellow-bg">,</span>
-<span class="ansi-green-intense-fg ansi-bold">     20</span> <span class="ansi-yellow-bg">        </span><span class="ansi-yellow-bg">)</span>,
-<span class="ansi-green-intense-fg ansi-bold">     21</span>         rg<span style="color: rgb(98,98,98)">.</span>TextQuestion(
-<span class="ansi-green-intense-fg ansi-bold">     22</span>             name<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">rejected</span><span style="color: rgb(175,0,0)">"</span>,
-<span class="ansi-green-intense-fg ansi-bold">     23</span>             title<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">The rejected answer to the question.</span><span style="color: rgb(175,0,0)">"</span>,
-<span class="ansi-green-intense-fg ansi-bold">     24</span>             labels<span style="color: rgb(98,98,98)">=</span>labels,
-<span class="ansi-green-intense-fg ansi-bold">     25</span>         )
-<span class="ansi-green-intense-fg ansi-bold">     26</span>     ],
-<span class="ansi-green-intense-fg ansi-bold">     27</span>     metadata<span style="color: rgb(98,98,98)">=</span>[
-<span class="ansi-green-intense-fg ansi-bold">     28</span>         rg<span style="color: rgb(98,98,98)">.</span>TermsMetadataProperty(name<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">origin_dataset</span><span style="color: rgb(175,0,0)">"</span>, title<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Origin Dataset</span><span style="color: rgb(175,0,0)">"</span>),
-<span class="ansi-green-intense-fg ansi-bold">     29</span>         rg<span style="color: rgb(98,98,98)">.</span>TermsMetadataProperty(name<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">task_type</span><span style="color: rgb(175,0,0)">"</span>, title<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">Task Type</span><span style="color: rgb(175,0,0)">"</span>),
-<span class="ansi-green-intense-fg ansi-bold">     30</span>     ],
-<span class="ansi-green-intense-fg ansi-bold">     31</span>     vectors<span style="color: rgb(98,98,98)">=</span>[
-<span class="ansi-green-intense-fg ansi-bold">     32</span>         rg<span style="color: rgb(98,98,98)">.</span>VectorField(name<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">question_vector</span><span style="color: rgb(175,0,0)">"</span>, dimensions<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">384</span>),
-<span class="ansi-green-intense-fg ansi-bold">     33</span>     ]
-<span class="ansi-green-intense-fg ansi-bold">     34</span> )
-
-<span class="ansi-red-fg">TypeError</span>: TextQuestion.__init__() got an unexpected keyword argument 'labels'</pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
@@ -2409,13 +2360,7 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="add-records">Add records<a class="headerlink" href="#add-records" title="Permanent link">&para;</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Even if we have created the dataset, it still lacks the information to be annotated (you can check it in the UI). We will use the <code>ylecun/mnist</code> dataset from <a href="https://huggingface.co/datasets/ylecun/mnist">the Hugging Face Hub</a>. Specifically, we will use the <code>train</code> split and get <code>100</code> examples. </p>
+<p>Even if we have created the dataset, it still lacks the information to be annotated (you can check it in the UI). We will use the <code>openbmb/RLAIF-V-Dataset</code> dataset from <a href="https://huggingface.co/datasets/openbmb/RLAIF-V-Dataset">the Hugging Face Hub</a>. Specifically, we will use <code>100</code> examples. Because we are dealing with a potentially large image dataset, we will set <code>streaming=True</code> to avoid loading the entire dataset into memory and iterate over the data to lazily load it.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>When working with Hugging Face dataset you can set <code>Image(decode=False)</code> so that we can get <a href="https://huggingface.co/docs/datasets/en/image_load#local-files">public image URLs</a>, however, this depends on the dataset.</p>
@@ -2426,8 +2371,18 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;ylecun/mnist&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train[:1000]&quot;</span><span class="p">)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">hf_dataset</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">n_rows</span> <span class="o">=</span> <span class="mi">100</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;openbmb/RLAIF-V-Dataset&quot;</span><span class="p">,</span> <span class="n">streaming</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">dataset_rows</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">hf_dataset</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]:</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">dataset_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="k">if</span> <span class="n">count</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">=</span> <span class="n">n_rows</span><span class="p">:</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="k">break</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="n">dataset_rows</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">dataset_rows</span><span class="p">)</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">hf_dataset</span>
 </span></code></pre></div>
 
 </div>
@@ -2451,8 +2406,15 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 <div class="output_area">
 <div class="output_text output_subarea output_execute_result">
 <pre>
-<code>{'image': &lt;PIL.PngImagePlugin.PngImageFile image mode=L size=28x28&gt;,
- 'label': 5}</code>
+<code>{'ds_name': 'RLAIF-V',
+ 'image': &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=640x480&gt;,
+ 'question': 'Who is more likely to use these tools a leather crafter or a paper crafter?',
+ 'chosen': 'A leather crafter is more likely to use these tools. The image shows various crafting tools, including scissors and a hole punch, which are commonly used in leatherworking projects. Leather is a material that requires cutting, shaping, and precise hole-punching techniques to create desired designs or patterns. In contrast, paper crafters typically use different types of tools, such as adhesives, decorative papers, or specialized cutting machines like the Silhouette Cameo, for their projects.',
+ 'rejected': 'A leather crafter is more likely to use these tools as they consist of a hole punch, scissors, and a knife. These items are typically used in crafting projects involving fabric or leather materials for various designs and patterns. Paper crafters may also benefit from some of these tools, but their primary focus would be on paper-related projects, which might require different types of tools such as paper cutters or scrapbooking supplies.',
+ 'origin_dataset': 'OK-VQA',
+ 'origin_split': '{"model": "OmniLMM-12B", "feedback_model": "OmniLMM-12B", "type": "question_answering"}',
+ 'idx': 'OmniLMM-12B_OmniLMM-12B_0',
+ 'image_path': 'coco2017/train2017/000000489771.jpg'}</code>
 </pre>
 </div>
 </div>
@@ -2462,7 +2424,8 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>As we can seem, the image is a 28x28 grayscale image. In order to use it in in Argilla, we need to convert them to a base64 string.</p>
+<h3 id="convert-pil-image-to-base64">Convert PIL image to base64<a class="headerlink" href="#convert-pil-image-to-base64" title="Permanent link">&para;</a></h3>
+<p>As we can see, the image is a PIL Image. In order to use it in in Argilla, we need to convert them to a base64 string.</p>
 </div>
 </div>
 </div>
@@ -2479,22 +2442,62 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 </span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image_data_uri&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_uri</span>
 </span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="k">return</span> <span class="n">batch</span>
 </span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">hf_dataset</span><span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pil_to_data_uri</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="n">hf_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">hf_dataset_with_base64</span><span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pil_to_data_uri</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="n">hf_dataset_with_base64</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span></code></pre></div>
 
 </div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="output_text output_subarea output_execute_result">
-<pre>
-<code>{'image': &lt;PIL.PngImagePlugin.PngImageFile image mode=L size=28x28&gt;,
- 'label': 5,
- 'image_data_uri': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAABAElEQVR4nGNgGMyAWUhIqK5jvdSy/9/rGRgYGFhgEnJsVjYCwQwMDAxPJgV+vniQgYGBgREqZ7iXH8r6l/SV4dn7m8gmCt3++/fv37/Htn3/iMW+gDnZf/+e5WbQnoXNNXyMs/5GoQoxwVmf/n9kSGFiwAW49/11wynJoPzx4YIcRlyygR/+/i2XxCWru+vv32nSuGQFYv/83Y3b4p9/fzpAmSyoMnohpiwM1w5h06Q+5enfv39/bcMiJVF09+/fv39P+mFKiTtd/fv3799jgZiBJLT69t+/f/8eDuDEkDJf8+jv379/v7Ryo4qzMDAwMAQGMjBc3/y35wM2V1IfAABFF16Aa0wAOwAAAABJRU5ErkJggg=='}</code>
-</pre>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="retrieve-values-nested-in-json">Retrieve values nested in JSON<a class="headerlink" href="#retrieve-values-nested-in-json" title="Permanent link">&para;</a></h3>
+<p>The question type values are nested in a JSON object. We can obtain them by looping through the data and getting the <code>origin_split</code> column.</p>
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span> <span class="nf">retrieve_type_from_json</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">loaded_json</span> <span class="o">=</span> <span class="p">[</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;origin_split&quot;</span><span class="p">]]</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;task_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">loaded_json</span><span class="p">]</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="k">return</span> <span class="n">batch</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="n">hf_dataset_with_base64_task</span><span class="o">=</span> <span class="n">hf_dataset_with_base64</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">retrieve_type_from_json</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">hf_dataset_with_base64_task</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="create-vectors">Create vectors<a class="headerlink" href="#create-vectors" title="Permanent link">&para;</a></h3>
+<p>We will use the <code>sentence-transformers</code> library to create vectors for the questions. We will use the <code>TaylorAI/bge-micro-v2</code> model which strikes a good balance between speed and performance. Note that we also need to convert the vectort to a <code>list</code> to store it in the Argilla dataset.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="p">(</span><span class="s2">&quot;TaylorAI/bge-micro-v2&quot;</span><span class="p">)</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">def</span> <span class="nf">encode_questions</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">vectors_as_numpy</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;question&quot;</span><span class="p">])</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;question_vector&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vectors_as_numpy</span><span class="p">]</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="k">return</span> <span class="n">batch</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="n">hf_dataset_with_base64_task_vectors</span> <span class="o">=</span> <span class="n">hf_dataset_with_base64_task</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">encode_questions</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">hf_dataset_with_base64_task_vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span></code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="log-to-argilla">Log to Argilla<a class="headerlink" href="#log-to-argilla" title="Permanent link">&para;</a></h3>
 </div>
 </div>
 </div>
@@ -2508,8 +2511,17 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)))</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">hf_dataset</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">mapping</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_data_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">})</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)))</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">hf_dataset</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="p">{</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="s2">&quot;image_data_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">,</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="s2">&quot;idx&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;question&quot;</span><span class="p">,</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="s2">&quot;chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;chosen&quot;</span><span class="p">,</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="s2">&quot;rejected&quot;</span><span class="p">:</span> <span class="s2">&quot;rejected&quot;</span><span class="p">,</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="s2">&quot;task_type&quot;</span><span class="p">:</span> <span class="s2">&quot;task_type&quot;</span><span class="p">,</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="s2">&quot;question_vector&quot;</span><span class="p">:</span> <span class="s2">&quot;question_vector&quot;</span><span class="p">,</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="s2">&quot;origin_dataset&quot;</span><span class="p">:</span> <span class="s2">&quot;origin_dataset&quot;</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="p">})</span>
 </span></code></pre></div>
 
 </div>
@@ -2517,120 +2529,7 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="add-initial-model-suggestions">Add initial model suggestions<a class="headerlink" href="#add-initial-model-suggestions" title="Permanent link">&para;</a></h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The next step is to add suggestions to the dataset. This will make things easier and faster for the annotation team. Suggestions will appear as preselected options, so annotators will only need to correct them. In our case, we will generate them using <a href="https://huggingface.co/docs/transformers/en/tasks/zero_shot_image_classification">a zero-shot CLIP model</a>. However, you can use a framework or technique of your choice.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We will start by loading the model using a <code>transformers</code> pipeline.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">checkpoint</span> <span class="o">=</span> <span class="s2">&quot;openai/clip-vit-large-patch14&quot;</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">detector</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;zero-shot-image-classification&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;mps&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, let's try to make a model prediction and see if it makes sense.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">predictions</span> <span class="o">=</span> <span class="n">detector</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">candidate_labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">predictions</span><span class="p">,</span> <span class="n">display</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
-</span></code></pre></div>
-
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area">
-<div class="output_png output_subarea">
-<img alt="No description has been provided for this image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAABDklEQVR4AWNgGHhgPP/vfCMczjB49+fPn7fYJc0e//3z/uUfSzZMaS6bB3/+/jkV8udvFUSSCUnNzAMyQJ4Rz0EGXQxJY29GxkOljC/OT2JiRNICZoLcspnHu1KUgeHvZzQHqy39+/JCCETH3z9LUbSyb/rzwV0YZCcQ/P1zGMKAkpZ//tjDBdAlj/3dB5dj+P/3CJgD9YqPwf9NCMl//y8gOAwMoX+eScL47O1/d/HAOCA69M99GJe9+c9DdxgHTIf+mQjlGyz9sxZFioEh7O9DiEjRu7+L0OSAxv6cZCAbuunh3/vLLTAl//x5eh0Yl0ea0KUYGGSO/wHG1p+XMJtRVUg2ACV7VVEFB4IHAKxwbkRtVspVAAAAAElFTkSuQmCC"/>
-</div>
-</div>
-<div class="output_area">
-<div class="output_text output_subarea output_execute_result">
-<pre>
-<code>([{'score': 0.5236628651618958, 'label': '0'},
-  {'score': 0.11496700346469879, 'label': '7'},
-  {'score': 0.08030630648136139, 'label': '8'},
-  {'score': 0.07141078263521194, 'label': '9'},
-  {'score': 0.05868939310312271, 'label': '6'},
-  {'score': 0.05507850646972656, 'label': '5'},
-  {'score': 0.0341767854988575, 'label': '1'},
-  {'score': 0.027202051132917404, 'label': '4'},
-  {'score': 0.018533246591687202, 'label': '3'},
-  {'score': 0.015973029658198357, 'label': '2'}],
- None)</code>
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>It's time to make the predictions on the dataset! We will set a function that uses the zero-shot model. The model will infer the label based on the image. When working with large datasets, you can create a <code>batch_predict</code> method to speed up the process.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">prediction</span> <span class="o">=</span> <span class="n">detector</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">candidate_labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;image_label&quot;</span><span class="p">:</span> <span class="n">prediction</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span> <span class="s2">&quot;image_label.score&quot;</span><span class="p">:</span> <span class="n">prediction</span><span class="p">[</span><span class="s2">&quot;score&quot;</span><span class="p">]}</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>To update the records, we will need to retrieve them from the server and update them with the new suggestions. The <code>id</code> will always need to be provided as it is the records' identifier to update a record and avoid creating a new one.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">updated_data</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="p">{</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>        <span class="o">**</span><span class="n">predict</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="p">)</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="p">}</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">data</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="p">]</span>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">updated_data</span><span class="p">)</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Voilà! We have added the suggestions to the dataset, and they will appear in the UI marked with a ✨. </p>
+<p>Voilà! We have also added the suggestions to the dataset for the <code>chosen</code> <code>rejected</code> pairs, and they will appear in the UI marked with a ✨. </p>
 </div>
 </div>
 </div>
@@ -2656,290 +2555,6 @@ Cell <span class="ansi-green-fg">In[4], line 16</span>
 <p>Check this <a href="../../how_to_guides/annotate/">how-to guide</a> to know more about annotating in the UI.</p>
 </div>
 </div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="train-your-model">Train your model<a class="headerlink" href="#train-your-model" title="Permanent link">&para;</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>After the annotation, we will have a robust dataset to train the main model. In our case, we will fine-tune using transformers and the . However, you can select the one that best fits your requirements. So, let's start by retrieving the annotated records.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Check this <a href="../../how_to_guides/query/">how-to guide</a> to know more about filtering and querying in Argilla. Also, you can check the Hugging Face docs on <a href="https://huggingface.co/docs/transformers/en/tasks/image_classification">fine-tuning an image classification model</a>.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="formatting-the-data">Formatting the data<a class="headerlink" href="#formatting-the-data" title="Permanent link">&para;</a></h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="s2">&quot;image_classification_dataset&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">status_filter</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Query</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="n">rg</span><span class="o">.</span><span class="n">Filter</span><span class="p">((</span><span class="s2">&quot;response.status&quot;</span><span class="p">,</span> <span class="s2">&quot;==&quot;</span><span class="p">,</span> <span class="s2">&quot;submitted&quot;</span><span class="p">)))</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">submitted</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="p">(</span><span class="n">status_filter</span><span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">flatten</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We then need to convert our base64 images to a format that the model can understand so we will convert them to PIL images again.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">def</span> <span class="nf">base64_to_pil</span><span class="p">(</span><span class="n">base64_string</span><span class="p">):</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="n">image_data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;^data:image/.+;base64,&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">base64_string</span><span class="p">)</span>
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">image_data</span><span class="p">)))</span>
-</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="k">return</span> <span class="n">image</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, let's apply that to the whole dataset.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">submitted_pil_image</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="p">{</span>
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>        <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">base64_to_pil</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]),</span>
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;image_label.responses&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>    <span class="p">}</span>
-</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">submitted</span>
-</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="p">]</span>
-</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="n">submitted_pil_image</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We now need to ensure our images are forwarded with the correct dimensions. Because the original MNIST dataset is greyscale and the VIT model expects RGB, we need to add a channel dimension to the images. We will do this by stacking the images along the channel axis.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">def</span> <span class="nf">greyscale_to_rgb</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">Image</span><span class="p">:</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="k">return</span> <span class="n">Image</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">img</span><span class="p">))</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="n">submitted_pil_image_rgb</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="p">{</span>
-</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>        <span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">greyscale_to_rgb</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]),</span>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span>
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>    <span class="p">}</span>
-</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">submitted_pil_image</span>
-</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="p">]</span>
-</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="n">submitted_pil_image_rgb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Next, we will load the <code>ImageProcessor</code> for fine-tuning the model. This processor will handle the image resizing and normalization in order to be compatible with the model we intend to use.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">checkpoint</span> <span class="o">=</span> <span class="s2">&quot;google/vit-base-patch16-224-in21k&quot;</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="n">processor</span> <span class="o">=</span> <span class="n">AutoImageProcessor</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">)</span>
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="n">submitted_pil_image_rgb_processed</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    <span class="p">{</span>
-</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>        <span class="s2">&quot;pixel_values&quot;</span><span class="p">:</span> <span class="n">processor</span><span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">],</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">&#39;pt&#39;</span><span class="p">)[</span><span class="s2">&quot;pixel_values&quot;</span><span class="p">],</span>
-</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span>
-</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>    <span class="p">}</span>
-</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">submitted_pil_image_rgb</span>
-</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="p">]</span>
-</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="n">submitted_pil_image_rgb_processed</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can now convert the images to a Hugging Face datasets Dataset that is ready for fine-tuning.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">prepared_ds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">submitted_pil_image_rgb_processed</span><span class="p">)</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">prepared_ds</span> <span class="o">=</span> <span class="n">prepared_ds</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">prepared_ds</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="the-actual-training">The actual training<a class="headerlink" href="#the-actual-training" title="Permanent link">&para;</a></h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We then need to define our data collator, which will ensure the data is unpacked and stacked correctly for the model. We wi</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">def</span> <span class="nf">collate_fn</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    <span class="k">return</span> <span class="p">{</span>
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>        <span class="s1">&#39;pixel_values&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pixel_values&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">]),</span>
-</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>        <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">])</span>
-</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>    <span class="p">}</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Next, we can define our training metrics. We will use the accuracy metric to evaluate the model's performance.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="n">metric</span> <span class="o">=</span> <span class="n">load_metric</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="k">def</span> <span class="nf">compute_metrics</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>    <span class="k">return</span> <span class="n">metric</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">predictions</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">references</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">label_ids</span><span class="p">)</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We then load our model and configure the labels that we will use for training.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForImageClassification</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>    <span class="n">checkpoint</span><span class="p">,</span>
-</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>    <span class="n">num_labels</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span>
-</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    <span class="n">id2label</span><span class="o">=</span><span class="p">{</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)},</span>
-</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>    <span class="n">label2id</span><span class="o">=</span><span class="p">{</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">):</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">)}</span>
-</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="p">)</span>
-</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="n">model</span><span class="o">.</span><span class="n">config</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Finally, we define the training arguments and start the training process.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">training_args</span> <span class="o">=</span> <span class="n">TrainingArguments</span><span class="p">(</span>
-</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>  <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./image-classifier&quot;</span><span class="p">,</span>
-</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>  <span class="n">per_device_train_batch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>  <span class="n">evaluation_strategy</span><span class="o">=</span><span class="s2">&quot;steps&quot;</span><span class="p">,</span>
-</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>  <span class="n">num_train_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>  <span class="n">fp16</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="c1"># True if you have a GPU with mixed precision support</span>
-</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>  <span class="n">save_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>  <span class="n">eval_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>  <span class="n">logging_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-</span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>  <span class="n">learning_rate</span><span class="o">=</span><span class="mf">2e-4</span><span class="p">,</span>
-</span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>  <span class="n">save_total_limit</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>  <span class="n">remove_unused_columns</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-24-13"><a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>  <span class="n">push_to_hub</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-24-14"><a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>  <span class="n">load_best_model_at_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-24-15"><a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a><span class="p">)</span>
-</span><span id="__span-24-16"><a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a>
-</span><span id="__span-24-17"><a id="__codelineno-24-17" name="__codelineno-24-17" href="#__codelineno-24-17"></a><span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span>
-</span><span id="__span-24-18"><a id="__codelineno-24-18" name="__codelineno-24-18" href="#__codelineno-24-18"></a>    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-</span><span id="__span-24-19"><a id="__codelineno-24-19" name="__codelineno-24-19" href="#__codelineno-24-19"></a>    <span class="n">args</span><span class="o">=</span><span class="n">training_args</span><span class="p">,</span>
-</span><span id="__span-24-20"><a id="__codelineno-24-20" name="__codelineno-24-20" href="#__codelineno-24-20"></a>    <span class="n">data_collator</span><span class="o">=</span><span class="n">collate_fn</span><span class="p">,</span>
-</span><span id="__span-24-21"><a id="__codelineno-24-21" name="__codelineno-24-21" href="#__codelineno-24-21"></a>    <span class="n">compute_metrics</span><span class="o">=</span><span class="n">compute_metrics</span><span class="p">,</span>
-</span><span id="__span-24-22"><a id="__codelineno-24-22" name="__codelineno-24-22" href="#__codelineno-24-22"></a>    <span class="n">train_dataset</span><span class="o">=</span><span class="n">prepared_ds</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">],</span>
-</span><span id="__span-24-23"><a id="__codelineno-24-23" name="__codelineno-24-23" href="#__codelineno-24-23"></a>    <span class="n">eval_dataset</span><span class="o">=</span><span class="n">prepared_ds</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">],</span>
-</span><span id="__span-24-24"><a id="__codelineno-24-24" name="__codelineno-24-24" href="#__codelineno-24-24"></a>    <span class="n">tokenizer</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span>
-</span><span id="__span-24-25"><a id="__codelineno-24-25" name="__codelineno-24-25" href="#__codelineno-24-25"></a><span class="p">)</span>
-</span><span id="__span-24-26"><a id="__codelineno-24-26" name="__codelineno-24-26" href="#__codelineno-24-26"></a>
-</span><span id="__span-24-27"><a id="__codelineno-24-27" name="__codelineno-24-27" href="#__codelineno-24-27"></a><span class="n">train_results</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-</span><span id="__span-24-28"><a id="__codelineno-24-28" name="__codelineno-24-28" href="#__codelineno-24-28"></a><span class="n">trainer</span><span class="o">.</span><span class="n">save_model</span><span class="p">()</span>
-</span><span id="__span-24-29"><a id="__codelineno-24-29" name="__codelineno-24-29" href="#__codelineno-24-29"></a><span class="n">trainer</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">train_results</span><span class="o">.</span><span class="n">metrics</span><span class="p">)</span>
-</span><span id="__span-24-30"><a id="__codelineno-24-30" name="__codelineno-24-30" href="#__codelineno-24-30"></a><span class="n">trainer</span><span class="o">.</span><span class="n">save_metrics</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">train_results</span><span class="o">.</span><span class="n">metrics</span><span class="p">)</span>
-</span><span id="__span-24-31"><a id="__codelineno-24-31" name="__codelineno-24-31" href="#__codelineno-24-31"></a><span class="n">trainer</span><span class="o">.</span><span class="n">save_state</span><span class="p">()</span>
-</span></code></pre></div>
-
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>As the training data had a better-quality, we can expect a better model. So, we can update the remainder of our original dataset with the new model's suggestions.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="language-python highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">pipe</span> <span class="o">=</span> <span class="n">pipeline</span><span class="p">(</span><span class="s2">&quot;image-classification&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">image_processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
-</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="k">def</span> <span class="nf">run_inference</span><span class="p">(</span><span class="n">batch</span><span class="p">):</span>
-</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>    <span class="n">predictions</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
-</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image_label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">]</span>
-</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;image_label.score&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;score&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">prediction</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">]</span>
-</span><span id="__span-25-7"><a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>    <span class="k">return</span> <span class="n">batch</span>
-</span><span id="__span-25-8"><a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>
-</span><span id="__span-25-9"><a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">run_inference</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-25-10"><a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">hf_dataset</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span> <span class="n">mapping</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_data_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;image&quot;</span><span class="p">})</span>
-</span></code></pre></div>
-
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
