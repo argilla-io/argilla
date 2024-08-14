@@ -33,7 +33,6 @@ export default (_, inject: Inject) => {
 
   inject("colorSchema", (theme) => {
     updateTheme(theme);
-    systemTheme;
   });
 
   const init = () => {
