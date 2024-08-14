@@ -60,7 +60,6 @@ $header-button-color: #262a2e;
   left: 0;
   transform: translateY(0);
   position: sticky;
-  background: $bg;
   z-index: 3;
   :deep(.header__filters) {
     position: relative;
