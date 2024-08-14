@@ -2406,7 +2406,7 @@
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="vibe-check-the-dataset">Vibe check the dataset<a class="headerlink" href="#vibe-check-the-dataset" title="Permanent link">&para;</a></h2>
 <p>We will have a look at <a href="https://huggingface.co/datasets/tner/ontonotes5">the dataset</a> to understand its structure and the kind of data it contains. We do this by using <a href="https://huggingface.co/docs/hub/main/en/datasets-viewer-embed">the embedded Hugging Face Dataset Viewer</a>.</p>
-<iframe frameborder="0" height="560px" src="https://huggingface.co/datasets/tner/ontonotes5/embed/viewer/default/train?row=7" width="100%"></iframe>
+<iframe frameborder="0" height="560px" src="https://huggingface.co/datasets/tner/ontonotes5/embed/viewer/default/train" width="100%"></iframe>
 </div>
 </div>
 </div>
@@ -2420,7 +2420,7 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, we will need to configure the dataset. In the settings, we can specify the guidelines, fields, and questions. If needed, you can also add metadata and vectors. However, for our use case, we just need a text field and a span question. We will focus on Name Entity Recognition, but this workflow can also be applied to Span Classification, which differs in that the spans are less clearly defined and often overlap.</p>
+<p>Now, we will need to configure the dataset. In the settings, we can specify the guidelines, fields, and questions. If needed, you can also add metadata and vectors. However, for our use case, we just need a text field and a span question, corresponding to the <code>token</code> and <code>tags</code> columns. We will focus on Name Entity Recognition, but this workflow can also be applied to Span Classification, which differs in that the spans are less clearly defined and often overlap.</p>
 </div>
 </div>
 </div>
