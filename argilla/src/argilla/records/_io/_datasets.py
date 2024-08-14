@@ -18,8 +18,6 @@ from datasets import Dataset as HFDataset
 from datasets import IterableDataset
 
 from argilla.records._io._generic import GenericIO
-from joblib.test import data
-from numpy import isin
 
 if TYPE_CHECKING:
     from argilla.records import Record
