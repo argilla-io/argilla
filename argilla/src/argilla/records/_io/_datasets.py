@@ -59,8 +59,10 @@ class HFDatasetsIO:
             Generator[Dict[str, Union[str, float, int, list]], None, None]: A generator of dictionaries to be passed to DatasetRecords.add or DatasetRecords.update.
         """
         record_dicts = []
-        if not isinstance(dataset, IterableDataset):
+        try:
             dataset: IterableDataset = dataset.to_iterable_dataset()
+        except AttributeError:
+            pass
         for example in dataset:
             record_dicts.append(example)
         return record_dicts
