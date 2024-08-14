@@ -51,7 +51,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$header-button-color: #262a2e;
 .header {
   opacity: 1;
   transition: none;
@@ -79,21 +78,6 @@ $header-button-color: #262a2e;
     &:after {
       margin-top: calc($base-space/2);
     }
-  }
-}
-.header__button {
-  background: $header-button-color;
-  color: palette(white);
-  margin-right: $base-space;
-  padding: 10px 12px 10px 10px;
-  font-weight: 600;
-  @include font-size(14px);
-  box-shadow: $shadow-200;
-  &:hover {
-    background: lighten($header-button-color, 3%);
-  }
-  svg {
-    fill: palette(white);
   }
 }
 </style>
