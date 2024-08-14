@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Union, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from datasets import Dataset as HFDataset
+from datasets import IterableDataset
 
 from argilla.records._io._generic import GenericIO
+from joblib.test import data
+from numpy import isin
 
 if TYPE_CHECKING:
     from argilla.records import Record
@@ -58,6 +61,8 @@ class HFDatasetsIO:
             Generator[Dict[str, Union[str, float, int, list]], None, None]: A generator of dictionaries to be passed to DatasetRecords.add or DatasetRecords.update.
         """
         record_dicts = []
-        for example in dataset.to_iterable_dataset():
+        if not isinstance(dataset, IterableDataset):
+            dataset: IterableDataset = dataset.to_iterable_dataset()
+        for example in dataset:
             record_dicts.append(example)
         return record_dicts
