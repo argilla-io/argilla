@@ -88,35 +88,6 @@ $primary-darken-color: darken($primary-color, 10%);
 $secondary-color: palette(grey, 200);
 $secondary-lighten-color: lighten(palette(grey, 200), 5%);
 $secondary-darken-color: darken(palette(grey, 200), 5%);
-$highlight: $brand-primary-color;
-$similarity-color: palette(orange-red-crayola);
-$bg: palette(grey, 800);
-
-// Black opacity
-//-----------
-$black-87: rgba(0, 0, 0, 0.87);
-$black-54: rgba(0, 0, 0, 0.6);
-$black-37: rgba(0, 0, 0, 0.37);
-$black-20: rgba(0, 0, 0, 0.2);
-$black-10: rgba(0, 0, 0, 0.1);
-$black-6: rgba(0, 0, 0, 0.06);
-$black-4: rgba(0, 0, 0, 0.04);
-$black-3: rgba(0, 0, 0, 0.03);
-$black-2: rgba(0, 0, 0, 0.02);
-$black-1: rgba(0, 0, 0, 0.001);
-
-// White opacity
-//-----------
-$white-87: hsla(0, 0%, 100%, 0.87);
-$white-54: hsla(0, 0%, 100%, 0.54);
-$white-37: hsla(0, 0%, 100%, 0.37);
-$white-20: hsla(0, 0%, 100%, 0.2);
-$white-10: hsla(0, 0%, 100%, 0.1);
-$white-6: hsla(0, 0%, 100%, 0.06);
-$white-4: hsla(0, 0%, 100%, 0.04);
-$white-3: hsla(0, 0%, 100%, 0.03);
-$white-2: hsla(0, 0%, 100%, 0.02);
-$white-1: hsla(0, 0%, 100%, 0.03);
 
 // States
 //-----------

@@ -188,7 +188,7 @@ a {
 
 .highlight-text {
   display: inline;
-  color: $highlight;
+  color: var(--fg-highlight);
 }
 
 // TYPE //

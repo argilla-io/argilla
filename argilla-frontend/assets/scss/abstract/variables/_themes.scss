@@ -1,11 +1,13 @@
 :root {
+  --color-white: #ffffff;
+  --color-dark-grey: hsl(207, 9%, 19%);
   --bg-black: hsla(0, 0%, 0%, 0.87);
-  --bg-solid-grey-1: #{palette(grey, 800)};
-  --bg-solid-grey-2: #{palette(grey, 700)};
-  --bg-solid-grey-3: #{palette(grey, 600)};
+  --bg-solid-grey-1: hsl(0, 0%, 98%);
+  --bg-solid-grey-2: hsl(0, 0%, 96%);
+  --bg-solid-grey-3: hsl(0, 0%, 90%);
   --bg-accent-grey-1: hsl(0, 0%, 100%);
   --bg-accent-grey-2: hsl(0, 0%, 100%);
-  --bg-accent-grey-3: #{palette(grey, 800)};
+  --bg-accent-grey-3: hsl(0, 0%, 98%);
   --bg-opacity-1: hsla(0, 0%, 0%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 0%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 0%, 0.03);
@@ -38,13 +40,16 @@
   --fg-label-2: hsl(239, 37%, 40%);
   --bg-label: hsl(239, 36%, 47%);
   --bg-form-button-area: hsl(228, 50%, 96%);
+  --bg-similarity: hsl(2, 100%, 94%);
+  --fg-similarity: hsl(3, 100%, 69%);
+  --fg-highlight: hsl(3, 100%, 69%);
 }
 
 [data-theme="dark"] {
-  --bg-black: #{palette(black)};
+  --bg-black: #000000;
   --bg-solid-grey-1: hsl(214deg 12% 10%);
-  --bg-solid-grey-2: #{palette(grey, 150)};
-  --bg-solid-grey-3: #{palette(grey, 200)};
+  --bg-solid-grey-2: hsl(207, 9%, 19%);
+  --bg-solid-grey-3: hsl(0, 0%, 30%);
   --bg-accent-grey-1: hsl(214deg 12% 12%);
   --bg-accent-grey-2: hsl(214deg 12% 16%);
   --bg-accent-grey-3: hsl(214deg 12% 14%);
@@ -58,9 +63,9 @@
   --bg-opacity-37: hsla(0, 0%, 100%, 0.37);
   --bg-opacity-54: hsla(0, 0%, 100%, 0.54);
   --bg-opacity-87: hsla(0, 0%, 100%, 0.87);
-  --fg-primary: #{$white-87};
-  --fg-secondary: #{$white-54};
-  --fg-tertiary: #{$white-37};
+  --fg-primary: hsla(0, 0%, 100%, 0.87);
+  --fg-secondary: hsla(0, 0%, 100%, 0.54);
+  --fg-tertiary: hsla(0, 0%, 100%, 0.37);
   --fg-cuaternary: hsl(227, 100%, 70%);
   --fg-status-pending: hsl(35, 62%, 62%);
   --fg-status-draft: hsl(188, 92%, 39%);
@@ -80,4 +85,7 @@
   --fg-label-2: hsl(0, 0%, 100%);
   --bg-label: hsl(239, 37%, 40%);
   --bg-form-button-area: hsla(228, 50%, 96%, 0.174);
+  --bg-similarity: hsla(2, 100%, 94%, 4%);
+  --fg-similarity: hsla(3, 100%, 74%, 90%);
+  --fg-highlight: hsl(3, 100%, 69%);
 }
