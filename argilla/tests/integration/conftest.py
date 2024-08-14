@@ -49,6 +49,11 @@ def dataset_name() -> str:
     return f"test_dataset_{uuid.uuid4()}"
 
 
+@pytest.fixture()
+def username() -> str:
+    return f"test_username_{uuid.uuid4()}"
+
+
 @pytest.fixture
 def workspace(client: Argilla) -> Workspace:
     ws_name = f"test-{uuid.uuid4()}"

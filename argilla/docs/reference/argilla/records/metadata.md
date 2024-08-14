@@ -40,6 +40,22 @@ dataset_with_metadata.records.log(
 
 Depending on the `MetadataProperty` type, metadata might need to be formatted in a slightly different way.
 
+=== "For `TermsMetadataProperty`"
+
+    ```python
+    rg.Records(
+        fields={"text": "example"},
+        metadata={"category": "A"}
+    )
+
+    # with multiple terms
+
+    rg.Records(
+        fields={"text": "example"},
+        metadata={"category": ["A", "B"]}
+    )
+    ```
+
 === "For `FloatMetadataProperty`"
 
     ```python
@@ -55,21 +71,5 @@ Depending on the `MetadataProperty` type, metadata might need to be formatted in
     rg.Records(
         fields={"text": "example"},
         metadata={"category": 42}
-    )
-    ```
-
-=== "For `TermsMetadataProperty`"
-
-    ```python
-    rg.Records(
-        fields={"text": "example"},
-        metadata={"category": "A"}
-    )
-
-    # with multiple terms
-
-    rg.Records(
-        fields={"text": "example"},
-        metadata={"category": ["A", "B"]}
     )
     ```

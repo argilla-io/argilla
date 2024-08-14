@@ -12,4 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = "2.0.1"
+from argilla._exceptions._base import ArgillaError
+
+
+class ArgillaCredentialsError(ArgillaError):
+    def __init__(self, message: str = "Credentials (api_key and/or api_url) are invalid") -> None:
+        super().__init__(message)
