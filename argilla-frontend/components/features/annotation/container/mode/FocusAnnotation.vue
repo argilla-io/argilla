@@ -26,7 +26,7 @@
               <PaginationFeedbackTask :recordCriteria="recordCriteria" />
             </div>
             <div v-if="recordsMessage" class="wrapper--empty">
-              <p class="wrapper__text --heading3" v-text="recordsMessage" />
+              <p class="wrapper__text --heading3" v-html="recordsMessage" />
             </div>
             <Record
               v-else
@@ -202,9 +202,11 @@ export default {
   }
   &__text {
     color: $black-54;
+    max-width: 80%;
   }
   &--empty {
     width: 100%;
+    text-align: center;
     height: 80vh;
     display: flex;
     align-items: center;

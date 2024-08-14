@@ -32,9 +32,10 @@ export default {
   guidelines: "Richtlinien",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
   noRecordsMessages: {
-    datasetEmptyForAnnotator: "Der Datensatz ist leer, kommen Sie bald wieder",
+    datasetEmptyForAnnotator:
+      "Der Datensatz ist leer. Bitten fragen Sie einen Admin, Einträge Hinzufügen und kommst du bald wieder.",
     datasetEmptyForAdmin:
-      "The dataset is empty. You can add records using the Python SDK, see [documentation](https://docs.argilla.io/latest/how_to_guides/record/) on adding records.",
+      "Der Datensatz ist leer. Du kannst Einträgen mit dem Python SDK hinzufügen, siehe <a href='https://docs.argilla.io/latest/how_to_guides/record/'>dokumentation</a> zum Hinzufügen von Einträgen.",
     taskDistributionCompleted: "🎉 Die Aufgabe ist erledigt!",
     noDraftRecords:
       "Sie haben keine Datensätze mit Antwortentwürfen / Sie haben keine Datensätze im Entwurf ",

@@ -43,7 +43,7 @@ export default {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",
     datasetEmptyForAdmin:
-      "The dataset is empty. You can add records using the Python SDK, see [documentation](https://docs.argilla.io/latest/how_to_guides/record/) on adding records.",
+      "The dataset is empty. You can add records using the Python SDK, see <a href='https://docs.argilla.io/latest/how_to_guides/record/'>documentation</a> on adding records.",
     taskDistributionCompleted: "🎉 The task is completed!",
     noDraftRecords:
       "You have no records with draft responses / You have no records in draft",
