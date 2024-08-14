@@ -1,17 +1,20 @@
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
 import { Records } from "~/v1/domain/entities/record/Records";
-import { useTranslate } from "~/v1/infrastructure/services";
+import { useRole, useTranslate } from "~/v1/infrastructure/services";
 import { useMetrics } from "~/v1/infrastructure/storage/MetricsStorage";
 import { useTeamProgress } from "~/v1/infrastructure/storage/TeamProgressStorage";
 
 export const useRecordMessages = (recordCriteria: RecordCriteria) => {
   const t = useTranslate();
+  const { isAdminOrOwnerRole } = useRole();
   const { state: metrics } = useMetrics();
   const { state: progress } = useTeamProgress();
 
   const getMessagesForLoading = (records: Records) => {
     if (metrics.isEmpty) {
-      return t("noRecordsMessages.datasetEmpty");
+      return isAdminOrOwnerRole.value
+        ? t("noRecordsMessages.datasetEmptyForAdmin")
+        : t("noRecordsMessages.datasetEmptyForAnnotator");
     }
 
     if (progress.isCompleted) {

@@ -4,6 +4,7 @@ import { Progress } from "~/v1/domain/entities/dataset/Progress";
 import { RecordStatus } from "~/v1/domain/entities/record/RecordAnswer";
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
 import { Records } from "~/v1/domain/entities/record/Records";
+import { useRole } from "~/v1/infrastructure/services";
 import { useMetrics } from "~/v1/infrastructure/storage/MetricsStorage";
 import { useTeamProgress } from "~/v1/infrastructure/storage/TeamProgressStorage";
 
@@ -11,6 +12,9 @@ jest.mock("~/v1/infrastructure/storage/MetricsStorage");
 const useMetricsMocked = jest.mocked(useMetrics);
 jest.mock("~/v1/infrastructure/storage/TeamProgressStorage");
 const useTeamProgressMocked = jest.mocked(useTeamProgress);
+
+jest.mock("~/v1/infrastructure/services/useRole");
+const useRoleMocked = jest.mocked(useRole);
 
 const createRecordCriteria = (
   status: RecordStatus,
@@ -66,9 +70,15 @@ const mockTamProgressWith = (progress: Progress) => {
 
 describe("useRecordsMessages", () => {
   describe("getMessagesForLoading should", () => {
-    test("return `The dataset is empty message' when the dataset no have records", () => {
+    test("return `The dataset is empty message for admin' when the dataset no have records and the logged in user is admin or owner", () => {
       const recordCriteria = createRecordCriteria("pending");
       const records = createRecordsMockWith(false);
+      useRoleMocked.mockReturnValue({
+        isAdminOrOwner: jest.fn(),
+        isAdminOrOwnerRole: {
+          value: true,
+        } as any,
+      });
 
       mockMetricsWith(METRICS.EMPTY());
       mockTamProgressWith(PROGRESS.EMPTY());
@@ -76,7 +86,27 @@ describe("useRecordsMessages", () => {
       const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
       expect(getMessagesForLoading(records)).toBe(
-        "#noRecordsMessages.datasetEmpty#"
+        "#noRecordsMessages.datasetEmptyForAdmin#"
+      );
+    });
+
+    test("return `The dataset is empty message for annotator' when the dataset no have records and the logged in user is annotator", () => {
+      const recordCriteria = createRecordCriteria("pending");
+      const records = createRecordsMockWith(false);
+      useRoleMocked.mockReturnValue({
+        isAdminOrOwner: jest.fn(),
+        isAdminOrOwnerRole: {
+          value: false,
+        } as any,
+      });
+
+      mockMetricsWith(METRICS.EMPTY());
+      mockTamProgressWith(PROGRESS.EMPTY());
+
+      const { getMessagesForLoading } = useRecordMessages(recordCriteria);
+
+      expect(getMessagesForLoading(records)).toBe(
+        "#noRecordsMessages.datasetEmptyForAnnotator#"
       );
     });
 
