@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="settings">
     <h2 class="--heading5 --medium">{{ $t("settings.datasetInfo") }}</h2>
     <div class="settings__area">
       <div class="settings__row">

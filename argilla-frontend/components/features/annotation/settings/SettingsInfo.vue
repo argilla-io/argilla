@@ -213,7 +213,8 @@ export default {
     width: 80px;
     height: 24px;
     padding: $base-space * 2;
-    background: palette(white);
+    background: var(--bg-accent-grey-2);
+    color: var(--fg-primary);
     border: 1px solid var(--bg-opacity-20);
     border-radius: $border-radius;
     outline: 0;

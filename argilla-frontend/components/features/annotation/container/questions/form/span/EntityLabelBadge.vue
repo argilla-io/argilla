@@ -99,6 +99,9 @@ input[type="checkbox"] {
   border-radius: $border-radius;
   cursor: pointer;
   user-select: none;
+  [data-theme="dark"] & {
+    background: hsl(from v-bind(optionDarkColor) h s l / 18%);
+  }
   span {
     white-space: nowrap;
     overflow: hidden;
@@ -107,10 +110,16 @@ input[type="checkbox"] {
   }
   &:not(.label-active):hover {
     background: v-bind(optionLightColor);
+    [data-theme="dark"] & {
+      background: hsl(from v-bind(optionDarkColor) h s l / 22%);
+    }
   }
   &.label-active {
     background: v-bind(optionColor);
     color: var(--fg-primary);
+    [data-theme="dark"] & {
+      background: hsl(from v-bind(optionDarkColor) h s l / 80%);
+    }
   }
 }
 

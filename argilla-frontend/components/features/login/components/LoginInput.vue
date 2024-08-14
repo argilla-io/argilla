@@ -129,7 +129,7 @@ export default {
   &__label {
     display: block;
     margin-bottom: calc($base-space / 2);
-    color: $black-87;
+    color: rgba(0, 0, 0, 0.87);
     font-weight: 500;
   }
   &__input {
@@ -140,7 +140,7 @@ export default {
     height: $base-space * 5.5;
     padding: $base-space * 2;
     background: palette(white);
-    border: 1px solid $black-20;
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: $border-radius;
     outline: 0;
     @include font-size(16px);
@@ -163,7 +163,7 @@ export default {
   }
 }
 .--has-error input {
-  border-color: $black-20;
+  border-color: rgba(0, 0, 0, 0.2);
   &:focus {
     border-color: $primary-color;
   }
@@ -176,7 +176,7 @@ select {
     &,
     &:hover,
     &:focus {
-      -webkit-text-fill-color: $black-87;
+      -webkit-text-fill-color: rgba(0, 0, 0, 0.87);
       -webkit-box-shadow: 0 0 0px 1000px palette(white) inset;
       box-shadow: 0 0 0px 1000px palette(white) inset;
       transition: background-color 5000s ease-in-out 0s;

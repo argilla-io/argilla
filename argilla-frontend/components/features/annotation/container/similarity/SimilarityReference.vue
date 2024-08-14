@@ -139,8 +139,8 @@ export default {
     align-items: center;
     gap: $base-space;
     min-width: 0;
-    background: lighten($similarity-color, 25%);
-    border: 1px solid lighten($similarity-color, 10%);
+    background: var(--bg-similarity);
+    border: 1px solid hsl(from var(--fg-similarity) h s l / 25%);
     padding: 2px $base-space;
     border-radius: $border-radius-l;
     @include font-size(12px);
@@ -151,13 +151,13 @@ export default {
       text-overflow: ellipsis;
       font-weight: 500;
       line-height: 1rem;
-      color: $similarity-color;
+      color: var(--fg-similarity);
     }
     &__button-close.button {
       padding: 0;
-      color: $similarity-color;
+      color: var(--fg-similarity);
       &:hover {
-        color: darken($similarity-color, 15%);
+        color: var(--fg-similarity);
       }
     }
   }

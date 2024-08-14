@@ -315,7 +315,7 @@ $borderColor: var(--bg-opacity-6);
       border-bottom: 1px solid $borderColor;
     }
     .svg-icon {
-      fill: var(--fg-primary);
+      fill: var(--fg-secondary);
     }
     &__checkbox {
       margin: 0 !important;

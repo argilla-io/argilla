@@ -124,7 +124,8 @@ export default {
         width: 100%;
         height: 24px;
         padding: 16px;
-        background: palette(white);
+        background: var(--bg-accent-grey-2);
+        color: var(--fg-primary);
         border: 1px solid var(--bg-opacity-20);
         border-radius: $border-radius;
         outline: 0;

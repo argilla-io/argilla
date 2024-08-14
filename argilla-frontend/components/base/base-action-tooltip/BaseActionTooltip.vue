@@ -49,10 +49,10 @@ export default {
 .tooltip {
   position: absolute;
   top: 0;
-  background: palette(grey, 100);
+  background: var(--bg-accent-grey-1);
   display: inline-block;
   border-radius: $border-radius-s;
-  color: palette(white);
+  color: var(--fg-primary);
   @include font-size(12px);
   box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
   padding: 0.1em 0.5em;
@@ -67,14 +67,6 @@ export default {
   }
   &__container {
     position: relative;
-    &.active {
-      :deep(svg) {
-        .breadcrumbs &,
-        .code & {
-          fill: $brand-secondary-color;
-        }
-      }
-    }
   }
 }
 </style>

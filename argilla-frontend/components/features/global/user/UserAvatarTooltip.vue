@@ -130,18 +130,18 @@ $buttonSize: 34px;
     top: 3.8em;
     right: -0.5em;
     padding-top: $base-space * 2;
-    background: palette(grey, 100);
+    background: var(--color-dark-grey);
     border-radius: $border-radius;
     @include font-size(14px);
     font-weight: 400;
-    color: palette(white);
+    color: var(--color-white);
     box-shadow: $shadow;
     min-width: 260px;
     &:after {
       position: absolute;
       top: -10px;
       right: 1em;
-      @include triangle(top, 10px, 10px, palette(grey, 100));
+      @include triangle(top, 10px, 10px, var(--color-dark-grey));
     }
     a {
       text-decoration: none;
@@ -175,7 +175,7 @@ $buttonSize: 34px;
   font-weight: 400;
   line-height: 1em;
   padding: 1em;
-  background: $black-54;
+  background: rgba(0, 0, 0, 0.54);
   text-align: right;
   border-bottom-right-radius: $border-radius;
   border-bottom-left-radius: $border-radius;

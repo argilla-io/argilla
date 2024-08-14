@@ -59,7 +59,7 @@ export default {
   &__content {
     min-height: 65px;
     display: block;
-    background: palette(white);
+    background: var(--bg-accent-grey-1);
     padding: $base-space;
     border-radius: $border-radius;
     border: 1px solid var(--bg-opacity-10);

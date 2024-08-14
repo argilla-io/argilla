@@ -13,13 +13,13 @@ export default {
 <style lang="scss" scoped>
 .button-hf {
   @extend %button !optional;
-  background: $black-87;
-  color: palette(white);
+  background: rgba(0, 0, 0, 0.87);
+  color: #ffffff;
   width: 100%;
   padding: calc($base-space / 2) $base-space * 4;
   justify-content: center;
   &:hover {
-    background: lighten($black-87, 10%);
+    background: lighten(rgba(0, 0, 0, 0.87), 10%);
   }
   svg {
     width: 30px;

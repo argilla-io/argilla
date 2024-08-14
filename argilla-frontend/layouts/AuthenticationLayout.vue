@@ -27,7 +27,7 @@ export default {
 .auth {
   &__wrapper {
     display: flex;
-    background: palette(white);
+    background: #ffffff;
     min-height: 100vh;
   }
   &__info {
@@ -45,7 +45,7 @@ export default {
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
-      color: $black-87;
+      color: rgba(0, 0, 0, 0.87);
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
@@ -56,7 +56,7 @@ export default {
       }
       &--mobile {
         position: relative;
-        color: palette(white);
+        color: #ffffff;
         max-width: 260px;
         margin: 0;
         @include font-size(20px);

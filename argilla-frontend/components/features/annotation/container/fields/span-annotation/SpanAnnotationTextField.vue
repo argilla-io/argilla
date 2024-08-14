@@ -50,21 +50,27 @@
         <template v-for="{ id, color } in spanQuestion.answer.options">
           <style :key="id" scoped>
             .span-annotation__field::highlight(hl-{{id}}) {
+              color: var(--color-dark-grey);
               background-color: {{color}};
             }
             .span-annotation__field::highlight(hl-{{id}}-selection) {
+              color: var(--color-dark-grey);
               background-color: {{color}};
             }
             .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
+              color: var(--color-dark-grey);
               background: {{color.palette.light}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
+              color: var(--color-dark-grey);
               background: {{color}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
+              color: var(--color-dark-grey);
               background: {{color.palette.light}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              color: var(--color-dark-grey);
               background: {{color}};
             }
             ::highlight(search-text-highlight-{{name}}) {
@@ -261,6 +267,7 @@ export default {
     &--active {
       cursor: none;
       &::selection {
+        color: var(--color-dark-grey);
         background-color: transparent;
       }
     }
@@ -285,6 +292,6 @@ export default {
   left: 0;
 }
 ::highlight(search-text-highlight) {
-  color: $highlight;
+  color: var(--fg-highlight);
 }
 </style>

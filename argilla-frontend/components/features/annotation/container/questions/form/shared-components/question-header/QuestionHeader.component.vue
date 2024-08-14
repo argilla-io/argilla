@@ -18,7 +18,6 @@
       v-tooltip="{
         content: tooltipMessage,
         open: openTooltip,
-        backgroundColor: '#FFF',
       }"
     />
   </div>

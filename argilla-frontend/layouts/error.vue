@@ -52,7 +52,7 @@ export default {
 .error {
   position: relative;
   min-height: 100vh;
-  background: palette(white);
+  background: #ffffff;
   &__container {
     @extend %container;
     margin: auto;
@@ -67,7 +67,7 @@ export default {
   &__code {
     position: absolute;
     left: -3vw;
-    color: palette(white);
+    color: #ffffff;
     font-family: $secondary-font-family;
     text-shadow: 0 0 2px $brand-primary-color;
     font-size: 34vw;
@@ -119,7 +119,7 @@ export default {
     border: 0;
     outline: 0;
     text-decoration: none;
-    color: palette(white);
+    color: #ffffff;
     @include font-size(16px);
     font-weight: 600;
     &:hover {

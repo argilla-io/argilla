@@ -271,6 +271,9 @@ export default {
   user-select: none;
   transform-origin: left top;
   transition: scale 0.2s;
+  [data-theme="dark"] & {
+    color: var(--color-dark-grey);
+  }
   &:before {
     content: "";
     position: absolute;
@@ -353,9 +356,9 @@ export default {
     display: none;
     padding: 1px;
     border-radius: 0;
-    background: var(--bg-opacity-54);
+    background: var(--color-dark-grey);
     &:hover {
-      background: var(--bg-opacity-87);
+      background: hsl(from var(--color-dark-grey) h s l / 80%);
     }
   }
   &--clickable {

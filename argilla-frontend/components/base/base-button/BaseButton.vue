@@ -193,15 +193,6 @@ export default {
       border-color: $primary-darken-color;
     }
   }
-  &.light {
-    background: lighten($black-4, 50%);
-    color: $primary-color;
-    &:hover,
-    &:active,
-    &.active {
-      background: $black-4;
-    }
-  }
   &.text {
     padding-left: 0;
     padding-right: 0;
@@ -211,14 +202,6 @@ export default {
     &:hover {
       background: none;
       color: darken($primary-color, 10%);
-    }
-  }
-  &.link {
-    background: none;
-    color: $primary-color;
-    &:hover {
-      text-decoration: underline;
-      background: none;
     }
   }
 }
@@ -243,12 +226,12 @@ export default {
     color: var(--fg-secondary);
   }
   &.light {
-    background: lighten($black-4, 50%);
+    background: hsl(from var(--bg-opacity-4) h s l / 3%);
     color: var(--fg-secondary);
     &:hover,
     &:active,
     &.active {
-      background: var(--bg-opacity-4);
+      background: var(--bg-opacity-6);
     }
     .svg-icon {
       fill: var(--fg-secondary);
