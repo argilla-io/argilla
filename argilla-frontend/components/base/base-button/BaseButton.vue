@@ -249,15 +249,6 @@ export default {
       color: var(--fg-primary);
     }
   }
-  &.link {
-    background: none;
-    color: var(--fg-secondary);
-    padding: 0;
-    &:hover {
-      text-decoration: underline;
-      background: none;
-    }
-  }
 }
 .--danger {
   background-color: $danger;

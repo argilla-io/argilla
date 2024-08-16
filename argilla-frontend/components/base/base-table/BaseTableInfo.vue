@@ -77,7 +77,7 @@
                           >
                             <base-button
                               :title="action.title"
-                              class="table-info__actions__button button-icon"
+                              class="table-info__actions__button"
                               @click.prevent="
                                 onActionClicked(action.name, item)
                               "
@@ -429,16 +429,16 @@ $borderColor: var(--bg-opacity-6);
     &__buttons {
       display: flex;
       flex-shrink: 0;
-
-      &__button {
-        position: relative;
-        display: inline-block;
-        .svg-icon {
-          margin: 0;
-        }
-        & + #{$this} {
-          margin-left: auto;
-        }
+    }
+    &__button {
+      position: relative;
+      display: inline-block;
+      padding: $base-space;
+      .svg-icon {
+        margin: 0;
+      }
+      & + #{$this} {
+        margin-left: auto;
       }
     }
   }
