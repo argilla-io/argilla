@@ -22,6 +22,7 @@ export const useColorSchema = () => {
 
   return {
     currentTheme,
+    setTheme,
     initialize,
   };
 };
