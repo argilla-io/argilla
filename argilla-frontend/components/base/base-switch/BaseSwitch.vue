@@ -137,7 +137,7 @@ $switch-thumb-size: 18px;
     pointer-events: none;
     cursor: default;
     .re-switch-thumb {
-      background-color: palette(white) !important;
+      background-color: var(--color-white) !important;
       transform: translate3d(-1px, -50%, 0px) !important;
     }
     &:active {
@@ -160,7 +160,7 @@ $switch-thumb-size: 18px;
       position: absolute;
       top: 50%;
       left: 0;
-      background-color: $primary-color;
+      background-color: var(--bg-action);
       border-radius: 50%;
       transition: $swift-linear;
     }

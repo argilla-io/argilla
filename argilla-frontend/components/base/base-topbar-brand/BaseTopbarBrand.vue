@@ -36,7 +36,7 @@ export default {
   min-height: $topbarHeight;
   position: relative;
   background: var(--bg-black);
-  color: palette(white);
+  color: var(--color-white);
   padding-top: 0;
   padding-bottom: 0;
   padding-right: 1.2em;

@@ -111,9 +111,9 @@ $error-color: #ffd9d7;
   #{$this}__link.button {
     padding: 0;
     @include font-size(12px);
-    color: $primary-color;
+    color: var(--bg-action);
     &:hover {
-      color: darken($primary-color, 10%);
+      color: var(--bg-action-accent);
     }
   }
   &__close-button {

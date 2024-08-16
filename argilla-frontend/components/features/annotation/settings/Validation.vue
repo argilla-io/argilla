@@ -24,7 +24,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$color-error: palette(orange-red-crayola);
+$color-error: var(--color-brand);
 .--error-message {
   @include font-size(12px);
   color: $color-error;

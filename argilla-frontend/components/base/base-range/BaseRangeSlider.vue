@@ -78,7 +78,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$slider-color: $primary-color;
+$slider-color: var(--bg-action);
 $slider-light-color: rgba(0, 26, 255, 0.1);
 $slider-thumb-size: 16px;
 label {
@@ -111,8 +111,8 @@ label {
     margin-left: -15px;
     width: 30px;
     text-align: center;
-    color: palette(white);
-    background: palette(grey, 200);
+    color: var(--color-white);
+    background: var(--color-black);
     border-radius: $border-radius-s;
     @include font-size(12px);
     &:before {
@@ -120,7 +120,7 @@ label {
       left: calc(50% - 6px);
       top: 0;
       transform: translateY(-50%);
-      @include triangle(top, 6px, 6px, palette(grey, 200));
+      @include triangle(top, 6px, 6px, var(--color-black));
     }
     .range:hover & {
       display: block;

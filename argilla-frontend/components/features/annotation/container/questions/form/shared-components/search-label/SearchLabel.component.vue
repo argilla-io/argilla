@@ -87,7 +87,7 @@ export default {
   overflow: hidden;
   transition: all 0.2s ease-out;
   &:focus-within {
-    border-color: $primary-color;
+    border-color: var(--bg-action);
   }
   &:hover {
     transition: all 0.2s ease-in;
@@ -108,7 +108,7 @@ export default {
     }
   }
   &.--focused {
-    border-color: $primary-color;
+    border-color: var(--bg-action);
   }
 }
 

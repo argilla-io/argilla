@@ -442,27 +442,6 @@ $borderColor: var(--bg-opacity-6);
       }
     }
   }
-  &__title {
-    display: block;
-    hyphens: auto;
-    word-break: break-word;
-    .button-icon {
-      padding: $base-space;
-      display: inline-block;
-      .svg-icon {
-        fill: var(--fg-tertiary);
-        &:hover {
-          fill: var(--fg-secondary);
-        }
-      }
-    }
-    a {
-      text-decoration: none;
-      &:hover {
-        color: palette(black);
-      }
-    }
-  }
 }
 button[data-title] {
   position: relative;

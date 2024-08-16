@@ -101,7 +101,7 @@ export default {
     text-decoration: none;
     color: var(--fg-cuaternary);
     &:hover {
-      color: darken($primary-color, 10%);
+      color: var(--bg-action-accent);
     }
   }
   p > code:not(.hljs),

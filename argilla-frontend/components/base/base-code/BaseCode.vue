@@ -29,7 +29,7 @@ export default {
   top: 1em;
   right: 1em;
   svg {
-    fill: palette(white);
+    fill: var(--color-white);
   }
 }
 </style>

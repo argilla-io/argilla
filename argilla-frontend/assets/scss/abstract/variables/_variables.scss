@@ -15,83 +15,13 @@
  * limitations under the License.
  */
 
-// Color map
-//-----------
-$palettes: (
-  white: (
-    base: #ffffff,
-  ),
-  black: (
-    base: #000000,
-  ),
-  grey: (
-    100: #212121,
-    150: #2d3236,
-    200: #4d4d4d,
-    300: #686a6d,
-    400: #838589,
-    500: #a7a7a7,
-    600: #e6e6e6,
-    700: #f5f5f5,
-    800: #fafafa,
-  ),
-  blue: (
-    100: #52a3ed,
-    500: #3e5cc9,
-  ),
-  purple: (
-    100: #3b3269,
-    200: #4c4ea3,
-    300: #d6d6ff,
-    400: #eeeeff,
-    800: #f0f0fe,
-    900: #f6f6fe,
-  ),
-  pink: (
-    base: #f2067a,
-  ),
-  yellow: (
-    400: #fee075,
-  ),
-  orange: (
-    400: #fdbc4d,
-  ),
-  orange-red-crayola: (
-    base: #ff675f,
-  ),
-  apricot: (
-    light: #fffbfa,
-    base: #f8c0a7,
-    dark: #fd8f5e,
-  ),
-  brown: (
-    base: #bb720a,
-  ),
-  green: (
-    base: #60a018,
-  ),
-  red: (
-    base: #cf3832,
-  ),
-  turquoise: (
-    base: #08a4bd,
-  ),
-);
-
-// Colours
-//-----------
-$primary-color: palette(blue, 500);
-$secondary-color: palette(grey, 200);
-$secondary-lighten-color: lighten(palette(grey, 200), 5%);
-$secondary-darken-color: darken(palette(grey, 200), 5%);
-
 // States
 //-----------
-$error: palette(pink);
-$danger: palette(red);
-$warning: palette(apricot, dark);
-$success: palette(green);
-$info: palette(grey, 600);
+$error: #ff675f;
+$danger: #ff675f;
+$warning: #fd8f5e;
+$success: #60a018;
+$info: #e6e6e6;
 
 // Fonts
 //-----------
@@ -169,7 +99,3 @@ $swift-linear: all $swift-linear-duration $swift-linear-timing-function !default
 
 // topbar
 $topbarHeight: $base-space * 7;
-
-// record
-$record-reference-border-color: palette(apricot, dark);
-$record-reference-background-color: palette(apricot, light);

@@ -315,7 +315,7 @@ $max-visible-card-items: 12;
     &--ranked {
       @extend .draggable__rank-card;
       background-color: $card-bg-primary-color;
-      color: palette(white);
+      color: var(--color-white);
       &:focus {
         outline: 2px solid var(--fg-cuaternary);
       }

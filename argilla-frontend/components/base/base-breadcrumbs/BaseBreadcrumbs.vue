@@ -96,7 +96,7 @@ export default {
     }
   }
   &__item {
-    color: palette(white);
+    color: var(--color-white);
     text-decoration: none;
     outline: none;
     &.--action {

@@ -141,7 +141,7 @@ export default {
     pointer-events: none;
   }
   &:focus {
-    outline: 2px solid $primary-color;
+    outline: 2px solid var(--bg-action);
   }
   &:focus:not(:focus-visible) {
     outline: none;
@@ -151,8 +151,8 @@ export default {
   @extend %button;
   .spinner {
     flex-shrink: 0;
-    border: 3px solid #242323d8;
-    border-top-color: #00000021;
+    border: 3px solid var(--bg-opacity-54);
+    border-top-color: var(--bg-opacity-10);
   }
 }
 .small {
@@ -165,43 +165,43 @@ export default {
   justify-content: center;
 }
 .primary {
-  background-color: $primary-color;
-  color: palette(white);
+  background-color: var(--bg-action);
+  color: var(--color-white);
   .svg-icon {
-    fill: palette(white);
+    fill: var(--color-white);
   }
   .spinner {
     border-color: #ffffff40;
-    border-top-color: palette(white);
+    border-top-color: var(--color-white);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: $primary-darken-color;
+    background-color: var(--bg-action-accent);
   }
   &.outline {
     background: none;
-    border: 1px solid $primary-color;
-    color: $primary-color;
+    border: 1px solid var(--bg-action);
+    color: var(--bg-action);
     .svg-icon {
-      fill: $primary-color;
+      fill: var(--bg-action);
     }
     &:hover,
     &:active,
     &.active {
-      color: $primary-darken-color;
-      border-color: $primary-darken-color;
+      color: var(--bg-action-accent);
+      border-color: var(--bg-action-accent);
     }
   }
   &.text {
     padding-left: 0;
     padding-right: 0;
     background: none;
-    color: $primary-color;
+    color: var(--bg-action);
     border-radius: 0;
     &:hover {
       background: none;
-      color: darken($primary-color, 10%);
+      color: var(--bg-action-accent);
     }
   }
 }
@@ -261,9 +261,9 @@ export default {
 }
 .--danger {
   background-color: $danger;
-  color: palette(white);
+  color: var(--color-white);
   .svg-icon {
-    fill: palette(white);
+    fill: var(--color-white);
   }
   &:hover,
   &:active,

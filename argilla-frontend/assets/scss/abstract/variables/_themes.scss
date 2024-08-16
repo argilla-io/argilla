@@ -1,6 +1,11 @@
 :root {
-  --color-white: #ffffff;
+  --color-black: hsla(0, 0%, 0%, 0.87);
+  --color-white: hsl(0, 0%, 100%);
   --color-dark-grey: hsl(207, 9%, 19%);
+  --color-brand: hsl(3, 100%, 69%);
+  --color-brand-secondary: hsl(19, 85%, 81%);
+  --bg-action: hsl(227, 56%, 52%);
+  --bg-action-accent: hsl(227, 50%, 46%);
   --bg-black: hsla(0, 0%, 0%, 0.87);
   --bg-solid-grey-1: hsl(0, 0%, 98%);
   --bg-solid-grey-2: hsl(0, 0%, 96%);
@@ -52,6 +57,8 @@
 
 [data-theme="dark"] {
   --bg-black: #000000;
+  --bg-action: hsl(227, 56%, 52%);
+  --bg-action-accent: hsl(227, 50%, 55%);
   --bg-solid-grey-1: hsl(214deg 12% 10%);
   --bg-solid-grey-2: hsl(207, 9%, 19%);
   --bg-solid-grey-3: hsl(0, 0%, 30%);

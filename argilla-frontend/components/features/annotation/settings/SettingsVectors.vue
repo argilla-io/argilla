@@ -137,7 +137,7 @@ export default {
         border-radius: $border-radius;
         outline: 0;
         &:focus {
-          border: 1px solid $primary-color;
+          border: 1px solid var(--bg-action);
         }
       }
     }
