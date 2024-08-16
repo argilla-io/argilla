@@ -14,34 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { Inject } from "@nuxt/types/app";
+import { useColorSchema } from "~/v1/infrastructure/services/useColorSchema";
+
 export default (_, inject: Inject) => {
-  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  const colorSchema = useColorSchema();
 
-  const getInitialTheme = localStorage.getItem("theme") || systemTheme;
+  colorSchema.initialize();
 
-  const updateTheme = (theme: string) => {
-    localStorage.setItem("theme", theme);
-    if (theme !== "system") {
-      document.documentElement.setAttribute("data-theme", theme);
-    } else {
-      document.documentElement.setAttribute("data-theme", systemTheme);
-    }
-  };
-
-  inject("colorSchema", (theme) => {
-    updateTheme(theme);
-  });
-
-  const init = () => {
-    updateTheme(getInitialTheme);
-  };
-
-  if (process.client) {
-    window.onNuxtReady(() => {
-      init();
-    });
-  }
+  inject("colorSchema", colorSchema);
 };
