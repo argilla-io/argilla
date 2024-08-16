@@ -61,7 +61,7 @@ export default {
   &__logo {
     max-width: 150px;
     path {
-      fill: $brand-primary-color;
+      fill: palette(orange-red-crayola);
     }
   }
   &__code {
@@ -69,7 +69,7 @@ export default {
     left: -3vw;
     color: #ffffff;
     font-family: $secondary-font-family;
-    text-shadow: 0 0 2px $brand-primary-color;
+    text-shadow: 0 0 2px palette(orange-red-crayola);
     font-size: 34vw;
     line-height: 1em;
     @include media("<desktop") {
@@ -78,7 +78,7 @@ export default {
       margin-left: $base-space * 3;
       margin-bottom: 0.4em;
       @include font-size(75px);
-      color: $brand-primary-color;
+      color: palette(orange-red-crayola);
       text-shadow: none;
     }
   }
@@ -86,10 +86,10 @@ export default {
     display: inline-block;
     border: 1px solid #ffe5d9;
     padding: 5px 10px;
-    border: 1px solid $brand-primary-color;
+    border: 1px solid palette(orange-red-crayola);
     border-radius: 20px;
     margin-bottom: 20px;
-    color: $brand-primary-color;
+    color: palette(orange-red-crayola);
   }
   &__title {
     display: block;
@@ -115,7 +115,7 @@ export default {
     gap: $base-space;
     padding: 12px 20px;
     border-radius: $border-radius;
-    background: $brand-primary-color;
+    background: palette(orange-red-crayola);
     border: 0;
     outline: 0;
     text-decoration: none;
@@ -123,7 +123,7 @@ export default {
     @include font-size(16px);
     font-weight: 600;
     &:hover {
-      background: darken($brand-primary-color, 5%);
+      background: darken(palette(orange-red-crayola), 5%);
     }
     @include media(">desktop") {
       margin-left: calc(4 / 12 * 100%);

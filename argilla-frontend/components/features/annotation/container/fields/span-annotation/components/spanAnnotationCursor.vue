@@ -124,6 +124,9 @@ export default {
   width: 4px;
   background: v-bind(cursorColor);
   border: 1px solid var(--bg-accent-grey-2);
+  [data-theme="dark"] & {
+    background: v-bind("cursorColor.palette.veryDark");
+  }
   &.entity {
     z-index: 200;
     &:before {
@@ -135,7 +138,6 @@ export default {
       bottom: $base-space * 2;
       transform: translate(-50%, -50%);
       left: 50%;
-      color: var(--color-dark-grey);
       padding: calc($base-space / 2);
       border-radius: $border-radius;
       box-shadow: $shadow-100;
@@ -143,6 +145,9 @@ export default {
       @include font-size(10px);
       text-transform: uppercase;
       line-height: 1em;
+      [data-theme="dark"] & {
+        background: v-bind("cursorColor.palette.veryDark");
+      }
     }
   }
 }

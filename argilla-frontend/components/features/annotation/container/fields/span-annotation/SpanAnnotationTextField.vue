@@ -49,29 +49,36 @@
       <template>
         <template v-for="{ id, color } in spanQuestion.answer.options">
           <style :key="id" scoped>
-            .span-annotation__field::highlight(hl-{{id}}) {
-              color: var(--color-dark-grey);
+            .span-annotation__field::highlight(hl-{{id}}), .span-annotation__field::highlight(hl-{{id}}-selection) {
               background-color: {{color}};
             }
-            .span-annotation__field::highlight(hl-{{id}}-selection) {
-              color: var(--color-dark-grey);
-              background-color: {{color}};
+            [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}), [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-selection) {
+              background-color: {{color.palette.veryDark}};
             }
             .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
-              color: var(--color-dark-grey);
               background: {{color.palette.light}};
+            }
+            [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
+              background: {{color.palette.dark}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
-              color: var(--color-dark-grey);
               background: {{color}};
+            }
+            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
+              background: {{color.palette.veryDark}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
-              color: var(--color-dark-grey);
               background: {{color.palette.light}};
+              color: inherit;
+            }
+            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
+              background: {{color.palette.dark}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
-              color: var(--color-dark-grey);
               background: {{color}};
+            }
+            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              background: {{color.palette.veryDark}};
             }
             ::highlight(search-text-highlight-{{name}}) {
               color: #ff675f;
@@ -267,7 +274,6 @@ export default {
     &--active {
       cursor: none;
       &::selection {
-        color: var(--color-dark-grey);
         background-color: transparent;
       }
     }

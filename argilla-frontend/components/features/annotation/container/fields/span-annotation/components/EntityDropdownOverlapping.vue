@@ -173,7 +173,7 @@ export default {
     display: flex;
     flex-direction: column;
     border-radius: $border-radius;
-    background-color: palette(white);
+    background-color: var(--bg-accent-grey-2);
     box-shadow: $shadow;
     z-index: 100;
     &__header {
@@ -239,12 +239,14 @@ export default {
   }
   &__badge.badge {
     @include font-size(12px);
+    cursor: pointer;
   }
   &__input {
     height: $base-space * 2;
     width: 160px;
     background: transparent;
     border: none;
+    color: var(--fg-primary);
     @include font-size(12px);
     &:focus-visible {
       outline: 0;

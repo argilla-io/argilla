@@ -80,11 +80,7 @@ $palettes: (
 
 // Colours
 //-----------
-$brand-primary-color: palette(orange-red-crayola);
-$brand-secondary-color: palette(apricot);
 $primary-color: palette(blue, 500);
-$primary-lighten-color: lighten($primary-color, 10%);
-$primary-darken-color: darken($primary-color, 10%);
 $secondary-color: palette(grey, 200);
 $secondary-lighten-color: lighten(palette(grey, 200), 5%);
 $secondary-darken-color: darken(palette(grey, 200), 5%);

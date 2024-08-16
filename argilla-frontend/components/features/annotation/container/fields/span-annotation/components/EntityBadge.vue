@@ -77,6 +77,9 @@ export default {
   @include font-size(12px);
   @include line-height(12px);
   text-transform: uppercase;
+  [data-theme="dark"] & {
+    background-color: v-bind("color.palette.veryDark");
+  }
   &--clickable {
     @extend .badge;
     &:not(.badge--active):hover {

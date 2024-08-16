@@ -271,9 +271,6 @@ export default {
   user-select: none;
   transform-origin: left top;
   transition: scale 0.2s;
-  [data-theme="dark"] & {
-    color: var(--color-dark-grey);
-  }
   &:before {
     content: "";
     position: absolute;
@@ -313,6 +310,9 @@ export default {
     height: 2px;
     background: v-bind(entityColor);
     margin-top: 20px;
+    [data-theme="dark"] & {
+      background: v-bind("entityColor.palette.veryDark");
+    }
   }
   &__suggestion {
     margin-right: calc($base-space / 2);
@@ -350,6 +350,9 @@ export default {
       background: v-bind("selectedOption.color");
       width: 100%;
       transition: width 0.2s ease;
+      [data-theme="dark"] & {
+        background: v-bind("entityColor.palette.veryDark");
+      }
     }
   }
   &__close-button {
@@ -369,6 +372,9 @@ export default {
     @extend .span-entity;
     background: v-bind(entityColor);
     margin-top: 0;
+    [data-theme="dark"] & {
+      background: v-bind("entityColor.palette.veryDark");
+    }
   }
 }
 </style>

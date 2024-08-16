@@ -9,8 +9,8 @@
         type="radio"
         :id="theme"
         :value="theme"
-        v-model="colorSchema"
-        @input="$colorSchema(theme)"
+        v-model="currentTheme"
+        @input="$colorSchema.setTheme(theme)"
       />
       <label :for="theme">
         <svgicon width="20" height="20" :name="`${theme}-theme`" />
@@ -29,7 +29,7 @@ export default {
   data() {
     return {
       themes: ["system", "dark", "light"],
-      colorSchema: localStorage.getItem("theme") || "system",
+      currentTheme: this.$colorSchema.currentTheme,
     };
   },
 };

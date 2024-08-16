@@ -44,6 +44,9 @@ export default {
     optionColor() {
       return this.option.color;
     },
+    optionVeryDarkColor() {
+      return this.optionColor.palette.veryDark;
+    },
     optionDarkColor() {
       return this.optionColor.palette.dark;
     },
@@ -100,7 +103,7 @@ input[type="checkbox"] {
   cursor: pointer;
   user-select: none;
   [data-theme="dark"] & {
-    background: hsl(from v-bind(optionDarkColor) h s l / 18%);
+    background: hsl(from v-bind(optionDarkColor) h s l / 10%);
   }
   span {
     white-space: nowrap;
@@ -118,7 +121,7 @@ input[type="checkbox"] {
     background: v-bind(optionColor);
     color: var(--fg-primary);
     [data-theme="dark"] & {
-      background: hsl(from v-bind(optionDarkColor) h s l / 80%);
+      background: v-bind(optionVeryDarkColor);
     }
   }
 }

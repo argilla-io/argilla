@@ -146,6 +146,7 @@ export default {
   }
   &__badge.badge {
     @include font-size(12px);
+    cursor: pointer;
   }
   &__input {
     height: $base-space * 2;
