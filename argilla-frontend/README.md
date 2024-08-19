@@ -31,12 +31,12 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
+Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
 
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [free Hugging Face Spaces deployment integration](https://huggingface.co/new-space?template=argilla/argilla-template-space). Curious, and want to know more? Read our [documentation](https://argilla-io.github.io/argilla/latest/).
+If you just want to get started, deploy Argilla with [Hugging Face Spaces](https://docs.v2.argilla.io/latest/getting_started/quickstart/). Curious, and want to know more? Read our [documentation](https://docs.v2.argilla.io).
 
 This repository only contains developer info about the front end. If you want to get started, we recommend taking a
-look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://argilla-io.github.io/argilla/latest/).
+look at our [main repository](https://github.com/argilla-io/argilla) or our [documentation](https://docs.argilla.io/latest/).
 
 Are you a contributor or do you want to understand what is going on under the hood, please keep reading the
 documentation below.
@@ -77,7 +77,7 @@ npm run generate
 
 ## 🫱🏾‍🫲🏼 Contribute
 
-To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [community](https://docs.argilla.io/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 

@@ -16,17 +16,25 @@
   -->
 
 <template>
-  <BarProgress
-    v-if="datasetMetrics.hasMetrics"
-    :loading="false"
-    :progress-ranges="progressRanges"
-    :progress-completed="datasetMetrics.submitted + datasetMetrics.discarded"
-    :total="datasetMetrics.total"
-  />
+  <div class="my-progress__container">
+    <TeamProgress :datasetId="datasetId" />
+    <StatusCounterSkeleton
+      v-if="!metrics.hasMetrics"
+      class="my-progress__status--skeleton"
+    />
+    <StatusCounter
+      v-else
+      class="my-progress__status"
+      :color="RecordStatus.submitted.color"
+      :name="RecordStatus.submitted.name"
+      :value="metrics.submitted"
+    />
+  </div>
 </template>
 
 <script>
-import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
+import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
+import { useAnnotationProgressViewModel } from "./useAnnotationProgressViewModel";
 
 export default {
   props: {
@@ -34,31 +42,34 @@ export default {
       type: String,
       required: true,
     },
-    enableFetch: {
-      type: Boolean,
-      default: false,
-    },
   },
   computed: {
-    progressRanges() {
-      return [
-        {
-          id: "completed",
-          name: "completed",
-          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
-          value: this.datasetMetrics.submitted + this.datasetMetrics.discarded,
-        },
-        {
-          id: "pending",
-          name: "progress",
-          color: "linear-gradient(white)",
-          value: this.datasetMetrics.pending + this.datasetMetrics.draft,
-        },
-      ];
+    RecordStatus() {
+      return RecordStatus;
     },
   },
   setup(props) {
-    return useFeedbackTaskProgressViewModel(props);
+    return useAnnotationProgressViewModel(props);
   },
 };
 </script>
+
+<style lang="scss" scoped>
+$statusCounterMinWidth: 110px;
+$statusCounterMinHeight: 30px;
+.my-progress {
+  &__container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: $base-space * 2;
+  }
+  &__status {
+    &--skeleton {
+      min-width: $statusCounterMinWidth;
+      min-height: $statusCounterMinHeight;
+    }
+  }
+}
+</style>

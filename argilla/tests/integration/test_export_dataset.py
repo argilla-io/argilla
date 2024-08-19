@@ -18,10 +18,14 @@ import random
 import uuid
 from string import ascii_lowercase
 from tempfile import TemporaryDirectory
-
-import pytest
+from typing import Any, List
 
 import argilla as rg
+import pytest
+from argilla._exceptions import ConflictError
+from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
+
+_RETRIES = 5
 
 
 @pytest.fixture
@@ -45,8 +49,9 @@ def dataset(client) -> rg.Dataset:
     dataset.delete()
 
 
-def test_export_dataset_to_disk(dataset: rg.Dataset):
-    mock_data = [
+@pytest.fixture
+def mock_data() -> List[dict[str, Any]]:
+    return [
         {
             "text": "Hello World, how are you?",
             "label": "positive",
@@ -63,63 +68,137 @@ def test_export_dataset_to_disk(dataset: rg.Dataset):
             "id": uuid.uuid4(),
         },
     ]
-    dataset.records.log(records=mock_data)
-
-    with TemporaryDirectory() as temp_dir:
-        output_dir = dataset.to_disk(path=temp_dir)
-
-        records_path = os.path.join(output_dir, "records.json")
-        assert os.path.exists(records_path)
-        with open(records_path, "r") as f:
-            exported_records = json.load(f)
-
-        settings_path = os.path.join(output_dir, "settings.json")
-        assert os.path.exists(settings_path)
-        with open(settings_path, "r") as f:
-            exported_settings = json.load(f)
-
-        dataset_path = os.path.join(output_dir, "dataset.json")
-        assert os.path.exists(dataset_path)
-        with open(dataset_path, "r") as f:
-            exported_dataset = json.load(f)
-
-    assert len(exported_records) == len(mock_data)
-    assert exported_records[0]["fields"]["text"] == "Hello World, how are you?"
-    assert exported_records[0]["suggestions"]["label"]["value"] == "positive"
-
-    assert exported_settings["fields"][0]["name"] == "text"
-    assert exported_settings["questions"][0]["name"] == "label"
-
-    assert exported_dataset["name"] == dataset.name
 
 
-def test_import_dataset_from_disk(dataset: rg.Dataset, client):
-    mock_data = [
-        {
-            "text": "1: Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "2: Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "3: Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
-    dataset.records.log(records=mock_data)
+@pytest.fixture
+def token():
+    return os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING")
 
-    with TemporaryDirectory() as temp_dir:
-        output_dir = dataset.to_disk(path=temp_dir)
-        new_dataset = rg.Dataset.from_disk(output_dir, client=client)
 
-    for i, record in enumerate(new_dataset.records(with_suggestions=True)):
-        assert record.fields["text"] == mock_data[i]["text"]
-        assert record.suggestions["label"].value == mock_data[i]["label"]
+@pytest.mark.flaky(retries=_RETRIES, only_on=[OSError])  # I/O consistency CICD pipline
+@pytest.mark.parametrize("with_records_export", [True, False])
+class TestDiskImportExportMixin:
+    def test_export_dataset_to_disk(
+        self, dataset: rg.Dataset, mock_data: List[dict[str, Any]], with_records_export: bool
+    ):
+        dataset.records.log(records=mock_data)
 
-    assert new_dataset.settings.fields[0].name == "text"
-    assert new_dataset.settings.questions[0].name == "label"
+        with TemporaryDirectory() as temp_dir:
+            output_dir = dataset.to_disk(path=temp_dir, with_records=with_records_export)
+
+            records_path = os.path.join(output_dir, rg.Dataset._DEFAULT_RECORDS_PATH)
+            if with_records_export:
+                assert os.path.exists(records_path)
+                with open(records_path, "r") as f:
+                    exported_records = json.load(f)
+
+                assert len(exported_records) == len(mock_data)
+                assert exported_records[0]["fields"]["text"] == "Hello World, how are you?"
+                assert exported_records[0]["suggestions"]["label"]["value"] == "positive"
+            else:
+                assert not os.path.exists(records_path)
+
+            settings_path = os.path.join(output_dir, rg.Dataset._DEFAULT_SETTINGS_PATH)
+            assert os.path.exists(settings_path)
+            with open(settings_path, "r") as f:
+                exported_settings = json.load(f)
+
+            dataset_path = os.path.join(output_dir, rg.Dataset._DEFAULT_DATASET_PATH)
+            assert os.path.exists(dataset_path)
+            with open(dataset_path, "r") as f:
+                exported_dataset = json.load(f)
+
+        assert exported_settings["fields"][0]["name"] == "text"
+        assert exported_settings["questions"][0]["name"] == "label"
+
+        assert exported_dataset["name"] == dataset.name
+
+    @pytest.mark.parametrize("with_records_import", [True, False])
+    def test_import_dataset_from_disk(
+        self,
+        dataset: rg.Dataset,
+        client,
+        mock_data: List[dict[str, Any]],
+        with_records_export: bool,
+        with_records_import: bool,
+    ):
+        dataset.records.log(records=mock_data)
+
+        with TemporaryDirectory() as temp_dir:
+            output_dir = dataset.to_disk(path=temp_dir, with_records=with_records_export)
+            new_dataset = rg.Dataset.from_disk(
+                output_dir, client=client, with_records=with_records_import, name=f"test_{uuid.uuid4()}"
+            )
+
+        if with_records_export and with_records_import:
+            for i, record in enumerate(new_dataset.records(with_suggestions=True)):
+                assert record.fields["text"] == mock_data[i]["text"]
+                assert record.suggestions["label"].value == mock_data[i]["label"]
+        else:
+            assert len(new_dataset.records.to_list()) == 0
+
+        assert new_dataset.settings.fields[0].name == "text"
+        assert new_dataset.settings.questions[0].name == "label"
+
+
+@pytest.mark.flaky(
+    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError, OSError]
+)  # Hub consistency CICD pipline
+@pytest.mark.skipif(
+    not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"),
+    reason="You are missing a token to write to `argilla-internal-testing` org on the Hugging Face Hub",
+)
+@pytest.mark.parametrize("with_records_export", [True, False])
+class TestHubImportExportMixin:
+    def test_export_dataset_to_hub(
+        self, token: str, dataset: rg.Dataset, mock_data: List[dict[str, Any]], with_records_export: bool
+    ):
+        repo_id = f"argilla-internal-testing/test_export_dataset_to_hub_with_records_{with_records_export}"
+        dataset.records.log(records=mock_data)
+        dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
+
+    @pytest.mark.parametrize("with_records_import", [True, False])
+    def test_import_dataset_from_hub(
+        self,
+        token: str,
+        dataset: rg.Dataset,
+        client,
+        mock_data: List[dict[str, Any]],
+        with_records_export: bool,
+        with_records_import: bool,
+    ):
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_records_{with_records_export}"
+        dataset.records.log(records=mock_data)
+
+        dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
+
+        if with_records_import and not with_records_export:
+            with pytest.warns(
+                expected_warning=UserWarning,
+                match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
+            ):
+                new_dataset = rg.Dataset.from_hub(
+                    repo_id=repo_id,
+                    client=client,
+                    with_records=with_records_import,
+                    token=token,
+                    name=f"test_{uuid.uuid4()}",
+                )
+        else:
+            new_dataset = rg.Dataset.from_hub(
+                repo_id=repo_id,
+                client=client,
+                with_records=with_records_import,
+                token=token,
+                name=f"test_{uuid.uuid4()}",
+            )
+
+        if with_records_import and with_records_export:
+            for i, record in enumerate(new_dataset.records(with_suggestions=True)):
+                assert record.fields["text"] == mock_data[i]["text"]
+                assert record.suggestions["label"].value == mock_data[i]["label"]
+        else:
+            assert len(new_dataset.records.to_list()) == 0
+
+        assert new_dataset.settings.fields[0].name == "text"
+        assert new_dataset.settings.questions[0].name == "label"

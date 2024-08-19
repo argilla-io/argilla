@@ -21,6 +21,23 @@
       </div>
     </div>
     <div class="settings__area">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('taskDistribution')"
+      />
+
+      <div class="form-group">
+        <label v-text="$t('minimumSubmittedResponses')" />
+        <span class="info-icon" :data-title="$t('taskDistributionTooltip')">
+          <svgicon name="info" width="20" height="20"></svgicon>
+        </span>
+        <span
+          class="form-group__input--read-only"
+          v-text="settings.dataset.distribution.minSubmitted"
+        />
+      </div>
+    </div>
+    <div class="settings__area">
       <DatasetDescriptionReadOnly
         :guidelines="guidelines"
         :isColorLight="!guidelines"
@@ -75,6 +92,35 @@ export default {
 
   &__dataset-name {
     margin: 0;
+  }
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: $base-space;
+  &__input--read-only {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 80px;
+    height: 24px;
+    padding: $base-space * 2;
+    border: 1px solid $black-20;
+    border-radius: $border-radius;
+    background: $black-4;
+    border: 1px solid $black-20;
+    opacity: 0.6;
+  }
+}
+.info-icon {
+  color: $black-37;
+  margin-right: $base-space * 2;
+  &[data-title] {
+    position: relative;
+    overflow: visible;
+    @include tooltip-mini("top", $base-space);
   }
 }
 </styles>

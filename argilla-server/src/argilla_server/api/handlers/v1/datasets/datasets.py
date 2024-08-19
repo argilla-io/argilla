@@ -22,6 +22,7 @@ from sqlalchemy.orm import selectinload
 from argilla_server.api.policies.v1 import DatasetPolicy, MetadataPropertyPolicy, authorize, is_authorized
 from argilla_server.api.schemas.v1.datasets import (
     Dataset as DatasetSchema,
+    UsersProgress,
 )
 from argilla_server.api.schemas.v1.datasets import (
     DatasetCreate,
@@ -39,7 +40,6 @@ from argilla_server.api.schemas.v1.metadata_properties import (
 from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
-from argilla_server.enums import ResponseStatus
 from argilla_server.models import Dataset, User
 from argilla_server.search_engine import (
     SearchEngine,
@@ -189,23 +189,7 @@ async def get_current_user_dataset_metrics(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return {
-        "records": {
-            "count": await datasets.count_records_by_dataset_id(db, dataset_id),
-        },
-        "responses": {
-            "count": await datasets.count_responses_by_dataset_id_and_user_id(db, dataset_id, current_user.id),
-            "submitted": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.submitted
-            ),
-            "discarded": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.discarded
-            ),
-            "draft": await datasets.count_responses_by_dataset_id_and_user_id(
-                db, dataset_id, current_user.id, ResponseStatus.draft
-            ),
-        },
-    }
+    return await datasets.get_user_dataset_metrics(db, current_user.id, dataset.id)
 
 
 @router.get("/datasets/{dataset_id}/progress", response_model=DatasetProgress)
@@ -219,7 +203,23 @@ async def get_dataset_progress(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return await datasets.get_dataset_progress(db, dataset_id)
+    return await datasets.get_dataset_progress(db, dataset.id)
+
+
+@router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress, response_model_exclude_unset=True)
+async def get_dataset_users_progress(
+    *,
+    current_user: User = Security(auth.get_current_user),
+    dataset_id: UUID,
+    db: AsyncSession = Depends(get_async_db),
+):
+    dataset = await Dataset.get_or_raise(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicy.get(dataset))
+
+    progress = await datasets.get_dataset_users_progress(dataset.id)
+
+    return UsersProgress(users=progress)
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=DatasetSchema)
@@ -232,7 +232,7 @@ async def create_dataset(
 ):
     await authorize(current_user, DatasetPolicy.create(dataset_create.workspace_id))
 
-    dataset = await datasets.create_dataset(db, dataset_create)
+    dataset = await datasets.create_dataset(db, dataset_create.dict())
 
     await telemetry_client.track_crud_dataset(action="create", dataset=dataset)
 
@@ -373,7 +373,7 @@ async def update_dataset(
 
     await authorize(current_user, DatasetPolicy.update(dataset))
 
-    dataset = await datasets.update_dataset(db, dataset, dataset_update)
+    dataset = await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
 
     await telemetry_client.track_crud_dataset(action="update", dataset=dataset)
 

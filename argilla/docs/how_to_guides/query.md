@@ -42,13 +42,11 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-    workspace = client.workspaces("my_workspace")
-
-    dataset = client.datasets(name="my_dataset", workspace=workspace)
+    dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
     query = rg.Query(query="my_term")
 
-    queried_records = list(dataset.records(query=query))
+    queried_records = dataset.records(query=query).to_list(flatten=True)
     ```
 
 === "Multiple search term"
@@ -58,25 +56,23 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-    workspace = client.workspaces("my_workspace")
-
-    dataset = client.datasets(name="my_dataset", workspace=workspace)
+    dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
     query = rg.Query(query="my_term1 my_term2")
 
-    queried_records = list(dataset.records(query=query))
+    queried_records = dataset.records(query=query).to_list(flatten=True)
     ```
 
 ## Filter by conditions
 
 You can use the `Filter` class to define the conditions and pass them to the `Dataset.records` attribute to fetch records based on the conditions. Conditions include "==", ">=", "<=", or "in". Conditions can be combined with dot notation to filter records based on metadata, suggestions, or responses. You can use a single condition or multiple conditions to filter records.
 
-| operator | description |
-|----------|-------------|
-| `==`     | The `field` value is equal to the `value` |
+| operator | description                                               |
+| -------- | --------------------------------------------------------- |
+| `==`     | The `field` value is equal to the `value`                 |
 | `>=`     | The `field` value is greater than or equal to the `value` |
-| `<=`     | The `field` value is less than or equal to the `value` |
-| `in`     | TThe `field` value is included in a list of values |
+| `<=`     | The `field` value is less than or equal to the `value`    |
+| `in`     | TThe `field` value is included in a list of values        |
 
 === "Single condition"
 
@@ -85,13 +81,13 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-    workspace = client.workspaces("my_workspace")
-
-    dataset = client.datasets(name="my_dataset", workspace=workspace)
+    dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
     filter_label = rg.Filter(("label", "==", "positive"))
 
-    filtered_records = list(dataset.records(query=rg.Query(filter=filter_label)))
+    filtered_records = dataset.records(query=rg.Query(filter=filter_label)).to_list(
+        flatten=True
+    )
     ```
 
 === "Multiple conditions"
@@ -101,9 +97,7 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-    workspace = client.workspaces("my_workspace")
-
-    dataset = client.datasets(name="my_dataset", workspace=workspace)
+    dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
     filters = rg.Filter(
         [
@@ -114,30 +108,32 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
         ]
     )
 
-    filtered_records = list(dataset.records(
-        query=rg.Query(filter=filters)),
-        with_suggestions=True
-    )
+    filtered_records = dataset.records(
+        query=rg.Query(filter=filters), with_suggestions=True
+    ).to_list(flatten=True)
     ```
 
 ## Filter by status
 
-You can filter records based on their status. The status can be `pending`, `draft`, `submitted`, or `discarded`.
+You can filter records based on record or response status. Record status can be `pending` or `completed`, and response status can be `pending`, `draft`, `submitted`, or `discarded`.
 
 ```python
 import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-workspace = client.workspaces("my_workspace")
-
-dataset = client.datasets(name="my_dataset", workspace=workspace)
+dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
 status_filter = rg.Query(
-    filter=rg.Filter(("response.status", "==", "submitted"))
+    filter=rg.Filter(
+        [
+            ("status", "==", "completed"),
+            ("response.status", "==", "discarded")
+        ]
+    )
 )
 
-filtered_records = list(dataset.records(status_filter))
+filtered_records = dataset.records(status_filter).to_list(flatten=True)
 ```
 
 ## Query and filter a dataset
@@ -149,9 +145,7 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-workspace = client.workspaces("my_workspace")
-
-dataset = client.datasets(name="my_dataset", workspace=workspace)
+dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
 query_filter = rg.Query(
     query="my_term",
@@ -163,10 +157,9 @@ query_filter = rg.Query(
     )
 )
 
-queried_filtered_records = list(dataset.records(
+queried_filtered_records = dataset.records(
     query=query_filter,
     with_metadata=True,
     with_suggestions=True
-)
-)
+).to_list(flatten=True)
 ```

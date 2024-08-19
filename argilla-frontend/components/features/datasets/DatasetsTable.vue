@@ -97,12 +97,12 @@ export default {
           sortable: "true",
         },
         {
-          name: "Global progress",
+          name: this.$t("datasetTable.progress"),
           class: "progress",
           component: {
             name: "DatasetProgress",
             props: (item) => ({
-              dataset: item,
+              datasetId: item.id,
             }),
           },
         },

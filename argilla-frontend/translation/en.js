@@ -34,6 +34,10 @@ export default {
   visibleLabels: "Visible labels",
   annotationGuidelines: "Annotation guidelines",
   guidelines: "Guidelines",
+  taskDistribution: "Task distribution",
+  minimumSubmittedResponses: "Minimum submitted responses",
+  taskDistributionTooltip:
+    "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   breadcrumbs: {
     home: "Home",
@@ -42,9 +46,7 @@ export default {
   },
   datasets: {
     left: "left",
-    submitted: "Submitted",
-    conflicting: "Conflicting",
-    discarded: "Discarded",
+    completed: "Completed",
     pending: "Pending",
   },
   recordStatus: {
@@ -53,6 +55,8 @@ export default {
     discarded: "Discarded",
     submitted: "Submitted",
     validated: "Validated",
+    completedTooltip:
+      "The record is complete, it has the \nminimum number of responses",
   },
   userSettings: {
     title: "My settings",
@@ -181,8 +185,6 @@ export default {
     hide: "Hide",
     passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
-    quickstart:
-      "You are using the Quickstart version of Argilla. Check <a href='{link}' target='_blank'>this guide</a> to learn more about usage and configuration options.",
     hf: {
       title: "Welcome to {space}",
       subtitle: "Join <strong>{user}</strong> to build better datasets for AI",
@@ -214,10 +216,14 @@ export default {
     workspace: "Workspace",
     createdAt: "Created",
     lastActivityAt: "Updated",
+    progress: "Team progress",
   },
   metrics: {
     total: "Total",
-    progress: "Progress",
+    progress: {
+      my: "My Progress",
+      team: "Team progress",
+    },
   },
   persistentStorage: {
     adminOrOwner:
@@ -229,6 +235,10 @@ export default {
     businessLogic: {
       missing_vector: {
         message: "Vector not found for the selected record",
+      },
+      update_distribution_with_existing_responses: {
+        message:
+          "Distribution settings can't be modified for a dataset containing user responses",
       },
     },
     http: {

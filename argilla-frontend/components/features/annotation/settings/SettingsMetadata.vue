@@ -60,15 +60,15 @@
           <BaseButton
             type="button"
             class="secondary light small"
-            @on-click="settings.dataset.restore()"
-            :disabled="!settings.dataset.isModified"
+            @on-click="settings.dataset.restore('metadata')"
+            :disabled="!settings.dataset.isModifiedExtraMetadata"
           >
             <span v-text="$t('cancel')" />
           </BaseButton>
           <BaseButton
             type="submit"
             class="primary small"
-            :disabled="!settings.dataset.isModified"
+            :disabled="!settings.dataset.isModifiedExtraMetadata"
           >
             <span v-text="$t('update')" />
           </BaseButton>
@@ -110,6 +110,7 @@ export default {
     flex: 1;
     flex-direction: column;
     gap: $base-space * 2;
+    margin-bottom: $base-space;
     max-width: 800px;
     padding-top: $base-space;
 

@@ -3,9 +3,8 @@
 [Argilla](https://argilla.io) is an open-source data curation platform for LLMs. Using Argilla, everyone can build robust language models through faster data curation using both human and machine feedback. We provide support for each step in the MLOps cycle, from data labeling to model monitoring.
 
 ```{admonition} Argilla 2.x
-:class: danger
-We are announcing that Argilla 1.29 is the final minor release for Argilla 1.x. Although we will continue to release bug fixes for this version, we will neither be adding nor removing any functionalities. Instead, we will focus our efforts on Argilla 2.x. Argilla 1.29 will reach its end-of-life on June 20, 2025.
-Looking for documentation for Argilla 2.x? Visit the docs [here](https://argilla-io.github.io/argilla/)!
+:class: info
+We are announcing that Argilla 1.29 is the final minor release for Argilla 1.x. Although we will continue to release bug fixes for this version, we will neither be adding nor removing any functionalities. Visit the [2.x docs](https://docs.argilla.io/)!
 ```
 
 <div class="social social--sidebar" style="margin-top: 1em; display: flex; justify-content: right; gap: 8px">
@@ -148,7 +147,7 @@ We are continuously working on improving Argilla's features and usability, focus
 
 ## 🤝 Contribute
 
-To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [developer](https://docs.v1.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.v1.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 ## 🥇 Contributors
 

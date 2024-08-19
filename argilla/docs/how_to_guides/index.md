@@ -27,7 +27,7 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](workspace.md)
 
--   __Manage and create datasets__
+-   __Create, update, and delete datasets__
 
     ---
 
@@ -43,6 +43,22 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](record.md)
 
+-   __Distribute the annotation__
+
+    ---
+
+    Learn how to use Argilla's automatic task distribution to annotate as a team efficiently.
+
+    [:octicons-arrow-right-24: How-to guide](distribution.md)
+
+-   __Annotate a dataset__
+
+    ---
+
+    Learn how to use the Argilla UI to navigate datasets and submit responses.
+
+    [:octicons-arrow-right-24: How-to guide](annotate.md)
+
 -   __Query and filter a dataset__
 
     ---
@@ -51,13 +67,14 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](query.md)
 
--   __Importing and exporting datasets and records__
+-   __Import and export datasets and records__
 
     ---
 
     Learn how to export your dataset or its records to Python, your local disk, or the Hugging face Hub.
 
     [:octicons-arrow-right-24: How-to guide](import_export.md)
+
 
 </div>
 

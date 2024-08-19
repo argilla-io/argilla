@@ -6,13 +6,17 @@ export class Metrics {
     discarded: number;
   };
 
+  public readonly hasMetrics: boolean;
+
   constructor(
-    private readonly records: number,
-    public readonly responses: number,
+    public readonly total: number,
     public readonly submitted: number,
     public readonly discarded: number,
-    public readonly draft: number
+    public readonly draft: number,
+    public readonly pending: number
   ) {
+    this.hasMetrics = total >= 0;
+
     this.percentage = {
       pending: (this.pending * 100) / this.total,
       draft: (this.draft * 100) / this.total,
@@ -21,20 +25,8 @@ export class Metrics {
     };
   }
 
-  get hasMetrics() {
-    return this.records > 0;
-  }
-
-  get total() {
-    return this.records;
-  }
-
   get responded() {
     return this.submitted + this.discarded + this.draft;
-  }
-
-  get pending() {
-    return this.total - this.responded;
   }
 
   get progress() {

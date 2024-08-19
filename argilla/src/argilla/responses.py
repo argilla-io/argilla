@@ -13,10 +13,11 @@
 # limitations under the License.
 import warnings
 from enum import Enum
-from typing import Any, TYPE_CHECKING, List, Dict, Optional, Iterable, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
-from argilla._models import UserResponseModel, ResponseStatus as ResponseStatusModel
+from argilla._models import ResponseStatus as ResponseStatusModel
+from argilla._models import UserResponseModel
 from argilla._resource import Resource
 from argilla.settings import RankingQuestion
 
@@ -50,7 +51,14 @@ class Response:
         status: Optional[Union[ResponseStatus, str]] = None,
         _record: Optional["Record"] = None,
     ) -> None:
-        """Initializes a `Response` for a `Record` with a user_id and value"""
+        """Initializes a `Response` for a `Record` with a user_id and value
+
+        Attributes:
+            question_name (str): The name of the question that the suggestion is for.
+            value (str): The value of the response
+            user_id (UUID): The id of the user that submits the response
+            status (Union[ResponseStatus, str]): The status of the response as "draft", "submitted", "discarded".
+        """
 
         if question_name is None:
             raise ValueError("question_name is required")
@@ -162,7 +170,7 @@ class UserResponse(Resource):
         """Creates a UserResponse from a ResponseModel"""
         responses = cls.__model_as_responses_list(model)
         for response in responses:
-            question = dataset.settings.question_by_name(response.question_name)
+            question = dataset.settings.questions[response.question_name]
             # We need to adapt the ranking question value to the expected format
             if isinstance(question, RankingQuestion):
                 response.value = cls.__ranking_from_model_value(response.value)  # type: ignore
@@ -174,7 +182,7 @@ class UserResponse(Resource):
 
         values = self.__responses_as_model_values(self.responses)
         for question_name, value in values.items():
-            question = self._record.dataset.settings.question_by_name(question_name)
+            question = self._record.dataset.settings.questions[question_name]
             if isinstance(question, RankingQuestion):
                 value["value"] = self.__ranking_to_model_value(value["value"])
 

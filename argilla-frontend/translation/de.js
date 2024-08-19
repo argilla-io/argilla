@@ -36,12 +36,19 @@ export default {
     datasetSettings: "einstellungen",
     userSettings: "meine einstellungen",
   },
+  datasets: {
+    left: "übrig",
+    completed: "Vollendet",
+    pending: "Ausstehend",
+  },
   recordStatus: {
     pending: "Ausstehend",
     draft: "Entwurf",
     discarded: "Verworfen",
     submitted: "Gesichert",
     validated: "Validiert",
+    completedTooltip:
+      "Der Datensatz ist abgeschlossen, es hat die Anzahl der Antworten.",
   },
   userSettings: {
     title: "Meine Einstellungen",
@@ -171,8 +178,6 @@ export default {
     hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
-    quickstart:
-      "Sie verwenden die Quickstart-Version von Argilla. Überprüfen Sie <a href='{link}' target='_blank'>diesen Leitfaden</a> um mehr über Nutzung und Konfigurationsoptionen zu erfahren.",
     hf: {
       title: "Willkommen bei {space}",
       subtitle:
@@ -202,20 +207,26 @@ export default {
   datasetTable: {
     name: "Dataset",
     workspace: "Arbeitsbereich",
-    task: "Datensatz",
-    tags: "Tags",
     createdAt: "Erstellt am",
     lastActivityAt: "Aktualisiert am",
+    progress: "Teamfortschritt",
   },
   metrics: {
     total: "Total",
-    progress: "Fortschritt",
+    progress: {
+      my: "mein Fortschritt",
+      team: "Fortschritte im Team",
+    },
   },
 
   validations: {
     businessLogic: {
       missing_vector: {
         message: "Vektor nicht im ausgewählten Datensatz gefunden",
+      },
+      update_distribution_with_existing_responses: {
+        message:
+          "Die Verteilungseinstellungen können für einen Datensatz mit Benutzerantworten nicht geändert werden",
       },
     },
     http: {

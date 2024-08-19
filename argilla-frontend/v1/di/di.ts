@@ -3,6 +3,11 @@ import Container, { register } from "ts-injecty";
 
 import { useEventDispatcher } from "@codescouts/events";
 
+import { useTeamProgress } from "../infrastructure/storage/TeamProgressStorage";
+import {
+  UpdateMetricsEventHandler,
+  UpdateTeamProgressEventHandler,
+} from "../infrastructure/events";
 import {
   DatasetRepository,
   RecordRepository,
@@ -56,6 +61,9 @@ export const loadDependencyContainer = (context: Context) => {
   const useAuth = () => context.$auth;
 
   const dependencies = [
+    register(UpdateMetricsEventHandler).build(),
+    register(UpdateTeamProgressEventHandler).build(),
+
     register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
@@ -65,9 +73,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
     register(EnvironmentRepository).withDependency(useAxios).build(),
-    register(OAuthRepository)
-      .withDependencies(useAxios, useRoutes, useAuth)
-      .build(),
+    register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
     register(WorkspaceRepository).withDependency(useAxios).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
@@ -83,7 +89,7 @@ export const loadDependencyContainer = (context: Context) => {
       .build(),
 
     register(GetDatasetProgressUseCase)
-      .withDependency(DatasetRepository)
+      .withDependencies(DatasetRepository, useTeamProgress)
       .build(),
 
     register(GetRecordsByCriteriaUseCase)
@@ -176,7 +182,9 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependency(EnvironmentRepository)
       .build(),
 
-    register(OAuthLoginUseCase).withDependency(OAuthRepository).build(),
+    register(OAuthLoginUseCase)
+      .withDependencies(OAuthRepository, useAuth)
+      .build(),
   ];
 
   Container.register(dependencies);

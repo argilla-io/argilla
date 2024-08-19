@@ -17,7 +17,7 @@ from uuid import UUID
 import pytest
 
 from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.enums import DatasetStatus
+from argilla_server.enums import DatasetStatus, RecordStatus
 from argilla_server.models import Dataset, Record
 from httpx import AsyncClient
 from sqlalchemy import func, select
@@ -90,6 +90,7 @@ class TestDatasetRecordsBulk:
             "items": [
                 {
                     "id": str(record.id),
+                    "status": RecordStatus.pending,
                     "dataset_id": str(dataset.id),
                     "external_id": record.external_id,
                     "fields": record.fields,

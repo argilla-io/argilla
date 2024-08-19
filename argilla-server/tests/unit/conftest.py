@@ -16,6 +16,18 @@ from typing import TYPE_CHECKING, Dict, Generator
 
 import pytest
 import pytest_asyncio
+
+import uuid
+from typing import TYPE_CHECKING, Dict, Generator, Optional
+
+import pytest
+import pytest_asyncio
+from sqlalchemy.engine.interfaces import IsolationLevel
+from httpx import AsyncClient
+from opensearchpy import OpenSearch
+
+from argilla_server import telemetry
+from argilla_server.contexts import distribution, datasets
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.database import get_async_db
@@ -23,9 +35,6 @@ from argilla_server.models import User, UserRole, Workspace
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.settings import settings
 from argilla_server.telemetry import TelemetryClient
-from httpx import AsyncClient
-from opensearchpy import OpenSearch
-
 from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
@@ -73,18 +82,27 @@ async def async_client(
 ) -> Generator["AsyncClient", None, None]:
     from argilla_server import app
 
-    async def override_get_async_db():
+    async def override_get_async_db(isolation_level: Optional[IsolationLevel] = None):
         session = TestSession()
+
+        # NOTE: We are ignoring the isolation_level because is causing errors with the tests.
+        # if isolation_level is not None:
+        #     await session.connection(execution_options={"isolation_level": isolation_level})
+
         yield session
 
     async def override_get_search_engine():
         yield mock_search_engine
 
-    mocker.patch("argilla_server._app._get_db_wrapper", wraps=contextlib.asynccontextmanager(override_get_async_db))
+    mocker.patch.object(distribution, "_get_async_db", override_get_async_db)
+    mocker.patch.object(datasets, "get_async_db", override_get_async_db)
 
-    for api in [api_v1]:
-        api.dependency_overrides[get_async_db] = override_get_async_db
-        api.dependency_overrides[get_search_engine] = override_get_search_engine
+    api_v1.dependency_overrides.update(
+        {
+            get_async_db: override_get_async_db,
+            get_search_engine: override_get_search_engine,
+        }
+    )
 
     async with AsyncClient(app=app, base_url="http://testserver") as async_client:
         yield async_client

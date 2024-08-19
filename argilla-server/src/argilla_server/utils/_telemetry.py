@@ -14,6 +14,8 @@
 import logging
 import os
 
+from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -33,9 +35,7 @@ def server_deployment_type() -> str:
 
 def is_running_on_huggingface_space() -> bool:
     """Returns True if the current process is running inside a Huggingface Space, False otherwise."""
-    from argilla_server.api.schemas.v1.settings import HuggingfaceSettings
-
-    return HuggingfaceSettings().is_running_on_huggingface
+    return HUGGINGFACE_SETTINGS.is_running_on_huggingface
 
 
 def is_running_on_docker_container() -> bool:

@@ -7,7 +7,6 @@ import {
   AvailableStatus,
   BulkAnnotationUseCase,
 } from "~/v1/domain/usecases/bulk-annotation-use-case";
-import { useDebounce } from "~/v1/infrastructure/services/useDebounce";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 import { useTranslate } from "~/v1/infrastructure/services/useTranslate";
 
@@ -17,7 +16,6 @@ export const useBulkAnnotationViewModel = ({
   records: Records;
 }) => {
   const notification = useNotifications();
-  const debounceForSubmit = useDebounce(300);
 
   const affectAllRecords = ref(false);
   const progress = ref(0);
@@ -44,11 +42,12 @@ export const useBulkAnnotationViewModel = ({
     recordReference: Record,
     selectedRecords: Record[]
   ) => {
+    let allSuccessful = false;
     try {
       const totalRecords = records.total;
       const isAffectingAllRecords = affectAllRecords.value;
 
-      const allSuccessful = await bulkAnnotationUseCase.execute(
+      allSuccessful = await bulkAnnotationUseCase.execute(
         status,
         criteria,
         recordReference,
@@ -73,19 +72,13 @@ export const useBulkAnnotationViewModel = ({
           type: "info",
         });
       }
-
-      progress.value = 0;
-
-      await debounceForSubmit.wait();
-
-      return allSuccessful;
     } catch {
     } finally {
       affectAllRecords.value = false;
       progress.value = 0;
     }
 
-    return false;
+    return allSuccessful;
   };
 
   const discard = async (

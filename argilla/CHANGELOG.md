@@ -14,10 +14,30 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc)
+## [Unreleased]()
+
+## [2.0.0](https://github.com/argilla-io/argilla/compare/v2.0.0rc1...v2.0.0)
+
+### Added
+
+- Added core class refactors. For an overview, see [this blog post](https://argilla.io/blog/introducing-argilla-new-sdk/)
+- Added `TaskDistribution` to define distribution of records to users .
+- Added new [documentation site](docs.argilla.io) and structure and migrated [legacy documentation](http://docs.v1.argilla.io/).
+
+### Changed
+
+- Changed `FeedbackDataset` to `Dataset`.
+- Changed `rg.init` into `rg.Argilla` class to interact with Argilla server.
+
+### Deprecated
+
+- Deprecated task specific dataset classes like `TextClassification` and `TokenClassification`. To migrate legacy datasets to `rg.Dataset` class, see the [how-to-guide](https://docs.v2.argilla.io/dev/how_to_guides/migrate_from_legacy_datasets/).
+- Deprecated use case extensions like `listeners` and `ArgillaTrainer`.
+
+## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
 
 > [!NOTE]
-> This release for 2.0.0rc1 does not contain any changelog entries because it is the first release candidate for the 2.0.0 version. The following versions will contain the changelog entries again. For a general overview of the changes in the 2.0.0 version, please refer to [our blog](https://argilla.io/blog/) or [our new documentation](https://argilla-io.github.io/argilla/latest).
+> This release for 2.0.0rc1 does not contain any changelog entries because it is the first release candidate for the 2.0.0 version. The following versions will contain the changelog entries again. For a general overview of the changes in the 2.0.0 version, please refer to [our blog](https://argilla.io/blog/) or [our new documentation](https://docs.argilla.io/latest).
 
 ## [1.29.0](https://github.com/argilla-io/argilla/compare/v1.28.0...v1.29.0)
 
@@ -599,7 +619,7 @@ These are the section headers that we use:
 - Added Telemetry support for `ArgillaTrainer` (closes [#3325](https://github.com/argilla-io/argilla/issues/3325))
 - `User.workspaces` is no longer an attribute but a property, and is calling `list_user_workspaces` to list all the workspace names for a given user ID ([#3334](https://github.com/argilla-io/argilla/pull/3334))
 - Renamed `FeedbackDatasetConfig` to `DatasetConfig` and export/import from YAML as default instead of JSON (just used internally on `push_to_huggingface` and `from_huggingface` methods of `FeedbackDataset`) ([#3326](https://github.com/argilla-io/argilla/pull/3326)).
-- The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
+- The protected metadata fields support other than textual info - existing datasets must be reindex. See [docs](https://docs.v1.argilla.io/en/latest/getting_started/installation/configurations/database_migrations.html#elasticsearch) for more detail (Closes [#3332](https://github.com/argilla-io/argilla/issues/3332)).
 - Updated `Dockerfile` parent image from `python:3.9.16-slim` to `python:3.10.12-slim` ([#3425](https://github.com/argilla-io/argilla/pull/3425)).
 - Updated `quickstart.Dockerfile` parent image from `elasticsearch:8.5.3` to `argilla/argilla-server:${ARGILLA_VERSION}` ([#3425](https://github.com/argilla-io/argilla/pull/3425)).
 

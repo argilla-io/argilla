@@ -42,6 +42,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
             vectors=[rg.VectorField(name="vector", dimensions=10)],
             guidelines="guidelines",
             allow_extra_metadata=True,
+            distribution=rg.TaskDistribution(min_submitted=2),
         )
         ```
 
@@ -51,7 +52,8 @@ A **dataset** is a collection of records that you can configure for labelers to 
 
 To create a dataset, you can define it in the `Dataset` class and then call the `create` method that will send the dataset to the server so that it can be visualized in the UI. If the dataset does not appear in the UI, you may need to click the refresh button to update the view. For further configuration of the dataset, you can refer to the [settings section](#define-dataset-settings).
 
-> The created dataset will be empty, to add the records refer to this [how-to guide](record.md).
+!!! info
+    If you have deployed Argilla with Hugging Face Spaces and HF Sign in, you can use `argilla` as a workspace name. Otherwise, you might need to create a workspace following [this guide](workspace.md#create-a-new-workspace).
 
 ```python
 import argilla as rg
@@ -77,11 +79,12 @@ dataset = rg.Dataset(
     name="my_dataset",
     workspace="my_workspace",
     settings=settings,
-    client=client,
 )
 
 dataset.create()
 ```
+> The created dataset will be empty, to add records go to this [how-to guide](record.md).
+
 !!! tip "Accessing attributes"
     Access the attributes of a dataset by calling them directly on the `dataset` object. For example, `dataset.id`, `dataset.name` or `dataset.settings`. You can similarly access the fields, questions, metadata, vectors and guidelines. For instance, `dataset.fields` or `dataset.questions`.
 
@@ -92,37 +95,48 @@ To create multiple datasets with the same settings, define the settings once and
 ```python
 import argilla as rg
 
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
 settings = rg.Settings(
-    guidelines="Select the sentiment of the prompt.",
-    fields=[rg.TextField(name="prompt", use_markdown=True)],
-    questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+    guidelines="These are some guidelines.",
+    fields=[rg.TextField(name="text", use_markdown=True)],
+    questions=[
+        rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"])
+    ],
+    distribution=rg.TaskDistribution(min_submitted=3),
 )
 
-dataset1 = rg.Dataset(name="sentiment_analysis_1", settings=settings)
-dataset2 = rg.Dataset(name="sentiment_analysis_2", settings=settings)
+dataset1 = rg.Dataset(name="my_dataset_1", settings=settings)
+dataset2 = rg.Dataset(name="my_dataset_2", settings=settings)
 
 # Create the datasets on the server
 dataset1.create()
 dataset2.create()
 ```
 
-### Create a dataset with settings from an existing dataset
+### Create a dataset from an existing dataset
 
-To create a new dataset with settings from an existing dataset, get the settings from the existing dataset and pass it
-to the new dataset.
+To create a new dataset from an existing dataset, get the settings from the existing dataset and pass them to the new dataset.
 
 ```python
 import argilla as rg
 
-# Get the settings from an existing dataset
-existing_dataset = client.datasets("sentiment_analysis")
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-# Create a new dataset with the same settings
-dataset = rg.Dataset(name="sentiment_analysis_copy", settings=existing_dataset.settings)
+existing_dataset = client.datasets("my_dataset")
 
-# Create the dataset on the server
-dataset.create()
+new_dataset = rg.Dataset(name="my_dataset_copy", settings=existing_dataset.settings)
+
+new_dataset.create()
 ```
+
+!!! info
+    You can also copy the records from the original dataset to the new one:
+
+    ```python
+    records = list(existing_dataset.records)
+    new_dataset.records.log(records)
+    ```
 
 ## Define dataset settings
 
@@ -360,6 +374,9 @@ Metadata properties allow you to configure the use of metadata information for t
     ```
     ![FloatMetadataProperty](../assets/images/how_to_guides/dataset/float_metadata.png)
 
+!!! note
+    You can also set the `allow_extra_metadata` argument in the dataset to `True` to specify whether the dataset will allow metadata fields in the records other than those specified under metadata. Note that these will not be accessible from the UI for any user, only retrievable using the Python SDK.
+
 ### Vectors
 
 To use the similarity search in the UI and the Python SDK, you will need to configure vectors using the `VectorField` class. It has the following configuration:
@@ -395,6 +412,19 @@ It is good practice to use at least the dataset guidelines if not both methods. 
 !!! tip
     If you want further guidance on good practices for guidelines during the project development, check our [blog post](https://argilla.io/blog/annotation-guidelines-practices/).
 
+### Distribution
+
+When working as a team, you may want to distribute the annotation task to ensure efficiency and quality. You can use the `TaskDistribution` settings to configure the number of minimum submitted responses expected for each record. Argilla will use this setting to automatically handle records in your team members' pending queues.
+
+```python
+rg.TaskDistribution(
+    min_submitted = 2
+)
+```
+
+> To learn more about how to distribute the task among team members in the [Distribute the annotation guide](../how_to_guides/distribution.md).
+
+
 ## List datasets
 
 You can list all the datasets available in a workspace using the `datasets` attribute of the `Workspace` class. You can also use `len(workspace.datasets)` to get the number of datasets in a workspace.
@@ -412,23 +442,49 @@ for dataset in datasets:
     print(dataset)
 ```
 
-## Retrieve a dataset
-
-You can retrieve a dataset by calling the `datasets` method on the `Argilla` class and passing the name of the dataset as an argument. By default, this method attempts to retrieve the dataset from the first workspace. If the dataset is in a different workspace, you must specify either the workspace name or id as an argument.
-
+When you list datasets, dataset settings are not preloaded, since this can introduce extra requests to the server. If you want to work with settings when listing datasets, you need to load them:
 ```python
 import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-workspace = client.workspaces("my_workspace")
-
-# Retrieve the dataset from the first workspace
-retrieved_dataset = client.datasets(name="my_dataset")
-
-# Retrieve the dataset from the specified workspace
-retrieved_dataset = client.datasets(name="my_dataset", workspace=workspace)
+for dataset in client.datasets:
+    dataset.settings.get() # this will get the dataset settings from the server
+    print(dataset.settings)
 ```
+
+!!! tip "Notebooks"
+    When using a notebook, executing `client.datasets` will display a table with the `name`of the existing datasets, the `id`, `workspace_id` to which they belong, and the last update as `updated_at`. .
+
+## Retrieve a dataset
+
+You can retrieve a dataset by calling the `datasets` method on the `Argilla` class and passing the `name` or `id` of the dataset as an argument. If the dataset does not exist, a warning message will be raised and `None` will be returned.
+
+=== "By name"
+
+    By default, this method attempts to retrieve the dataset from the first workspace. If the dataset is in a different workspace, you must specify either the workspace or workspace name as an argument.
+
+    ```python
+    import argilla as rg
+
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    # Retrieve the dataset from the first workspace
+    retrieved_dataset = client.datasets(name="my_dataset")
+
+    # Retrieve the dataset from the specified workspace
+    retrieved_dataset = client.datasets(name="my_dataset", workspace="my_workspace")
+    ```
+
+=== "By id"
+
+    ```python
+    import argilla as rg
+
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    dataset = client.datasets(id="<uuid-or-uuid-string>")
+    ```
 
 ## Check dataset existence
 
@@ -441,42 +497,119 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 dataset = client.datasets(name="my_dataset")
 
-dataset_exist = dataset is not None
+if dataset is not None:
+    pass
 ```
 
 ## Update a dataset
 
-You can update a dataset by calling the `update` method on the `Dataset` class and passing the new settings as an argument.
+Once a dataset is published, there are limited things you can update. Here is a summary of the attributes you can change for each setting:
 
-!!! note
-    Keep in mind that once your dataset is published, only the guidelines can be updated.
+=== "Fields"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|✅|✅|
+    |Required|❌|❌|
+    |Use markdown|✅|✅|
+
+=== "Questions"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|❌|✅|
+    |Description|❌|✅|
+    |Required|❌|❌|
+    |Labels|❌|❌|
+    |Values|❌|❌|
+    |Label order|❌|✅|
+    |Suggestions first|❌|✅|
+    |Visible labels|❌|✅|
+    |Field|❌|❌|
+    |Allow overlapping|❌|❌|
+    |Use markdown|❌|✅|
+
+=== "Metadata"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|✅|✅|
+    |Options|❌|❌|
+    |Minimum value|❌|❌|
+    |Maximum value|❌|❌|
+    |Visible for annotators|✅|✅|
+    |Allow extra metadata|✅|✅|
+
+
+=== "Vectors"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Name|❌|❌|
+    |Title|✅|✅|
+    |Dimensions|❌|❌|
+
+=== "Guidelines"
+    | From SDK | From UI |
+    | ----- | -------------- |
+    |✅|✅|
+
+=== "Distribution"
+    | Attributes | From SDK | From UI |
+    | ---- | ----- | -------------- |
+    |Minimum submitted|✅*|✅*|
+
+    > \* Can be changed as long as the dataset doesn't have any responses.
+
+To modify these attributes, you can simply set the new value of the attributes you wish to change and call the `update` method on the `Dataset` object.
 
 ```python
 import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-dataset_to_update = client.datasets(name="my_dataset")
+dataset = client.datasets("my_dataset")
 
-settings_to_update = rg.Settings(
-    guidelines="These are some updated guidelines.",
-    fields=[
-        rg.TextField(
-            name="text",
-        ),
-    ],
-    questions=[
-        rg.LabelQuestion(
-            name="label",
-            labels=["label_4", "label_5", "label_6"]
-        ),
-    ],
-)
+dataset.settings.fields["text"].use_markdown = True
+dataset.settings.metadata["my_metadata"].visible_for_annotators = False
 
-dataset_to_update.settings = settings_to_update
-
-dataset_updated = dataset_to_update.update()
+dataset.update()
 ```
+
+You can also add and delete metadata properties and vector fields using the `add` and `delete` methods.
+
+=== "Add"
+
+    ```python
+    import argilla as rg
+
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    dataset = client.datasets("my_dataset")
+
+    dataset.settings.vectors.add(rg.VectorField(name="my_new_vector", dimensions=123))
+    dataset.settings.metadata.add(
+        rg.TermsMetadataProperty(
+            name="my_new_metadata",
+            options=["option_1", "option_2", "option_3"],
+        ),
+    )
+    dataset.update()
+    ```
+
+=== "Delete"
+
+    ```python
+    import argilla as rg
+
+    client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+    dataset = client.datasets("my_dataset")
+
+    dataset.settings.vectors["my_old_vector"].delete()
+    dataset.settings.metadata["my_old_metadata"].delete()
+
+    dataset.update()
+    ```
 
 ## Delete a dataset
 

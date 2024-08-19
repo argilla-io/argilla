@@ -1,8 +1,8 @@
 # Project information
 site_name: Argilla Docs
-site_url: https://argilla-io.github.io/argilla/
+site_url: https://docs.argilla.io/
 site_author: Argilla, Inc.
-site_description: The Argilla python server SDK
+site_description: Data-centric tool for AI builders
 copyright: Copyright &copy; 2017 - 2024 Argilla
 
 # Repository
@@ -103,7 +103,7 @@ plugins:
   - gen-files:
       scripts:
         - docs/scripts/gen_changelog.py
-        # - docs/scripts/gen_popular_issues.py
+        - docs/scripts/gen_popular_issues.py
         # - docs/scripts/gen_ref_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
@@ -131,26 +131,31 @@ nav:
   - Argilla: index.md
   - Getting started:
       - Quickstart: getting_started/quickstart.md
-      - Installation: getting_started/installation.md
+      - Deploy with Docker: getting_started/how-to-deploy-argilla-with-docker.md
+      - Hugging Face Spaces settings: getting_started/how-to-configure-argilla-on-huggingface.md
       - FAQ: getting_started/faq.md
   - How-to guides:
       - how_to_guides/index.md
-      - Manage users and credentials: how_to_guides/user.md
-      - Manage workspaces: how_to_guides/workspace.md
-      - Manage and create datasets: how_to_guides/dataset.md
-      - Add, update, and delete records: how_to_guides/record.md
-      - Query and filter records: how_to_guides/query.md
-      - Importing and exporting datasets: how_to_guides/import_export.md
-      - Annotate a dataset: how_to_guides/annotate.md
-      - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
+      - Basic:
+        - Manage users and credentials: how_to_guides/user.md
+        - Manage workspaces: how_to_guides/workspace.md
+        - Create, update and delete datasets: how_to_guides/dataset.md
+        - Add, update, and delete records: how_to_guides/record.md
+        - Distribute the annotation task: how_to_guides/distribution.md
+        - Annotate datasets: how_to_guides/annotate.md
+        - Query and filter records: how_to_guides/query.md
+        - Import and export datasets: how_to_guides/import_export.md
       - Advanced:
         - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
         - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:
       - tutorials/index.md
-      - Text classification task: tutorials/text_classification.ipynb
+      - Text classification: tutorials/text_classification.ipynb
+      - Token classification: tutorials/token_classification.ipynb
   - API Reference:
       - Python SDK: reference/argilla/
+      - FastAPI Server:
+        - Server configuration: reference/argilla-server/configuration.md
       - Telemetry:
         - Server Telemetry: reference/telemetry.md
   - Community:

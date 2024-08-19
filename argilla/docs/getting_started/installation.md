@@ -7,7 +7,7 @@ description: Installation of the Argilla SDK.
 ## Install the SDK with pip
 
 ```console
-pip install argilla --pre
+pip install argilla
 ```
 
 ## Run the Argilla server
@@ -16,14 +16,8 @@ If you have already deployed Argilla Server, you can skip this step. Otherwise, 
 
 * Using a [HF Space](https://huggingface.co/new-space?template=argilla/argilla-template-space).
 
-!!! note
-    As this is a release candidate version, you'll need to manually change the version in the HF Space Files > Dockerfile to `argilla/argilla-quickstart:v2.0.0rc2`.
+* [Locally with Docker](./how-to-deploy-argilla-with-docker.md).
 
-* Locally with Docker.
-
-```console
-docker run -d --name quickstart -p 6900:6900 argilla/argilla-quickstart:v2.0.0rc2
-```
 
 ## Connect to the Argilla server
 
