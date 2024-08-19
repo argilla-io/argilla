@@ -97,9 +97,9 @@ def configure_middleware(app: FastAPI):
 
     @app.middleware("http")
     async def add_server_timing_header(request: Request, call_next):
-        start_time = datetime.now(datetime.UTC)
+        start_time = datetime.utcnow()
         response = await call_next(request)
-        response_time_ms = (datetime.now(datetime.UTC) - start_time).total_seconds() * 1000
+        response_time_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
 
         response.headers["Server-Timing"] = f"total;dur={response_time_ms}"
 
