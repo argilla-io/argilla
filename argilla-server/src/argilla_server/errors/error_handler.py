@@ -57,9 +57,8 @@ class APIErrorHandler:
             "code": error.code,
             "user-agent": request.headers.get("user-agent"),
             "accept-language": request.headers.get("accept-language"),
+            "type": error.__class__.__name__,
         }
-        if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
-            user_agent["type"] = error.type
 
         await get_telemetry_client().track_data(topic="error/server", user_agent=user_agent)
 
