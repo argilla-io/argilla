@@ -102,14 +102,16 @@ class TelemetryClient:
 
     @staticmethod
     def _process_dataset_settings(dataset: Dataset):
-        attributes = [
-            "allow_extra_metadata",
-            "guidelines",
-        ]
         user_data = {}
-        for attr in attributes:
-            if dataset.is_relationship_loaded(attr):
-                user_data[attr] = getattr(dataset, attr)
+        if dataset.is_relationship_loaded("guidelines"):
+            user_data["guidelines"] = True if getattr(dataset, "guidelines") else False
+        if dataset.is_relationship_loaded("guidelines"):
+            user_data["allow_extra_metadata"] = getattr(dataset, "allow_extra_metadata")
+        if dataset.is_relationship_loaded("distribution"):
+            distribution = getattr(dataset, "distribution")
+            user_data["distribution_strategy"] = distribution["strategy"]
+            if "min_submitted" in distribution:
+                user_data["distribution_min_submitted"] = distribution["min_submitted"]
 
         attributes = [
             "fields",
