@@ -36,7 +36,7 @@ These are the tutorials for *the Argilla SDK*. They provide step-by-step instruc
 
     ---
 
-    Learn about a standard workflow for multi-modal preference datasets like image question answering.
+    Learn about a standard workflow for multi-modal preference datasets like image generation preference.
     [:octicons-arrow-right-24: Tutorial](image_preference.ipynb)
 
 </div>
