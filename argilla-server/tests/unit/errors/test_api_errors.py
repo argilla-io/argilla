@@ -78,11 +78,8 @@ class TestAPIErrorHandler:
             "code": error.code,
             "user-agent": mock_request.headers.get("user-agent"),
             "accept-language": mock_request.headers.get("accept-language"),
-            "count": 1,
+            "type": error.__class__.__name__,
         }
-        if isinstance(error, (GenericServerError, EntityNotFoundError, EntityAlreadyExistsError)):
-            user_agent["type"] = error.type
-        user_agent.update(test_telemetry._system_info)
 
         test_telemetry.track_data.assert_called_once_with(topic="error/server", user_agent=user_agent)
         test_telemetry.track_data.assert_called()

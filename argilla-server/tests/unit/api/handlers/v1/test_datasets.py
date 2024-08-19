@@ -19,8 +19,6 @@ from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
-from sqlalchemy import func, inspect, select
-
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.api.schemas.v1.datasets import DATASET_GUIDELINES_MAX_LENGTH, DATASET_NAME_MAX_LENGTH
 from argilla_server.api.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
@@ -40,9 +38,9 @@ from argilla_server.enums import (
     DatasetStatus,
     OptionsOrder,
     RecordInclude,
+    RecordStatus,
     ResponseStatusFilter,
     SimilarityOrder,
-    RecordStatus,
     SortOrder,
 )
 from argilla_server.models import (
@@ -60,18 +58,20 @@ from argilla_server.models import (
     VectorSettings,
 )
 from argilla_server.search_engine import (
+    AndFilter,
+    MetadataFilterScope,
+    Order,
+    RangeFilter,
+    RecordFilterScope,
+    ResponseFilterScope,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
-    TextQuery,
-    AndFilter,
     TermsFilter,
-    MetadataFilterScope,
-    RangeFilter,
-    ResponseFilterScope,
-    Order,
-    RecordFilterScope,
+    TextQuery,
 )
+from sqlalchemy import func, inspect, select
+
 from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
@@ -3087,7 +3087,7 @@ class TestSuiteDatasets:
 
         mock_search_engine.index_records.assert_called_once_with(dataset, records[:4])
 
-        test_telemetry.track_crud_records.assert_called_once_with(action="update", record_or_dataset=dataset, count=4)
+        test_telemetry.track_crud_records.assert_called_with(action="update", record_or_dataset=dataset, count=4)
         test_telemetry.track_data.assert_called()
 
     async def test_update_dataset_records_with_suggestions(
