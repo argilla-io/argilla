@@ -16,8 +16,7 @@ import dataclasses
 import json
 import logging
 import platform
-import uuid
-from typing import Optional, Union
+from typing import Union
 
 from fastapi import Request
 from huggingface_hub.utils import send_telemetry
@@ -51,16 +50,8 @@ _LOGGER = logging.getLogger(__name__)
 class TelemetryClient:
     enable_telemetry: dataclasses.InitVar[bool] = settings.enable_telemetry
 
-    _server_id: Optional[uuid.UUID] = dataclasses.field(init=False, default=None)
-
-    @property
-    def server_id(self) -> uuid.UUID:
-        return self._server_id
-
     def __post_init__(self, enable_telemetry: bool):
-        self._server_id = uuid.UUID(int=uuid.getnode())
         self._system_info = {
-            "server_id": str(self._server_id),
             "system": platform.system(),
             "machine": platform.machine(),
             "platform": platform.platform(),
@@ -70,7 +61,6 @@ class TelemetryClient:
         }
 
         _LOGGER.info("System Info:")
-        _LOGGER.info(f"Server id: {self.server_id}")
         _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
         self.enable_telemetry = enable_telemetry
 
