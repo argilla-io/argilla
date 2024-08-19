@@ -97,9 +97,9 @@ def configure_middleware(app: FastAPI):
 
     @app.middleware("http")
     async def add_server_timing_header(request: Request, call_next):
-        start_time = datetime.utcnow()
+        start_time = datetime.now(datetime.UTC)
         response = await call_next(request)
-        response_time_ms = (datetime.utcnow() - start_time).total_seconds() * 1000
+        response_time_ms = (datetime.now(datetime.UTC) - start_time).total_seconds() * 1000
 
         response.headers["Server-Timing"] = f"total;dur={response_time_ms}"
 
@@ -177,7 +177,7 @@ def show_telemetry_warning():
             f'{"#set ARGILLA_ENABLE_TELEMETRY=0" if os.name == "nt" else "$>export ARGILLA_ENABLE_TELEMETRY=0"}'
         )
         _LOGGER.warning(message)
-    
+
     message += "\n\n    "
     message += "#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"
     message += "\n"
