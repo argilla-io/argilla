@@ -48,6 +48,7 @@
   --bg-similarity: hsl(2, 100%, 94%);
   --fg-similarity: hsl(3, 100%, 69%);
   --fg-highlight: hsl(3, 100%, 69%);
+  --bg-auth: hsl(18, 57%, 91%);
   --bg-auth-gradient: linear-gradient(
     178.31deg,
     #ffe5d9 1.36%,
@@ -59,12 +60,12 @@
   --bg-black: #000000;
   --bg-action: hsl(227, 56%, 52%);
   --bg-action-accent: hsl(227, 50%, 55%);
-  --bg-solid-grey-1: hsl(214deg 12% 10%);
-  --bg-solid-grey-2: hsl(207, 9%, 19%);
-  --bg-solid-grey-3: hsl(0, 0%, 30%);
-  --bg-accent-grey-1: hsl(214deg 12% 12%);
-  --bg-accent-grey-2: hsl(214deg 12% 16%);
-  --bg-accent-grey-3: hsl(214deg 12% 14%);
+  --bg-solid-grey-1: hsl(214, 12%, 10%);
+  --bg-solid-grey-2: hsl(214, 12%, 14%);
+  --bg-solid-grey-3: hsl(214, 12%, 16%);
+  --bg-accent-grey-1: hsl(214, 12%, 12%);
+  --bg-accent-grey-2: hsl(214, 12%, 16%);
+  --bg-accent-grey-3: hsl(214, 12%, 14%);
   --bg-opacity-1: hsla(0, 0%, 100%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 100%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 100%, 0.03);
@@ -100,6 +101,7 @@
   --bg-similarity: hsla(2, 100%, 94%, 4%);
   --fg-similarity: hsla(3, 100%, 74%, 90%);
   --fg-highlight: hsl(3, 100%, 69%);
+  --bg-auth: hsl(214, 12%, 10%);
   --bg-auth-gradient: linear-gradient(
     178.31deg,
     var(--bg-accent-grey-2) 1.36%,

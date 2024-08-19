@@ -74,8 +74,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$bg-color: #f5e3db;
-$gradient-bg-color: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
+$bg-color: var(--bg-auth);
+$gradient-bg-color: var(--bg-auth-gradient);
 .hf-login {
   display: flex;
   flex-direction: column;
@@ -153,7 +153,7 @@ $gradient-bg-color: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
     justify-content: center;
     transition: opacity 0.2s ease-in;
     @include font-size(16px);
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--fg-primary);
     &:hover {
       opacity: 0.8;
       transition: opacity 0.2s ease-in;
@@ -175,7 +175,7 @@ $gradient-bg-color: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
     max-width: min(400px, calc(100% - $base-space * 4));
     padding: $base-space;
     margin-inline: auto;
-    background: #ffffff;
+    background: var(--bg-accent-grey-1);
     border-radius: 18px;
     @include media(">tablet") {
       position: relative;
