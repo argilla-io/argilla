@@ -213,7 +213,7 @@ class TestHubImportExportMixin:
         with_records_export: bool,
         with_records_import: bool,
     ):
-        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_records_{with_records_export}"
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_using_settings_with_records{with_records_export}"
         dataset.records.log(records=mock_data)
 
         dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
