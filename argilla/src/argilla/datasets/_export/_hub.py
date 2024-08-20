@@ -19,6 +19,7 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
 from uuid import UUID
 
+from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
 from datasets.data_files import EmptyDatasetError
@@ -33,7 +34,7 @@ from git import repo
 if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
 
-    from argilla import Argilla, Dataset, Workspace
+    from argilla import Argilla, Dataset, Workspace, Settings
 
 DATASET_SERVER_URL = "https://datasets-server.huggingface.co"
 HF_TOKEN = os.environ["HF_TOKEN_ARGILLA_INTERNAL_TESTING"]
@@ -180,7 +181,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                         )
                 try:
                     cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
-                except RecordsIngestionError as e:
+                except (RecordsIngestionError, UnprocessableEntityError) as e:
                     if settings is not None:
                         raise SettingsError(
                             message=f"Failed to load records from Hugging Face dataset. Defined settings do not match dataset schema {hf_dataset.features}"

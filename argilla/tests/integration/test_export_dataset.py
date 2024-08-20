@@ -22,7 +22,7 @@ from typing import Any, List
 
 import argilla as rg
 import pytest
-from argilla._exceptions import ConflictError
+from argilla._exceptions import ConflictError, SettingsError
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -248,7 +248,9 @@ class TestHubImportExportMixin:
         with_records_export: bool,
         with_records_import: bool,
     ):
-        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_records_{with_records_export}"
+        repo_id = (
+            f"argilla-internal-testing/test_import_dataset_from_hub_using_settings_with_records{with_records_export}"
+        )
         dataset.records.log(records=mock_data)
 
         dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
@@ -287,3 +289,29 @@ class TestHubImportExportMixin:
         assert len(new_dataset.settings.questions[1].labels) == 2
         assert new_dataset.settings.questions[1].labels[0] == "extra_positive"
         assert new_dataset.settings.questions[1].labels[1] == "extra_negative"
+
+    def test_import_dataset_from_hub_using_wrong_settings(
+        self,
+        token: str,
+        dataset: rg.Dataset,
+        client,
+        mock_data: List[dict[str, Any]],
+        with_records_export: bool,
+    ):
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_using_wrong_settings_with_records_{with_records_export}"
+        dataset.records.log(records=mock_data)
+
+        dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
+        settings = rg.Settings(
+            fields=[
+                rg.TextField(name="text"),
+            ],
+            questions=[
+                rg.RatingQuestion(name="label", values=[1, 2, 3, 4, 5]),
+            ],
+        )
+        if with_records_export:
+            with pytest.raises(SettingsError):
+                rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings)
+        else:
+            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings)
