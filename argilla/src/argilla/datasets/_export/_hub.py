@@ -31,7 +31,7 @@ from argilla.responses import Response
 if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
 
-    from argilla import Argilla, Dataset, Workspace
+    from argilla import Argilla, Dataset, Workspace, Settings
 
 
 class HubImportExportMixin(DiskImportExportMixin):
