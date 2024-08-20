@@ -211,3 +211,30 @@ class TestHubImportExportMixin:
         assert new_dataset.settings.fields[0].name == "text"
         assert new_dataset.settings.fields[1].name == "image"
         assert new_dataset.settings.questions[0].name == "label"
+
+    @pytest.mark.parametrize("with_records_import", [True])
+    def test_import_image_dataset_from_hub(
+        self,
+        token: str,
+        dataset: rg.Dataset,
+        client,
+        mock_data: List[dict[str, Any]],
+        with_records_export: bool,
+        with_records_import: bool,
+    ):
+
+        repo_id = "argilla-internal-testing/test_import_image_dataset_from_hub"
+        new_dataset = rg.Dataset.from_hub(
+            repo_id=repo_id,
+            client=client,
+            with_records=with_records_import,
+            token=token,
+            name=f"test_{uuid.uuid4()}",
+        )
+
+        assert new_dataset.settings.fields[0].name == "image"
+        assert new_dataset.settings.questions[0].name == "label"
+
+        for record in new_dataset.records(with_suggestions=True):
+            assert record.fields["image"].startswith("http")
+            assert record.suggestions["label"].value in ["positive", "negative"]
