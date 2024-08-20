@@ -20,15 +20,22 @@ from typing import TYPE_CHECKING, Any, Optional, Type, Union
 from uuid import UUID
 
 from datasets.data_files import EmptyDatasetError
+from datasets.features import Image
 
 from argilla.datasets._export._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
+from argilla.settings import ImageField
+from git import repo
 
 if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
 
     from argilla import Argilla, Dataset, Workspace
+
+DATASET_SERVER_URL = "https://datasets-server.huggingface.co"
+HF_TOKEN = os.environ["HF_TOKEN_ARGILLA_INTERNAL_TESTING"]
+HEADERS = {"Authorization": f"Bearer {HF_TOKEN}"}
 
 
 class HubImportExportMixin(DiskImportExportMixin):
@@ -72,7 +79,10 @@ class HubImportExportMixin(DiskImportExportMixin):
             self.to_disk(path=config_dir, with_records=False)
 
             if generate_card:
-                sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
+                try:
+                    sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
+                except StopIteration:
+                    sample_argilla_record = None
                 if hfds:
                     sample_huggingface_record = hfds[0]
                     size_categories = len(hfds)
@@ -90,7 +100,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                     argilla_guidelines=self.settings.guidelines or None,
                     argilla_vectors_settings=self.settings.vectors or None,
                     argilla_metadata_properties=self.settings.metadata,
-                    argilla_record=sample_argilla_record.to_dict(),
+                    argilla_record=sample_argilla_record or {},
                     huggingface_record=sample_huggingface_record,
                 )
                 card.save(filepath=os.path.join(tmpdirname, "README.md"))
@@ -149,8 +159,10 @@ class HubImportExportMixin(DiskImportExportMixin):
                             "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
                             f" are: {', '.join(hf_dataset.keys())}."
                         )
-                    hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
-
+                    split = next(iter(hf_dataset.keys()))
+                    hf_dataset: Dataset = hf_dataset[split]
+                if cls._has_image_features(hf_dataset, dataset):
+                    dataset = cls._cast_images_as_urls(hf_dataset, repo_id)
                 cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
             except EmptyDatasetError:
                 warnings.warn(
@@ -218,3 +230,46 @@ class HubImportExportMixin(DiskImportExportMixin):
                     record.responses.add(response)
             records.append(record)
         dataset.records.log(records=records)
+
+    @staticmethod
+    def _has_image_features(hf_dataset: "HFDataset", dataset) -> bool:
+        """Check if the Hugging Face dataset contains image features.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to check.
+
+        Returns:
+            bool: True if the Hugging Face dataset contains image features, False otherwise.
+        """
+        for feature in hf_dataset.features:
+            if isinstance(feature, Image):
+                for fields in dataset.settings.fields:
+                    if isinstance(fields, ImageField):
+                        return True
+
+        return False
+
+    @staticmethod
+    def _cast_images_as_urls(hf_dataset: "HFDataset", repo_id: str) -> "HFDataset":
+        """Cast the image features in the Hugging Face dataset as URLs.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to cast.
+            repo_id (str): The ID of the Hugging Face Hub repo.
+
+        Returns:
+            HFDataset: The Hugging Face dataset with image features cast as URLs.
+        """
+        config_name = dataset.info.config_name
+        split = dataset.split
+        url = f"{DATASET_SERVER_URL}/rows?dataset={repo_id}&config={config_name}&split={split}"
+
+        def _get_image_url(sample: dict, idx: int) -> dict:
+            api_url = f"{url}&offset={idx}&length=1"
+            response = requests.get(api_url, headers=HEADERS)
+            data = response.json()
+            img_url = data["rows"][0]["row"]["image"]["src"]
+            return {"image": img_url}
+
+        hf_dataset = hf_dataset.map(_get_image_url, with_indices=True)
+        return hf_dataset
