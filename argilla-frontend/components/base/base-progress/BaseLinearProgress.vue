@@ -119,14 +119,14 @@ $borderRadius: 3px;
     border-radius: $borderRadius;
     overflow: hidden;
     background: var(--bg-solid-grey-3);
-    box-shadow: 0 0 0 1px var(--bg-opacity-0);
+    box-shadow: 0 0 0 1px var(--bg-accent-grey-2);
   }
   &__bar {
     position: relative;
     height: 100%;
     border-radius: $borderRadius;
     margin: 0 -1px;
-    box-shadow: 0 0 0 1px var(--bg-opacity-0);
+    box-shadow: 0 0 0 1px var(--bg-accent-grey-2);
     z-index: 1;
     &:after {
       content: "";
@@ -186,7 +186,7 @@ $borderRadius: 3px;
 .animate-progress-leave-to {
   .progress__range {
     max-width: 100%;
-    transition: all 0.5s $cb-slow;
+    transition: all 0.5s ease-in-out;
   }
 }
 </styles>

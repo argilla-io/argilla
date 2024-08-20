@@ -245,10 +245,10 @@ export default {
 $toast-colors: () !default;
 $toast-colors: map-merge(
   (
-    "success": $success,
-    "info": $info,
-    "warning": $warning,
-    "error": $error,
+    "success": var(--color-success),
+    "info": var(--color-info),
+    "warning": var(--color-warning),
+    "danger": var(--color-danger),
   ),
   $toast-colors
 );

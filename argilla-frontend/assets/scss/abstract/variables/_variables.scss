@@ -15,14 +15,6 @@
  * limitations under the License.
  */
 
-// States
-//-----------
-$error: #ff675f;
-$danger: #ff675f;
-$warning: #fd8f5e;
-$success: #60a018;
-$info: #e6e6e6;
-
 // Fonts
 //-----------
 $primary-font-family: "Inter", "Helvetica", "Arial", sans-serif;
@@ -32,20 +24,6 @@ $tertiary-font-family: "Roboto Condensed", sans-serif;
 $quaternary-font-family: "Roboto Mono", monospace;
 $base-font-size: 14px;
 $base-line-height: 1.4em;
-
-// Easing
-//-----------
-// http://cubic-bezier.com/
-// ease-in fast->slow
-// ease-out slow->fast
-//
-// $cb-fast -> ease-in
-// $cb-normal -> ease-in forzado
-// $cb-slow -> ease-out
-
-$cb-fast: cubic-bezier(0, 0, 0.24, 0.9);
-$cb-normal: cubic-bezier(0.02, 0.42, 0.01, 0.51);
-$cb-slow: cubic-bezier(0.59, 0, 0.68, 0.69);
 
 // Grid
 //-----------

@@ -4,6 +4,10 @@
   --color-dark-grey: hsl(207, 9%, 19%);
   --color-brand: hsl(3, 100%, 69%);
   --color-brand-secondary: hsl(19, 85%, 81%);
+  --color-danger: var(--color-brand);
+  --color-warning: hsl(18, 98%, 68%);
+  --color-success: hsl(88, 74%, 36%);
+  --color-info: hsl(0, 0%, 90%);
   --bg-action: hsl(227, 56%, 52%);
   --bg-action-accent: hsl(227, 50%, 46%);
   --bg-black: hsla(0, 0%, 0%, 0.87);
@@ -57,7 +61,7 @@
 }
 
 [data-theme="dark"] {
-  --bg-black: #000000;
+  --bg-black: hsl(0, 0%, 0%);
   --bg-action: hsl(227, 56%, 52%);
   --bg-action-accent: hsl(227, 50%, 55%);
   --bg-solid-grey-1: hsl(214, 12%, 10%);

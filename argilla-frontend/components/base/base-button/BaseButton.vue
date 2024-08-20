@@ -133,7 +133,7 @@ export default {
   @include font-size(14px);
   line-height: 14px;
   padding: 12px 24px;
-  transition: background 0.3s $cb-normal;
+  transition: background 0.3s ease-in;
   cursor: pointer;
   &[disabled] {
     opacity: 0.5;
@@ -251,7 +251,7 @@ export default {
   }
 }
 .--danger {
-  background-color: $danger;
+  background-color: var(--color-danger);
   color: var(--color-white);
   .svg-icon {
     fill: var(--color-white);
@@ -259,25 +259,25 @@ export default {
   &:hover,
   &:active,
   &.active {
-    background-color: darken($danger, 10%);
+    background-color: hsl(from var(--color-danger) h s calc(l - 4));
   }
   &.outline {
     background: none;
-    border: 1px solid $danger;
-    color: $danger;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
     .svg-icon {
-      fill: $danger;
+      fill: var(--color-danger);
     }
     &:hover,
     &:active,
     &.active {
-      color: darken($danger, 10%);
-      border-color: darken($danger, 10%);
+      color: hsl(from var(--color-danger) h s calc(l - 4));
+      border-color: hsl(var(--color-danger) calc(l - 4));
     }
   }
   &.light {
     background: var(--bg-opacity-2);
-    color: $danger;
+    color: var(--color-danger);
     &:hover,
     &:active,
     &.active {
@@ -286,7 +286,7 @@ export default {
   }
   &.link {
     background: none;
-    color: $danger;
+    color: var(--color-danger);
     &:hover {
       text-decoration: underline;
       background: none;
