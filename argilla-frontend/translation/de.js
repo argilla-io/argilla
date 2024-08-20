@@ -12,7 +12,6 @@ export default {
   searchDatasets: "Durchsuche Datensätze",
   expand: "Erweitern",
   copied: "Kopiert",
-  copyClipboard: "In Zwischenablage kopieren",
   copyLink: "Link kopieren",
   copyRecord: "Eintrag kopieren",
   refresh: "Refresh",
@@ -93,6 +92,13 @@ export default {
     cancel: "Abbrechen",
     continue: "Fortfahren",
     delete: "Löschen",
+    tooltip: {
+      copyToClipboard: "Copy to clipboard",
+      copyNameToClipboard: "Copy dataset name to clipboard",
+      copyLinkToClipboard: "Copy dataset link to clipboard",
+      goToDatasetSettings: "Go to dataset settings",
+      datasetSettings: "Dataset settings",
+    },
   },
   to_submit_complete_required:
     "Zum Absenden beantworten \nSie benötigte Fragen",
@@ -204,6 +210,8 @@ export default {
   update: "Aktualisieren",
   youAreOnlineAgain: "Sie sind wieder online",
   youAreOffline: "Sie sind offline",
+  write: "Schreiben",
+  preview: "Vorschau",
   datasetTable: {
     name: "Dataset",
     workspace: "Arbeitsbereich",
