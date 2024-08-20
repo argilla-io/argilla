@@ -157,6 +157,14 @@ class HubImportExportMixin(DiskImportExportMixin):
                             f" are: {', '.join(hf_dataset.keys())}."
                         )
                     hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
+                for feature in hf_dataset.features:
+                    if feature not in dataset.settings.fields or feature not in dataset.settings.questions:
+                        warnings.warn(
+                            message=f"Feature {feature} in Hugging Face dataset is not defined in dataset settings."
+                        )
+                        warnings.warn(
+                            message=f"Available fields: {dataset.settings.fields}. Available questions: {dataset.settings.questions}."
+                        )
                 try:
                     cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
                 except RecordsIngestionError as e:
