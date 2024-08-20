@@ -19,11 +19,12 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any, Optional, Type, Union
 from uuid import UUID
 
+import requests
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
 from datasets.data_files import EmptyDatasetError
-from datasets.features import Image
+from datasets.features import Image, Features, Value
 
 from argilla.datasets._export._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
@@ -83,7 +84,9 @@ class HubImportExportMixin(DiskImportExportMixin):
 
             if generate_card:
                 try:
-                    sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
+                    sample_argilla_record = next(
+                        iter(self.records(with_suggestions=True, with_responses=True))
+                    ).to_dict()
                 except StopIteration:
                     sample_argilla_record = None
                 if hfds:
@@ -180,6 +183,8 @@ class HubImportExportMixin(DiskImportExportMixin):
                             message=f"Available fields: {dataset.settings.fields}. Available questions: {dataset.settings.questions}."
                         )
                 try:
+                    features = Features({feature_name: Value("string") for feature_name in hf_dataset.features})
+                    hf_dataset = hf_dataset.cast(features)
                     cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
                 except (RecordsIngestionError, UnprocessableEntityError) as e:
                     if settings is not None:
@@ -235,7 +240,8 @@ class HubImportExportMixin(DiskImportExportMixin):
         records = []
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
-            record.id = row.pop("id")
+            if "id" in row:
+                record.id = row.pop("id")
             for question_name, values in response_questions.items():
                 response_users = {}
                 response_values = values["responses"][idx]
@@ -266,10 +272,10 @@ class HubImportExportMixin(DiskImportExportMixin):
         Returns:
             bool: True if the Hugging Face dataset contains image features, False otherwise.
         """
-        for feature in hf_dataset.features:
+        for feature in hf_dataset.features.values():
             if isinstance(feature, Image):
-                for fields in dataset.settings.fields:
-                    if isinstance(fields, ImageField):
+                for field in dataset.settings.fields:
+                    if isinstance(field, ImageField):
                         return True
 
         return False
@@ -285,16 +291,23 @@ class HubImportExportMixin(DiskImportExportMixin):
         Returns:
             HFDataset: The Hugging Face dataset with image features cast as URLs.
         """
-        config_name = dataset.info.config_name
-        split = dataset.split
+        config_name = hf_dataset.info.config_name
+        split = hf_dataset.split
         url = f"{DATASET_SERVER_URL}/rows?dataset={repo_id}&config={config_name}&split={split}"
 
-        def _get_image_url(sample: dict, idx: int) -> dict:
+        def _get_image_url(sample: dict, idx: int, column: str) -> dict:
             api_url = f"{url}&offset={idx}&length=1"
             response = requests.get(api_url, headers=HEADERS)
             data = response.json()
-            img_url = data["rows"][0]["row"]["image"]["src"]
-            return {"image": img_url}
+            img_url = data["rows"][0]["row"][column]["src"]
+            return {f"{column}_str": img_url}
 
-        hf_dataset = hf_dataset.map(_get_image_url, with_indices=True)
-        return hf_dataset
+        for column_name, feature in hf_dataset.features.items():
+            if not isinstance(feature, Image):
+                continue
+            casted_dataset = hf_dataset.map(_get_image_url, with_indices=True, fn_kwargs={"column": column_name})
+            casted_dataset = casted_dataset.remove_columns(column_name)
+            casted_dataset = casted_dataset.rename_column(
+                original_column_name=f"{column_name}_str", new_column_name=column_name
+            )
+        return casted_dataset
