@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fix bug when submit the latest record, sometimes you navigate to non existing page [#5419](https://github.com/argilla-io/argilla/pull/5419)
+
 ## [2.0.0](https://github.com/argilla-io/argilla/compare/v2.0.0rc1...v2.0.0)
 
 ### Added
