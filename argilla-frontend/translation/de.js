@@ -93,11 +93,11 @@ export default {
     continue: "Fortfahren",
     delete: "Löschen",
     tooltip: {
-      copyToClipboard: "Copy to clipboard",
-      copyNameToClipboard: "Copy dataset name to clipboard",
-      copyLinkToClipboard: "Copy dataset link to clipboard",
-      goToDatasetSettings: "Go to dataset settings",
-      datasetSettings: "Dataset settings",
+      copyToClipboard: "In Zwischenablage kopieren",
+      copyNameToClipboard: "Datensatznamen in die Zwischenablage kopieren",
+      copyLinkToClipboard: "Datensatzlink in die Zwischenablage kopieren",
+      goToDatasetSettings: "Zu den Datensatzeinstellungen gehen",
+      datasetSettings: "Datensatzeinstellungen",
     },
   },
   to_submit_complete_required:
