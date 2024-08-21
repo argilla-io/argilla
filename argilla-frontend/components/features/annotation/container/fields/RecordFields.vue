@@ -1,7 +1,17 @@
 <template>
   <div class="fields">
     <div v-for="{ id, name, title, content, settings } in fields" :key="id">
+      <SpanAnnotationTextField
+        v-if="hasSpanQuestion(name)"
+        :id="`${id}-${record.id}-span-field`"
+        :name="name"
+        :title="title"
+        :fieldText="content"
+        :spanQuestion="getSpanQuestion(name)"
+        :searchText="recordCriteria.committed.searchText.value.text"
+      />
       <TextFieldComponent
+        v-else
         :name="name"
         :title="title"
         :fieldText="content"
