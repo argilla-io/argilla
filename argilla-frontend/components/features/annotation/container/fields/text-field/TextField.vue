@@ -17,8 +17,7 @@
       </BaseActionTooltip>
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
-      <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
-      <MarkdownRenderer v-else :markdown="fieldText" />
+      <Sandbox :fieldText="fieldText" :record="record" />
       <template>
         <style :key="name" scoped>
           ::highlight(search-text-highlight-{{name}}) {
@@ -54,6 +53,9 @@ export default {
     useMarkdown: {
       type: Boolean,
       default: false,
+    },
+    record: {
+      type: Object,
     },
   },
   computed: {
