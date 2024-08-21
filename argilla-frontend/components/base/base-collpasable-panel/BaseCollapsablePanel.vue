@@ -87,7 +87,8 @@ export default {
     &:hover {
       :deep(p),
       :deep(svg) {
-        color: hsl(from var(--fg-primary) h s l / 60%);
+        color: var(--fg-primary);
+        opacity: 0.7;
       }
     }
   }
