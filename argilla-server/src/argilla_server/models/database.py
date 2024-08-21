@@ -85,6 +85,10 @@ class Field(DatabaseModel):
     @property
     def is_chat(self):
         return self.settings.get("type") == FieldType.chat
+    
+    @property
+    def is_custom(self):
+        return self.settings.get("type") == FieldType.custom
 
     def __repr__(self):
         return (

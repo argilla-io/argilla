@@ -159,7 +159,7 @@ def es_mapping_for_field(field: Field) -> dict:
             },
         }
         return {es_field_for_record_field(field.name): es_field}
-    elif field.is_image:
+    elif field.is_image or field.is_custom:
         return {
             es_field_for_record_field(field.name): {
                 "type": "object",
