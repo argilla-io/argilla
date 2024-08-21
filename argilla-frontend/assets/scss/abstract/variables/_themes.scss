@@ -58,6 +58,9 @@
     #ffe5d9 1.36%,
     #ffd1bc 109.14%
   );
+  --bg-banner-info: hsl(0, 0%, 90%);
+  --bg-banner-warning: hsl(47, 83%, 91%);
+  --bg-banner-error: hsl(3, 100%, 92%);
 }
 
 [data-theme="dark"] {
@@ -111,4 +114,7 @@
     var(--bg-accent-grey-2) 1.36%,
     hsl(211deg 29.58% 26.5%) 109.14%
   );
+  --bg-banner-info: hsl(0, 0%, 20%);
+  --bg-banner-warning: hsl(47, 83%, 16%);
+  --bg-banner-error: hsl(3, 100%, 20%);
 }
