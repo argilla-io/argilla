@@ -16,14 +16,14 @@ import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, Union, Dict
 from uuid import UUID
+
+from datasets.data_files import EmptyDatasetError
 
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
-from datasets.data_files import EmptyDatasetError
-
 from argilla.datasets._export._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
@@ -72,6 +72,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         with TemporaryDirectory() as tmpdirname:
             config_dir = os.path.join(tmpdirname)
+
             self.to_disk(path=config_dir, with_records=False)
 
             if generate_card:
@@ -129,7 +130,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         Returns:
             A `Dataset` loaded from the Hugging Face Hub.
         """
-        from datasets import Dataset, DatasetDict, load_dataset
+        from datasets import load_dataset
         from huggingface_hub import snapshot_download
 
         if settings is not None:
@@ -150,31 +151,9 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         if with_records:
             try:
-                hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-                if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
-                    if len(hf_dataset.keys()) > 1:
-                        raise ValueError(
-                            "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
-                            f" are: {', '.join(hf_dataset.keys())}."
-                        )
-                    hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
-                for feature in hf_dataset.features:
-                    if feature not in dataset.settings.fields or feature not in dataset.settings.questions:
-                        warnings.warn(
-                            message=f"Feature {feature} in Hugging Face dataset is not defined in dataset settings."
-                        )
-                        warnings.warn(
-                            message=f"Available fields: {dataset.settings.fields}. Available questions: {dataset.settings.questions}."
-                        )
-                try:
-                    cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
-                except (RecordsIngestionError, UnprocessableEntityError) as e:
-                    if settings is not None:
-                        raise SettingsError(
-                            message=f"Failed to load records from Hugging Face dataset. Defined settings do not match dataset schema {hf_dataset.features}"
-                        ) from e
-                    else:
-                        raise e
+                hf_dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
+                hf_dataset = cls._get_single_dataset(hf_dataset=hf_dataset, kwargs=kwargs)
+                cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
             except EmptyDatasetError:
                 warnings.warn(
                     message="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
@@ -240,4 +219,33 @@ class HubImportExportMixin(DiskImportExportMixin):
                     )
                     record.responses.add(response)
             records.append(record)
-        dataset.records.log(records=records)
+
+        try:
+            dataset.records.log(records=records)
+        except (RecordsIngestionError, UnprocessableEntityError) as e:
+            raise SettingsError(
+                message=f"Failed to load records from Hugging Face dataset. Defined settings do not match dataset schema. Hugging face dataset features: {hf_dataset.features}. Argilla dataset settings : {dataset.settings}"
+            ) from e
+
+    @staticmethod
+    def _get_single_dataset(hf_dataset: "HFDataset", kwargs: Dict) -> "HFDataset":
+        """Get a single dataset from a Hugging Face dataset.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to get a single dataset from.
+
+        Returns:
+            HFDataset: The single dataset.
+        """
+        from datasets import DatasetDict
+
+        if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
+            if len(hf_dataset.keys()) > 1:
+                raise ValueError(
+                    "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
+                    f" are: {', '.join(hf_dataset.keys())}."
+                )
+            split = next(iter(hf_dataset.keys()))
+            warnings.warn(message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}.")
+            hf_dataset = hf_dataset[split]
+        return hf_dataset
