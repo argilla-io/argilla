@@ -1,12 +1,5 @@
 <template>
-  <iframe
-    v-if="isHTML"
-    :srcdoc="fieldText"
-    ref="iframe"
-    frameborder="0"
-    scrolling="no"
-  />
-  <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
+  <iframe :srcdoc="fieldText" ref="iframe" frameborder="0" scrolling="no" />
 </template>
 
 <script>
