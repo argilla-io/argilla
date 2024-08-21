@@ -1,7 +1,7 @@
 <template>
   <div class="text_field_component" :key="fieldText">
     <div class="title-area --body2">
-      <span class="text_field_component__title-content" v-text="title" />
+      <span class="text_field_component__title-content">{{ title }}</span>
       <BaseActionTooltip
         class="text_field_component__tooltip"
         tooltip="Copied"
@@ -10,28 +10,61 @@
         <BaseButton
           title="Copy to clipboard"
           class="text_field_component__copy-button"
-          @click.prevent="$copyToClipboard(fieldText)"
+          @click.prevent="copyConversation"
         >
           <svgicon color="#acacac" name="copy" width="18" height="18" />
         </BaseButton>
       </BaseActionTooltip>
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
-      <Sandbox :fieldText="mock" :record="record" />
-      <template>
-        <style :key="name" scoped>
-          ::highlight(search-text-highlight-{{name}}) {
-            color: #ff675f;
-          }
-        </style>
-      </template>
+      <div class="flex-1 p-2 sm:p-6 justify-between flex flex-col">
+        <div id="messages" class="flex flex-col space-y-4 p-3 overflow-y-auto">
+          <div
+            :id="`message-role-${message.role}`"
+            class="chat-message"
+            v-for="(message, index) in chatMessages"
+            :key="index"
+          >
+            <div class="flex items-end">
+              <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+                <div class="message-role-title">
+                  <span class="px-4 py-2 rounded-lg inline-block rounded-tl-none bg-gray-300 text-gray-600">{{ message.role }}</span>
+                </div>
+                <div>
+                  <span
+                    class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600"
+                    v-if="!message.editing"
+                    @dblclick="editMessage(index)"
+                  >{{ message.content }}</span>
+                  <input
+                    v-else
+                    type="text"
+                    v-model="message.content"
+                    @blur="finishEditing(index)"
+                    @keyup.enter="finishEditing(index)"
+                    class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600"
+                  />
+                </div>
+              </div>
+              <div class="message-actions">
+                <button @click="editMessage(index)">✏️</button>
+                <button @click="deleteMessage(index)">🗑️</button>
+                <button @click="regenerateMessage(index)">↪️</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    <style scoped>
+      ::highlight(search-text-highlight-{{name}}) {
+        color: #ff675f;
+      }
+    </style>
   </div>
 </template>
 
 <script>
-import { useTextFieldViewModel } from "./useTextFieldViewModel";
-
 export default {
   name: "TextFieldComponent",
   props: {
@@ -61,133 +94,97 @@ export default {
   },
   data() {
     return {
-      mock: `<link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
-<style>
-    body {
-      background-color: #f0f0f0;
-    }
-</style>
-
-<div class="flex-1 p:2 sm:p-6 justify-between flex flex-col">
-<div id="messages" class="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
-<div class="chat-message">
-         <div class="flex items-end ">
-            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Click on avatar picture</span></div>
-            </div>
-            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1" onClick="(function(){
-                  alert('Clicked');
-            })();">
-         </div>
-      </div>
-
-<div class="chat-message">
-         <div class="flex items-end ">
-            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
-            </div>
-            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
-         </div>
-      </div>
-
-      <div class="chat-message">
-         <div class="flex items-end ">
-            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
-            </div>
-            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
-         </div>
-      </div>
-
-      <div class="chat-message">
-         <div class="flex items-end ">
-            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
-            </div>
-            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
-         </div>
-      </div>
-
-      <div class="chat-message">
-         <div class="flex items-end ">
-            <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-               <div><span class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">Bereitstellung</span></div>
-            </div>
-            <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" alt="My profile" class="w-6 h-6 rounded-full order-1">
-         </div>
-      </div>
-
-</div>
-</div>
-
-<h2 class="ml-2">Vue JS</h2>
-
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"><\/script>
-
-<div id="app">
-  <p class="ml-2">{{ message }}</p>
-
-  <input type="text" v-model="message" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required />
-
-  <br />
-
-  <button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="counter++">+</button>
-
-  {{counter}}
-
-  <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" @click="counter--">-</button>
-
-  <h3>Data</h3>
-
-  {{ JSON.stringify(fromOutside) }}
-</div>
-
-<script>
-  const { createApp, ref } = Vue
-
-  createApp({
-    setup() {
-      const message = ref('Hello vue!')
-      const counter = ref(0)
-      const fromOutside = ref("NONE")
-
-      window.addEventListener('message', ({data})=>  {
-        fromOutside.value = JSON.parse(data);
-      });
-
-      return {
-        message,
-        counter,
-        fromOutside
-      }
-    }
-  }).mount('#app')
-<\/script>
-`,
+      chatMessages: [
+        {
+          role: "user",
+          content: "Could you explain to me the difference between these two concepts? agricola and agricultura",
+          editing: false,
+        },
+        {
+          role: "system",
+          content: "Sure! agricola is a noun and agricultura is a verb",
+          editing: false,
+        },
+        {
+          role: "user",
+          content: "But what do they mean?",
+          editing: false,
+        },
+        {
+          role: "system",
+          content: "agricola means farmer and agricultura means farming",
+          editing: false,
+        },
+      ],
     };
   },
-  computed: {
-    classes() {
-      return this.$language.isRTL(this.fieldText) ? "--rtl" : "--ltr";
+  methods: {
+    async regenerateMessage(index) {
+      const apiUrl = "https://api-inference.huggingface.co/models/microsoft/Phi-3-mini-4k-instruct/v1/chat/completions";
+      const apiKey = "hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Replace with your Hugging Face API key
+
+      for (let i = index + 1; i < this.chatMessages.length; i++) {
+        const previousMessages = this.chatMessages.slice(0, i).map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        }));
+
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "microsoft/Phi-3-mini-4k-instruct",
+            messages: previousMessages,
+            max_tokens: 500,
+            stream: false,
+          }),
+        });
+
+        const responseData = await response.json();
+        const generatedContent = responseData.choices[0]?.message?.content || "Error generating response";
+
+        this.$set(this.chatMessages, i, {
+          ...this.chatMessages[i],
+          content: generatedContent,
+        });
+      }
     },
-  },
-  setup(props) {
-    return useTextFieldViewModel(props);
+    deleteMessage(index) {
+      this.chatMessages.splice(index, 1);
+    },
+    editMessage(index) {
+      this.chatMessages[index].editing = true;
+    },
+    finishEditing(index) {
+      this.chatMessages[index].editing = false;
+    },
+    copyConversation() {
+      const conversation = this.chatMessages.map(message => ({
+        content: message.content,
+        role: message.role,
+      }));
+      const conversationStr = JSON.stringify(conversation, null, 2);
+      navigator.clipboard.writeText(conversationStr).then(() => {
+        alert("Conversation copied to clipboard!");
+      });
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .text_field_component {
-  $this: &;
   display: flex;
   flex-direction: column;
-  gap: $base-space;
-  padding: 2 * $base-space;
-  background: palette(grey, 800);
-  border-radius: $border-radius-m;
+  gap: 1rem;
+  padding: 2rem;
+  background: lightgray;
+  border-radius: 0.5rem;
   &:hover {
-    #{$this}__copy-button {
+    .text_field_component__copy-button {
       opacity: 1;
     }
   }
@@ -195,33 +192,56 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: $base-space;
-    color: $black-87;
+    color: #fff;
   }
   .content-area {
     white-space: pre-wrap;
     word-break: break-word;
   }
-  &__title-content {
-    word-break: break-word;
-    width: calc(100% - 30px);
+  div#message-role-user {
+    background-color: lightgreen;
+    right: 0;
+    margin-left: auto;
   }
-  &__tooltip {
+  .chat-message {
     display: flex;
-    align-self: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #d1e7dd;
+    width: 30%;
+    border-radius: 10px;
+    .message-content {
+      color: #333;
+      padding: 10px;
+      border-radius: 10px;
+      margin-left: 10px;
+      max-width: 80%;
+      position: relative;
+    }
+    .message-role-title {
+      display: flex;
+      align-items: center;
+      span {
+        font-weight: bold;
+      }
+    }
+    .message-actions {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+      button {
+        background-color: darkgray;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        &:hover {
+          background-color: #0056b3;
+        }
+      }
+    }
   }
-  &__copy-button {
-    flex-shrink: 0;
-    padding: 0;
-    opacity: 0;
-  }
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.25s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
