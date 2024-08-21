@@ -17,7 +17,14 @@ from typing import Optional, Union, TYPE_CHECKING
 from argilla import Argilla
 from argilla._api import FieldsAPI
 from argilla._exceptions import ArgillaError
-from argilla._models import FieldModel, TextFieldSettings, ChatFieldSettings, ImageFieldSettings, FieldSettings
+from argilla._models import (
+    FieldModel,
+    TextFieldSettings,
+    ChatFieldSettings,
+    ImageFieldSettings,
+    CustomFieldSettings,
+    FieldSettings,
+)
 from argilla.settings._common import SettingsPropertyBase
 from argilla.settings._metadata import MetadataField, MetadataType
 from argilla.settings._vector import VectorField
@@ -30,7 +37,7 @@ except ImportError:
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-__all__ = ["Field", "TextField", "ImageField", "ChatField"]
+__all__ = ["Field", "TextField", "ImageField", "ChatField", "CustomField"]
 
 
 class AbstractField(ABC, SettingsPropertyBase):
@@ -188,7 +195,48 @@ class ChatField(AbstractField):
         )
 
 
-Field = Union[TextField, ImageField, ChatField]
+class CustomField(AbstractField):
+    """Custom field for use in Argilla `Dataset` `Settings`"""
+
+    def __init__(
+        self,
+        name: str,
+        template: Optional[str] = "",
+        title: Optional[str] = None,
+        required: Optional[bool] = True,
+        description: Optional[str] = None,
+        _client: Optional[Argilla] = None,
+    ) -> None:
+        """
+        Custom field for use in Argilla `Dataset` `Settings`
+
+        Parameters:
+            name (str): The name of the field
+            title (Optional[str], optional): The title of the field. Defaults to None.
+            template (str): The template of the field
+            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            description (Optional[str], optional): The description of the field. Defaults to None.
+        """
+
+        super().__init__(
+            name=name,
+            title=title,
+            required=required,
+            description=description,
+            settings=CustomFieldSettings(template=template),
+            _client=_client,
+        )
+
+    @property
+    def template(self) -> Optional[str]:
+        return self._model.settings.template
+
+    @template.setter
+    def template(self, value: str) -> None:
+        self._model.settings.template = value
+
+
+Field = Union[TextField, ImageField, ChatField, CustomField]
 
 
 def _field_from_model(model: FieldModel) -> Field:
@@ -198,6 +246,8 @@ def _field_from_model(model: FieldModel) -> Field:
         return ImageField.from_model(model)
     elif model.settings.type == "chat":
         return ChatField.from_model(model)
+    elif model.settings.type == "custom":
+        return CustomField.from_model(model)
     else:
         raise ArgillaError(f"Unsupported field type: {model.settings.type}")
 
@@ -212,6 +262,8 @@ def _field_from_dict(data: dict) -> Union[Field, VectorField, MetadataType]:
         return ImageField.from_dict(data)
     elif field_type == "chat":
         return ChatField.from_dict(data)
+    elif field_type == "custom":
+        return CustomField.from_dict(data)
     elif field_type == "vector":
         return VectorField.from_dict(data)
     elif field_type == "metadata":

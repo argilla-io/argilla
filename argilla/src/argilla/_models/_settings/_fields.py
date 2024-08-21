@@ -35,8 +35,13 @@ class ChatFieldSettings(BaseModel):
     type: Literal["chat"] = "chat"
 
 
+class CustomFieldSettings(BaseModel):
+    type: Literal["custom"] = "custom"
+    template: str
+
+
 FieldSettings = Annotated[
-    Union[TextFieldSettings, ImageFieldSettings, ChatFieldSettings],
+    Union[TextFieldSettings, ImageFieldSettings, ChatFieldSettings, CustomFieldSettings],
     Field(..., discriminator="type"),
 ]
 
