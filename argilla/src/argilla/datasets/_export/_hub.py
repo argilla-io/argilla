@@ -30,7 +30,6 @@ from argilla.datasets._export._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
 from argilla.settings import ImageField
-from git import repo
 
 if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
@@ -193,7 +192,6 @@ class HubImportExportMixin(DiskImportExportMixin):
                         ) from e
                     else:
                         raise e
-
             except EmptyDatasetError:
                 warnings.warn(
                     message="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
