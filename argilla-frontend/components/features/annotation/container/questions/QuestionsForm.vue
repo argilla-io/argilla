@@ -423,6 +423,9 @@ export default {
     &:not([disabled]) {
       background: var(--bg-status-submitted);
     }
+    &:hover:not([disabled]) {
+      background: var(--bg-status-submitted-accent);
+    }
     &:active:not([disabled]),
     &.--button--submitting,
     &.--button--submitting:hover {
