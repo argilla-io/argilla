@@ -64,7 +64,7 @@ export class GetRecordsByCriteriaUseCase {
               field.id,
               field.name,
               field.title,
-              record.fields[field.name],
+              record,
               datasetId,
               field.required,
               field.settings
@@ -148,7 +148,7 @@ export class GetRecordsByCriteriaUseCase {
               field.id,
               field.name,
               field.title,
-              referenceRecordFromBackend.fields[field.name],
+              referenceRecordFromBackend,
               datasetId,
               field.required,
               field.settings

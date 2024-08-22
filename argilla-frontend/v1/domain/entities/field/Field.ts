@@ -8,7 +8,7 @@ export class Field {
     public readonly id: string,
     public readonly name: string,
     public title: string,
-    public readonly content: string,
+    private readonly record: any,
     public readonly datasetId: string,
     public readonly required: boolean,
     public settings: any
@@ -21,8 +21,19 @@ export class Field {
     return this.fieldType === "text";
   }
 
-  public get isChatType() {
-    return this.fieldType === "chat";
+  public get isCustomType() {
+    return this.fieldType === "custom";
+  }
+
+  public get content() {
+    if (this.isCustomType) {
+      return `<script>const record_object = ${JSON.stringify(
+        this.record
+      )};</script>
+      ${this.settings.template}`;
+    }
+
+    return this.record.fields[this.name];
   }
 
   private get fieldType() {
@@ -37,7 +48,7 @@ export class Field {
   }
 
   private MAX_TITLE_LENGTH = 500;
-  public validate(): Record<"title", string[]> {
+  validate(): Record<"title", string[]> {
     const validations: Record<"title", string[]> = {
       title: [],
     };
@@ -50,7 +61,7 @@ export class Field {
     return validations;
   }
 
-  public get isFieldValid(): boolean {
+  get isFieldValid(): boolean {
     return this.validate().title.length === 0;
   }
 
