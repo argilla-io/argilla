@@ -86,7 +86,7 @@ $radio-button-size: 20px;
     min-width: $radio-button-size;
     height: $radio-button-size;
     position: relative;
-    border: 1px solid var(--bg-solid-grey-3);
+    border: 1px solid var(--bg-opacity-20);
     background: var(--bg-accent-grey-2);
     border-radius: 50%;
     transition: all 0.2s ease;
