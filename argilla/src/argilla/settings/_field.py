@@ -208,12 +208,12 @@ class CustomField(AbstractField):
         _client: Optional[Argilla] = None,
     ) -> None:
         """
-        Custom field for use in Argilla `Dataset` `Settings`
+        Custom field for use in Argilla `Dataset` `Settings` for working with custom HTML and CSS templates
 
         Parameters:
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
-            template (str): The template of the field
+            template (str): The template of the field (HTML and CSS)
             required (Optional[bool], optional): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
