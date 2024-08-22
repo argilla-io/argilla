@@ -32,7 +32,7 @@ export default {
   padding: $base-space * 2;
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
-  min-height: 10em;
+  min-height: 5em;
   background: palette(white);
   &:hover {
     .button-copy {
