@@ -13,7 +13,6 @@
 # limitations under the License.
 from abc import ABC
 import os
-import re
 import requests
 from typing import Optional, Union, TYPE_CHECKING
 
