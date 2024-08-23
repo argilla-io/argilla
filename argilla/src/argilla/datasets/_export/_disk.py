@@ -19,8 +19,8 @@ import warnings
 from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
-from uuid import uuid4
 
+from argilla._exceptions import RecordsIngestionError, ArgillaError
 from argilla._models import DatasetModel
 from argilla.client import Argilla
 from argilla.settings import Settings
@@ -90,28 +90,39 @@ class DiskImportExportMixin(ABC):
 
         # Get the relevant workspace_id of the incoming dataset
         if isinstance(workspace, str):
-            workspace_id = client.workspaces(workspace).id
-        elif isinstance(workspace, Workspace):
-            workspace_id = workspace.id
+            workspace = client.workspaces(workspace)
+            if not workspace:
+                raise ArgillaError(f"Workspace {workspace} not found on the server.")
         else:
             warnings.warn("Workspace not provided. Using default workspace.")
-            workspace_id = client.workspaces.default.id
-        dataset_model.workspace_id = workspace_id
+            workspace = client.workspaces.default
+        dataset_model.workspace_id = workspace.id
 
-        # Get a relevant and unique name for the incoming dataset.
-        if name:
-            logging.warning(f"Changing dataset name from {dataset_model.name} to {name}")
+        if name and (name != dataset_model.name):
+            logging.info(f"Changing dataset name from {dataset_model.name} to {name}")
             dataset_model.name = name
-        elif client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace_id):
-            logging.warning(f"Loaded dataset name {dataset_model.name} already exists. Changing to unique UUID.")
-            dataset_model.name = f"{dataset_model.name}_{uuid4()}"
 
-        # Create the dataset and load the settings and records
-        dataset = cls.from_model(model=dataset_model, client=client)
-        dataset.settings = Settings.from_json(path=settings_path)
-        dataset.create()
+        if client.api.datasets.name_exists(name=dataset_model.name, workspace_id=workspace.id):
+            warnings.warn(
+                f"Loaded dataset name {dataset_model.name} already exists in the workspace {workspace.name} so using it. To create a new dataset, provide a unique name to the `name` parameter."
+            )
+            dataset_model = client.api.datasets.get_by_name_and_workspace_id(
+                name=dataset_model.name, workspace_id=workspace.id
+            )
+            dataset = cls.from_model(model=dataset_model, client=client)
+        else:
+            # Create a new dataset and load the settings and records
+            dataset = cls.from_model(model=dataset_model, client=client)
+            dataset.settings = Settings.from_json(path=settings_path)
+            dataset.create()
+
         if os.path.exists(records_path) and with_records:
-            dataset.records.from_json(path=records_path)
+            try:
+                dataset.records.from_json(path=records_path)
+            except RecordsIngestionError as e:
+                raise RecordsIngestionError(
+                    message="Error importing dataset records from disk. Records and datasets settings are not compatible."
+                ) from e
         return dataset
 
     ############################
