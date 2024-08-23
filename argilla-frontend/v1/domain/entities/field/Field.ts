@@ -25,6 +25,10 @@ export class Field {
     return this.fieldType === "image";
   }
 
+  get isChatType() {
+    return this.fieldType === "chat";
+  }
+
   get isCustomType() {
     return this.fieldType === "custom";
   }
