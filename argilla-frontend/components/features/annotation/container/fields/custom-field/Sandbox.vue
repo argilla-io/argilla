@@ -1,6 +1,11 @@
 <template>
-  <iframe :srcdoc="content" ref="iframe" frameborder="0" scrolling="no" @load="resize" />
-</template>
+  <iframe
+    :srcdoc="content"
+    ref="iframe"
+    frameborder="0"
+    scrolling="no"
+    @load="resize"
+  />
 </template>
 
 <script>
