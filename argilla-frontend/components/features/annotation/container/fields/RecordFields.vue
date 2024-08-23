@@ -9,6 +9,7 @@
         settings,
         isTextType,
         isChatType,
+        isImageType,
       } in fields"
       :key="id"
     >
@@ -36,7 +37,13 @@
         :title="title"
         :content="content"
       />
-      <ImageField v-else :name="name" :title="title" :content="content" />
+      <ImageField
+        v-else-if="isImageType"
+        :name="name"
+        :title="title"
+        :content="content"
+      />
+      <CustomField v-else :name="name" :title="title" :content="content" />
     </div>
   </div>
 </template>

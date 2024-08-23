@@ -1,38 +1,28 @@
 <template>
-  <div class="text_field_component" :key="fieldText">
+  <div class="custom_field_component" :key="content">
     <div class="title-area --body2">
-      <span class="text_field_component__title-content" v-text="title" />
+      <span class="custom_field_component__title-content" v-text="title" />
       <BaseActionTooltip
-        class="text_field_component__tooltip"
+        class="custom_field_component__tooltip"
         tooltip="Copied"
         tooltip-position="left"
       >
         <BaseButton
           title="Copy to clipboard"
-          class="text_field_component__copy-button"
-          @click.prevent="$copyToClipboard(fieldText)"
+          class="custom_field_component__copy-button"
+          @click.prevent="$copyToClipboard(content)"
         >
           <svgicon color="#acacac" name="copy" width="18" height="18" />
         </BaseButton>
       </BaseActionTooltip>
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
-      <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
-      <MarkdownRenderer v-else :markdown="fieldText" />
-      <template>
-        <style :key="name" scoped>
-          ::highlight(search-text-highlight-{{name}}) {
-            color: #ff675f;
-          }
-        </style>
-      </template>
+      <Sandbox :content="content" />
     </div>
   </div>
 </template>
 
 <script>
-import { useTextFieldViewModel } from "./useTextFieldViewModel";
-
 export default {
   props: {
     name: {
@@ -43,35 +33,21 @@ export default {
       type: String,
       required: true,
     },
-    searchText: {
-      type: String,
-      default: "",
-    },
-    fieldText: {
+    content: {
       type: String,
       required: true,
-    },
-    useMarkdown: {
-      type: Boolean,
-      default: false,
-    },
-    record: {
-      type: Object,
     },
   },
   computed: {
     classes() {
-      return this.$language.isRTL(this.fieldText) ? "--rtl" : "--ltr";
+      return this.$language.isRTL(this.content) ? "--rtl" : "--ltr";
     },
-  },
-  setup(props) {
-    return useTextFieldViewModel(props);
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.text_field_component {
+.custom_field_component {
   $this: &;
   display: flex;
   flex-direction: column;

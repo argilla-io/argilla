@@ -2,6 +2,7 @@ interface OriginalField {
   title: string;
   settings: any;
 }
+
 export class Field {
   private original: OriginalField;
   constructor(
@@ -14,18 +15,21 @@ export class Field {
     public settings: any
   ) {
     this.initializeOriginal();
-    console.log(this);
   }
 
-  public get isTextType() {
+  get isTextType() {
     return this.fieldType === "text";
   }
 
-  public get isCustomType() {
+  get isImageType() {
+    return this.fieldType === "image";
+  }
+
+  get isCustomType() {
     return this.fieldType === "custom";
   }
 
-  public get content() {
+  get content() {
     if (this.isCustomType) {
       return `<script>const record_object = ${JSON.stringify(
         this.record
@@ -40,7 +44,7 @@ export class Field {
     return this.settings?.type?.toLowerCase() ?? null;
   }
 
-  public get isModified(): boolean {
+  get isModified(): boolean {
     return (
       this.title.trim() !== this.original.title ||
       this.settings.use_markdown !== this.original.settings.use_markdown
