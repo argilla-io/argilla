@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC
+import os
+import re
+import requests
 from typing import Optional, Union, TYPE_CHECKING
 
 from argilla import Argilla
@@ -217,7 +220,7 @@ class CustomField(AbstractField):
             required (Optional[bool], optional): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
-
+        template = self._load_template(template)
         super().__init__(
             name=name,
             title=title,
@@ -233,7 +236,19 @@ class CustomField(AbstractField):
 
     @template.setter
     def template(self, value: str) -> None:
-        self._model.settings.template = value
+        self._model.settings.template = self._load_template(value)
+
+    def _load_template(self, template: str) -> str:
+        if template.endswith(".html") and os.path.exists(template):
+            with open(template, "r") as f:
+                return f.read()
+        if template.startswith("http") or template.startswith("https"):
+            return requests.get(template).text
+        if isinstance(template, str):
+            return template
+        raise ArgillaError(
+            "Invalid template. Please provide 1: a valid path or URL to a HTML file. 2: a valid HTML string."
+        )
 
 
 Field = Union[TextField, ImageField, ChatField, CustomField]
