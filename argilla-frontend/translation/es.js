@@ -128,7 +128,7 @@ export default {
     actionConfirmation: "Confirmación de acción en bloque",
     actionConfirmationText:
       "Esta acción afectará {total} registros, ¿Quiere continuar?",
-    allRecordsAnnotated: "Los registros {Total} han sido {Action}",
+    allRecordsAnnotated: "{total} registros han sido {action}",
     affectedAll: {
       submitted: "enviado",
       discarded: "descartado",
