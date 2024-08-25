@@ -125,7 +125,7 @@ export default {
     pageSize: "Tamaño de página",
     selectAllResults: "Seleccione todos los registros coincidentes {Total}",
     haveSelectedRecords: "Has seleccionado todos los registros {Total}",
-    actionConfirmation: "Confirmación de acción a granel",
+    actionConfirmation: "Confirmación de acción en bloque",
     actionConfirmationText:
       "Esta acción afectará {total} registros, ¿Quiere continuar?",
     allRecordsAnnotated: "Los registros {Total} han sido {Action}",
