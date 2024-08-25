@@ -225,7 +225,7 @@ export default {
   write: "Escritura",
   preview: "Vista previa",
   datasetTable: {
-    name: "Conjunto de datos",
+    name: "Dataset",
     workspace: "Espacio de trabajo",
     createdAt: "Creado",
     lastActivityAt: "Actualizado",
