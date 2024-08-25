@@ -251,7 +251,7 @@ export default {
       },
       update_distribution_with_existing_responses: {
         message:
-          "La configuración de distribución no se puede modificar para un conjunto de datos que contiene respuestas del usuario",
+          "La configuración de distribución no se puede modificar para un dataset que contiene respuestas del usuario",
       },
     },
     http: {
