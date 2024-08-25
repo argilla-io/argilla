@@ -37,7 +37,7 @@ export default {
   minimumSubmittedResponses: "Respuestas mínimas enviadas",
   taskDistributionTooltip:
     "Una tarea se completa cuando todos los \nregistros tienen el número mínimo \nde respuestas enviadas",
-  noAnnotationGuidelines: "Este conjunto de datos no tiene pautas de anotación",
+  noAnnotationGuidelines: "Este dataset no tiene guía de anotación",
   breadcrumbs: {
     home: "Inicio",
     datasetSettings: "Configuración",
