@@ -265,7 +265,7 @@ export default {
         message: "Espere unos segundos antes de intentarlo de nuevo",
       },
       500: {
-        message: "Ocurrió un error, inténtelo de nuevo más tarde",
+        message: "Ocurrió un error, inténtalo de nuevo más tarde",
       },
     },
   },
