@@ -8,7 +8,7 @@ export default {
   minimize: "Minimizar",
   select: "Seleccionar",
   search: "Buscar",
-  searchPlaceholder: "Introducir una consulta",
+  searchPlaceholder: "Introduce una consulta",
   searchDatasets: "Search DataSets",
   expand: "Expandir",
   copied: "Copiado",
