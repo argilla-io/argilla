@@ -67,7 +67,7 @@ export default {
     },
     apiKey: "Clave de API",
     apiKeyDescription:
-      "Los tokens de clave API le permiten administrar conjuntos de datos utilizando el SDK de Python",
+      "Los tokens de clave API permiten administrar datasets utilizando el SDK de Python",
     copyKey: "Copiar clave",
   },
   userAvatarTooltip: {
