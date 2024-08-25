@@ -262,7 +262,7 @@ export default {
         message: "No se encontró el recurso solicitado",
       },
       429: {
-        message: "Espere unos segundos antes de intentarlo de nuevo",
+        message: "Espera unos segundos antes de intentarlo de nuevo",
       },
       500: {
         message: "Ocurrió un error, inténtalo de nuevo más tarde",
