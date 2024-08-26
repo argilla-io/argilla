@@ -51,6 +51,7 @@ class Settings(DefaultSettingsMixin, Resource):
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = False,
         distribution: Optional[TaskDistribution] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         _dataset: Optional["Dataset"] = None,
     ) -> None:
         """
@@ -70,6 +71,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
         self._dataset = _dataset
         self._distribution = distribution
+        self._mapping = mapping
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
@@ -137,6 +139,14 @@ class Settings(DefaultSettingsMixin, Resource):
     @distribution.setter
     def distribution(self, value: TaskDistribution) -> None:
         self._distribution = value
+
+    @property
+    def mapping(self) -> Dict[str, Union[str, Sequence[str]]]:
+        return self._mapping
+
+    @mapping.setter
+    def mapping(self, value: Dict[str, Union[str, Sequence[str]]]):
+        self._mapping = value
 
     @property
     def dataset(self) -> "Dataset":
@@ -221,6 +231,7 @@ class Settings(DefaultSettingsMixin, Resource):
                 "metadata": self.metadata.serialize(),
                 "allow_extra_metadata": self.allow_extra_metadata,
                 "distribution": self.distribution.to_dict(),
+                "mapping": self.mapping,
             }
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the settings. {e.__class__.__name__}") from e
@@ -272,6 +283,7 @@ class Settings(DefaultSettingsMixin, Resource):
         guidelines = settings_dict.get("guidelines")
         distribution = settings_dict.get("distribution")
         allow_extra_metadata = settings_dict.get("allow_extra_metadata")
+        mapping = settings_dict.get("mapping")
 
         questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
         fields = [TextField.from_dict(field) for field in fields]
@@ -289,6 +301,7 @@ class Settings(DefaultSettingsMixin, Resource):
             guidelines=guidelines,
             allow_extra_metadata=allow_extra_metadata,
             distribution=distribution,
+            mapping=mapping,
         )
 
     def _copy(self) -> "Settings":
