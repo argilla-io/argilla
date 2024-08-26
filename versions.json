@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_5411-docs-update-migrating-to-20-flow-2",
+    "title": "docs_5411-docs-update-migrating-to-20-flow-2",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_5411-docs-update-migrating-to-20-flow",
     "title": "docs_5411-docs-update-migrating-to-20-flow",
     "aliases": [],
