@@ -10,7 +10,6 @@ export const useAxiosExtension = (axiosInstanceFn: () => NuxtAxiosInstance) => {
       withCredentials: false,
     });
 
-    publicAxios.interceptors.request = axios.interceptors.request;
     publicAxios.interceptors.response = axios.interceptors.response;
 
     return publicAxios;
