@@ -167,7 +167,7 @@ export default {
     tooltip: "Esta pregunta contiene una sugerencia {agente} {stork}",
     filter: {
       value: "Valores de sugerencia",
-      score: "Puntaje",
+      score: "Puntuación",
       agent: "Agente",
     },
     plural: "Sugerencias",
