@@ -110,15 +110,13 @@ class TextField(AbstractField):
             description (Optional[str]): The description of the field.
         """
 
-        super().__init__(api=client.api.fields, client=client)
-
-        self._model = FieldModel(
+        super().__init__(
             name=name,
             title=title,
             required=required,
             description=description,
-            settings=TextFieldSettings(use_markdown=use_markdown),
             _client=client,
+            settings=TextFieldSettings(use_markdown=use_markdown),
         )
 
     @property
