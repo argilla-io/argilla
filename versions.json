@@ -13,6 +13,14 @@
     }
   },
   {
+    "version": "docs_move-ga-to-plausible",
+    "title": "docs_move-ga-to-plausible",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
