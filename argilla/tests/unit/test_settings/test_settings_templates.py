@@ -1,0 +1,35 @@
+import pytest
+from unittest import mock
+from argilla.settings._templates import DefaultSettingsMixin
+
+
+class TestDefaultSettingsMixin:
+    def test_for_document_classification(self):
+        settings = DefaultSettingsMixin.for_document_classification()
+        assert settings.guidelines == "Select a label for the document."
+        assert len(settings.fields) == 1
+        assert settings.fields[0].name == "text"
+        assert len(settings.questions) == 1
+        assert settings.questions[0].name == "label"
+        assert settings.questions[0].labels == ["positive", "negative"]
+
+    def test_for_response_ranking(self):
+        settings = DefaultSettingsMixin.for_response_ranking()
+        assert settings.guidelines == "Rank the responses."
+        assert len(settings.fields) == 3
+        assert settings.fields[0].name == "instruction"
+        assert settings.fields[1].name == "response1"
+        assert settings.fields[2].name == "response2"
+        assert len(settings.questions) == 1
+        assert settings.questions[0].name == "ranking"
+        assert settings.questions[0].values == ["response1", "response2"]
+
+    def test_for_response_rating(self):
+        settings = DefaultSettingsMixin.for_response_rating()
+        assert settings.guidelines == "Rate the response."
+        assert len(settings.fields) == 2
+        assert settings.fields[0].name == "instruction"
+        assert settings.fields[1].name == "response"
+        assert len(settings.questions) == 1
+        assert settings.questions[0].name == "rating"
+        assert settings.questions[0].values == [1, 2, 3, 4, 5]
