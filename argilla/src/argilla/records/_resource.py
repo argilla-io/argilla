@@ -13,18 +13,18 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Iterable
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
+from uuid import UUID
 
 from argilla._exceptions import ArgillaError
 from argilla._models import (
-    MetadataModel,
-    RecordModel,
-    UserResponseModel,
-    SuggestionModel,
-    VectorModel,
-    MetadataValue,
     FieldValue,
+    MetadataModel,
+    MetadataValue,
+    RecordModel,
+    SuggestionModel,
+    UserResponseModel,
+    VectorModel,
     VectorValue,
 )
 from argilla._resource import Resource
@@ -87,7 +87,7 @@ class Record(Resource):
             raise ValueError("If fields are an empty dictionary, an id must be provided.")
 
         self._dataset = _dataset
-        self._model = RecordModel(external_id=id or uuid4(), id=_server_id)
+        self._model = RecordModel(external_id=id, id=_server_id)
         self.__fields = RecordFields(fields=fields)
         self.__vectors = RecordVectors(vectors=vectors)
         self.__metadata = RecordMetadata(metadata=metadata)
@@ -370,8 +370,8 @@ class RecordResponses(Iterable[Response]):
 
     def _check_response_already_exists(self, response: Response) -> None:
         """Checks if a response for the same question name and user id already exists"""
-        for response in self.__responses_by_question_name[response.question_name]:
-            if response.user_id == response.user_id:
+        for existing_response in self.__responses_by_question_name[response.question_name]:
+            if existing_response.user_id == response.user_id:
                 raise ArgillaError(
                     f"Response for question with name {response.question_name!r} and user id {response.user_id!r} "
                     f"already found. The responses for the same question name do not support more than one user"
