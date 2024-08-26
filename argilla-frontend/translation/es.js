@@ -184,7 +184,7 @@ export default {
   },
   spanAnnotation: {
     shortcutHelper: "Presiona 'Shift' para seleccionar solo caracteres",
-    notSupported: "La anotación en selección no es compatible con su navegador",
+    notSupported: "La anotación de tipo span no es compatible con su navegador",
   },
   login: {
     title: "Iniciar sesión",
