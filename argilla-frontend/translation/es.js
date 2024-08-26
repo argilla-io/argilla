@@ -130,9 +130,9 @@ export default {
       "Esta acción afectará a {total} registros, ¿Quiere continuar?",
     allRecordsAnnotated: "{total} registros han sido {action}",
     affectedAll: {
-      submitted: "enviado",
-      discarded: "descartado",
-      draft: "borrador",
+      submitted: "enviados",
+      discarded: "descartados",
+      draft: "guardados como borrador",
     },
   },
   shortcuts: {
