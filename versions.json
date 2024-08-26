@@ -29,6 +29,14 @@
     }
   },
   {
+    "version": "docs_5401-docs-add-basic-developer-documentation",
+    "title": "docs_5401-docs-add-basic-developer-documentation",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_move-ga-to-plausible",
     "title": "docs_move-ga-to-plausible",
     "aliases": [],
