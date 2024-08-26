@@ -29,7 +29,7 @@ import argilla as rg
 
 client = rg.Argilla(
     [local_]api_url="[LOCAL_HOST]",
-    [hf_]api_url="https://[HF_OWNER]-[HF_SPACE_NAME].hf.space",
+    [hf_]api_url="https://[HF_HOST]",
     api_key="[USER_API_KEY]"
 )
 ```
@@ -60,7 +60,7 @@ settings = rg.Settings(
 )
 dataset = rg.Dataset(
     name=f"my_first_dataset",
-    workspace="<your-workspace>",
+    workspace="argilla", # change this to your workspace
     settings=settings,
     client=client,
 )

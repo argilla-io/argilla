@@ -80,7 +80,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     You can add the data directly as a dictionary like structure, where the keys correspond to the names of fields, questions, metadata or vectors in the dataset and the values are the data to be added.
 
-    If your data structure does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which keys in the source data correspond to the dataset fields.
+    If your data structure does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which keys in the source data correspond to the dataset fields, metadata, vectors, suggestions, or responses. If you need to add the same data to multiple attributes, you can also use a list with the name of the attributes.
 
     We illustrate this python dictionaries that represent your data, but we would not advise you to define dictionaries. Instead, use the `Record` object to instantiate records.
 
@@ -120,7 +120,6 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
     2. The data structure has keys `query` and `response`, and the Argilla dataset has fields `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
-
 
 === "From a Hugging Face dataset"
 
