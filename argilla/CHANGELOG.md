@@ -36,10 +36,6 @@ These are the section headers that we use:
 - Added frontend skeletons to progress metrics to optimise load time and improve user experience. ([#5391](https://github.com/argilla-io/argilla/pull/5391))
 - Added documentation in methods in API references for the Python SDK. ([#5400](https://github.com/argilla-io/argilla/commit/a6fc0117bc4923aec0be80df27eb79ddf3f007c7))
 
-### Added
-
-- Added test mock for ArgillaAPI validation step so that the validation method is mocked instead of the entire API.
-
 ### Fixed
 
 - Fix bug when submit the latest record, sometimes you navigate to non existing page [#5419](https://github.com/argilla-io/argilla/pull/5419)
