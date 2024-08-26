@@ -5,7 +5,9 @@ This guide will help you migrate task specific datasets to Argilla V2. These do 
 !!! note
     Legacy Datasets include: `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
 
-    `FeedbackDataset`'s do not need to be migrated as they are already in the Argilla V2 format.
+    `FeedbackDataset`'s, `User`'s and `Workspace`'s do not need to be migrated as they are already in the Argilla V2 format.
+
+
 
 To follow this guide, you will need to have the following prerequisites:
 
