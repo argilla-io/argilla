@@ -68,7 +68,7 @@ Next, recreate the users and workspaces on the Argilla V2 server:
 
 ```python
 for workspace in workspaces_v1:
-    rg.Workspace.create(
+    rg.Workspace(
         name=workspace.name
     ).create()
 ```
