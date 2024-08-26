@@ -34,7 +34,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
             f"Question with name `{question_create.name}` already exists for dataset with id `{dataset.id}`"
         )
 
-    QuestionCreateValidator(question_create).validate_for(dataset)
+    QuestionCreateValidator.validate(question_create, dataset)
 
     return await Question.create(
         db,
@@ -48,7 +48,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
 
 
 async def update_question(db: AsyncSession, question: Question, question_update: QuestionUpdate) -> Question:
-    QuestionUpdateValidator(question_update).validate_for(question)
+    QuestionUpdateValidator.validate(question_update, question)
 
     params = question_update.dict(exclude_unset=True)
 
@@ -56,6 +56,6 @@ async def update_question(db: AsyncSession, question: Question, question_update:
 
 
 async def delete_question(db: AsyncSession, question: Question) -> Question:
-    QuestionDeleteValidator().validate_for(question.dataset)
+    QuestionDeleteValidator.validate(question.dataset)
 
     return await question.delete(db)

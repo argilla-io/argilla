@@ -42,7 +42,7 @@ Or, play with the Argilla UI by signing in with your Hugging Face account:
 
 
 !!! INFO "Looking for Argilla 1.x?"
-    Looking for documentation for Argilla 1.x? Visit [the latest release](https://docs.argilla.io/en/latest/).
+    Looking for documentation for Argilla 1.x? Visit [the latest release](https://docs.v1.argilla.io/en/latest/).
 
 !!! NOTE "Migrate to Argilla 2.x"
     Want to learn how to migrate from Argilla 1.x to 2.x? Take a look at our dedicated [Migration Guide](how_to_guides/migrate_from_legacy_datasets.md).

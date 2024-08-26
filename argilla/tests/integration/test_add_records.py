@@ -12,35 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 import uuid
 from datetime import datetime
 
-
 import argilla as rg
+import pytest
 from argilla import Argilla, Workspace
-
-
-def test_create_dataset(client):
-    workspace = client.workspaces.default
-    mock_dataset_name = f"test_create_dataset{datetime.now().strftime('%Y%m%d%H%M%S')}"
-    dataset = rg.Dataset(
-        name=mock_dataset_name,
-        workspace=workspace,
-        settings=rg.Settings(
-            fields=[
-                rg.TextField(name="text"),
-            ],
-            questions=[
-                rg.TextQuestion(name="response"),
-            ],
-        ),
-        client=client,
-    )
-    dataset.create()
-    gotten_dataset = dataset.get()
-    assert dataset.id == gotten_dataset.id
-    assert dataset.name == mock_dataset_name
+from argilla._exceptions._responses import RecordResponsesError
+from argilla._exceptions._suggestions import RecordSuggestionsError
 
 
 def test_add_records(client):
@@ -205,7 +184,34 @@ def test_add_records_with_suggestions(client) -> None:
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8, 0.7]
 
 
-def test_add_records_with_responses(client) -> None:
+def test_add_records_with_suggestions_non_existent_question(client) -> None:
+    mock_dataset_name = (
+        f"test_add_record_with_suggestions_non_existent_question {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    )
+    mock_data = [
+        rg.Record(
+            fields={"text": "value"}, suggestions=[rg.Suggestion(question_name="non_existent_question", value="mock")]
+        )
+    ]
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"),
+        ],
+        questions=[
+            rg.TextQuestion(name="comment", use_markdown=False),
+        ],
+    )
+    dataset = rg.Dataset(
+        name=mock_dataset_name,
+        settings=settings,
+        client=client,
+    )
+    dataset.create()
+    with pytest.raises(RecordSuggestionsError, match="Argilla SDK error: RecordSuggestionsError: Record suggestion"):
+        dataset.records.log(mock_data)
+
+
+def test_add_records_with_responses(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -238,7 +244,7 @@ def test_add_records_with_responses(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -263,7 +269,43 @@ def test_add_records_with_responses(client) -> None:
         assert record.responses["label"][0].user_id == user.id
 
 
-def test_add_records_with_responses_and_suggestions(client) -> None:
+def test_add_records_with_responses_non_existent_question(client, username: str) -> None:
+    mock_dataset_name = (
+        f"test_add_record_with_responses_non_existent_question {datetime.now().strftime('%Y%m%d%H%M%S')}"
+    )
+
+    settings = rg.Settings(
+        fields=[
+            rg.TextField(name="text"),
+        ],
+        questions=[
+            rg.TextQuestion(name="comment", use_markdown=False),
+        ],
+    )
+    dataset = rg.Dataset(
+        name=mock_dataset_name,
+        settings=settings,
+        client=client,
+    )
+    dataset.create()
+    user = rg.User(
+        username=username,
+        first_name="test",
+        password="testtesttest",
+        client=client,
+    )
+    user.create()
+    mock_data = [
+        rg.Record(
+            fields={"text": "value"},
+            responses=[rg.Response(question_name="non_existent_question", value="mock", user_id=user.id)],
+        )
+    ]
+    with pytest.raises(RecordResponsesError, match="Argilla SDK error: RecordResponsesError: Record response"):
+        dataset.records.log(mock_data)
+
+
+def test_add_records_with_responses_and_suggestions(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -299,7 +341,7 @@ def test_add_records_with_responses_and_suggestions(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -325,7 +367,7 @@ def test_add_records_with_responses_and_suggestions(client) -> None:
     assert dataset_records[2].responses["label"][0].user_id == user.id
 
 
-def test_add_records_with_fields_mapped(client) -> None:
+def test_add_records_with_fields_mapped(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -364,7 +406,7 @@ def test_add_records_with_fields_mapped(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -394,7 +436,7 @@ def test_add_records_with_fields_mapped(client) -> None:
     assert dataset_records[2].responses["label"][0].user_id == user.id
 
 
-def test_add_records_with_id_mapped(client) -> None:
+def test_add_records_with_id_mapped(client, username: str) -> None:
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -430,7 +472,7 @@ def test_add_records_with_id_mapped(client) -> None:
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -525,7 +567,7 @@ def test_add_record_resources(client):
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8]
 
 
-def test_add_records_with_responses_and_same_schema_name(client: Argilla):
+def test_add_records_with_responses_and_same_schema_name(client: Argilla, username: str):
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
         {
@@ -555,7 +597,7 @@ def test_add_records_with_responses_and_same_schema_name(client: Argilla):
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,
@@ -576,7 +618,7 @@ def test_add_records_with_responses_and_same_schema_name(client: Argilla):
     assert dataset_records[1].responses["label"][0].user_id == user.id
 
 
-def test_add_records_objects_with_responses(client: Argilla):
+def test_add_records_objects_with_responses(client: Argilla, username: str):
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
 
     settings = rg.Settings(
@@ -594,7 +636,7 @@ def test_add_records_objects_with_responses(client: Argilla):
         client=client,
     )
     user = rg.User(
-        username=f"test_{random.randint(0, 1000)}",
+        username=username,
         first_name="test",
         password="testtesttest",
         client=client,

@@ -22,6 +22,7 @@ from typing import Any, List
 
 import argilla as rg
 import pytest
+from argilla._exceptions import ConflictError, SettingsError
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -125,7 +126,9 @@ class TestDiskImportExportMixin:
 
         with TemporaryDirectory() as temp_dir:
             output_dir = dataset.to_disk(path=temp_dir, with_records=with_records_export)
-            new_dataset = rg.Dataset.from_disk(output_dir, client=client, with_records=with_records_import)
+            new_dataset = rg.Dataset.from_disk(
+                output_dir, client=client, with_records=with_records_import, name=f"test_{uuid.uuid4()}"
+            )
 
         if with_records_export and with_records_import:
             for i, record in enumerate(new_dataset.records(with_suggestions=True)):
@@ -175,11 +178,19 @@ class TestHubImportExportMixin:
                 match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
             ):
                 new_dataset = rg.Dataset.from_hub(
-                    repo_id=repo_id, client=client, with_records=with_records_import, token=token
+                    repo_id=repo_id,
+                    client=client,
+                    with_records=with_records_import,
+                    token=token,
+                    name=f"test_{uuid.uuid4()}",
                 )
         else:
             new_dataset = rg.Dataset.from_hub(
-                repo_id=repo_id, client=client, with_records=with_records_import, token=token
+                repo_id=repo_id,
+                client=client,
+                with_records=with_records_import,
+                token=token,
+                name=f"test_{uuid.uuid4()}",
             )
 
         if with_records_import and with_records_export:
@@ -191,3 +202,81 @@ class TestHubImportExportMixin:
 
         assert new_dataset.settings.fields[0].name == "text"
         assert new_dataset.settings.questions[0].name == "label"
+
+    @pytest.mark.parametrize("with_records_import", [True, False])
+    def test_import_dataset_from_hub_using_settings(
+        self,
+        token: str,
+        dataset: rg.Dataset,
+        client,
+        mock_data: List[dict[str, Any]],
+        with_records_export: bool,
+        with_records_import: bool,
+    ):
+        repo_id = (
+            f"argilla-internal-testing/test_import_dataset_from_hub_using_settings_with_records{with_records_export}"
+        )
+        dataset.records.log(records=mock_data)
+
+        dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
+        settings = rg.Settings(
+            fields=[
+                rg.TextField(name="text"),
+            ],
+            questions=[
+                rg.LabelQuestion(name="label", labels=["positive", "negative"]),
+                rg.LabelQuestion(name="extra_label", labels=["extra_positive", "extra_negative"]),
+            ],
+        )
+        if with_records_import and not with_records_export:
+            with pytest.warns(
+                expected_warning=UserWarning,
+                match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
+            ):
+                new_dataset = rg.Dataset.from_hub(
+                    repo_id=repo_id, client=client, with_records=with_records_import, token=token, settings=settings
+                )
+        else:
+            new_dataset = rg.Dataset.from_hub(
+                repo_id=repo_id, client=client, with_records=with_records_import, token=token, settings=settings
+            )
+
+        if with_records_import and with_records_export:
+            for i, record in enumerate(new_dataset.records(with_suggestions=True)):
+                assert record.fields["text"] == mock_data[i]["text"]
+                assert record.suggestions["label"].value == mock_data[i]["label"]
+        else:
+            assert len(new_dataset.records.to_list()) == 0
+
+        assert new_dataset.settings.fields[0].name == "text"
+        assert new_dataset.settings.questions[0].name == "label"
+        assert new_dataset.settings.questions[1].name == "extra_label"
+        assert len(new_dataset.settings.questions[1].labels) == 2
+        assert new_dataset.settings.questions[1].labels[0] == "extra_positive"
+        assert new_dataset.settings.questions[1].labels[1] == "extra_negative"
+
+    def test_import_dataset_from_hub_using_wrong_settings(
+        self,
+        token: str,
+        dataset: rg.Dataset,
+        client,
+        mock_data: List[dict[str, Any]],
+        with_records_export: bool,
+    ):
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_using_wrong_settings_with_records_{with_records_export}"
+        dataset.records.log(records=mock_data)
+
+        dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
+        settings = rg.Settings(
+            fields=[
+                rg.TextField(name="text"),
+            ],
+            questions=[
+                rg.RatingQuestion(name="label", values=[1, 2, 3, 4, 5]),
+            ],
+        )
+        if with_records_export:
+            with pytest.raises(SettingsError):
+                rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings)
+        else:
+            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings)
