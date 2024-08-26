@@ -23,8 +23,8 @@ extra:
     - icon: fontawesome/brands/discord
       link: http://hf.co/join/discord
   analytics:
-    provider: google
-    property: G-T5RMYPJ1B2
+    provider: plausible
+    domain: docs.argilla.io
     feedback:
       title: Was this page helpful?
       ratings:
@@ -150,6 +150,7 @@ plugins:
             show_signature_annotations: false
   - social
   - mknotebooks
+  - material-plausible
 
 nav:
   - Argilla: index.md
