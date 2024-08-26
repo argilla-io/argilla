@@ -31,12 +31,10 @@ DATASET_NAME_MAX_LENGTH = 200
 DATASET_GUIDELINES_MIN_LENGTH = 1
 DATASET_GUIDELINES_MAX_LENGTH = 10000
 
-
 DatasetName = Annotated[
     constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
     Field(..., description="Dataset name"),
 ]
-
 
 DatasetGuidelines = Annotated[
     constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
@@ -86,6 +84,22 @@ class DatasetProgress(BaseModel):
     total: int
     completed: int
     pending: int
+
+
+class RecordResponseDistribution(BaseModel):
+    submitted: Optional[int]
+    discarded: Optional[int]
+    draft: Optional[int]
+
+
+class UserProgress(BaseModel):
+    username: str
+    completed: RecordResponseDistribution
+    pending: RecordResponseDistribution
+
+
+class UsersProgress(BaseModel):
+    users: List[UserProgress]
 
 
 class Dataset(BaseModel):

@@ -29,6 +29,7 @@ class TestRecordsBulkValidators:
         dataset = await DatasetFactory.create(status="ready")
 
         await TextFieldFactory.create(name="text", dataset=dataset)
+        await TextFieldFactory.create(name="optional", dataset=dataset, required=False)
         await dataset.awaitable_attrs.fields
 
         await dataset.awaitable_attrs.metadata_properties
@@ -40,11 +41,13 @@ class TestRecordsBulkValidators:
 
         records_create = RecordsBulkCreate(
             items=[
-                RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
+                RecordCreate(fields={"text": "hello world", "optional": "optional"}, metadata={"source": "test"}),
+                RecordCreate(fields={"text": "hello world", "optional": ""}, metadata={"source": "test"}),
+                RecordCreate(fields={"text": "hello world", "optional": None}, metadata={"source": "test"}),
             ]
         )
 
-        await RecordsBulkCreateValidator(records_create, db).validate_for(dataset)
+        await RecordsBulkCreateValidator.validate(db, records_create, dataset)
 
     async def test_records_validator_with_draft_dataset(self, db: AsyncSession):
         dataset = await DatasetFactory.create(status="draft")
@@ -55,7 +58,7 @@ class TestRecordsBulkValidators:
                     RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
                 ]
             )
-            await RecordsBulkCreateValidator(records_create, db=db).validate_for(dataset)
+            await RecordsBulkCreateValidator.validate(db, records_create, dataset)
 
     async def test_records_bulk_create_validator_with_existing_external_id_in_db(self, db: AsyncSession):
         dataset = await self.configure_dataset()
@@ -76,7 +79,7 @@ class TestRecordsBulkValidators:
         )
 
         with pytest.raises(UnprocessableEntityError, match="found records with same external ids: 1"):
-            await RecordsBulkCreateValidator(records_create, db).validate_for(dataset)
+            await RecordsBulkCreateValidator.validate(db, records_create, dataset)
 
     async def test_records_bulk_create_validator_with_record_errors(self, db: AsyncSession):
         dataset = await self.configure_dataset()
@@ -91,7 +94,7 @@ class TestRecordsBulkValidators:
             UnprocessableEntityError,
             match="record at position 1 is not valid because",
         ):
-            await RecordsBulkCreateValidator(records_create, db).validate_for(dataset)
+            await RecordsBulkCreateValidator.validate(db, records_create, dataset)
 
     async def test_records_bulk_upsert_validator(self, db: AsyncSession):
         dataset = await self.configure_dataset()
@@ -102,7 +105,7 @@ class TestRecordsBulkValidators:
             ]
         )
 
-        RecordsBulkUpsertValidator(records_upsert, db).validate_for(dataset)
+        RecordsBulkUpsertValidator.validate(records_upsert, dataset)
 
     async def test_records_bulk_upsert_validator_with_draft_dataset(self, db: AsyncSession):
         dataset = await DatasetFactory.create(status="draft")
@@ -116,7 +119,7 @@ class TestRecordsBulkValidators:
                 ]
             )
 
-            RecordsBulkUpsertValidator(records_upsert, db).validate_for(dataset)
+            RecordsBulkUpsertValidator.validate(records_upsert, dataset)
 
     async def test_records_bulk_upsert_validator_with_record_error(self, db: AsyncSession):
         dataset = await self.configure_dataset()
@@ -132,4 +135,4 @@ class TestRecordsBulkValidators:
             UnprocessableEntityError,
             match="record at position 2 is not valid because",
         ):
-            RecordsBulkUpsertValidator(records_upsert, db).validate_for(dataset)
+            RecordsBulkUpsertValidator.validate(records_upsert, dataset)
