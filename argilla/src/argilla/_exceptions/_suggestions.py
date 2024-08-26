@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla._exceptions._api import *  # noqa: F403
-from argilla._exceptions._client import *  # noqa: F403
-from argilla._exceptions._metadata import *  # noqa: F403
-from argilla._exceptions._serialization import *  # noqa: F403
-from argilla._exceptions._settings import *  # noqa: F403
-from argilla._exceptions._records import *  # noqa: F403
+from argilla._exceptions._base import ArgillaError
+
+
+class RecordSuggestionsError(ArgillaError):
+    pass

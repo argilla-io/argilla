@@ -1,19 +1,25 @@
 <template>
   <div class="team-progress">
-    <BaseLinearProgress
+    <BaseLinearProgressSkeleton
+      v-if="!progress.hasMetrics"
       class="team-progress__bar"
-      :progress-ranges="progressRanges"
-      :progress-max="progress.total"
-      :show-tooltip="showTooltip"
-      :tooltip-position-fixed="false"
-      :show-percent-in-tooltip="false"
     />
-    <span class="team-progress__percent"
-      >{{ progress.percentage.completed }}%</span
-    >
-    <span v-if="visibleProgressValues" class="team-progress__info">
-      {{ progress.completed }} of {{ progress.total }}
-    </span>
+    <template v-else>
+      <BaseLinearProgress
+        class="team-progress__bar"
+        :progress-ranges="progressRanges"
+        :progress-max="progress.total"
+        :show-tooltip="showTooltip"
+        :tooltip-position-fixed="false"
+        :show-percent-in-tooltip="false"
+      />
+      <span class="team-progress__percent"
+        >{{ progress.percentage.completed }}%</span
+      >
+      <span v-if="visibleProgressValues" class="team-progress__info">
+        {{ progress.completed }} of {{ progress.total }}
+      </span>
+    </template>
   </div>
 </template>
 
