@@ -144,7 +144,7 @@ export default {
   },
   questions_form: {
     validate: "Validar",
-    clear: "Claro",
+    clear: "Borrar",
     reset: "Reiniciar",
     discard: "Descartar",
     submit: "Entregar",
