@@ -127,7 +127,7 @@ export default {
     haveSelectedRecords: "Has seleccionado todos los registros {Total}",
     actionConfirmation: "Confirmación de acción en bloque",
     actionConfirmationText:
-      "Esta acción afectará {total} registros, ¿Quiere continuar?",
+      "Esta acción afectará a {total} registros, ¿Quiere continuar?",
     allRecordsAnnotated: "{total} registros han sido {action}",
     affectedAll: {
       submitted: "enviado",
