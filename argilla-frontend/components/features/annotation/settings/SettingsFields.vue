@@ -20,6 +20,7 @@
           </Validation>
 
           <BaseSwitch
+            v-if="field.isTextType"
             class="settings__edition-form__switch"
             v-model="field.settings.use_markdown"
             >{{ $t("useMarkdown") }}</BaseSwitch
