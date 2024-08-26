@@ -12,7 +12,7 @@ export default {
   searchDatasets: "Search DataSets",
   expand: "Expandir",
   copied: "Copiado",
-  copyLink: "Enlace de copia",
+  copyLink: "Copiar enlace",
   copyRecord: "Copiar registro",
   refresh: "Refrescar",
   typeYourText: "Escriba su texto",
