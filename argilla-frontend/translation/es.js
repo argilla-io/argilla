@@ -118,7 +118,7 @@ export default {
     recordsSelected:
       "1 registro seleccionado | {count} registros seleccionados",
     recordsViewSettings: "Tamaño de registro",
-    fixedHeight: "Records de colapso",
+    fixedHeight: "Colapsar registros",
     defaultHeight: "Expandir registros",
     to_annotate_record_bulk_required: "No hay registro seleccionado",
     select_to_annotate: "Seleccione todo",
