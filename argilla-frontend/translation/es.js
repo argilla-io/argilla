@@ -154,7 +154,7 @@ export default {
   sorting: {
     addOtherField: "+ Agregar otro campo",
     suggestion: {
-      score: "Puntuación de sugerencias",
+      score: "Puntuación de sugerencia",
       value: "Valor de sugerencia",
     },
     response: "Valor de respuesta",
