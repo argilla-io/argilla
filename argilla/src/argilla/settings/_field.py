@@ -95,24 +95,27 @@ class TextField(AbstractField):
         name: str,
         title: Optional[str] = None,
         use_markdown: Optional[bool] = False,
-        required: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         client: Optional[Argilla] = None,
     ) -> None:
         """Text field for use in Argilla `Dataset` `Settings`
+
         Parameters:
             name (str): The name of the field
-            title (Optional[str], optional): The title of the field. Defaults to None.
-            use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to False.
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
-            description (Optional[str], optional): The description of the field. Defaults to None.
-
+            title (Optional[str]): The name of the field, as it will be displayed in the UI.
+            use_markdown (Optional[bool]): Whether to render the markdown in the UI. When True, you will be able \
+                to use all the Markdown features for text formatting, including LaTex formulas and embedding multimedia content and PDFs.
+            required (bool): Whether the field is required. At least one field must be required.
+            description (Optional[str]): The description of the field.
         """
 
-        super().__init__(
+        super().__init__(api=client.api.fields, client=client)
+
+        self._model = FieldModel(
             name=name,
             title=title,
-            required=required or True,
+            required=required,
             description=description,
             settings=TextFieldSettings(use_markdown=use_markdown),
             _client=client,

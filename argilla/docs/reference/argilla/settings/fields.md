@@ -4,11 +4,11 @@ hide: footer
 
 # Fields
 
-Fields in Argilla are define the content of a record that will be reviewed by a user.
+Fields in Argilla define the content of a record that will be reviewed by a user.
 
 ## Usage Examples
 
-To define a field, instantiate the `TextField` class and pass it to the `fields` parameter of the `Settings` class.
+To define a field, instantiate the different field classes and pass it to the `fields` parameter of the `Settings` class.
 
 ```python
 text_field = rg.TextField(name="text")
@@ -21,8 +21,12 @@ The `fields` parameter of the `Settings` class can accept a list of fields, like
 ```python
 settings = rg.Settings(
     fields=[
-        rg.TextField(name="text"),
-        rg.ImageField(name="image"),
+        text_field,
+        markdown_field,
+        image_field,
+    ],
+    questions=[
+        rg.TextQuestion(name="response"),
     ],
 )
 
@@ -30,16 +34,11 @@ data = rg.Dataset(
     name="my_dataset",
     settings=settings,
 )
-
 ```
 
 > To add records with values for fields, refer to the [`rg.Dataset.records`](../records/records.md) documentation.
 
 ---
 
-## `rg.TextField`
 
 ::: src.argilla.settings._field.TextField
-    options:
-        heading_level: 3
-        show_root_toc_entry: false

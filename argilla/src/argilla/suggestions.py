@@ -11,14 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Any, Optional, Literal, Union, List, TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
+from argilla._exceptions._suggestions import RecordSuggestionsError
 from argilla._models import SuggestionModel
 from argilla._resource import Resource
 from argilla.settings import RankingQuestion
 
 if TYPE_CHECKING:
-    from argilla import QuestionType, Record, Dataset
+    from argilla import Dataset, QuestionType, Record
 
 __all__ = ["Suggestion"]
 
@@ -119,15 +120,20 @@ class Suggestion(Resource):
             return self._model
 
         question = self.record.dataset.settings.questions[self.question_name]
-        return SuggestionModel(
-            value=self.__to_model_value(self.value, question),
-            question_name=question.name,
-            question_id=question.id,
-            type=self._model.type,
-            score=self._model.score,
-            agent=self._model.agent,
-            id=self._model.id,
-        )
+        if question:
+            return SuggestionModel(
+                value=self.__to_model_value(self.value, question),
+                question_name=None if not question else question.name,
+                question_id=None if not question else question.id,
+                type=self._model.type,
+                score=self._model.score,
+                agent=self._model.agent,
+                id=self._model.id,
+            )
+        else:
+            raise RecordSuggestionsError(
+                f"Record suggestion is invalid because question with name={self.question_name} does not exist in the dataset ({self.record.dataset.name}). Available questions are: {list(self.record.dataset.settings.questions._properties_by_name.keys())}"
+            )
 
     @classmethod
     def __to_model_value(cls, value: Any, question: "QuestionType") -> Any:
