@@ -87,7 +87,7 @@ for user in users_v1:
 
     for workspace_name in user.workspaces:
         if workspace_name != user.name:
-            workspace = rg.Workspace(name=workspace_name)
+            workspace = client.workspaces(name=workspace_name)
             user.add_to_workspace(workspace)
 ```
 
