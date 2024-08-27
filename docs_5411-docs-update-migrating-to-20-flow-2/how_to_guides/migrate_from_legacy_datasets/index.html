@@ -2221,11 +2221,11 @@
 
 
 <h1 id="migrate-users-workspaces-and-datasets-to-argilla-2x">Migrate users, workspaces and datasets to Argilla 2.x<a class="headerlink" href="#migrate-users-workspaces-and-datasets-to-argilla-2x" title="Permanent link">&para;</a></h1>
-<p>This guide will help you migrate task to Argilla V2. These do not include the <code>FeedbackDataset</code> which is just an interim naming convention for the latest extensible dataset. Task specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the <a href="https://argilla.io/blog/introducing-argilla-new-sdk/">SDK migration blog post</a>. Additionally, we will provide guidance on how to maintain your your <code>User</code>'s and <code>Workspace</code>'s within the new Argilla V2 format.</p>
+<p>This guide will help you migrate task to Argilla V2. These do not include the <code>FeedbackDataset</code> which is just an interim naming convention for the latest extensible dataset. Task-specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the <a href="https://argilla.io/blog/introducing-argilla-new-sdk/">SDK migration blog post</a>. Additionally, we will provide guidance on how to maintain your <code>User</code>'s and <code>Workspace</code>'s within the new Argilla V2 format.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Legacy datasets include: <code>DatasetForTextClassification</code>, <code>DatasetForTokenClassification</code>, and <code>DatasetForText2Text</code>.</p>
-<p><code>FeedbackDataset</code>'s do not need to be migrated as they are already in the Argilla V2 format.</p>
+<p><code>FeedbackDataset</code>'s do not need to be migrated as they are already in the Argilla V2 format. Anyway, since the 2.x version includes changes to the search index structure, you should reindex the datasets by enabling the docker environment variable REINDEX_DATASET (This step is automatically executed if you're running Argilla in an HF Space). See the <a href="../../reference/argilla-server/configuration/#docker-images-only">server configuration docs</a> section for more details.</p>
 </div>
 <p>To follow this guide, you will need to have the following prerequisites:</p>
 <ul>
