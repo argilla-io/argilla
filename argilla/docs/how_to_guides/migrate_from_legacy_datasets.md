@@ -80,13 +80,15 @@ for user in users_v1:
         first_name=user.first_name,
         last_name=user.last_name,
         role=user.role,
-        password="<your_chosen_password>"
+        password="<your_chosen_password>" # (1)
     ).create()
     for workspace_name in user.workspaces:
         if workspace_name != user.name:
             workspace = rg.Workspace(name=workspace_name)
             user.add_to_workspace(workspace)
 ```
+
+1. You need to chose a new password for the user, to do this programmatically you can use the `uuid` package to generate a random password. Take care to keep track of the passwords you chose, since you will not be able to retrieve them later.
 
 Now you have successfully migrated your users and workspaces to Argilla V2 and can continue with the next steps.
 
