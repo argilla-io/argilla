@@ -53,14 +53,7 @@ class ServerHTTPException(HTTPException):
 class APIErrorHandler:
     @classmethod
     async def track_error(cls, error: ServerError, request: Request):
-        user_agent = {
-            "code": error.code,
-            "user-agent": request.headers.get("user-agent"),
-            "accept-language": request.headers.get("accept-language"),
-            "type": error.__class__.__name__,
-        }
-
-        await get_telemetry_client().track_data(topic="error/server", user_agent=user_agent)
+        await get_telemetry_client().track_error(error=error, request=request)
 
     @classmethod
     async def common_exception_handler(cls, request: Request, error: Exception):

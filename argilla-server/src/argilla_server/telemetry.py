@@ -23,6 +23,9 @@ from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
 from argilla_server.constants import DEFAULT_USERNAME
+from argilla_server.errors.base_errors import (
+    ServerError,
+)
 from argilla_server.models import (
     Dataset,
     Field,
@@ -260,6 +263,17 @@ class TelemetryClient:
         topic = f"dataset/records/suggestions/{action}"
         user_agent = {"record_id": record_id}
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
+
+    async def track_error(self, error: ServerError, request: Request):
+        topic = "error/server"
+        user_agent = {
+            "code": error.code,
+            "user-agent": request.headers.get("user-agent"),
+            "accept-language": request.headers.get("accept-language"),
+            "type": error.__class__.__name__,
+        }
+
+        await self.track_data(topic=topic, user_agent=user_agent)
 
 
 _TELEMETRY_CLIENT = TelemetryClient()
