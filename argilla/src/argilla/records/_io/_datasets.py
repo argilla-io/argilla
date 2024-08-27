@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Union
 from uuid import uuid4
 
 from datasets import Dataset as HFDataset
-from datasets import IterableDataset, Image, Value
+from datasets import IterableDataset, Image
 
 from argilla.records._io._generic import GenericIO
 from argilla.media import pil_to_data_uri
