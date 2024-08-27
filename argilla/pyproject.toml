@@ -17,6 +17,7 @@ dependencies = [
     "tqdm>=4.60.0",
     "rich>=10.0.0",
     "datasets>=2.0.0",
+    "pillow>=9.5.0",
 ]
 
 legacy = [
