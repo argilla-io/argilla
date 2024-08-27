@@ -80,6 +80,12 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_ELASTICSEARCH_CA_PATH`: Path to CA cert for ES host. For example: `/full/path/to/root-ca.pem` (Optional)
 
+### Redis
+
+Redis is used by Argilla to store information about jobs to be processed on background. The following environment variables are useful to config how Argilla connects to Redis:
+
+- `ARGILLA_REDIS_URL`: A URL string that contains the necessary information to connect to a Redis instance (Default: `redis://localhost:6379/0`).
+
 ### Datasets
 
 - `ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS`: Set the number of maximum items to be allowed by label and multi label questions (Default: `500`).
