@@ -57,7 +57,7 @@ async def create_current_user_responses_bulk(
     )
     for response in responses_bulk_items_filtered:
         if response.item:
-            await telemetry_client.track_crud_records_responses(action="create", record_id=response.item.record_id)
+            await telemetry_client.track_crud_records_responses(action="me/create", record_id=response.item.record_id)
 
     return ResponsesBulk(items=responses_bulk_items)
 

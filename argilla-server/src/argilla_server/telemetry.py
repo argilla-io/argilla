@@ -257,11 +257,13 @@ class TelemetryClient:
     async def track_crud_records_suggestions(
         self,
         action: str,
-        record_id: str,
+        record_id: Union[str, None] = None,
         count: Union[int, None] = None,
     ):
         topic = f"dataset/records/suggestions/{action}"
-        user_agent = {"record_id": record_id}
+        user_agent = {}
+        if record_id:
+            user_agent["record_id"] = record_id
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
     async def track_error(self, error: ServerError, request: Request):

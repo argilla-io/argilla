@@ -69,7 +69,7 @@ async def list_users(
 
     users = await accounts.list_users(db)
 
-    await telemetry_client.track_crud_user(action="read", user=None, is_oauth=False, count=len(users))
+    await telemetry_client.track_crud_user(action="list", user=None, is_oauth=False, count=len(users))
     for user in users:
         await telemetry_client.track_crud_user(action="read", user=user, is_oauth=False)
 

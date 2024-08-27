@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
@@ -46,7 +45,7 @@ from argilla_server.api.schemas.v1.suggestions import (
 )
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
-from argilla_server.enums import RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.enums import RecordSortField, ResponseStatusFilter
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, Record, User, VectorSettings
@@ -268,7 +267,7 @@ async def list_dataset_records(
         include=include,
     )
 
-    await telemetry_client.track_crud_records(action="read", record_or_dataset=dataset, count=len(records))
+    await telemetry_client.track_crud_records(action="list", record_or_dataset=dataset, count=len(records))
 
     return Records(items=records, total=total)
 
@@ -364,12 +363,16 @@ async def search_current_user_dataset_records(
             query_score=record_id_score_map[record.id]["query_score"],
         )
 
-    await telemetry_client.track_crud_records(action="read", record_or_dataset=dataset, count=search_responses.total)
-
-    return SearchRecordsResult(
+    searc_record_results = SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()],
         total=search_responses.total,
     )
+
+    await telemetry_client.track_crud_records(
+        action="me/search", record_or_dataset=dataset, count=search_responses.total
+    )
+
+    return searc_record_results
 
 
 @router.post(
@@ -423,12 +426,14 @@ async def search_dataset_records(
             query_score=record_id_score_map[record.id]["query_score"],
         )
 
-    await telemetry_client.track_crud_records(action="read", record_or_dataset=dataset, count=search_responses.total)
-
-    return SearchRecordsResult(
+    search_record_results = SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()],
         total=search_responses.total,
     )
+
+    await telemetry_client.track_crud_records(action="search", record_or_dataset=dataset, count=search_responses.total)
+
+    return search_record_results
 
 
 @router.get(
@@ -439,6 +444,7 @@ async def search_dataset_records(
 async def list_dataset_records_search_suggestions_options(
     *,
     db: AsyncSession = Depends(get_async_db),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -448,7 +454,7 @@ async def list_dataset_records_search_suggestions_options(
 
     suggestion_agents_by_question = await search.get_dataset_suggestion_agents_by_question(db, dataset.id)
 
-    return SearchSuggestionsOptions(
+    search_suggestion_options = SearchSuggestionsOptions(
         items=[
             SearchSuggestionOptions(
                 question=SearchSuggestionOptionsQuestion(id=sa["question_id"], name=sa["question_name"]),
@@ -457,6 +463,10 @@ async def list_dataset_records_search_suggestions_options(
             for sa in suggestion_agents_by_question
         ]
     )
+
+    await telemetry_client.track_crud_records_suggestions(action="search")
+
+    return search_suggestion_options
 
 
 async def _filter_record_metadata_for_user(record: Record, user: User) -> Optional[Dict[str, Any]]:
