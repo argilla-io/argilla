@@ -50,7 +50,7 @@ class CreateRecordsBulk:
         self._search_engine = search_engine
 
     async def create_records_bulk(self, dataset: Dataset, bulk_create: RecordsBulkCreate) -> RecordsBulk:
-        await RecordsBulkCreateValidator(bulk_create, db=self._db).validate_for(dataset)
+        await RecordsBulkCreateValidator.validate(self._db, bulk_create, dataset)
 
         async with self._db.begin_nested():
             records = [
@@ -98,7 +98,7 @@ class CreateRecordsBulk:
                         raise ValueError(f"question with question_id={suggestion_create.question_id} does not exist")
 
                     try:
-                        SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
+                        SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
                         upsert_many_suggestions.append(dict(**suggestion_create.dict(), record_id=record.id))
                     except (UnprocessableEntityError, ValueError) as ex:
                         raise ValueError(f"suggestion for question name={question.name} is not valid: {ex}")
@@ -131,7 +131,7 @@ class CreateRecordsBulk:
                     if response_create.user_id not in users_by_id:
                         raise ValueError(f"user with id {response_create.user_id} not found")
 
-                    ResponseCreateValidator(response_create).validate_for(record)
+                    ResponseCreateValidator.validate(response_create, record)
                     upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
             except (UnprocessableEntityError, ValueError) as ex:
                 raise UnprocessableEntityError(
@@ -159,7 +159,7 @@ class CreateRecordsBulk:
                     if not settings:
                         raise ValueError(f"vector with name={name} does not exist for dataset_id={record.dataset.id}")
 
-                    VectorValidator(value).validate_for(settings)
+                    VectorValidator.validate(value, settings)
                     upsert_many_vectors.append(dict(value=value, record_id=record.id, vector_settings_id=settings.id))
             except (UnprocessableEntityError, ValueError) as ex:
                 raise UnprocessableEntityError(
@@ -185,7 +185,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
         # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
         # computed inside the validator
-        RecordsBulkUpsertValidator(bulk_upsert, self._db, found_records).validate_for(dataset)
+        RecordsBulkUpsertValidator.validate(bulk_upsert, dataset, found_records)
 
         records = []
         async with self._db.begin_nested():

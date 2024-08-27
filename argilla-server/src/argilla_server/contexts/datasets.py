@@ -14,6 +14,8 @@
 
 import asyncio
 import copy
+from collections import defaultdict
+
 import sqlalchemy
 
 from datetime import datetime
@@ -59,6 +61,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.contexts import accounts, distribution
+from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole, RecordStatus
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.jobs import dataset_jobs
@@ -431,15 +434,19 @@ async def get_user_dataset_metrics(db: AsyncSession, user_id: UUID, dataset_id: 
 async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
     records_completed, records_pending = await asyncio.gather(
         db.execute(
-            select(func.count(Record.id)).filter(
-                Record.dataset_id == dataset_id,
-                Record.status == RecordStatus.completed,
+            select(func.count(Record.id)).where(
+                and_(
+                    Record.dataset_id == dataset_id,
+                    Record.status == RecordStatus.completed,
+                )
             ),
         ),
         db.execute(
-            select(func.count(Record.id)).filter(
-                Record.dataset_id == dataset_id,
-                Record.status == RecordStatus.pending,
+            select(func.count(Record.id)).where(
+                and_(
+                    Record.dataset_id == dataset_id,
+                    Record.status == RecordStatus.pending,
+                )
             ),
         ),
     )
@@ -453,6 +460,25 @@ async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
         "completed": records_completed,
         "pending": records_pending,
     }
+
+
+async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:
+    query = (
+        select(User.username, Record.status, Response.status, func.count(Response.id))
+        .join(Record)
+        .join(User)
+        .where(Record.dataset_id == dataset_id)
+        .group_by(User.username, Record.status, Response.status)
+    )
+
+    async for session in get_async_db():
+        annotators_progress = defaultdict(lambda: defaultdict(dict))
+        results = (await session.execute(query)).all()
+
+        for username, record_status, response_status, count in results:
+            annotators_progress[username][record_status][response_status] = count
+
+        return [{"username": username, **progress} for username, progress in annotators_progress.items()]
 
 
 _EXTRA_METADATA_FLAG = "extra"
@@ -595,7 +621,7 @@ async def _build_record_responses(
         try:
             cache = await validate_user_exists(db, response_create.user_id, cache)
 
-            ResponseCreateValidator(response_create).validate_for(record)
+            ResponseCreateValidator.validate(response_create, record)
 
             responses.append(
                 Response(
@@ -636,7 +662,7 @@ async def _build_record_suggestions(
                     raise UnprocessableEntityError(f"question_id={str(suggestion_create.question_id)} does not exist")
                 questions_cache[suggestion_create.question_id] = question
 
-            SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
+            SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
 
             suggestions.append(
                 Suggestion(
@@ -820,7 +846,7 @@ async def create_response(
             f"Response already exists for record with id `{record.id}` and by user with id `{user.id}`"
         )
 
-    ResponseCreateValidator(response_create).validate_for(record)
+    ResponseCreateValidator.validate(response_create, record)
 
     async with db.begin_nested():
         response = await Response.create(
@@ -846,7 +872,7 @@ async def create_response(
 async def update_response(
     db: AsyncSession, search_engine: SearchEngine, response: Response, response_update: ResponseUpdate
 ):
-    ResponseUpdateValidator(response_update).validate_for(response.record)
+    ResponseUpdateValidator.validate(response_update, response.record)
 
     async with db.begin_nested():
         response = await response.update(
@@ -870,7 +896,7 @@ async def update_response(
 async def upsert_response(
     db: AsyncSession, search_engine: SearchEngine, record: Record, user: User, response_upsert: ResponseUpsert
 ) -> Response:
-    ResponseUpsertValidator(response_upsert).validate_for(record)
+    ResponseUpsertValidator.validate(response_upsert, record)
 
     async with db.begin_nested():
         response = await Response.upsert(
@@ -943,7 +969,7 @@ async def upsert_suggestion(
     question: Question,
     suggestion_create: "SuggestionCreate",
 ) -> Suggestion:
-    SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
+    SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
 
     async with db.begin_nested():
         suggestion = await Suggestion.upsert(
