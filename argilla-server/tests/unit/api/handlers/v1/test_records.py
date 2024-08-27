@@ -1043,9 +1043,7 @@ class TestSuiteRecords:
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
 
-        test_telemetry.track_crud_records_subtopic.assert_called_with(
-            action="create", sub_topic="responses", record_id=record.id
-        )
+        test_telemetry.track_crud_records_responses.assert_called_with(action="create", record_id=record.id)
         test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
@@ -1290,8 +1288,8 @@ class TestSuiteRecords:
             ]
         }
 
-        test_telemetry.track_crud_records_subtopic.assert_called_with(
-            action="read", sub_topic="suggestions", record_id=record.id, count=len(response.json()["items"])
+        test_telemetry.track_crud_records_suggestions.assert_called_with(
+            action="read", record_id=record.id, count=len(response.json()["items"])
         )
         test_telemetry.track_data.assert_called()
 
@@ -1344,9 +1342,7 @@ class TestSuiteRecords:
 
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
 
-        test_telemetry.track_crud_records_subtopic.assert_called_with(
-            action="create", sub_topic="suggestions", record_id=record.id
-        )
+        test_telemetry.track_crud_records_suggestions.assert_called_with(action="create", record_id=record.id)
         test_telemetry.track_data.assert_called()
 
     async def test_create_record_suggestion_update(
@@ -1532,9 +1528,8 @@ class TestSuiteRecords:
         expected_calls = [call(suggestion) for suggestion in suggestions]
         mock_search_engine.delete_record_suggestion.assert_has_calls(expected_calls)
 
-        test_telemetry.track_crud_records_subtopic.assert_called_with(
+        test_telemetry.track_crud_records_suggestions.assert_called_with(
             action="delete",
-            sub_topic="suggestions",
             record_id=record.id,
             count=len(suggestions_ids) + len(random_uuids),
         )

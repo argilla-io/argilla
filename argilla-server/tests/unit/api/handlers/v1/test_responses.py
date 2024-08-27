@@ -109,9 +109,7 @@ class TestSuiteResponses:
 
         mock_search_engine.update_record_response.assert_called_once_with(response)
 
-        test_telemetry.track_crud_records_subtopic.assert_called_with(
-            action="update", sub_topic="responses", record_id=record.id
-        )
+        test_telemetry.track_crud_records_responses.assert_called_with(action="update", record_id=record.id)
         test_telemetry.track_data.assert_called()
 
     async def test_update_response_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
@@ -438,9 +436,7 @@ class TestSuiteResponses:
 
         mock_search_engine.delete_record_response.assert_called_once_with(response)
 
-        test_telemetry.track_crud_records_subtopic.assert_called_with(
-            action="delete", sub_topic="responses", record_id=response.record.id
-        )
+        test_telemetry.track_crud_records_responses.assert_called_with(action="delete", record_id=response.record.id)
         test_telemetry.track_data.assert_called()
 
     async def test_delete_response_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):

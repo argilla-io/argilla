@@ -67,8 +67,8 @@ class TestSuiteSuggestions:
 
         mock_search_engine.delete_record_suggestion.assert_called_once_with(suggestion)
 
-        test_telemetry.track_crud_records_subtopic.assert_called_with(
-            action="delete", sub_topic="suggestions", record_id=suggestion.record.id
+        test_telemetry.track_crud_records_suggestions.assert_called_with(
+            action="delete", record_id=suggestion.record.id
         )
         test_telemetry.track_data.assert_called()
 

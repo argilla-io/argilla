@@ -91,7 +91,7 @@ class TelemetryClient:
         }
 
     @staticmethod
-    def _process_dataset_settings(dataset: Dataset):
+    def _process_dataset_settings(dataset: Dataset) -> dict:
         user_data = {}
         if dataset.is_relationship_loaded("guidelines"):
             user_data["guidelines"] = True if getattr(dataset, "guidelines") else False
@@ -103,7 +103,7 @@ class TelemetryClient:
             if "min_submitted" in distribution:
                 user_data["distribution_min_submitted"] = distribution["min_submitted"]
 
-        attributes = [
+        attributes: list[str] = [
             "fields",
             "questions",
             "vectors_settings",
@@ -125,7 +125,7 @@ class TelemetryClient:
             TermsMetadataPropertySettings,
             IntegerMetadataPropertySettings,
         ],
-    ):
+    ) -> dict:
         user_data = {"dataset_id": str(setting.dataset_id)}
         if isinstance(setting, (Field, Question)):
             user_data["required"] = setting.required
@@ -241,14 +241,23 @@ class TelemetryClient:
             raise NotImplementedError("Expected element of `Dataset` or `Record`")
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
 
-    async def track_crud_records_subtopic(
+    async def track_crud_records_responses(
         self,
         action: str,
-        sub_topic: str,
         record_id: str,
         count: Union[int, None] = None,
     ):
-        topic = f"dataset/records/{sub_topic}/{action}"
+        topic = f"dataset/records/responses/{action}"
+        user_agent = {"record_id": record_id}
+        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+
+    async def track_crud_records_suggestions(
+        self,
+        action: str,
+        record_id: str,
+        count: Union[int, None] = None,
+    ):
+        topic = f"dataset/records/suggestions/{action}"
         user_agent = {"record_id": record_id}
         await self.track_data(topic=topic, user_agent=user_agent, count=count)
 

@@ -52,8 +52,6 @@ async def delete_suggestion(
 
     suggestion = await datasets.delete_suggestion(db, search_engine, suggestion)
 
-    await telemetry_client.track_crud_records_subtopic(
-        action="delete", sub_topic="suggestions", record_id=suggestion.record_id
-    )
+    await telemetry_client.track_crud_records_suggestions(action="delete", record_id=suggestion.record_id)
 
     return suggestion

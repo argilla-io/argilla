@@ -117,7 +117,7 @@ async def create_record_response(
 
     response = await datasets.create_response(db, search_engine, record, current_user, response_create)
 
-    await telemetry_client.track_crud_records_subtopic(action="create", sub_topic="responses", record_id=record_id)
+    await telemetry_client.track_crud_records_responses(action="create", record_id=record_id)
 
     return response
 
@@ -142,8 +142,8 @@ async def get_record_suggestions(
 
     await authorize(current_user, RecordPolicy.get_suggestions(record))
 
-    await telemetry_client.track_crud_records_subtopic(
-        action="read", sub_topic="suggestions", record_id=record_id, count=len(record.suggestions)
+    await telemetry_client.track_crud_records_suggestions(
+        action="read", record_id=record_id, count=len(record.suggestions)
     )
 
     return Suggestions(items=record.suggestions)
@@ -198,7 +198,7 @@ async def upsert_suggestion(
 
     suggestion = await datasets.upsert_suggestion(db, search_engine, record, question, suggestion_create)
 
-    await telemetry_client.track_crud_records_subtopic(action=action, sub_topic="suggestions", record_id=record_id)
+    await telemetry_client.track_crud_records_suggestions(action=action, record_id=record_id)
 
     return suggestion
 
@@ -239,9 +239,7 @@ async def delete_record_suggestions(
 
     await datasets.delete_suggestions(db, search_engine, record, suggestion_ids)
 
-    await telemetry_client.track_crud_records_subtopic(
-        action="delete", sub_topic="suggestions", record_id=record_id, count=num_suggestions
-    )
+    await telemetry_client.track_crud_records_suggestions(action="delete", record_id=record_id, count=num_suggestions)
 
 
 @router.delete("/records/{record_id}", response_model=RecordSchema, response_model_exclude_unset=True)
