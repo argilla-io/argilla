@@ -3,7 +3,7 @@
 This guide will help you migrate task to Argilla V2. These do not include the `FeedbackDataset` which is just an interim naming convention for the latest extensible dataset. Task specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the [SDK migration blog post](https://argilla.io/blog/introducing-argilla-new-sdk/). Additionally, we will provide guidance on how to maintain your your `User`'s and `Workspace`'s within the new Argilla V2 format.
 
 !!! note
-    Legacy dataseets include: `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
+    Legacy datasets include: `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
 
     `FeedbackDataset`'s do not need to be migrated as they are already in the Argilla V2 format.
 
