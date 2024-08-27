@@ -256,7 +256,7 @@ export default {
     },
     http: {
       401: {
-        message: "No pudo validar las credenciales",
+        message: "No se pudo validar las credenciales",
       },
       404: {
         message: "No se encontró el recurso solicitado",
