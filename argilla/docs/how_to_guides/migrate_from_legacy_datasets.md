@@ -1,11 +1,11 @@
 # Migrate users, workspaces and datasets to Argilla 2.x
 
-This guide will help you migrate task to Argilla V2. These do not include the `FeedbackDataset` which is just an interim naming convention for the latest extensible dataset. Task specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the [SDK migration blog post](https://argilla.io/blog/introducing-argilla-new-sdk/). Additionally, we will provide guidance on how to maintain your your `User`'s and `Workspace`'s within the new Argilla V2 format.
+This guide will help you migrate task to Argilla V2. These do not include the `FeedbackDataset` which is just an interim naming convention for the latest extensible dataset. Task-specific datasets are datasets that are used for a specific task, such as text classification, token classification, etc. If you would like to learn about the backstory of SDK this migration, please refer to the [SDK migration blog post](https://argilla.io/blog/introducing-argilla-new-sdk/). Additionally, we will provide guidance on how to maintain your `User`'s and `Workspace`'s within the new Argilla V2 format.
 
 !!! note
     Legacy datasets include: `DatasetForTextClassification`, `DatasetForTokenClassification`, and `DatasetForText2Text`.
 
-    `FeedbackDataset`'s do not need to be migrated as they are already in the Argilla V2 format.
+    `FeedbackDataset`'s do not need to be migrated as they are already in the Argilla V2 format. Anyway, since the 2.x version includes changes to the search index structure, you should reindex the datasets by enabling the docker environment variable REINDEX_DATASET (This step is automatically executed if you're running Argilla in an HF Space). See the [server configuration docs](../reference/argilla-server/configuration.md#docker-images-only) section for more details.
 
 
 To follow this guide, you will need to have the following prerequisites:
