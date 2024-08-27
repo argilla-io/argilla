@@ -133,6 +133,9 @@ class HubImportExportMixin(DiskImportExportMixin):
         from datasets import load_dataset
         from huggingface_hub import snapshot_download
 
+        if name is None:
+            name = repo_id.replace("/", "_")
+
         if settings is not None:
             dataset = cls(name=name, settings=settings)
             dataset.create()
