@@ -84,7 +84,7 @@ for user in users_v1:
     ).create()
     if user.role == "owner":
        continue
-       
+
     for workspace_name in user.workspaces:
         if workspace_name != user.name:
             workspace = rg.Workspace(name=workspace_name)
