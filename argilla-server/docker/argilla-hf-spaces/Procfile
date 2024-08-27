@@ -1,4 +1,4 @@
 elastic: /usr/share/elasticsearch/bin/elasticsearch
 redis: /usr/bin/redis-server
-rq: sleep 30; rq worker --with-scheduler
+worker: sleep 30; rq worker --with-scheduler
 argilla: sleep 30; /bin/bash start_argilla_server.sh
