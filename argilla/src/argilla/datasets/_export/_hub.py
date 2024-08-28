@@ -204,10 +204,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         records = []
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
-            if "id" in row:
-                record.id = row.pop("id")
             for question_name, values in response_questions.items():
-                response_users = {}
                 response_values = values["responses"][idx]
                 response_users = values["users"][idx]
                 response_status = values["status"][idx]
