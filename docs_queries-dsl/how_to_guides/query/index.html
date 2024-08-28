@@ -937,9 +937,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#advanced-queries-wip" class="md-nav__link">
+  <a href="#advanced-queries" class="md-nav__link">
     <span class="md-ellipsis">
-      Advanced queries [WIP!]
+      Advanced queries
     </span>
   </a>
   
@@ -2151,9 +2151,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#advanced-queries-wip" class="md-nav__link">
+  <a href="#advanced-queries" class="md-nav__link">
     <span class="md-ellipsis">
-      Advanced queries [WIP!]
+      Advanced queries
     </span>
   </a>
   
@@ -2275,19 +2275,54 @@
 </div>
 </div>
 </div>
-<h3 id="advanced-queries-wip">Advanced queries [WIP!]<a class="headerlink" href="#advanced-queries-wip" title="Permanent link">&para;</a></h3>
-<p>If you need to  Support Elasticsearch's simple query string syntax.</p>
-<ul>
-<li><code>+</code> signifies AND operation</li>
-<li><code>|</code> signifies OR operation</li>
-<li><code>-</code> negates a single token</li>
-<li><code>"</code> wraps a number of tokens to signify a phrase for searching</li>
-<li><code>*</code> at the end of a term signifies a prefix query</li>
-<li><code>(</code> and <code>)</code> signify precedence</li>
-<li><code>~N</code> after a word signifies edit distance (fuzziness)</li>
-<li><code>~N</code> after a phrase signifies slop amount
-To use one of these characters literally, escape it with a preceding backslash (<code>\</code>).</li>
-</ul>
+<h3 id="advanced-queries">Advanced queries<a class="headerlink" href="#advanced-queries" title="Permanent link">&para;</a></h3>
+<p>If you need more complex searches, you can use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax">Elasticsearch's simple query string syntax</a>. Here is a summary of the different available operators:</p>
+<table>
+<thead>
+<tr>
+<th>operator</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code></td>
+<td>signifies AND operation</td>
+</tr>
+<tr>
+<td><code>|</code></td>
+<td>signifies OR operation</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>negates a single token</td>
+</tr>
+<tr>
+<td><code>"</code></td>
+<td>wraps a number of tokens to signify a phrase for searching</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>at the end of a term signifies a prefix query</td>
+</tr>
+<tr>
+<td><code>(</code> and <code>)</code></td>
+<td>signify precedence</td>
+</tr>
+<tr>
+<td><code>~N</code></td>
+<td>after a word signifies edit distance (fuzziness)</td>
+</tr>
+<tr>
+<td><code>~N</code></td>
+<td>after a phrase signifies slop amount</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To use one of these characters literally, escape it with a preceding backslash (<code>\</code>).</p>
+</div>
 <p>[EXAMPLES...]</p>
 <h2 id="filter-by-conditions">Filter by conditions<a class="headerlink" href="#filter-by-conditions" title="Permanent link">&para;</a></h2>
 <p>You can use the <code>Filter</code> class to define the conditions and pass them to the <code>Dataset.records</code> attribute to fetch records based on the conditions. Conditions include "==", "&gt;=", "&lt;=", or "in". Conditions can be combined with dot notation to filter records based on metadata, suggestions, or responses. You can use a single condition or multiple conditions to filter records.</p>
