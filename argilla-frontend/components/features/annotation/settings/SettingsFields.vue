@@ -9,6 +9,7 @@
         >
           <div class="settings__edition-form__name">
             <h4 class="--body1 --medium" v-text="field.name" />
+            <BaseBadge class="--capitalized" :text="`${$t(field.type)}`" />
           </div>
 
           <Validation
@@ -103,6 +104,9 @@ export default {
       gap: $base-space * 2;
       h4 {
         margin: 0;
+      }
+      .badge {
+        margin-inline: 0 auto;
       }
     }
 

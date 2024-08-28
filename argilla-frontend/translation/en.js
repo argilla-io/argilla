@@ -4,6 +4,7 @@ export default {
   label_selection: "Label",
   span: "Span",
   text: "Text",
+  image: "Image",
   rating: "Rating",
   minimize: "Minimize",
   select: "Select",
