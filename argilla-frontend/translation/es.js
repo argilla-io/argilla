@@ -9,7 +9,7 @@ export default {
   select: "Seleccionar",
   search: "Buscar",
   searchPlaceholder: "Introduce una consulta",
-  searchDatasets: "Search DataSets",
+  searchDatasets: "Buscar dataset",
   expand: "Expandir",
   copied: "Copiado",
   copyLink: "Copiar enlace",
