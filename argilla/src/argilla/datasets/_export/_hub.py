@@ -233,7 +233,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             ) from e
 
     @staticmethod
-    def _get_single_dataset(hf_dataset: "HFDataset", kwargs: Dict) -> "HFDataset":
+    def _get_dataset_split(hf_dataset: "HFDataset", split: Optional[str] = None, **kwargs: Dict) -> "HFDataset":
         """Get a single dataset from a Hugging Face dataset.
 
         Parameters:
@@ -243,11 +243,12 @@ class HubImportExportMixin(DiskImportExportMixin):
             HFDataset: The single dataset.
         """
 
-        if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
+        if isinstance(hf_dataset, DatasetDict) and split is None:
             split = next(iter(hf_dataset.keys()))
             if len(hf_dataset.keys()) > 1:
                 warnings.warn(
-                    message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}. Available splits are: {', '.join(hf_dataset.keys())}."
+                    message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}. "
+                    f"Available splits are: {', '.join(hf_dataset.keys())}."
                 )
             hf_dataset = hf_dataset[split]
         return hf_dataset
