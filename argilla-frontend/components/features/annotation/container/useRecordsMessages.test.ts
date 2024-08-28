@@ -16,15 +16,47 @@ const useTeamProgressMocked = jest.mocked(useTeamProgress);
 jest.mock("~/v1/infrastructure/services/useRole");
 const useRoleMocked = jest.mocked(useRole);
 
+class RecordCriteriaMocked extends RecordCriteria {
+  constructor(
+    private readonly _isFilteringByAdvanceSearch: boolean,
+    datasetId: string,
+    datasetVersion: string,
+    status: RecordStatus,
+    searchText: string,
+    metadata: string,
+    sortBy: string,
+    response: string,
+    suggestion: string,
+    similaritySearch: string
+  ) {
+    super(
+      datasetId,
+      datasetVersion,
+      status,
+      searchText,
+      metadata,
+      sortBy,
+      response,
+      suggestion,
+      similaritySearch
+    );
+  }
+
+  get isFilteringByAdvanceSearch() {
+    return this._isFilteringByAdvanceSearch;
+  }
+}
+
 const createRecordCriteria = (
   status: RecordStatus,
-  isFilteredByText = false
+  isFilteringByAdvanceSearch = false
 ) => {
-  const criteria = new RecordCriteria(
+  const criteria = new RecordCriteriaMocked(
+    isFilteringByAdvanceSearch,
     "datasetId",
     "1",
     status,
-    isFilteredByText ? "searchText" : "",
+    "",
     "",
     "",
     "",
@@ -128,7 +160,11 @@ describe("useRecordsMessages", () => {
     test.each(["pending", "draft", "submitted", "discarded"])(
       "return 'No have %s records matching with a query' when no have records",
       (status: RecordStatus) => {
-        const recordCriteria = createRecordCriteria(status, true);
+        const isFilteringByAdvanceSearch = true;
+        const recordCriteria = createRecordCriteria(
+          status,
+          isFilteringByAdvanceSearch
+        );
         const records = createRecordsMockWith(false);
 
         mockMetricsWith(METRICS.WITH_20_ANNOTATED());

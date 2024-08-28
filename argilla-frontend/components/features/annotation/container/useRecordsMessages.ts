@@ -24,7 +24,7 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
 
       const { status } = recordCriteria.committed;
 
-      if (recordCriteria.isFilteredByText) {
+      if (recordCriteria.isFilteringByAdvanceSearch) {
         return t("noRecordsMessages.noRecordsFound", { status });
       }
 
