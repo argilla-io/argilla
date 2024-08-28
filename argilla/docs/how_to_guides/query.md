@@ -63,19 +63,23 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
     queried_records = dataset.records(query=query).to_list(flatten=True)
     ```
 
-### Advanced queries [WIP!]
+### Advanced queries
 
-If you need to  Support Elasticsearch's simple query string syntax. 
+If you need more complex searches, you can use [Elasticsearch's simple query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax). Here is a summary of the different available operators: 
 
-- `+` signifies AND operation
-- `|` signifies OR operation
-- `-` negates a single token
-- `"` wraps a number of tokens to signify a phrase for searching
-- `*` at the end of a term signifies a prefix query
-- `(` and `)` signify precedence
-- `~N` after a word signifies edit distance (fuzziness)
-- `~N` after a phrase signifies slop amount
-To use one of these characters literally, escape it with a preceding backslash (`\`).
+| operator | description                                               |
+| -------- | --------------------------------------------------------- |
+|`+`       | signifies AND operation                                   |
+|`|`       | signifies OR operation                                    |
+|`-`       | negates a single token                                    |
+|`"`       | wraps a number of tokens to signify a phrase for searching|
+|`*`       | at the end of a term signifies a prefix query             |
+|`(` and `)`| signify precedence                                       |
+|`~N`      | after a word signifies edit distance (fuzziness)          |
+|`~N`      | after a phrase signifies slop amount                      |
+
+!!! tip
+    To use one of these characters literally, escape it with a preceding backslash (`\`).
 
 [EXAMPLES...]
 
