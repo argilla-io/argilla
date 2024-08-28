@@ -65,7 +65,7 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 
 ### Advanced queries [WIP!]
 
-If you need to  Support Elasticsearch's simple query string syntax. 
+If you need to  Support Elasticsearch's simple query string syntax.
 
 - `+` signifies AND operation
 - `|` signifies OR operation
