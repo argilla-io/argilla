@@ -189,7 +189,7 @@ class TelemetryClient:
             duration_in_ms = response.headers["Server-Timing"]
             duration_in_ms = duration_in_ms.removeprefix("total;dur=")
 
-            user_agent["duration_in_ms"] = duration_in_ms
+            user_agent["duration_in_milliseconds"] = duration_in_ms
 
         if response.status_code >= 400:
             argilla_error: Exception = get_request_error(request=request)
