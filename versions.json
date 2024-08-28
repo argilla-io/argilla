@@ -37,6 +37,14 @@
     }
   },
   {
+    "version": "docs_queries-dsl",
+    "title": "docs_queries-dsl",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_move-ga-to-plausible",
     "title": "docs_move-ga-to-plausible",
     "aliases": [],
