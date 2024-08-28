@@ -17,13 +17,16 @@ from typing import Union
 from unittest.mock import MagicMock
 
 import pytest
+from fastapi import Request
+from starlette.responses import JSONResponse
+
+from argilla_server.api.errors.v1.exception_handlers import set_request_error
+from argilla_server.errors import ServerError
 from argilla_server.models import (
     Record,
     User,
 )
 from argilla_server.telemetry import TelemetryClient
-from fastapi import Request
-
 from tests.factories import (
     DatasetFactory,
     IntegerMetadataPropertyFactory,
@@ -53,6 +56,83 @@ class TestSuiteTelemetry:
         telemetry_client = TelemetryClient(enable_telemetry=False)
 
         assert telemetry_client.enable_telemetry == False
+
+    async def test_track_endpoint(self, test_telemetry: TelemetryClient):
+        request = Request(
+            scope={
+                "type": "http",
+                "path": "/api/test/endpoint",
+                "headers": [
+                    (b"accept-language", b"en-US"),
+                    (b"user-agent", b"test"),
+                ],
+                "method": "GET",
+            }
+        )
+        response = JSONResponse(content={"test": "test"}, status_code=201, headers={"Server-Timing": "total;dur=50"})
+        await test_telemetry.track_endpoint(endpoint_path="/api/test/endpoint", request=request, response=response)
+
+        test_telemetry.track_data.assert_called_once_with(
+            topic="endpoints",
+            data={
+                "endpoint": "GET /api/test/endpoint",
+                "request.method": "GET",
+                "request.user-agent": "test",
+                "request.accept-language": "en-US",
+                "response.status": "201",
+                "duration_in_milliseconds": "50",
+            },
+        )
+
+    async def test_track_endpoint_call_with_error(self, test_telemetry: TelemetryClient):
+        request = Request(
+            scope={
+                "type": "http",
+                "path": "/api/test/endpoint",
+                "headers": {},
+                "method": "POST",
+            }
+        )
+        response = JSONResponse(content={"test": "test"}, status_code=500)
+        await test_telemetry.track_endpoint(endpoint_path="/api/test/endpoint", request=request, response=response)
+
+        test_telemetry.track_data.assert_called_once_with(
+            topic="endpoints",
+            data={
+                "endpoint": "POST /api/test/endpoint",
+                "request.method": "POST",
+                "request.user-agent": None,
+                "request.accept-language": None,
+                "response.status": "500",
+            },
+        )
+
+    async def test_track_endpoint_call_with_error_and_exception(self, test_telemetry: TelemetryClient):
+        request = Request(
+            scope={
+                "type": "http",
+                "path": "/api/test/endpoint",
+                "headers": {},
+                "method": "POST",
+            }
+        )
+        response = JSONResponse(content={"test": "test"}, status_code=500)
+        set_request_error(request, ServerError("Test exception"))
+
+        await test_telemetry.track_endpoint(endpoint_path="/api/test/endpoint", request=request, response=response)
+
+        test_telemetry.track_data.assert_called_once_with(
+            topic="endpoints",
+            data={
+                "endpoint": "POST /api/test/endpoint",
+                "request.method": "POST",
+                "request.user-agent": None,
+                "request.accept-language": None,
+                "response.status": "500",
+                "response.error": "argilla.api.errors::ServerError()",
+                "response.error_code": "argilla.api.errors::ServerError",
+            },
+        )
 
     async def test_track_user_login(self, test_telemetry: MagicMock):
         user = User(id=uuid.uuid4(), username="argilla")
