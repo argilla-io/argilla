@@ -2323,7 +2323,21 @@
 <p class="admonition-title">Tip</p>
 <p>To use one of these characters literally, escape it with a preceding backslash (<code>\</code>).</p>
 </div>
-<p>[EXAMPLES...]</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Advanced query examples</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<p>Here are some examples of advanced queries:</p>
+<ul>
+<li><strong>AND operation</strong>: To search for records that contain both terms, use the <code>+</code> operator: <code>argilla + distilabel</code>. This query will return records that contain both terms. This is the default operator. So, the previous query can be written as <code>argilla distilabel</code>.</li>
+<li><strong>OR operation</strong>: To search for records that contain either term, use the <code>|</code> operator: <code>argilla | distilabel</code>. This query will return records that contain either term.</li>
+<li><strong>Negate a term</strong>: To exclude records that contain a specific term, use the <code>-</code> operator: <code>argilla -distilabel</code>. This query will return records that contain the first term but not the second term.</li>
+<li><strong>Phrase search</strong>: To search for records that contain a specific phrase, use the <code>"</code> operator: <code>"argilla and distilabel"</code>. This query will return records that contain the phrase "argilla and distilabel".</li>
+<li><strong>Prefix query</strong>: To search for records that contain a specific prefix, use the <code>*</code> operator: <code>argill*</code>.</li>
+<li><strong>Precedence</strong>: To group terms, use parentheses: <code>(argilla | distilabel) rules</code>. This query will return records that contain either "argilla" or "distilabel" and "rules".</li>
+<li><strong>Edit distance</strong>: To search for records that contain a term with an edit distance, use the <code>~N</code> operator: <code>argilla~1</code>. This query will return records that contain the term "argilla" with an edit distance of 1.</li>
+</ul>
 <h2 id="filter-by-conditions">Filter by conditions<a class="headerlink" href="#filter-by-conditions" title="Permanent link">&para;</a></h2>
 <p>You can use the <code>Filter</code> class to define the conditions and pass them to the <code>Dataset.records</code> attribute to fetch records based on the conditions. Conditions include "==", "&gt;=", "&lt;=", or "in". Conditions can be combined with dot notation to filter records based on metadata, suggestions, or responses. You can use a single condition or multiple conditions to filter records.</p>
 <table>
@@ -2352,7 +2366,7 @@
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Single condition</label><label for="__tabbed_3_2">Multiple conditions</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Single condition</label><label for="__tabbed_4_2">Multiple conditions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
