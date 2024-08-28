@@ -81,7 +81,19 @@ If you need more complex searches, you can use [Elasticsearch's simple query str
 !!! tip
     To use one of these characters literally, escape it with a preceding backslash (`\`).
 
-[EXAMPLES...]
+
+=== "Advanced query examples"
+
+Here are some examples of advanced queries:
+
+- **AND operation**: To search for records that contain both terms, use the `+` operator: `argilla + distilabel`. This query will return records that contain both terms. This is the default operator. So, the previous query can be written as `argilla distilabel`.
+- **OR operation**: To search for records that contain either term, use the `|` operator: `argilla | distilabel`. This query will return records that contain either term.
+- **Negate a term**: To exclude records that contain a specific term, use the `-` operator: `argilla -distilabel`. This query will return records that contain the first term but not the second term.
+- **Phrase search**: To search for records that contain a specific phrase, use the `"` operator: `"argilla and distilabel"`. This query will return records that contain the phrase "argilla and distilabel".
+- **Prefix query**: To search for records that contain a specific prefix, use the `*` operator: `argill*`.
+- **Precedence**: To group terms, use parentheses: `(argilla | distilabel) rules`. This query will return records that contain either "argilla" or "distilabel" and "rules".
+- **Edit distance**: To search for records that contain a term with an edit distance, use the `~N` operator: `argilla~1`. This query will return records that contain the term "argilla" with an edit distance of 1.
+
 
 ## Filter by conditions
 
