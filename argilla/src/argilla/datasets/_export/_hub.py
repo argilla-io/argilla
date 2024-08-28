@@ -156,7 +156,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         if with_records:
             try:
                 hf_dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-                hf_dataset = cls. _get_dataset_split(hf_dataset=hf_dataset, **kwargs)
+                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, **kwargs)
                 cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
             except EmptyDatasetError:
                 warnings.warn(
