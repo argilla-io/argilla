@@ -33,7 +33,7 @@ export default {
   visibleLabels: "Etiquetas visibles",
   annotationGuidelines: "Guía de anotación",
   guidelines: "Guías",
-  taskDistribution: "Distribución de tareas",
+  taskDistribution: "Distribución de la tarea",
   minimumSubmittedResponses: "Respuestas mínimas enviadas",
   taskDistributionTooltip:
     "Una tarea se completa cuando todos los \nregistros tienen el número mínimo \nde respuestas enviadas",
