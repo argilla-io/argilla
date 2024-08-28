@@ -73,7 +73,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         self._model = DatasetModel(name=name)
         self._settings = settings._copy() if settings else Settings(_dataset=self)
         self._settings.dataset = self
-        self.__records = DatasetRecords(client=self._client, dataset=self)
+        self.__records = DatasetRecords(client=self._client, dataset=self, mapping=self._settings.mapping)
 
     #####################
     #  Properties       #
