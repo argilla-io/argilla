@@ -60,7 +60,7 @@ class HFDatasetsIO:
         Returns:
             Generator[Dict[str, Union[str, float, int, list]], None, None]: A generator of dictionaries to be passed to DatasetRecords.add or DatasetRecords.update.
         """
-        media_features = HFDatasetsIO._get_media_features(dataset)
+        media_features = HFDatasetsIO._get_image_features(dataset)
         if media_features:
             dataset = HFDatasetsIO._cast_images_as_urls(hf_dataset=dataset, columns=media_features)
         try:
@@ -73,7 +73,7 @@ class HFDatasetsIO:
         return record_dicts
 
     @staticmethod
-    def _get_media_features(dataset: "HFDataset") -> List[str]:
+    def _get_image_features(dataset: "HFDataset") -> List[str]:
         """Check if the Hugging Face dataset contains image features.
 
         Parameters:
