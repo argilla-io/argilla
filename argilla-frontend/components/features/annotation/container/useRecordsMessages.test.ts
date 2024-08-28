@@ -67,18 +67,18 @@ const mockTamProgressWith = (progress: Progress) => {
     get: jest.fn(),
   });
 };
+useRoleMocked.mockReturnValue({
+  isAdminOrOwner: jest.fn(),
+  isAdminOrOwnerRole: {
+    value: true,
+  } as any,
+});
 
 describe("useRecordsMessages", () => {
   describe("getMessagesForLoading should", () => {
     test("return `The dataset is empty message for admin' when the dataset no have records and the logged in user is admin or owner", () => {
       const recordCriteria = createRecordCriteria("pending");
       const records = createRecordsMockWith(false);
-      useRoleMocked.mockReturnValue({
-        isAdminOrOwner: jest.fn(),
-        isAdminOrOwnerRole: {
-          value: true,
-        } as any,
-      });
 
       mockMetricsWith(METRICS.EMPTY());
       mockTamProgressWith(PROGRESS.EMPTY());
@@ -110,7 +110,7 @@ describe("useRecordsMessages", () => {
       );
     });
 
-    test("return 'The task is completed' when team progress mark as completed", () => {
+    test("return 'The task is completed' when team progress mark as completed and does not have records to annotate", () => {
       const recordCriteria = createRecordCriteria("pending");
       const records = createRecordsMockWith(false);
 

@@ -17,15 +17,15 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
         : t("noRecordsMessages.datasetEmptyForAnnotator");
     }
 
-    if (progress.isCompleted) {
-      return t("noRecordsMessages.taskDistributionCompleted");
-    }
-
     if (!records.hasRecordsToAnnotate) {
+      if (progress.isCompleted) {
+        return t("noRecordsMessages.taskDistributionCompleted");
+      }
+
       const { status } = recordCriteria.committed;
 
       if (recordCriteria.isFilteredByText) {
-        return t("noRecordsMessages.noRecordsFound", status);
+        return t("noRecordsMessages.noRecordsFound", { status });
       }
 
       if (status === "draft") {
@@ -36,7 +36,7 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
         return t("noRecordsMessages.noSubmittedRecords");
       }
 
-      return t("noRecordsMessages.noRecords", status);
+      return t("noRecordsMessages.noRecords", { status });
     }
 
     return null;
@@ -59,7 +59,7 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
       }
 
       if (status === "discarded") {
-        return t("noRecordsMessages.noRecords", status);
+        return t("noRecordsMessages.noRecords", { status });
       }
     }
 
