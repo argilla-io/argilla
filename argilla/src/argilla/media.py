@@ -37,13 +37,14 @@ def pil_to_data_uri(image_object: "Image") -> str:
 
     try:
         buffered = io.BytesIO()
-        image_object.save(buffered, format="PNG")
+        image_object.save(buffered, format=image_object.format)
     except Exception as e:
         raise ValueError("An error occurred while saving the image binary to buffer") from e
 
     try:
         img_str = base64.b64encode(buffered.getvalue()).decode()
-        data_uri = f"data:image/png;base64,{img_str}"
+        mimetype = f"image/{image_object.format.lower()}"
+        data_uri = f"data:{mimetype};base64,{img_str}"
     except Exception as e:
         raise ValueError("An error occurred while converting the image binary to base64") from e
 
