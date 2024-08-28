@@ -82,10 +82,7 @@ class HFDatasetsIO:
         Returns:
             bool: True if the Hugging Face dataset contains image features, False otherwise.
         """
-        media_features = []
-        for name, feature in dataset.features.items():
-            if isinstance(feature, Image):
-                media_features.append(name)
+        media_features = [name for name, feature in dataset.features.items() if isinstance(feature, Image)]
         return media_features
 
     @staticmethod
