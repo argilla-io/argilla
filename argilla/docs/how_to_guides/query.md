@@ -65,7 +65,7 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 
 ### Advanced queries
 
-If you need more complex searches, you can use [Elasticsearch's simple query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax). Here is a summary of the different available operators: 
+If you need more complex searches, you can use [Elasticsearch's simple query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax). Here is a summary of the different available operators:
 
 | operator | description                                               |
 | -------- | --------------------------------------------------------- |
