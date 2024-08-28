@@ -35,7 +35,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
 
 To search for records with terms, you can use the `Dataset.records` attribute with a query string. The search terms are used to search for records that contain the terms in the text field. You can search a single term or various terms, in the latter, all of them should appear in the record to be retrieved.
 
-=== "Single search term"
+=== "Single term search"
 
     ```python
     import argilla as rg
@@ -49,7 +49,7 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
     queried_records = dataset.records(query=query).to_list(flatten=True)
     ```
 
-=== "Multiple search term"
+=== "Multiple terms search"
 
     ```python
     import argilla as rg
@@ -62,6 +62,22 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 
     queried_records = dataset.records(query=query).to_list(flatten=True)
     ```
+
+### Advanced queries [WIP!]
+
+If you need to  Support Elasticsearch's simple query string syntax. 
+
+- `+` signifies AND operation
+- `|` signifies OR operation
+- `-` negates a single token
+- `"` wraps a number of tokens to signify a phrase for searching
+- `*` at the end of a term signifies a prefix query
+- `(` and `)` signify precedence
+- `~N` after a word signifies edit distance (fuzziness)
+- `~N` after a phrase signifies slop amount
+To use one of these characters literally, escape it with a preceding backslash (`\`).
+
+[EXAMPLES...]
 
 ## Filter by conditions
 
