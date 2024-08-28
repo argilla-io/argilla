@@ -216,6 +216,7 @@ class TestHubImportExportMixin:
         repo_id = (
             f"argilla-internal-testing/test_import_dataset_from_hub_using_settings_with_records{with_records_export}"
         )
+        mock_dataset_name = f"test_import_dataset_from_hub_using_settings_{uuid.uuid4()}"
         dataset.records.log(records=mock_data)
 
         dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
@@ -234,11 +235,21 @@ class TestHubImportExportMixin:
                 match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
             ):
                 new_dataset = rg.Dataset.from_hub(
-                    repo_id=repo_id, client=client, with_records=with_records_import, token=token, settings=settings
+                    repo_id=repo_id,
+                    client=client,
+                    with_records=with_records_import,
+                    token=token,
+                    settings=settings,
+                    name=mock_dataset_name,
                 )
         else:
             new_dataset = rg.Dataset.from_hub(
-                repo_id=repo_id, client=client, with_records=with_records_import, token=token, settings=settings
+                repo_id=repo_id,
+                client=client,
+                with_records=with_records_import,
+                token=token,
+                settings=settings,
+                name=mock_dataset_name,
             )
 
         if with_records_import and with_records_export:
@@ -254,6 +265,7 @@ class TestHubImportExportMixin:
         assert len(new_dataset.settings.questions[1].labels) == 2
         assert new_dataset.settings.questions[1].labels[0] == "extra_positive"
         assert new_dataset.settings.questions[1].labels[1] == "extra_negative"
+        assert new_dataset.name == mock_dataset_name
 
     def test_import_dataset_from_hub_using_wrong_settings(
         self,
