@@ -69,7 +69,7 @@ def create_server_app() -> FastAPI:
     )
 
     configure_logging()
-    configure_basic_middlewares(app)
+    configure_common_middleware(app)
     configure_api_router(app)
     configure_telemetry(app)
     configure_app_statics(app)
@@ -95,7 +95,7 @@ def configure_api_docs(app: FastAPI):
         return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
 
-def configure_basic_middlewares(app: FastAPI):
+def configure_common_middleware(app: FastAPI):
     """Configures fastapi middleware"""
 
     @app.middleware("http")
