@@ -31,9 +31,11 @@ YIELD_PER = 100
 
 @job(default_queue, retry=Retry(max=3))
 async def update_dataset_records_status_job(dataset_id: UUID):
-    """This Job worker updates the status of all the records in the dataset when the distribution strategy changes."""
+    """This Job updates the status of all the records in the dataset when the distribution strategy changes."""
 
-    async with AsyncSessionLocal() as db, SearchEngine.get_by_name(settings.search_engine) as search_engine:
+    record_ids = []
+
+    async with AsyncSessionLocal() as db:
         stream = await db.stream(
             select(Record.id)
             .where(Record.dataset_id == dataset_id)
@@ -41,10 +43,10 @@ async def update_dataset_records_status_job(dataset_id: UUID):
             .execution_options(yield_per=YIELD_PER)
         )
 
-        record_ids = []
         async for record_id in stream.scalars():
             record_ids.append(record_id)
 
     # NOTE: We are updating the records status outside the database transaction to avoid database locks with SQLite.
-    for record_id in record_ids:
-        await distribution.update_record_status(search_engine, record_id)
+    async with SearchEngine.get_by_name(settings.search_engine) as search_engine:
+        for record_id in record_ids:
+            await distribution.update_record_status(search_engine, record_id)
