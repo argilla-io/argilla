@@ -43,11 +43,11 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
   };
 
   const getMessageForPagination = (isNextRecordExist: boolean) => {
-    if (progress.isCompleted) {
-      return t("noRecordsMessages.taskDistributionCompleted");
-    }
-
     if (!isNextRecordExist) {
+      if (progress.isCompleted) {
+        return t("noRecordsMessages.taskDistributionCompleted");
+      }
+
       const { status } = recordCriteria.committed;
 
       if (status === "pending") {

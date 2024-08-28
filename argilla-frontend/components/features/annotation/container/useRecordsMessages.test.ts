@@ -208,6 +208,7 @@ describe("useRecordsMessages", () => {
   describe("getMessageForPagination should", () => {
     test("return 'The task is completed' when team progress mark as completed", () => {
       const recordCriteria = createRecordCriteria("pending");
+      const hasRecordsOnNextPage = false;
 
       mockMetricsWith(METRICS.WITH_20_ANNOTATED());
 
@@ -215,13 +216,14 @@ describe("useRecordsMessages", () => {
 
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
-      expect(getMessageForPagination(true)).toBe(
+      expect(getMessageForPagination(hasRecordsOnNextPage)).toBe(
         "#noRecordsMessages.taskDistributionCompleted#"
       );
     });
 
     test("return 'No have pending records' when pending queue is empty", () => {
       const recordCriteria = createRecordCriteria("pending");
+      const hasRecordsOnNextPage = false;
 
       mockMetricsWith(METRICS.WITH_20_ANNOTATED());
 
@@ -229,13 +231,14 @@ describe("useRecordsMessages", () => {
 
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
-      expect(getMessageForPagination(false)).toBe(
+      expect(getMessageForPagination(hasRecordsOnNextPage)).toBe(
         "#noRecordsMessages.noPendingRecordsToAnnotate#"
       );
     });
 
     test("return 'No have draft records' when draft queue is empty", () => {
       const recordCriteria = createRecordCriteria("draft");
+      const hasRecordsOnNextPage = false;
 
       mockMetricsWith(METRICS.WITH_20_ANNOTATED());
 
@@ -243,13 +246,14 @@ describe("useRecordsMessages", () => {
 
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
-      expect(getMessageForPagination(false)).toBe(
+      expect(getMessageForPagination(hasRecordsOnNextPage)).toBe(
         "#noRecordsMessages.noDraftRecordsToReview#"
       );
     });
 
     test("return 'No have discarded records' when discarded queue is empty", () => {
       const recordCriteria = createRecordCriteria("discarded");
+      const hasRecordsOnNextPage = false;
 
       mockMetricsWith(METRICS.WITH_20_ANNOTATED());
 
@@ -257,13 +261,14 @@ describe("useRecordsMessages", () => {
 
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
-      expect(getMessageForPagination(false)).toBe(
+      expect(getMessageForPagination(hasRecordsOnNextPage)).toBe(
         "#noRecordsMessages.noRecords.discarded#"
       );
     });
 
     test("return null when have records to annotate", () => {
       const recordCriteria = createRecordCriteria("pending");
+      const hasRecordsOnNextPage = true;
 
       mockMetricsWith(METRICS.WITH_20_ANNOTATED());
 
@@ -271,7 +276,7 @@ describe("useRecordsMessages", () => {
 
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
-      expect(getMessageForPagination(true)).toBeNull();
+      expect(getMessageForPagination(hasRecordsOnNextPage)).toBeNull();
     });
   });
 });
