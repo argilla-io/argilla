@@ -40,6 +40,8 @@ from argilla_server.models import User, Workspace
 from argilla_server.search_engine import get_search_engine
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
+from argilla_server.telemetry import get_telemetry_client
+from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 
 _LOGGER = logging.getLogger("argilla")
 
@@ -67,8 +69,9 @@ def create_server_app() -> FastAPI:
     )
 
     configure_logging()
-    configure_middleware(app)
+    configure_basic_middlewares(app)
     configure_api_router(app)
+    configure_telemetry(app)
     configure_app_statics(app)
     configure_api_docs(app)
 
@@ -92,7 +95,7 @@ def configure_api_docs(app: FastAPI):
         return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
 
-def configure_middleware(app: FastAPI):
+def configure_basic_middlewares(app: FastAPI):
     """Configures fastapi middleware"""
 
     @app.middleware("http")
@@ -119,6 +122,32 @@ def configure_middleware(app: FastAPI):
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
     app.mount("/api/v1", api_v1)
+
+
+def configure_telemetry(app: FastAPI):
+    """
+    Configures telemetry middleware for the app if telemetry is enabled
+
+    """
+    if not settings.enable_telemetry:
+        return
+
+    @app.middleware("http")
+    async def track_api_endpoint(request: Request, call_next):
+        response = await call_next(request)
+        try:
+            endpoint_path = resolve_endpoint_path_for_request(request)
+
+            if endpoint_path:
+                await get_telemetry_client().track_endpoint(
+                    endpoint_path,
+                    request,
+                    response,
+                )
+        except Exception as e:
+            _LOGGER.warning(f"Error tracking endpoint: {e}")
+        finally:
+            return response
 
 
 def configure_app_statics(app: FastAPI):
@@ -177,10 +206,6 @@ def show_telemetry_warning():
             f'{"#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"}'
         )
         _LOGGER.warning(message)
-
-    message += "\n\n    "
-    message += "#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"
-    message += "\n"
 
 
 async def _create_oauth_allowed_workspaces(db: AsyncSession):
