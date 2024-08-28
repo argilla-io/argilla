@@ -24,7 +24,7 @@ export default {
   order: "Orden",
   useMarkdown: "Usar Markdown",
   suggestionFirst: "Mostrar sugerencias primero",
-  visibleForAnnotators: "Visible para las anotadoras",
+  visibleForAnnotators: "Visible para los anotadores",
   recordInfo: "Información de registro",
   viewMetadata: "Ver metadatos",
   allowExtraMetadata: "Permitir metadatos adicionales",
@@ -72,23 +72,23 @@ export default {
   },
   userAvatarTooltip: {
     settings: "Mi configuración",
-    docs: "Ver documentos",
+    docs: "Documentación",
     logout: "Cerrar sesión",
   },
   settings: {
-    title: "Configuración del conjunto de datos",
-    datasetInfo: "Información del conjunto de datos",
-    seeYourDataset: "Vea su conjunto de datos",
+    title: "Configuración del dataset",
+    datasetInfo: "Información del dataset",
+    seeYourDataset: "Ver el dataset",
     editFields: "Editar campos",
     editQuestions: "Editar preguntas",
     editMetadata: "Editar propiedades de metadatos",
     editVectors: "Editar vectores",
-    deleteDataset: "Eliminar el conjunto de datos",
+    deleteDataset: "Eliminar el dataset",
     deleteWarning: "Ten cuidado, esta acción no es reversible",
     deleteConfirmation: "Confirma la eliminación",
     deleteConfirmationMessage:
       "Estás a punto de eliminar: <strong> {datasetName} </strong> del espacio de trabajo <strong> {workspaceName} </strong>. Esta acción no puede deshacerse",
-    yesDelete: "Sí, Eliminar",
+    yesDelete: "Sí, eliminar",
     write: "Escribir",
     preview: "Vista previa",
     uiPreview: "Vista previa de la interfaz de usuario",
@@ -103,16 +103,15 @@ export default {
     delete: "Eliminar",
     tooltip: {
       copyToClipboard: "Copiar en el portapapeles",
-      copyNameToClipboard:
-        "Copiar el nombre del conjunto de datos al portapapeles",
-      copyLinkToClipboard:
-        "Copiar enlace del conjunto de datos al portapapeles",
-      goToDatasetSettings: "Vaya a la configuración del conjunto de datos",
-      datasetSettings: "Configuración del conjunto de datos",
+      copyNameToClipboard: "Copiar el nombre del dataset al portapapeles",
+      copyLinkToClipboard: "Copiar enlace del dataset al portapapeles",
+      goToDatasetSettings: "Configuración del dataset",
+      datasetSettings: "Configuración del dataset",
     },
   },
-  to_submit_complete_required: "Para enviar respuestas completas",
-  some_records_failed_to_annotate: "Algunos registros no lograron anotar",
+  to_submit_complete_required:
+    "Para enviar completa \nlas respuestas requeridas",
+  some_records_failed_to_annotate: "Algunos registros no fueron anotados",
   changes_no_submit: "No envió sus cambios",
   bulkAnnotation: {
     recordsSelected:
@@ -121,9 +120,9 @@ export default {
     fixedHeight: "Colapsar registros",
     defaultHeight: "Expandir registros",
     to_annotate_record_bulk_required: "No hay registro seleccionado",
-    select_to_annotate: "Seleccione todo",
+    select_to_annotate: "Seleccionar todo",
     pageSize: "Tamaño de página",
-    selectAllResults: "Seleccione todos los registros coincidentes {Total}",
+    selectAllResults: "Selecciona todos los registros coincidentes {total}",
     haveSelectedRecords: "Has seleccionado todos los registros {Total}",
     actionConfirmation: "Confirmación de acción en bloque",
     actionConfirmationText:
@@ -163,7 +162,7 @@ export default {
   },
   suggestion: {
     agent: "\nagente: {agent}",
-    score: "\npuntaje: {score}",
+    score: "\npuntuación: {score}",
     tooltip: "Esta pregunta contiene una sugerencia {agente} {stork}",
     filter: {
       value: "Valores de sugerencia",
@@ -189,16 +188,16 @@ export default {
   login: {
     title: "Iniciar sesión",
     username: "Usuario",
-    usernameDescription: "Ingrese su usuario",
+    usernameDescription: "Introduce tu usuario",
     password: "Contraseña",
     show: "Mostrar",
     hide: "Ocultar",
-    passwordDescription: "Ingrese su contraseña",
+    passwordDescription: "Introduce tu contraseña",
     claim: "Trabajen en datos juntos. </br> para mejorar sus modelos.",
     hf: {
       title: "Bienvenido a {Space}",
       subtitle:
-        "Únete a <strong>{user}</strong> para construir mejores conjuntos de datos para AI",
+        "Únete a <strong>{user}</strong> para construir mejores datasets para IA",
     },
   },
   status: "Estado",
@@ -213,7 +212,7 @@ export default {
   "reset-all": "Restablecer todo",
   reset: "Reiniciar",
   less: "Menos",
-  learnMore: "Aprenda más",
+  learnMore: "Aprende más",
   with: "con",
   find: "Encontrar",
   cancel: "Cancelar",
@@ -222,7 +221,7 @@ export default {
   update: "Actualizar",
   youAreOnlineAgain: "Estás en línea de nuevo",
   youAreOffline: "Estás fuera de línea",
-  write: "Escritura",
+  write: "Texto",
   preview: "Vista previa",
   datasetTable: {
     name: "Dataset",
