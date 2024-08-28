@@ -18,7 +18,7 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
     }
 
     if (!records.hasRecordsToAnnotate) {
-      if (progress.isCompleted) {
+      if (!recordCriteria.isFilteringByAdvanceSearch && progress.isCompleted) {
         return t("noRecordsMessages.taskDistributionCompleted");
       }
 
@@ -44,7 +44,7 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
 
   const getMessageForPagination = (isNextRecordExist: boolean) => {
     if (!isNextRecordExist) {
-      if (progress.isCompleted) {
+      if (!recordCriteria.isFilteringByAdvanceSearch && progress.isCompleted) {
         return t("noRecordsMessages.taskDistributionCompleted");
       }
 

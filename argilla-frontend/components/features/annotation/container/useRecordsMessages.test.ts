@@ -143,7 +143,7 @@ describe("useRecordsMessages", () => {
     });
 
     test("return 'The task is completed' when team progress mark as completed and does not have records to annotate", () => {
-      const recordCriteria = createRecordCriteria("pending");
+      const recordCriteria = createRecordCriteria("pending", false);
       const records = createRecordsMockWith(false);
 
       mockMetricsWith(METRICS.WITH_20_ANNOTATED());
