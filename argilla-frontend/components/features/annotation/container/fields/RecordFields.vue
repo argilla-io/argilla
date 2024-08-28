@@ -1,7 +1,16 @@
 <template>
   <div class="fields">
     <div
-      v-for="{ id, name, title, content, settings, isTextType } in fields"
+      v-for="{
+        id,
+        name,
+        title,
+        content,
+        settings,
+        isTextType,
+        isImageType,
+      } in fields"
+      :class="[isImageType ? 'fields__container--image' : '']"
       :key="id"
     >
       <SpanAnnotationTextField
@@ -64,5 +73,12 @@ export default {
   min-width: 0;
   height: 100%;
   min-height: 0;
+
+  &__container {
+    &--image {
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+  }
 }
 </style>

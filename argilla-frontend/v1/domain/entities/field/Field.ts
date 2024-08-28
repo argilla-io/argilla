@@ -20,6 +20,10 @@ export class Field {
     return this.type === "text";
   }
 
+  get isImageType() {
+    return this.type === "image";
+  }
+
   get type() {
     return this.settings?.type?.toLowerCase() ?? null;
   }
