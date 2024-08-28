@@ -99,11 +99,9 @@ class HFDatasetsIO:
 
         unique_identifier = uuid4().hex
 
-        def batch_fn(batch, column):
-            data_uris = []
-            for sample in batch:
-                data_uris.append(pil_to_data_uri(sample))
-            return {f"column_{unique_identifier}": data_uris}
+        def batch_fn(batch):
+            data_uris = [pil_to_data_uri(sample) for sample in batch]
+            return {unique_identifier: data_uris}
 
         for column in columns:
             hf_dataset = hf_dataset.map(
@@ -112,10 +110,7 @@ class HFDatasetsIO:
                 batched=True,
                 input_columns=[column],
                 remove_columns=[column],
-                fn_kwargs={"column": column},
             )
-            hf_dataset = hf_dataset.rename_column(
-                original_column_name=f"column_{unique_identifier}", new_column_name=column
-            )
+            hf_dataset = hf_dataset.rename_column(original_column_name=unique_identifier, new_column_name=column)
 
         return hf_dataset
