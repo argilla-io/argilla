@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
 from argilla._exceptions import ArgillaError
-from argilla.media import cast_image
+from argilla.media import cast_image, uncast_image
 from argilla._models import (
     FieldValue,
     MetadataModel,
@@ -278,10 +278,14 @@ class RecordFields(dict):
         self.record = record
 
     def to_dict(self) -> dict:
-        return {
-            key: cast_image(value) if self.record.dataset.settings.schema[key].type == "image" else value
-            for key, value in self.items()
-        }
+        return {key: cast_image(value) if self._is_image(key) else value for key, value in self.items()}
+
+    def __getitem__(self, key: str) -> FieldValue:
+        value = super().__getitem__(key)
+        return uncast_image(value) if self._is_image(key) else value
+
+    def _is_image(self, key: str) -> bool:
+        return self.record.dataset.settings.schema[key].type == "image"
 
 
 class RecordMetadata(dict):
