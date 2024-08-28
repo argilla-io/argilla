@@ -82,7 +82,7 @@ If you need more complex searches, you can use [Elasticsearch's simple query str
     To use one of these characters literally, escape it with a preceding backslash (`\`).
 
 
-=== "Advanced query examples"
+#### Advanced query examples
 
 Here are some examples of advanced queries:
 
