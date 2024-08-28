@@ -91,7 +91,7 @@ def cast_image(image: "Image") -> str:
         return pil_to_data_uri(image)
 
 
-def uncast_image(data_uri: str) -> "Image":
+def data_uri_to_pil(data_uri: str) -> "Image":
     """Convert a base64 data URI string to a PIL image."""
     try:
         from PIL import Image
@@ -108,3 +108,13 @@ def uncast_image(data_uri: str) -> "Image":
         raise ValueError("An error occurred while converting the data URI to a PIL image.") from e
 
     return image
+
+
+def uncast_image(image: str) -> "Image":
+    """Convert a base64 data URI string to a PIL image."""
+    if image.startswith("data:image"):
+        return data_uri_to_pil(image)
+    elif image.startswith("http"):
+        return image
+    else:
+        raise ValueError("The image must be a data URI string.")
