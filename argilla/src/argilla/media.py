@@ -14,6 +14,7 @@
 
 import base64
 import io
+from pathlib import Path
 import warnings
 from typing import TYPE_CHECKING
 
@@ -55,3 +56,36 @@ def pil_to_data_uri(image_object: "Image") -> str:
         raise ValueError("An error occurred while converting the image binary to base64") from e
 
     return data_uri
+
+
+def filepath_to_data_uri(file_path: "Path") -> str:
+    """Convert an image file to a base64 data URI string."""
+    file_path = Path(file_path)
+    if file_path.exists():
+        with open(file_path, "rb") as image_file:
+            img_str = base64.b64encode(image_file.read()).decode()
+            mimetype = f"image/{file_path.suffix[1:]}"
+            data_uri = f"data:{mimetype};base64,{img_str}"
+    else:
+        raise FileNotFoundError(f"File not found at {file_path}")
+
+    return data_uri
+
+
+def cast_image(image: "Image") -> str:
+    """Convert a PIL image to a base64 data URI string.
+    Parameters:
+        image_object (Image): The PIL image to convert to a base64 data URI.
+    Returns:
+        str: The data URI string.
+    """
+    if isinstance(image, str):
+        if image.startswith("data:") or image.startswith("http"):
+            return image
+        else:
+            return filepath_to_data_uri(image)
+    elif isinstance(image, Path):
+        return filepath_to_data_uri(image)
+
+    else:
+        return pil_to_data_uri(image)
