@@ -19,6 +19,7 @@ from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Any, Optional, Type, Union, Dict
 from uuid import UUID
 
+from datasets import DatasetDict
 from datasets.data_files import EmptyDatasetError
 
 from argilla._exceptions._api import UnprocessableEntityError
@@ -241,15 +242,12 @@ class HubImportExportMixin(DiskImportExportMixin):
         Returns:
             HFDataset: The single dataset.
         """
-        from datasets import DatasetDict
 
         if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
-            if len(hf_dataset.keys()) > 1:
-                raise ValueError(
-                    "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
-                    f" are: {', '.join(hf_dataset.keys())}."
-                )
             split = next(iter(hf_dataset.keys()))
-            warnings.warn(message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}.")
+            if len(hf_dataset.keys()) > 1:
+                warnings.warn(
+                    message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}. Available splits are: {', '.join(hf_dataset.keys())}."
+                )
             hf_dataset = hf_dataset[split]
         return hf_dataset
