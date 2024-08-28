@@ -41,15 +41,10 @@ async def update_dataset_records_status_job(dataset_id: UUID):
             .execution_options(yield_per=YIELD_PER)
         )
 
-        # NOTE: Avoiding this previous implementation to avoid big transactions and instead enqueuing a job for each record
-        # async for record_id in stream.scalars():
-        #     await distribution.update_record_status(search_engine, record_id)
-
+        record_ids = []
         async for record_id in stream.scalars():
-            update_record_status_job.delay(record_id)
+            record_ids.append(record_id)
 
-
-@job(default_queue, retry=Retry(max=3))
-async def update_record_status_job(record_id: UUID):
-    async with SearchEngine.get_by_name(settings.search_engine) as search_engine:
+    # NOTE: We are updating the records status outside the database transaction to avoid database locks with SQLite.
+    for record_id in record_ids:
         await distribution.update_record_status(search_engine, record_id)
