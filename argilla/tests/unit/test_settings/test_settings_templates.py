@@ -19,13 +19,14 @@ from argilla.settings._templates import DefaultSettingsMixin
 
 class TestDefaultSettingsMixin:
     def test_for_document_classification(self):
-        settings = DefaultSettingsMixin.for_document_classification()
+        mock_labels = ["positive", "negative"]
+        settings = DefaultSettingsMixin.for_document_classification(labels=mock_labels)
         assert settings.guidelines == "Select a label for the document."
         assert len(settings.fields) == 1
         assert settings.fields[0].name == "text"
         assert len(settings.questions) == 1
         assert settings.questions[0].name == "label"
-        assert settings.questions[0].labels == ["positive", "negative"]
+        assert settings.questions[0].labels == mock_labels
 
     def test_for_response_ranking(self):
         settings = DefaultSettingsMixin.for_response_ranking()
