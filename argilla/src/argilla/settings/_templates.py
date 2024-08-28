@@ -26,6 +26,7 @@ class DefaultSettingsMixin:
     @classmethod
     def for_document_classification(
         cls: "Settings",
+        labels: List[str],
         guidelines: Optional[str] = None,
         fields: Optional[List["Field"]] = None,
         questions: Optional[List["QuestionType"]] = None,
@@ -44,7 +45,8 @@ class DefaultSettingsMixin:
         settings = Settings(
             guidelines="Select a label for the document.",
             fields=[TextField(name="text")],
-            questions=[LabelQuestion(name="label", labels=["positive", "negative"])],
+            questions=[LabelQuestion(name="label", labels=labels)],
+            mapping={"input": "text", "output": "label", "document": "text"},
         )
 
         return DefaultSettingsMixin._update_settings(
@@ -78,6 +80,12 @@ class DefaultSettingsMixin:
             guidelines="Rank the responses.",
             fields=[TextField(name="instruction"), TextField(name="response1"), TextField(name="response2")],
             questions=[RankingQuestion(name="ranking", values=["response1", "response2"])],
+            mapping={
+                "input": "instruction",
+                "prompt": "instruction",
+                "chosen": "response1",
+                "rejected": "response2",
+            },
         )
 
         return DefaultSettingsMixin._update_settings(
@@ -111,6 +119,12 @@ class DefaultSettingsMixin:
             guidelines="Rate the response.",
             fields=[TextField(name="instruction"), TextField(name="response")],
             questions=[RatingQuestion(name="rating", values=[1, 2, 3, 4, 5])],
+            mapping={
+                "input": "instruction",
+                "prompt": "instruction",
+                "output": "response",
+                "score": "rating",
+            },
         )
         return DefaultSettingsMixin._update_settings(
             settings=settings,
