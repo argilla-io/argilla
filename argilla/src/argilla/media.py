@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING
-import io
 import base64
+import io
+import warnings
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from PIL import Image
@@ -35,15 +36,20 @@ def pil_to_data_uri(image_object: "Image") -> str:
     if not isinstance(image_object, Image.Image):
         raise ValueError("The image_object must be a PIL Image object.")
 
+    image_format = image_object.format
+    if image_format is None:
+        image_format = "PNG"
+        warnings.warn("The image format is not set. Defaulting to PNG.", UserWarning)
+
     try:
         buffered = io.BytesIO()
-        image_object.save(buffered, format=image_object.format)
+        image_object.save(buffered, format=image_format)
     except Exception as e:
         raise ValueError("An error occurred while saving the image binary to buffer") from e
 
     try:
         img_str = base64.b64encode(buffered.getvalue()).decode()
-        mimetype = f"image/{image_object.format.lower()}"
+        mimetype = f"image/{image_format.lower()}"
         data_uri = f"data:{mimetype};base64,{img_str}"
     except Exception as e:
         raise ValueError("An error occurred while converting the image binary to base64") from e
