@@ -45,8 +45,6 @@ export default {
     datasetEmptyForAdmin:
       "The dataset is empty. You can add records using the Python SDK, see <a href='https://docs.argilla.io/latest/how_to_guides/record/'>documentation</a> on adding records.",
     taskDistributionCompleted: "🎉 The task is completed!",
-    noDraftRecords:
-      "You have no records with draft responses / You have no records in draft",
     noSubmittedRecords: "You have not submitted any record yet",
     noRecordsFound: "You have no {status} records matching your query",
     noRecords: "You have no {status} records",

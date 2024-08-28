@@ -190,7 +190,7 @@ describe("useRecordsMessages", () => {
       const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
       expect(getMessagesForLoading(records)).toBe(
-        "#noRecordsMessages.noDraftRecords#"
+        "#noRecordsMessages.noDraftRecordsToReview#"
       );
     });
 

@@ -29,7 +29,7 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
       }
 
       if (status === "draft") {
-        return t("noRecordsMessages.noDraftRecords");
+        return t("noRecordsMessages.noDraftRecordsToReview");
       }
 
       if (status === "submitted") {
