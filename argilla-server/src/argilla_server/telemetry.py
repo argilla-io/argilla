@@ -18,10 +18,11 @@ import logging
 import platform
 from typing import Union
 
-from fastapi import Request
+from fastapi import Request, Response
 from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
+from argilla_server.api.errors.v1.exception_handlers import get_request_error
 from argilla_server.constants import DEFAULT_USERNAME
 from argilla_server.errors.base_errors import (
     ServerError,
@@ -152,7 +153,7 @@ class TelemetryClient:
         return user_data
 
     async def track_data(self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1):
-        library_name = "argilla"
+        library_name = "argilla/server"
         topic = f"{library_name}/{topic}"
 
         if include_system_info:
@@ -161,6 +162,42 @@ class TelemetryClient:
             user_agent["count"] = count
 
         send_telemetry(topic=topic, library_name=library_name, library_version=__version__, user_agent=user_agent)
+
+    async def track_endpoint(self, endpoint_path: str, request: Request, response: Response) -> None:
+        """
+        Track the endpoint usage. This method is called after the endpoint is processed.
+        The method will track the endpoint usage, the user-agent, and the response status code. If an error is raised
+        during the endpoint processing, the error will be tracked as well.
+
+        Parameters:
+            endpoint_path (str): The path of the endpoint
+            request (Request): The incoming request
+            response (Response): The outgoing response
+
+        """
+        topic = f"endpoints"
+
+        user_agent = {
+            "endpoint": f"{request.method} {endpoint_path}",
+            "request.user-agent": request.headers.get("user-agent"),
+            "request.method": request.method,
+            "request.accept-language": request.headers.get("accept-language"),
+            "response.status": str(response.status_code),
+        }
+
+        if "Server-Timing" in response.headers:
+            duration_in_ms = response.headers["Server-Timing"]
+            duration_in_ms = duration_in_ms.removeprefix("total;dur=")
+
+            user_agent["duration_in_ms"] = duration_in_ms
+
+        if response.status_code >= 400:
+            argilla_error: Exception = get_request_error(request=request)
+            if argilla_error:
+                user_agent["response.error"] = str(argilla_error)
+                user_agent["response.error_code"] = argilla_error.code  # noqa
+
+        await self.track_data(topic=topic, user_agent=user_agent)
 
     async def track_user_login(self, request: Request, user: User):
         topic = "user/login"
