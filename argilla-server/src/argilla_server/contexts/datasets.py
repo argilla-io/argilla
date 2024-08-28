@@ -173,8 +173,7 @@ async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict
 
     dataset = await dataset.update(db, **dataset_attrs)
 
-    if dataset_attrs.get("distribution") is not None:
-        dataset_jobs.update_dataset_records_status_job.delay(dataset.id)
+    dataset_jobs.update_dataset_records_status_job.delay(dataset.id)
 
     return dataset
 
