@@ -44,7 +44,7 @@ class TestEndpointsTelemetry:
 
         test_telemetry.track_endpoint.assert_called_once_with("/api/v1/datasets", ANY, ANY)
 
-    def test_not_track_endpoint_call_with_telemetry_disabled(self, test_telemetry: TelemetryClient):
+    def test_not_track_endpoint_call_with_disabled_telemetry(self, test_telemetry: TelemetryClient):
         settings.enable_telemetry = False
 
         client = TestClient(create_server_app())
