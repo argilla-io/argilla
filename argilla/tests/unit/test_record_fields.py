@@ -25,7 +25,7 @@ class TestRecordFields:
         fields = record.fields
         assert fields["name"] == "John Doe"
         assert record.metadata["age"] == 30
-    
+
     def test_create_record_image_path(self):
         record = Record(fields={"image": "path/to/image.jpg"})
 
