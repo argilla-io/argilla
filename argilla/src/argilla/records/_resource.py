@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
 
 from argilla._exceptions import ArgillaError
-from argilla.media import cast_image, uncast_image
+from argilla._helpers._media import cast_image, uncast_image
 from argilla._models import (
     FieldValue,
     MetadataModel,
@@ -285,6 +285,8 @@ class RecordFields(dict):
         return uncast_image(value) if self._is_image(key) else value
 
     def _is_image(self, key: str) -> bool:
+        if not self.record.dataset:
+            return False
         return self.record.dataset.settings.schema[key].type == "image"
 
 

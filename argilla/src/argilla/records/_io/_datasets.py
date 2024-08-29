@@ -19,7 +19,7 @@ from datasets import Dataset as HFDataset
 from datasets import IterableDataset, Image
 
 from argilla.records._io._generic import GenericIO
-from argilla.media import pil_to_data_uri
+from argilla._helpers._media import pil_to_data_uri
 
 if TYPE_CHECKING:
     from argilla.records import Record
