@@ -13,10 +13,35 @@
 # limitations under the License.
 
 import pytest
+import random
+from tempfile import NamedTemporaryFile
 
-from argilla import Record, Suggestion
-from argilla.records._resource import RecordSuggestions
+from PIL import Image
 
+from argilla import Record, Settings, ImageField, Dataset
+
+
+@pytest.fixture
+def pil_image():
+    image = Image.new("RGB", (100, 100), color="red")
+    return image
+
+
+@pytest.fixture
+def path_to_image(pil_image):
+    with NamedTemporaryFile(suffix=".jpg") as f:
+        pil_image.save(f.name)
+        yield f.name
+
+@pytest.fixture
+def dataset():
+    dataset = Dataset(
+        name=f"test_dataset_{random.randint(1, 1000)}",
+        settings=Settings(
+            fields=[ImageField(name="image")],
+        ),
+    )
+    return dataset
 
 class TestRecordFields:
     def test_create_record_fields(self):
@@ -25,9 +50,32 @@ class TestRecordFields:
         fields = record.fields
         assert fields["name"] == "John Doe"
         assert record.metadata["age"] == 30
-    
+
     def test_create_record_image_path(self):
         record = Record(fields={"image": "path/to/image.jpg"})
 
         fields = record.fields
         assert fields["image"] == "path/to/image.jpg"
+
+    def test_create_dataset_with_local_image(self, path_to_image, pil_image, dataset):
+        record = Record(fields={"image": path_to_image}, _dataset=dataset)
+
+        assert isinstance(record.fields["image"], Image.Image)
+        assert record.fields["image"].size == pil_image.size
+        assert record.fields["image"].mode == pil_image.mode
+
+    def test_create_record_image_pil(self, pil_image, dataset):
+        record = Record(fields={"image": pil_image}, _dataset=dataset)
+
+        fields = record.fields
+        assert isinstance(fields["image"], Image.Image)
+        assert fields["image"].size == pil_image.size
+        assert fields["image"].mode == pil_image.mode
+        
+    def test_create_record_with_wrong_image_type(self, dataset):
+        record = Record(fields={"image": 123}, _dataset=dataset)
+        with pytest.raises(ValueError):
+            record.fields.to_dict()
+        with pytest.raises(ValueError):
+            record.fields["image"]
+            
