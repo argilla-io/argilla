@@ -16,13 +16,14 @@ import dataclasses
 import json
 import logging
 import platform
-from typing import Union
+from typing import Dict, Union
 
 from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
 from argilla_server.models import (
     Dataset,
+    DatasetDistributionStrategy,
     Field,
     FloatMetadataPropertySettings,
     IntegerMetadataPropertySettings,
@@ -40,12 +41,7 @@ from argilla_server.utils._telemetry import (
 
 _LOGGER = logging.getLogger(__name__)
 
-_RELEVANT_ATTRIBUTES = [
-    "fields",
-    "questions",
-    "vectors_settings",
-    "metadata_properties",
-]
+_RELEVANT_ATTRIBUTES = ["fields", "questions", "vectors_settings", "metadata_properties"]
 
 
 @dataclasses.dataclass
@@ -65,28 +61,6 @@ class TelemetryClient:
         _LOGGER.info("System Info:")
         _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
         self.enable_telemetry = enable_telemetry
-        self._launch_tracked = False
-
-    async def ensure_server_launch_tracked(self):
-        self._launch_tracked = True
-        if not self._launch_tracked:
-            await self.track_server_launch()
-
-    @staticmethod
-    def _process_dataset_settings(dataset: Dataset) -> dict:
-        user_data = {}
-
-        if dataset.is_relationship_loaded("distribution"):
-            distribution = getattr(dataset, "distribution")
-            user_data["distribution_strategy"] = distribution["strategy"]
-            if "min_submitted" in distribution:
-                user_data["distribution_min_submitted"] = distribution["min_submitted"]
-
-        for attr in _RELEVANT_ATTRIBUTES:
-            if dataset.is_relationship_loaded(attr):
-                user_data[f"num_{attr}"] = len(getattr(dataset, attr))
-
-        return user_data
 
     @staticmethod
     def _process_dataset_settings_setting(
@@ -96,6 +70,7 @@ class TelemetryClient:
             Question,
             FloatMetadataPropertySettings,
             TermsMetadataPropertySettings,
+            Dict[str, Union[DatasetDistributionStrategy, int]],
             IntegerMetadataPropertySettings,
         ],
     ) -> dict:
@@ -109,6 +84,7 @@ class TelemetryClient:
             The processed dataset setting.
         """
         user_data = {}
+
         if isinstance(setting, (Field, Question)):
             field_type = setting.settings["type"]
             if isinstance(field_type, str):
@@ -126,7 +102,9 @@ class TelemetryClient:
         ):
             user_data["type"] = setting.type.value
         elif isinstance(setting, VectorSettings):
-            user_data["type"] = "default"
+            user_data["type"] = "vector"
+        elif isinstance(setting, dict):
+            user_data["type"] = f"distribution_{setting['strategy']}_{setting['min_submitted']}"
         else:
             raise NotImplementedError("Expected a setting to be processed.")
 
@@ -145,14 +123,13 @@ class TelemetryClient:
         Returns:
             None
         """
-        library_name = "argilla"
+        library_name = "argilla/server"
         topic = f"{library_name}/{topic}"
 
         user_agent = user_agent or {}
         user_agent.update(self._system_info)
         user_agent["count"] = count or 1
         user_agent["request.endpoint.method"] = crud_action
-        await self.ensure_server_launch_tracked()
         send_telemetry(topic=topic, library_name=library_name, library_version=__version__, user_agent=user_agent)
 
     async def track_crud_dataset(
@@ -169,23 +146,23 @@ class TelemetryClient:
         Returns:
             Nonee
         """
-        topic = "dataset"
-        user_agent = {}
-        import pdb
-
-        pdb.set_trace()
         if dataset:
-            user_agent.update(self._process_dataset_settings(dataset=dataset))
-        await self.track_data(topic=topic, crud_action=crud_action, user_agent=user_agent, count=count)
-
-        if dataset:
-            for attr in _RELEVANT_ATTRIBUTES:
+            for attr in _RELEVANT_ATTRIBUTES + ["distribution"]:
                 if dataset.is_relationship_loaded(attr):
                     obtained_attr_list = getattr(dataset, attr)
+                    if attr == "distribution":
+                        obtained_attr_list = [obtained_attr_list]
                     for obtained_attr in obtained_attr_list:
                         await self.track_crud_dataset_setting(
                             crud_action=crud_action, setting_name=attr, setting=obtained_attr
                         )
+
+            for attr in _RELEVANT_ATTRIBUTES:
+                if dataset.is_relationship_loaded(attr):
+                    obtained_attr_list = getattr(dataset, attr)
+                    await self.track_resource_size(
+                        crud_action=crud_action, setting_name=f"dataset/{attr}", count=len(obtained_attr_list)
+                    )
 
     async def track_crud_dataset_setting(
         self,
@@ -212,6 +189,19 @@ class TelemetryClient:
         user_agent: dict = self._process_dataset_settings_setting(setting=setting)
         await self.track_data(topic=topic, crud_action=crud_action, user_agent=user_agent, count=count)
 
+    async def track_resource_size(self, crud_action: str, setting_name: str, count: int) -> None:
+        """
+        This method is used to track the creation, update, and deletion of dataset settings. These
+        settings include fields, questions, vectors settings, and metadata properties.
+
+        Args:
+            crud_action: The action performed on the dataset setting.
+            setting_name: The name of the dataset setting.
+            count: The number of dataset settings.
+        """
+        topic: str = f"{setting_name}/size"
+        await self.track_data(topic=topic, crud_action=crud_action, count=count)
+
     async def track_crud_records(self, crud_action: str, count: Union[int, None] = None) -> None:
         """
         This method is used to track the creation, update, and deletion of records in a dataset.
@@ -233,8 +223,18 @@ class TelemetryClient:
         Returns:
             None
         """
-        topic = "server/launch"
-        await self.track_data(topic=topic, crud_action="launch", count=1)
+        topic = "startup"
+        await self.track_data(topic=topic, crud_action="create")
+
+    async def track_server_shutdown(self) -> None:
+        """
+        This method is used to track the shutdown of the server.
+
+        Returns:
+            None
+        """
+        topic = "shutdown"
+        await self.track_data(topic=topic, crud_action="delete")
 
 
 _TELEMETRY_CLIENT = TelemetryClient()

@@ -71,6 +71,7 @@ def create_server_app() -> FastAPI:
     configure_api_router(app)
     configure_app_statics(app)
     configure_api_docs(app)
+    configure_telemetry(app)
 
     # This if-else clause is needed to simplify the test dependency setup. Otherwise, we cannot override dependencies
     # easily. We can review this once we have separate fastapi application for the api and the webapp.
@@ -237,6 +238,18 @@ async def configure_search_engine():
                 )
 
     await ping_search_engine()
+
+
+async def configure_telemetry(app):
+    from argilla_server.telemetry import get_telemetry_client
+
+    @app.on_event("startup")
+    async def startup_event():
+        await get_telemetry_client().track_server_startup()
+
+    @app.on_event("shutdown")
+    async def shutdown_event():
+        await get_telemetry_client().track_server_shutdown()
 
 
 app = create_server_app()
