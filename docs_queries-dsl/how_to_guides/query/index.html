@@ -943,21 +943,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Advanced queries">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#advanced-query-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced query examples
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
       </ul>
@@ -2172,21 +2157,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Advanced queries">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#advanced-query-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced query examples
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
         
       </ul>
@@ -2307,6 +2277,9 @@
 </div>
 <h3 id="advanced-queries">Advanced queries<a class="headerlink" href="#advanced-queries" title="Permanent link">&para;</a></h3>
 <p>If you need more complex searches, you can use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax">Elasticsearch's simple query string syntax</a>. Here is a summary of the different available operators:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Descriptions</label><label for="__tabbed_3_2">Examples</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <table>
 <thead>
 <tr>
@@ -2316,54 +2289,90 @@
 </thead>
 <tbody>
 <tr>
-<td><code>+</code></td>
-<td>signifies AND operation</td>
+<td><code>+</code> or <code>space</code></td>
+<td><strong>AND</strong>: matches records that contain both terms</td>
 </tr>
 <tr>
 <td><code>|</code></td>
-<td>signifies OR operation</td>
+<td><strong>OR</strong>: matches records that contain either term</td>
 </tr>
 <tr>
 <td><code>-</code></td>
-<td>negates a single token</td>
-</tr>
-<tr>
-<td><code>"</code></td>
-<td>wraps a number of tokens to signify a phrase for searching</td>
+<td><strong>Negation</strong>: exclude records that contain a specific term</td>
 </tr>
 <tr>
 <td><code>*</code></td>
-<td>at the end of a term signifies a prefix query</td>
+<td><strong>Prefix</strong>:matches records that contain a specific prefix</td>
+</tr>
+<tr>
+<td><code>"</code></td>
+<td><strong>Phrase</strong>: matches records that contain a specific phrase</td>
 </tr>
 <tr>
 <td><code>(</code> and <code>)</code></td>
-<td>signify precedence</td>
+<td><strong>Precedence</strong>: group terms</td>
 </tr>
 <tr>
 <td><code>~N</code></td>
-<td>after a word signifies edit distance (fuzziness)</td>
-</tr>
-<tr>
-<td><code>~N</code></td>
-<td>after a phrase signifies slop amount</td>
+<td><strong>Edit distance</strong>: matches records that contain a term or phrase with an edit distance</td>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>operator</th>
+<th>example</th>
+<th>explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+</code> or <code>space</code></td>
+<td><code>argilla + distilabel</code> or <code>argilla distilabel</code></td>
+<td>returns records that include the terms "argilla" and "distilabel"</td>
+</tr>
+<tr>
+<td><code>|</code></td>
+<td><code>argilla | distilabel</code></td>
+<td>returns records that include the term "argilla" or "distilabel"</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td><code>argilla -distilabel</code></td>
+<td>returns records that contain the term "argilla" and don't have the term "distilabel"</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td><code>arg*</code></td>
+<td>returns records with any words starting with "arg-"</td>
+</tr>
+<tr>
+<td><code>"</code></td>
+<td><code>"argilla and distilabel"</code></td>
+<td>returns records that contain the phrase "argilla and distilabel"</td>
+</tr>
+<tr>
+<td><code>(</code> and <code>)</code></td>
+<td><code>(argilla | distilabel) rules</code></td>
+<td>returns records that contain either "argilla" or "distilabel" and "rules"</td>
+</tr>
+<tr>
+<td><code>~N</code></td>
+<td><code>argilla~1</code></td>
+<td>returns records that contain the term "argilla" with an edit distance of 1, e.g. "argila"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>To use one of these characters literally, escape it with a preceding backslash (<code>\</code>).</p>
+<p>To use one of these characters literally, escape it with a preceding backslash <code>\</code>, e.g. <code>"1 \+ 2"</code> would match records where the phrase "1 + 2" is found.</p>
 </div>
-<h4 id="advanced-query-examples">Advanced query examples<a class="headerlink" href="#advanced-query-examples" title="Permanent link">&para;</a></h4>
-<p>Here are some examples of advanced queries:</p>
-<ul>
-<li><strong>AND operation</strong>: To search for records that contain both terms, use the <code>+</code> operator: <code>argilla + distilabel</code>. This query will return records that contain both terms. This is the default operator. So, the previous query can be written as <code>argilla distilabel</code>.</li>
-<li><strong>OR operation</strong>: To search for records that contain either term, use the <code>|</code> operator: <code>argilla | distilabel</code>. This query will return records that contain either term.</li>
-<li><strong>Negate a term</strong>: To exclude records that contain a specific term, use the <code>-</code> operator: <code>argilla -distilabel</code>. This query will return records that contain the first term but not the second term.</li>
-<li><strong>Phrase search</strong>: To search for records that contain a specific phrase, use the <code>"</code> operator: <code>"argilla and distilabel"</code>. This query will return records that contain the phrase "argilla and distilabel".</li>
-<li><strong>Prefix query</strong>: To search for records that contain a specific prefix, use the <code>*</code> operator: <code>argill*</code>.</li>
-<li><strong>Precedence</strong>: To group terms, use parentheses: <code>(argilla | distilabel) rules</code>. This query will return records that contain either "argilla" or "distilabel" and "rules".</li>
-<li><strong>Edit distance</strong>: To search for records that contain a term with an edit distance, use the <code>~N</code> operator: <code>argilla~1</code>. This query will return records that contain the term "argilla" with an edit distance of 1.</li>
-</ul>
 <h2 id="filter-by-conditions">Filter by conditions<a class="headerlink" href="#filter-by-conditions" title="Permanent link">&para;</a></h2>
 <p>You can use the <code>Filter</code> class to define the conditions and pass them to the <code>Dataset.records</code> attribute to fetch records based on the conditions. Conditions include "==", "&gt;=", "&lt;=", or "in". Conditions can be combined with dot notation to filter records based on metadata, suggestions, or responses. You can use a single condition or multiple conditions to filter records.</p>
 <table>
@@ -2388,11 +2397,11 @@
 </tr>
 <tr>
 <td><code>in</code></td>
-<td>TThe <code>field</code> value is included in a list of values</td>
+<td>The <code>field</code> value is included in a list of values</td>
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Single condition</label><label for="__tabbed_3_2">Multiple conditions</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Single condition</label><label for="__tabbed_4_2">Multiple conditions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
