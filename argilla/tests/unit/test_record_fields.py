@@ -33,6 +33,7 @@ def path_to_image(pil_image):
         pil_image.save(f.name)
         yield f.name
 
+
 @pytest.fixture
 def dataset():
     dataset = Dataset(
@@ -42,6 +43,7 @@ def dataset():
         ),
     )
     return dataset
+
 
 class TestRecordFields:
     def test_create_record_fields(self):
@@ -71,11 +73,10 @@ class TestRecordFields:
         assert isinstance(fields["image"], Image.Image)
         assert fields["image"].size == pil_image.size
         assert fields["image"].mode == pil_image.mode
-        
+
     def test_create_record_with_wrong_image_type(self, dataset):
         record = Record(fields={"image": 123}, _dataset=dataset)
         with pytest.raises(ValueError):
             record.fields.to_dict()
         with pytest.raises(ValueError):
             record.fields["image"]
-            
