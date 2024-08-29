@@ -1,12 +1,5 @@
 <template>
-  <iframe
-    v-if="isHTML"
-    :srcdoc="fieldText"
-    ref="iframe"
-    frameborder="0"
-    scrolling="no"
-  />
-  <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
+  <iframe :srcdoc="fieldText" ref="iframe" frameborder="0" scrolling="no" />
 </template>
 
 <script>
@@ -16,15 +9,6 @@ export default {
       type: String,
       required: true,
     },
-    record: {
-      type: Object,
-      required: true,
-    },
-  },
-  computed: {
-    isHTML() {
-      return /<([A-Za-z][A-Za-z0-9]*)\b[^>]*>(.*?)<\/\1>/.test(this.fieldText);
-    },
   },
   methods: {
     resize() {
@@ -33,20 +17,6 @@ export default {
         450 +
         "px";
     },
-  },
-  mounted() {
-    this.$refs.iframe.addEventListener("load", this.resize);
-
-    setTimeout(() => {
-      this.$refs.iframe.contentWindow.postMessage(
-        JSON.stringify({
-          ...this.record,
-        }),
-        "*"
-      );
-    }, 200);
-
-    window.addEventListener("resize", this.resize);
   },
 };
 </script>
