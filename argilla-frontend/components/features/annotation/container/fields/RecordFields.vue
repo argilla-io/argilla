@@ -17,7 +17,6 @@
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
         :searchText="recordCriteria.committed.searchText.value.text"
-        :record="record"
       />
     </div>
   </div>
