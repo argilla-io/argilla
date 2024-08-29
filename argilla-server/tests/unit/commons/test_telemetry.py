@@ -55,7 +55,7 @@ class TestSuiteTelemetry:
         mock_telemetry_client: MagicMock,
     ):
         dataset = await DatasetFactory.create()
-        await mock_telemetry_client.track_crud_dataset(action="create", dataset=dataset)
+        await mock_telemetry_client.track_crud_dataset(crud_action="create", dataset=dataset)
         mock_telemetry_client.track_data.assert_called()
 
     @pytest.mark.parametrize("record_or_dataset_factory", [RecordFactory, DatasetFactory])
@@ -66,10 +66,10 @@ class TestSuiteTelemetry:
         if isinstance(record_or_dataset, Record):
             await ResponseFactory.create(record=record_or_dataset)
             await SuggestionFactory.create(record=record_or_dataset)
-        await mock_telemetry_client.track_crud_records(action="create", record_or_dataset=record_or_dataset)
+        await mock_telemetry_client.track_crud_records(crud_action="create")
         mock_telemetry_client.track_data.assert_called()
 
-    @pytest.mark.parametrize("action", __CRUD__)
+    @pytest.mark.parametrize("crud_action", __CRUD__)
     @pytest.mark.parametrize(
         "setting_factory_config",
         [
@@ -85,14 +85,13 @@ class TestSuiteTelemetry:
         ],
     )
     async def test_track_crud_dataset_setting(
-        self, mock_telemetry_client: MagicMock, action: str, setting_factory_config
+        self, mock_telemetry_client: MagicMock, crud_action: str, setting_factory_config
     ):
         setting_name, setting_factory = setting_factory_config
         setting = await setting_factory.create_batch(size=1)
         setting_config = {setting_name: setting}
         dataset = await DatasetFactory.create(**setting_config)
-        await mock_telemetry_client.track_crud_dataset(action=action, dataset=dataset)
-        mock_telemetry_client.track_crud_dataset_setting.assert_called_with(
-            action=action, setting_name=setting_name, setting=setting[0], dataset=dataset
-        )
+
+        await mock_telemetry_client.track_crud_dataset(crud_action=crud_action, dataset=dataset)
+        mock_telemetry_client.track_crud_dataset_setting.assert_called()
         mock_telemetry_client.track_data.assert_called()

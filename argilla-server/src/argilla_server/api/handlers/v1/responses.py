@@ -49,7 +49,7 @@ async def create_current_user_responses_bulk(
 ) -> ResponsesBulk:
     responses_bulk_items = await use_case.execute(body.items, user=current_user)
 
-    return ResponsesBulk(items=[resp for resp in responses_bulk_items if resp.item])
+    return ResponsesBulk(items=responses_bulk_items)
 
 
 @router.put("/responses/{response_id}", response_model=ResponseSchema)

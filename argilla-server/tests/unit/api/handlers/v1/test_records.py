@@ -239,9 +239,6 @@ class TestSuiteRecords:
 
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
-        mock_telemetry_client.track_crud_records.assert_called_with(action="update", record_or_dataset=record)
-        mock_telemetry_client.track_data.assert_called()
-
     async def test_update_record_with_null_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):

@@ -1831,7 +1831,7 @@ class TestSuiteDatasets:
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
 
-        mock_telemetry_client.track_crud_records.track_data()
+        mock_telemetry_client.track_crud_records.assert_called()
         mock_telemetry_client.track_data.assert_called()
 
     async def test_create_dataset_records_with_response_for_multiple_users(

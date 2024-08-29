@@ -40,6 +40,13 @@ from argilla_server.utils._telemetry import (
 
 _LOGGER = logging.getLogger(__name__)
 
+_RELEVANT_ATTRIBUTES = [
+    "fields",
+    "questions",
+    "vectors_settings",
+    "metadata_properties",
+]
+
 
 @dataclasses.dataclass
 class TelemetryClient:
@@ -68,13 +75,14 @@ class TelemetryClient:
     @staticmethod
     def _process_dataset_settings(dataset: Dataset) -> dict:
         user_data = {}
-        attributes: list[str] = [
-            "fields",
-            "questions",
-            "vectors_settings",
-            "metadata_properties",
-        ]
-        for attr in attributes:
+
+        if dataset.is_relationship_loaded("distribution"):
+            distribution = getattr(dataset, "distribution")
+            user_data["distribution_strategy"] = distribution["strategy"]
+            if "min_submitted" in distribution:
+                user_data["distribution_min_submitted"] = distribution["min_submitted"]
+
+        for attr in _RELEVANT_ATTRIBUTES:
             if dataset.is_relationship_loaded(attr):
                 user_data[f"num_{attr}"] = len(getattr(dataset, attr))
 
@@ -102,7 +110,11 @@ class TelemetryClient:
         """
         user_data = {}
         if isinstance(setting, (Field, Question)):
-            user_data["type"] = setting.settings["type"].value
+            field_type = setting.settings["type"]
+            if isinstance(field_type, str):
+                user_data["type"] = field_type
+            else:
+                user_data["type"] = field_type.value
         elif isinstance(
             setting,
             (
@@ -155,20 +167,21 @@ class TelemetryClient:
             count: The number of dataset settings.
 
         Returns:
-            None
+            Nonee
         """
         topic = "dataset"
-        user_agent = self._process_dataset_settings(dataset=dataset)
+        user_agent = {}
+        import pdb
+
+        pdb.set_trace()
+        if dataset:
+            user_agent.update(self._process_dataset_settings(dataset=dataset))
         await self.track_data(topic=topic, crud_action=crud_action, user_agent=user_agent, count=count)
 
-        attributes: list[str] = ["fields", "questions", "vectors_settings", "metadata_properties"]
         if dataset:
-            for attr in attributes:
+            for attr in _RELEVANT_ATTRIBUTES:
                 if dataset.is_relationship_loaded(attr):
                     obtained_attr_list = getattr(dataset, attr)
-                    await self.track_crud_dataset_setting(
-                        crud_action=crud_action, setting_name=attr, setting=None, count=len(obtained_attr_list)
-                    )
                     for obtained_attr in obtained_attr_list:
                         await self.track_crud_dataset_setting(
                             crud_action=crud_action, setting_name=attr, setting=obtained_attr
@@ -195,6 +208,7 @@ class TelemetryClient:
             None
         """
         topic: str = f"dataset/{setting_name}"
+        user_agent = {}
         user_agent: dict = self._process_dataset_settings_setting(setting=setting)
         await self.track_data(topic=topic, crud_action=crud_action, user_agent=user_agent, count=count)
 
