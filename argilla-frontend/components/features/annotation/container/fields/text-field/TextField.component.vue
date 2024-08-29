@@ -18,7 +18,7 @@
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
       <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
-      <Sandbox v-else-if="isHTML" :fieldText="fieldText" :record="record" />
+      <Sandbox v-else-if="isHTML" :fieldText="fieldText" />
       <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
       <template>
         <style :key="name" scoped>
@@ -56,9 +56,6 @@ export default {
     useMarkdown: {
       type: Boolean,
       default: false,
-    },
-    record: {
-      type: Object,
     },
   },
   computed: {
