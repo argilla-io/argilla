@@ -57,7 +57,6 @@ from argilla_server.search_engine import (
     get_search_engine,
 )
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 from argilla_server.utils import parse_query_param, parse_uuids
 
 LIST_DATASET_RECORDS_LIMIT_DEFAULT = 50
@@ -247,7 +246,6 @@ async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = 0,
@@ -267,8 +265,6 @@ async def list_dataset_records(
         include=include,
     )
 
-    await telemetry_client.track_crud_records(action="list", record_or_dataset=dataset, count=len(records))
-
     return Records(items=records, total=total)
 
 
@@ -277,7 +273,6 @@ async def delete_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
@@ -297,8 +292,6 @@ async def delete_dataset_records(
 
     await datasets.delete_records(db, search_engine, dataset, record_ids)
 
-    await telemetry_client.track_crud_records(action="delete", record_or_dataset=dataset, count=num_records)
-
 
 @router.post(
     "/me/datasets/{dataset_id}/records/search",
@@ -310,7 +303,6 @@ async def search_current_user_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
@@ -363,16 +355,10 @@ async def search_current_user_dataset_records(
             query_score=record_id_score_map[record.id]["query_score"],
         )
 
-    searc_record_results = SearchRecordsResult(
+    return SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()],
         total=search_responses.total,
     )
-
-    await telemetry_client.track_crud_records(
-        action="me/search", record_or_dataset=dataset, count=search_responses.total
-    )
-
-    return searc_record_results
 
 
 @router.post(
@@ -385,7 +371,6 @@ async def search_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     body: SearchRecordsQuery,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
@@ -426,14 +411,10 @@ async def search_dataset_records(
             query_score=record_id_score_map[record.id]["query_score"],
         )
 
-    search_record_results = SearchRecordsResult(
+    return SearchRecordsResult(
         items=[record["search_record"] for record in record_id_score_map.values()],
         total=search_responses.total,
     )
-
-    await telemetry_client.track_crud_records(action="search", record_or_dataset=dataset, count=search_responses.total)
-
-    return search_record_results
 
 
 @router.get(
@@ -444,7 +425,6 @@ async def search_dataset_records(
 async def list_dataset_records_search_suggestions_options(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -454,7 +434,7 @@ async def list_dataset_records_search_suggestions_options(
 
     suggestion_agents_by_question = await search.get_dataset_suggestion_agents_by_question(db, dataset.id)
 
-    search_suggestion_options = SearchSuggestionsOptions(
+    return SearchSuggestionsOptions(
         items=[
             SearchSuggestionOptions(
                 question=SearchSuggestionOptionsQuestion(id=sa["question_id"], name=sa["question_name"]),
@@ -463,10 +443,6 @@ async def list_dataset_records_search_suggestions_options(
             for sa in suggestion_agents_by_question
         ]
     )
-
-    await telemetry_client.track_crud_records_suggestions(action="search")
-
-    return search_suggestion_options
 
 
 async def _filter_record_metadata_for_user(record: Record, user: User) -> Optional[Dict[str, Any]]:

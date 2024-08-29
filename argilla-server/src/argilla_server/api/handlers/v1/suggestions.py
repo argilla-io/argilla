@@ -25,7 +25,6 @@ from argilla_server.database import get_async_db
 from argilla_server.models import Record, Suggestion, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["suggestions"])
 
@@ -35,7 +34,6 @@ async def delete_suggestion(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     suggestion_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -51,7 +49,5 @@ async def delete_suggestion(
     await authorize(current_user, SuggestionPolicy.delete(suggestion))
 
     suggestion = await datasets.delete_suggestion(db, search_engine, suggestion)
-
-    await telemetry_client.track_crud_records_suggestions(action="delete", record_id=suggestion.record_id)
 
     return suggestion

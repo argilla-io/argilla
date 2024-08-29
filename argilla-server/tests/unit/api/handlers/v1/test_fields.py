@@ -13,7 +13,6 @@
 #  limitations under the License.
 from datetime import datetime
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -56,7 +55,6 @@ async def test_update_field(
     role: UserRole,
     payload: dict,
     expected_settings: dict,
-    test_telemetry: MagicMock,
 ):
     field = await TextFieldFactory.create()
     user = await UserFactory.create(role=role, workspaces=[field.dataset.workspace])
@@ -82,11 +80,6 @@ async def test_update_field(
     field = await db.get(Field, field.id)
     assert field.title == title
     assert field.settings == expected_settings
-
-    test_telemetry.track_crud_dataset_setting.assert_called_with(
-        action="update", dataset=field.dataset, setting_name="fields", setting=field
-    )
-    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.parametrize("title", [None, "", "t" * (FIELD_CREATE_TITLE_MAX_LENGTH + 1)])
@@ -190,9 +183,7 @@ async def test_update_field_without_authentication(async_client: "AsyncClient"):
 
 
 @pytest.mark.asyncio
-async def test_delete_field(
-    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, test_telemetry: MagicMock
-):
+async def test_delete_field(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     field = await TextFieldFactory.create(name="name", title="title")
 
     response = await async_client.delete(f"/api/v1/fields/{field.id}", headers=owner_auth_header)
@@ -211,11 +202,6 @@ async def test_delete_field(
         "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
         "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
     }
-
-    test_telemetry.track_crud_dataset_setting.assert_called_with(
-        action="delete", dataset=field.dataset, setting_name="fields", setting=field
-    )
-    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio

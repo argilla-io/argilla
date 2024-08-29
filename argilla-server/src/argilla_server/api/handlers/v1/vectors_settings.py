@@ -25,7 +25,6 @@ from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.models import User, VectorSettings
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["vectors-settings"])
 
@@ -34,7 +33,6 @@ router = APIRouter(tags=["vectors-settings"])
 async def update_vector_settings(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     vector_settings_id: UUID,
     vector_settings_update: VectorSettingsUpdate,
     current_user: User = Security(auth.get_current_user),
@@ -47,20 +45,13 @@ async def update_vector_settings(
 
     await authorize(current_user, VectorSettingsPolicy.update(vector_settings))
 
-    vectors_setting = await datasets.update_vector_settings(db, vector_settings, vector_settings_update)
-
-    await telemetry_client.track_crud_dataset_setting(
-        action="update", setting_name="vectors_settings", dataset=vectors_setting.dataset, setting=vectors_setting
-    )
-
-    return vector_settings
+    return await datasets.update_vector_settings(db, vector_settings, vector_settings_update)
 
 
 @router.delete("/vectors-settings/{vector_settings_id}", response_model=VectorSettingsSchema)
 async def delete_vector_settings(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     vector_settings_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -72,10 +63,4 @@ async def delete_vector_settings(
 
     await authorize(current_user, VectorSettingsPolicy.delete(vector_settings))
 
-    vectors_setting = await datasets.delete_vector_settings(db, vector_settings)
-
-    await telemetry_client.track_crud_dataset_setting(
-        action="delete", setting_name="vectors_settings", dataset=vectors_setting.dataset, setting=vectors_setting
-    )
-
-    return vectors_setting
+    return await datasets.delete_vector_settings(db, vector_settings)

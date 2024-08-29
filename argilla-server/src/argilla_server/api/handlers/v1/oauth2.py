@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Request, Path
+from fastapi import APIRouter, Depends, Path, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,7 +28,6 @@ from argilla_server.pydantic_v1 import Field
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 from argilla_server.security.settings import settings
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(prefix="/oauth2", tags=["Authentication"])
 
@@ -72,7 +71,6 @@ async def get_access_token(
     request: Request,
     provider: OAuth2ClientProvider = Depends(get_provider_by_name_or_raise),
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ) -> Token:
     userinfo = UserInfo(await provider.get_user_data(request)).use_claims(provider.claims)
 
@@ -90,6 +88,5 @@ async def get_access_token(
             ).dict(exclude_unset=True),
             workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
         )
-        await telemetry_client.track_crud_user(action="create", user=user, is_oauth=True)
 
     return Token(access_token=accounts.generate_user_token(user))

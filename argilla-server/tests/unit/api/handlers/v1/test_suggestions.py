@@ -14,7 +14,6 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -39,7 +38,6 @@ class TestSuiteSuggestions:
         mock_search_engine: SearchEngine,
         db: "AsyncSession",
         role: UserRole,
-        test_telemetry: MagicMock,
     ) -> None:
         suggestion = await SuggestionFactory.create()
         user = await UserFactory.create(role=role, workspaces=[suggestion.record.dataset.workspace])
@@ -66,11 +64,6 @@ class TestSuiteSuggestions:
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 0
 
         mock_search_engine.delete_record_suggestion.assert_called_once_with(suggestion)
-
-        test_telemetry.track_crud_records_suggestions.assert_called_with(
-            action="delete", record_id=suggestion.record.id
-        )
-        test_telemetry.track_data.assert_called()
 
     async def test_delete_suggestion_non_existent(self, async_client: "AsyncClient", owner_auth_header: dict) -> None:
         suggestion_id = uuid4()

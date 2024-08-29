@@ -34,21 +34,12 @@ router = APIRouter()
 async def list_dataset_questions(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.questions)])
 
     await authorize(current_user, DatasetPolicy.get(dataset))
-
-    for question in dataset.questions:
-        await telemetry_client.track_crud_dataset_setting(
-            action="read", dataset=dataset, setting_name="questions", setting=question
-        )
-    await telemetry_client.track_crud_dataset_setting(
-        action="list", setting_name="questions", dataset=dataset, count=len(dataset.questions)
-    )
 
     return Questions(items=dataset.questions)
 
@@ -77,8 +68,6 @@ async def create_dataset_question(
 
     question = await questions.create_question(db, dataset, question_create)
 
-    await telemetry_client.track_crud_dataset_setting(
-        action="create", setting_name="questions", dataset=dataset, setting=question
-    )
+    await telemetry_client.track_crud_dataset_setting(crud_action="create", setting_name="questions", setting=question)
 
     return question
