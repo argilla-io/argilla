@@ -23,10 +23,12 @@ def pil_image():
     image = Image.new("RGB", (100, 100), color="red")
     return image
 
+
 @pytest.fixture
 def data_uri_image(pil_image):
     data_uri = pil_to_data_uri(pil_image)
     return data_uri
+
 
 @pytest.fixture
 def path_to_image(pil_image):
@@ -38,7 +40,7 @@ def path_to_image(pil_image):
 def test_cast_image_with_pil_image(pil_image):
     result = cast_image(pil_image)
     uncasted = uncast_image(result)
-    
+
     assert isinstance(result, str)
     assert result.startswith("data:image")
     assert "base64" in result
@@ -47,13 +49,13 @@ def test_cast_image_with_pil_image(pil_image):
     assert uncasted.size == pil_image.size
     assert uncasted.mode == pil_image.mode
     assert uncasted.getcolors() == pil_image.getcolors()
-    
+
 
 def test_cast_image_with_file_path(path_to_image):
     result = cast_image(path_to_image)
     uncasted = uncast_image(result)
     pil_image = Image.open(path_to_image)
-    
+
     assert isinstance(result, str)
     assert result.startswith("data:image")
     assert "base64" in result
@@ -67,7 +69,7 @@ def test_cast_image_with_file_path(path_to_image):
 def test_cast_image_with_data_uri(data_uri_image):
     result = cast_image(data_uri_image)
     uncasted = uncast_image(result)
-    
+
     assert result == data_uri_image
     assert isinstance(uncasted, Image.Image)
 
@@ -76,10 +78,9 @@ def test_cast_image_with_invalid_input():
     invalid_input = 123
     with pytest.raises(ValueError):
         cast_image(invalid_input)
-        
-    
+
+
 def test_uncast_image_with_url():
     image_url = "https://example.com/image.jpg"
     result = uncast_image(image_url)
     assert result == image_url
-    
