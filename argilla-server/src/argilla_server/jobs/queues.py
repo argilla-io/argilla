@@ -18,9 +18,7 @@ from rq import Queue
 
 from argilla_server.settings import settings
 
-JOB_TIMEOUT_DISABLED = -1
-
 
 redis_connection = redis.from_url(settings.redis_url)
 
-default_queue = Queue(job_timeout=JOB_TIMEOUT_DISABLED, connection=redis_connection)
+default_queue = Queue(connection=redis_connection)

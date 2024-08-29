@@ -26,10 +26,11 @@ from argilla_server.search_engine.base import SearchEngine
 from argilla_server.settings import settings
 from argilla_server.contexts import distribution
 
-YIELD_PER = 100
+JOB_TIMEOUT_DISABLED = -1
+JOB_RECORDS_YIELD_PER = 100
 
 
-@job(default_queue, retry=Retry(max=3))
+@job(default_queue, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
 async def update_dataset_records_status_job(dataset_id: UUID):
     """This Job updates the status of all the records in the dataset when the distribution strategy changes."""
 
@@ -40,7 +41,7 @@ async def update_dataset_records_status_job(dataset_id: UUID):
             select(Record.id)
             .where(Record.dataset_id == dataset_id)
             .order_by(Record.inserted_at.asc())
-            .execution_options(yield_per=YIELD_PER)
+            .execution_options(yield_per=JOB_RECORDS_YIELD_PER)
         )
 
         async for record_id in stream.scalars():
