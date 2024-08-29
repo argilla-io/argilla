@@ -2277,98 +2277,52 @@
 </div>
 <h3 id="advanced-queries">Advanced queries<a class="headerlink" href="#advanced-queries" title="Permanent link">&para;</a></h3>
 <p>If you need more complex searches, you can use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax">Elasticsearch's simple query string syntax</a>. Here is a summary of the different available operators:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Descriptions</label><label for="__tabbed_3_2">Examples</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
 <table>
 <thead>
 <tr>
 <th>operator</th>
 <th>description</th>
+<th>example</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>+</code> or <code>space</code></td>
-<td><strong>AND</strong>: matches records that contain both terms</td>
+<td><strong>AND</strong>: search both terms</td>
+<td><code>argilla + distilabel</code> or <code>argilla distilabel</code></br> return records that include the terms "argilla" and "distilabel"</td>
 </tr>
 <tr>
 <td><code>|</code></td>
-<td><strong>OR</strong>: matches records that contain either term</td>
+<td><strong>OR</strong>: search either term</td>
+<td><code>argilla | distilabel</code> </br> returns records that include the term "argilla" or "distilabel"</td>
 </tr>
 <tr>
 <td><code>-</code></td>
-<td><strong>Negation</strong>: exclude records that contain a specific term</td>
+<td><strong>Negation</strong>: exclude a term</td>
+<td><code>argilla -distilabel</code> </br> returns records that contain the term "argilla" and don't have the term "distilabel"</td>
 </tr>
 <tr>
 <td><code>*</code></td>
-<td><strong>Prefix</strong>:matches records that contain a specific prefix</td>
+<td><strong>Prefix</strong>: search a prefix</td>
+<td><code>arg*</code></br> returns records with any words starting with "arg-"</td>
 </tr>
 <tr>
 <td><code>"</code></td>
-<td><strong>Phrase</strong>: matches records that contain a specific phrase</td>
+<td><strong>Phrase</strong>: search a phrase</td>
+<td><code>"argilla and distilabel"</code> </br> returns records that contain the phrase "argilla and distilabel"</td>
 </tr>
 <tr>
 <td><code>(</code> and <code>)</code></td>
 <td><strong>Precedence</strong>: group terms</td>
+<td><code>(argilla | distilabel) rules</code> </br> returns records that contain either "argilla" or "distilabel" and "rules"</td>
 </tr>
 <tr>
 <td><code>~N</code></td>
-<td><strong>Edit distance</strong>: matches records that contain a term or phrase with an edit distance</td>
+<td><strong>Edit distance</strong>: search a term or phrase with an edit distance</td>
+<td><code>argilla~1</code> </br> returns records that contain the term "argilla" with an edit distance of 1, e.g. "argila"</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>operator</th>
-<th>example</th>
-<th>explanation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>+</code> or <code>space</code></td>
-<td><code>argilla + distilabel</code> or <code>argilla distilabel</code></td>
-<td>returns records that include the terms "argilla" and "distilabel"</td>
-</tr>
-<tr>
-<td><code>|</code></td>
-<td><code>argilla | distilabel</code></td>
-<td>returns records that include the term "argilla" or "distilabel"</td>
-</tr>
-<tr>
-<td><code>-</code></td>
-<td><code>argilla -distilabel</code></td>
-<td>returns records that contain the term "argilla" and don't have the term "distilabel"</td>
-</tr>
-<tr>
-<td><code>*</code></td>
-<td><code>arg*</code></td>
-<td>returns records with any words starting with "arg-"</td>
-</tr>
-<tr>
-<td><code>"</code></td>
-<td><code>"argilla and distilabel"</code></td>
-<td>returns records that contain the phrase "argilla and distilabel"</td>
-</tr>
-<tr>
-<td><code>(</code> and <code>)</code></td>
-<td><code>(argilla | distilabel) rules</code></td>
-<td>returns records that contain either "argilla" or "distilabel" and "rules"</td>
-</tr>
-<tr>
-<td><code>~N</code></td>
-<td><code>argilla~1</code></td>
-<td>returns records that contain the term "argilla" with an edit distance of 1, e.g. "argila"</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>To use one of these characters literally, escape it with a preceding backslash <code>\</code>, e.g. <code>"1 \+ 2"</code> would match records where the phrase "1 + 2" is found.</p>
@@ -2401,7 +2355,7 @@
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Single condition</label><label for="__tabbed_4_2">Multiple conditions</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Single condition</label><label for="__tabbed_3_2">Multiple conditions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
