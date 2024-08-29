@@ -67,33 +67,30 @@ To search for records with terms, you can use the `Dataset.records` attribute wi
 
 If you need more complex searches, you can use [Elasticsearch's simple query string syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax). Here is a summary of the different available operators:
 
-| operator | description                                               |
-| -------- | --------------------------------------------------------- |
-|`+`       | signifies AND operation                                   |
-|`|`       | signifies OR operation                                    |
-|`-`       | negates a single token                                    |
-|`"`       | wraps a number of tokens to signify a phrase for searching|
-|`*`       | at the end of a term signifies a prefix query             |
-|`(` and `)`| signify precedence                                       |
-|`~N`      | after a word signifies edit distance (fuzziness)          |
-|`~N`      | after a phrase signifies slop amount                      |
+=== "Descriptions"
+    | operator     | description                                               |
+    | ------------ | --------------------------------------------------------- |
+    |`+` or `space`| **AND**: matches records that contain both terms          |
+    |`|`           | **OR**: matches records that contain either term          |
+    |`-`           | **Negation**: exclude records that contain a specific term|
+    |`*`           | **Prefix**:matches records that contain a specific prefix |
+    |`"`           | **Phrase**: matches records that contain a specific phrase|
+    |`(` and `)`   | **Precedence**: group terms                               |
+    |`~N`          | **Edit distance**: matches records that contain a term or phrase with an edit distance|
+
+=== "Examples"
+    | operator     |  example                      | explanation                                     |
+    | ------------ | ----------------------------- | ----------------------------------------------- |
+    |`+` or `space`| `argilla + distilabel` or `argilla distilabel`| returns records that include the terms "argilla" and "distilabel"|
+    |`|`           | `argilla | distilabel`        | returns records that include the term "argilla" or "distilabel"|
+    |`-`           | `argilla -distilabel`         | returns records that contain the term "argilla" and don't have the term "distilabel"|
+    |`*`           | `arg*`                        | returns records with any words starting with "arg-"|
+    |`"`           | `"argilla and distilabel"`    | returns records that contain the phrase "argilla and distilabel"|
+    |`(` and `)`   | `(argilla | distilabel) rules`| returns records that contain either "argilla" or "distilabel" and "rules"|
+    |`~N`          | `argilla~1`                   | returns records that contain the term "argilla" with an edit distance of 1, e.g. "argila"|
 
 !!! tip
-    To use one of these characters literally, escape it with a preceding backslash (`\`).
-
-
-#### Advanced query examples
-
-Here are some examples of advanced queries:
-
-- **AND operation**: To search for records that contain both terms, use the `+` operator: `argilla + distilabel`. This query will return records that contain both terms. This is the default operator. So, the previous query can be written as `argilla distilabel`.
-- **OR operation**: To search for records that contain either term, use the `|` operator: `argilla | distilabel`. This query will return records that contain either term.
-- **Negate a term**: To exclude records that contain a specific term, use the `-` operator: `argilla -distilabel`. This query will return records that contain the first term but not the second term.
-- **Phrase search**: To search for records that contain a specific phrase, use the `"` operator: `"argilla and distilabel"`. This query will return records that contain the phrase "argilla and distilabel".
-- **Prefix query**: To search for records that contain a specific prefix, use the `*` operator: `argill*`.
-- **Precedence**: To group terms, use parentheses: `(argilla | distilabel) rules`. This query will return records that contain either "argilla" or "distilabel" and "rules".
-- **Edit distance**: To search for records that contain a term with an edit distance, use the `~N` operator: `argilla~1`. This query will return records that contain the term "argilla" with an edit distance of 1.
-
+    To use one of these characters literally, escape it with a preceding backslash `\`, e.g. `"1 \+ 2"` would match records where the phrase "1 + 2" is found.
 
 ## Filter by conditions
 
@@ -104,7 +101,7 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 | `==`     | The `field` value is equal to the `value`                 |
 | `>=`     | The `field` value is greater than or equal to the `value` |
 | `<=`     | The `field` value is less than or equal to the `value`    |
-| `in`     | TThe `field` value is included in a list of values        |
+| `in`     | The `field` value is included in a list of values        |
 
 === "Single condition"
 
