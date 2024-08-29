@@ -14,12 +14,11 @@
 
 import base64
 import io
-from pathlib import Path
 import warnings
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import Union
 
-if TYPE_CHECKING:
-    from PIL import Image
+from PIL import Image
 
 
 def pil_to_data_uri(image_object: "Image") -> str:
@@ -29,11 +28,6 @@ def pil_to_data_uri(image_object: "Image") -> str:
     Returns:
         str: The data URI string.
     """
-    try:
-        from PIL import Image
-    except ImportError as e:
-        raise ImportError("The PIL library is required to convert PIL images for upload.") from e
-
     if not isinstance(image_object, Image.Image):
         raise ValueError("The image_object must be a PIL Image object.")
 
@@ -72,7 +66,7 @@ def filepath_to_data_uri(file_path: "Path") -> str:
     return data_uri
 
 
-def cast_image(image: "Image") -> str:
+def cast_image(image: Union["Image", str, Path]) -> str:
     """Convert a PIL image to a base64 data URI string.
     Parameters:
         image_object (Image): The PIL image to convert to a base64 data URI.
@@ -86,35 +80,28 @@ def cast_image(image: "Image") -> str:
             return filepath_to_data_uri(image)
     elif isinstance(image, Path):
         return filepath_to_data_uri(image)
-
-    else:
+    elif isinstance(image, Image.Image):
         return pil_to_data_uri(image)
-
-
-def data_uri_to_pil(data_uri: str) -> "Image":
-    """Convert a base64 data URI string to a PIL image."""
-    try:
-        from PIL import Image
-    except ImportError as e:
-        raise ImportError("The PIL library is required to convert PIL images for upload.") from e
-
-    if not data_uri.startswith("data:image"):
-        raise ValueError("The data URI must be an image data URI.")
-
-    try:
-        image_data = base64.b64decode(data_uri.split(",")[1])
-        image = Image.open(io.BytesIO(image_data))
-    except Exception as e:
-        raise ValueError("An error occurred while converting the data URI to a PIL image.") from e
-
-    return image
+    else:
+        raise ValueError("The image must be a data URI string, a file path, or a PIL Image object.")
 
 
 def uncast_image(image: str) -> "Image":
     """Convert a base64 data URI string to a PIL image."""
-    if image.startswith("data:image"):
-        return data_uri_to_pil(image)
+    if isinstance(image, Image.Image):
+        return image
+    elif not isinstance(image, str):
+        raise ValueError("The image must be a data URI string.")
+    elif image.startswith("data:image"):
+        try:
+            image_data = base64.b64decode(image.split(",")[1])
+            image = Image.open(io.BytesIO(image_data))
+        except Exception as e:
+            raise ValueError("An error occurred while converting the data URI to a PIL image.") from e
+        return image
     elif image.startswith("http"):
         return image
+    elif Path(image).exists():
+        return Image.open(image)
     else:
         raise ValueError("The image must be a data URI string.")
