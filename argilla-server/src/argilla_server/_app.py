@@ -127,7 +127,6 @@ def configure_api_router(app: FastAPI):
 def configure_telemetry(app: FastAPI):
     """
     Configures telemetry middleware for the app if telemetry is enabled
-
     """
     if not settings.enable_telemetry:
         return
