@@ -133,19 +133,12 @@ def configure_telemetry(app: FastAPI):
         return
 
     @app.middleware("http")
-    async def track_api_endpoint(request: Request, call_next):
+    async def track_api_requests(request: Request, call_next):
         response = await call_next(request)
         try:
-            endpoint_path = resolve_endpoint_path_for_request(request)
-
-            if endpoint_path:
-                await get_telemetry_client().track_endpoint(
-                    endpoint_path,
-                    request,
-                    response,
-                )
+            await get_telemetry_client().track_api_request(request, response)
         except Exception as e:
-            _LOGGER.warning(f"Error tracking endpoint: {e}")
+            _LOGGER.warning(f"Error tracking request: {e}")
         finally:
             return response
 

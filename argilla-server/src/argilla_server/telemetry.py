@@ -42,6 +42,7 @@ from argilla_server.models import (
     Workspace,
 )
 from argilla_server.settings import settings
+from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 from argilla_server.utils._telemetry import (
     is_running_on_docker_container,
     server_deployment_type,
@@ -164,18 +165,22 @@ class TelemetryClient:
 
         send_telemetry(topic=topic, library_name=library_name, library_version=__version__, user_agent=user_agent)
 
-    async def track_endpoint(self, endpoint_path: str, request: Request, response: Response) -> None:
+    async def track_api_request(self, request: Request, response: Response) -> None:
         """
         Track the endpoint usage. This method is called after the endpoint is processed.
         The method will track the endpoint usage, the user-agent, and the response status code. If an error is raised
         during the endpoint processing, the error will be tracked as well.
 
         Parameters:
-            endpoint_path (str): The path of the endpoint
             request (Request): The incoming request
             response (Response): The outgoing response
 
         """
+
+        endpoint_path = resolve_endpoint_path_for_request(request)
+        if endpoint_path is None:
+            return
+
         topic = f"endpoints"
 
         data = {
@@ -195,7 +200,6 @@ class TelemetryClient:
         if response.status_code >= 400:
             argilla_error: Exception = get_request_error(request=request)
             if argilla_error:
-                data["response.error"] = str(argilla_error)
                 data["response.error_code"] = argilla_error.code  # noqa
 
         await self.track_data(topic=topic, data=data)
