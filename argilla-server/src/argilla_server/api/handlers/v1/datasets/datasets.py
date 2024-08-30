@@ -73,12 +73,16 @@ async def list_current_user_datasets(
     db: AsyncSession = Depends(get_async_db),
     workspace_id: Optional[UUID] = None,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, DatasetPolicy.list(workspace_id))
 
     if not workspace_id:
         if current_user.is_owner:
             dataset_list = await datasets.list_datasets(db)
+            await telemetry_client.track_resource_size(
+                crud_action="read", setting_name="dataset", count=len(dataset_list)
+            )
         else:
             await current_user.awaitable_attrs.datasets
             dataset_list = current_user.datasets

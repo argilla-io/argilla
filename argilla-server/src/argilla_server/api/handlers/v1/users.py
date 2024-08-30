@@ -25,6 +25,7 @@ from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.models import User
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["users"])
 
@@ -53,10 +54,13 @@ async def list_users(
     *,
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.list)
 
     users = await accounts.list_users(db)
+
+    await telemetry_client.track_resource_size(crud_action="read", setting_name="user", count=len(users))
 
     return Users(items=users)
 
@@ -93,6 +97,7 @@ async def list_user_workspaces(
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
+    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.list_workspaces)
 
@@ -100,6 +105,7 @@ async def list_user_workspaces(
 
     if user.is_owner:
         workspaces = await accounts.list_workspaces(db)
+        await telemetry_client.track_resource_size(crud_action="read", setting_name="workspace", count=len(workspaces))
     else:
         workspaces = await accounts.list_workspaces_by_user_id(db, user_id)
 

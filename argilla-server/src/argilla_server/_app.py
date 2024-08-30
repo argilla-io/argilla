@@ -40,6 +40,7 @@ from argilla_server.models import User, Workspace
 from argilla_server.search_engine import get_search_engine
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
+from argilla_server.telemetry import get_telemetry_client
 
 _LOGGER = logging.getLogger("argilla")
 
@@ -50,7 +51,9 @@ async def app_lifespan(app: FastAPI):
     show_telemetry_warning()
     await configure_database()
     await configure_search_engine()
+    await get_telemetry_client().track_server_startup()
     yield
+    await get_telemetry_client().track_server_shutdown()
 
 
 def create_server_app() -> FastAPI:
@@ -238,18 +241,6 @@ async def configure_search_engine():
                 )
 
     await ping_search_engine()
-
-
-async def configure_telemetry(app):
-    from argilla_server.telemetry import get_telemetry_client
-
-    @app.on_event("startup")
-    async def startup_event():
-        await get_telemetry_client().track_server_startup()
-
-    @app.on_event("shutdown")
-    async def shutdown_event():
-        await get_telemetry_client().track_server_shutdown()
 
 
 app = create_server_app()
