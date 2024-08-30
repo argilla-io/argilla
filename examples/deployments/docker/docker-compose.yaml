@@ -37,13 +37,14 @@ services:
     image: argilladev/argilla-server:pr-5432
     environment:
       <<: *common-variables
+      BACKGROUND_NUM_WORKERS: 2
     networks:
       - argilla
     depends_on:
       - postgres
       - elasticsearch
       - redis
-    command: sh -c 'rq worker --with-scheduler --url $${ARGILLA_REDIS_URL}'
+    command: sh -c 'rq worker-pool --num-workers $${BACKGROUND_NUM_WORKERS} --url $${ARGILLA_REDIS_URL}'
 
   postgres:
     image: postgres:14
