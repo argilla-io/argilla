@@ -89,7 +89,7 @@ class TelemetryClient:
             return {"type": f"distribution_{setting['strategy']}_{setting['min_submitted']}"}
         raise NotImplementedError("Expected a setting to be processed.")
 
-    async def track_data(self, topic: str, count: int, crud_action: str = None, user_agent: dict = None) -> None:
+    async def track_data(self, topic: str, count: int = None, crud_action: str = None, user_agent: dict = None) -> None:
         library_name = "argilla/server"
         topic = f"{library_name}/{topic}"
         user_agent = user_agent or {}
@@ -170,7 +170,7 @@ class TelemetryClient:
         topic = "dataset/records"
         await self.track_data(topic=topic, crud_action=crud_action, count=count)
 
-    async def track_server_launch(self) -> None:
+    async def track_server_startup(self) -> None:
         """
         This method is used to track the launch of the server.
 
