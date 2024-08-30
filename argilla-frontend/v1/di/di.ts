@@ -101,8 +101,17 @@ export const loadDependencyContainer = (context: Context) => {
       )
       .build(),
 
+    register(GetUserMetricsUseCase)
+      .withDependencies(MetricsRepository, useMetrics)
+      .build(),
+
     register(LoadRecordsToAnnotateUseCase)
-      .withDependencies(GetRecordsByCriteriaUseCase, useRecords)
+      .withDependencies(
+        GetRecordsByCriteriaUseCase,
+        GetDatasetProgressUseCase,
+        GetUserMetricsUseCase,
+        useRecords
+      )
       .build(),
 
     register(GetFieldsUseCase).withDependency(FieldRepository).build(),
@@ -126,10 +135,6 @@ export const loadDependencyContainer = (context: Context) => {
         RecordRepository,
         useEventDispatcher
       )
-      .build(),
-
-    register(GetUserMetricsUseCase)
-      .withDependencies(MetricsRepository, useMetrics)
       .build(),
 
     register(GetDatasetSettingsUseCase)

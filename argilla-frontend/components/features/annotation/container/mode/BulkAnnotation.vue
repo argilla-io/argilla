@@ -218,7 +218,6 @@ export default {
     },
     recordsMessage: {
       type: String,
-      required: true,
     },
     statusClass: {
       type: String,

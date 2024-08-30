@@ -11,15 +11,15 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
   const { state: progress } = useTeamProgress();
 
   const getMessagesForLoading = (records: Records) => {
-    if (metrics.isEmpty) {
-      return isAdminOrOwnerRole.value
-        ? t("noRecordsMessages.datasetEmptyForAdmin")
-        : t("noRecordsMessages.datasetEmptyForAnnotator");
-    }
-
     if (!records.hasRecordsToAnnotate) {
       if (!recordCriteria.isFilteringByAdvanceSearch && progress.isCompleted) {
         return t("noRecordsMessages.taskDistributionCompleted");
+      }
+
+      if (metrics.isEmpty) {
+        return isAdminOrOwnerRole.value
+          ? t("noRecordsMessages.datasetEmptyForAdmin")
+          : t("noRecordsMessages.datasetEmptyForAnnotator");
       }
 
       const { status } = recordCriteria.committed;
