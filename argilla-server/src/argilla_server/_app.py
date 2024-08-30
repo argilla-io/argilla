@@ -74,7 +74,6 @@ def create_server_app() -> FastAPI:
     configure_api_router(app)
     configure_app_statics(app)
     configure_api_docs(app)
-    configure_telemetry(app)
 
     # This if-else clause is needed to simplify the test dependency setup. Otherwise, we cannot override dependencies
     # easily. We can review this once we have separate fastapi application for the api and the webapp.

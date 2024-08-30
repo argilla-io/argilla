@@ -57,9 +57,7 @@ class TelemetryClient:
             "deployment": server_deployment_type(),
             "docker": is_running_on_docker_container(),
         }
-
-        _LOGGER.info("System Info:")
-        _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
+        _LOGGER.info(f"System Info:\nContext: {json.dumps(self._system_info, indent=2)}")
         self.enable_telemetry = enable_telemetry
 
     @staticmethod
@@ -68,29 +66,13 @@ class TelemetryClient:
             Field,
             VectorSettings,
             Question,
-            FloatMetadataPropertySettings,
-            TermsMetadataPropertySettings,
+            MetadataPropertySettings,
             Dict[str, Union[DatasetDistributionStrategy, int]],
-            IntegerMetadataPropertySettings,
         ],
     ) -> dict:
-        """
-        This method is used to process the dataset settings.
-
-        Args:
-            setting: The dataset setting.
-
-        Returns:
-            The processed dataset setting.
-        """
-        user_data = {}
-
         if isinstance(setting, (Field, Question)):
             field_type = setting.settings["type"]
-            if isinstance(field_type, str):
-                user_data["type"] = field_type
-            else:
-                user_data["type"] = field_type.value
+            return {"type": field_type if isinstance(field_type, str) else field_type.value}
         elif isinstance(
             setting,
             (
@@ -100,58 +82,31 @@ class TelemetryClient:
                 MetadataProperty,
             ),
         ):
-            user_data["type"] = setting.type.value
+            return {"type": setting.type.value}
         elif isinstance(setting, VectorSettings):
-            user_data["type"] = "vector"
+            return {"type": "vector"}
         elif isinstance(setting, dict):
-            user_data["type"] = f"distribution_{setting['strategy']}_{setting['min_submitted']}"
-        else:
-            raise NotImplementedError("Expected a setting to be processed.")
+            return {"type": f"distribution_{setting['strategy']}_{setting['min_submitted']}"}
+        raise NotImplementedError("Expected a setting to be processed.")
 
-        return user_data
-
-    async def track_data(self, topic: str, crud_action: str, count: int, user_agent: dict = None) -> None:
-        """
-        This method is used to track the data.
-
-        Args:
-            topic: The topic to track.
-            crud_action: The endpoint method.
-            user_agent: The user agent.
-            count: The count.
-
-        Returns:
-            None
-        """
+    async def track_data(self, topic: str, count: int, crud_action: str = None, user_agent: dict = None) -> None:
         library_name = "argilla/server"
         topic = f"{library_name}/{topic}"
-
         user_agent = user_agent or {}
         user_agent.update(self._system_info)
-        user_agent["count"] = count or 1
-        user_agent["request.endpoint.method"] = crud_action
+        if count is not None:
+            user_agent["count"] = count or 1
+        if crud_action:
+            user_agent["request.endpoint.method"] = crud_action
         send_telemetry(topic=topic, library_name=library_name, library_version=__version__, user_agent=user_agent)
 
     async def track_crud_dataset(
         self, crud_action: str, dataset: Union[Dataset, None] = None, count: Union[int, None] = None
     ) -> None:
-        """
-        This method is used to track the creation, update, and deletion of a dataset.
-
-        Args:
-            crud_action: The action performed on the dataset.
-            dataset: The dataset.
-            count: The number of dataset settings.
-
-        Returns:
-            Nonee
-        """
         if dataset:
             for attr in _RELEVANT_ATTRIBUTES + ["distribution"]:
                 if dataset.is_relationship_loaded(attr):
-                    obtained_attr_list = getattr(dataset, attr)
-                    if attr == "distribution":
-                        obtained_attr_list = [obtained_attr_list]
+                    obtained_attr_list = [dataset.distribution] if attr == "distribution" else getattr(dataset, attr)
                     for obtained_attr in obtained_attr_list:
                         await self.track_crud_dataset_setting(
                             crud_action=crud_action, setting_name=attr, setting=obtained_attr
@@ -185,7 +140,6 @@ class TelemetryClient:
             None
         """
         topic: str = f"dataset/{setting_name}"
-        user_agent = {}
         user_agent: dict = self._process_dataset_settings_setting(setting=setting)
         await self.track_data(topic=topic, crud_action=crud_action, user_agent=user_agent, count=count)
 
@@ -224,7 +178,7 @@ class TelemetryClient:
             None
         """
         topic = "startup"
-        await self.track_data(topic=topic, crud_action="create")
+        await self.track_data(topic=topic)
 
     async def track_server_shutdown(self) -> None:
         """
@@ -234,7 +188,7 @@ class TelemetryClient:
             None
         """
         topic = "shutdown"
-        await self.track_data(topic=topic, crud_action="delete")
+        await self.track_data(topic=topic)
 
 
 _TELEMETRY_CLIENT = TelemetryClient()
