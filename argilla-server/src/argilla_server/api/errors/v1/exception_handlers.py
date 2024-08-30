@@ -30,7 +30,7 @@ def set_request_error(request: Request, error: Exception) -> None:
 
     """
 
-    request.scope["argilla_error"] = error
+    request.state.error = error
 
 
 def get_request_error(request: Request) -> Optional[Exception]:
@@ -43,7 +43,8 @@ def get_request_error(request: Request) -> Optional[Exception]:
     Returns:
         Optional[Exception]: The error stored in the request scope, or None if no error is stored
     """
-    return request.scope.get("argilla_error")
+
+    return getattr(request.state, "error", None)
 
 
 def add_exception_handlers(app: FastAPI):
