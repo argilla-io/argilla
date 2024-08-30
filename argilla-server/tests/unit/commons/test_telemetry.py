@@ -17,7 +17,9 @@ from typing import Union
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi import Request
+from fastapi import Request, APIRouter
+from fastapi.routing import APIRoute
+from pytest_mock import mocker, MockerFixture
 from starlette.responses import JSONResponse
 
 from argilla_server.api.errors.v1.exception_handlers import set_request_error
@@ -57,7 +59,9 @@ class TestSuiteTelemetry:
 
         assert telemetry_client.enable_telemetry == False
 
-    async def test_track_endpoint(self, test_telemetry: TelemetryClient):
+    async def test_track_api_request(self, test_telemetry: TelemetryClient, mocker: MockerFixture):
+        mocker.patch("argilla_server.telemetry.resolve_endpoint_path_for_request", return_value="/api/test/endpoint")
+
         request = Request(
             scope={
                 "type": "http",
@@ -70,7 +74,7 @@ class TestSuiteTelemetry:
             }
         )
         response = JSONResponse(content={"test": "test"}, status_code=201, headers={"Server-Timing": "total;dur=50"})
-        await test_telemetry.track_endpoint(endpoint_path="/api/test/endpoint", request=request, response=response)
+        await test_telemetry.track_api_request(request=request, response=response)
 
         test_telemetry.track_data.assert_called_once_with(
             topic="endpoints",
@@ -84,7 +88,9 @@ class TestSuiteTelemetry:
             },
         )
 
-    async def test_track_endpoint_call_with_error(self, test_telemetry: TelemetryClient):
+    async def test_track_api_request_call_with_error(self, test_telemetry: TelemetryClient, mocker: MockerFixture):
+        mocker.patch("argilla_server.telemetry.resolve_endpoint_path_for_request", return_value="/api/test/endpoint")
+
         request = Request(
             scope={
                 "type": "http",
@@ -94,7 +100,7 @@ class TestSuiteTelemetry:
             }
         )
         response = JSONResponse(content={"test": "test"}, status_code=500)
-        await test_telemetry.track_endpoint(endpoint_path="/api/test/endpoint", request=request, response=response)
+        await test_telemetry.track_api_request(request=request, response=response)
 
         test_telemetry.track_data.assert_called_once_with(
             topic="endpoints",
@@ -107,7 +113,11 @@ class TestSuiteTelemetry:
             },
         )
 
-    async def test_track_endpoint_call_with_error_and_exception(self, test_telemetry: TelemetryClient):
+    async def test_track_api_request_call_with_error_and_exception(
+        self, test_telemetry: TelemetryClient, mocker: MockerFixture
+    ):
+        mocker.patch("argilla_server.telemetry.resolve_endpoint_path_for_request", return_value="/api/test/endpoint")
+
         request = Request(
             scope={
                 "type": "http",
@@ -119,7 +129,7 @@ class TestSuiteTelemetry:
         response = JSONResponse(content={"test": "test"}, status_code=500)
         set_request_error(request, ServerError("Test exception"))
 
-        await test_telemetry.track_endpoint(endpoint_path="/api/test/endpoint", request=request, response=response)
+        await test_telemetry.track_api_request(request=request, response=response)
 
         test_telemetry.track_data.assert_called_once_with(
             topic="endpoints",
@@ -129,7 +139,6 @@ class TestSuiteTelemetry:
                 "request.user-agent": None,
                 "request.accept-language": None,
                 "response.status": "500",
-                "response.error": "argilla.api.errors::ServerError()",
                 "response.error_code": "argilla.api.errors::ServerError",
             },
         )

@@ -24,17 +24,17 @@ from argilla_server.settings import settings
 from argilla_server.telemetry import TelemetryClient
 
 
-class TestEndpointsTelemetry:
-    def test_track_endpoint_call(self, test_telemetry: TelemetryClient):
+class TestAPITelemetry:
+    def test_track_api_request_call(self, test_telemetry: TelemetryClient):
         settings.enable_telemetry = True  # Forcing telemetry to be enabled for this test
 
         client = TestClient(create_server_app())
 
         client.get("/api/v1/version")
 
-        test_telemetry.track_endpoint.assert_called_once_with("/api/v1/version", ANY, ANY)
+        test_telemetry.track_api_request.assert_called_once()
 
-    def test_track_endpoint_error_call(self, test_telemetry: TelemetryClient):
+    def test_track_api_request_call_on_error(self, test_telemetry: TelemetryClient):
         settings.enable_telemetry = True
 
         client = TestClient(create_server_app())
@@ -42,13 +42,13 @@ class TestEndpointsTelemetry:
         response = client.post("/api/v1/datasets")
         assert response.status_code == 401
 
-        test_telemetry.track_endpoint.assert_called_once_with("/api/v1/datasets", ANY, ANY)
+        test_telemetry.track_api_request.assert_called_once()
 
-    def test_not_track_endpoint_call_with_disabled_telemetry(self, test_telemetry: TelemetryClient):
+    def test_not_track_api_request_call_when_disabled_telemetry(self, test_telemetry: TelemetryClient):
         settings.enable_telemetry = False
 
         client = TestClient(create_server_app())
 
         client.get("/api/v1/version")
 
-        test_telemetry.track_endpoint.assert_not_called()
+        test_telemetry.track_api_request.assert_not_called()
