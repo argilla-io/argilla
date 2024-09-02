@@ -25,7 +25,7 @@ from argilla_server._version import __version__
 from argilla_server.api.errors.v1.exception_handlers import get_request_error
 from argilla_server.security.authentication.provider import get_request_user
 from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
-from argilla_server.utils._telemetry import (
+from argilla_server.telemetry._helpers import (
     is_running_on_docker_container,
     server_deployment_type,
     get_server_id,

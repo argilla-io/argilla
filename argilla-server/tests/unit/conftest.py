@@ -118,7 +118,7 @@ def test_telemetry(mocker: "MockerFixture") -> "TelemetryClient":
             setattr(real_telemetry, attr_name, wrapped)
 
     # Patch the _TELEMETRY_CLIENT to use the real_telemetry
-    mocker.patch("argilla_server.telemetry._TELEMETRY_CLIENT", new=real_telemetry)
+    mocker.patch("argilla_server.telemetry._client._TELEMETRY_CLIENT", new=real_telemetry)
 
     return real_telemetry
 
