@@ -104,8 +104,8 @@
   --fg-cuaternary: hsl(227, 100%, 70%);
   --fg-status-pending: hsl(35, 62%, 60%);
   --fg-status-draft: hsl(188, 92%, 39%);
-  --bg-status-draft: hsl(188, 40%, 50%);
-  --bg-status-draft-accent: hsl(188, 40%, 54%);
+  --bg-status-draft: hsl(188, 40%, 40%);
+  --bg-status-draft-accent: hsl(188, 40%, 44%);
   --fg-status-discarded: hsl(0, 0%, 46%);
   --bg-status-discarded: hsl(0, 0%, 40%);
   --bg-status-discarded-accent: hsl(0, 0%, 48%);
@@ -118,7 +118,7 @@
   --bg-filter-badge-accent: hsl(239, 53%, 54%);
   --fg-label: hsl(239, 36%, 75%);
   --fg-label-2: hsl(0, 0%, 100%);
-  --bg-label: hsl(239, 37%, 40%);
+  --bg-label: hsl(239, 37%, 50%);
   --bg-label-unselected: hsl(214, 12%, 18%);
   --bg-label-unselected-hover: hsl(214, 12%, 20%);
   --bg-field: linear-gradient(45deg, var(--bg-opacity-4), var(--bg-opacity-2));
