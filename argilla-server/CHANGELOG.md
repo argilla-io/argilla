@@ -19,7 +19,7 @@ These are the section headers that we use:
 ### Added
 
 - Added new `image` type dataset field supporting URLs and Data URLs. ([#5279](https://github.com/argilla-io/argilla/pull/5279))
-- Added new `chat` type dataset field supporting chat-like conversations. ([#5375](https://github.com/argilla-io/argilla/pull/5375))
+- Added new `chat` type dataset field supporting chat-like conversations. ([#5376](https://github.com/argilla-io/argilla/pull/5376))
 - Added new endpoint `GET /api/v1/datsets/:dataset_id/users/progress` to compute the users progress. ([#5367](https://github.com/argilla-io/argilla/pull/5367))
 
 ### Fixed
