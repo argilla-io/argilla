@@ -90,7 +90,7 @@ $badgeBorderActiveColor: var(--fg-filter-badge);
   &--active {
     @extend .badge;
     background-color: $badgeBgHoverColor;
-    border: 1px solid $badgeBorderActiveColor;
+    border: 1px solid hsla(from $badgeBorderActiveColor h s l / 40%);
   }
   &__text {
     white-space: nowrap;

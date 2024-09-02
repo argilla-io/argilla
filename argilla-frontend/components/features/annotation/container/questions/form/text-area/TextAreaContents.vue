@@ -119,7 +119,7 @@ export default {
   border: 1px solid var(--bg-opacity-20);
   border-radius: $border-radius-s;
   min-height: 10em;
-  background: var(--bg-accent-grey-1);
+  background: var(--bg-accent-grey-2);
   outline: none;
   &.--editing {
     border-color: var(--fg-cuaternary);

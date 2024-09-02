@@ -327,7 +327,7 @@ export default {
     scroll-behavior: smooth;
     border-radius: $border-radius-m;
     border: 1px solid transparent;
-    background: var(--bg-accent-grey-1);
+    background: var(--bg-form);
     .--pending & {
       border-color: var(--bg-opacity-6);
     }
@@ -385,7 +385,7 @@ export default {
     height: $base-space * 2;
     border-radius: $border-radius;
     border-width: 1px 1px 3px 1px;
-    border-color: var(--bg-opacity-20);
+    border-color: var(--fg-shortcut-key);
     border-style: solid;
     box-sizing: content-box;
     color: var(--fg-primary);

@@ -65,23 +65,23 @@ export default {
     padding: 0;
   }
   &__tab {
+    min-height: 30px;
     list-style: none;
     border-top-right-radius: $border-radius;
     border-top-left-radius: $border-radius;
     background: var(--bg-accent-grey-2);
-    border-top: 1px solid var(--bg-solid-grey-3);
-    border-left: 1px solid var(--bg-solid-grey-3);
-    border-right: 1px solid var(--bg-solid-grey-3);
+    border-top: 1px solid var(--bg-opacity-10);
+    border-left: 1px solid var(--bg-opacity-10);
+    border-right: 1px solid var(--bg-opacity-10);
     &:not(.--active) {
-      background: var(--bg-solid-grey-1);
+      background: var(--bg-solid-grey-2);
       .button {
         color: var(--fg-tertiary);
       }
     }
     &.--active {
-      margin-bottom: -1px;
-      border-bottom: 1px solid var(--bg-accent-grey-2);
-      padding-bottom: 3px;
+      margin-bottom: -2px;
+      border-bottom: 1px solid transparent;
     }
     &:last-child:not(:first-child) {
       margin-left: -1px;
@@ -97,7 +97,7 @@ export default {
     border-bottom-left-radius: $border-radius;
     border-bottom-right-radius: $border-radius;
     background: var(--bg-accent-grey-2);
-    border: 1px solid var(--bg-solid-grey-3);
+    border: 1px solid var(--bg-opacity-10);
   }
 }
 </style>

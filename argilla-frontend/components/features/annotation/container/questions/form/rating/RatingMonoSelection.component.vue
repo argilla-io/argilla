@@ -128,7 +128,7 @@ export default {
   min-width: $base-space * 4;
   padding-inline: $base-space;
   outline: none;
-  background: var(--bg-solid-grey-2);
+  background: var(--bg-label-unselected);
   color: var(--fg-label);
   font-weight: 500;
   overflow: hidden;
@@ -142,7 +142,7 @@ export default {
   }
 
   &.label-active {
-    color: white;
+    color: var(--color-white);
     background: var(--bg-label);
     box-shadow: none;
     &:hover {
@@ -152,7 +152,7 @@ export default {
   }
 
   &:not(.label-active):hover {
-    background: var(--bg-opacity-6);
+    background: var(--bg-label-unselected-hover);
     transition: all 0.2s ease-in-out;
   }
 }

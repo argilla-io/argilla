@@ -79,7 +79,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 $slider-color: var(--bg-action);
-$slider-light-color: rgba(0, 26, 255, 0.1);
+$slider-light-color: hsla(from var(--fg-cuaternary) h s l / 20%);
 $slider-thumb-size: 16px;
 label {
   width: fit-content;

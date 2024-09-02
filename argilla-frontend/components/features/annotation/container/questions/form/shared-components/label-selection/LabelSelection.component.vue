@@ -414,7 +414,7 @@ export default {
   min-width: 50px;
   text-align: center;
   padding-inline: $base-space;
-  background: var(--bg-solid-grey-2);
+  background: var(--bg-label-unselected);
   color: var(--fg-label);
   font-weight: 500;
   outline: none;
@@ -445,7 +445,7 @@ export default {
   }
 
   &:not(.label-active):hover {
-    background: var(--bg-opacity-6);
+    background: var(--bg-label-unselected-hover);
     transition: all 0.2s ease-in-out;
   }
 
@@ -497,7 +497,7 @@ input[type="checkbox"] {
   line-height: 1;
   border-radius: $border-radius;
   border-width: 1px 1px 3px 1px;
-  border-color: var(--bg-opacity-20);
+  border-color: var(--fg-shortcut-key);
   border-style: solid;
   box-sizing: content-box;
   color: var(--fg-primary);

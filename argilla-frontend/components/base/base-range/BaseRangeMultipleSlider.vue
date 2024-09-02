@@ -150,6 +150,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$thumbColor: hsla(from var(--fg-cuaternary) h s l / 20%);
 .range {
   &__container {
     display: flex;
@@ -230,21 +231,21 @@ input[type="range"]::-moz-range-thumb {
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $thumbColor;
 }
 input[type="range"]:active::-webkit-slider-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 input[type="range"]:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 input[type="range"]::-moz-range-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $thumbColor;
 }
 input[type="range"]:active::-moz-range-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 input[type="range"]:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 </style>

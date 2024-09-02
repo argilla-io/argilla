@@ -17,6 +17,7 @@
   --bg-accent-grey-1: hsl(0, 0%, 100%);
   --bg-accent-grey-2: hsl(0, 0%, 100%);
   --bg-accent-grey-3: hsl(0, 0%, 98%);
+  --bg-accent-grey-4: hsl(0, 0%, 98%);
   --bg-opacity-1: hsla(0, 0%, 0%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 0%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 0%, 0.03);
@@ -27,6 +28,7 @@
   --bg-opacity-37: hsla(0, 0%, 0%, 0.37);
   --bg-opacity-54: hsla(0, 0%, 0%, 0.54);
   --bg-opacity-87: hsla(0, 0%, 0%, 0.87);
+  --fg-lighter: hsl(0, 0%, 100%);
   --fg-primary: hsla(0, 0%, 0%, 0.87);
   --fg-secondary: hsla(0, 0%, 0%, 0.54);
   --fg-tertiary: hsla(0, 0%, 0%, 0.37);
@@ -48,7 +50,12 @@
   --fg-label: hsl(239, 36%, 47%);
   --fg-label-2: hsl(239, 37%, 40%);
   --bg-label: hsl(239, 36%, 47%);
+  --bg-label-unselected: hsl(0, 0%, 96%);
+  --bg-label-unselected-hover: hsla(0, 0%, 0%, 0.06);
+  --bg-field: linear-gradient(45deg, var(--bg-opacity-2), var(--bg-opacity-1));
+  --bg-form: hsl(0, 0%, 100%);
   --bg-form-button-area: hsl(228, 50%, 96%);
+  --fg-shortcut-key: hsla(0, 0%, 0%, 0.2);
   --bg-similarity: hsl(2, 100%, 94%);
   --fg-similarity: hsl(3, 100%, 69%);
   --fg-highlight: hsl(3, 100%, 69%);
@@ -63,7 +70,12 @@
   --bg-banner-error: hsl(3, 100%, 92%);
 }
 
+[data-theme="light"] {
+  color-scheme: light;
+}
+
 [data-theme="dark"] {
+  color-scheme: dark;
   --bg-black: hsl(0, 0%, 0%);
   --bg-action: hsl(227, 56%, 52%);
   --bg-action-accent: hsl(227, 50%, 55%);
@@ -73,6 +85,7 @@
   --bg-accent-grey-1: hsl(214, 12%, 12%);
   --bg-accent-grey-2: hsl(214, 12%, 16%);
   --bg-accent-grey-3: hsl(214, 12%, 14%);
+  --bg-accent-grey-4: hsl(214, 12%, 16%);
   --bg-opacity-1: hsla(0, 0%, 100%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 100%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 100%, 0.03);
@@ -83,6 +96,7 @@
   --bg-opacity-37: hsla(0, 0%, 100%, 0.37);
   --bg-opacity-54: hsla(0, 0%, 100%, 0.54);
   --bg-opacity-87: hsla(0, 0%, 100%, 0.87);
+  --fg-lighter: hsl(0, 0%, 87%);
   --fg-primary: hsla(0, 0%, 100%, 0.87);
   --fg-secondary: hsla(0, 0%, 100%, 0.7);
   --fg-tertiary: hsla(0, 0%, 100%, 0.5);
@@ -104,7 +118,12 @@
   --fg-label: hsl(239, 36%, 75%);
   --fg-label-2: hsl(0, 0%, 100%);
   --bg-label: hsl(239, 37%, 40%);
+  --bg-label-unselected: hsl(214, 12%, 18%);
+  --bg-label-unselected-hover: hsl(214, 12%, 20%);
+  --bg-field: linear-gradient(45deg, var(--bg-opacity-4), var(--bg-opacity-2));
+  --bg-form: hsl(216 12% 14%);
   --bg-form-button-area: hsla(228, 40.18%, 59.31%, 0.2);
+  --fg-shortcut-key: hsla(0, 0%, 100%, 0.4);
   --bg-similarity: hsla(2, 100%, 94%, 4%);
   --fg-similarity: hsla(3, 100%, 74%, 90%);
   --fg-highlight: hsl(3, 100%, 69%);
