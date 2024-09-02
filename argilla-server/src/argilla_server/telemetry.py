@@ -17,30 +17,31 @@ import json
 import logging
 import platform
 import uuid
-from typing import Union
 
 from fastapi import Request, Response
 from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
 from argilla_server.api.errors.v1.exception_handlers import get_request_error
+from argilla_server.security.authentication.provider import get_request_user
 from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 from argilla_server.utils._telemetry import (
     is_running_on_docker_container,
     server_deployment_type,
+    get_server_id,
 )
-from argilla_server.security.authentication.provider import get_request_user
 
 _LOGGER = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
 class TelemetryClient:
-    _server_id: int = uuid.getnode()
+    _server_id: uuid.UUID = dataclasses.field(init=False)
 
     def __post_init__(self):
+        self._server_id = get_server_id()
         self._system_info = {
-            "server_id": self._server_id,
+            "server_id": self._server_id.urn,
             "system": platform.system(),
             "machine": platform.machine(),
             "platform": platform.platform(),

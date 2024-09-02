@@ -28,11 +28,14 @@ mock_request = Request(scope={"type": "http", "headers": {}})
 
 @pytest.mark.asyncio
 class TestSuiteTelemetry:
-    async def test_create_client_with_server_id(self):
+    async def test_create_client_with_server_id(self, mocker: MockerFixture):
+        mock_server_id = uuid.uuid4()
+        mocker.patch("argilla_server.telemetry.get_server_id", return_value=mock_server_id)
+
         test_telemetry = TelemetryClient()
 
         assert "server_id" in test_telemetry._system_info
-        assert test_telemetry._system_info["server_id"] == uuid.getnode()
+        assert test_telemetry._system_info["server_id"] == mock_server_id.urn
 
     async def test_track_data(self, mocker: MockerFixture):
         from argilla_server._version import __version__ as version
