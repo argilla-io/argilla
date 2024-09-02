@@ -25,7 +25,6 @@ from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.models import User
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["users"])
 
@@ -43,15 +42,10 @@ async def get_user(
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.get)
 
-    user = await User.get_or_raise(db, user_id)
-
-    await telemetry_client.track_crud_user(action="read", user=user)
-
-    return user
+    return await User.get_or_raise(db, user_id)
 
 
 @router.get("/users", response_model=Users)
@@ -59,15 +53,10 @@ async def list_users(
     *,
     db: AsyncSession = Depends(get_async_db),
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.list)
 
     users = await accounts.list_users(db)
-
-    await telemetry_client.track_crud_user(action="list", user=None, is_oauth=False, count=len(users))
-    for user in users:
-        await telemetry_client.track_crud_user(action="read", user=user, is_oauth=False)
 
     return Users(items=users)
 
@@ -78,13 +67,10 @@ async def create_user(
     db: AsyncSession = Depends(get_async_db),
     user_create: UserCreate,
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     await authorize(current_user, UserPolicy.create)
 
     user = await accounts.create_user(db, user_create.dict())
-
-    await telemetry_client.track_crud_user(action="create", user=user, is_oauth=False)
 
     return user
 
@@ -95,17 +81,12 @@ async def delete_user(
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     user = await User.get_or_raise(db, user_id)
 
     await authorize(current_user, UserPolicy.delete)
 
-    user = await accounts.delete_user(db, user)
-
-    await telemetry_client.track_crud_user(action="delete", user=user)
-
-    return user
+    return await accounts.delete_user(db, user)
 
 
 @router.get("/users/{user_id}/workspaces", response_model=Workspaces)

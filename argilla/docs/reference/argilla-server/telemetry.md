@@ -45,23 +45,8 @@ The following usage and error information is reported:
 * The system’s release version, e.g. `Darwin Kernel Version 21.5.0: Tue Apr 26 21:08:22 PDT 2022; root:xnu-8020`
 * The machine type, e.g. `AMD64`
 * The underlying platform spec with as much useful information as possible. (eg. `macOS-10.16-x86_64-i386-64bit`)
-* The type of deployment: `quickstart` or `server`, and if it is deployed on Hugging Face spaces.
+* The type of deployment: `huggingface_space` or `server`
 * The dockerized deployment flag: `True` or `False`
-
-This is performed by registering counters for the create, read, update, delete (CRUD) and list operations  for different API resources:
-
-* Users
-* Workspaces
-* Datasets
-  * Settings
-    * Fields
-    * Questions
-    * Vector Settings
-    * Metadata Properties
-  * Records
-    * Suggestions
-    * Responses
-* Raised server API errors
 
 For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/argilla-server/src/argilla_server/telemetry.py).
 

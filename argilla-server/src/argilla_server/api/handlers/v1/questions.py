@@ -25,7 +25,6 @@ from argilla_server.contexts import questions
 from argilla_server.database import get_async_db
 from argilla_server.models import Question, User
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter(tags=["questions"])
 
@@ -34,7 +33,6 @@ router = APIRouter(tags=["questions"])
 async def update_question(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     question_id: UUID,
     question_update: QuestionUpdate,
     current_user: User = Security(auth.get_current_user),
@@ -43,20 +41,13 @@ async def update_question(
 
     await authorize(current_user, QuestionPolicy.update(question))
 
-    question = await questions.update_question(db, question, question_update)
-
-    await telemetry_client.track_crud_dataset_setting(
-        action="update", dataset=question.dataset, setting_name="questions", setting=question
-    )
-
-    return question
+    return await questions.update_question(db, question, question_update)
 
 
 @router.delete("/questions/{question_id}", response_model=QuestionSchema)
 async def delete_question(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     question_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -64,10 +55,4 @@ async def delete_question(
 
     await authorize(current_user, QuestionPolicy.delete(question))
 
-    question = await questions.delete_question(db, question)
-
-    await telemetry_client.track_crud_dataset_setting(
-        action="delete", dataset=question.dataset, setting_name="questions", setting=question
-    )
-
-    return question
+    return await questions.delete_question(db, question)

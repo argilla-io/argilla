@@ -14,7 +14,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Type
-from unittest.mock import MagicMock, call
+from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
@@ -82,7 +82,7 @@ async def create_ranking_question(dataset: "Dataset") -> None:
 @pytest.mark.asyncio
 class TestSuiteRecords:
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-    async def test_get_record(self, async_client: "AsyncClient", role: UserRole, test_telemetry: MagicMock):
+    async def test_get_record(self, async_client: "AsyncClient", role: UserRole):
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -103,9 +103,6 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
-
-        test_telemetry.track_crud_records.assert_called_with(action="read", record_or_dataset=record)
-        test_telemetry.track_data.assert_called()
 
     async def test_get_record_without_authentication(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()
@@ -140,9 +137,7 @@ class TestSuiteRecords:
         assert response.json() == {"detail": f"Record with id `{record_id}` not found"}
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
-    async def test_update_record(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole, test_telemetry: MagicMock
-    ):
+    async def test_update_record(self, async_client: "AsyncClient", mock_search_engine: SearchEngine, role: UserRole):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
         question_0 = await TextQuestionFactory.create(dataset=dataset)
@@ -237,9 +232,6 @@ class TestSuiteRecords:
         }
 
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
-
-        test_telemetry.track_crud_records.assert_called_with(action="update", record_or_dataset=record)
-        test_telemetry.track_data.assert_called()
 
     async def test_update_record_with_null_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -994,13 +986,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize("status", ["submitted", "discarded", "draft"])
     async def test_create_record_response(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        owner: User,
-        owner_auth_header: dict,
-        status: str,
-        test_telemetry: MagicMock,
+        self, async_client: "AsyncClient", db: "AsyncSession", owner: User, owner_auth_header: dict, status: str
     ):
         dataset = await DatasetFactory.create()
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
@@ -1042,9 +1028,6 @@ class TestSuiteRecords:
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
-
-        test_telemetry.track_crud_records_responses.assert_called_with(action="create", record_id=record.id)
-        test_telemetry.track_data.assert_called()
 
     @pytest.mark.parametrize(
         "status, expected_status_code, expected_response_count",
@@ -1245,7 +1228,7 @@ class TestSuiteRecords:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin, UserRole.owner])
-    async def test_get_record_suggestions(self, async_client: "AsyncClient", role: UserRole, test_telemetry: MagicMock):
+    async def test_get_record_suggestions(self, async_client: "AsyncClient", role: UserRole):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
         record = await RecordFactory.create(dataset=dataset)
@@ -1288,11 +1271,6 @@ class TestSuiteRecords:
             ]
         }
 
-        test_telemetry.track_crud_records_suggestions.assert_called_with(
-            action="read", record_id=record.id, count=len(response.json()["items"])
-        )
-        test_telemetry.track_data.assert_called()
-
     @pytest.mark.parametrize(
         "payload",
         [
@@ -1312,7 +1290,7 @@ class TestSuiteRecords:
     )
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_create_record_suggestion(
-        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict, test_telemetry: MagicMock
+        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole, payload: dict
     ):
         dataset = await DatasetFactory.create()
         question = await TextQuestionFactory.create(dataset=dataset)
@@ -1341,9 +1319,6 @@ class TestSuiteRecords:
         }
 
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar() == 1
-
-        test_telemetry.track_crud_records_suggestions.assert_called_with(action="create", record_id=record.id)
-        test_telemetry.track_data.assert_called()
 
     async def test_create_record_suggestion_update(
         self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -1432,12 +1407,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_delete_record(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        mock_search_engine: "SearchEngine",
-        role: UserRole,
-        test_telemetry: MagicMock,
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: "SearchEngine", role: UserRole
     ):
         dataset = await DatasetFactory.create()
         record = await RecordFactory.create(dataset=dataset)
@@ -1460,9 +1430,6 @@ class TestSuiteRecords:
         }
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
         mock_search_engine.delete_records.assert_called_once_with(dataset=dataset, records=[record])
-
-        test_telemetry.track_crud_records.assert_called_with(action="delete", record_or_dataset=record)
-        test_telemetry.track_data.assert_called()
 
     async def test_delete_record_as_admin_from_another_workspace(self, async_client: "AsyncClient", db: "AsyncSession"):
         dataset = await DatasetFactory.create()
@@ -1499,12 +1466,7 @@ class TestSuiteRecords:
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.owner])
     async def test_delete_record_suggestions(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        mock_search_engine: SearchEngine,
-        role: UserRole,
-        test_telemetry: MagicMock,
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, role: UserRole
     ) -> None:
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
@@ -1527,13 +1489,6 @@ class TestSuiteRecords:
 
         expected_calls = [call(suggestion) for suggestion in suggestions]
         mock_search_engine.delete_record_suggestion.assert_has_calls(expected_calls)
-
-        test_telemetry.track_crud_records_suggestions.assert_called_with(
-            action="delete",
-            record_id=record.id,
-            count=len(suggestions_ids) + len(random_uuids),
-        )
-        test_telemetry.track_data.assert_called()
 
     async def test_delete_record_suggestions_with_no_ids(
         self, async_client: "AsyncClient", owner_auth_header: dict

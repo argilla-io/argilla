@@ -11,11 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import contextlib
-from typing import TYPE_CHECKING, Dict, Generator
-
-import pytest
-import pytest_asyncio
 
 import uuid
 from typing import TYPE_CHECKING, Dict, Generator, Optional

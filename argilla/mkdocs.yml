@@ -23,8 +23,8 @@ extra:
     - icon: fontawesome/brands/discord
       link: http://hf.co/join/discord
   analytics:
-    provider: google
-    property: G-T5RMYPJ1B2
+    provider: plausible
+    domain: docs.argilla.io
     feedback:
       title: Was this page helpful?
       ratings:
@@ -121,6 +121,7 @@ plugins:
         - docs/scripts/gen_changelog.py
         - docs/scripts/gen_popular_issues.py
         # - docs/scripts/gen_ref_pages.py
+      enabled: !ENV [CI, false] # enables the plugin only during continuous integration (CI), disabled on local build
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index
@@ -148,8 +149,10 @@ plugins:
             # Signature
             separate_signature: false
             show_signature_annotations: false
-  - social
+  - social:
+      enabled: !ENV [CI, false] # enables the plugin only during continuous integration (CI), disabled on local build
   - mknotebooks
+  - material-plausible
 
 nav:
   - Argilla: index.md
@@ -181,7 +184,7 @@ nav:
       - FastAPI Server:
         - Server configuration: reference/argilla-server/configuration.md
       - Telemetry:
-        - Server Telemetry: reference/telemetry.md
+        - Server Telemetry: reference/argilla-server/telemetry.md
   - Community:
       - community/index.md
       - How to contribute?: community/contributor.md

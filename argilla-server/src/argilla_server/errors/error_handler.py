@@ -34,7 +34,6 @@ from argilla_server.errors.base_errors import (
     WrongTaskError,
 )
 from argilla_server.pydantic_v1 import BaseModel
-from argilla_server.telemetry import get_telemetry_client
 
 
 class ErrorDetail(BaseModel):
