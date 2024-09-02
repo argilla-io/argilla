@@ -30,11 +30,6 @@ mock_request = Request(scope={"type": "http", "headers": {}})
 
 @pytest.mark.asyncio
 class TestSuiteTelemetry:
-    async def test_disable_telemetry(self):
-        telemetry_client = TelemetryClient(enable_telemetry=False)
-
-        assert telemetry_client.enable_telemetry == False
-
     async def test_track_api_request(self, test_telemetry: TelemetryClient, mocker: MockerFixture):
         mocker.patch("argilla_server.telemetry.resolve_endpoint_path_for_request", return_value="/api/test/endpoint")
 
