@@ -13,41 +13,43 @@
 #  limitations under the License.
 
 import json
+import secrets
 import httpx
 
 from math import floor
 from typing_extensions import Dict
 from datetime import datetime, timezone
-
 from standardwebhooks.webhooks import Webhook
 
+from argilla_server.models import Webhook as WebhookModel
 
-# TODO: Get the webhook URL from the database.
-# TODO: Add setting to enable/disable webhooks.
-# TODO: Check if webhooks are enabled/disabled.
-def notify_event(type: str, timestamp: datetime, data: Dict) -> httpx.Response:
-    # TODO: Generate random message id
-    msg_id = "msg_AFAlNySwBSr"
+MSG_ID_BYTES_LENGTH = 16
+
+
+def notify_event(webhook: WebhookModel, type: str, timestamp: datetime, data: Dict) -> httpx.Response:
+    msg_id = _generate_msg_id()
 
     payload = json.dumps(_build_payload(type, timestamp, data))
 
-    # TODO: Obtain the webhook secret from the settings
-    signature = Webhook("whsec_h7QRo0AFAlNySwBSr/XXXWFhh4cDlTo42PRPzXOT6SY=").sign(msg_id, timestamp, payload)
+    signature = Webhook(webhook.secret).sign(msg_id, timestamp, payload)
 
-    # TODO: Obtain the webhook URL from the settings
     return httpx.post(
-        "http://localhost:9000",
+        webhook.url,
         headers=_build_headers(msg_id, timestamp, signature),
         content=payload,
     )
 
 
+def _generate_msg_id() -> str:
+    return f"msg_{secrets.token_urlsafe(MSG_ID_BYTES_LENGTH)}"
+
+
 def _build_headers(msg_id: str, timestamp: datetime, signature: str) -> Dict:
     return {
-        "content-type": "application/json",
         "webhook-id": msg_id,
         "webhook-timestamp": str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp())),
         "webhook-signature": signature,
+        "content-type": "application/json",
     }
 
 

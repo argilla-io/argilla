@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import secrets
+import base64
 from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
@@ -512,7 +513,7 @@ class User(DatabaseModel):
 
 
 def generate_webhook_secret() -> str:
-    return secrets.token_urlsafe(_WEBHOOK_SECRET_BYTES_LENGTH)
+    return base64.b64encode(secrets.token_bytes(_WEBHOOK_SECRET_BYTES_LENGTH)).decode("utf-8")
 
 
 class Webhook(DatabaseModel):
