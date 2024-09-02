@@ -36,7 +36,7 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class TelemetryClient:
-    _server_id: str = str(uuid.UUID(int=uuid.getnode()))
+    _server_id: int = uuid.getnode()
 
     def __post_init__(self):
         self._system_info = {
@@ -52,16 +52,11 @@ class TelemetryClient:
         _LOGGER.info("System Info:")
         _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
 
-    async def track_data(self, topic: str, data: dict, include_system_info: bool = True, count: int = 1):
-        library_name = "argilla/server"
-        topic = f"{library_name}/{topic}"
+    async def track_data(self, topic: str, data: dict):
+        library_name = "argilla-server"
+        topic = f"argilla/server/{topic}"
 
-        user_agent = {**data}
-        if include_system_info:
-            user_agent.update(self._system_info)
-        if count is not None:
-            user_agent["count"] = count
-
+        user_agent = {**data, **self._system_info}
         send_telemetry(topic=topic, library_name=library_name, library_version=__version__, user_agent=user_agent)
 
     async def track_api_request(self, request: Request, response: Response) -> None:
