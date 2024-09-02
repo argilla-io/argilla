@@ -151,6 +151,7 @@ export default {
     write: "Escribir",
   },
   sorting: {
+    label: "Ordenar",
     addOtherField: "+ Agregar otro campo",
     suggestion: {
       score: "Puntuación de sugerencia",
@@ -200,6 +201,7 @@ export default {
         "Únete a <strong>{user}</strong> para construir mejores datasets para IA",
     },
   },
+  of: "de",
   status: "Estado",
   filters: "Filtros",
   filterBy: "Filtrar por ...",

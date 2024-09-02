@@ -17,7 +17,7 @@
         >{{ progress.percentage.completed }}%</span
       >
       <span v-if="visibleProgressValues" class="team-progress__info">
-        {{ progress.completed }} of {{ progress.total }}
+        {{ progress.completed }} {{ $t("of") }} {{ progress.total }}
       </span>
     </template>
   </div>

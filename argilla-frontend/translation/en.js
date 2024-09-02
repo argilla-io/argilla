@@ -148,6 +148,7 @@ export default {
     write: "Write",
   },
   sorting: {
+    label: "Sort",
     addOtherField: "+ Add another field",
     suggestion: {
       score: "Suggestion score",
@@ -196,6 +197,7 @@ export default {
       subtitle: "Join <strong>{user}</strong> to build better datasets for AI",
     },
   },
+  of: "of",
   status: "Status",
   filters: "Filters",
   filterBy: "Filter by...",

@@ -141,6 +141,7 @@ export default {
     draft: "Entwurf speichern",
   },
   sorting: {
+    label: "Sortieren",
     addOtherField: "+ Ein weiteres Feld hinzufügen",
     suggestion: {
       score: "Vorschlagsbewertung",
@@ -190,6 +191,7 @@ export default {
         "Helfe <strong>{user}</strong> um bessere Datensätze für KI zu erstellen",
     },
   },
+  of: "von",
   status: "Status",
   filters: "Filter",
   filterBy: "Filter nach...",
