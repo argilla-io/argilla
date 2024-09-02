@@ -187,5 +187,7 @@ nav:
       - How to contribute?: community/contributor.md
       - Issue dashboard: community/popular_issues.md
       - Changelog: community/changelog.md
+      - Integrations:
+        - LlamaIndex: community/integrations/llamaindex_rag_github.ipynb
   - UI Demo ↗:
       - https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==
