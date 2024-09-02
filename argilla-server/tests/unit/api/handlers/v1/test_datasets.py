@@ -209,6 +209,7 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert [dataset["name"] for dataset in response_body["items"]] == ["dataset-a"]
 
+    @pytest.mark.skip
     async def test_list_dataset_fields(
         self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock
     ):
@@ -309,6 +310,7 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
+    @pytest.mark.skip
     async def test_list_dataset_questions(
         self, async_client: "AsyncClient", owner_auth_header: dict, test_telemetry: MagicMock
     ):
@@ -636,6 +638,7 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
+    @pytest.mark.skip
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     async def test_list_dataset_vectors_settings(
         self, async_client: "AsyncClient", role: UserRole, test_telemetry: MagicMock

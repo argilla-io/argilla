@@ -18,10 +18,11 @@ import logging
 import platform
 from typing import Union
 
-from fastapi import Request
+from fastapi import Request, Response
 from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
+from argilla_server.api.errors.v1.exception_handlers import get_request_error
 from argilla_server.constants import DEFAULT_USERNAME
 from argilla_server.errors.base_errors import (
     ServerError,
@@ -41,6 +42,7 @@ from argilla_server.models import (
     Workspace,
 )
 from argilla_server.settings import settings
+from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 from argilla_server.utils._telemetry import (
     is_running_on_docker_container,
     server_deployment_type,
@@ -151,10 +153,11 @@ class TelemetryClient:
 
         return user_data
 
-    async def track_data(self, topic: str, user_agent: dict, include_system_info: bool = True, count: int = 1):
-        library_name = "argilla"
+    async def track_data(self, topic: str, data: dict, include_system_info: bool = True, count: int = 1):
+        library_name = "argilla/server"
         topic = f"{library_name}/{topic}"
 
+        user_agent = {**data}
         if include_system_info:
             user_agent.update(self._system_info)
         if count is not None:
@@ -162,11 +165,50 @@ class TelemetryClient:
 
         send_telemetry(topic=topic, library_name=library_name, library_version=__version__, user_agent=user_agent)
 
+    async def track_api_request(self, request: Request, response: Response) -> None:
+        """
+        Track the endpoint usage. This method is called after the endpoint is processed.
+        The method will track the endpoint usage, the user-agent, and the response status code. If an error is raised
+        during the endpoint processing, the error will be tracked as well.
+
+        Parameters:
+            request (Request): The incoming request
+            response (Response): The outgoing response
+
+        """
+
+        endpoint_path = resolve_endpoint_path_for_request(request)
+        if endpoint_path is None:
+            return
+
+        topic = f"endpoints"
+
+        data = {
+            "endpoint": f"{request.method} {endpoint_path}",
+            "request.user-agent": request.headers.get("user-agent"),
+            "request.method": request.method,
+            "request.accept-language": request.headers.get("accept-language"),
+            "response.status": str(response.status_code),
+        }
+
+        if "Server-Timing" in response.headers:
+            duration_in_ms = response.headers["Server-Timing"]
+            duration_in_ms = duration_in_ms.removeprefix("total;dur=")
+
+            data["duration_in_milliseconds"] = duration_in_ms
+
+        if response.status_code >= 400:
+            argilla_error: Exception = get_request_error(request=request)
+            if argilla_error:
+                data["response.error_code"] = argilla_error.code  # noqa
+
+        await self.track_data(topic=topic, data=data)
+
     async def track_user_login(self, request: Request, user: User):
         topic = "user/login"
         user_agent = self._process_user_model(user=user)
         user_agent.update(**self._process_request_info(request))
-        await self.track_data(topic=topic, user_agent=user_agent)
+        await self.track_data(topic=topic, data=user_agent)
 
     async def track_crud_user(
         self,
@@ -184,7 +226,7 @@ class TelemetryClient:
             user_agent["is_oauth"] = is_oauth
         if is_login is not None:
             user_agent["is_login"] = is_login
-        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, data=user_agent, count=count)
 
     async def track_crud_workspace(
         self, action: str, workspace: Union[Workspace, None] = None, count: Union[int, None] = None
@@ -193,7 +235,7 @@ class TelemetryClient:
         user_agent = {}
         if workspace:
             user_agent.update(self._process_workspace_model(workspace=workspace))
-        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, data=user_agent, count=count)
 
     async def track_crud_dataset(
         self, action: str, dataset: Union[Dataset, None] = None, count: Union[int, None] = None
@@ -203,7 +245,7 @@ class TelemetryClient:
         if dataset:
             user_agent.update(self._process_dataset_model(dataset=dataset))
             user_agent.update(self._process_dataset_settings(dataset=dataset))
-        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, data=user_agent, count=count)
 
         attributes: list[str] = ["fields", "questions", "vectors_settings", "metadata_properties"]
         if dataset:
@@ -230,7 +272,7 @@ class TelemetryClient:
         user_agent = self._process_dataset_model(dataset=dataset)
         if setting:
             user_agent.update(self._process_dataset_setting_settings(setting=setting))
-        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, data=user_agent, count=count)
 
     async def track_crud_records(
         self, action: str, record_or_dataset: Union[Record, Dataset, None] = None, count: Union[int, None] = None
@@ -242,7 +284,7 @@ class TelemetryClient:
             user_agent = self._process_dataset_model(dataset=record_or_dataset)
         else:
             raise NotImplementedError("Expected element of `Dataset` or `Record`")
-        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, data=user_agent, count=count)
 
     async def track_crud_records_responses(
         self,
@@ -252,7 +294,7 @@ class TelemetryClient:
     ):
         topic = f"dataset/records/responses/{action}"
         user_agent = {"record_id": record_id}
-        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, data=user_agent, count=count)
 
     async def track_crud_records_suggestions(
         self,
@@ -264,7 +306,7 @@ class TelemetryClient:
         user_agent = {}
         if record_id:
             user_agent["record_id"] = record_id
-        await self.track_data(topic=topic, user_agent=user_agent, count=count)
+        await self.track_data(topic=topic, data=user_agent, count=count)
 
     async def track_error(self, error: ServerError, request: Request):
         topic = "error/server"
@@ -275,7 +317,7 @@ class TelemetryClient:
             "type": error.__class__.__name__,
         }
 
-        await self.track_data(topic=topic, user_agent=user_agent)
+        await self.track_data(topic=topic, data=user_agent)
 
 
 _TELEMETRY_CLIENT = TelemetryClient()

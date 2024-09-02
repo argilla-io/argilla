@@ -18,6 +18,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 
+from argilla_server.api.errors.v1.exception_handlers import set_request_error
 from argilla_server.errors.base_errors import (
     BadRequestError,
     ClosedDatasetError,
@@ -59,7 +60,7 @@ class APIErrorHandler:
     async def common_exception_handler(cls, request: Request, error: Exception):
         """Wraps errors as custom generic error"""
         argilla_error = cls._exception_to_argilla_error(error)
-        await cls.track_error(argilla_error, request=request)
+        set_request_error(request, argilla_error)
 
         return await http_exception_handler(request, ServerHTTPException(argilla_error))
 
