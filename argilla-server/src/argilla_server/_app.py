@@ -48,9 +48,9 @@ _LOGGER = logging.getLogger("argilla")
 @contextlib.asynccontextmanager
 async def app_lifespan(app: FastAPI):
     # See https://fastapi.tiangolo.com/advanced/events/#lifespan
-    show_telemetry_warning()
     await configure_database()
     await configure_search_engine()
+    track_server_startup()
     yield
 
 
@@ -185,18 +185,28 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def show_telemetry_warning():
-    if settings.enable_telemetry:
-        message = "\n"
-        message += inspect.cleandoc(
-            "Argilla uses telemetry to report anonymous usage and error information. You\n"
-            "can know more about what information is reported at:\n\n"
-            "    https://docs.argilla.io/latest/reference/argilla-server/telemetry/\n\n"
-            "Telemetry is currently enabled. If you want to disable it, you can configure\n"
-            "the environment variable before relaunching the server:\n\n"
-            f'{"#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"}'
-        )
-        _LOGGER.warning(message)
+def track_server_startup() -> None:
+    """
+    Track server startup telemetry event if telemetry is enabled
+    """
+    if not settings.enable_telemetry:
+        return
+
+    _show_telemetry_warning()
+    get_telemetry_client().track_server_startup()
+
+
+def _show_telemetry_warning():
+    message = "\n"
+    message += inspect.cleandoc(
+        "Argilla uses telemetry to report anonymous usage and error information. You\n"
+        "can know more about what information is reported at:\n\n"
+        "    https://docs.argilla.io/latest/reference/argilla-server/telemetry/\n\n"
+        "Telemetry is currently enabled. If you want to disable it, you can configure\n"
+        "the environment variable before relaunching the server:\n\n"
+        f'{"#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"}'
+    )
+    _LOGGER.warning(message)
 
 
 async def _create_oauth_allowed_workspaces(db: AsyncSession):
