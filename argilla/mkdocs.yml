@@ -184,7 +184,7 @@ nav:
       - FastAPI Server:
         - Server configuration: reference/argilla-server/configuration.md
       - Telemetry:
-        - Server Telemetry: reference/telemetry.md
+        - Server Telemetry: reference/argilla-server/telemetry.md
   - Community:
       - community/index.md
       - How to contribute?: community/contributor.md
