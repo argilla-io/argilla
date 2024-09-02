@@ -16,6 +16,7 @@ import dataclasses
 import json
 import logging
 import platform
+import uuid
 from typing import Union
 
 from fastapi import Request, Response
@@ -24,9 +25,6 @@ from huggingface_hub.utils import send_telemetry
 from argilla_server._version import __version__
 from argilla_server.api.errors.v1.exception_handlers import get_request_error
 from argilla_server.constants import DEFAULT_USERNAME
-from argilla_server.errors.base_errors import (
-    ServerError,
-)
 from argilla_server.models import (
     Dataset,
     Field,
@@ -41,6 +39,7 @@ from argilla_server.models import (
     VectorSettings,
     Workspace,
 )
+from argilla_server.security.authentication.provider import get_request_user
 from argilla_server.settings import settings
 from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 from argilla_server.utils._telemetry import (
@@ -53,10 +52,11 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class TelemetryClient:
-    enable_telemetry: dataclasses.InitVar[bool] = settings.enable_telemetry
+    _server_id: str = str(uuid.UUID(int=uuid.getnode()))
 
-    def __post_init__(self, enable_telemetry: bool):
+    def __post_init__(self):
         self._system_info = {
+            "server_id": self._server_id,
             "system": platform.system(),
             "machine": platform.machine(),
             "platform": platform.platform(),
@@ -67,7 +67,6 @@ class TelemetryClient:
 
         _LOGGER.info("System Info:")
         _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
-        self.enable_telemetry = enable_telemetry
 
     @staticmethod
     def _process_request_info(request: Request):
@@ -191,24 +190,19 @@ class TelemetryClient:
             "response.status": str(response.status_code),
         }
 
-        if "Server-Timing" in response.headers:
-            duration_in_ms = response.headers["Server-Timing"]
-            duration_in_ms = duration_in_ms.removeprefix("total;dur=")
-
+        if server_timing := response.headers.get("Server-Timing"):
+            duration_in_ms = server_timing.removeprefix("total;dur=")
             data["duration_in_milliseconds"] = duration_in_ms
 
+        if user := get_request_user(request=request):
+            data["user.id"] = str(user.id)
+            data["user.role"] = user.role
+
         if response.status_code >= 400:
-            argilla_error: Exception = get_request_error(request=request)
-            if argilla_error:
+            if argilla_error := get_request_error(request=request):
                 data["response.error_code"] = argilla_error.code  # noqa
 
         await self.track_data(topic=topic, data=data)
-
-    async def track_user_login(self, request: Request, user: User):
-        topic = "user/login"
-        user_agent = self._process_user_model(user=user)
-        user_agent.update(**self._process_request_info(request))
-        await self.track_data(topic=topic, data=user_agent)
 
     async def track_crud_user(
         self,
@@ -307,17 +301,6 @@ class TelemetryClient:
         if record_id:
             user_agent["record_id"] = record_id
         await self.track_data(topic=topic, data=user_agent, count=count)
-
-    async def track_error(self, error: ServerError, request: Request):
-        topic = "error/server"
-        user_agent = {
-            "code": error.code,
-            "user-agent": request.headers.get("user-agent"),
-            "accept-language": request.headers.get("accept-language"),
-            "type": error.__class__.__name__,
-        }
-
-        await self.track_data(topic=topic, data=user_agent)
 
 
 _TELEMETRY_CLIENT = TelemetryClient()
