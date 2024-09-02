@@ -177,7 +177,7 @@ export default {
     onActionClicked(action, dataset) {
       switch (action) {
         case "go-to-settings":
-          this.goToSetting(dataset);
+          this.goToSetting(dataset.id);
           break;
         case "copy-url":
           this.copyUrl(dataset);
