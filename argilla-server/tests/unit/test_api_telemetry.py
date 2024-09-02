@@ -17,6 +17,7 @@ from unittest import mock
 from unittest.mock import MagicMock, ANY
 
 import pytest
+from pytest_mock import MockerFixture
 from starlette.testclient import TestClient
 
 from argilla_server._app import create_server_app
@@ -43,6 +44,19 @@ class TestAPITelemetry:
         assert response.status_code == 401
 
         test_telemetry.track_api_request.assert_called_once()
+
+    def test_track_api_request_with_unexpected_telemetry_error(
+        self, test_telemetry: TelemetryClient, mocker: "MockerFixture"
+    ):
+        with mocker.patch.object(test_telemetry, "track_api_request", side_effect=Exception("mocked error")):
+            settings.enable_telemetry = True
+
+            client = TestClient(create_server_app())
+
+            response = client.get("/api/v1/version")
+
+            test_telemetry.track_api_request.assert_called_once()
+            assert response.status_code == 200
 
     def test_not_track_api_request_call_when_disabled_telemetry(self, test_telemetry: TelemetryClient):
         settings.enable_telemetry = False
