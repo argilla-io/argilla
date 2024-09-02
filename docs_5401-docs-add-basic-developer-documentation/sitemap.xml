@@ -21,6 +21,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.argilla.io/docs_5401-docs-add-basic-developer-documentation/community/developer/</loc>
+         <lastmod>2024-09-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.argilla.io/docs_5401-docs-add-basic-developer-documentation/community/popular_issues/</loc>
          <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
