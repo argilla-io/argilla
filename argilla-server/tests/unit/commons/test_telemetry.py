@@ -11,14 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import uuid
 from unittest.mock import MagicMock
 
 import pytest
-from fastapi import Request, APIRouter
-from fastapi.routing import APIRoute
-from pytest_mock import mocker, MockerFixture
+from fastapi import Request
+from pytest_mock import MockerFixture
 from starlette.responses import JSONResponse
 
 from argilla_server.api.errors.v1.exception_handlers import set_request_error
@@ -30,8 +28,35 @@ mock_request = Request(scope={"type": "http", "headers": {}})
 
 @pytest.mark.asyncio
 class TestSuiteTelemetry:
+    async def test_create_client_with_server_id(self, mocker: MockerFixture):
+        mock_server_id = uuid.uuid4()
+        mocker.patch("argilla_server.telemetry._client.get_server_id", return_value=mock_server_id)
+
+        test_telemetry = TelemetryClient()
+
+        assert "server_id" in test_telemetry._system_info
+        assert test_telemetry._system_info["server_id"] == mock_server_id.urn
+
+    async def test_track_data(self, mocker: MockerFixture):
+        from argilla_server._version import __version__ as version
+
+        mock = mocker.patch("argilla_server.telemetry._client.send_telemetry")
+
+        telemetry = TelemetryClient()
+
+        await telemetry.track_data("test_topic", {"test": "test"})
+
+        mock.assert_called_once_with(
+            topic="argilla/server/test_topic",
+            library_name="argilla-server",
+            library_version=version,
+            user_agent={"test": "test", **telemetry._system_info},
+        )
+
     async def test_track_api_request(self, test_telemetry: TelemetryClient, mocker: MockerFixture):
-        mocker.patch("argilla_server.telemetry.resolve_endpoint_path_for_request", return_value="/api/test/endpoint")
+        mocker.patch(
+            "argilla_server.telemetry._client.resolve_endpoint_path_for_request", return_value="/api/test/endpoint"
+        )
 
         request = Request(
             scope={
@@ -60,7 +85,9 @@ class TestSuiteTelemetry:
         )
 
     async def test_track_api_request_call_with_error(self, test_telemetry: TelemetryClient, mocker: MockerFixture):
-        mocker.patch("argilla_server.telemetry.resolve_endpoint_path_for_request", return_value="/api/test/endpoint")
+        mocker.patch(
+            "argilla_server.telemetry._client.resolve_endpoint_path_for_request", return_value="/api/test/endpoint"
+        )
 
         request = Request(
             scope={
@@ -87,7 +114,9 @@ class TestSuiteTelemetry:
     async def test_track_api_request_call_with_error_and_exception(
         self, test_telemetry: TelemetryClient, mocker: MockerFixture
     ):
-        mocker.patch("argilla_server.telemetry.resolve_endpoint_path_for_request", return_value="/api/test/endpoint")
+        mocker.patch(
+            "argilla_server.telemetry._client.resolve_endpoint_path_for_request", return_value="/api/test/endpoint"
+        )
 
         request = Request(
             scope={
