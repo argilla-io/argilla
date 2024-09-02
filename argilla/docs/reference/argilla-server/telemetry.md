@@ -48,21 +48,6 @@ The following usage and error information is reported:
 * The type of deployment: `huggingface_space` or `server`
 * The dockerized deployment flag: `True` or `False`
 
-This is performed by registering counters for the create, read, update, delete (CRUD) and list operations  for different API resources:
-
-* Users
-* Workspaces
-* Datasets
-  * Settings
-    * Fields
-    * Questions
-    * Vector Settings
-    * Metadata Properties
-  * Records
-    * Suggestions
-    * Responses
-* Raised server API errors
-
 For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/argilla-server/src/argilla_server/telemetry.py).
 
 If you have any doubts, don't hesitate to join our [Discord channel](http://hf.co/join/discord) or open a GitHub issue. We'd be very happy to discuss how we can improve this.
