@@ -13,11 +13,13 @@
 # limitations under the License.
 
 from typing import TYPE_CHECKING, Any, Dict, List, Union
+from uuid import uuid4
 
 from datasets import Dataset as HFDataset
-from datasets import IterableDataset
+from datasets import IterableDataset, Image
 
 from argilla.records._io._generic import GenericIO
+from argilla._helpers._media import pil_to_data_uri
 
 if TYPE_CHECKING:
     from argilla.records import Record
@@ -58,11 +60,57 @@ class HFDatasetsIO:
         Returns:
             Generator[Dict[str, Union[str, float, int, list]], None, None]: A generator of dictionaries to be passed to DatasetRecords.add or DatasetRecords.update.
         """
-        record_dicts = []
+        media_features = HFDatasetsIO._get_image_features(dataset)
+        if media_features:
+            dataset = HFDatasetsIO._cast_images_as_urls(hf_dataset=dataset, columns=media_features)
         try:
             dataset: IterableDataset = dataset.to_iterable_dataset()
         except AttributeError:
             pass
+        record_dicts = []
         for example in dataset:
             record_dicts.append(example)
         return record_dicts
+
+    @staticmethod
+    def _get_image_features(dataset: "HFDataset") -> List[str]:
+        """Check if the Hugging Face dataset contains image features.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to check.
+
+        Returns:
+            bool: True if the Hugging Face dataset contains image features, False otherwise.
+        """
+        media_features = [name for name, feature in dataset.features.items() if isinstance(feature, Image)]
+        return media_features
+
+    @staticmethod
+    def _cast_images_as_urls(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
+        """Cast the image features in the Hugging Face dataset as URLs.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to cast.
+            repo_id (str): The ID of the Hugging Face Hub repo.
+
+        Returns:
+            HFDataset: The Hugging Face dataset with image features cast as URLs.
+        """
+
+        unique_identifier = uuid4().hex
+
+        def batch_fn(batch):
+            data_uris = [pil_to_data_uri(sample) for sample in batch]
+            return {unique_identifier: data_uris}
+
+        for column in columns:
+            hf_dataset = hf_dataset.map(
+                function=batch_fn,
+                with_indices=False,
+                batched=True,
+                input_columns=[column],
+                remove_columns=[column],
+            )
+            hf_dataset = hf_dataset.rename_column(original_column_name=unique_identifier, new_column_name=column)
+
+        return hf_dataset
