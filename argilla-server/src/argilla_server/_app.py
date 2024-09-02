@@ -41,7 +41,6 @@ from argilla_server.search_engine import get_search_engine
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
 from argilla_server.telemetry import get_telemetry_client
-from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 
 _LOGGER = logging.getLogger("argilla")
 

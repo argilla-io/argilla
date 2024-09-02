@@ -71,7 +71,6 @@ async def _filter_metadata_properties_by_policy(
 async def list_current_user_datasets(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     workspace_id: Optional[UUID] = None,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -86,64 +85,34 @@ async def list_current_user_datasets(
     else:
         dataset_list = await datasets.list_datasets_by_workspace_id(db, workspace_id)
 
-    await telemetry_client.track_crud_dataset(action="me/list", dataset=None, count=len(dataset_list))
-
     return Datasets(items=dataset_list)
 
 
 @router.get("/datasets/{dataset_id}/fields", response_model=Fields)
 async def list_dataset_fields(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.fields)])
 
     await authorize(current_user, DatasetPolicy.get(dataset))
-
-    for field in dataset.fields:
-        await telemetry_client.track_crud_dataset_setting(
-            action="read", dataset=dataset, setting_name="fields", setting=field
-        )
-    await telemetry_client.track_crud_dataset_setting(
-        action="list", dataset=dataset, setting_name="fields", count=len(dataset.fields)
-    )
 
     return Fields(items=dataset.fields)
 
 
 @router.get("/datasets/{dataset_id}/vectors-settings", response_model=VectorsSettings)
 async def list_dataset_vector_settings(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.vectors_settings)])
 
     await authorize(current_user, DatasetPolicy.get(dataset))
-
-    for vectors_setting in dataset.vectors_settings:
-        await telemetry_client.track_crud_dataset_setting(
-            action="read", dataset=dataset, setting_name="vectors_settings", setting=vectors_setting
-        )
-    await telemetry_client.track_crud_dataset_setting(
-        action="list", dataset=dataset, setting_name="vectors_settings", count=len(dataset.vectors_settings)
-    )
 
     return VectorsSettings(items=dataset.vectors_settings)
 
 
 @router.get("/me/datasets/{dataset_id}/metadata-properties", response_model=MetadataProperties)
 async def list_current_user_dataset_metadata_properties(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id, options=[selectinload(Dataset.metadata_properties)])
 
@@ -153,30 +122,16 @@ async def list_current_user_dataset_metadata_properties(
         current_user, dataset.metadata_properties
     )
 
-    for metadata_property in filtered_metadata_properties:
-        await telemetry_client.track_crud_dataset_setting(
-            action="read", dataset=dataset, setting_name="me/metadata_properties", setting=metadata_property
-        )
-    await telemetry_client.track_crud_dataset_setting(
-        action="list", dataset=dataset, setting_name="me/metadata_properties", count=len(filtered_metadata_properties)
-    )
-
     return MetadataProperties(items=filtered_metadata_properties)
 
 
 @router.get("/datasets/{dataset_id}", response_model=DatasetSchema)
 async def get_dataset(
-    *,
-    db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
-    dataset_id: UUID,
-    current_user: User = Security(auth.get_current_user),
+    *, db: AsyncSession = Depends(get_async_db), dataset_id: UUID, current_user: User = Security(auth.get_current_user)
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicy.get(dataset))
-
-    await telemetry_client.track_crud_dataset(action="read", dataset=dataset)
 
     return dataset
 
@@ -229,24 +184,18 @@ async def get_dataset_users_progress(
 async def create_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_create: DatasetCreate,
     current_user: User = Security(auth.get_current_user),
 ):
     await authorize(current_user, DatasetPolicy.create(dataset_create.workspace_id))
 
-    dataset = await datasets.create_dataset(db, dataset_create.dict())
-
-    await telemetry_client.track_crud_dataset(action="create", dataset=dataset)
-
-    return dataset
+    return await datasets.create_dataset(db, dataset_create.dict())
 
 
 @router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
 async def create_dataset_field(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     field_create: FieldCreate,
     current_user: User = Security(auth.get_current_user),
@@ -255,13 +204,7 @@ async def create_dataset_field(
 
     await authorize(current_user, DatasetPolicy.create_field(dataset))
 
-    field = await datasets.create_field(db, dataset, field_create)
-
-    await telemetry_client.track_crud_dataset_setting(
-        action="create", setting_name="fields", dataset=dataset, setting=field
-    )
-
-    return field
+    return await datasets.create_field(db, dataset, field_create)
 
 
 @router.post(
@@ -271,7 +214,6 @@ async def create_dataset_metadata_property(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     metadata_property_create: MetadataPropertyCreate,
     current_user: User = Security(auth.get_current_user),
@@ -280,13 +222,7 @@ async def create_dataset_metadata_property(
 
     await authorize(current_user, DatasetPolicy.create_metadata_property(dataset))
 
-    metadata_property = await datasets.create_metadata_property(db, search_engine, dataset, metadata_property_create)
-
-    await telemetry_client.track_crud_dataset_setting(
-        action="create", setting_name="metadata_properties", dataset=dataset, setting=metadata_property
-    )
-
-    return metadata_property
+    return await datasets.create_metadata_property(db, search_engine, dataset, metadata_property_create)
 
 
 @router.post(
@@ -296,7 +232,6 @@ async def create_dataset_vector_settings(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     vector_settings_create: VectorSettingsCreate,
     current_user: User = Security(auth.get_current_user),
@@ -305,13 +240,7 @@ async def create_dataset_vector_settings(
 
     await authorize(current_user, DatasetPolicy.create_vector_settings(dataset))
 
-    vector_setting = await datasets.create_vector_settings(db, search_engine, dataset, vector_settings_create)
-
-    await telemetry_client.track_crud_dataset_setting(
-        action="create", setting_name="vectors_settings", dataset=dataset, setting=vector_setting
-    )
-
-    return vector_setting
+    return await datasets.create_vector_settings(db, search_engine, dataset, vector_settings_create)
 
 
 @router.put("/datasets/{dataset_id}/publish", response_model=DatasetSchema)
@@ -319,7 +248,6 @@ async def publish_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ) -> Dataset:
@@ -338,8 +266,6 @@ async def publish_dataset(
 
     dataset = await datasets.publish_dataset(db, search_engine, dataset)
 
-    await telemetry_client.track_crud_dataset(action="create", dataset=dataset)
-
     return dataset
 
 
@@ -348,7 +274,6 @@ async def delete_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ):
@@ -356,18 +281,13 @@ async def delete_dataset(
 
     await authorize(current_user, DatasetPolicy.delete(dataset))
 
-    dataset = await datasets.delete_dataset(db, search_engine, dataset)
-
-    await telemetry_client.track_crud_dataset(action="delete", dataset=dataset)
-
-    return dataset
+    return await datasets.delete_dataset(db, search_engine, dataset)
 
 
 @router.patch("/datasets/{dataset_id}", response_model=DatasetSchema)
 async def update_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     dataset_update: DatasetUpdate,
     current_user: User = Security(auth.get_current_user),
@@ -376,8 +296,4 @@ async def update_dataset(
 
     await authorize(current_user, DatasetPolicy.update(dataset))
 
-    dataset = await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
-
-    await telemetry_client.track_crud_dataset(action="update", dataset=dataset)
-
-    return dataset
+    return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))

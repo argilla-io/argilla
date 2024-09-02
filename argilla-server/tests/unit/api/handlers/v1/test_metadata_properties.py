@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING, Type
-from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -161,9 +160,7 @@ class TestSuiteMetadataProperties:
 
 
 @pytest.mark.asyncio
-async def test_update_metadata_property(
-    async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, test_telemetry: MagicMock
-):
+async def test_update_metadata_property(async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict):
     metadata_property = await IntegerMetadataPropertyFactory.create(
         name="name", title="title", allowed_roles=[UserRole.admin, UserRole.annotator]
     )
@@ -192,14 +189,6 @@ async def test_update_metadata_property(
     assert metadata_property.title == "updated title"
     assert metadata_property.visible_for_annotators == False
     assert metadata_property.allowed_roles == [UserRole.admin]
-
-    test_telemetry.track_crud_dataset_setting.assert_called_with(
-        action="update",
-        setting_name="metadata_properties",
-        dataset=metadata_property.dataset,
-        setting=metadata_property,
-    )
-    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio
@@ -400,9 +389,7 @@ async def test_update_metadata_property_with_nonexistent_metadata_property_id(
 
 @pytest.mark.parametrize("user_role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_delete_metadata_property(
-    async_client: "AsyncClient", db: "AsyncSession", user_role: UserRole, test_telemetry: MagicMock
-):
+async def test_delete_metadata_property(async_client: "AsyncClient", db: "AsyncSession", user_role: UserRole):
     metadata_property = await IntegerMetadataPropertyFactory.create(name="name", title="title")
 
     user = await UserFactory.create(role=user_role, workspaces=[metadata_property.dataset.workspace])
@@ -425,14 +412,6 @@ async def test_delete_metadata_property(
     }
 
     assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
-
-    test_telemetry.track_crud_dataset_setting.assert_called_with(
-        action="delete",
-        setting_name="metadata_properties",
-        dataset=metadata_property.dataset,
-        setting=metadata_property,
-    )
-    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio

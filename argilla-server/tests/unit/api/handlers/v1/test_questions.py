@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from typing import TYPE_CHECKING, Type
-from unittest.mock import ANY, MagicMock
 from uuid import uuid4
 
 import pytest
@@ -249,7 +248,6 @@ async def test_update_question(
     payload: dict,
     expected_settings: dict,
     role: UserRole,
-    test_telemetry: MagicMock,
 ):
     question = await QuestionFactory.create()
     user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
@@ -279,11 +277,6 @@ async def test_update_question(
     assert question.title == title
     assert question.description == description
     assert question.settings == expected_settings
-
-    test_telemetry.track_crud_dataset_setting.assert_called_with(
-        action="update", dataset=question.dataset, setting_name="questions", setting=ANY
-    )
-    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.parametrize("title", [None, "", "t" * (QUESTION_CREATE_TITLE_MAX_LENGTH + 1)])
@@ -487,9 +480,7 @@ async def test_update_question_as_annotator(async_client: "AsyncClient"):
 
 @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
 @pytest.mark.asyncio
-async def test_delete_question(
-    async_client: "AsyncClient", db: "AsyncSession", role: UserRole, test_telemetry: MagicMock
-):
+async def test_delete_question(async_client: "AsyncClient", db: "AsyncSession", role: UserRole):
     question = await TextQuestionFactory.create(name="name", title="title", description="description")
     user = await UserFactory.create(role=role, workspaces=[question.dataset.workspace])
 
@@ -512,11 +503,6 @@ async def test_delete_question(
         "inserted_at": question.inserted_at.isoformat(),
         "updated_at": question.updated_at.isoformat(),
     }
-
-    test_telemetry.track_crud_dataset_setting.assert_called_with(
-        action="delete", dataset=question.dataset, setting_name="questions", setting=ANY
-    )
-    test_telemetry.track_data.assert_called()
 
 
 @pytest.mark.asyncio

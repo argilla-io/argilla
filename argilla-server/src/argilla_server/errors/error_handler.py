@@ -34,7 +34,6 @@ from argilla_server.errors.base_errors import (
     WrongTaskError,
 )
 from argilla_server.pydantic_v1 import BaseModel
-from argilla_server.telemetry import get_telemetry_client
 
 
 class ErrorDetail(BaseModel):
@@ -52,10 +51,6 @@ class ServerHTTPException(HTTPException):
 
 
 class APIErrorHandler:
-    @classmethod
-    async def track_error(cls, error: ServerError, request: Request):
-        await get_telemetry_client().track_error(error=error, request=request)
-
     @classmethod
     async def common_exception_handler(cls, request: Request, error: Exception):
         """Wraps errors as custom generic error"""
