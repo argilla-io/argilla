@@ -14,7 +14,6 @@ export class Field {
     public settings: any
   ) {
     this.initializeOriginal();
-    console.log(this);
   }
 
   public get isTextType() {
