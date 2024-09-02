@@ -32,12 +32,8 @@ router = APIRouter(tags=["users"])
 
 @router.get("/me", response_model=UserSchema)
 async def get_current_user(
-    request: Request,
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
-    await telemetry_client.track_user_login(request=request, user=current_user)
-
     return current_user
 
 
