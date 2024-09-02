@@ -12,22 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import json
-import httpx
-
-from datetime import datetime
-
-from fastapi.encoders import jsonable_encoder
-
-from argilla_server.models import Response
-from argilla_server.api.schemas.v1.responses import Response as ResponseSchema
-from argilla_server.api.webhooks.v1.commons import notify_event
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
+from argilla_server.api.policies.v1.commons import PolicyAction
+from argilla_server.models import User
 
 
-def notify_response_created_event(response: Response) -> httpx.Response:
-    return notify_event(
-        type=WebhookEvent.response_created,
-        timestamp=datetime.utcnow(),
-        data=jsonable_encoder(ResponseSchema.from_orm(response)),
-    )
+class WebhookPolicy:
+    @classmethod
+    async def list(cls, actor: User) -> bool:
+        return actor.is_owner or actor.is_admin
+
+    @classmethod
+    async def create(cls, actor: User) -> bool:
+        return actor.is_owner or actor.is_admin
+
+    @classmethod
+    async def update(cls, actor: User) -> bool:
+        return actor.is_owner or actor.is_admin
+
+    @classmethod
+    async def delete(cls, actor: User) -> bool:
+        return actor.is_owner or actor.is_admin

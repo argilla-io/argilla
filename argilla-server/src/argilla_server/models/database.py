@@ -55,9 +55,11 @@ __all__ = [
     "MetadataProperty",
     "Vector",
     "VectorSettings",
+    "Webhook",
 ]
 
 _USER_API_KEY_BYTES_LENGTH = 80
+_WEBHOOK_SECRET_BYTES_LENGTH = 64
 
 
 class Field(DatabaseModel):
@@ -505,5 +507,23 @@ class User(DatabaseModel):
         return (
             f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, "
             f"username={self.username!r}, role={self.role.value!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
+
+
+def generate_webhook_secret() -> str:
+    return secrets.token_urlsafe(_WEBHOOK_SECRET_BYTES_LENGTH)
+
+
+class Webhook(DatabaseModel):
+    __tablename__ = "webhooks"
+
+    url: Mapped[str] = mapped_column(Text, unique=True)
+    secret: Mapped[str] = mapped_column(Text, unique=True, default=generate_webhook_secret)
+    events: Mapped[List[str]] = mapped_column(JSON)
+
+    def __repr__(self):
+        return (
+            f"Webhook(id={str(self.id)!r}, url={self.url!r}, events={self.events!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
