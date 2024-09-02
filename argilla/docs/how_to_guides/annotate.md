@@ -136,6 +136,12 @@ The UI offers various features designed for data exploration and understanding. 
 
 From the **control panel** at the top of the left pane, you can search by keyword across the entire dataset. If you have more than one field in your records, you may specify if the search is to be performed “All” fields or on a specific one. Matched results are highlighted in color.
 
+!!! note
+    If you introduce more than one keyword, the search will return results where **all** keywords have a match.
+
+!!! tip
+    For more advanced searches, take a look at the [advanced queries DSL](query.md#advanced-queries).
+
 ### Order by record semantic similarity
 
 You can retrieve records based on their similarity to another record if vectors have been added to the dataset.
