@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Added
 
 - Added new `ImageField` supporting URLs and Data URLs. ([#5279](https://github.com/argilla-io/argilla/pull/5279))
+- Added dark mode ([#5412](https://github.com/argilla-io/argilla/pull/5412))
 
 ## [2.0.1](https://github.com/argilla-io/argilla/compare/v2.0.0...releases/2.0.1)
 
