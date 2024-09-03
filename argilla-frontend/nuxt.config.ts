@@ -114,6 +114,10 @@ const config: NuxtConfig = {
         code: "de",
         file: "de.js",
       },
+      {
+        code: "es",
+        file: "es.js",
+      },
     ],
     detectBrowserLanguage: false,
     vueI18n: {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="settings">
     <h2 class="--heading5 --medium">{{ $t("settings.datasetInfo") }}</h2>
     <div class="settings__area">
       <div class="settings__row">
@@ -11,7 +11,7 @@
         </div>
         <base-action-tooltip :tooltip="$t('copied')">
           <base-button
-            title="Copy to clipboard"
+            :title="$t('button.tooltip.copyToClipboard')"
             class="secondary small"
             @click.prevent="$copyToClipboard(datasetSettingsUrl)"
           >
@@ -93,27 +93,27 @@ export default {
   &__dataset-name {
     margin: 0;
   }
-}
-
-.form-group {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: $base-space;
-  &__input--read-only {
+  .form-group {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    width: 80px;
-    height: 24px;
-    padding: $base-space * 2;
-    border: 1px solid $black-20;
-    border-radius: $border-radius;
-    background: $black-4;
-    border: 1px solid $black-20;
-    opacity: 0.6;
+    width: 100%;
+    gap: $base-space;
+    &__input--read-only {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 80px;
+      height: 24px;
+      padding: $base-space * 2;
+      border: 1px solid $black-20;
+      border-radius: $border-radius;
+      background: $black-4;
+      border: 1px solid $black-20;
+      opacity: 0.6;
+    }
   }
 }
+
 .info-icon {
   color: $black-37;
   margin-right: $base-space * 2;
