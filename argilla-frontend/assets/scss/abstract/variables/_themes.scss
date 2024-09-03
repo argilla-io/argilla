@@ -72,7 +72,6 @@
 }
 
 [data-theme="dark"] {
-  color-scheme: dark;
   --bg-black: hsl(0, 0%, 0%);
   --bg-action: hsl(227, 56%, 52%);
   --bg-action-accent: hsl(227, 50%, 55%);
@@ -132,4 +131,8 @@
 
 [data-theme="light"] {
   color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
 }
