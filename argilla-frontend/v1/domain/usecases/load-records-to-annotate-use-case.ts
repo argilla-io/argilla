@@ -82,7 +82,7 @@ export class LoadRecordsToAnnotateUseCase {
 
     const records = this.recordsStorage.get();
 
-    if (!records.hasNecessaryBuffering(page)) {
+    if (records.shouldBuffering(page)) {
       this.loadBufferedRecords(criteria);
     }
   }
@@ -104,7 +104,7 @@ export class LoadRecordsToAnnotateUseCase {
 
       const newRecords = await this.getRecords.execute(newCriteria);
 
-      records.append(newRecords);
+      if (newRecords.hasRecordsToAnnotate) records.append(newRecords);
 
       this.recordsStorage.save(records);
     } catch {

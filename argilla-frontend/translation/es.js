@@ -9,7 +9,7 @@ export default {
   select: "Seleccionar",
   search: "Buscar",
   searchPlaceholder: "Introduce una consulta",
-  searchDatasets: "Search DataSets",
+  searchDatasets: "Buscar dataset",
   expand: "Expandir",
   copied: "Copiado",
   copyLink: "Copiar enlace",
@@ -32,11 +32,11 @@ export default {
   dimension: "Dimensión",
   visibleLabels: "Etiquetas visibles",
   annotationGuidelines: "Guía de anotación",
-  guidelines: "Guías",
-  taskDistribution: "Distribución de tareas",
-  minimumSubmittedResponses: "Respuestas mínimas enviadas",
+  guidelines: "Guía",
+  taskDistribution: "Distribución de la tarea",
+  minimumSubmittedResponses: "Respuestas mínimas entregadas",
   taskDistributionTooltip:
-    "Una tarea se completa cuando todos los \nregistros tienen el número mínimo \nde respuestas enviadas",
+    "Una tarea se completa cuando todos los \nregistros tienen el número mínimo \nde respuestas entregadas",
   noAnnotationGuidelines: "Este dataset no tiene guía de anotación",
   breadcrumbs: {
     home: "Inicio",
@@ -52,7 +52,7 @@ export default {
     pending: "Pendiente",
     draft: "Borrador",
     discarded: "Descartado",
-    submitted: "Enviado",
+    submitted: "Entregado",
     validated: "Validado",
     completedTooltip:
       "El registro está completo, tiene el número \nmínimo de respuestas",
@@ -110,9 +110,9 @@ export default {
     },
   },
   to_submit_complete_required:
-    "Para enviar completa \nlas respuestas requeridas",
+    "Para entregar completa \nlas respuestas requeridas",
   some_records_failed_to_annotate: "Algunos registros no fueron anotados",
-  changes_no_submit: "No envió sus cambios",
+  changes_no_submit: "No entregó sus cambios",
   bulkAnnotation: {
     recordsSelected:
       "1 registro seleccionado | {count} registros seleccionados",
@@ -129,7 +129,7 @@ export default {
       "Esta acción afectará a {total} registros, ¿Quiere continuar?",
     allRecordsAnnotated: "{total} registros han sido {action}",
     affectedAll: {
-      submitted: "enviados",
+      submitted: "entregados",
       discarded: "descartados",
       draft: "guardados como borrador",
     },
@@ -147,10 +147,11 @@ export default {
     reset: "Reiniciar",
     discard: "Descartar",
     submit: "Entregar",
-    draft: "Guardar como borrador",
+    draft: "Guardar borrador",
     write: "Escribir",
   },
   sorting: {
+    label: "Ordenar",
     addOtherField: "+ Agregar otro campo",
     suggestion: {
       score: "Puntuación de sugerencia",
@@ -193,13 +194,14 @@ export default {
     show: "Mostrar",
     hide: "Ocultar",
     passwordDescription: "Introduce tu contraseña",
-    claim: "Trabajen en datos juntos. </br> para mejorar sus modelos.",
+    claim: "Trabaja en equipo con tus datos.</br>Perfecciona tus modelos.",
     hf: {
       title: "Bienvenido a {Space}",
       subtitle:
         "Únete a <strong>{user}</strong> para construir mejores datasets para IA",
     },
   },
+  of: "de",
   status: "Estado",
   filters: "Filtros",
   filterBy: "Filtrar por ...",
@@ -216,8 +218,8 @@ export default {
   with: "con",
   find: "Encontrar",
   cancel: "Cancelar",
-  focus_mode: "Foco",
-  bulk_mode: "Masivo",
+  focus_mode: "Individual",
+  bulk_mode: "En bloque",
   update: "Actualizar",
   youAreOnlineAgain: "Estás en línea de nuevo",
   youAreOffline: "Estás fuera de línea",
@@ -250,7 +252,7 @@ export default {
       },
       update_distribution_with_existing_responses: {
         message:
-          "La configuración de distribución no se puede modificar para un dataset que contiene respuestas del usuario",
+          "La configuración de distribución no se puede modificar para un dataset que contiene respuestas de usuarios",
       },
     },
     http: {

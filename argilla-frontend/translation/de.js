@@ -4,6 +4,7 @@ export default {
   label_selection: "Label",
   span: "Span",
   text: "Text",
+  image: "Bild",
   rating: "Bewertung",
   minimize: "Minimieren",
   select: "Auswählen",
@@ -156,6 +157,7 @@ export default {
     draft: "Entwurf speichern",
   },
   sorting: {
+    label: "Sortieren",
     addOtherField: "+ Ein weiteres Feld hinzufügen",
     suggestion: {
       score: "Vorschlagsbewertung",
@@ -199,12 +201,14 @@ export default {
     hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
+    error: "Falscher Benutzername oder Passwort. Versuchen Sie es erneut",
     hf: {
       title: "Willkommen bei {space}",
       subtitle:
         "Helfe <strong>{user}</strong> um bessere Datensätze für KI zu erstellen",
     },
   },
+  of: "von",
   status: "Status",
   filters: "Filter",
   filterBy: "Filter nach...",

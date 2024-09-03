@@ -3,8 +3,7 @@ import { useUser } from "~/v1/infrastructure/services/useUser";
 
 const HF_PREFIX = "[hf_]";
 const LOCAL_PREFIX = "[local_]";
-const HF_OWNER = "[HF_OWNER]";
-const HF_SPACE_NAME = "[HF_SPACE_NAME]";
+const HF_HOST = "[HF_HOST]";
 const USER_API_KEY = "[USER_API_KEY]";
 const LOCAL_HOST = "[LOCAL_HOST]";
 
@@ -51,10 +50,7 @@ export const useDatasetEmptyViewModel = () => {
 
       if (row.includes(HF_PREFIX)) {
         content.push(
-          row
-            .replace(HF_PREFIX, "")
-            .replace(HF_OWNER, hfEnvironment.user)
-            .replace(HF_SPACE_NAME, hfEnvironment.space)
+          row.replace(HF_PREFIX, "").replace(HF_HOST, hfEnvironment.host)
         );
 
         continue;

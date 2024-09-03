@@ -13,12 +13,19 @@
 #  limitations under the License.
 from typing import cast
 from unittest import mock
+from unittest.mock import MagicMock
 
 import pytest
+from pytest_mock import MockerFixture
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server._app import create_server_app, configure_database, _create_oauth_allowed_workspaces
+from argilla_server._app import (
+    create_server_app,
+    configure_database,
+    _create_oauth_allowed_workspaces,
+    track_server_startup,
+)
 from argilla_server.models import Workspace
 from argilla_server.security.authentication.oauth2 import OAuth2Settings
 from argilla_server.security.authentication.oauth2.settings import AllowedWorkspace
@@ -26,6 +33,7 @@ from argilla_server.settings import Settings, settings
 from starlette.routing import Mount
 from starlette.testclient import TestClient
 
+from argilla_server.telemetry import TelemetryClient
 from tests.factories import WorkspaceFactory
 
 
@@ -118,3 +126,15 @@ class TestApp:
 
             workspaces = (await db.scalars(select(Workspace))).all()
             assert len(workspaces) == 1
+
+    def test_track_telemetry_on_startup(self, test_settings: Settings, test_telemetry: TelemetryClient):
+        settings.enable_telemetry = True
+
+        track_server_startup()
+        test_telemetry.track_server_startup.assert_called_once()
+
+    def test_track_telemetry_on_startup_disabled(self, test_settings: Settings, test_telemetry: TelemetryClient):
+        settings.enable_telemetry = False
+
+        track_server_startup()
+        test_telemetry.track_server_startup.assert_not_called()
