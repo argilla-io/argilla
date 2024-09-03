@@ -97,7 +97,7 @@ export default {
     padding: 0;
     flex-shrink: 0;
     [data-theme="dark"] & {
-      color: var(--color-black);
+      color: var(--color-white);
     }
   }
 }

@@ -366,7 +366,7 @@ export default {
     [data-theme="dark"] & {
       background: transparent;
       :deep(*) {
-        fill: var(--color-black);
+        fill: var(--color-white);
       }
       &:hover {
         opacity: 0.8;
