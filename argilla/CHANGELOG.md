@@ -14,7 +14,27 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
-## [Unreleased]()
+## [2.0.1](https://github.com/argilla-io/argilla/compare/v2.0.0...releases/2.0.1)
+
+### Fixed
+
+- Fixed error when creating optional fields. ([#5362](https://github.com/argilla-io/argilla/pull/5362))
+- Fixed error creating integer and float metadata with `visible_for_annotators`. ([#5364](https://github.com/argilla-io/argilla/pull/5364))
+- Fixed error when logging records with `suggestions` or `responses` for non-existent questions. ([#5396](https://github.com/argilla-io/argilla/pull/5396) by @maxserras)
+- Fixed error from conflicts in testing suite when running tests in parallel. ([#5349](https://github.com/argilla-io/argilla/commit/1119b164d0623170d44561c6b75d439d2dc96bd0))
+- Fixed error in response model when creating a response with a `None` value. ([#5343](https://github.com/argilla-io/argilla/commit/9e3705061a2dd88a7852288d9f6fd1aaeaa9b062))
+
+### Changed
+
+- Changed `from_hub` method to raise an error when a dataset with the same name exists. ([#5258](https://github.com/argilla-io/argilla/pull/5358))
+- Changed `log` method when ingesting records with no known keys to raise a descriptive error. ([#5356](https://github.com/argilla-io/argilla/pull/5356))
+- Changed `code snippets` to add new datasets ([#5395](https://github.com/argilla-io/argilla/pull/5395))
+
+### Added
+
+- Added Google Analytics to the documentation site. ([#5366](https://github.com/argilla-io/argilla/pull/5366))
+- Added frontend skeletons to progress metrics to optimise load time and improve user experience. ([#5391](https://github.com/argilla-io/argilla/pull/5391))
+- Added documentation in methods in API references for the Python SDK. ([#5400](https://github.com/argilla-io/argilla/commit/a6fc0117bc4923aec0be80df27eb79ddf3f007c7))
 
 ### Fixed
 
