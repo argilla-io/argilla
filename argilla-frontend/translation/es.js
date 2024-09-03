@@ -43,7 +43,7 @@ export default {
       "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",
     datasetEmptyForAdmin:
       "El dataset está vacío. Puedes agregar registros usando el SDK de Python, consulta la <a href='https://docs.argilla.io/latest/how_to_guides/record/'>documentación</a> sobre cómo agregar registros.",
-    taskDistributionCompleted: "🎉 La tarea está completada!",
+    taskDistributionCompleted: "🎉 ¡La tarea está completada!",
     noSubmittedRecords: "Aún no has entregado ningún registro",
     noRecordsFound:
       "No tienes registros {status} que coincidan con tu consulta",
