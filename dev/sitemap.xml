@@ -31,6 +31,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.argilla.io/dev/community/integrations/llamaindex_rag_github/</loc>
+         <lastmod>2024-09-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.argilla.io/dev/getting_started/faq/</loc>
          <lastmod>2024-09-03</lastmod>
          <changefreq>daily</changefreq>
