@@ -21,6 +21,7 @@ from starlette.responses import JSONResponse
 
 from argilla_server.api.errors.v1.exception_handlers import set_request_error
 from argilla_server.errors import ServerError
+from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS
 from argilla_server.telemetry import TelemetryClient
 
 mock_request = Request(scope={"type": "http", "headers": {}})
@@ -37,14 +38,29 @@ class TestSuiteTelemetry:
         assert "server_id" in test_telemetry._system_info
         assert test_telemetry._system_info["server_id"] == mock_server_id.urn
 
-    async def test_track_data(self, mocker: MockerFixture):
+    def test_create_client_with_persistent_storage_enabled(self):
+        HUGGINGFACE_SETTINGS.space_persistent_storage_enabled = True
+
+        test_telemetry = TelemetryClient()
+
+        assert "persistent_storage_enabled" in test_telemetry._system_info
+        assert test_telemetry._system_info["persistent_storage_enabled"] is True
+
+    def test_create_client_with_persistent_storage_disabled(self):
+        HUGGINGFACE_SETTINGS.space_persistent_storage_enabled = False
+
+        test_telemetry = TelemetryClient()
+
+        assert "persistent_storage_enabled" in test_telemetry._system_info
+        assert test_telemetry._system_info["persistent_storage_enabled"] is False
+
+    def test_track_data(self, mocker: MockerFixture):
         from argilla_server._version import __version__ as version
 
         mock = mocker.patch("argilla_server.telemetry._client.send_telemetry")
 
         telemetry = TelemetryClient()
-
-        await telemetry.track_data("test_topic", {"test": "test"})
+        telemetry.track_data("test_topic", {"test": "test"})
 
         mock.assert_called_once_with(
             topic="argilla/server/test_topic",
@@ -142,3 +158,7 @@ class TestSuiteTelemetry:
                 "response.error_code": "argilla.api.errors::ServerError",
             },
         )
+
+    def test_track_server_startup(self, test_telemetry: TelemetryClient):
+        test_telemetry.track_server_startup()
+        test_telemetry.track_data.assert_called_once_with(topic="startup")

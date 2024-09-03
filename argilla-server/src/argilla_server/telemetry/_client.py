@@ -17,12 +17,14 @@ import json
 import logging
 import platform
 import uuid
+from typing import Optional
 
 from fastapi import Request, Response
 from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
 from argilla_server.api.errors.v1.exception_handlers import get_request_error
+from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS
 from argilla_server.security.authentication.provider import get_request_user
 from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 from argilla_server.telemetry._helpers import (
@@ -48,16 +50,17 @@ class TelemetryClient:
             "sys_version": platform.version(),
             "deployment": server_deployment_type(),
             "docker": is_running_on_docker_container(),
+            "persistent_storage_enabled": HUGGINGFACE_SETTINGS.space_persistent_storage_enabled,
         }
 
         _LOGGER.info("System Info:")
         _LOGGER.info(f"Context: {json.dumps(self._system_info, indent=2)}")
 
-    async def track_data(self, topic: str, data: dict):
+    def track_data(self, topic: str, data: Optional[dict] = None):
         library_name = "argilla-server"
         topic = f"argilla/server/{topic}"
 
-        user_agent = {**data, **self._system_info}
+        user_agent = {**(data or {}), **self._system_info}
         send_telemetry(topic=topic, library_name=library_name, library_version=__version__, user_agent=user_agent)
 
     async def track_api_request(self, request: Request, response: Response) -> None:
@@ -75,8 +78,6 @@ class TelemetryClient:
         endpoint_path = resolve_endpoint_path_for_request(request)
         if endpoint_path is None:
             return
-
-        topic = f"endpoints"
 
         data = {
             "endpoint": f"{request.method} {endpoint_path}",
@@ -98,7 +99,16 @@ class TelemetryClient:
             if argilla_error := get_request_error(request=request):
                 data["response.error_code"] = argilla_error.code  # noqa
 
-        await self.track_data(topic=topic, data=data)
+        self.track_data(topic="endpoints", data=data)
+
+    def track_server_startup(self) -> None:
+        """
+        This method is used to track the launch of the server.
+
+        Returns:
+            None
+        """
+        self.track_data(topic="startup")
 
 
 _TELEMETRY_CLIENT = TelemetryClient()
