@@ -4,7 +4,7 @@
       class="textarea--markdown"
       :markdown="question.suggestion?.value"
     />
-    <BaseActionTooltip tooltip="Copied" class="button-copy">
+    <BaseActionTooltip :tooltip="$t('copied')" class="button-copy">
       <BaseButton @on-click="$copyToClipboard(question.suggestion?.value)">
         <svgicon name="copy" width="16" height="16" />
       </BaseButton>

@@ -22,7 +22,6 @@ from sqlalchemy.orm import selectinload
 from argilla_server.api.policies.v1 import DatasetPolicy, MetadataPropertyPolicy, authorize, is_authorized
 from argilla_server.api.schemas.v1.datasets import (
     Dataset as DatasetSchema,
-    UsersProgress,
 )
 from argilla_server.api.schemas.v1.datasets import (
     DatasetCreate,
@@ -30,6 +29,7 @@ from argilla_server.api.schemas.v1.datasets import (
     DatasetProgress,
     Datasets,
     DatasetUpdate,
+    UsersProgress,
 )
 from argilla_server.api.schemas.v1.fields import Field, FieldCreate, Fields
 from argilla_server.api.schemas.v1.metadata_properties import (
@@ -248,7 +248,6 @@ async def publish_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ) -> Dataset:
@@ -266,11 +265,6 @@ async def publish_dataset(
     await authorize(current_user, DatasetPolicy.publish(dataset))
 
     dataset = await datasets.publish_dataset(db, search_engine, dataset)
-
-    telemetry_client.track_data(
-        action="PublishedDataset",
-        data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
-    )
 
     return dataset
 

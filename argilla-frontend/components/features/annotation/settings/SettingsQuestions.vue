@@ -126,7 +126,7 @@
     </div>
     <div class="settings__preview">
       <QuestionsComponent
-        legend="UI preview"
+        :legend="$t('settings.uiPreview')"
         class="settings__preview__content"
         :questions="settings.questions"
       />

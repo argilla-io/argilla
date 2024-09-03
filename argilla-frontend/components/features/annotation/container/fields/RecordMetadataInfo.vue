@@ -21,7 +21,7 @@
               {{ value }}
               <BaseActionTooltip
                 class="table-info__copy"
-                tooltip="Copied"
+                :tooltip="$t('copied')"
                 tooltip-position="left"
               >
                 <BaseButton
