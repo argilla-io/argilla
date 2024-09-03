@@ -1861,7 +1861,7 @@
         <li class="md-nav__item">
   <a href="#how-to-opt-out" class="md-nav__link">
     <span class="md-ellipsis">
-      How to opt out
+      How to opt-out
     </span>
   </a>
   
@@ -2133,7 +2133,7 @@
         <li class="md-nav__item">
   <a href="#how-to-opt-out" class="md-nav__link">
     <span class="md-ellipsis">
-      How to opt out
+      How to opt-out
     </span>
   </a>
   
@@ -2190,16 +2190,16 @@
 
 
 <h1 id="server-telemetry">Server Telemetry<a class="headerlink" href="#server-telemetry" title="Permanent link">&para;</a></h1>
-<p>Argilla uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used.</p>
-<h2 id="how-to-opt-out">How to opt out<a class="headerlink" href="#how-to-opt-out" title="Permanent link">&para;</a></h2>
-<p>You can opt out of telemetry reporting using the <code>ENV</code> variable <code>ARGILLA_ENABLE_TELEMETRY</code> before launching the server. Setting this variable to <code>0</code> will completely disable telemetry reporting.</p>
+<p>Argilla uses telemetry to report anonymous usage and error information. As an open-source software, this type of information is important to improve and understand how the product is used. This is done through the <a href="https://github.com/huggingface/huggingface_hub">Hugging Face Hub library</a> telemetry implementations.</p>
+<h2 id="how-to-opt-out">How to opt-out<a class="headerlink" href="#how-to-opt-out" title="Permanent link">&para;</a></h2>
+<p>You can opt out of telemetry reporting using the <code>ENV</code> variable <code>HF_HUB_DISABLE_TELEMETRY</code> before launching the server. Setting this variable to <code>1</code> will completely disable telemetry reporting.</p>
 <p>If you are a Linux/MacOs user, you should run:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ARGILLA_ENABLE_TELEMETRY</span><span class="o">=</span><span class="m">0</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">HF_HUB_DISABLE_TELEMETRY</span><span class="o">=</span><span class="m">1</span>
 </span></code></pre></div>
 <p>If you are a Windows user, you should run:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">set</span><span class="w"> </span><span class="nv">ARGILLA_ENABLE_TELEMETRY</span><span class="o">=</span><span class="m">0</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">set</span><span class="w"> </span><span class="nv">HF_HUB_DISABLE_TELEMETRY</span><span class="o">=</span><span class="m">1</span>
 </span></code></pre></div>
-<p>To opt in again, you can set the variable to <code>1</code>.</p>
+<p>To opt in again, you can set the variable to <code>0</code>.</p>
 <h2 id="why-reporting-telemetry">Why reporting telemetry<a class="headerlink" href="#why-reporting-telemetry" title="Permanent link">&para;</a></h2>
 <p>Anonymous telemetry information enables us to continuously improve the product and detect recurring problems to better serve all users. We collect aggregated information about general usage and errors. We do NOT collect any information on users' data records, datasets, or metadata information.</p>
 <h2 id="sensitive-data">Sensitive data<a class="headerlink" href="#sensitive-data" title="Permanent link">&para;</a></h2>
@@ -2211,10 +2211,11 @@
 <h2 id="information-reported">Information reported<a class="headerlink" href="#information-reported" title="Permanent link">&para;</a></h2>
 <p>The following usage and error information is reported:</p>
 <ul>
-<li>The code of the raised error and the entity type related to the error, if any (Dataset, Workspace,...)</li>
+<li>The code of the raised error</li>
 <li>The <code>user-agent</code> and <code>accept-language</code> http headers</li>
 <li>Task name and number of records for bulk operations</li>
 <li>An anonymous generated user uuid</li>
+<li>An anonymous generated server uuid</li>
 <li>The Argilla version running the server</li>
 <li>The Python version, e.g. <code>3.8.13</code></li>
 <li>The system/OS name, such as <code>Linux</code>, <code>Darwin</code>, <code>Windows</code></li>
@@ -2224,7 +2225,7 @@
 <li>The type of deployment: <code>huggingface_space</code> or <code>server</code></li>
 <li>The dockerized deployment flag: <code>True</code> or <code>False</code></li>
 </ul>
-<p>For transparency, you can inspect the source code where this is performed <a href="https://github.com/argilla-io/argilla/blob/main/argilla-server/src/argilla_server/utils/_telemetry.py">here</a>.</p>
+<p>For transparency, you can inspect the source code where this is performed <a href="https://github.com/argilla-io/argilla/argilla-server/src/argilla_server/telemetry.py">here</a>.</p>
 <p>If you have any doubts, don't hesitate to join our <a href="http://hf.co/join/discord">Discord channel</a> or open a GitHub issue. We'd be very happy to discuss how we can improve this.</p>
 
 
