@@ -32,7 +32,7 @@ The Argilla repository has a monorepo structure, which means that all the compon
 - [`examples`](https://github.com/argilla-io/argilla/tree/develop/examples): Example resources for deployments, scripts and notebooks
 
 !!! note "How to contribute?"
- Before starting to develop, we recommend reading our [contribution guide](contributor.md) to understand the contribution process and the guidelines to follow. Once you have [cloned the Argilla repository](contributor.md#fork-the-argilla-repository) and [checked out to the correct branch](contributor.md#create-a-new-branch), you can start setting up your development environment.
+    Before starting to develop, we recommend reading our [contribution guide](contributor.md) to understand the contribution process and the guidelines to follow. Once you have [cloned the Argilla repository](contributor.md#fork-the-argilla-repository) and [checked out to the correct branch](contributor.md#create-a-new-branch), you can start setting up your development environment.
 
 
 ## Set up the Python environment
