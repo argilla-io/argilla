@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 - Added new endpoint `GET /api/v1/datsets/:dataset_id/users/progress` to compute the users progress. ([#5367](https://github.com/argilla-io/argilla/pull/5367))
 
+### Changed
+
+- Change the telemetry module to use the HuggingFace telemetry client ([#5218](https://github.com/argilla-io/argilla/pull/5218))
+
 ### Fixed
 
 - Fixed response duplicate checking ([#5357](https://github.com/argilla-io/argilla/issues/5357))
