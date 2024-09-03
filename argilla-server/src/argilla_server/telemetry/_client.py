@@ -92,7 +92,7 @@ class TelemetryClient:
             data["duration_in_milliseconds"] = duration_in_ms
 
         if user := get_request_user(request=request):
-            data["user.id"] = str(user.id)
+            data["user.id"] = user.id.urn
             data["user.role"] = user.role
 
         if response.status_code >= 400:
