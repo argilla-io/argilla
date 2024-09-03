@@ -115,7 +115,7 @@ export default {
 <style lang="scss" scoped>
 .container {
   display: flex;
-  min-height: 5em;
+  min-height: 4em;
   padding: $base-space;
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
