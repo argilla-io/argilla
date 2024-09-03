@@ -61,8 +61,8 @@ export default {
       ];
     },
   },
-  setup(props) {
-    return useTeamProgressViewModel(props);
+  setup() {
+    return useTeamProgressViewModel();
   },
 };
 </script>

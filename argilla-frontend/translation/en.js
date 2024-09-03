@@ -39,6 +39,18 @@ export default {
   taskDistributionTooltip:
     "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
+  noRecordsMessages: {
+    datasetEmptyForAnnotator:
+      "The dataset is empty. Ask an administrator to upload records and come back soon.",
+    datasetEmptyForAdmin:
+      "The dataset is empty. You can add records using the Python SDK, see <a href='https://docs.argilla.io/latest/how_to_guides/record/'>documentation</a> on adding records.",
+    taskDistributionCompleted: "🎉 The task is completed!",
+    noSubmittedRecords: "You have not submitted any record yet",
+    noRecordsFound: "You have no {status} records matching your query",
+    noRecords: "You have no {status} records",
+    noPendingRecordsToAnnotate: "🎉 Your have no pending records to annotate",
+    noDraftRecordsToReview: "You have no draft records to review",
+  },
   couldNotLoadImage: "Could not load image",
   breadcrumbs: {
     home: "Home",
@@ -51,11 +63,11 @@ export default {
     pending: "Pending",
   },
   recordStatus: {
-    pending: "Pending",
-    draft: "Draft",
-    discarded: "Discarded",
-    submitted: "Submitted",
-    validated: "Validated",
+    pending: "pending",
+    draft: "draft",
+    discarded: "discarded",
+    submitted: "submitted",
+    validated: "validated",
     completedTooltip:
       "The record is complete, it has the \nminimum number of responses",
   },

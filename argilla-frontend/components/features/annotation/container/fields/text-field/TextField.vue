@@ -18,6 +18,7 @@
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
       <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
+      <Sandbox v-else-if="isHTML" :fieldText="fieldText" />
       <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
       <template>
         <style :key="name" scoped>
@@ -59,6 +60,9 @@ export default {
   computed: {
     classes() {
       return this.$language.isRTL(this.fieldText) ? "--rtl" : "--ltr";
+    },
+    isHTML() {
+      return /<([A-Za-z][A-Za-z0-9]*)\b[^>]*>(.*?)<\/\1>/.test(this.fieldText);
     },
   },
   setup(props) {

@@ -86,11 +86,10 @@
                 />
                 <PaginationFeedbackTask :recordCriteria="recordCriteria" />
               </div>
-              <div
-                ref="bulkScrollableArea"
-                class="bulk__records snap"
-                v-if="records.hasRecordsToAnnotate"
-              >
+              <div v-if="recordsMessage" class="wrapper--empty">
+                <p class="wrapper__text --heading3" v-html="recordsMessage" />
+              </div>
+              <div ref="bulkScrollableArea" class="bulk__records snap" v-else>
                 <Record
                   class="snap-child"
                   :class="{
@@ -105,9 +104,6 @@
                   :selectedRecords="selectedRecords"
                   @on-select-record="onSelectRecord"
                 />
-              </div>
-              <div v-else class="wrapper--empty">
-                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
               </div>
             </section>
           </template>
@@ -220,9 +216,8 @@ export default {
     record: {
       type: Object,
     },
-    noRecordsMessage: {
+    recordsMessage: {
       type: String,
-      required: true,
     },
     statusClass: {
       type: String,
@@ -493,9 +488,11 @@ export default {
   }
   &__text {
     color: var(--fg-secondary);
+    max-width: 80%;
   }
   &--empty {
     width: 100%;
+    text-align: center;
     height: 80vh;
     display: flex;
     align-items: center;

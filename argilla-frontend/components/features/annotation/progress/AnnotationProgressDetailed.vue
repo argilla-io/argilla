@@ -90,8 +90,8 @@ export default {
       ];
     },
   },
-  setup(props) {
-    return useAnnotationProgressViewModel(props);
+  setup() {
+    return useAnnotationProgressViewModel();
   },
 };
 </script>

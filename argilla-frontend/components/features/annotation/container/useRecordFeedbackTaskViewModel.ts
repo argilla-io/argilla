@@ -1,5 +1,6 @@
 import { useResolve } from "ts-injecty";
 import { ref, onBeforeMount } from "vue-demi";
+import { useRecordMessages } from "./useRecordsMessages";
 import { LoadRecordsToAnnotateUseCase } from "@/v1/domain/usecases/load-records-to-annotate-use-case";
 import { useRecords } from "@/v1/infrastructure/storage/RecordsStorage";
 import { RecordCriteria } from "@/v1/domain/entities/record/RecordCriteria";
@@ -11,6 +12,11 @@ export const useRecordFeedbackTaskViewModel = ({
 }: {
   recordCriteria: RecordCriteria;
 }) => {
+  const { getMessagesForLoading, getMessageForPagination } =
+    useRecordMessages(recordCriteria);
+
+  const recordsMessage = ref<string | null>(null);
+
   const getDatasetVectorsUseCase = useResolve(GetDatasetVectorsUseCase);
   const loadRecordsUseCase = useResolve(LoadRecordsToAnnotateUseCase);
 
@@ -19,22 +25,22 @@ export const useRecordFeedbackTaskViewModel = ({
 
   const loadRecords = async (criteria: RecordCriteria) => {
     try {
-      await loadRecordsUseCase.load(criteria);
+      const newRecords = await loadRecordsUseCase.load(criteria);
+
+      recordsMessage.value = getMessagesForLoading(newRecords);
     } catch (err) {
       criteria.reset();
     }
   };
 
   const paginateRecords = async (criteria: RecordCriteria) => {
-    let isNextRecordExist = false;
-
     try {
-      isNextRecordExist = await loadRecordsUseCase.paginate(criteria);
+      const isNextRecordExist = await loadRecordsUseCase.paginate(criteria);
+
+      recordsMessage.value = getMessageForPagination(isNextRecordExist);
     } catch (err) {
       criteria.reset();
     }
-
-    return isNextRecordExist;
   };
 
   const loadVectors = async () => {
@@ -52,5 +58,6 @@ export const useRecordFeedbackTaskViewModel = ({
     datasetVectors,
     loadRecords,
     paginateRecords,
+    recordsMessage,
   };
 };

@@ -25,7 +25,7 @@ export const useBulkAnnotationViewModel = ({
   const isSubmitting = ref(false);
   const bulkAnnotationUseCase = useResolve(BulkAnnotationUseCase);
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const checkIfSomeFilterIsActive = (criteria: RecordCriteria) => {
     return (

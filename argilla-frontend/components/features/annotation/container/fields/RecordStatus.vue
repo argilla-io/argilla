@@ -29,24 +29,24 @@ export default {
       switch (this.record.status) {
         case "pending":
           return {
-            name: this.$t("recordStatus.pending"),
+            name: this.$tc("recordStatus.pending", 1),
             class: "--pending",
           };
         case "draft":
           return {
-            name: this.$t("recordStatus.draft"),
+            name: this.$tc("recordStatus.draft", 1),
             class: "--draft",
           };
 
         case "discarded":
           return {
-            name: this.$t("recordStatus.discarded"),
+            name: this.$tc("recordStatus.discarded", 1),
             class: "--discarded",
           };
 
         case "submitted":
           return {
-            name: this.$t("recordStatus.submitted"),
+            name: this.$tc("recordStatus.submitted", 1),
             class: "--submitted",
           };
       }
@@ -64,6 +64,7 @@ export default {
   border-radius: $border-radius-rounded;
 }
 .status-tag {
+  text-transform: capitalize;
   display: flex;
   align-items: center;
   gap: $base-space;

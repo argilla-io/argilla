@@ -38,6 +38,19 @@ export default {
   taskDistributionTooltip:
     "Una tarea se completa cuando todos los \nregistros tienen el número mínimo \nde respuestas entregadas",
   noAnnotationGuidelines: "Este dataset no tiene guía de anotación",
+  noRecordsMessages: {
+    datasetEmptyForAnnotator:
+      "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",
+    datasetEmptyForAdmin:
+      "El dataset está vacío. Puedes agregar registros usando el SDK de Python, consulta la <a href='https://docs.argilla.io/latest/how_to_guides/record/'>documentación</a> sobre cómo agregar registros.",
+    taskDistributionCompleted: "🎉 ¡La tarea está completada!",
+    noSubmittedRecords: "Aún no has entregado ningún registro",
+    noRecordsFound:
+      "No tienes registros {status} que coincidan con tu búsqueda",
+    noRecords: "No tienes registros {status}",
+    noPendingRecordsToAnnotate: "🎉 No tienes registros pendientes para anotar",
+    noDraftRecordsToReview: "No tienes ningún borrador para revisar",
+  },
   breadcrumbs: {
     home: "Inicio",
     datasetSettings: "Configuración",
@@ -49,11 +62,11 @@ export default {
     pending: "Pendiente",
   },
   recordStatus: {
-    pending: "Pendiente",
-    draft: "Borrador",
-    discarded: "Descartado",
-    submitted: "Entregado",
-    validated: "Validado",
+    pending: "pendiente | pendientes",
+    draft: "borrador | borradores",
+    discarded: "descartado | descartados",
+    submitted: "entregado | entregados",
+    validated: "validado | validados",
     completedTooltip:
       "El registro está completo, tiene el número \nmínimo de respuestas",
   },
