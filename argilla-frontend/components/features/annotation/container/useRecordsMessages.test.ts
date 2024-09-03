@@ -174,7 +174,7 @@ describe("useRecordsMessages", () => {
         const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
         expect(getMessagesForLoading(records)).toBe(
-          `#noRecordsMessages.noRecordsFound.${status}#`
+          `#noRecordsMessages.noRecordsFound.#recordStatus.${status}.2##`
         );
       }
     );
@@ -222,7 +222,7 @@ describe("useRecordsMessages", () => {
         const { getMessagesForLoading } = useRecordMessages(recordCriteria);
 
         expect(getMessagesForLoading(records)).toBe(
-          `#noRecordsMessages.noRecords.${status}#`
+          `#noRecordsMessages.noRecords.#recordStatus.${status}.2##`
         );
       }
     );
@@ -298,7 +298,7 @@ describe("useRecordsMessages", () => {
       const { getMessageForPagination } = useRecordMessages(recordCriteria);
 
       expect(getMessageForPagination(hasRecordsOnNextPage)).toBe(
-        "#noRecordsMessages.noRecords.discarded#"
+        "#noRecordsMessages.noRecords.#recordStatus.discarded.2##"
       );
     });
 
