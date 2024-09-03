@@ -2376,7 +2376,7 @@
 <p><strong>Relational Database</strong>: A relational database to store the metadata of the records and the annotations. <code>SQLite</code> is used as the default built-in option and is deployed separately with the Argilla Server, but a separate <code>PostgreSQL</code> can be used.</p>
 </li>
 <li>
-<p><strong>Vector Database</strong>: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support <code>ElasticSearch</code>, which can be deployed as a separate Docker image.</p>
+<p><strong>Vector Database</strong>: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support <code>ElasticSearch</code> and <code>OpenSearch</code>, which can be deployed as separate Docker images.</p>
 </li>
 <li>
 <p><strong>Vue.js UI</strong>: A web application to visualize and annotate your data, users, and teams. It is built with <code>Vue.js</code> and is directly deployed alongside the Argilla Server within our Argilla Docker image.</p>
@@ -2394,8 +2394,8 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">How to contribute?</p>
-</div>
 <p>Before starting to develop, we recommend reading our <a href="../contributor/">contribution guide</a> to understand the contribution process and the guidelines to follow. Once you have <a href="../contributor/#fork-the-argilla-repository">cloned the Argilla repository</a> and <a href="../contributor/#create-a-new-branch">checked out to the correct branch</a>, you can start setting up your development environment.</p>
+</div>
 <h2 id="set-up-the-python-environment">Set up the Python environment<a class="headerlink" href="#set-up-the-python-environment" title="Permanent link">&para;</a></h2>
 <p>To work on the Argilla Python SDK, you must install the Argilla package on your system.</p>
 <div class="admonition tip">
@@ -2438,7 +2438,8 @@
 <h2 id="set-up-the-databases">Set up the databases<a class="headerlink" href="#set-up-the-databases" title="Permanent link">&para;</a></h2>
 <p>To run your development environment, you need to set up Argilla's databases.</p>
 <h4 id="vector-database">Vector database<a class="headerlink" href="#vector-database" title="Permanent link">&para;</a></h4>
-<p>Argilla supports ElasticSearch as its primary search engine for the vector database. You can run it locally using Docker.</p>
+<p>Argilla supports ElasticSearch as its primary search engine for the vector database by default. For more information about setting OpenSearch, check the <a href="../../reference/argilla-server/configuration/">Server configuration</a>.</p>
+<p>You can run ElasticSearch locally using Docker:</p>
 <div class="language-sh highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Argilla supports ElasticSearch versions &gt;=8.5</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>elasticsearch-for-argilla<span class="w"> </span>-p<span class="w"> </span><span class="m">9200</span>:9200<span class="w"> </span>-p<span class="w"> </span><span class="m">9300</span>:9300<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;ES_JAVA_OPTS=-Xms512m -Xmx512m&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;discovery.type=single-node&quot;</span><span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;xpack.security.enabled=false&quot;</span><span class="w"> </span>docker.elastic.co/elasticsearch/elasticsearch:8.5.3
 </span></code></pre></div>
