@@ -49,12 +49,12 @@ export default {
 .tooltip {
   position: absolute;
   top: 0;
-  background: var(--bg-accent-grey-1);
+  background: var(--bg-tooltip);
   display: inline-block;
   border-radius: $border-radius-s;
-  color: var(--fg-primary);
+  color: var(--color-white);
   @include font-size(12px);
-  box-shadow: 0 1px 4px 1px rgba(222, 222, 222, 0.5);
+  box-shadow: 0 1px 4px 1px var(--bg-accent-grey-1);
   padding: 0.1em 0.5em;
   white-space: nowrap;
   font-family: $primary-font-family !important;

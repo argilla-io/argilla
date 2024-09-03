@@ -96,6 +96,9 @@ export default {
   &__button {
     padding: 0;
     flex-shrink: 0;
+    [data-theme="dark"] & {
+      color: var(--color-black);
+    }
   }
 }
 </style>

@@ -363,6 +363,15 @@ export default {
     &:hover {
       background: hsl(from var(--color-dark-grey) h s l / 80%);
     }
+    [data-theme="dark"] & {
+      background: transparent;
+      :deep(*) {
+        fill: var(--color-black);
+      }
+      &:hover {
+        opacity: 0.8;
+      }
+    }
   }
   &--clickable {
     cursor: pointer;
