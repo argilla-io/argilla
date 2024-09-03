@@ -35,7 +35,7 @@ export default {
     display: none;
     overflow: hidden;
     @include media(">desktop") {
-      background: var(--bg-auth-gradient);
+      background: linear-gradient(178.31deg, #ffe5d9 1.36%, #ffd1bc 109.14%);
       padding: $base-space * 2;
       display: flex;
       align-items: flex-start;
