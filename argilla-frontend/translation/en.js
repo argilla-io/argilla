@@ -63,11 +63,11 @@ export default {
     pending: "Pending",
   },
   recordStatus: {
-    pending: "Pending",
-    draft: "Draft",
-    discarded: "Discarded",
-    submitted: "Submitted",
-    validated: "Validated",
+    pending: "pending",
+    draft: "draft",
+    discarded: "discarded",
+    submitted: "submitted",
+    validated: "validated",
     completedTooltip:
       "The record is complete, it has the \nminimum number of responses",
   },

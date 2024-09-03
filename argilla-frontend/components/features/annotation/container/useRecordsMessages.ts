@@ -5,7 +5,7 @@ import { useMetrics } from "~/v1/infrastructure/storage/MetricsStorage";
 import { useTeamProgress } from "~/v1/infrastructure/storage/TeamProgressStorage";
 
 export const useRecordMessages = (recordCriteria: RecordCriteria) => {
-  const t = useTranslate();
+  const { t, tc } = useTranslate();
   const { isAdminOrOwnerRole } = useRole();
   const { state: metrics } = useMetrics();
   const { state: progress } = useTeamProgress();
@@ -25,7 +25,9 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
       const { status } = recordCriteria.committed;
 
       if (recordCriteria.isFilteringByAdvanceSearch) {
-        return t("noRecordsMessages.noRecordsFound", { status });
+        return t("noRecordsMessages.noRecordsFound", {
+          status: tc(`recordStatus.${status}`, 2),
+        });
       }
 
       if (status === "draft") {
@@ -36,7 +38,9 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
         return t("noRecordsMessages.noSubmittedRecords");
       }
 
-      return t("noRecordsMessages.noRecords", { status });
+      return t("noRecordsMessages.noRecords", {
+        status: tc(`recordStatus.${status}`, 2),
+      });
     }
 
     return null;
@@ -59,7 +63,9 @@ export const useRecordMessages = (recordCriteria: RecordCriteria) => {
       }
 
       if (status === "discarded") {
-        return t("noRecordsMessages.noRecords", { status });
+        return t("noRecordsMessages.noRecords", {
+          status: tc(`recordStatus.${status}`, 2),
+        });
       }
     }
 

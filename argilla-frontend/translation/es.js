@@ -62,11 +62,11 @@ export default {
     pending: "Pendiente",
   },
   recordStatus: {
-    pending: "Pendiente",
-    draft: "Borrador",
-    discarded: "Descartado",
-    submitted: "Entregado",
-    validated: "Validado",
+    pending: "pendiente | pendientes",
+    draft: "borrador | borradores",
+    discarded: "descartado | descartados",
+    submitted: "entregado | entregados",
+    validated: "validado | validados",
     completedTooltip:
       "El registro está completo, tiene el número \nmínimo de respuestas",
   },
