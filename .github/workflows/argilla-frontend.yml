@@ -28,13 +28,19 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run tests
+      -name: Install dependencies 📦
         run: |
           npm install
+
+      - name: Run lint 🧹
+        run: |
           npm run lint
+
+      - name: Run tests 🧪
+        run: |
           npm run test
 
-      - name: Build package
+      - name: Build package 📦
         env:
           # BASE_URL is used in the server to support parameterizable base root path
           # See scripts/build_frontend.sh

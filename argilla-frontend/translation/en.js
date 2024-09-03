@@ -121,13 +121,6 @@ export default {
       goToDatasetSettings: "Go to dataset settings",
       datasetSettings: "Dataset settings",
     },
-    tooltip: {
-      copyToClipboard: "Copy to clipboard",
-      copyNameToClipboard: "Copy dataset name to clipboard",
-      copyLinkToClipboard: "Copy dataset link to clipboard",
-      goToDatasetSettings: "Go to dataset settings",
-      datasetSettings: "Dataset settings",
-    },
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
