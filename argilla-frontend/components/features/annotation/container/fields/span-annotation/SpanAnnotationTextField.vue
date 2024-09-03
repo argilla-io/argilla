@@ -13,7 +13,7 @@
         tooltip-position="left"
       >
         <BaseButton
-          title="Copy to clipboard"
+          :title="$t('button.tooltip.copyToClipboard')"
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
         >
