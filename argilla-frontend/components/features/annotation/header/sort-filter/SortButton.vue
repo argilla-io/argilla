@@ -1,6 +1,6 @@
 <template>
   <FilterButton
-    button-name="Sort"
+    :button-name="$t('sorting.label')"
     icon-name="sort"
     :is-button-active="isButtonActive"
   >

@@ -6,20 +6,17 @@
       :copy-button="showCopyButton"
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
-    <template v-if="datasetId">
-      <NuxtLink
-        v-if="showSettingButton"
-        :to="{ name: 'dataset-id-settings', params: { id: this.datasetId } }"
-      >
-        <DatasetSettingsIconFeedbackTask v-if="datasetId" />
-      </NuxtLink>
+    <template v-if="datasetId && showSettingButton">
+      <div @click="goToSetting(datasetId)">
+        <DatasetSettingsIconFeedbackTask />
+      </div>
     </template>
     <user-avatar-tooltip />
   </BaseTopbarBrand>
 </template>
 
 <script>
-import { useRole } from "~/v1/infrastructure/services";
+import { useRoutes } from "~/v1/infrastructure/services";
 
 export default {
   name: "HeaderFeedbackTask",
@@ -41,7 +38,7 @@ export default {
     },
   },
   setup() {
-    return useRole();
+    return useRoutes();
   },
 };
 </script>
