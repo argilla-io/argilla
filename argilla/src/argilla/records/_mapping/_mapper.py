@@ -15,11 +15,12 @@
 import re
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union, Tuple
 from uuid import UUID
+import warnings
 
 from argilla._exceptions import RecordsIngestionError
 from argilla.records._resource import Record
 from argilla.responses import Response
-from argilla.settings import TextField, VectorField
+from argilla.settings import AbstractField, VectorField
 from argilla.settings._metadata import MetadataPropertyBase
 from argilla.settings._question import QuestionPropertyBase
 from argilla.suggestions import Suggestion
@@ -82,6 +83,24 @@ class IngestedRecordMapper:
         fields = self._map_attributes(data=data, mapping=self.mapping.field)
         metadata = self._map_attributes(data=data, mapping=self.mapping.metadata)
         vectors = self._map_attributes(data=data, mapping=self.mapping.vector)
+
+        unknown_keys = [key for key in data.keys() if key not in self.mapping.keys()]
+        if unknown_keys:
+            warnings.warn(f"Keys {unknown_keys} in data are not present in the mapping and will be ignored.")
+
+        if len([k for k in data if k != self.mapping.id.source]) == 0:
+            raise RecordsIngestionError(
+                message=f"Record has no data. All records must have at least one attribute. Record id: {record_id}."
+            )
+
+        if data and not (record_id or suggestions or responses or fields or metadata or vectors):
+            raise RecordsIngestionError(
+                message=f"""Record has no identifiable keys. If keys in source dataset
+                do not match the names in `dataset.settings`, you should use a
+                `mapping` with `dataset.records.log`.
+                Available keys: {self.mapping.keys()}.
+                Unkown keys: {unknown_keys}. """
+            )
 
         return Record(
             id=record_id,
@@ -165,7 +184,7 @@ class IngestedRecordMapper:
             attribute_route.type = AttributeType.SUGGESTION
         elif isinstance(schema_item, QuestionPropertyBase) and attribute_route.type == AttributeType.RESPONSE:
             attribute_route.type = AttributeType.RESPONSE
-        elif isinstance(schema_item, TextField):
+        elif isinstance(schema_item, AbstractField):
             attribute_route.type = AttributeType.FIELD
         elif isinstance(schema_item, VectorField):
             attribute_route.type = AttributeType.VECTOR

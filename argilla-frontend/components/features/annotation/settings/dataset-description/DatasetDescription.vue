@@ -33,8 +33,16 @@ export default {
   data() {
     return {
       tabs: [
-        { id: "0", name: "Write", component: "ContentEditableFeedbackTask" },
-        { id: "1", name: "Preview", component: "RenderMarkdownBaseComponent" },
+        {
+          id: "0",
+          name: this.$t("write"),
+          component: "ContentEditableFeedbackTask",
+        },
+        {
+          id: "1",
+          name: this.$t("preview"),
+          component: "RenderMarkdownBaseComponent",
+        },
       ],
     };
   },

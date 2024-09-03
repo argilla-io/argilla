@@ -4,6 +4,7 @@ export default {
   label_selection: "Label",
   span: "Span",
   text: "Text",
+  image: "Image",
   rating: "Rating",
   minimize: "Minimize",
   select: "Select",
@@ -12,7 +13,6 @@ export default {
   searchDatasets: "Search datasets",
   expand: "Expand",
   copied: "Copied",
-  copyClipboard: "Copy to clipboard",
   copyLink: "Copy link",
   copyRecord: "Copy record",
   refresh: "Refresh",
@@ -39,6 +39,7 @@ export default {
   taskDistributionTooltip:
     "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
+  couldNotLoadImage: "Could not load image",
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",
@@ -101,6 +102,13 @@ export default {
     cancel: "Cancel",
     continue: "Continue",
     delete: "Delete",
+    tooltip: {
+      copyToClipboard: "Copy to clipboard",
+      copyNameToClipboard: "Copy dataset name to clipboard",
+      copyLinkToClipboard: "Copy dataset link to clipboard",
+      goToDatasetSettings: "Go to dataset settings",
+      datasetSettings: "Dataset settings",
+    },
   },
   to_submit_complete_required: "To submit complete \nrequired responses",
   some_records_failed_to_annotate: "Some records failed to annotate",
@@ -142,6 +150,7 @@ export default {
     write: "Write",
   },
   sorting: {
+    label: "Sort",
     addOtherField: "+ Add another field",
     suggestion: {
       score: "Suggestion score",
@@ -185,11 +194,13 @@ export default {
     hide: "Hide",
     passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
+    error: "Wrong username or password. Try again",
     hf: {
       title: "Welcome to {space}",
       subtitle: "Join <strong>{user}</strong> to build better datasets for AI",
     },
   },
+  of: "of",
   status: "Status",
   filters: "Filters",
   filterBy: "Filter by...",
@@ -211,6 +222,8 @@ export default {
   update: "Update",
   youAreOnlineAgain: "You are online again",
   youAreOffline: "You are offline",
+  write: "Write",
+  preview: "Preview",
   datasetTable: {
     name: "Dataset",
     workspace: "Workspace",

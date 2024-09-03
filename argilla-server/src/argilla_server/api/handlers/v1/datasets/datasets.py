@@ -29,6 +29,7 @@ from argilla_server.api.schemas.v1.datasets import (
     DatasetProgress,
     Datasets,
     DatasetUpdate,
+    UsersProgress,
 )
 from argilla_server.api.schemas.v1.fields import Field, FieldCreate, Fields
 from argilla_server.api.schemas.v1.metadata_properties import (
@@ -39,7 +40,6 @@ from argilla_server.api.schemas.v1.metadata_properties import (
 from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
-from argilla_server.enums import ResponseStatus
 from argilla_server.models import Dataset, User
 from argilla_server.search_engine import (
     SearchEngine,
@@ -161,7 +161,23 @@ async def get_dataset_progress(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return await datasets.get_dataset_progress(db, dataset_id)
+    return await datasets.get_dataset_progress(db, dataset.id)
+
+
+@router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress, response_model_exclude_unset=True)
+async def get_dataset_users_progress(
+    *,
+    current_user: User = Security(auth.get_current_user),
+    dataset_id: UUID,
+    db: AsyncSession = Depends(get_async_db),
+):
+    dataset = await Dataset.get_or_raise(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicy.get(dataset))
+
+    progress = await datasets.get_dataset_users_progress(dataset.id)
+
+    return UsersProgress(users=progress)
 
 
 @router.post("/datasets", status_code=status.HTTP_201_CREATED, response_model=DatasetSchema)
@@ -232,7 +248,6 @@ async def publish_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ) -> Dataset:
@@ -250,11 +265,6 @@ async def publish_dataset(
     await authorize(current_user, DatasetPolicy.publish(dataset))
 
     dataset = await datasets.publish_dataset(db, search_engine, dataset)
-
-    telemetry_client.track_data(
-        action="PublishedDataset",
-        data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
-    )
 
     return dataset
 

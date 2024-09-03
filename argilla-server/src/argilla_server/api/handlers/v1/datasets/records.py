@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
@@ -46,7 +45,7 @@ from argilla_server.api.schemas.v1.suggestions import (
 )
 from argilla_server.contexts import datasets, search
 from argilla_server.database import get_async_db
-from argilla_server.enums import RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.enums import RecordSortField, ResponseStatusFilter
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, Record, User, VectorSettings
@@ -236,9 +235,9 @@ async def _build_response_status_filter_for_search(
     return user_response_status_filter
 
 
-async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
+async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset: Dataset):
     try:
-        await search.validate_search_records_query(db, query, dataset_id)
+        await search.validate_search_records_query(db, query, dataset)
     except (ValueError, NotFoundError) as e:
         raise UnprocessableEntityError(str(e))
 
@@ -324,7 +323,7 @@ async def search_current_user_dataset_records(
 
     await authorize(current_user, DatasetPolicy.search_records(dataset))
 
-    await _validate_search_records_query(db, body, dataset_id)
+    await _validate_search_records_query(db, body, dataset)
 
     search_responses = await _get_search_responses(
         db=db,
@@ -385,7 +384,7 @@ async def search_dataset_records(
 
     await authorize(current_user, DatasetPolicy.search_records_with_all_responses(dataset))
 
-    await _validate_search_records_query(db, body, dataset_id)
+    await _validate_search_records_query(db, body, dataset)
 
     search_responses = await _get_search_responses(
         db=db,

@@ -29,22 +29,24 @@ from tests.factories import (
     RatingQuestionFactory,
     SpanQuestionFactory,
     TextFieldFactory,
+    ImageFieldFactory,
     TextQuestionFactory,
 )
 
 
 @pytest.mark.asyncio
-class TestCreateDatasetRecordsInBulk:
+class TestCreateDatasetRecordsBulk:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/records/bulk"
 
-    async def test_create_dataset_records(
-        self, async_client: AsyncClient, db: AsyncSession, owner: User, owner_auth_header: dict
+    async def test_create_dataset_records_bulk(
+        self, db: AsyncSession, async_client: AsyncClient, owner: User, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
 
         await TextFieldFactory.create(name="prompt", dataset=dataset)
         await TextFieldFactory.create(name="response", dataset=dataset)
+        await ImageFieldFactory.create(name="image", dataset=dataset)
 
         text_question = await TextQuestionFactory.create(name="text-question", dataset=dataset)
 
@@ -120,6 +122,7 @@ class TestCreateDatasetRecordsInBulk:
                         "fields": {
                             "prompt": "Does exercise help reduce stress?",
                             "response": "Exercise can definitely help reduce stress.",
+                            "image": "https://argilla.io/image.jpeg",
                         },
                         "external_id": "1",
                         "responses": [
@@ -214,3 +217,198 @@ class TestCreateDatasetRecordsInBulk:
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 6
+
+    @pytest.mark.parametrize(
+        "web_url",
+        [
+            "http://argilla.io/image.jpeg",
+            "http://argilla.io/path/to/image.jpeg",
+            "https://argilla.io/image.jpeg",
+            "https://argilla.io/path/to/image.jpeg",
+        ],
+    )
+    async def test_create_dataset_records_bulk_with_web_url_image_field(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, web_url: str
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "image": web_url,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
+
+    @pytest.mark.parametrize(
+        "data_url",
+        [
+            "data:image/jpeg;base64,/9j/4QC8RXhpZgAASUkqAAgAAAAGABIBAwABAAAA",
+            "data:image/webp;base64,UklGRhgCAABXRUJQVlA4WAoAAAAIAAAAHwAAFwA",
+        ],
+    )
+    async def test_create_dataset_records_bulk_with_data_url_image_field(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, data_url: str
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "image": data_url,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
+
+    @pytest.mark.parametrize(
+        "invalid_url",
+        [
+            "http://argilla.io",
+            "https://argilla.io",
+            "http:/argilla.io",
+            "https:/argilla.io",
+            "invalid-url",
+            "data:",
+        ],
+    )
+    async def test_create_dataset_records_bulk_with_invalid_image_field_url(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, invalid_url: str
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "image": invalid_url,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because image field 'image' has an invalid URL value",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_image_field_web_url_exceeding_maximum_length(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "image": f"https://argilla.io/{'a' * 2038}.jpeg",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 2038 characters for Web URLs",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_image_field_data_url_using_invalid_mime_type(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "image": "data:image/invalid;base64,UklGRhgCAABXRUJQVlA4WAoAAAAIAAAAHwAAFwA",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_image_field_data_url_exceeding_maximum_length(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "image": f"data:image/jpeg;base64,{'a' * 5_000_000}",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0

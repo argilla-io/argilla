@@ -9,6 +9,7 @@
         >
           <div class="settings__edition-form__name">
             <h4 class="--body1 --medium" v-text="field.name" />
+            <BaseBadge class="--capitalized" :text="`${$t(field.type)}`" />
           </div>
 
           <Validation
@@ -20,6 +21,7 @@
           </Validation>
 
           <BaseSwitch
+            v-if="field.isTextType"
             class="settings__edition-form__switch"
             v-model="field.settings.use_markdown"
             >{{ $t("useMarkdown") }}</BaseSwitch
@@ -102,6 +104,9 @@ export default {
       gap: $base-space * 2;
       h4 {
         margin: 0;
+      }
+      .badge {
+        margin-inline: 0 auto;
       }
     }
 

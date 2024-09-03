@@ -20,10 +20,10 @@ import argilla as rg
 
 
 @pytest.fixture
-def dataset(client: rg.Argilla):
-    ws = client.workspaces[0]
+def dataset(client: rg.Argilla, dataset_name: str):
+    ws = client.workspaces.default
     settings = rg.Settings(
-        guidelines=f"my_dataset_{random.randint(1, 100)}",
+        guidelines=f"The dataset guidelines",
         fields=[rg.TextField(name="text", required=True, title="Text")],
         questions=[
             rg.LabelQuestion(name="label", title="Label", labels=["positive", "negative"]),
@@ -32,7 +32,7 @@ def dataset(client: rg.Argilla):
     )
 
     ds = rg.Dataset(
-        name=f"my_dataset_{random.randint(1, 100)}",
+        name=dataset_name,
         settings=settings,
         client=client,
         workspace=ws,
