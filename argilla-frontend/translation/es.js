@@ -209,7 +209,7 @@ export default {
     passwordDescription: "Introduce tu contraseña",
     claim: "Trabaja en equipo con tus datos.</br>Perfecciona tus modelos.",
     hf: {
-      title: "Bienvenido a {Space}",
+      title: "Bienvenido a {space}",
       subtitle:
         "Únete a <strong>{user}</strong> para construir mejores datasets para IA",
     },
