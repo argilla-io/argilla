@@ -16,7 +16,7 @@ As an Argilla developer, you are already part of the community, and your contrib
 
     - **Relational Database**: A relational database to store the metadata of the records and the annotations. `SQLite` is used as the default built-in option and is deployed separately with the Argilla Server, but a separate `PostgreSQL` can be used.
 
-    - **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support `ElasticSearch`, which can be deployed as a separate Docker image.
+    - **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and basic document searches. We currently support `ElasticSearch` and `OpenSearch`, which can be deployed as separate Docker images.
 
     - **Vue.js UI**: A web application to visualize and annotate your data, users, and teams. It is built with `Vue.js` and is directly deployed alongside the Argilla Server within our Argilla Docker image.
 
@@ -99,7 +99,9 @@ To run your development environment, you need to set up Argilla's databases.
 
 #### Vector database
 
-Argilla supports ElasticSearch as its primary search engine for the vector database. You can run it locally using Docker.
+Argilla supports ElasticSearch as its primary search engine for the vector database by default. For more information about setting OpenSearch, check the [Server configuration](../reference/argilla-server/configuration.md).
+
+You can run ElasticSearch locally using Docker:
 
 ```sh
 # Argilla supports ElasticSearch versions >=8.5
