@@ -6,34 +6,30 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="These are the tutorials for the Argilla SDK. They provide step-by-step instructions for common tasks.">
+        <meta name="description" content="In this guide we will show you how to use the Image Field in Argilla to create records with images.">
       
       
         <meta name="author" content="Argilla, Inc.">
       
       
-        <link rel="canonical" href="https://docs.argilla.io/dev/tutorials/">
+        <link rel="canonical" href="https://docs.argilla.io/dev/how_to_guides/image_field/">
       
       
-        <link rel="prev" href="../how_to_guides/migrate_from_legacy_datasets/">
       
       
-        <link rel="next" href="text_classification/">
-      
-      
-      <link rel="icon" href="../assets/favicon.ico">
+      <link rel="icon" href="../../assets/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.33">
     
     
       
-        <title>Tutorials - Argilla Docs</title>
+        <title>Images in Argilla datasets - Argilla Docs</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.3cba04c6.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,17 +48,17 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-      <link rel="stylesheet" href="../css/ansi-colours.css">
+      <link rel="stylesheet" href="../../css/ansi-colours.css">
     
-      <link rel="stylesheet" href="../css/jupyter-cells.css">
+      <link rel="stylesheet" href="../../css/jupyter-cells.css">
     
-      <link rel="stylesheet" href="../css/pandas-dataframe.css">
+      <link rel="stylesheet" href="../../css/pandas-dataframe.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -123,11 +119,11 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Tutorials - Argilla Docs" >
+        <meta  property="og:title"  content="Images in Argilla datasets - Argilla Docs" >
       
-        <meta  property="og:description"  content="These are the tutorials for the Argilla SDK. They provide step-by-step instructions for common tasks." >
+        <meta  property="og:description"  content="In this guide we will show you how to use the Image Field in Argilla to create records with images." >
       
-        <meta  property="og:image"  content="https://docs.argilla.io/dev/assets/images/social/tutorials/index.png" >
+        <meta  property="og:image"  content="https://docs.argilla.io/dev/assets/images/social/how_to_guides/image_field.png" >
       
         <meta  property="og:image:type"  content="image/png" >
       
@@ -135,15 +131,15 @@
       
         <meta  property="og:image:height"  content="630" >
       
-        <meta  property="og:url"  content="https://docs.argilla.io/dev/tutorials/" >
+        <meta  property="og:url"  content="https://docs.argilla.io/dev/how_to_guides/image_field/" >
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Tutorials - Argilla Docs" >
+        <meta  name="twitter:title"  content="Images in Argilla datasets - Argilla Docs" >
       
-        <meta  name="twitter:description"  content="These are the tutorials for the Argilla SDK. They provide step-by-step instructions for common tasks." >
+        <meta  name="twitter:description"  content="In this guide we will show you how to use the Image Field in Argilla to create records with images." >
       
-        <meta  name="twitter:image"  content="https://docs.argilla.io/dev/assets/images/social/tutorials/index.png" >
+        <meta  name="twitter:image"  content="https://docs.argilla.io/dev/assets/images/social/how_to_guides/image_field.png" >
       
     
     
@@ -166,7 +162,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorials" class="md-skip">
+        <a href="#images-in-argilla-datasets" class="md-skip">
           Skip to content
         </a>
       
@@ -184,9 +180,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../.." title="Argilla Docs" class="md-header__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../../assets/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -203,7 +199,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tutorials
+              Images in Argilla datasets
             
           </span>
         </div>
@@ -327,7 +323,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
     
@@ -346,7 +342,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../getting_started/quickstart/" class="md-tabs__link">
+        <a href="../../getting_started/quickstart/" class="md-tabs__link">
           
   
   Getting started
@@ -362,7 +358,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../how_to_guides/" class="md-tabs__link">
+      <a href="../" class="md-tabs__link">
         
   
     
@@ -377,11 +373,9 @@
         
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../tutorials/" class="md-tabs__link">
         
   
     
@@ -406,7 +400,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../reference/argilla/client/" class="md-tabs__link">
+        <a href="../../reference/argilla/client/" class="md-tabs__link">
           
   
   API Reference
@@ -425,7 +419,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../community/" class="md-tabs__link">
+      <a href="../../community/" class="md-tabs__link">
         
   
     
@@ -466,8 +460,6 @@
           
             
               
-                
-              
               <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
@@ -479,9 +471,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
+    <a href="../.." title="Argilla Docs" class="md-nav__button md-logo" aria-label="Argilla Docs" data-md-component="logo">
       
-  <img src="../assets/logo.svg" alt="logo">
+  <img src="../../assets/logo.svg" alt="logo">
 
     </a>
     Argilla Docs
@@ -508,7 +500,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -568,7 +560,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/quickstart/" class="md-nav__link">
+      <a href="../../getting_started/quickstart/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -589,7 +581,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/how-to-deploy-argilla-with-docker/" class="md-nav__link">
+      <a href="../../getting_started/how-to-deploy-argilla-with-docker/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -610,7 +602,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/how-to-configure-argilla-on-huggingface/" class="md-nav__link">
+      <a href="../../getting_started/how-to-configure-argilla-on-huggingface/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -631,7 +623,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting_started/faq/" class="md-nav__link">
+      <a href="../../getting_started/faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -676,7 +668,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../how_to_guides/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -747,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/user/" class="md-nav__link">
+      <a href="../user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -768,7 +760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/workspace/" class="md-nav__link">
+      <a href="../workspace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -789,7 +781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/dataset/" class="md-nav__link">
+      <a href="../dataset/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -810,7 +802,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/record/" class="md-nav__link">
+      <a href="../record/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -831,7 +823,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/distribution/" class="md-nav__link">
+      <a href="../distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -852,7 +844,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/annotate/" class="md-nav__link">
+      <a href="../annotate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -873,7 +865,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/query/" class="md-nav__link">
+      <a href="../query/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -894,7 +886,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/import_export/" class="md-nav__link">
+      <a href="../import_export/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -963,7 +955,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
+      <a href="../use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -984,7 +976,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../how_to_guides/migrate_from_legacy_datasets/" class="md-nav__link">
+      <a href="../migrate_from_legacy_datasets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1017,32 +1009,27 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../../tutorials/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1053,13 +1040,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_4" id="__nav_4_label" tabindex="">
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Tutorials
@@ -1073,7 +1060,7 @@
   
   
     <li class="md-nav__item">
-      <a href="text_classification/" class="md-nav__link">
+      <a href="../../tutorials/text_classification/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1094,7 +1081,7 @@
   
   
     <li class="md-nav__item">
-      <a href="token_classification/" class="md-nav__link">
+      <a href="../../tutorials/token_classification/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1202,7 +1189,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/client/" class="md-nav__link">
+      <a href="../../reference/argilla/client/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1223,7 +1210,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/workspaces/" class="md-nav__link">
+      <a href="../../reference/argilla/workspaces/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1244,7 +1231,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/users/" class="md-nav__link">
+      <a href="../../reference/argilla/users/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1282,7 +1269,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/argilla/datasets/datasets/" class="md-nav__link ">
+            <a href="../../reference/argilla/datasets/datasets/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1313,7 +1300,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/datasets/dataset_records/" class="md-nav__link">
+      <a href="../../reference/argilla/datasets/dataset_records/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1359,7 +1346,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/argilla/settings/settings/" class="md-nav__link ">
+            <a href="../../reference/argilla/settings/settings/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1390,7 +1377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/fields/" class="md-nav__link">
+      <a href="../../reference/argilla/settings/fields/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1411,7 +1398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/questions/" class="md-nav__link">
+      <a href="../../reference/argilla/settings/questions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1432,7 +1419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/metadata_property/" class="md-nav__link">
+      <a href="../../reference/argilla/settings/metadata_property/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1453,7 +1440,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/vectors/" class="md-nav__link">
+      <a href="../../reference/argilla/settings/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1474,7 +1461,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/settings/task_distribution/" class="md-nav__link">
+      <a href="../../reference/argilla/settings/task_distribution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1520,7 +1507,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/argilla/records/records/" class="md-nav__link ">
+            <a href="../../reference/argilla/records/records/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1551,7 +1538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/responses/" class="md-nav__link">
+      <a href="../../reference/argilla/records/responses/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1572,7 +1559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/suggestions/" class="md-nav__link">
+      <a href="../../reference/argilla/records/suggestions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1593,7 +1580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/vectors/" class="md-nav__link">
+      <a href="../../reference/argilla/records/vectors/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1614,7 +1601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/records/metadata/" class="md-nav__link">
+      <a href="../../reference/argilla/records/metadata/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1643,7 +1630,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/search/" class="md-nav__link">
+      <a href="../../reference/argilla/search/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1664,7 +1651,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla/markdown/" class="md-nav__link">
+      <a href="../../reference/argilla/markdown/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1733,7 +1720,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla-server/configuration/" class="md-nav__link">
+      <a href="../../reference/argilla-server/configuration/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1802,7 +1789,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/argilla-server/telemetry/" class="md-nav__link">
+      <a href="../../reference/argilla-server/telemetry/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1855,7 +1842,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../community/" class="md-nav__link ">
+            <a href="../../community/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -1886,7 +1873,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../community/contributor/" class="md-nav__link">
+      <a href="../../community/contributor/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1907,7 +1894,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../community/popular_issues/" class="md-nav__link">
+      <a href="../../community/popular_issues/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1928,7 +1915,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../community/changelog/" class="md-nav__link">
+      <a href="../../community/changelog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2025,9 +2012,7 @@
             
             
               
-                
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -2038,6 +2023,32 @@
   
     
   
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#define-an-image-field" class="md-nav__link">
+    <span class="md-ellipsis">
+      Define an Image Field
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-records-with-image-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Records with Image Fields
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -2052,7 +2063,7 @@
                   
 
   
-    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/tutorials/index.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/argilla-io/argilla/edit/main/argilla/docs/how_to_guides/image_field.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -2060,36 +2071,49 @@
   
 
 
-<h1 id="tutorials">Tutorials<a class="headerlink" href="#tutorials" title="Permanent link">&para;</a></h1>
-<p>These are the tutorials for <em>the Argilla SDK</em>. They provide step-by-step instructions for common tasks.</p>
-<div class="grid cards">
-<ul>
-<li>
-<p><strong>Text classification</strong></p>
-<hr />
-<p>Learn about a standard workflow for a text classification task with model fine-tuning.
-<a href="text_classification/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Tutorial</a></p>
-</li>
-<li>
-<p><strong>Token classification</strong></p>
-<hr />
-<p>Learn about a standard workflow for a token classification task with model fine-tuning.
-<a href="token_classification/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Tutorial</a></p>
-</li>
-<li>
-<p><strong>Image classification</strong></p>
-<hr />
-<p>Learn about a standard workflow for an image classification task with model fine-tuning.
-<a href="image_classification/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Tutorial</a></p>
-</li>
-<li>
-<p><strong>Image preference</strong></p>
-<hr />
-<p>Learn about a standard workflow for multi-modal preference datasets like image generation preference.
-<a href="image_preference/"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13.22 19.03a.75.75 0 0 1 0-1.06L18.19 13H3.75a.75.75 0 0 1 0-1.5h14.44l-4.97-4.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"/></svg></span> Tutorial</a></p>
-</li>
-</ul>
+<h1 id="images-in-argilla-datasets">Images in Argilla datasets<a class="headerlink" href="#images-in-argilla-datasets" title="Permanent link">&para;</a></h1>
+<p>In Argilla, you can create records with images using the <code>rg.ImageField</code> class. This class is used to define fields in a dataset's settings that will contain images. <code>ImageField</code> fields can be used to store image URLs or data URIs, and a dataset can have multiple image fields or a combination of image and text fields.</p>
+<div class="admonition info">
+<p class="admonition-title">Main Class</p>
+<p>=== <code>rg.ImageField</code></p>
+<div class="language-text highlight"><pre><span></span><code>```python
+rg.ImageField(
+    name=&quot;image&quot;
+)
+```
+</code></pre></div>
+<p>=== <code>rg.Record</code></p>
+<div class="language-text highlight"><pre><span></span><code>```python
+rg.Record(
+    fields={&quot;image&quot;: &quot;https://example.com/image.jpg&quot;},
+)
+```
+</code></pre></div>
 </div>
+<h2 id="define-an-image-field">Define an Image Field<a class="headerlink" href="#define-an-image-field" title="Permanent link">&para;</a></h2>
+<p>To define an image field, instantiate the <code>ImageField</code> class and pass it to the <code>rg.Settings</code> class.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">ImageField</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="p">),</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="p">],</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="adding-records-with-image-fields">Adding Records with Image Fields<a class="headerlink" href="#adding-records-with-image-fields" title="Permanent link">&para;</a></h2>
+<p>To add records with image fields, pass the remote URL or data URI of the image to the records object. The field names must match those defined as an <code>rg.ImageField</code> in the dataset's <code>Settings</code> object to be accepted.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">records</span><span class="o">=</span><span class="p">[</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">Record</span><span class="p">(</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>            <span class="n">fields</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/image.jpg&quot;</span><span class="p">},</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="p">),</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">Record</span><span class="p">(</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>            <span class="n">fields</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="s2">&quot;data:image/png;base64,iV...&quot;</span><span class="p">},</span> <span class="c1"># (1)</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="p">),</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="p">]</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="p">)</span>
+</span></code></pre></div>
+<ol>
+<li>The image can be referenced as either a remote URL or a data URI.</li>
+</ol>
 
 
 
@@ -2104,8 +2128,6 @@
 
   
 
-
-  
 
 
   <form class="md-feedback" name="feedback" hidden>
@@ -2140,7 +2162,7 @@
               
                 
               
-              Thanks for your feedback! Help us improve this page by <a href="https://github.com/argilla-io/argilla/issues/new/?title=[Feedback]+Tutorials+-+/tutorials/" target="_blank" rel="noopener">opening a GitHub issue</a>.
+              Thanks for your feedback! Help us improve this page by <a href="https://github.com/argilla-io/argilla/issues/new/?title=[Feedback]+Images%20in%20Argilla%20datasets+-+/how_to_guides/image_field/" target="_blank" rel="noopener">opening a GitHub issue</a>.
             </div>
           
         </div>
@@ -2167,46 +2189,6 @@
       
         <footer class="md-footer">
   
-    
-      
-        
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../how_to_guides/migrate_from_legacy_datasets/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Migrate your legacy datasets to Argilla V2">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Migrate your legacy datasets to Argilla V2
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="text_classification/" class="md-footer__link md-footer__link--next" aria-label="Next: Text classification">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Text classification
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -2283,12 +2265,12 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.sections", "navigation.tabs", "navigation.footer", "navigation.top", "navigation.tracking", "navigation.path", "toc.follow", "content.code.copy", "content.code.annotate", "content.action.edit", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.af256bd8.min.js"></script>
+      <script src="../../assets/javascripts/bundle.af256bd8.min.js"></script>
       
-        <script src="../js/open_in_new_tab.js"></script>
+        <script src="../../js/open_in_new_tab.js"></script>
       
     
   </body>

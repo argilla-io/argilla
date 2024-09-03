@@ -66,6 +66,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.argilla.io/dev/how_to_guides/image_field/</loc>
+         <lastmod>2024-09-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.argilla.io/dev/how_to_guides/import_export/</loc>
          <lastmod>2024-09-03</lastmod>
          <changefreq>daily</changefreq>
@@ -207,6 +212,16 @@
     </url>
     <url>
          <loc>https://docs.argilla.io/dev/tutorials/</loc>
+         <lastmod>2024-09-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.argilla.io/dev/tutorials/image_classification/</loc>
+         <lastmod>2024-09-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.argilla.io/dev/tutorials/image_preference/</loc>
          <lastmod>2024-09-03</lastmod>
          <changefreq>daily</changefreq>
     </url>

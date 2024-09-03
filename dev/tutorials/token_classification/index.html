@@ -1171,6 +1171,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#vibe-check-the-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vibe check the dataset
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-and-create-the-argilla-dataset" class="md-nav__link">
     <span class="md-ellipsis">
       Configure and create the Argilla dataset
@@ -2208,6 +2217,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#vibe-check-the-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vibe check the dataset
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configure-and-create-the-argilla-dataset" class="md-nav__link">
     <span class="md-ellipsis">
       Configure and create the Argilla dataset
@@ -2330,14 +2348,11 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this tutorial, we will show a standard workflow for a token classification task, in this case, using GLiNER, SpanMarker and Argilla.</p>
-<p>We will follow these steps:</p>
 <ul>
-<li>Configure the Argilla dataset</li>
-<li>Add initial model suggestions</li>
-<li>Evaluate with Argilla</li>
-<li>Train your model</li>
-<li>Update the suggestions with the new model</li>
+<li><strong>Goal</strong>: Show a standard workflow for a token classification task, including zero-shot suggestions and model fine-tuning.</li>
+<li><strong>Dataset</strong>: <a href="https://huggingface.co/datasets/tner/ontonotes5">ontonotes5</a>, a large corpus comprising various genres of text that need to be classified for Named Entity Recognition.</li>
+<li><strong>Libraries</strong>: <a href="https://github.com/huggingface/datasets">datasets</a>, <a href="https://github.com/urchade/GLiNER">gliner</a>, <a href="https://github.com/huggingface/transformers">transformers</a>, <a href="https://github.com/tomaarsen/SpanMarkerNER">spanmarker</a></li>
+<li><strong>Components</strong>: <a href="https://docs.argilla.io/latest/reference/argilla/settings/fields/#src.argilla.settings._field.TextField">TextField</a>, <a href="https://docs.argilla.io/latest/reference/argilla/settings/questions/#src.argilla.settings._question.SpanQuestion">SpanQuestion</a>, <a href="https://docs.argilla.io/latest/reference/argilla/records/suggestions/">Suggestion</a>, <a href="https://docs.argilla.io/dev/reference/argilla/search/#rgquery_1">Query</a>, <a href="https://docs.argilla.io/dev/reference/argilla/search/#rgfilter">Filter</a></li>
 </ul>
 </div>
 </div>
@@ -2407,10 +2422,11 @@
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DatasetDict</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kn">from</span> <span class="nn">gliner</span> <span class="kn">import</span> <span class="n">GLiNER</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="kn">from</span> <span class="nn">span_marker</span> <span class="kn">import</span> <span class="n">SpanMarkerModel</span><span class="p">,</span> <span class="n">Trainer</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">TrainingArguments</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">import</span> <span class="nn">torch</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DatasetDict</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="kn">from</span> <span class="nn">gliner</span> <span class="kn">import</span> <span class="n">GLiNER</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="kn">from</span> <span class="nn">span_marker</span> <span class="kn">import</span> <span class="n">SpanMarkerModel</span><span class="p">,</span> <span class="n">Trainer</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">TrainingArguments</span>
 </span></code></pre></div>
 
 </div>
@@ -2440,6 +2456,15 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="vibe-check-the-dataset">Vibe check the dataset<a class="headerlink" href="#vibe-check-the-dataset" title="Permanent link">&para;</a></h2>
+<p>We will have a look at <a href="https://huggingface.co/datasets/tner/ontonotes5">the dataset</a> to understand its structure and the kind of data it contains. We do this by using <a href="https://huggingface.co/docs/hub/main/en/datasets-viewer-embed">the embedded Hugging Face Dataset Viewer</a>.</p>
+<iframe frameborder="0" height="560px" src="https://huggingface.co/datasets/tner/ontonotes5/embed/viewer/default/train" width="100%"></iframe>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="configure-and-create-the-argilla-dataset">Configure and create the Argilla dataset<a class="headerlink" href="#configure-and-create-the-argilla-dataset" title="Permanent link">&para;</a></h2>
 </div>
 </div>
@@ -2447,7 +2472,7 @@
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Now, we will need to configure the dataset. In the settings, we can specify the guidelines, fields, and questions. If needed, you can also add metadata and vectors. However, for our use case, we just need a text field and a span question. We will focus on Name Entity Recognition, but this workflow can also be applied to Span Classification, which differs in that the spans are less clearly defined and often overlap.</p>
+<p>Now, we will need to configure the dataset. In the settings, we can specify the guidelines, fields, and questions. If needed, you can also add metadata and vectors. However, for our use case, we just need a text field and a span question, corresponding to the <code>token</code> and <code>tags</code> columns. We will focus on Name Entity Recognition, but this workflow can also be applied to Span Classification, which differs in that the spans are less clearly defined and often overlap.</p>
 </div>
 </div>
 </div>
@@ -2683,7 +2708,7 @@
 <p>After the annotation, we will have a robust dataset to train our model for entity recognition. For our case, we will train a SpanMarker model, but you can select any model of your choice. So, let's start by retrieving the annotated records.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Check this <a href="../../how_to_guides/query/">how-to guide</a> to learn more about filtering and querying in Argilla.</p>
+<p>Check this <a href="../../how_to_guides/query/">how-to guide</a> to learn more about filtering and querying in Argilla. Also, you can check the Hugging Face docs on <a href="https://huggingface.co/docs/transformers/en/tasks/token_classification">fine-tuning an token classification model</a>.</p>
 </div>
 </div>
 </div>
@@ -2839,17 +2864,15 @@
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
-<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">import</span> <span class="nn">torch</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_name</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="k">elif</span> <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">mps</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;mps&quot;</span><span class="p">)</span>
-</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using MPS device&quot;</span><span class="p">)</span>
-</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="k">else</span><span class="p">:</span>
-</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No GPU available, using CPU instead.&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using </span><span class="si">{</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_name</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="k">elif</span> <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">mps</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;mps&quot;</span><span class="p">)</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using MPS device&quot;</span><span class="p">)</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="k">else</span><span class="p">:</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>    <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No GPU available, using CPU instead.&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 
 </div>
