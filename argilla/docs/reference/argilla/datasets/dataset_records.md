@@ -131,7 +131,7 @@ Records can also be updated using the `log` method with records that contain an 
             metadata={"department": "toys"},
             id="2" # (1)
         ),
-    ] # (1)
+    ]
 
     dataset.records.log(records)
     ```
@@ -149,7 +149,7 @@ Records can also be updated using the `log` method with records that contain an 
             "metadata": {"department": "toys"},
             "id": "2" # (1)
         },
-    ] # (1)
+    ]
 
     dataset.records.log(data)
     ```
@@ -175,6 +175,7 @@ Records can also be updated using the `log` method with records that contain an 
     )
 
     ```
+
     1. The `id` field is required to identify the record to be updated. The `id` field must be unique for each record in the dataset. If the `id` field is not provided, the record will be added as a new record.
     2. Let's say that your data structure has keys `my_id` instead of `id`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the dataset.
 
@@ -210,9 +211,9 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
             "image": os.path.join(image_dir, "image1.jpg"), # (1)
         },
         {
-            "image": os.path.join(image_dir, "image2.jpg"), # (1)
+            "image": os.path.join(image_dir, "image2.jpg"),
         },
-    ] # (1)
+    ]
 
     dataset.records.log(data)
     ```
@@ -224,8 +225,8 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
     Hugging face datasets can be passed directly to the `log` method. The image field must be defined as an `Image` in the dataset's features.
 
     ```python
-    hf_dataset = load_dataset("ylecun/mnist", split="train[:100]") # (1)
-    dataset.records.log(records=hf_dataset) # (2)
+    hf_dataset = load_dataset("ylecun/mnist", split="train[:100]")
+    dataset.records.log(records=hf_dataset)
     ```
 
     If the image field is not defined as an `Image` in the dataset's features, you can cast the dataset to the correct schema before adding it to the Argilla dataset. This is only necessary if the image field is not defined as an `Image` in the dataset's features, and is not one of the supported image types by Argilla (URL, local path, or PIL object).
@@ -235,7 +236,7 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
     hf_dataset = hf_dataset.cast(
         features=Features({"image": Image(), "label": Value("string")}),
     )
-    dataset.records.log(records=hf_dataset) # (2)
+    dataset.records.log(records=hf_dataset)
     ```
 
     1. In this example, the Hugging Face dataset matches the Argilla dataset schema but the image field is not defined as an `Image` in the dataset's features.
