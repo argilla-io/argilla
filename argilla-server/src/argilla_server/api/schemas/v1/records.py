@@ -20,6 +20,7 @@ from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
+from argilla_server.api.schemas.v1.chat import ChatMessage
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
@@ -82,12 +83,19 @@ class Record(BaseModel):
 
 
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[StrictStr, None, List[Dict[StrictStr, StrictStr]]]]
+    fields: Dict[str, Union[StrictStr, None, List[ChatMessage]]]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
     suggestions: Optional[List[SuggestionCreate]]
     vectors: Optional[Dict[str, List[float]]]
+
+    @validator("fields")
+    def validate_chat_messages(cls, fields):
+        for key, value in fields.items():
+            if isinstance(value, list) and all(isinstance(item, ChatMessage) for item in value):
+                fields[key] = [msg.dict() for msg in value]
+        return fields
 
     @validator("responses")
     @classmethod
@@ -148,7 +156,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[StrictStr, None, List[Dict[StrictStr, StrictStr]]]]]
+    fields: Optional[Dict[str, Union[StrictStr, None, List[ChatMessage]]]]
 
 
 class RecordIncludeParam(BaseModel):
