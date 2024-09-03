@@ -2,7 +2,7 @@
   <li class="status-counter">
     <span>
       <span class="color-bullet" :style="{ backgroundColor: color }"></span>
-      <label class="status-counter__name" v-text="name" />
+      <label class="status-counter__name" v-text="statusLabel" />
     </span>
     <span class="status-counter__counter" v-text="value" />
   </li>
@@ -22,6 +22,11 @@ export default {
     value: {
       type: Number,
       required: true,
+    },
+  },
+  computed: {
+    statusLabel() {
+      return this.$tc(`recordStatus.${this.name}`, 1);
     },
   },
 };

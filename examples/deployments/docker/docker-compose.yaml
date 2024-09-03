@@ -8,8 +8,8 @@ services:
       ARGILLA_HOME_PATH: /var/lib/argilla
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
 
-      # Opt-out for telemetry https://docs.argilla.io/latest/reference/argilla-server/telemetry/
-      # ARGILLA_ENABLE_TELEMETRY: 0
+      # HF_HUB_DISABLE_TELEMETRY: 1 # Opt-out for telemetry https://huggingface.co/docs/huggingface_hub/main/en/package_reference/utilities#huggingface_hub.utils.send_telemetry
+      # HF_HUB_OFFLINE: 1 # Opt-out for telemetry https://huggingface.co/docs/huggingface_hub/main/en/package_reference/utilities#huggingface_hub.utils.send_telemetry
 
       USERNAME: argilla
       PASSWORD: 12345678

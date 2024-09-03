@@ -1,6 +1,18 @@
 <template>
   <div class="fields">
-    <div v-for="{ id, name, title, content, settings } in fields" :key="id">
+    <div
+      v-for="{
+        id,
+        name,
+        title,
+        content,
+        settings,
+        isTextType,
+        isImageType,
+      } in fields"
+      :class="[isImageType ? 'fields__container--image' : '']"
+      :key="id"
+    >
       <SpanAnnotationTextField
         v-if="hasSpanQuestion(name)"
         :id="`${id}-${record.id}-span-field`"
@@ -10,14 +22,15 @@
         :spanQuestion="getSpanQuestion(name)"
         :searchText="recordCriteria.committed.searchText.value.text"
       />
-      <TextFieldComponent
-        v-else
+      <TextField
+        v-else-if="isTextType"
         :name="name"
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
         :searchText="recordCriteria.committed.searchText.value.text"
       />
+      <ImageField v-else :name="name" :title="title" :content="content" />
     </div>
   </div>
 </template>
@@ -60,5 +73,12 @@ export default {
   min-width: 0;
   height: 100%;
   min-height: 0;
+
+  &__container {
+    &--image {
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+  }
 }
 </style>

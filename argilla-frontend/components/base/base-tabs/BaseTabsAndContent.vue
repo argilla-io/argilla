@@ -60,9 +60,9 @@ export default {
     },
   },
   mounted() {
-    this.$emit("onChanged", this.currentTab.id);
-
     this.$emit("onLoaded");
+
+    this.$emit("onChanged", this.currentTab.id);
   },
 };
 </script>

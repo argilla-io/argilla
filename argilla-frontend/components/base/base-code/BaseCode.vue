@@ -1,5 +1,5 @@
 <template>
-  <base-action-tooltip class="button" tooltip="Copied">
+  <base-action-tooltip class="button" :tooltip="$t('copied')">
     <a href="#" @click.prevent="copy(code)">
       <svgicon name="copy" width="16" height="16" />
     </a>

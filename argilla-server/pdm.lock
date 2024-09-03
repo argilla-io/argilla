@@ -5,7 +5,7 @@
 groups = ["default", "postgresql", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:450aca6667256e87484dcded8760cc65990255a18e54d858ef760a0f478858a1"
+content_hash = "sha256:f7cd7425c576fd8a495336b8e19857708dfe4bc2e065ce7cb5313541e4ea37d4"
 
 [[metadata.targets]]
 requires_python = ">=3.8,<3.11"
@@ -848,7 +848,7 @@ name = "filelock"
 version = "3.13.1"
 requires_python = ">=3.8"
 summary = "A platform independent file lock."
-groups = ["test"]
+groups = ["default", "test"]
 files = [
     {file = "filelock-3.13.1-py3-none-any.whl", hash = "sha256:57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c"},
     {file = "filelock-3.13.1.tar.gz", hash = "sha256:521f5f56c50f8426f5e03ad3b281b490a87ef15bc6c526f168290f0c7148d44e"},
@@ -915,7 +915,7 @@ name = "fsspec"
 version = "2023.10.0"
 requires_python = ">=3.8"
 summary = "File-system specification"
-groups = ["test"]
+groups = ["default", "test"]
 files = [
     {file = "fsspec-2023.10.0-py3-none-any.whl", hash = "sha256:346a8f024efeb749d2a5fca7ba8854474b1ff9af7c3faaf636a4548781136529"},
     {file = "fsspec-2023.10.0.tar.gz", hash = "sha256:330c66757591df346ad3091a53bd907e15348c2ba17d63fd54f5c39c4457d2a5"},
@@ -1060,7 +1060,7 @@ name = "huggingface-hub"
 version = "0.20.2"
 requires_python = ">=3.8.0"
 summary = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
-groups = ["test"]
+groups = ["default", "test"]
 dependencies = [
     "filelock",
     "fsspec>=2023.5.0",
@@ -2436,7 +2436,7 @@ name = "tqdm"
 version = "4.66.1"
 requires_python = ">=3.7"
 summary = "Fast, Extensible Progress Meter"
-groups = ["test"]
+groups = ["default", "test"]
 dependencies = [
     "colorama; platform_system == \"Windows\"",
 ]
