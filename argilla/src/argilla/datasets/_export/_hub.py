@@ -16,28 +16,31 @@ import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
-from typing import Any, Type, TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, Union, Dict
 from uuid import UUID
 
+from datasets import DatasetDict
+from datasets.data_files import EmptyDatasetError
+
+from argilla._exceptions._api import UnprocessableEntityError
+from argilla._exceptions._records import RecordsIngestionError
+from argilla._exceptions._settings import SettingsError
+from argilla.datasets._export._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
-from argilla.datasets._export._disk import DiskImportExportMixin
 
 if TYPE_CHECKING:
-    from argilla import Dataset
-    from argilla import Argilla
-    from argilla import Workspace
     from datasets import Dataset as HFDataset
+
+    from argilla import Argilla, Dataset, Workspace, Settings
 
 
 class HubImportExportMixin(DiskImportExportMixin):
-    _DEFAULT_DATASET_REPO_DIR = ".argilla"
-    _DEFAULT_CONFIGURATION_FILES = ["settings.json", "dataset.json"]
-
     def to_hub(
         self: "Dataset",
         repo_id: str,
         *,
+        with_records: bool = True,
         generate_card: Optional[bool] = True,
         **kwargs,
     ) -> None:
@@ -46,13 +49,13 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         Parameters:
             repo_id: the ID of the Hugging Face Hub repo to push the `Dataset` to.
+            with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
             generate_card: whether to generate a dataset card for the `Dataset` in the Hugging Face Hub. Defaults
                 to `True`.
-            *args: the args to pass to `datasets.Dataset.push_to_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
         """
 
-        from huggingface_hub import HfApi, DatasetCardData
+        from huggingface_hub import DatasetCardData, HfApi
 
         from argilla.datasets._export.card import (
             ArgillaDatasetCard,
@@ -61,20 +64,29 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         hf_api = HfApi(token=kwargs.get("token"))
 
-        hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
-        hfds.push_to_hub(repo_id, **kwargs)
+        hfds = False
+        if with_records:
+            hfds = self.records(with_vectors=True, with_responses=True, with_suggestions=True).to_datasets()
+            hfds.push_to_hub(repo_id, **kwargs)
+        else:
+            hf_api.create_repo(repo_id=repo_id, repo_type="dataset", exist_ok=kwargs.get("exist_ok") or True)
 
         with TemporaryDirectory() as tmpdirname:
-            config_dir = os.path.join(tmpdirname, self._DEFAULT_DATASET_REPO_DIR)
-            os.makedirs(config_dir)
+            config_dir = os.path.join(tmpdirname)
+
             self.to_disk(path=config_dir, with_records=False)
 
             if generate_card:
                 sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
-                sample_huggingface_record = hfds[0]
+                if hfds:
+                    sample_huggingface_record = hfds[0]
+                    size_categories = len(hfds)
+                else:
+                    sample_huggingface_record = "No sample records provided"
+                    size_categories = 0
                 card = ArgillaDatasetCard.from_template(
                     card_data=DatasetCardData(
-                        size_categories=size_categories_parser(len(hfds)),
+                        size_categories=size_categories_parser(size_categories),
                         tags=["rlfh", "argilla", "human-feedback"],
                     ),
                     repo_id=repo_id,
@@ -98,47 +110,60 @@ class HubImportExportMixin(DiskImportExportMixin):
     def from_hub(
         cls: Type["Dataset"],
         repo_id: str,
-        workspace: Optional[Union["Workspace", str, UUID]] = None,
+        *,
+        name: Optional[str] = None,
+        workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
         with_records: bool = True,
+        settings: Optional["Settings"] = None,
         **kwargs: Any,
     ):
-        """Loads a `FeedbackDataset` from the Hugging Face Hub.
+        """Loads a `Dataset` from the Hugging Face Hub.
 
         Parameters:
             repo_id: the ID of the Hugging Face Hub repo to load the `Dataset` from.
-            workspace: the workspace to load the `Dataset` into. If not provided, the default workspace will be used.
+            name (str, optional): The name to assign to the new dataset. Defaults to None and the dataset's source name is used, unless it already exists, in which case a unique UUID is appended.
+            workspace (Union[Workspace, str], optional): The workspace to import the dataset to. Defaults to None and default workspace is used.
             client: the client to use to load the `Dataset`. If not provided, the default client will be used.
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
-            *args: the args to pass to `datasets.Dataset.load_from_hub`.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
             A `Dataset` loaded from the Hugging Face Hub.
         """
-        from datasets import DatasetDict, load_dataset, Dataset
+        from datasets import load_dataset
         from huggingface_hub import snapshot_download
 
-        folder_path = snapshot_download(  # download both files in parallel
-            repo_id=repo_id,
-            repo_type="dataset",
-            allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
-            token=kwargs.get("token"),
-        )
+        if name is None:
+            name = repo_id.replace("/", "_")
 
-        dataset = cls.from_disk(path=folder_path, target_workspace=workspace, client=client)
+        if settings is not None:
+            dataset = cls(name=name, settings=settings)
+            dataset.create()
+        else:
+            # download configuration files from the hub
+            folder_path = snapshot_download(
+                repo_id=repo_id,
+                repo_type="dataset",
+                allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
+                token=kwargs.get("token"),
+            )
 
-        hf_dataset: Dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-        if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
-            if len(hf_dataset.keys()) > 1:
-                raise ValueError(
-                    "Only one dataset can be loaded at a time, use `split` to select a split, available splits"
-                    f" are: {', '.join(hf_dataset.keys())}."
-                )
-            hf_dataset: Dataset = hf_dataset[list(hf_dataset.keys())[0]]
+            dataset = cls.from_disk(
+                path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
+            )
 
         if with_records:
-            cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
+            try:
+                hf_dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
+                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, **kwargs)
+                cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
+            except EmptyDatasetError:
+                warnings.warn(
+                    message="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
+                    category=UserWarning,
+                )
+
         return dataset
 
     @staticmethod
@@ -162,7 +187,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         # Check if all user ids are known to this Argilla client
         known_users_ids = [user.id for user in dataset._client.users]
         unknown_user_ids = set(user_ids.keys()) - set(known_users_ids)
-        my_user = dataset._client.me.id
+        my_user = dataset._client.me
         if len(unknown_user_ids) > 1:
             warnings.warn(
                 message=f"""Found unknown user ids in dataset repo: {unknown_user_ids}.
@@ -179,9 +204,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         records = []
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
-            record.id = row.pop("id")
             for question_name, values in response_questions.items():
-                response_users = {}
                 response_values = values["responses"][idx]
                 response_users = values["users"][idx]
                 response_status = values["status"][idx]
@@ -198,4 +221,31 @@ class HubImportExportMixin(DiskImportExportMixin):
                     )
                     record.responses.add(response)
             records.append(record)
-        dataset.records.log(records=records)
+
+        try:
+            dataset.records.log(records=records)
+        except (RecordsIngestionError, UnprocessableEntityError) as e:
+            raise SettingsError(
+                message=f"Failed to load records from Hugging Face dataset. Defined settings do not match dataset schema. Hugging face dataset features: {hf_dataset.features}. Argilla dataset settings : {dataset.settings}"
+            ) from e
+
+    @staticmethod
+    def _get_dataset_split(hf_dataset: "HFDataset", split: Optional[str] = None, **kwargs: Dict) -> "HFDataset":
+        """Get a single dataset from a Hugging Face dataset.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to get a single dataset from.
+
+        Returns:
+            HFDataset: The single dataset.
+        """
+
+        if isinstance(hf_dataset, DatasetDict) and split is None:
+            split = next(iter(hf_dataset.keys()))
+            if len(hf_dataset.keys()) > 1:
+                warnings.warn(
+                    message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}. "
+                    f"Available splits are: {', '.join(hf_dataset.keys())}."
+                )
+            hf_dataset = hf_dataset[split]
+        return hf_dataset

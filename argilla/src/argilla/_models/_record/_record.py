@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+import uuid
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import Field, field_serializer, field_validator
 
@@ -30,13 +31,13 @@ FieldValue = Union[str, None]
 class RecordModel(ResourceModel):
     """Schema for the records of a `Dataset`"""
 
+    status: Literal["pending", "completed"] = "pending"
     fields: Optional[Dict[str, FieldValue]] = None
     metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
     suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(default_factory=tuple)
-
-    external_id: Optional[Any] = None
+    external_id: Optional[Any] = Field(default=None)
 
     @field_serializer("external_id", when_used="unless-none")
     def serialize_external_id(self, value: str) -> str:
@@ -68,3 +69,11 @@ class RecordModel(ResourceModel):
         if isinstance(metadata, dict):
             return [MetadataModel(name=key, value=value) for key, value in metadata.items()]
         return metadata
+
+    @field_validator("external_id", mode="before")
+    @classmethod
+    def validate_external_id(cls, external_id: Any) -> Union[str, int, uuid.UUID]:
+        """Ensure external_id is captured correctly and only converted if None."""
+        if external_id is None:
+            external_id = uuid.uuid4()
+        return external_id

@@ -4,6 +4,7 @@ export default {
   label_selection: "Label",
   span: "Span",
   text: "Text",
+  image: "Bild",
   rating: "Bewertung",
   minimize: "Minimieren",
   select: "Auswählen",
@@ -12,7 +13,6 @@ export default {
   searchDatasets: "Durchsuche Datensätze",
   expand: "Erweitern",
   copied: "Kopiert",
-  copyClipboard: "In Zwischenablage kopieren",
   copyLink: "Link kopieren",
   copyRecord: "Eintrag kopieren",
   refresh: "Refresh",
@@ -36,12 +36,19 @@ export default {
     datasetSettings: "einstellungen",
     userSettings: "meine einstellungen",
   },
+  datasets: {
+    left: "übrig",
+    completed: "Vollendet",
+    pending: "Ausstehend",
+  },
   recordStatus: {
     pending: "Ausstehend",
     draft: "Entwurf",
     discarded: "Verworfen",
     submitted: "Gesichert",
     validated: "Validiert",
+    completedTooltip:
+      "Der Datensatz ist abgeschlossen, es hat die Anzahl der Antworten.",
   },
   userSettings: {
     title: "Meine Einstellungen",
@@ -86,6 +93,13 @@ export default {
     cancel: "Abbrechen",
     continue: "Fortfahren",
     delete: "Löschen",
+    tooltip: {
+      copyToClipboard: "In Zwischenablage kopieren",
+      copyNameToClipboard: "Datensatznamen in die Zwischenablage kopieren",
+      copyLinkToClipboard: "Datensatzlink in die Zwischenablage kopieren",
+      goToDatasetSettings: "Zu den Datensatzeinstellungen gehen",
+      datasetSettings: "Datensatzeinstellungen",
+    },
   },
   to_submit_complete_required:
     "Zum Absenden beantworten \nSie benötigte Fragen",
@@ -128,6 +142,7 @@ export default {
     draft: "Entwurf speichern",
   },
   sorting: {
+    label: "Sortieren",
     addOtherField: "+ Ein weiteres Feld hinzufügen",
     suggestion: {
       score: "Vorschlagsbewertung",
@@ -171,14 +186,14 @@ export default {
     hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
-    quickstart:
-      "Sie verwenden die Quickstart-Version von Argilla. Überprüfen Sie <a href='{link}' target='_blank'>diesen Leitfaden</a> um mehr über Nutzung und Konfigurationsoptionen zu erfahren.",
+    error: "Falscher Benutzername oder Passwort. Versuchen Sie es erneut",
     hf: {
       title: "Willkommen bei {space}",
       subtitle:
         "Helfe <strong>{user}</strong> um bessere Datensätze für KI zu erstellen",
     },
   },
+  of: "von",
   status: "Status",
   filters: "Filter",
   filterBy: "Filter nach...",
@@ -199,23 +214,31 @@ export default {
   update: "Aktualisieren",
   youAreOnlineAgain: "Sie sind wieder online",
   youAreOffline: "Sie sind offline",
+  write: "Schreiben",
+  preview: "Vorschau",
   datasetTable: {
     name: "Dataset",
     workspace: "Arbeitsbereich",
-    task: "Datensatz",
-    tags: "Tags",
     createdAt: "Erstellt am",
     lastActivityAt: "Aktualisiert am",
+    progress: "Teamfortschritt",
   },
   metrics: {
     total: "Total",
-    progress: "Fortschritt",
+    progress: {
+      my: "mein Fortschritt",
+      team: "Fortschritte im Team",
+    },
   },
 
   validations: {
     businessLogic: {
       missing_vector: {
         message: "Vektor nicht im ausgewählten Datensatz gefunden",
+      },
+      update_distribution_with_existing_responses: {
+        message:
+          "Die Verteilungseinstellungen können für einen Datensatz mit Benutzerantworten nicht geändert werden",
       },
     },
     http: {

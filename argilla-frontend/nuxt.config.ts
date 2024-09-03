@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
+import { NuxtConfig } from "@nuxt/types";
 import pkg from "./package.json";
 
 const LOCAL_ENVIRONMENT = "http://0.0.0.0:6900";
@@ -114,6 +114,10 @@ const config: NuxtConfig = {
         code: "de",
         file: "de.js",
       },
+      {
+        code: "es",
+        file: "es.js",
+      },
     ],
     detectBrowserLanguage: false,
     vueI18n: {
@@ -170,24 +174,9 @@ const config: NuxtConfig = {
 
   auth: {
     strategies: {
-      basic: {
-        scheme: "local",
-        token: {
-          property: "access_token",
-        },
-        user: {
-          property: false,
-          autoFetch: true,
-        },
+      local: {
         endpoints: {
-          login: {
-            url: "/v1/token",
-            method: "post",
-            propertyName: "access_token",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          },
           logout: false,
-          user: { url: "/v1/me", propertyName: false },
         },
       },
     },
@@ -197,23 +186,15 @@ const config: NuxtConfig = {
   },
 
   router: {
-    middleware: ["auth-guard"],
+    middleware: ["route-guard", "me"],
     base: process.env.BASE_URL ?? "/",
   },
 
   publicRuntimeConfig: {
     clientVersion: pkg.version,
     documentationSite: "https://docs.argilla.io/",
-    documentationSiteQuickStart:
-      "https://docs.argilla.io/en/latest/getting_started/quickstart.html",
-    documentationSiteSemanticSearch:
-      "https://docs.argilla.io/en/latest/reference/webapp/features.html#semantic-search",
-    documentationSiteLabelScheme:
-      "https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#define-a-labeling-schema",
-    documentationSiteQueryDatasets:
-      "https://docs.argilla.io/en/latest/guides/query_datasets.html",
     documentationPersistentStorage:
-      "https://docs.argilla.io/en/latest/getting_started/installation/deployments/huggingface-spaces.html#setting-up-persistent-storage",
+      "https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#persistent-storage",
   },
 };
 export default config;

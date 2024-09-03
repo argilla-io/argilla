@@ -23,7 +23,8 @@ from argilla._resource import Resource
 from argilla.client import Argilla
 
 if TYPE_CHECKING:
-    from argilla import Dataset, User
+    from argilla.datasets._resource import Dataset
+    from argilla.users._resource import User
 
 
 class Workspace(Resource):
@@ -52,6 +53,7 @@ class Workspace(Resource):
             client (Argilla): The client used to interact with Argilla
             name (str): The name of the workspace
             id (UUID): The id of the workspace
+
         Returns:
             Workspace: The initialized workspace object
         """
@@ -125,7 +127,6 @@ class Workspace(Resource):
 
         Returns:
             WorkspaceUsers: A list of all users in the workspace
-
         """
         return WorkspaceUsers(workspace=self)
 

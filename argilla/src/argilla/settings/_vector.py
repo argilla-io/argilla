@@ -30,7 +30,7 @@ class VectorField(Resource):
 
     _model: VectorFieldModel
     _api: VectorsAPI
-    _dataset: "Dataset"
+    _dataset: Optional["Dataset"]
 
     def __init__(
         self,
@@ -42,9 +42,9 @@ class VectorField(Resource):
         """Vector field for use in Argilla `Dataset` `Settings`
 
         Parameters:
-            name (str): The name of the field
+            name (str): The name of the vector field
             dimensions (int): The number of dimensions in the vector
-            title (Optional[str], optional): The title of the field. Defaults to None.
+            title (Optional[str]): The title of the vector to be shown in the UI.
         """
         client = _client or Argilla._get_default()
         super().__init__(api=client.api.vectors, client=client)
@@ -83,6 +83,7 @@ class VectorField(Resource):
     def dataset(self, value: "Dataset") -> None:
         self._dataset = value
         self._model.dataset_id = self._dataset.id
+        self._with_client(self._dataset._client)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name={self.name}, title={self.title}, dimensions={self.dimensions})"
@@ -98,3 +99,10 @@ class VectorField(Resource):
     def from_dict(cls, data: dict) -> "VectorField":
         model = VectorFieldModel(**data)
         return cls.from_model(model=model)
+
+    def _with_client(self, client: "Argilla") -> "VectorField":
+        # TODO: Review and simplify. Maybe only one of them is required
+        self._client = client
+        self._api = self._client.api.vectors
+
+        return self

@@ -100,6 +100,7 @@ with mkdocs_gen_files.open(DATA_PATH, "w") as f:
         .reset_index()
     )
 
+    df["Milestone"] = df["Milestone"].astype(str).fillna("")
     planned_issues = df[
         ((df["Milestone"].str.startswith("v2")) & (df["State"] == "open"))
         | ((df["Milestone"].str.startswith("2")) & (df["State"] == "open"))

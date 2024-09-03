@@ -12,7 +12,7 @@ Thank you for investing your time in contributing to the project! Any contributi
     * **Discord**: You are welcome to join the [Argilla Discord community](http://hf.co/join/discord), where you can keep in touch with other users, contributors and the Argilla team. In the following [section](#first-contact-in-discord), you can find more information on how to get started in Discord.
     * **Git**: This is a very useful tool to keep track of the changes in your files. Using the command-line interface (CLI), you can make your contributions easily. For that, you need to have it [installed and updated](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your computer.
     * **GitHub**: It is a platform and cloud-based service that uses git and allows developers to collaborate on projects. To contribute to Argilla, you'll need to create an account. Check the [Contributor Workflow with Git and Github](#contributor-workflow-with-git-and-github) for more info.
-    * **Developer Documentation**: To collaborate, you'll need to set up an efficient environment. Check the [developer documentation](../getting_started/installation.md) to know how to do it.
+    * **Developer Documentation**: To collaborate, you'll need to set up an efficient environment. Check the [Server](https://github.com/argilla-io/argilla/blob/develop/argilla-server/README.md) and [Frontend](https://github.com/argilla-io/argilla/blob/develop/argilla-frontend/README.md) READMEs to know how to do it.
     * **Schedule a meeting with our developer advocate**: If you have more questions, do not hesitate to contact our developer advocate and [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min).
 
 ## First Contact in Discord
@@ -21,8 +21,8 @@ Discord is a handy tool for more casual conversations and to answer day-to-day q
 
 When part of the Hugging Face Discord, you can select "Channels & roles" and select "Argilla" along with any of the other groups that are interesting to you. "Argilla" will cover anything about argilla and distilabel. You can join the following channels:
 
-* **#argilla-general**: 📣 Stay up-to-date and general discussions.
-* **#argilla-help**: 🙋‍♀️ Need assistance? We're always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
+* **#argilla-distilabel-general**: 📣 Stay up-to-date and general discussions.
+* **#argilla-distilabel-help**: 🙋‍♀️ Need assistance? We're always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
 
 So now there is only one thing left to do: introduce yourself and talk to the community. You'll always be welcome! 🤗👋
 
@@ -70,7 +70,7 @@ git clone https://github.com/[your-github-username]/argilla.git
 cd argilla
 ```
 
-To keep your fork’s main/develop branch up to date with our repo, add it as an upstream remote branch. For more info, check the [documentation](../getting_started/installation.md).
+To keep your fork’s main/develop branch up to date with our repo, add it as an upstream remote branch.
 
 ```sh
 git remote add upstream https://github.com/argilla-io/argilla.git
@@ -117,11 +117,11 @@ A sample addition would be:
 - Fixed the key errors for the `init` method ([#NUMBER_OF_PR](LINK_TO_PR)). Contributed by @github_handle.
 ```
 
-You can have a look at the [CHANGELOG.md](https://raw.githubusercontent.com/argilla-io/argilla/develop/CHANGELOG.md) file to see more cases and examples.
+You can have a look at the [CHANGELOG.md](https://github.com/argilla-io/argilla/blob/develop/argilla/CHANGELOG.md)) file to see more cases and examples.
 
 ### Make changes and push them
 
-Make the changes you want in your local repository, and test that everything works and you are following the guidelines. Check the [documentation](../getting_started/installation.md) for more information about the development.
+Make the changes you want in your local repository, and test that everything works and you are following the guidelines.
 
 Once you have finished, you can check the status of your repository and synchronize with the upstreaming repo with the following command:
 

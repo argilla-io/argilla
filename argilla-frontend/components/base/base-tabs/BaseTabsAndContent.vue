@@ -49,11 +49,20 @@ export default {
       return this.currentTab.component;
     },
   },
+  watch: {
+    currentTab() {
+      this.$emit("onChanged", this.currentTab.id);
+    },
+  },
   methods: {
     getSelectedTab(id) {
       this.currentTab = this.tabs.find((tab) => tab.id === id);
     },
   },
+  mounted() {
+    this.$emit("onLoaded");
+
+    this.$emit("onChanged", this.currentTab.id);
+  },
 };
 </script>
-<style lang="scss" scoped></style>

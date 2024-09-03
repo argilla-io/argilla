@@ -17,6 +17,7 @@ from enum import Enum
 
 class FieldType(str, Enum):
     text = "text"
+    image = "image"
 
 
 class ResponseStatus(str, Enum):
@@ -27,7 +28,6 @@ class ResponseStatus(str, Enum):
 
 class ResponseStatusFilter(str, Enum):
     draft = "draft"
-    missing = "missing"  # Deprecated, use pending instead
     pending = "pending"
     submitted = "submitted"
     discarded = "discarded"
@@ -43,10 +43,19 @@ class DatasetStatus(str, Enum):
     ready = "ready"
 
 
+class DatasetDistributionStrategy(str, Enum):
+    overlap = "overlap"
+
+
 class UserRole(str, Enum):
     owner = "owner"
     admin = "admin"
     annotator = "annotator"
+
+
+class RecordStatus(str, Enum):
+    pending = "pending"
+    completed = "completed"
 
 
 class RecordInclude(str, Enum):

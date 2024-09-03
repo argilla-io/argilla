@@ -16,7 +16,7 @@ import inspect
 import random
 
 import factory
-from argilla_server.enums import FieldType, MetadataPropertyType, OptionsOrder
+from argilla_server.enums import DatasetDistributionStrategy, FieldType, MetadataPropertyType, OptionsOrder
 from argilla_server.models import (
     Dataset,
     Field,
@@ -203,6 +203,7 @@ class DatasetFactory(BaseFactory):
         model = Dataset
 
     name = factory.Sequence(lambda n: f"dataset-{n}")
+    distribution = {"strategy": DatasetDistributionStrategy.overlap, "min_submitted": 1}
     workspace = factory.SubFactory(WorkspaceFactory)
 
 
@@ -254,7 +255,16 @@ class FieldFactory(BaseFactory):
 
 
 class TextFieldFactory(FieldFactory):
-    settings = {"type": FieldType.text.value, "use_markdown": False}
+    settings = {
+        "type": FieldType.text,
+        "use_markdown": False,
+    }
+
+
+class ImageFieldFactory(FieldFactory):
+    settings = {
+        "type": FieldType.image,
+    }
 
 
 class MetadataPropertyFactory(BaseFactory):

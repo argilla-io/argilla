@@ -15,8 +15,7 @@
 import uuid
 
 import pytest
-
-from argilla import Record, Suggestion, Response
+from argilla import Record, Response, Suggestion
 from argilla._exceptions import ArgillaError
 from argilla._models import MetadataModel
 
@@ -34,11 +33,21 @@ class TestRecords:
         )
         assert (
             record.__repr__() == f"Record(id={record_id},"
+            "status=pending,"
             "fields={'name': 'John', 'age': '30'},"
             "metadata={'key': 'value'},"
             "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
             f"responses={{'question': [{{'value': 'answer'}}]}})"
         )
+
+    def test_record_external_id(self):
+        for id in [0, "1", "0"]:
+            record = Record(id=id, fields={"name": "John", "age": "30"})
+            assert record.id == id
+        record = Record(id=None, fields={"name": "John", "age": "30"})
+        assert record.id
+        record = Record(fields={"name": "John", "age": "30"})
+        assert record.id
 
     def test_update_record_metadata_by_key(self):
         record = Record(fields={"name": "John", "age": "30"}, metadata={"key": "value"})
@@ -65,6 +74,13 @@ class TestRecords:
 
         record.vectors["new-vector"] = [1.0, 2.0, 3.0]
         assert record.vectors == {"vector": [1.0, 2.0, 3.0], "new-vector": [1.0, 2.0, 3.0]}
+
+    def test_prevent_update_record(self):
+        record = Record(fields={"name": "John"})
+        assert record.status == "pending"
+
+        with pytest.raises(AttributeError):
+            record.status = "completed"
 
     def test_add_record_response_for_the_same_question_and_user_id(self):
         response = Response(question_name="question", value="value", user_id=uuid.uuid4())

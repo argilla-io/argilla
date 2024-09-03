@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import random
+import uuid
 
 import pytest
 
@@ -20,22 +21,11 @@ import argilla as rg
 from argilla._exceptions import NotFoundError
 
 
-@pytest.fixture(autouse=True, scope="session")
-def clean_test_datasets(client: rg.Argilla):
-    for dataset in client.datasets:
-        if dataset.name.startswith("test_"):
-            dataset.delete()
-    yield
-    for dataset in client.datasets:
-        if dataset.name.startswith("test_"):
-            dataset.delete()
-
-
 @pytest.fixture
-def dataset(client: rg.Argilla):
+def dataset(client: rg.Argilla, dataset_name: str):
     ws = client.workspaces[0]
     dataset = rg.Dataset(
-        name=f"test_{random.randint(0, 1000)}",
+        name=dataset_name,
         settings=rg.Settings(
             fields=[
                 rg.TextField(name="text"),
@@ -52,10 +42,10 @@ def dataset(client: rg.Argilla):
     dataset.delete()
 
 
-def test_dataset_with_workspace(client: rg.Argilla):
+def test_dataset_with_workspace(client: rg.Argilla, dataset_name: str):
     ws = client.workspaces[0]
     dataset = rg.Dataset(
-        name=f"test_{random.randint(0, 1000)}",
+        name=dataset_name,
         settings=rg.Settings(
             fields=[
                 rg.TextField(name="text"),
@@ -73,10 +63,10 @@ def test_dataset_with_workspace(client: rg.Argilla):
     assert dataset.workspace == ws
 
 
-def test_dataset_with_workspace_name(client: rg.Argilla):
+def test_dataset_with_workspace_name(client: rg.Argilla, dataset_name: str):
     ws = client.workspaces[0]
     dataset = rg.Dataset(
-        name=f"test_{random.randint(0, 1000)}",
+        name=dataset_name,
         settings=rg.Settings(
             fields=[
                 rg.TextField(name="text"),
@@ -95,10 +85,10 @@ def test_dataset_with_workspace_name(client: rg.Argilla):
     assert dataset.workspace == ws
 
 
-def test_dataset_with_incorrect_workspace_name(client: rg.Argilla):
+def test_dataset_with_incorrect_workspace_name(client: rg.Argilla, dataset_name: str):
     with pytest.raises(expected_exception=NotFoundError):
         rg.Dataset(
-            name=f"test_{random.randint(0, 1000)}",
+            name=dataset_name,
             settings=rg.Settings(
                 fields=[
                     rg.TextField(name="text"),
@@ -107,14 +97,14 @@ def test_dataset_with_incorrect_workspace_name(client: rg.Argilla):
                     rg.TextQuestion(name="response"),
                 ],
             ),
-            workspace=f"non_existing_workspace_{random.randint(0, 1000)}",
+            workspace=f"non_existing_workspace",
             client=client,
         ).create()
 
 
-def test_dataset_with_default_workspace(client: rg.Argilla):
+def test_dataset_with_default_workspace(client: rg.Argilla, dataset_name: str):
     dataset = rg.Dataset(
-        name=f"test_{random.randint(0, 1000)}",
+        name=dataset_name,
         settings=rg.Settings(
             fields=[
                 rg.TextField(name="text"),

@@ -22,14 +22,14 @@ from uuid import UUID
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
-from argilla.settings._field import TextField
+from argilla.settings._field import Field, _field_from_dict, _field_from_model
 from argilla.settings._metadata import MetadataType, MetadataField
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
+from argilla.settings._question import QuestionType, question_from_model, question_from_dict
+from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
-
 
 __all__ = ["Settings"]
 
@@ -43,34 +43,39 @@ class Settings(Resource):
 
     def __init__(
         self,
-        fields: Optional[List[TextField]] = None,
+        fields: Optional[List[Field]] = None,
         questions: Optional[List[QuestionType]] = None,
         vectors: Optional[List[VectorField]] = None,
         metadata: Optional[List[MetadataType]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = False,
+        distribution: Optional[TaskDistribution] = None,
         _dataset: Optional["Dataset"] = None,
     ) -> None:
         """
         Args:
-            fields (List[TextField]): A list of TextField objects that represent the fields in the Dataset.
-            questions (List[Union[LabelQuestion, MultiLabelQuestion, RankingQuestion, TextQuestion, RatingQuestion]]): A list of Question objects that represent the questions in the Dataset.
+            fields (List[Field]): A list of Field objects that represent the fields in the Dataset.
+            questions (List[Union[LabelQuestion, MultiLabelQuestion, RankingQuestion, TextQuestion, RatingQuestion]]):
+                A list of Question objects that represent the questions in the Dataset.
             vectors (List[VectorField]): A list of VectorField objects that represent the vectors in the Dataset.
             metadata (List[MetadataField]): A list of MetadataField objects that represent the metadata in the Dataset.
             guidelines (str): A string containing the guidelines for the Dataset.
-            allow_extra_metadata (bool): A boolean that determines whether or not extra metadata is allowed in the Dataset. Defaults to False.
+            allow_extra_metadata (bool): A boolean that determines whether or not extra metadata is allowed in the
+                Dataset. Defaults to False.
+            distribution (TaskDistribution): The annotation task distribution configuration.
+                Default to DEFAULT_TASK_DISTRIBUTION
         """
         super().__init__(client=_dataset._client if _dataset else None)
 
-        self.__questions = questions or []
-        self.__fields = SettingsProperties(self, fields)
-        self.__vectors = SettingsProperties(self, vectors)
-        self.__metadata = SettingsProperties(self, metadata)
-
+        self._dataset = _dataset
+        self._distribution = distribution
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
-        self._dataset = _dataset
+        self.__questions = QuestionsProperties(self, questions)
+        self.__fields = SettingsProperties(self, fields)
+        self.__vectors = SettingsProperties(self, vectors)
+        self.__metadata = SettingsProperties(self, metadata)
 
     #####################
     # Properties        #
@@ -81,16 +86,16 @@ class Settings(Resource):
         return self.__fields
 
     @fields.setter
-    def fields(self, fields: List[TextField]):
+    def fields(self, fields: List[Field]):
         self.__fields = SettingsProperties(self, fields)
 
     @property
-    def questions(self) -> List[QuestionType]:
+    def questions(self) -> "SettingsProperties":
         return self.__questions
 
     @questions.setter
     def questions(self, questions: List[QuestionType]):
-        self.__questions = questions
+        self.__questions = QuestionsProperties(self, questions)
 
     @property
     def vectors(self) -> "SettingsProperties":
@@ -125,6 +130,14 @@ class Settings(Resource):
         self.__allow_extra_metadata = value
 
     @property
+    def distribution(self) -> TaskDistribution:
+        return self._distribution or TaskDistribution.default()
+
+    @distribution.setter
+    def distribution(self, value: TaskDistribution) -> None:
+        self._distribution = value
+
+    @property
     def dataset(self) -> "Dataset":
         return self._dataset
 
@@ -152,7 +165,7 @@ class Settings(Resource):
         return schema_dict
 
     @cached_property
-    def schema_by_id(self) -> Dict[UUID, Union[TextField, QuestionType, MetadataType, VectorField]]:
+    def schema_by_id(self) -> Dict[UUID, Union[Field, QuestionType, MetadataType, VectorField]]:
         return {v.id: v for v in self.schema.values()}
 
     def validate(self) -> None:
@@ -168,7 +181,7 @@ class Settings(Resource):
         self.questions = self._fetch_questions()
         self.vectors = self._fetch_vectors()
         self.metadata = self._fetch_metadata()
-        self.__get_dataset_related_attributes()
+        self.__fetch_dataset_related_attributes()
 
         self._update_last_api_call()
         return self
@@ -178,7 +191,7 @@ class Settings(Resource):
 
         self._update_dataset_related_attributes()
         self.__fields.create()
-        self._create_questions()
+        self.__questions.create()
         self.__vectors.create()
         self.__metadata.create()
 
@@ -197,27 +210,16 @@ class Settings(Resource):
         self._update_last_api_call()
         return self
 
-    def question_by_name(self, question_name: str) -> QuestionType:
-        for question in self.questions:
-            if question.name == question_name:
-                return question
-        raise ValueError(f"Question with name {question_name} not found")
-
-    def question_by_id(self, question_id: UUID) -> QuestionType:
-        property = self.schema_by_id.get(question_id)
-        if isinstance(property, QuestionPropertyBase):
-            return property
-        raise ValueError(f"Question with id {question_id} not found")
-
     def serialize(self):
         try:
             return {
                 "guidelines": self.guidelines,
-                "questions": self.__serialize_questions(self.questions),
+                "questions": self.__questions.serialize(),
                 "fields": self.__fields.serialize(),
                 "vectors": self.vectors.serialize(),
                 "metadata": self.metadata.serialize(),
                 "allow_extra_metadata": self.allow_extra_metadata,
+                "distribution": self.distribution.to_dict(),
             }
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the settings. {e.__class__.__name__}") from e
@@ -241,26 +243,7 @@ class Settings(Resource):
 
         with open(path, "r") as file:
             settings_dict = json.load(file)
-
-        fields = settings_dict.get("fields", [])
-        vectors = settings_dict.get("vectors", [])
-        metadata = settings_dict.get("metadata", [])
-        guidelines = settings_dict.get("guidelines")
-        allow_extra_metadata = settings_dict.get("allow_extra_metadata")
-
-        questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
-        fields = [TextField.from_dict(field) for field in fields]
-        vectors = [VectorField.from_dict(vector) for vector in vectors]
-        metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
-
-        return cls(
-            questions=questions,
-            fields=fields,
-            vectors=vectors,
-            metadata=metadata,
-            guidelines=guidelines,
-            allow_extra_metadata=allow_extra_metadata,
-        )
+            return cls._from_dict(settings_dict)
 
     def __eq__(self, other: "Settings") -> bool:
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
@@ -272,6 +255,7 @@ class Settings(Resource):
     def __repr__(self) -> str:
         return (
             f"Settings(guidelines={self.guidelines}, allow_extra_metadata={self.allow_extra_metadata}, "
+            f"distribution={self.distribution}, "
             f"fields={self.fields}, questions={self.questions}, vectors={self.vectors}, metadata={self.metadata})"
         )
 
@@ -279,9 +263,40 @@ class Settings(Resource):
     #  Private methods  #
     #####################
 
-    def _fetch_fields(self) -> List[TextField]:
+    @classmethod
+    def _from_dict(cls, settings_dict: dict) -> "Settings":
+        fields = settings_dict.get("fields", [])
+        vectors = settings_dict.get("vectors", [])
+        metadata = settings_dict.get("metadata", [])
+        guidelines = settings_dict.get("guidelines")
+        distribution = settings_dict.get("distribution")
+        allow_extra_metadata = settings_dict.get("allow_extra_metadata")
+
+        questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
+        fields = [_field_from_dict(field) for field in fields]
+        vectors = [VectorField.from_dict(vector) for vector in vectors]
+        metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
+
+        if distribution:
+            distribution = TaskDistribution.from_dict(distribution)
+
+        return cls(
+            questions=questions,
+            fields=fields,
+            vectors=vectors,
+            metadata=metadata,
+            guidelines=guidelines,
+            allow_extra_metadata=allow_extra_metadata,
+            distribution=distribution,
+        )
+
+    def _copy(self) -> "Settings":
+        instance = self.__class__._from_dict(self.serialize())
+        return instance
+
+    def _fetch_fields(self) -> List[Field]:
         models = self._client.api.fields.list(dataset_id=self._dataset.id)
-        return [TextField.from_model(model) for model in models]
+        return [_field_from_model(model) for model in models]
 
     def _fetch_questions(self) -> List[QuestionType]:
         models = self._client.api.questions.list(dataset_id=self._dataset.id)
@@ -295,7 +310,7 @@ class Settings(Resource):
         models = self._client.api.metadata.list(dataset_id=self._dataset.id)
         return [MetadataField.from_model(model) for model in models]
 
-    def __get_dataset_related_attributes(self):
+    def __fetch_dataset_related_attributes(self):
         # This flow may be a bit weird, but it's the only way to update the dataset related attributes
         # Everything is point that we should have several settings-related endpoints in the API to handle this.
         # POST /api/v1/datasets/{dataset_id}/settings
@@ -308,6 +323,9 @@ class Settings(Resource):
 
         self.guidelines = dataset_model.guidelines
         self.allow_extra_metadata = dataset_model.allow_extra_metadata
+
+        if dataset_model.distribution:
+            self.distribution = TaskDistribution.from_model(dataset_model.distribution)
 
     def _update_dataset_related_attributes(self):
         # This flow may be a bit weird, but it's the only way to update the dataset related attributes
@@ -323,18 +341,9 @@ class Settings(Resource):
             name=self._dataset.name,
             guidelines=self.guidelines,
             allow_extra_metadata=self.allow_extra_metadata,
+            distribution=self.distribution._api_model(),
         )
         self._client.api.datasets.update(dataset_model)
-
-    def _create_questions(self) -> None:
-        for question in self.__questions:
-            try:
-                question_model = self._client.api.questions.create(
-                    dataset_id=self._dataset.id, question=question._model
-                )
-                question._model = question_model
-            except ArgillaAPIError as e:
-                raise SettingsError(f"Failed to create question {question.name}") from e
 
     def _validate_empty_settings(self):
         if not all([self.fields, self.questions]):
@@ -366,11 +375,8 @@ class Settings(Resource):
 
         return guidelines
 
-    def __serialize_questions(self, questions: List[QuestionType]):
-        return [question.serialize() for question in questions]
 
-
-Property = Union[TextField, VectorField, MetadataType, QuestionType]
+Property = Union[Field, VectorField, MetadataType, QuestionType]
 
 
 class SettingsProperties(Sequence[Property]):
@@ -384,12 +390,19 @@ class SettingsProperties(Sequence[Property]):
         self._settings = settings
 
         for property in properties or []:
+            if self._settings.dataset and hasattr(property, "dataset"):
+                property.dataset = self._settings.dataset
             self.add(property)
 
-    def __getitem__(self, key: Union[str, int]) -> Optional[Property]:
+    def __getitem__(self, key: Union[UUID, str, int]) -> Optional[Property]:
         if isinstance(key, int):
             return list(self._properties_by_name.values())[key]
-        return self._properties_by_name.get(key)
+        elif isinstance(key, UUID):
+            for prop in self._properties_by_name.values():
+                if prop.id and prop.id == key:
+                    return prop
+        else:
+            return self._properties_by_name.get(key)
 
     def __iter__(self) -> Iterator[Property]:
         return iter(self._properties_by_name.values())
@@ -434,3 +447,28 @@ class SettingsProperties(Sequence[Property]):
 
         if property.name in dir(self):
             raise ValueError(f"Property with name {property.name!r} conflicts with an existing attribute")
+
+
+class QuestionsProperties(SettingsProperties[QuestionType]):
+    """
+    This class is used to align questions with the rest of the settings.
+
+    Since questions are not aligned with the Resource class definition, we use this
+    class to work with questions as we do with fields, vectors, or metadata (specially when creating questions).
+
+    Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
+    """
+
+    def create(self):
+        for question in self:
+            try:
+                self._create_question(question)
+            except ArgillaAPIError as e:
+                raise SettingsError(f"Failed to create question {question.name}") from e
+
+    def _create_question(self, question: QuestionType) -> None:
+        question_model = self._settings._client.api.questions.create(
+            dataset_id=self._settings.dataset.id,
+            question=question.api_model(),
+        )
+        question._model = question_model

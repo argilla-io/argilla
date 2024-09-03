@@ -32,12 +32,11 @@
 </a>
 </p>
 
-Argilla is a **collaboration platform for AI engineers and domain experts** that require **high-quality outputs, full data ownership, and overall efficiency**.
-
+Argilla is a collaboration tool for AI engineers and domain experts who need to build high-quality datasets for their projects.
 > [!NOTE]
 > This README represents the 1.29 SDK version. We have stopped development for the 1.x SDK version, while still committing to bug fixes. If you are looking for the README of the 2.x SDK version take a look [here](../README.md).
 
-If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.argilla.io/).
+If you just want to get started, we recommend our [UI demo](https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA%3D%3D) or our [2-click deployment quick start](https://docs.v1.argilla.io/en/latest/getting_started/cheatsheet.html). Curious, and want to know more? Read our [documentation](https://docs.v1.argilla.io/).
 
 ## Why use Argilla?
 
@@ -49,7 +48,7 @@ Compute is expensive and output quality is important. We help you focus on data,
 
 ### Take control of your data and models
 
-Most AI platforms are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to **manage your data and models in a way that suits you best**.
+Most AI tools are black boxes. Argilla is different. We believe that you should be the owner of both your data and your models. That's why we provide you with all the tools your team needs to **manage your data and models in a way that suits you best**.
 
 ### Improve efficiency by quickly iterating on the right data and models
 
@@ -61,7 +60,7 @@ We are an open-source community-driven project and we love to hear from you. Her
 
 - [Community Meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB): listen in or present during one of our bi-weekly events.
 
-- [Discord](http://hf.co/join/discord"): get direct support from the community in #argilla-general and #argilla-help.
+- [Discord](http://hf.co/join/discord"): get direct support from the community in #argilla-distilabel-general and #argilla-distilabel-help.
 
 - [Roadmap](https://github.com/orgs/argilla-io/projects/10/views/1): plans change but we love to discuss those with our community so feel encouraged to participate.
 
@@ -69,26 +68,26 @@ We are an open-source community-driven project and we love to hear from you. Her
 
 ### Open-source datasets and models
 
-Argilla is a tool that can be used to achieve and keep **high-quality data standards** with a **focus on NLP and LLMs**. Our community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?other=argilla) and [models](https://huggingface.co/models?other=distilabel), and **we love contributions to open-source** ourselves too.
+The community uses Argilla to create amazing open-source [datasets](https://huggingface.co/datasets?library=library:argilla&sort=trending) and [models](https://huggingface.co/models?other=distilabel).
 
-- Our [cleaned UltraFeedback dataset](https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences-cleaned) and the [Notus](https://huggingface.co/argilla/notus-7b-v1) and [Notux](https://huggingface.co/argilla/notux-8x7b-v1) models, where we improved benchmark and empirical human judgment for the Mistral and Mixtral models with cleaner data using **human feedback**.
-- Our [distilabeled Intel Orca DPO dataset](https://huggingface.co/datasets/argilla/distilabel-intel-orca-dpo-pairs) and the [improved OpenHermes model](https://huggingface.co/argilla/distilabeled-OpenHermes-2.5-Mistral-7B), show how we improve model performance by filtering out 50% of the original dataset through **human and AI feedback**.
+- [Cleaned UltraFeedback dataset](https://huggingface.co/datasets/argilla/ultrafeedback-binarized-preferences-cleaned) used to fine-tune the [Notus](https://huggingface.co/argilla/notus-7b-v1) and [Notux](https://huggingface.co/argilla/notux-8x7b-v1) models. The original UltraFeedback dataset was curated using Argilla UI filters to find and report a bug in the original data generation code. Based on this data curation process, Argilla built this new version of the UltraFeedback dataset and fine-tuned Notus, outperforming Zephyr on several benchmarks.
+- [distilabeled Intel Orca DPO dataset](https://huggingface.co/datasets/argilla/distilabel-intel-orca-dpo-pairs) used to fine-tune the [improved OpenHermes model](https://huggingface.co/argilla/distilabeled-OpenHermes-2.5-Mistral-7B). This dataset was built by combining human curation in Argilla with AI feedback from distilabel, leading to an improved version of the Intel Orca dataset and outperforming models fine-tuned on the original dataset.
 
-### Internal Use cases
+### Examples Use cases
 
-AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](https://loris.ai/) and [Prolific](https://www.prolific.com/) use Argilla to **improve the quality and efficiency of AI** projects. They shared their experiences in our [AI community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
+AI teams from companies like [the Red Cross](https://510.global/), [Loris.ai](https://loris.ai/) and [Prolific](https://www.prolific.com/) use Argilla to improve the quality and efficiency of AI projects. They shared their experiences in our [AI community meetup](https://lu.ma/embed-checkout/evt-IQtRiSuXZCIW6FB).
 
-- AI for good: [the Red Cross presentation](https://youtu.be/ZsCqrAhzkFU?feature=shared) showcases **how their experts and AI team collaborate** by classifying and redirecting requests from refugees of the Ukrainian crisis to streamline the support processes of the Red Cross.
-- Customer support: during [the Loris meetup](https://youtu.be/jWrtgf2w4VU?feature=shared) they showed how their AI team uses unsupervised and few-shot contrastive learning to help them **quickly validate and gain labelled samples for a huge amount of multi-label classifiers**.
-- Research studies: [the showcase from Prolific](https://youtu.be/ePDlhIxnuAs?feature=shared) announced their integration with our platform. They use it to actively **distribute data collection projects** among their annotating workforce. This allows them to quickly and **efficiently collect high-quality data** for their research studies.
+- AI for good: [the Red Cross presentation](https://youtu.be/ZsCqrAhzkFU?feature=shared) showcases how the Red Cross domain experts and AI team collaborated by classifying and redirecting requests from refugees of the Ukrainian crisis to streamline the support processes of the Red Cross.
+- Customer support: during [the Loris meetup](https://youtu.be/jWrtgf2w4VU?feature=shared) they showed how their AI team uses unsupervised and few-shot contrastive learning to help them quickly validate and gain labelled samples for a huge amount of multi-label classifiers.
+- Research studies: [the showcase from Prolific](https://youtu.be/ePDlhIxnuAs?feature=shared) announced their integration with our platform. They use it to actively distribute data collection projects among their annotating workforce. This allows Prolific to quickly and efficiently collect high-quality data for research studies.
 
 ## 👨‍💻 Getting started
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">pip install argilla</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/installation/deployments/docker.html">pip install argilla</a></summary>
 <p>
 
-First things first! You can <a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/python.html">install Argilla</a> from pypi.
+First things first! You can <a href="https://docs.v1.argilla.io/en/develop/getting_started/installation/deployments/python.html">install Argilla</a> from pypi.
 
 ```bash
 pip install argilla
@@ -98,7 +97,7 @@ pip install argilla
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/deployments/docker.html">Deploy Locally</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/installation/deployments/docker.html">Deploy Locally</a></summary>
 <p>
 
 ```bash
@@ -109,20 +108,20 @@ docker run -d --name argilla -p 6900:6900 argilla/argilla-quickstart:latest
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html">Deploy on Hugging Face Hub</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html">Deploy on Hugging Face Hub</a></summary>
 <p>
 
 HuggingFace Spaces now have persistent storage and this is supported from Argilla 1.11.0 onwards, but you will need to manually activate it via the HuggingFace Spaces settings. Otherwise, unless you're on a paid space upgrade, after 48 hours of inactivity the space will be shut off and you will lose all the data. To avoid losing data, we highly recommend using the persistent storage layer offered by HuggingFace.
 
 After this, we can connect to our server.
 
-<a href="https://docs.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/develop/getting_started/installation/deployments/huggingface-spaces.html"><img src="https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/hub/spaces-argilla-embed-space.png" width="100%"></a>
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/cheatsheet.html#connect-to-argilla">Connect to the Server</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/cheatsheet.html#connect-to-argilla">Connect to the Server</a></summary>
 <p>
 Once you have deployed Argilla, we will connect to the server.
 
@@ -136,13 +135,13 @@ workspace = "argilla-workspace"  # e.g. "admin"
 )
 ```
 
-After this, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
+After this, you can start using Argilla, so you can create a dataset and add records to it. We use the FeedbackDataset as an example, but you can use any of the other datasets available in Argilla. You can find more information about the different datasets <a href="https://docs.v1.argilla.io/en/latest/practical_guides/choose_dataset.html">here</a>.
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html#create-a-new-workspace">Create workspace</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/getting_started/installation/configurations/workspace_management.html#create-a-new-workspace">Create workspace</a></summary>
 <p>
 Once you have connected to the server, we will create a workspace for datasets.
 
@@ -162,7 +161,7 @@ for user in users:
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/create_update_dataset/create_dataset.html">Configure datasets</a></summary>
 <p>
 
 ```python
@@ -190,13 +189,13 @@ dataset = rg.FeedbackDataset(
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/create_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/snapshot-feedback-demo.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/create_dataset.html"><img src="https://docs.v1.argilla.io/en/latest/_images/snapshot-feedback-demo.png" width="100%"></a>
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/records.html">Add records</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/records.html">Add records</a></summary>
 <p>
 
 ```python
@@ -215,14 +214,14 @@ remote_dataset.add_records(record)
 
 And that's it, you now have your first dataset ready. You can begin annotating it or embark on other related tasks.
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/records.html"><img src="https://docs.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/records.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-annotate.png" width="100%"></a>
 
 </p>
 </details>
 
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html">Query datasets</a></summary>
 <p>
 
 ```python
@@ -231,13 +230,13 @@ import argilla_v1 as rg
 filtered_dataset = dataset.filter_by(response_status="submitted")
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-search.png" width="100%">
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-search.png" width="100%">
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html">Semantic search</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html">Semantic search</a></summary>
 <p>
 
 ```python
@@ -258,13 +257,13 @@ similar_records = ds.find_similar_records(
 )
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
 
 </p>
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html">Weak supervision</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/tutorials/techniques/weak_supervision.html">Weak supervision</a></summary>
 <p>
 
 ```python
@@ -274,7 +273,7 @@ rule = Rule(query="positive impact", label="optimism")
 add_rules(dataset="go_emotion", rules=[rule])
 ```
 
-<a href="https://docs.argilla.io/en/latest/tutorials/techniques/weak_supervision.html"><img src="https://docs.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/tutorials/techniques/weak_supervision.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-weak-labelling.png" width="100%"></a>
 
 <!-- <tr>
 <td>
@@ -297,7 +296,7 @@ plugin.start()
 </details>
 
 <details>
-<summary><a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html">Train models</a></summary>
+<summary><a href="https://docs.v1.argilla.io/en/latest/practical_guides/fine_tune.html">Train models</a></summary>
 <p>
 
 ```python
@@ -318,14 +317,14 @@ trainer.train()
 records = trainer.predict(["my-text"], as_argilla_records=True)
 ```
 
-<a href="https://docs.argilla.io/en/latest/practical_guides/fine_tune.html"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
+<a href="https://docs.v1.argilla.io/en/latest/practical_guides/fine_tune.html"><img src="https://argilla.io/blog/introducing-argilla-trainer/train.png" width="100%"></a>
 
 </p>
 </details>
 
 ## 🥇 Contributors
 
-To help our community with the creation of contributions, we have created our [developer](https://docs.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
+To help our community with the creation of contributions, we have created our [developer](https://docs.v1.argilla.io/en/latest/community/developer_docs.html) and [contributor](https://docs.v1.argilla.io/en/latest/community/contributing.html) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 

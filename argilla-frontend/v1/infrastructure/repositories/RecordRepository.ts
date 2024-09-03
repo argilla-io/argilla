@@ -42,10 +42,7 @@ export class RecordRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
   getRecords(criteria: RecordCriteria): Promise<BackendRecords> {
-    if (criteria.isFilteringByAdvanceSearch)
-      return this.getRecordsByAdvanceSearch(criteria);
-
-    return this.getRecordsByDatasetId(criteria);
+    return this.getRecordsByAdvanceSearch(criteria);
   }
 
   async getRecord(recordId: string): Promise<BackendRecord> {
@@ -188,35 +185,6 @@ export class RecordRepository {
     }
   }
 
-  private async getRecordsByDatasetId(
-    criteria: RecordCriteria
-  ): Promise<BackendRecords> {
-    const { datasetId, status, page } = criteria;
-    const { from, many } = page.server;
-    try {
-      const url = `/v1/me/datasets/${datasetId}/records`;
-
-      const params = this.createParams(from, many, status);
-
-      const { data } = await this.axios.get<ResponseWithTotal<BackendRecord[]>>(
-        url,
-        {
-          params,
-        }
-      );
-      const { items: records, total } = data;
-
-      return {
-        records,
-        total,
-      };
-    } catch (err) {
-      throw {
-        response: RECORD_API_ERRORS.ERROR_FETCHING_RECORDS,
-      };
-    }
-  }
-
   private async getRecordsByAdvanceSearch(
     criteria: RecordCriteria
   ): Promise<BackendRecords> {
@@ -244,7 +212,30 @@ export class RecordRepository {
 
       const body: BackendAdvanceSearchQuery = {
         query: {},
+        filters: {
+          and: [
+            {
+              type: "terms",
+              scope: {
+                entity: "response",
+                property: "status",
+              },
+              values: [status],
+            },
+          ],
+        },
       };
+
+      if (status === "pending") {
+        body.filters.and.push({
+          type: "terms",
+          scope: {
+            entity: "record",
+            property: "status",
+          },
+          values: [status],
+        });
+      }
 
       if (isFilteringBySimilarity) {
         body.query.vector = {
@@ -261,16 +252,6 @@ export class RecordRepository {
           field: searchText.isFilteringByField
             ? searchText.value.field
             : undefined,
-        };
-      }
-
-      if (
-        isFilteringByMetadata ||
-        isFilteringByResponse ||
-        isFilteringBySuggestion
-      ) {
-        body.filters = {
-          and: [],
         };
       }
 
@@ -443,7 +424,7 @@ export class RecordRepository {
         });
       }
 
-      const params = this.createParams(from, many, status);
+      const params = this.createParams(from, many);
 
       const { data } = await this.axios.post<
         ResponseWithTotal<BackendSearchRecords[]>
@@ -508,7 +489,7 @@ export class RecordRepository {
     };
   }
 
-  private createParams(fromRecord: number, howMany: number, status: string) {
+  private createParams(fromRecord: number, howMany: number) {
     const offset = `${fromRecord - 1}`;
     const params = new URLSearchParams();
 
@@ -516,7 +497,6 @@ export class RecordRepository {
     params.append("include", "suggestions");
     params.append("offset", offset);
     params.append("limit", howMany.toString());
-    params.append("response_status", status);
 
     return params;
   }

@@ -106,14 +106,16 @@
                 type="button"
                 class="secondary light small"
                 @on-click="restore(question)"
-                :disabled="!question.isModified"
+                :disabled="!question.isSettingsModified"
               >
                 <span v-text="$t('cancel')" />
               </BaseButton>
               <BaseButton
                 type="submit"
                 class="primary small"
-                :disabled="!question.isModified || !question.isQuestionValid"
+                :disabled="
+                  !question.isSettingsModified || !question.isQuestionValid
+                "
               >
                 <span v-text="$t('update')" />
               </BaseButton>
@@ -124,7 +126,7 @@
     </div>
     <div class="settings__preview">
       <QuestionsComponent
-        legend="UI preview"
+        :legend="$t('settings.uiPreview')"
         class="settings__preview__content"
         :questions="settings.questions"
       />

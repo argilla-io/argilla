@@ -13,7 +13,13 @@ import { DatasetSetting } from "~/v1/domain/entities/dataset/DatasetSetting";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 interface Tab {
-  id: "info" | "fields" | "questions" | "metadata" | "vector" | "danger-zone";
+  id:
+    | "general"
+    | "fields"
+    | "questions"
+    | "metadata"
+    | "vector"
+    | "danger-zone";
   name: string;
   component: string;
 }
@@ -34,7 +40,11 @@ export const useDatasetSettingViewModel = () => {
   const tabs = ref<Tab[]>([]);
 
   const configureTabs = (datasetSettings: DatasetSetting) => {
-    tabs.value.push({ id: "info", name: "Info", component: "SettingsInfo" });
+    tabs.value.push({
+      id: "general",
+      name: "General",
+      component: "SettingsInfo",
+    });
     tabs.value.push({
       id: "fields",
       name: t("fields"),
@@ -95,17 +105,19 @@ export const useDatasetSettingViewModel = () => {
   });
 
   const goToDataset = () => {
-    if (routes.previousRouteMatchWith(datasetId)) return routes.goBack();
+    if (routes.previousRouteMatchWith(`${datasetId}/annotation-mode`)) {
+      return routes.goBack();
+    }
 
     routes.goToFeedbackTaskAnnotationPage(datasetId);
   };
 
-  const goToTabWithModification = () => {
-    const goToTab = (id: Tab["id"]) => {
-      document.getElementById(id).click();
-    };
+  const goToTab = (id: Tab["id"]) => {
+    document.getElementById(id)?.click();
+  };
 
-    if (datasetSetting.isDatasetModified) return goToTab("info");
+  const goToTabWithModification = () => {
+    if (datasetSetting.isDatasetModified) return goToTab("general");
     if (datasetSetting.isFieldsModified) return goToTab("fields");
     if (datasetSetting.isQuestionsModified) return goToTab("questions");
     if (datasetSetting.isMetadataPropertiesModified) return goToTab("metadata");
@@ -148,6 +160,18 @@ export const useDatasetSettingViewModel = () => {
     }
   );
 
+  const onTabChanged = async (tabId: Tab["id"]) => {
+    await routes.setQueryParamsVirtually({ key: "tab", value: tabId });
+  };
+
+  const onTabLoaded = () => {
+    const selectedTab = routes.getQueryParams<string>("tab") as Tab["id"];
+
+    if (tabs.value.some((t) => t.id === selectedTab)) {
+      goToTab(selectedTab);
+    }
+  };
+
   return {
     isLoadingDataset,
     breadcrumbs,
@@ -157,5 +181,7 @@ export const useDatasetSettingViewModel = () => {
     datasetSetting,
     goToOutside,
     goToDataset,
+    onTabChanged,
+    onTabLoaded,
   };
 };

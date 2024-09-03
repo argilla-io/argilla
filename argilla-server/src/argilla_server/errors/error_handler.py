@@ -96,7 +96,7 @@ class APIErrorHandler:
         if isinstance(error, ServerError):
             return error
 
-        _LOGGER.error(error)
+        _LOGGER.error(error, exc_info=error, stacklevel=2)
         if isinstance(error, RequestValidationError):
             return ValidationError(error)
 

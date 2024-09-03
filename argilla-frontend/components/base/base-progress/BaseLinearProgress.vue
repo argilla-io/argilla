@@ -25,13 +25,20 @@
           class="progress__tooltip__triangle"
           :style="{ left: `${getTrianglePosition(hoveredRange)}%` }"
         />
-        <div class="progress__tooltip">
-          <span
-            class="progress__tooltip__percent-info"
-            v-text="
-              `${hoveredRange.name}: ${getPercentage(hoveredRange.value)}%`
-            "
-          />
+        <div
+          class="progress__tooltip"
+          :style="{
+            left: tooltipPositionFixed
+              ? '50%'
+              : `${getTrianglePosition(hoveredRange)}%`,
+          }"
+        >
+          <span class="progress__tooltip__percent-info"
+            >{{ hoveredRange.name }}:
+            <span v-if="showPercentInTooltip"
+              >{{ getPercentage(hoveredRange.value) }}%</span
+            >
+          </span>
           {{ hoveredRange.tooltip }}
         </div>
       </template>
@@ -45,6 +52,14 @@ export default {
     showTooltip: {
       type: Boolean,
       default: false,
+    },
+    showPercentInTooltip: {
+      type: Boolean,
+      default: true,
+    },
+    tooltipPositionFixed: {
+      type: Boolean,
+      default: true,
     },
     progressMax: {
       type: Number,
@@ -67,7 +82,7 @@ export default {
   },
   methods: {
     getPercentage(value) {
-      return ((value / this.progressMax) * 100).toFixed();
+      return ((value / this.progressMax) * 100).toFixed(2);
     },
     getTrianglePosition(range) {
       if (!range) return;
@@ -86,10 +101,10 @@ export default {
 </script>
 
 <styles lang="scss" scoped>
-$progressHeight: 12px;
+$progressHeight: 14px;
 $tooltipBackgroundColor: palette(grey, 600);
 $tooltipTriangleSize: 5px;
-$borderRadius: 10px;
+$borderRadius: 3px;
 
 .progress {
   $this: &;
@@ -103,12 +118,14 @@ $borderRadius: 10px;
     height: $progressHeight;
     border-radius: $borderRadius;
     overflow: hidden;
+    background: palette(grey, 600);
+    box-shadow: 0 0 0 1px palette(white);
   }
   &__bar {
     position: relative;
     height: 100%;
     border-radius: $borderRadius;
-    margin: 0 -4px;
+    margin: 0 -1px;
     box-shadow: 0 0 0 1px palette(white);
     z-index: 1;
     &:after {
@@ -124,7 +141,6 @@ $borderRadius: 10px;
     white-space: nowrap;
     min-width: 180px;
     bottom: calc(100% + #{$tooltipTriangleSize} + 2px);
-    left: 50%;
     transform: translateX(-50%);
     padding: calc($base-space / 2);
     background: $tooltipBackgroundColor;

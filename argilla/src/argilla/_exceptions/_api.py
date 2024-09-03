@@ -19,6 +19,8 @@ from argilla._exceptions._base import ArgillaError
 
 
 class ArgillaAPIError(ArgillaError):
+    message = "Server error"
+
     def __init__(self, message: Optional[str] = None, status_code: int = 500):
         """Base class for all Argilla API exceptions
         Args:
@@ -82,7 +84,7 @@ def api_error_handler(func):
             500: InternalServerError,
         }
         exception_class = switch.get(status_code, ArgillaAPIError)
-        raise exception_class(f"{exception_class.message}. Details: {error_detail}")
+        raise exception_class(f"{exception_class.message}. Details: {error_detail}", status_code=status_code)
 
     def _handler_wrapper(*args, **kwargs):
         try:

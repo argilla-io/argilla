@@ -29,6 +29,7 @@ from argilla_server.api.schemas.v1.records_bulk import (
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.contexts import distribution
 from argilla_server.contexts.accounts import fetch_users_by_ids_as_dict
 from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
@@ -49,7 +50,7 @@ class CreateRecordsBulk:
         self._search_engine = search_engine
 
     async def create_records_bulk(self, dataset: Dataset, bulk_create: RecordsBulkCreate) -> RecordsBulk:
-        await RecordsBulkCreateValidator(bulk_create, db=self._db).validate_for(dataset)
+        await RecordsBulkCreateValidator.validate(self._db, bulk_create, dataset)
 
         async with self._db.begin_nested():
             records = [
@@ -67,6 +68,7 @@ class CreateRecordsBulk:
 
             await self._upsert_records_relationships(records, bulk_create.items)
             await _preload_records_relationships_before_index(self._db, records)
+            await distribution.unsafe_update_records_status(self._db, records)
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
@@ -96,7 +98,7 @@ class CreateRecordsBulk:
                         raise ValueError(f"question with question_id={suggestion_create.question_id} does not exist")
 
                     try:
-                        SuggestionCreateValidator(suggestion_create).validate_for(question.parsed_settings, record)
+                        SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
                         upsert_many_suggestions.append(dict(**suggestion_create.dict(), record_id=record.id))
                     except (UnprocessableEntityError, ValueError) as ex:
                         raise ValueError(f"suggestion for question name={question.name} is not valid: {ex}")
@@ -129,7 +131,7 @@ class CreateRecordsBulk:
                     if response_create.user_id not in users_by_id:
                         raise ValueError(f"user with id {response_create.user_id} not found")
 
-                    ResponseCreateValidator(response_create).validate_for(record)
+                    ResponseCreateValidator.validate(response_create, record)
                     upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
             except (UnprocessableEntityError, ValueError) as ex:
                 raise UnprocessableEntityError(
@@ -157,7 +159,7 @@ class CreateRecordsBulk:
                     if not settings:
                         raise ValueError(f"vector with name={name} does not exist for dataset_id={record.dataset.id}")
 
-                    VectorValidator(value).validate_for(settings)
+                    VectorValidator.validate(value, settings)
                     upsert_many_vectors.append(dict(value=value, record_id=record.id, vector_settings_id=settings.id))
             except (UnprocessableEntityError, ValueError) as ex:
                 raise UnprocessableEntityError(
@@ -183,7 +185,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
         # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
         # computed inside the validator
-        RecordsBulkUpsertValidator(bulk_upsert, self._db, found_records).validate_for(dataset)
+        RecordsBulkUpsertValidator.validate(bulk_upsert, dataset, found_records)
 
         records = []
         async with self._db.begin_nested():
@@ -207,6 +209,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
 
             await self._upsert_records_relationships(records, bulk_upsert.items)
             await _preload_records_relationships_before_index(self._db, records)
+            await distribution.unsafe_update_records_status(self._db, records)
             await self._search_engine.index_records(dataset, records)
 
         await self._db.commit()
@@ -237,6 +240,7 @@ async def _preload_records_relationships_before_index(db: "AsyncSession", record
         .filter(Record.id.in_([record.id for record in records]))
         .options(
             selectinload(Record.responses).selectinload(Response.user),
+            selectinload(Record.responses_submitted),
             selectinload(Record.suggestions).selectinload(Suggestion.question),
             selectinload(Record.vectors),
         )

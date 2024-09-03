@@ -15,16 +15,16 @@
 from unittest import mock
 
 import pytest
-from argilla_server.enums import UserRole
-from argilla_server.errors.future import AuthenticationError
-from argilla_server.models import User
-from argilla_server.security.authentication import JWT
-from argilla_server.security.authentication.oauth2 import OAuth2Settings
 from httpcore import URL
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.enums import UserRole
+from argilla_server.errors.future import AuthenticationError
+from argilla_server.models import User
+from argilla_server.security.authentication import JWT
+from argilla_server.security.authentication.oauth2 import OAuth2Settings
 from tests.factories import AdminFactory, AnnotatorFactory
 
 
@@ -143,7 +143,7 @@ class TestOauth2:
     ):
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
                 return_value={"preferred_username": "username", "name": "name"},
             ):
                 response = await async_client.get(
@@ -159,9 +159,60 @@ class TestOauth2:
                 assert JWT.decode(json_response["access_token"])["username"] == "username"
                 assert json_response["token_type"] == "bearer"
 
-                user = (await db.execute(select(User).where(User.username == "username"))).scalar_one_or_none()
+                user = await db.scalar(select(User).filter_by(username="username"))
                 assert user is not None
                 assert user.role == UserRole.annotator
+
+    async def test_provider_huggingface_access_token_with_missing_username(
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        default_oauth_settings: OAuth2Settings,
+    ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            with mock.patch(
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
+                return_value={"name": "name"},
+            ):
+                response = await async_client.get(
+                    "/api/v1/oauth2/providers/huggingface/access-token",
+                    params={"code": "code", "state": "valid"},
+                    headers=owner_auth_header,
+                    cookies={"oauth2_state": "valid"},
+                )
+
+                assert response.status_code == 500
+
+    async def test_provider_huggingface_access_token_with_missing_name(
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        default_oauth_settings: OAuth2Settings,
+    ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            with mock.patch(
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
+                return_value={"preferred_username": "username"},
+            ):
+                response = await async_client.get(
+                    "/api/v1/oauth2/providers/huggingface/access-token",
+                    params={"code": "code", "state": "valid"},
+                    headers=owner_auth_header,
+                    cookies={"oauth2_state": "valid"},
+                )
+
+                assert response.status_code == 200
+
+                json_response = response.json()
+                assert JWT.decode(json_response["access_token"])["username"] == "username"
+                assert json_response["token_type"] == "bearer"
+
+                user = await db.scalar(select(User).filter_by(username="username"))
+                assert user is not None
+                assert user.role == UserRole.annotator
+                assert user.first_name == "username"
 
     async def test_provider_access_token_with_oauth_disabled(
         self,
@@ -193,7 +244,7 @@ class TestOauth2:
             response = await async_client.get(
                 "/api/v1/oauth2/providers/huggingface/access-token", headers=owner_auth_header
             )
-            assert response.status_code == 400
+            assert response.status_code == 422
             assert response.json() == {"detail": "'code' parameter was not found in callback request"}
 
     async def test_provider_access_token_with_not_found_state(
@@ -203,7 +254,7 @@ class TestOauth2:
             response = await async_client.get(
                 "/api/v1/oauth2/providers/huggingface/access-token", params={"code": "code"}, headers=owner_auth_header
             )
-            assert response.status_code == 400
+            assert response.status_code == 422
             assert response.json() == {"detail": "'state' parameter was not found in callback request"}
 
     async def test_provider_access_token_with_invalid_state(
@@ -216,7 +267,7 @@ class TestOauth2:
                 headers=owner_auth_header,
                 cookies={"oauth2_state": "valid"},
             )
-            assert response.status_code == 400
+            assert response.status_code == 422
             assert response.json() == {"detail": "'state' parameter does not match"}
 
     async def test_provider_access_token_with_authentication_error(
@@ -224,7 +275,7 @@ class TestOauth2:
     ):
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
                 side_effect=AuthenticationError("error"),
             ):
                 response = await async_client.get(
@@ -236,7 +287,7 @@ class TestOauth2:
                 assert response.status_code == 401
                 assert response.json() == {"detail": "error"}
 
-    async def test_provider_access_token_with_unauthorized_user(
+    async def test_provider_access_token_with_already_created_user(
         self,
         async_client: AsyncClient,
         db: AsyncSession,
@@ -247,7 +298,7 @@ class TestOauth2:
 
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
                 return_value={"preferred_username": admin.username, "name": admin.first_name},
             ):
                 response = await async_client.get(
@@ -256,8 +307,11 @@ class TestOauth2:
                     headers=owner_auth_header,
                     cookies={"oauth2_state": "valid"},
                 )
-                assert response.status_code == 401
-                assert response.json() == {"detail": "Could not authenticate user"}
+                assert response.status_code == 200
+
+                userinfo = JWT.decode(response.json()["access_token"])
+                assert userinfo["username"] == admin.username
+                assert userinfo["role"] == admin.role
 
     async def test_provider_access_token_with_same_username(
         self,
@@ -270,7 +324,7 @@ class TestOauth2:
 
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.client_provider.OAuth2ClientProvider._fetch_user_data",
+                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
                 return_value={"preferred_username": user.username, "name": user.first_name},
             ):
                 response = await async_client.get(

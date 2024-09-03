@@ -2,18 +2,23 @@
   <div
     class="panel"
     :class="[
-      isExpanded ? '--expanded' : '--collapsed',
+      !isExpanded ? '--collapsed' : undefined,
       hideOnDesktop ? '--mobile' : undefined,
     ]"
   >
     <BaseButton class="panel__header" @click="toggleExpand(isExpanded)">
-      <slot name="panelHeader" />
-      <svgicon
-        class="panel__header__icon"
-        :name="isExpanded ? 'chevron-down' : 'chevron-right'"
-        width="12"
-        height="12"
-      />
+      <div class="panel__header__container">
+        <slot v-if="!isExpanded" name="panelHeader" />
+        <div v-else style="width: 100%; text-align: left">
+          <slot name="panelHeaderExpanded" />
+        </div>
+        <svgicon
+          class="panel__header__icon"
+          :name="isExpanded ? 'chevron-down' : 'chevron-right'"
+          width="12"
+          height="12"
+        />
+      </div>
     </BaseButton>
 
     <div class="panel__content" v-if="isExpanded">
@@ -53,6 +58,18 @@ export default {
   border-top: 1px solid $black-10;
 
   &__header {
+    overflow: visible;
+    &__container {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      @include media("<desktop") {
+        height: $base-space * 3;
+      }
+    }
+
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -80,6 +97,12 @@ export default {
     padding: $base-space $base-space * 2;
     overflow-y: auto;
     @include font-size(13px);
+  }
+}
+
+.--collapsed {
+  @include media("<desktop") {
+    max-height: 6vh;
   }
 }
 

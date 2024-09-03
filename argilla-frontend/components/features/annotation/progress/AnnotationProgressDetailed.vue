@@ -16,31 +16,38 @@
   -->
 
 <template>
-  <div v-if="datasetMetrics.hasMetrics" class="metrics">
-    <BaseCircleProgress class="metrics__donut" :slices="progressItems" />
-    <ul class="metrics__list">
-      <li
-        v-for="(status, index) in progressItems"
-        :key="index"
-        class="metrics__list__item"
-      >
-        <span
-          class="color-bullet"
-          :style="{ backgroundColor: status.color }"
-        ></span>
-        <label class="metrics__list__name" v-text="status.name" />
-        <span
-          class="metrics__list__counter"
-          v-text="`(${getFormattedProgress(status.value)})`"
+  <div>
+    <ul class="my-progress__list">
+      <template v-if="!metrics.hasMetrics">
+        <StatusCounterSkeleton
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="my-progress__status--skeleton"
         />
-      </li>
+      </template>
+      <template v-else>
+        <StatusCounter
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="my-progress__status"
+          :color="status.color"
+          :name="status.name"
+          :value="status.value"
+        />
+      </template>
     </ul>
+    <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
+    <TeamProgress
+      visibleProgressValues
+      :datasetId="datasetId"
+      :show-tooltip="false"
+    />
   </div>
 </template>
 
 <script>
 import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
-import { useFeedbackTaskProgressViewModel } from "./useFeedbackTaskProgressViewModel";
+import { useAnnotationProgressViewModel } from "./useAnnotationProgressViewModel";
 
 export default {
   props: {
@@ -57,46 +64,41 @@ export default {
     progressItems() {
       return [
         {
-          name: RecordStatus.submitted.name,
-          color: RecordStatus.submitted.color,
-          value: this.datasetMetrics.submitted,
-          percent: this.datasetMetrics.percentage.submitted,
+          name: RecordStatus.pending.name,
+          color: RecordStatus.pending.color,
+          value: this.metrics.pending,
+          percent: this.metrics.percentage.pending,
         },
         {
           name: RecordStatus.draft.name,
           color: RecordStatus.draft.color,
-          value: this.datasetMetrics.draft,
-          percent: this.datasetMetrics.percentage.draft,
+          value: this.metrics.draft,
+          percent: this.metrics.percentage.draft,
         },
         {
           name: RecordStatus.discarded.name,
           color: RecordStatus.discarded.color,
-          value: this.datasetMetrics.discarded,
-          percent: this.datasetMetrics.percentage.discarded,
+          value: this.metrics.discarded,
+          percent: this.metrics.percentage.discarded,
         },
         {
-          name: RecordStatus.pending.name,
-          color: RecordStatus.pending.color,
-          value: this.datasetMetrics.pending,
-          percent: this.datasetMetrics.percentage.pending,
+          name: RecordStatus.submitted.name,
+          color: RecordStatus.submitted.color,
+          value: this.metrics.submitted,
+          percent: this.metrics.percentage.submitted,
         },
       ];
     },
   },
-  methods: {
-    getFormattedProgress(progress) {
-      return progress && this.$options.filters.formatNumber(progress);
-    },
-  },
   setup(props) {
-    return useFeedbackTaskProgressViewModel(props);
+    return useAnnotationProgressViewModel(props);
   },
 };
 </script>
 
 <style lang="scss" scoped>
-$bullet-size: 10px;
-.metrics {
+$statusCounterMinHeight: 60px;
+.my-progress {
   display: flex;
   align-items: center;
   gap: $base-space * 4;
@@ -106,28 +108,30 @@ $bullet-size: 10px;
     flex-shrink: 0;
   }
 }
-.color-bullet {
-  height: $bullet-size;
-  width: $bullet-size;
-  border-radius: $border-radius-rounded;
+.team-progress {
+  &__title {
+    text-transform: uppercase;
+    color: $black-54;
+    font-weight: 500;
+  }
 }
 
-.metrics__list {
-  display: grid;
-  grid-template-columns: auto auto;
-  column-gap: $base-space * 2;
-  row-gap: $base-space;
-  list-style: none;
-  padding-left: 0;
-  &__item {
+.my-progress {
+  &__list {
     display: flex;
-    align-items: center;
+    list-style: none;
     gap: $base-space;
-    @include font-size(13px);
-    min-width: 140px;
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: $base-space * 3;
   }
-  &__name {
-    text-transform: capitalize;
+  &__status.status-counter {
+    flex-direction: column;
+    width: 100%;
+  }
+  &__status--skeleton {
+    @extend .my-progress__status;
+    height: $statusCounterMinHeight;
   }
 }
 </style>
