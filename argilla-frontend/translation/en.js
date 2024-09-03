@@ -4,6 +4,7 @@ export default {
   label_selection: "Label",
   span: "Span",
   text: "Text",
+  image: "Image",
   rating: "Rating",
   minimize: "Minimize",
   select: "Select",
@@ -38,6 +39,7 @@ export default {
   taskDistributionTooltip:
     "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
+  couldNotLoadImage: "Could not load image",
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",
