@@ -71,10 +71,6 @@
   --bg-tooltip: var(--color-dark-grey);
 }
 
-[data-theme="light"] {
-  color-scheme: light;
-}
-
 [data-theme="dark"] {
   color-scheme: dark;
   --bg-black: hsl(0, 0%, 0%);
@@ -138,4 +134,8 @@
   --bg-banner-warning: hsl(47, 83%, 16%);
   --bg-banner-error: hsl(3, 100%, 20%);
   --bg-tooltip: hsl(207, 9%, 32%);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
 }
