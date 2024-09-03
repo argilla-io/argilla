@@ -25,6 +25,7 @@ from argilla_server.contexts import questions
 from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
 from argilla_server.security import auth
+from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter()
 
