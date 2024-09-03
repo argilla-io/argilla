@@ -4,7 +4,7 @@ export const useColorSchema = () => {
     ? "dark"
     : "light";
 
-  const currentTheme = ref(localStorage.getItem("theme") || systemTheme);
+  const currentTheme = ref(localStorage.getItem("theme") || "system");
 
   const setTheme = (theme: string) => {
     currentTheme.value = theme;
