@@ -56,6 +56,9 @@ dependencies = [
     # for CLI
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
     "packaging>=23.2",
+    "psycopg2-binary>=2.9.9",
+    # For Telemetry
+    "huggingface_hub>=0.13,<1",
 ]
 
 [project.optional-dependencies]
@@ -105,7 +108,7 @@ log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
 log_date_format = "%Y-%m-%d %H:%M:%S"
 log_cli = "True"
 testpaths = ["tests"]
-env = ["ARGILLA_ENABLE_TELEMETRY=0"]
+env = ["HF_HUB_DISABLE_TELEMETRY=1"]
 
 [tool.coverage.run]
 concurrency = ["greenlet", "thread", "multiprocessing"]

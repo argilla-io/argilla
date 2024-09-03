@@ -65,6 +65,7 @@ describe("useRunningEnvironment", () => {
       expect(space).toEqual({
         user: "USER_NAME_FAKE",
         space: "AWESOME_SPACE",
+        host: "huggingface.co",
       });
     });
   });
