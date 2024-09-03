@@ -513,6 +513,7 @@ class User(DatabaseModel):
 
 
 def generate_webhook_secret() -> str:
+    # NOTE: https://www.standardwebhooks.com implementation requires a base64 encoded secret
     return base64.b64encode(secrets.token_bytes(_WEBHOOK_SECRET_BYTES_LENGTH)).decode("utf-8")
 
 

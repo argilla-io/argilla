@@ -26,11 +26,11 @@ from argilla_server.models import Webhook as WebhookModel
 MSG_ID_BYTES_LENGTH = 16
 
 
+# NOTE: We are using standard webhooks implementation.
+# For more information take a look to https://www.standardwebhooks.com
 def notify_event(webhook: WebhookModel, type: str, timestamp: datetime, data: Dict) -> httpx.Response:
     msg_id = _generate_msg_id()
-
     payload = json.dumps(_build_payload(type, timestamp, data))
-
     signature = Webhook(webhook.secret).sign(msg_id, timestamp, payload)
 
     return httpx.post(

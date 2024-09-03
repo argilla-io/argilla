@@ -18,6 +18,10 @@ from argilla_server.models import User
 
 class WebhookPolicy:
     @classmethod
+    async def ping(cls, actor: User) -> bool:
+        return actor.is_owner or actor.is_admin
+
+    @classmethod
     async def list(cls, actor: User) -> bool:
         return actor.is_owner or actor.is_admin
 

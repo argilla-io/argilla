@@ -82,3 +82,17 @@ async def delete_webhook(
     await authorize(current_user, WebhookPolicy.delete)
 
     return await webhooks.delete_webhook(db, webhook)
+
+
+@router.post("/webhooks/{webhook_id}/ping", status_code=status.HTTP_204_NO_CONTENT)
+async def ping_webhook(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Security(auth.get_current_user),
+    webhook_id: UUID,
+):
+    webhook = await Webhook.get_or_raise(db, webhook_id)
+
+    await authorize(current_user, WebhookPolicy.ping)
+
+    await webhooks.ping_webhook(webhook)
