@@ -193,6 +193,54 @@ Records can also be updated using the `log` method with records that contain an 
     1. In this example, the Hugging Face dataset matches the Argilla dataset schema.
     2. The `uuid` key in the Hugging Face dataset corresponds to the `id` field in the Argilla dataset.
 
+### Adding and updating records with images
+
+Argilla datasets can contain image fields. You can add images to a dataset by passing the image to the record object as either a remote URL, a local path to an image file, or a PIL object. The field names must be defined as an `rg.ImageField` in the dataset's `Settings` object to be accepted. Images will be stored in the Argilla database and returned as rescaled PIL objects.
+
+=== "From a data structure with local file paths"
+
+    ```python
+
+    import os
+
+    image_dir = "path/to/images"
+
+    data = [
+        {
+            "image": os.path.join(image_dir, "image1.jpg"), # (1)
+        },
+        {
+            "image": os.path.join(image_dir, "image2.jpg"), # (1)
+        },
+    ] # (1)
+
+    dataset.records.log(data)
+    ```
+
+    1. The image can be referenced as either a remote URL, a local file path, or a PIL object.
+   
+=== "From a Hugging face"
+
+    Hugging face datasets can be passed directly to the `log` method. The image field must be defined as an `Image` in the dataset's features.
+
+    ```python
+    hf_dataset = load_dataset("ylecun/mnist", split="train[:100]") # (1)
+    dataset.records.log(records=hf_dataset) # (2)
+    ```
+
+    If the image field is not defined as an `Image` in the dataset's features, you can cast the dataset to the correct schema before adding it to the Argilla dataset. This is only necessary if the image field is not defined as an `Image` in the dataset's features, and is not one of the supported image types by Argilla (URL, local path, or PIL object).
+
+    ```python
+    hf_dataset = load_dataset("<my_custom_dataset>") # (1)
+    hf_dataset = hf_dataset.cast(
+        features=Features({"image": Image(), "label": Value("string")}),
+    )
+    dataset.records.log(records=hf_dataset) # (2)
+    ```
+
+    1. In this example, the Hugging Face dataset matches the Argilla dataset schema but the image field is not defined as an `Image` in the dataset's features.
+
+
 ### Iterating over records in a dataset
 
 `Dataset.records` can be used to iterate over records in a dataset from the server. The records will be fetched in batches from the server::
