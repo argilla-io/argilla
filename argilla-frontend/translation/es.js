@@ -46,7 +46,7 @@ export default {
     taskDistributionCompleted: "🎉 ¡La tarea está completada!",
     noSubmittedRecords: "Aún no has entregado ningún registro",
     noRecordsFound:
-      "No tienes registros {status} que coincidan con tu consulta",
+      "No tienes registros {status} que coincidan con tu búsqueda",
     noRecords: "No tienes registros {status}",
     noPendingRecordsToAnnotate: "🎉 No tienes registros pendientes para anotar",
     noDraftRecordsToReview: "No tienes ningún borrador para revisar",
