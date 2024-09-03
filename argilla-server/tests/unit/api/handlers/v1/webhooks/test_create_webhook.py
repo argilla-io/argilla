@@ -23,7 +23,7 @@ from argilla_server.api.webhooks.v1.enums import WebhookEvent
 from argilla_server.models import Webhook
 from argilla_server.constants import API_KEY_HEADER_NAME
 
-from tests.factories import AdminFactory, AnnotatorFactory
+from tests.factories import AdminFactory, AnnotatorFactory, WebhookFactory
 
 
 @pytest.mark.asyncio
@@ -213,3 +213,23 @@ class TestCreateWebhook:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 0
+
+    async def test_create_webhook_reaching_maximum_number_of_webhooks(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        await WebhookFactory.create_batch(10)
+
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "url": "https://example.com/webhook",
+                "events": [WebhookEvent.response_created],
+                "description": "Test webhook",
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "You can't create more than 10 webhooks. Please delete some of them first"}
+
+        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 10

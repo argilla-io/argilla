@@ -14,10 +14,11 @@
 
 from typing import Sequence
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import select
 
 from argilla_server.models import Webhook
+from argilla_server.validators.webhooks import WebhookCreateValidator
 
 
 async def list_webhooks(db: AsyncSession) -> Sequence[Webhook]:
@@ -25,7 +26,11 @@ async def list_webhooks(db: AsyncSession) -> Sequence[Webhook]:
 
 
 async def create_webhook(db: AsyncSession, webhook_attrs: dict) -> Webhook:
-    return await Webhook(**webhook_attrs).save(db)
+    webhook = Webhook(**webhook_attrs)
+
+    await WebhookCreateValidator.validate(db, webhook)
+
+    return await webhook.save(db)
 
 
 async def update_webhook(db: AsyncSession, webhook: Webhook, webhook_attrs: dict) -> Webhook:
