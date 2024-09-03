@@ -74,14 +74,11 @@ $searchBarSize: $base-space * 4;
   align-items: center;
   gap: $base-space * 1.5;
   padding: $base-space * 1.2 $base-space * 1.5;
-  border: 1px solid var(--bg-opacity-6);
+  border: 1px solid var(--bg-opacity-10);
   border-radius: $border-radius-l;
-  background: transparent;
+  background: var(--bg-accent-grey-1);
   transition: all 0.2s ease;
-  &:hover {
-    border: 1px solid var(--bg-solid-grey-2);
-    transition: all 0.2s ease;
-  }
+
   &.active,
   &.re-input-focused {
     border: 1px solid var(--fg-cuaternary);
