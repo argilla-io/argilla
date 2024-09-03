@@ -523,9 +523,12 @@ class Webhook(DatabaseModel):
     url: Mapped[str] = mapped_column(Text, unique=True)
     secret: Mapped[str] = mapped_column(Text, unique=True, default=generate_webhook_secret)
     events: Mapped[List[str]] = mapped_column(JSON)
+    enabled: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     def __repr__(self):
         return (
             f"Webhook(id={str(self.id)!r}, url={self.url!r}, events={self.events!r}, "
+            f"enabled={self.enabled!r}, description={self.description!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )

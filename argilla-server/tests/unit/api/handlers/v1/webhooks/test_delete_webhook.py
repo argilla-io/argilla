@@ -42,6 +42,8 @@ class TestDeleteWebhook:
             "url": webhook.url,
             "secret": webhook.secret,
             "events": [WebhookEvent.response_created],
+            "enabled": True,
+            "description": None,
             "inserted_at": webhook.inserted_at.isoformat(),
             "updated_at": webhook.updated_at.isoformat(),
         }

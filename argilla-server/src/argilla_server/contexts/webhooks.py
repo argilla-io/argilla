@@ -18,11 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select
 
 from argilla_server.models import Webhook
-from argilla_server.api.webhooks.v1.ping import notify_ping_event
-
-
-async def ping_webhook(webhook: Webhook) -> None:
-    notify_ping_event(webhook)
 
 
 async def list_webhooks(db: AsyncSession) -> Sequence[Webhook]:

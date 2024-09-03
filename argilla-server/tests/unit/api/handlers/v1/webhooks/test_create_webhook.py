@@ -38,6 +38,7 @@ class TestCreateWebhook:
             json={
                 "url": "https://example.com/webhook",
                 "events": [WebhookEvent.response_created],
+                "description": "Test webhook",
             },
         )
 
@@ -51,6 +52,8 @@ class TestCreateWebhook:
             "url": "https://example.com/webhook",
             "secret": webhook.secret,
             "events": [WebhookEvent.response_created],
+            "enabled": True,
+            "description": "Test webhook",
             "inserted_at": webhook.inserted_at.isoformat(),
             "updated_at": webhook.updated_at.isoformat(),
         }
@@ -130,6 +133,58 @@ class TestCreateWebhook:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 0
+
+    async def test_create_webhook_with_duplicated_events(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "url": "https://example.com/webhook",
+                "events": [WebhookEvent.response_created, WebhookEvent.response_created],
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 0
+
+    @pytest.mark.parametrize("invalid_description", ["", "d" * 1001])
+    async def test_create_webhook_with_invalid_description(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, invalid_description: str
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "url": "https://example.com/webhook",
+                "events": [WebhookEvent.response_created],
+                "description": invalid_description,
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 0
+
+    async def test_create_webhook_with_description_as_none(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "url": "https://example.com/webhook",
+                "events": [WebhookEvent.response_created],
+                "description": None,
+            },
+        )
+
+        assert response.status_code == 201
+        assert response.json()["description"] == None
+
+        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 1
+        webhook = (await db.execute(select(Webhook))).scalar_one()
+        assert webhook.description == None
 
     async def test_create_webhook_without_url(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict

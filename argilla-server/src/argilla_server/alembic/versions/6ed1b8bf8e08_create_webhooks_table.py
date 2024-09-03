@@ -38,6 +38,8 @@ def upgrade() -> None:
         sa.Column("url", sa.Text(), nullable=False),
         sa.Column("secret", sa.Text(), nullable=False),
         sa.Column("events", sa.JSON(), nullable=False),
+        sa.Column("enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
+        sa.Column("description", sa.Text(), nullable=True),
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id"),

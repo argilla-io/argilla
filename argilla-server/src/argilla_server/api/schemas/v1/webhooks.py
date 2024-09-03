@@ -22,7 +22,9 @@ from argilla_server.api.webhooks.v1.enums import WebhookEvent
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.pydantic_v1 import BaseModel, Field
 
-WEBHOOKS_EVENTS_MIN_ITEMS = 1
+WEBHOOK_EVENTS_MIN_ITEMS = 1
+WEBHOOK_DESCRIPTION_MIN_LENGTH = 1
+WEBHOOK_DESCRIPTION_MAX_LENGTH = 1000
 
 
 class Webhook(BaseModel):
@@ -30,6 +32,8 @@ class Webhook(BaseModel):
     url: str
     secret: str
     events: List[WebhookEvent]
+    enabled: bool
+    description: Optional[str]
     inserted_at: datetime
     updated_at: datetime
 
@@ -43,11 +47,26 @@ class Webhooks(BaseModel):
 
 class WebhookCreate(BaseModel):
     url: HttpUrl
-    events: List[WebhookEvent] = Field(min_items=WEBHOOKS_EVENTS_MIN_ITEMS)
+    events: List[WebhookEvent] = Field(
+        min_items=WEBHOOK_EVENTS_MIN_ITEMS,
+        unique_items=True,
+    )
+    description: Optional[str] = Field(
+        min_length=WEBHOOK_DESCRIPTION_MIN_LENGTH,
+        max_length=WEBHOOK_DESCRIPTION_MAX_LENGTH,
+    )
 
 
 class WebhookUpdate(UpdateSchema):
     url: Optional[HttpUrl]
-    events: Optional[List[WebhookEvent]] = Field(min_items=WEBHOOKS_EVENTS_MIN_ITEMS)
+    events: Optional[List[WebhookEvent]] = Field(
+        min_items=WEBHOOK_EVENTS_MIN_ITEMS,
+        unique_items=True,
+    )
+    enabled: Optional[bool]
+    description: Optional[str] = Field(
+        min_length=WEBHOOK_DESCRIPTION_MIN_LENGTH,
+        max_length=WEBHOOK_DESCRIPTION_MAX_LENGTH,
+    )
 
-    __non_nullable_fields__ = {"url", "events"}
+    __non_nullable_fields__ = {"url", "events", "enabled"}

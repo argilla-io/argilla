@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, Security, status
 
 from argilla_server.database import get_async_db
 from argilla_server.api.policies.v1 import WebhookPolicy, authorize
+from argilla_server.api.webhooks.v1.ping import notify_ping_event
 from argilla_server.security import auth
 from argilla_server.models import User
 from argilla_server.api.schemas.v1.webhooks import (
@@ -95,4 +96,4 @@ async def ping_webhook(
 
     await authorize(current_user, WebhookPolicy.ping)
 
-    await webhooks.ping_webhook(webhook)
+    notify_ping_event(webhook)
