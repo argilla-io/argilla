@@ -194,7 +194,6 @@ export default {
     hide: "Hide",
     passwordDescription: "Enter your password",
     claim: "Work on data together.</br>Make your models better.",
-    error: "Wrong username or password. Try again",
     hf: {
       title: "Welcome to {space}",
       subtitle: "Join <strong>{user}</strong> to build better datasets for AI",

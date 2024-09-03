@@ -1,5 +1,4 @@
 export * from "./AgentRepository";
-export * from "./AuthRepository";
 export * from "./AxiosCache";
 export * from "./DatasetRepository";
 export * from "./EnvironmentRepository";
@@ -10,6 +9,5 @@ export * from "./MetricsRepository";
 export * from "./OAuthRepository";
 export * from "./QuestionRepository";
 export * from "./RecordRepository";
-export * from "./UserRepository";
 export * from "./VectorRepository";
 export * from "./WorkspaceRepository";

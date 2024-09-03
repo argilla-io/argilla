@@ -174,9 +174,24 @@ const config: NuxtConfig = {
 
   auth: {
     strategies: {
-      local: {
+      basic: {
+        scheme: "local",
+        token: {
+          property: "access_token",
+        },
+        user: {
+          property: false,
+          autoFetch: true,
+        },
         endpoints: {
+          login: {
+            url: "/v1/token",
+            method: "post",
+            propertyName: "access_token",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          },
           logout: false,
+          user: { url: "/v1/me", propertyName: false },
         },
       },
     },
@@ -186,7 +201,7 @@ const config: NuxtConfig = {
   },
 
   router: {
-    middleware: ["route-guard", "me"],
+    middleware: ["auth-guard"],
     base: process.env.BASE_URL ?? "/",
   },
 

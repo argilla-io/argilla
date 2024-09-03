@@ -26,12 +26,6 @@ const mountLoginPage = ({ auth } = {}) => {
   });
 };
 
-jest.mock("./useSignInViewModel", () => {
-  const useSignInViewModel = jest.fn();
-
-  return { useSignInViewModel };
-});
-
 describe("Login page should", () => {
   it("still in the same page if the auth token is not valid", () => {
     const loginUserSpy = jest.spyOn(SignIn.methods, "loginUser");

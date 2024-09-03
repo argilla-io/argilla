@@ -1,7 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Response } from "../types";
 import { useRunningEnvironment } from "../services/useRunningEnvironment";
-import { PublicNuxtAxiosInstance } from "../services/useAxiosExtension";
 import { largeCache } from "./AxiosCache";
 import {
   OAuthParams,
@@ -23,10 +22,12 @@ interface BackendOAuthProvider {
 export class OAuthRepository implements IOAuthRepository {
   private readonly axios: NuxtAxiosInstance;
   constructor(
-    axios: PublicNuxtAxiosInstance,
+    axios: NuxtAxiosInstance,
     private readonly router: RouterService
   ) {
-    this.axios = axios.makePublic();
+    this.axios = axios.create({
+      withCredentials: false,
+    });
   }
 
   async getProviders(): Promise<OAuthProvider[]> {

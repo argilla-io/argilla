@@ -1,23 +1,16 @@
 import { mock } from "@codescouts/test/jest";
 import { IOAuthRepository } from "../services/IOAuthRepository";
 import { IAuthService } from "../services/IAuthService";
-import { IUserRepository } from "../services/IUserRepository";
 import { OAuthLoginUseCase } from "./oauth-login-use-case";
-import { LoadUserUseCase } from "./load-user-use-case";
 
 describe("OAuthLoginUseCase should", () => {
   test("logout user before call the login on backend", async () => {
-    const auth = mock<IAuthService>();
     const oauthRepository = mock<IOAuthRepository>();
-    const loadUserUseCase = new LoadUserUseCase(auth, mock<IUserRepository>());
+    const auth = mock<IAuthService>();
 
     oauthRepository.login.mockRejectedValue(new Error("FAKE"));
 
-    const useCase = new OAuthLoginUseCase(
-      auth,
-      oauthRepository,
-      loadUserUseCase
-    );
+    const useCase = new OAuthLoginUseCase(oauthRepository, auth);
 
     try {
       await useCase.login("huggingface", null);
@@ -27,15 +20,10 @@ describe("OAuthLoginUseCase should", () => {
   });
 
   test("call the backend after logout", async () => {
-    const auth = mock<IAuthService>();
     const oauthRepository = mock<IOAuthRepository>();
-    const loadUserUseCase = new LoadUserUseCase(auth, mock<IUserRepository>());
+    const auth = mock<IAuthService>();
 
-    const useCase = new OAuthLoginUseCase(
-      auth,
-      oauthRepository,
-      loadUserUseCase
-    );
+    const useCase = new OAuthLoginUseCase(oauthRepository, auth);
 
     await useCase.login("huggingface", null);
 
@@ -43,17 +31,12 @@ describe("OAuthLoginUseCase should", () => {
   });
 
   test("save token if the token is defined", async () => {
-    const auth = mock<IAuthService>();
     const oauthRepository = mock<IOAuthRepository>();
-    const loadUserUseCase = new LoadUserUseCase(auth, mock<IUserRepository>());
+    const auth = mock<IAuthService>();
 
     oauthRepository.login.mockResolvedValue("FAKE_TOKEN");
 
-    const useCase = new OAuthLoginUseCase(
-      auth,
-      oauthRepository,
-      loadUserUseCase
-    );
+    const useCase = new OAuthLoginUseCase(oauthRepository, auth);
 
     await useCase.login("huggingface", null);
 
@@ -61,17 +44,12 @@ describe("OAuthLoginUseCase should", () => {
   });
 
   test("no save token if the token is not defined", async () => {
-    const auth = mock<IAuthService>();
     const oauthRepository = mock<IOAuthRepository>();
-    const loadUserUseCase = new LoadUserUseCase(auth, mock<IUserRepository>());
+    const auth = mock<IAuthService>();
 
     oauthRepository.login.mockResolvedValue("");
 
-    const useCase = new OAuthLoginUseCase(
-      auth,
-      oauthRepository,
-      loadUserUseCase
-    );
+    const useCase = new OAuthLoginUseCase(oauthRepository, auth);
 
     await useCase.login("huggingface", null);
 

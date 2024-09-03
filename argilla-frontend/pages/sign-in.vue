@@ -22,14 +22,14 @@
       <form class="form" @submit.prevent="onLoginUser">
         <p class="form__title" v-text="$t('login.title')" />
         <LoginInput
-          v-model="username"
+          v-model="login.username"
           :name="$t('login.username')"
           type="text"
           :autofocus="true"
           autocomplete="on"
         />
         <LoginInput
-          v-model="password"
+          v-model="login.password"
           :name="$t('login.password')"
           type="password"
           autocomplete="on"
@@ -50,14 +50,15 @@
 
 <script>
 import AuthenticationLayout from "@/layouts/AuthenticationLayout";
-import { useSignInViewModel } from "./useSignInViewModel";
 
 export default {
   data() {
     return {
       error: undefined,
-      username: "",
-      password: "",
+      login: {
+        username: "",
+        password: "",
+      },
       hasAuthToken: false,
     };
   },
@@ -89,12 +90,12 @@ export default {
     formattedError() {
       if (this.error) {
         return this.error.toString().includes("401")
-          ? this.$t("login.error")
+          ? "Wrong username or password. Try again"
           : this.error;
       }
     },
     isButtonEnabled() {
-      return !!this.username && !!this.password;
+      return !!this.login.username && !!this.login.password;
     },
   },
   methods: {
@@ -104,8 +105,11 @@ export default {
         path: redirect_url,
       });
     },
-    async loginUser({ username, password }) {
-      await this.login(username, password);
+    async loginUser(authData) {
+      await this.$auth.logout();
+      await this.$auth.loginWith("basic", {
+        data: this.encodedLoginData(authData),
+      });
 
       this.$notification.clear();
 
@@ -113,17 +117,16 @@ export default {
     },
     async onLoginUser() {
       try {
-        await this.loginUser({
-          username: this.username,
-          password: this.password,
-        });
+        await this.loginUser(this.login);
       } catch (err) {
         this.error = err;
       }
     },
-  },
-  setup() {
-    return useSignInViewModel();
+    encodedLoginData({ username, password }) {
+      return `username=${encodeURIComponent(
+        username
+      )}&password=${encodeURIComponent(password)}`;
+    },
   },
 };
 </script>
