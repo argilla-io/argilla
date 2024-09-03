@@ -179,6 +179,8 @@ nav:
       - tutorials/index.md
       - Text classification: tutorials/text_classification.ipynb
       - Token classification: tutorials/token_classification.ipynb
+      - Image classification: tutorials/image_classification.ipynb
+      - Image preference: tutorials/image_preference.ipynb
   - API Reference:
       - Python SDK: reference/argilla/
       - FastAPI Server:
