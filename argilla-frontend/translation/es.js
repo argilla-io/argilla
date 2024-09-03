@@ -49,7 +49,7 @@ export default {
       "No tienes registros {status} que coincidan con tu consulta",
     noRecords: "No tienes registros {status}",
     noPendingRecordsToAnnotate: "🎉 No tienes registros pendientes para anotar",
-    noDraftRecordsToReview: "No tienes registros en borrador para revisar",
+    noDraftRecordsToReview: "No tienes ningún borrador para revisar",
   },
   breadcrumbs: {
     home: "Inicio",
