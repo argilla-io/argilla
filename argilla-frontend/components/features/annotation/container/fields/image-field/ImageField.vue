@@ -55,7 +55,10 @@ export default {
   $this: &;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100%;
+  min-width: 100%;
+  height: fit-content;
+  width: fit-content;
   gap: $base-space * 2;
   padding: 2 * $base-space;
   background: palette(grey, 800);
@@ -72,7 +75,10 @@ export default {
   }
 
   img {
-    width: 70%;
+    max-width: fit-content;
+    max-height: fit-content;
+    height: fit-content;
+    width: fit-content;
   }
 
   &_title {

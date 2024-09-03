@@ -59,7 +59,9 @@ class QuestionPropertyBase(SettingsPropertyBase):
         elif isinstance(values, list) and all(isinstance(value, int) for value in values):
             return [{"value": value} for value in values]
         else:
-            raise ValueError("Invalid labels format. Please provide a list of strings or a list of dictionaries.")
+            raise ValueError(
+                "Invalid labels format. Please provide a list of strings or a dictionary of key-value pairs."
+            )
 
     @staticmethod
     def _render_options_as_values(options: List[dict]) -> Dict[str, str]:
@@ -101,13 +103,14 @@ class LabelQuestion(QuestionPropertyBase):
             a list of available labels.
 
         Parameters:
-            name: str: The name of the question to be used as a reference.
-            labels: Union[List[str], Dict[str, str]]: The list of available labels for the question,
-                or a dictionary of key-value pairs where the key is the label and the value is the label text in the UI.
-            title: Optional[str]: The title of the question to be shown in the UI.
-            description: Optional[str]: The description of the question to be shown in the UI.
-            required: bool: If the question is required for a record to be valid.
-            visible_labels: Optional[int]: The number of visible labels for the question.
+            name (str): The name of the question to be used as a reference.
+            labels (Union[List[str], Dict[str, str]]): The list of available labels for the question, or a
+                dictionary of key-value pairs where the key is the label and the value is the label name displayed in the UI.
+            title (Optional[str]): The title of the question to be shown in the UI.
+            description (Optional[str]): The description of the question to be shown in the UI.
+            required (bool): If the question is required for a record to be valid. At least one question must be required.
+            visible_labels (Optional[int]): The number of visible labels for the question to be shown in the UI. \
+                Setting it to None show all options.
         """
         self._model = LabelQuestionModel(
             name=name,
@@ -161,27 +164,29 @@ class MultiLabelQuestion(LabelQuestion):
     def __init__(
         self,
         name: str,
-        labels: List[str],
+        labels: Union[List[str], Dict[str, str]],
         visible_labels: Optional[int] = None,
         labels_order: Literal["natural", "suggestion"] = "natural",
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
     ) -> None:
-        """Create a new multilabel question for `Settings` of a `Dataset`. A \
-            multilabel question is a question where the user can select multiple \
+        """Create a new multi-label question for `Settings` of a `Dataset`. A \
+            multi-label question is a question where the user can select multiple \
             labels from a list of available labels.
 
         Parameters:
-            name: str: The name of the question to be used as a reference.
-            labels: List[str]: The list of available labels for the question.
-            labels_order: Literal["natural", "suggestion"]: The order of the labels in the UI. \
-                Can be either "natural" or "suggestion". Default is "natural".
-            title: Optional[str]: The title of the question to be shown in the UI.
-            description: Optional[str]: The description of the question to be shown in the UI.
-            required: bool: If the question is required for a record to be valid.
-            visible_labels: Optional[int]: The number of visible labels for the question.
-            labels_order: str: The order of the labels in the UI. Can be either "natural" or "suggestion". Default is "natural".
+            name (str): The name of the question to be used as a reference.
+            labels (Union[List[str], Dict[str, str]]): The list of available labels for the question, or a \
+                dictionary of key-value pairs where the key is the label and the value is the label name displayed in the UI.
+            visible_labels (Optional[int]): The number of visible labels for the question to be shown in the UI. \
+                Setting it to None show all options.
+            labels_order (Literal["natural", "suggestion"]): The order of the labels in the UI. \
+                Can be either "natural" (order in which they were specified) or "suggestion" (order prioritizing those associated with a suggestion). \
+                The score of the suggestion will be taken into account for ordering if available.
+            title (Optional[str]: The title of the question to be shown in the UI.
+            description (Optional[str]): The description of the question to be shown in the UI.
+            required (bool): If the question is required for a record to be valid. At least one question must be required.
         """
         self._model = MultiLabelQuestionModel(
             name=name,
@@ -227,11 +232,12 @@ class TextQuestion(QuestionPropertyBase):
             is a question where the user can input text.
 
         Parameters:
-            name: str: The name of the question to be used as a reference.
-            title: Optional[str]: The title of the question to be shown in the UI.
-            description: Optional[str]: The description of the question to be shown in the UI.
-            required: bool: If the question is required for a record to be valid.
-            use_markdown: bool: If the question should use markdown for the description.
+            name (str): The name of the question to be used as a reference.
+            title (Optional[str]): The title of the question to be shown in the UI.
+            description (Optional[str]): The description of the question to be shown in the UI.
+            required (bool): If the question is required for a record to be valid. At least one question must be required.
+            use_markdown (Optional[bool]): Whether to render the markdown in the UI. When True, you will be able \
+                to use all the Markdown features for text formatting, including LaTex formulas and embedding multimedia content and PDFs.
         """
         self._model = TextQuestionModel(
             name=name,
@@ -277,11 +283,11 @@ class RatingQuestion(QuestionPropertyBase):
             is a question where the user can select a value from a sequential list of options.
 
         Parameters:
-            name: str: The name of the question to be used as a reference.
-            values: List[int]: The list of available values for the question.
-            title: Optional[str]: The title of the question to be shown in the UI.
-            description: Optional[str]: The description of the question to be shown in the UI.
-            required: bool: If the question is required for a record to be valid.
+            name (str): The name of the question to be used as a reference.
+            values (List[int]): The list of selectable values. It should be defined in the range [0, 10].
+            title (Optional[str]:) The title of the question to be shown in the UI.
+            description (Optional[str]): The description of the question to be shown in the UI.
+            required (bool): If the question is required for a record to be valid. At least one question must be required.
         """
         self._model = RatingQuestionModel(
             name=name,
@@ -319,7 +325,7 @@ class RankingQuestion(QuestionPropertyBase):
     def __init__(
         self,
         name: str,
-        values: List[str],
+        values: Union[List[str], Dict[str, str]],
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
@@ -328,11 +334,12 @@ class RankingQuestion(QuestionPropertyBase):
             is a question where the user can rank a list of options.
 
         Parameters:
-            name: str: The name of the question to be used as a reference.
-            values: List[str]: The list of available values for the question.
-            title: Optional[str]: The title of the question to be shown in the UI.
-            description: Optional[str]: The description of the question to be shown in the UI.
-            required: bool: If the question is required for a record to be valid.
+            name (str): The name of the question to be used as a reference.
+            values (Union[List[str], Dict[str, str]]): The list of options to be ranked, or a \
+                dictionary of key-value pairs where the key is the label and the value is the label name displayed in the UI.
+            title (Optional[str]:) The title of the question to be shown in the UI.
+            description (Optional[str]): The description of the question to be shown in the UI.
+            required (bool): If the question is required for a record to be valid. At least one question must be required.
         """
         self._model = RankingQuestionModel(
             name=name,
@@ -370,7 +377,7 @@ class SpanQuestion(QuestionPropertyBase):
         self,
         name: str,
         field: str,
-        labels: List[str],
+        labels: Union[List[str], Dict[str, str]],
         allow_overlapping: bool = False,
         visible_labels: Optional[int] = None,
         title: Optional[str] = None,
@@ -382,14 +389,16 @@ class SpanQuestion(QuestionPropertyBase):
             and assign it a label.
 
             Parameters:
-                name: str: The name of the question to be used as a reference.
-                field: str: The name of the text field to apply the span question to.
-                labels: List[str]: The list of available labels for the question.
-                allow_overlapping: bool: If the user can select overlapping spans.
-                visible_labels: Optional[int]: The number of labels to show at once.
-                title: Optional[str]: The title of the question to be shown in the UI.
-                description: Optional[str]: The description of the question to be shown in the UI.
-                required: bool: If the question is required for a record to be valid.
+                name (str): The name of the question to be used as a reference.
+                field (str): The name of the text field where the span question will be applied.
+                labels (Union[List[str], Dict[str, str]]): The list of available labels for the question, or a \
+                    dictionary of key-value pairs where the key is the label and the value is the label name displayed in the UI.
+                allow_overlapping (bool) This value specifies whether overlapped spans are allowed or not.
+                visible_labels (Optional[int]): The number of visible labels for the question to be shown in the UI. \
+                    Setting it to None show all options.
+                title (Optional[str]:) The title of the question to be shown in the UI.
+                description (Optional[str]): The description of the question to be shown in the UI.
+                required (bool): If the question is required for a record to be valid. At least one question must be required.
             """
         self._model = SpanQuestionModel(
             name=name,

@@ -89,9 +89,7 @@ class MetadataPropertyBase(Resource):
         self._with_client(self._dataset._client)
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(name={self.name}, title={self.title}, dimensions={self.visible_for_annotators})"
-        )
+        return f"{self.__class__.__name__}(name={self.name}, title={self.title}, visible_for_annotators={self.visible_for_annotators})"
 
     def _with_client(self, client: "Argilla") -> "Self":
         # TODO: Review and simplify. Maybe only one of them is required
@@ -115,8 +113,9 @@ class TermsMetadataProperty(MetadataPropertyBase):
         Parameters:
             name (str): The name of the metadata field
             options (Optional[List[str]]): The list of options
-            title (Optional[str]): The title of the metadata field
-            visible_for_annotators (Optional[bool]): Whether the metadata field is visible for annotators
+            title (Optional[str]): The title of the metadata to be shown in the UI
+            visible_for_annotators (Optional[bool]): Whether the metadata field is visible for annotators.
+
         Raises:
             MetadataError: If an error occurs while defining metadata settings
         """
@@ -158,19 +157,20 @@ class FloatMetadataProperty(MetadataPropertyBase):
         min: Optional[float] = None,
         max: Optional[float] = None,
         title: Optional[str] = None,
+        visible_for_annotators: Optional[bool] = True,
         client: Optional[Argilla] = None,
     ) -> None:
         """Create a metadata field with float settings.
 
         Parameters:
             name (str): The name of the metadata field
-            min (Optional[float]): The minimum value
-            max (Optional[float]): The maximum value
-            title (Optional[str]): The title of the metadata field
-            client (Optional[Argilla]): The client to use for API requests
-        Raises:
-            MetadataError: If an error occurs while defining metadata settings
+            min (Optional[float]): The minimum valid value. If none is provided, it will be computed from the values provided in the records.
+            max (Optional[float]): The maximum valid value. If none is provided, it will be computed from the values provided in the records.
+            title (Optional[str]): The title of the metadata to be shown in the UI
+            visible_for_annotators (Optional[bool]): Whether the metadata field is visible for annotators.
 
+        Raises:
+            MetadataError: If an error occurs while defining metadata settings.
         """
 
         super().__init__(client=client)
@@ -185,6 +185,7 @@ class FloatMetadataProperty(MetadataPropertyBase):
             type=MetadataPropertyType.float,
             title=title,
             settings=settings,
+            visible_for_annotators=visible_for_annotators,
         )
 
     @property
@@ -218,17 +219,20 @@ class IntegerMetadataProperty(MetadataPropertyBase):
         min: Optional[int] = None,
         max: Optional[int] = None,
         title: Optional[str] = None,
+        visible_for_annotators: Optional[bool] = True,
         client: Optional[Argilla] = None,
     ) -> None:
         """Create a metadata field with integer settings.
 
         Parameters:
             name (str): The name of the metadata field
-            min (Optional[int]): The minimum value
-            max (Optional[int]): The maximum value
-            title (Optional[str]): The title of the metadata field
+            min (Optional[int]): The minimum valid value. If none is provided, it will be computed from the values provided in the records.
+            max (Optional[int]): The maximum  valid value. If none is provided, it will be computed from the values provided in the records.
+            title (Optional[str]): The title of the metadata to be shown in the UI
+            visible_for_annotators (Optional[bool]): Whether the metadata field is visible for annotators.
+
         Raises:
-            MetadataError: If an error occurs while defining metadata settings
+            MetadataError: If an error occurs while defining metadata settings.
         """
         super().__init__(client=client)
 
@@ -242,6 +246,7 @@ class IntegerMetadataProperty(MetadataPropertyBase):
             type=MetadataPropertyType.integer,
             title=title,
             settings=settings,
+            visible_for_annotators=visible_for_annotators,
         )
 
     @property
