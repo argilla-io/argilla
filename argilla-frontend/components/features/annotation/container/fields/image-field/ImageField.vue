@@ -71,7 +71,7 @@ export default {
     max-width: 100%;
     margin: auto;
     align-items: center;
-    color: $black-37;
+    color: var(--bg-opacity-37);
   }
 
   img {
