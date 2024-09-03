@@ -43,8 +43,6 @@ def upgrade() -> None:
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("secret"),
-        sa.UniqueConstraint("url"),
     )
 
 

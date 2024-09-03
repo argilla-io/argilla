@@ -520,8 +520,8 @@ def generate_webhook_secret() -> str:
 class Webhook(DatabaseModel):
     __tablename__ = "webhooks"
 
-    url: Mapped[str] = mapped_column(Text, unique=True)
-    secret: Mapped[str] = mapped_column(Text, unique=True, default=generate_webhook_secret)
+    url: Mapped[str] = mapped_column(Text)
+    secret: Mapped[str] = mapped_column(Text, default=generate_webhook_secret)
     events: Mapped[List[str]] = mapped_column(JSON)
     enabled: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
