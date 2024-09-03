@@ -143,9 +143,6 @@
     bottom: 0;
     width: clamp(560px, 70%, 800px);
     @extend %deco;
-    [data-theme="dark"] & {
-      opacity: 0.95;
-    }
   }
 }
 </style>

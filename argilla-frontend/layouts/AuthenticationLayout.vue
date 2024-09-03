@@ -45,7 +45,7 @@ export default {
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
-      color: var(--fg-primary);
+      color: var(--color-black);
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
@@ -56,7 +56,7 @@ export default {
       }
       &--mobile {
         position: relative;
-        color: var(--color-white);
+        color: var(--color-black);
         max-width: 260px;
         margin: 0;
         @include font-size(20px);
