@@ -4,11 +4,11 @@
       <span class="text_field_component__title-content" v-text="title" />
       <BaseActionTooltip
         class="text_field_component__tooltip"
-        tooltip="Copied"
+        :tooltip="$t('copied')"
         tooltip-position="left"
       >
         <BaseButton
-          title="Copy to clipboard"
+          :title="$t('button.tooltip.copyToClipboard')"
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
         >
