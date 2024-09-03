@@ -115,10 +115,10 @@ export default {
 <style lang="scss" scoped>
 .container {
   display: flex;
+  min-height: 4em;
   padding: $base-space;
   border: 1px solid var(--bg-opacity-20);
   border-radius: $border-radius-s;
-  min-height: 10em;
   background: var(--bg-accent-grey-2);
   outline: none;
   &.--editing {

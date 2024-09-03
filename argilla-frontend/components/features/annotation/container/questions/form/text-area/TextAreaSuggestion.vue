@@ -32,8 +32,8 @@ export default {
   padding: $base-space * 2;
   border: 1px solid var(--bg-opacity-20);
   border-radius: $border-radius-s;
-  min-height: 10em;
   background: var(--bg-accent-grey-2);
+  min-height: 5em;
   &:hover {
     .button-copy {
       display: block;
