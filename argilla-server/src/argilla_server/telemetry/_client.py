@@ -79,8 +79,6 @@ class TelemetryClient:
         if endpoint_path is None:
             return
 
-        topic = f"endpoints"
-
         data = {
             "endpoint": f"{request.method} {endpoint_path}",
             "request.user-agent": request.headers.get("user-agent"),
@@ -101,7 +99,7 @@ class TelemetryClient:
             if argilla_error := get_request_error(request=request):
                 data["response.error_code"] = argilla_error.code  # noqa
 
-        self.track_data(topic=topic, data=data)
+        self.track_data(topic="endpoints", data=data)
 
     def track_server_startup(self) -> None:
         """
@@ -110,9 +108,7 @@ class TelemetryClient:
         Returns:
             None
         """
-        topic = "startup"
-
-        self.track_data(topic=topic)
+        self.track_data(topic="startup")
 
 
 _TELEMETRY_CLIENT = TelemetryClient()
