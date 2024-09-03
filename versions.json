@@ -53,6 +53,14 @@
     }
   },
   {
+    "version": "docs_fix-wrong-env-var-name",
+    "title": "docs_fix-wrong-env-var-name",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
