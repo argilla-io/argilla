@@ -51,20 +51,20 @@ The following deployment information is reported:
 
 The following endpoint usage is reported:
 
-* The endpoint with the method used and the path
-* The `user-agent` and `accept-language` http headers
-* The request method
-* The `accept-language` header
-* The response status code
-* The duration of the request in milliseconds
-* The `user.id` and `user.role` if the user is authenticated
-* The error code if the response status code is greater than 400
+* The endpoint with the method used and the path.
+* The `user-agent` and `accept-language` http headers.
+* The request method.
+* The `accept-language` header.
+* The response status code.
+* The duration of the request in milliseconds.
+* The `user.id` and `user.role` if the user is authenticated.
+* The error code if the response status code is greater than 400.
 
 The following usage information is reported:
 
-* The total number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution` per type
-* The per server number of `User`, `Workspace`, `Dataset`
-* The per `Dataset` number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution`
+* The total number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution` per type.
+* The per server number of `User`, `Workspace`, `Dataset`.
+* The per `Dataset` number of `Field`, `Question`, `Vector` and `MetadataProperty`.
 
 For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/argilla-server/src/argilla_server/telemetry.py).
 
