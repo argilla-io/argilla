@@ -20,7 +20,7 @@ from uuid import UUID
 from elasticsearch8 import AsyncElasticsearch
 from opensearchpy import AsyncOpenSearch
 
-from argilla_server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla_server.models import (
     Dataset,
     Field,
@@ -153,7 +153,7 @@ def es_field_for_metadata_property(metadata_property: Union[str, MetadataPropert
 
 
 def es_field_for_record_field(field_name: str) -> str:
-    return f"fields.{field_name or '*'}"
+    return f"fields.{field_name}"
 
 
 def es_field_for_response_property(property: str) -> str:
@@ -165,7 +165,7 @@ def es_mapping_for_field(field: Field) -> dict:
 
     if field.is_text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
-    if field.is_chat:
+    elif field.is_chat:
         es_field = {
             "type": "object",
             "properties": {
@@ -174,7 +174,15 @@ def es_mapping_for_field(field: Field) -> dict:
             },
         }
         return {es_field_for_record_field(field.name): es_field}
-    elif field.is_image or field.is_custom:
+    elif field.is_custom:
+        return {
+            es_field_for_record_field(field.name): {
+                "type": "object",
+                "dynamic": True,
+                "properties": {},
+            }
+        }
+    elif field.is_image:
         return {
             es_field_for_record_field(field.name): {
                 "type": "object",
@@ -233,6 +241,25 @@ def es_path_for_vector_settings(vector_settings: VectorSettings) -> str:
 
 def es_path_for_question_response(question_name: str) -> str:
     return f"{question_name}"
+
+
+def _is_custom_field(field_name: str, dataset: Dataset) -> bool:
+    """
+    Check if the field is a custom field in the dataset
+
+    Parameters
+    ----------
+        field_name : str : The name of the field
+        dataset : Dataset : The dataset object
+
+    Returns
+    -------
+        bool : True if the field is a custom field, False otherwise
+    """
+    for field in dataset.fields:
+        if field.name == field_name:
+            return field.is_custom
+    return False
 
 
 @dataclasses.dataclass
@@ -647,7 +674,14 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if isinstance(text, str):
             text = TextQuery(q=text)
 
-        return es_simple_query_string(es_field_for_record_field(text.field), query=text.q)
+        if not text.field:
+            field_name = "*"
+        elif _is_custom_field(text.field, dataset):
+            field_name = f"{text.field}.*"
+        else:
+            field_name = text.field
+
+        return es_simple_query_string(field_name=es_field_for_record_field(field_name), query=text.q)
 
     @staticmethod
     def _mapping_for_fields(fields: List[Field]) -> dict:
