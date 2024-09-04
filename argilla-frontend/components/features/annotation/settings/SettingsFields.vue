@@ -119,7 +119,7 @@ export default {
       & label {
         width: fit-content;
         height: 14px;
-        color: $black-87;
+        color: var(--fg-primary);
       }
 
       & input {
@@ -129,12 +129,13 @@ export default {
         width: 100%;
         height: 24px;
         padding: 16px;
-        background: palette(white);
-        border: 1px solid $black-20;
+        background: var(--bg-accent-grey-2);
+        color: var(--fg-primary);
+        border: 1px solid var(--bg-opacity-20);
         border-radius: $border-radius;
         outline: 0;
         &:focus {
-          border: 1px solid $primary-color;
+          border: 1px solid var(--bg-action);
         }
       }
     }
@@ -153,7 +154,7 @@ export default {
       justify-content: flex-end;
       align-items: center;
       padding: $base-space * 2 0;
-      border-bottom: 1px solid $black-10;
+      border-bottom: 1px solid var(--bg-opacity-10);
       display: inline-flex;
       gap: $base-space;
     }

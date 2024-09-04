@@ -27,7 +27,7 @@ export const useDatasetViewModel = () => {
 
     notification.notify({
       message,
-      type: "error",
+      type: "danger",
     });
   };
 

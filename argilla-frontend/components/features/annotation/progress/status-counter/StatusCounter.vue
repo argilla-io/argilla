@@ -46,17 +46,17 @@ $bullet-size: 8px;
   flex-direction: row;
   gap: $base-space;
   padding: $base-space;
-  background: $black-3;
+  background: var(--bg-opacity-3);
   border-radius: $border-radius;
 
   &__name {
     text-transform: capitalize;
-    color: $black-54;
+    color: var(--fg-secondary);
     @include font-size(12px);
   }
   &__counter {
     font-weight: 600;
-    color: $black-87;
+    color: var(--fg-primary);
     @include font-size(14px);
   }
 }

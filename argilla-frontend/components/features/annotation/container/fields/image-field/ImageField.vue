@@ -59,8 +59,9 @@ export default {
   min-width: 100%;
   gap: $base-space * 2;
   padding: 2 * $base-space;
-  background: palette(grey, 800);
+  background: var(--bg-field);
   border-radius: $border-radius-m;
+  border: 1px solid var(--bg-opacity-2);
 
   &_placeholder {
     display: flex;
@@ -69,7 +70,7 @@ export default {
     max-width: 100%;
     margin: auto;
     align-items: center;
-    color: $black-37;
+    color: var(--bg-opacity-37);
   }
 
   &__wrapper {
@@ -96,7 +97,7 @@ export default {
 
 ::-webkit-scrollbar-thumb {
   border-radius: $base-space;
-  background-color: $black-54;
+  background-color: var(--bg-opacity-54);
   box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 </style>

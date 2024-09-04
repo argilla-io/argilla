@@ -469,12 +469,12 @@ export default {
       padding: 0 0 0 $base-space * 2;
       &__selection-text {
         user-select: none;
-        color: $black-54;
+        color: var(--fg-secondary);
         @include font-size(13px);
       }
       &__checkbox {
         :deep(.checkbox__container) {
-          border-color: $black-54;
+          border-color: var(--fg-secondary);
         }
       }
       &--left {
@@ -487,7 +487,7 @@ export default {
     }
   }
   &__text {
-    color: $black-54;
+    color: var(--fg-secondary);
     max-width: 80%;
   }
   &--empty {

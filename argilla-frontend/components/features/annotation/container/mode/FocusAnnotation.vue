@@ -200,7 +200,7 @@ export default {
     }
   }
   &__text {
-    color: $black-54;
+    color: var(--fg-secondary);
     max-width: 80%;
   }
   &--empty {
