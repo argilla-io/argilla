@@ -33,10 +33,9 @@ We do not collect any piece of information related to the source data you store 
 
 ## Information reported
 
-The following usage and error information is reported:
+The following deployment information is reported:
 
 * The code of the raised error
-* The `user-agent` and `accept-language` http headers
 * Task name and number of records for bulk operations
 * An anonymous generated user uuid
 * An anonymous generated server uuid
@@ -48,6 +47,24 @@ The following usage and error information is reported:
 * The underlying platform spec with as much useful information as possible. (eg. `macOS-10.16-x86_64-i386-64bit`)
 * The type of deployment: `huggingface_space` or `server`
 * The dockerized deployment flag: `True` or `False`
+* Whether the server is deploy with `persistent_storage_enabled` or not.
+
+The following endpoint usage is reported:
+
+* The endpoint with the method used and the path
+* The `user-agent` and `accept-language` http headers
+* The request method
+* The `accept-language` header
+* The response status code
+* The duration of the request in milliseconds
+* The `user.id` and `user.role` if the user is authenticated
+* The error code if the response status code is greater than 400
+
+The following usage information is reported:
+
+* The total number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution` per type
+* The per server number of `User`, `Workspace`, `Dataset`
+* The per `Dataset` number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution`
 
 For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/argilla-server/src/argilla_server/telemetry.py).
 
