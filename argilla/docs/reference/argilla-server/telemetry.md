@@ -62,9 +62,10 @@ The following endpoint usage is reported:
 
 The following usage information is reported:
 
-* The total number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution` per type.
-* The per server number of `User`, `Workspace`, `Dataset`.
-* The per `Dataset` number of `Field`, `Question`, `Vector` and `MetadataProperty`.
+* The number of `Record`.
+* The number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution` per type.
+* The number of `User`, `Workspace`, `Dataset` per server.
+* The number of `Field`, `Question`, `Vector`, `MetadataProperty` and `Distribution` per `Dataset`.
 
 For transparency, you can inspect the source code where this is performed [here](https://github.com/argilla-io/argilla/argilla-server/src/argilla_server/telemetry.py).
 
