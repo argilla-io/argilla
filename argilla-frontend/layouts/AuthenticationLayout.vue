@@ -27,7 +27,7 @@ export default {
 .auth {
   &__wrapper {
     display: flex;
-    background: palette(white);
+    background: var(--bg-accent-grey-1);
     min-height: 100vh;
   }
   &__info {
@@ -45,7 +45,7 @@ export default {
     &__claim {
       position: relative;
       font-family: $secondary-font-family;
-      color: $black-87;
+      color: var(--color-black);
       @include font-size(30px);
       line-height: 1.2em;
       @include media(">desktop") {
@@ -56,7 +56,7 @@ export default {
       }
       &--mobile {
         position: relative;
-        color: palette(white);
+        color: var(--color-black);
         max-width: 260px;
         margin: 0;
         @include font-size(20px);
@@ -154,24 +154,24 @@ export default {
   @include font-size(12px);
   margin: 0;
   a {
-    color: $primary-color;
+    color: var(--bg-action);
     text-decoration: none;
     &:hover {
-      color: darken($primary-color, 10%);
+      color: var(--bg-action-accent);
     }
   }
 }
 :deep(.form__error) {
-  color: palette(orange-red-crayola);
+  color: var(--color-brand);
 }
 :deep(.form__extra-info) {
   @include font-size(14px);
   margin-bottom: 0;
   a {
-    color: $primary-color;
+    color: var(--bg-action);
     text-decoration: none;
     &:hover {
-      color: darken($primary-color, 10%);
+      color: var(--bg-action-accent);
     }
   }
 }

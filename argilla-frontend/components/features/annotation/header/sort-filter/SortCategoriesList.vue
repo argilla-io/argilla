@@ -83,7 +83,7 @@ export default {
   &__group {
     display: inline-block;
     padding: $base-space * 2 $base-space 0 $base-space;
-    color: $black-37;
+    color: var(--fg-tertiary);
     @include font-size(12px);
     text-transform: capitalize;
     font-weight: 400;
@@ -105,7 +105,7 @@ export default {
       font-weight: 400;
     }
     &:hover {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
     &:focus {
       outline: none;

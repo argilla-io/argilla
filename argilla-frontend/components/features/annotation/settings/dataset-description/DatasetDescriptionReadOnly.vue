@@ -36,10 +36,10 @@ export default {
 .description {
   &__text {
     white-space: pre-wrap;
-    color: $black-87;
+    color: var(--fg-primary);
 
     &.--light {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
 }

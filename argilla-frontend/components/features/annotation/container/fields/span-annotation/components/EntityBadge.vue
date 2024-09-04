@@ -71,12 +71,15 @@ export default {
   padding: 2px calc($base-space / 2);
   border-radius: 2px;
   background-color: v-bind(color);
-  color: $black-87;
+  color: var(--fg-primary);
   font-family: "Roboto Condensed", sans-serif;
   font-weight: 500;
   @include font-size(12px);
   @include line-height(12px);
   text-transform: uppercase;
+  [data-theme="dark"] & {
+    background-color: v-bind("color.palette.veryDark");
+  }
   &--clickable {
     @extend .badge;
     &:not(.badge--active):hover {
@@ -93,6 +96,9 @@ export default {
   &__button {
     padding: 0;
     flex-shrink: 0;
+    [data-theme="dark"] & {
+      color: var(--color-white);
+    }
   }
 }
 </style>

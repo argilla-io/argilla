@@ -62,7 +62,7 @@ jobs:
           - 6379:6379
 
     env:
-      ARGILLA_ENABLE_TELEMETRY: 0
+      HF_HUB_DISABLE_TELEMETRY: 1
 
     steps:
       - name: Checkout Code 🛎

@@ -115,7 +115,7 @@ export default {
       border-radius: $border-radius;
     }
     &--highlighted {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
     :deep(.checkbox__container) {
       background: none !important;
@@ -127,7 +127,7 @@ export default {
       text-overflow: ellipsis;
     }
     &.checkbox :deep(.checkbox__container .svg-icon) {
-      fill: $primary-color;
+      fill: var(--fg-cuaternary);
       min-width: 16px;
     }
   }

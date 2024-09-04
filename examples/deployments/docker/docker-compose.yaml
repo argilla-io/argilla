@@ -17,10 +17,12 @@ services:
       USERNAME: argilla
       PASSWORD: 12345678
       API_KEY: argilla.apikey
-      # Opt-out for telemetry https://docs.argilla.io/latest/reference/argilla-server/telemetry/
-      # ARGILLA_ENABLE_TELEMETRY: 0
       # Uncomment the following line to reindex Argilla datasets into the search engine when starting up
       # REINDEX_DATASETS: 1
+      # Opt-out for telemetry https://huggingface.co/docs/huggingface_hub/main/en/package_reference/utilities#huggingface_hub.utils.send_telemetry
+      # HF_HUB_DISABLE_TELEMETRY: 1
+      # Opt-out for telemetry https://huggingface.co/docs/huggingface_hub/main/en/package_reference/utilities#huggingface_hub.utils.send_telemetry
+      # HF_HUB_OFFLINE: 1
     networks:
       - argilla
     volumes:

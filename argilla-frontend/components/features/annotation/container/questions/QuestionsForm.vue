@@ -327,30 +327,30 @@ export default {
     scroll-behavior: smooth;
     border-radius: $border-radius-m;
     border: 1px solid transparent;
-    background: palette(white);
+    background: var(--bg-form);
     .--pending & {
-      border-color: $black-6;
+      border-color: var(--bg-opacity-6);
     }
     .--draft &,
     .--saving-draft & {
-      border-color: $draft-color;
+      border-color: var(--fg-status-draft);
     }
     .--discarded &,
     .--discarding & {
-      border-color: $discarded-color;
+      border-color: var(--fg-status-discarded);
     }
     .--submitted &,
     .--submitting & {
-      border-color: $submitted-color;
+      border-color: var(--fg-status-submitted);
     }
     .--saving-draft & {
-      box-shadow: 0 0 0 1px $draft-color;
+      box-shadow: 0 0 0 1px var(--fg-status-draft);
     }
     .--discarding & {
-      box-shadow: 0 0 0 1px $discarded-color;
+      box-shadow: 0 0 0 1px var(--fg-status-discarded);
     }
     .--submitting & {
-      box-shadow: 0 0 0 1px $submitted-color;
+      box-shadow: 0 0 0 1px var(--fg-status-submitted);
     }
     .--waiting & {
       opacity: 0.7;
@@ -365,7 +365,7 @@ export default {
     justify-content: space-between;
     align-items: stretch;
     border-radius: $border-radius-m;
-    background: #f0f2fa;
+    background: var(--bg-form-button-area);
     container-type: inline-size;
     &:hover {
       .button--submit:not(:hover) {
@@ -385,11 +385,11 @@ export default {
     height: $base-space * 2;
     border-radius: $border-radius;
     border-width: 1px 1px 3px 1px;
-    border-color: $black-20;
+    border-color: var(--fg-shortcut-key);
     border-style: solid;
     box-sizing: content-box;
-    color: $black-87;
-    background: palette(white);
+    color: var(--fg-primary);
+    background: var(--bg-accent-grey-2);
     @include font-size(11px);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       "Open Sans", "Helvetica Neue", sans-serif;
@@ -406,7 +406,7 @@ export default {
   &--discard {
     width: 100%;
     justify-content: center;
-    color: $black-87;
+    color: var(--fg-primary);
     min-height: $base-space * 6;
     border-radius: $border-radius-m - 1;
     padding: $base-space;
@@ -421,15 +421,15 @@ export default {
   }
   &--submit {
     &:not([disabled]) {
-      background: $submitted-color-light;
+      background: var(--bg-status-submitted);
     }
     &:hover:not([disabled]) {
-      background: darken($submitted-color-light, 2%);
+      background: var(--bg-status-submitted-accent);
     }
     &:active:not([disabled]),
     &.--button--submitting,
     &.--button--submitting:hover {
-      background: $submitted-color-medium;
+      background: var(--bg-status-submitted-accent);
     }
     &.--button--remove-bg {
       background: transparent;
@@ -437,22 +437,22 @@ export default {
   }
   &--draft {
     &:hover:not([disabled]) {
-      background: $draft-color-light;
+      background: var(--bg-status-draft);
     }
     &:active:not([disabled]),
     &.--button--saving-draft,
     &.--button--saving-draft:hover {
-      background: $draft-color-medium;
+      background: var(--bg-status-draft-accent);
     }
   }
   &--discard {
     &:hover:not([disabled]) {
-      background: $discarded-color-light;
+      background: var(--bg-status-discarded);
     }
     &:active:not([disabled]),
     &.--button--discarding,
     &.--button--discarding:hover {
-      background: $discarded-color-medium;
+      background: var(--bg-status-discarded-accent);
     }
   }
 }

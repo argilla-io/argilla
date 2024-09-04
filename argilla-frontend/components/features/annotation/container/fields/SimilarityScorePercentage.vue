@@ -15,7 +15,7 @@ export default {
 </script>
 <style scoped lang="scss">
 .similarity-score {
-  color: $similarity-color;
+  color: var(--fg-similarity);
   @include font-size(12px);
   line-height: 1;
   font-weight: 600;
