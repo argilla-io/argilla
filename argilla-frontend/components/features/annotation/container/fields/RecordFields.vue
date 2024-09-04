@@ -43,7 +43,14 @@
         :title="title"
         :content="content"
       />
-      <CustomField v-else :name="name" :title="title" :content="content" />
+      <CustomField
+        v-else
+        :name="name"
+        :title="title"
+        :content="content"
+        :record="record"
+        :settings="settings"
+      />
     </div>
   </div>
 </template>

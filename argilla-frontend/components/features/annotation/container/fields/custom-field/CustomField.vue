@@ -17,12 +17,25 @@
       </BaseActionTooltip>
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
-      <Sandbox :content="content" />
+      <Sandbox :content="template" />
     </div>
   </div>
 </template>
-
 <script>
+const BASIC_TEMPLATE = `
+<script>const record_object = #RECORD_OBJECT#;<\/script>
+<script src="./js/handlebars.min.js"><\/script>
+<div id="template" class="text-center">
+  #TEMPLATE#
+</div>
+<script>
+  const template = document.getElementById("template").innerHTML;
+  const compiledTemplate = Handlebars.compile(template);
+  const html = compiledTemplate({ record_object });
+  document.body.innerHTML = html;
+<\/script>`;
+const ADVANCE_TEMPLATE = `<script>const record_object = #RECORD_OBJECT#;<\/script>#TEMPLATE#`;
+
 export default {
   props: {
     name: {
@@ -33,14 +46,31 @@ export default {
       type: String,
       required: true,
     },
+    settings: {
+      type: Object,
+      required: true,
+    },
     content: {
       type: String,
       required: true,
     },
+    record: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
-    classes() {
-      return this.$language.isRTL(this.content) ? "--rtl" : "--ltr";
+    isBasic() {
+      return this.settings.mode === "basic";
+    },
+    template() {
+      const recordObject = JSON.stringify(this.record);
+
+      const templateToUse = this.isBasic ? BASIC_TEMPLATE : ADVANCE_TEMPLATE;
+
+      return templateToUse
+        .replace("#RECORD_OBJECT#", recordObject)
+        .replace("#TEMPLATE#", this.content);
     },
   },
 };

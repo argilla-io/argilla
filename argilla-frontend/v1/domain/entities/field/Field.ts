@@ -9,7 +9,7 @@ export class Field {
     public readonly id: string,
     public readonly name: string,
     public title: string,
-    private readonly record: any,
+    public readonly content: string,
     public readonly datasetId: string,
     public readonly required: boolean,
     public settings: any
@@ -31,17 +31,6 @@ export class Field {
 
   get isCustomType() {
     return this.fieldType === "custom";
-  }
-
-  get content() {
-    if (this.isCustomType) {
-      return `<script>const record_object = ${JSON.stringify(
-        this.record
-      )};</script>
-      ${this.settings.template}`;
-    }
-
-    return this.record.fields[this.name];
   }
 
   private get fieldType() {
