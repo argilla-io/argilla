@@ -189,11 +189,11 @@ $searchBarSize: $base-space * 4;
   border: 1px solid transparent;
   &.active,
   &.expanded {
-    background: palette(white);
-    border: 1px solid $black-10;
+    background: var(--bg-accent-grey-2);
+    border: 1px solid var(--bg-opacity-10);
     transition: all 0.3s ease;
     .button.--search {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
   &.active,
@@ -205,18 +205,18 @@ $searchBarSize: $base-space * 4;
   }
   &.expanded:focus-within,
   &.active {
-    border: 1px solid $primary-color;
+    border: 1px solid var(--fg-cuaternary);
   }
   &__icon.button {
     display: flex;
     flex-shrink: 0;
     padding: $base-space;
-    color: $black-54;
+    color: var(--fg-secondary);
     &.--search {
       border-radius: $border-radius-l;
       &:hover {
-        background: $black-4;
-        color: $black-54;
+        background: var(--bg-opacity-4);
+        color: var(--fg-secondary);
         transition: all 0.3s ease;
       }
     }
@@ -228,14 +228,15 @@ $searchBarSize: $base-space * 4;
     outline: 0;
     background: none;
     line-height: 1.4;
+    color: var(--fg-primary);
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
   &__fields {
     display: none;
     max-width: 30%;
-    border-left: 1px solid $black-37;
+    border-left: 1px solid var(--fg-tertiary);
     flex-shrink: 0;
     &__header {
       display: flex;
@@ -250,7 +251,7 @@ $searchBarSize: $base-space * 4;
       }
       &:hover {
         cursor: pointer;
-        color: $black-87;
+        color: var(--fg-primary);
       }
       .svg-icon {
         flex-shrink: 0;
@@ -265,7 +266,7 @@ $searchBarSize: $base-space * 4;
         border-radius: $border-radius-s;
         transition: background-color 0.3s ease;
         &:hover {
-          background: $black-4;
+          background: var(--bg-opacity-4);
           cursor: pointer;
           transition: background-color 0.3s ease;
         }
@@ -276,6 +277,7 @@ $searchBarSize: $base-space * 4;
         text-align: left;
         padding: 0;
         font-weight: normal;
+        line-height: 1.2em;
         @include truncate;
       }
     }

@@ -130,12 +130,12 @@ export default {
       const toPosition = this.sliderTo - this.min;
       this.$refs.track.style.background = `linear-gradient(
       to right,
-      #ccc 0%,
-      #ccc ${(fromPosition / rangeDistance) * 100}%,
+      var(--bg-opacity-10) 0%,
+      var(--bg-opacity-10) ${(fromPosition / rangeDistance) * 100}%,
       #3e5cc9 ${(fromPosition / rangeDistance) * 100}%,
       #3e5cc9 ${(toPosition / rangeDistance) * 100}%,
-      #ccc ${(toPosition / rangeDistance) * 100}%,
-      #ccc 100%)`;
+      var(--bg-opacity-10) ${(toPosition / rangeDistance) * 100}%,
+      var(--bg-opacity-10) 100%)`;
 
       this.$refs.from.style.zIndex = 2;
       this.$refs.to.style.zIndex = 3;
@@ -150,6 +150,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$thumbColor: hsla(from var(--fg-cuaternary) h s l / 20%);
 .range {
   &__container {
     display: flex;
@@ -164,7 +165,7 @@ export default {
   &__track {
     border-radius: 15px;
     height: 6px;
-    background: $black-10;
+    background: var(--bg-opacity-10);
   }
   &__inputs {
     display: flex;
@@ -175,9 +176,11 @@ export default {
       width: 110px;
       height: $base-space * 4;
       padding: $base-space;
-      border: 1px solid $black-10;
+      border: 1px solid var(--bg-opacity-10);
       border-radius: $border-radius;
       outline: none;
+      background: transparent;
+      color: var(--bg-primary);
     }
   }
   &__slider {
@@ -199,7 +202,7 @@ export default {
   &__separator {
     height: 1px;
     width: $base-space * 3;
-    background: $black-10;
+    background: var(--bg-opacity-10);
   }
 }
 
@@ -209,7 +212,7 @@ input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   height: 15px;
   width: 15px;
-  background-color: $primary-color;
+  background-color: var(--fg-cuaternary);
   border-radius: 50%;
   border: none;
   transition: 0.2s ease-in-out;
@@ -220,7 +223,7 @@ input[type="range"]::-moz-range-thumb {
   pointer-events: all;
   height: 15px;
   width: 15px;
-  background-color: $primary-color;
+  background-color: var(--fg-cuaternary);
   border-radius: 50%;
   border: none;
   transition: 0.2s ease-in-out;
@@ -228,21 +231,21 @@ input[type="range"]::-moz-range-thumb {
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $thumbColor;
 }
 input[type="range"]:active::-webkit-slider-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 input[type="range"]:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 input[type="range"]::-moz-range-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 6px $thumbColor;
 }
 input[type="range"]:active::-moz-range-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 input[type="range"]:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 10px rgba(0, 26, 255, 0.1);
+  box-shadow: 0 0 0 10px $thumbColor;
 }
 </style>

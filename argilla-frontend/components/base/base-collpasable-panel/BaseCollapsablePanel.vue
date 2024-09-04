@@ -55,10 +55,11 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-top: 1px solid $black-10;
+  border-top: 1px solid var(--bg-opacity-10);
 
   &__header {
     overflow: visible;
+    color: var(--fg-secondary);
     &__container {
       width: 100%;
       display: flex;
@@ -86,7 +87,8 @@ export default {
     &:hover {
       :deep(p),
       :deep(svg) {
-        color: darken(palette(grey, 300), 10%);
+        color: var(--fg-primary);
+        opacity: 0.7;
       }
     }
   }

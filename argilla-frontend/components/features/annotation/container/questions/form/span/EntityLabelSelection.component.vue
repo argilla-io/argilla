@@ -319,21 +319,21 @@ export default {
   gap: $base-space;
   background: none;
   border: none;
-  color: $black-37;
+  color: var(--fg-tertiary);
   font-weight: 500;
   text-decoration: none;
   .--more {
     border-radius: 20px;
-    border: 1px solid $black-10;
+    border: 1px solid var(--bg-opacity-10);
     padding: 2px 4px;
-    color: $black-54;
+    color: var(--fg-secondary);
     @include font-size(12px);
   }
   .--less {
     @include font-size(14px);
   }
   .svg-icon {
-    color: $black-37;
+    color: var(--fg-tertiary);
     border-radius: $border-radius;
   }
 }

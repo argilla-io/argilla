@@ -56,7 +56,7 @@ export default {
 }
 .user-token-description {
   grid-area: b;
-  color: $black-37;
+  color: var(--fg-tertiary);
   margin-top: 0;
 }
 .user-token-value {

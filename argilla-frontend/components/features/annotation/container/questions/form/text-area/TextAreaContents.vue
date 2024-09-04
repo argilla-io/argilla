@@ -117,16 +117,16 @@ export default {
   display: flex;
   min-height: 4em;
   padding: $base-space;
-  border: 1px solid $black-20;
+  border: 1px solid var(--bg-opacity-20);
   border-radius: $border-radius-s;
-  background: palette(white);
+  background: var(--bg-accent-grey-2);
   outline: none;
   &.--editing {
-    border-color: $primary-color;
-    outline: 1px solid $primary-color;
+    border-color: var(--fg-cuaternary);
+    outline: 1px solid var(--fg-cuaternary);
   }
   &:focus {
-    outline: 1px solid $black-20;
+    outline: 1px solid var(--bg-opacity-20);
   }
   &:focus:not(:focus-visible) {
     outline: none;
