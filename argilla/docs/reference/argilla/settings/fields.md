@@ -13,6 +13,7 @@ To define a field, instantiate the `TextField` class and pass it to the `fields`
 ```python
 text_field = rg.TextField(name="text")
 markdown_field = rg.TextField(name="text", use_markdown=True)
+image_field = rg.ImageField(name="image")
 ```
 
 The `fields` parameter of the `Settings` class can accept a list of fields, like this:
@@ -21,6 +22,7 @@ The `fields` parameter of the `Settings` class can accept a list of fields, like
 settings = rg.Settings(
     fields=[
         rg.TextField(name="text"),
+        rg.ImageField(name="image"),
     ],
 )
 
