@@ -22,9 +22,17 @@ from argilla.records._io import HFDatasetsIO
 
 class TestHFDatasetsIO:
     def test_to_datasets_with_partial_values_in_records(self):
-        mock_schema = {
-            "field": rg.TextField(name="field"),
-        }
+        mock_dataset = rg.Dataset(
+            name="test",
+            settings=rg.Settings(
+                fields=[
+                    rg.TextField(name="field"),
+                ],
+                questions=[
+                    rg.TextQuestion(name="question"),
+                ],
+            ),
+            )
         records = [
             rg.Record(fields={"field": "The field"}, metadata={"a": "a"}),
             rg.Record(fields={"field": "Other field", "other": "Field"}, metadata={"b": "b"}),
@@ -47,7 +55,7 @@ class TestHFDatasetsIO:
             ),
         ]
 
-        ds = HFDatasetsIO.to_datasets(records, schema=mock_schema)
+        ds = HFDatasetsIO.to_datasets(records, dataset=mock_dataset)
         assert ds.features == {
             "status": Value(dtype="string", id=None),
             "_server_id": Value(dtype="null", id=None),
