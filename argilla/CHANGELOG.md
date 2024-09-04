@@ -14,6 +14,14 @@ These are the section headers that we use:
 * "Security" in case of vulnerabilities.
 -->
 
+## [Unreleased]()
+
+### Added
+
+- Added `HTML Sandbox` to support external and custom CSS and Javascript in fields ([#5353](https://github.com/argilla-io/argilla/pull/5353))
+- Added `Spanish` languages ([#5416](https://github.com/argilla-io/argilla/pull/5416))
+- Added new `ImageField` supporting URLs and Data URLs. ([#5279](https://github.com/argilla-io/argilla/pull/5279))
+
 ## [2.0.1](https://github.com/argilla-io/argilla/compare/v2.0.0...releases/2.0.1)
 
 ### Fixed

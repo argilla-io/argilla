@@ -33,7 +33,7 @@ router = APIRouter(tags=["users"])
 @router.get("/me", response_model=UserSchema)
 async def get_current_user(
     current_user: User = Security(auth.get_current_user),
-) -> User:
+):
     return current_user
 
 

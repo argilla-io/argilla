@@ -48,10 +48,9 @@ _LOGGER = logging.getLogger("argilla")
 @contextlib.asynccontextmanager
 async def app_lifespan(app: FastAPI):
     # See https://fastapi.tiangolo.com/advanced/events/#lifespan
-    show_telemetry_warning()
     await configure_database()
     await configure_search_engine()
-    await get_telemetry_client().track_server_startup()
+    track_server_startup()
     yield
     await get_telemetry_client().track_server_shutdown()
 
@@ -70,8 +69,9 @@ def create_server_app() -> FastAPI:
     )
 
     configure_logging()
-    configure_middleware(app)
+    configure_common_middleware(app)
     configure_api_router(app)
+    configure_telemetry(app)
     configure_app_statics(app)
     configure_api_docs(app)
 
@@ -95,7 +95,7 @@ def configure_api_docs(app: FastAPI):
         return RedirectResponse(url=f"{settings.base_url}api/v1/docs")
 
 
-def configure_middleware(app: FastAPI):
+def configure_common_middleware(app: FastAPI):
     """Configures fastapi middleware"""
 
     @app.middleware("http")
@@ -122,6 +122,24 @@ def configure_middleware(app: FastAPI):
 def configure_api_router(app: FastAPI):
     """Configures and set the api router to app"""
     app.mount("/api/v1", api_v1)
+
+
+def configure_telemetry(app: FastAPI):
+    """
+    Configures telemetry middleware for the app if telemetry is enabled
+    """
+    if not settings.enable_telemetry:
+        return
+
+    @app.middleware("http")
+    async def track_api_requests(request: Request, call_next):
+        response = await call_next(request)
+        try:
+            await get_telemetry_client().track_api_request(request, response)
+        except Exception as e:
+            _LOGGER.warning(f"Error tracking request: {e}")
+        finally:
+            return response
 
 
 def configure_app_statics(app: FastAPI):
@@ -168,18 +186,28 @@ def configure_app_statics(app: FastAPI):
     )
 
 
-def show_telemetry_warning():
-    if settings.enable_telemetry:
-        message = "\n"
-        message += inspect.cleandoc(
-            "Argilla uses telemetry to report anonymous usage and error information. You\n"
-            "can know more about what information is reported at:\n\n"
-            "    https://docs.argilla.io/latest/reference/argilla-server/telemetry/\n\n"
-            "Telemetry is currently enabled. If you want to disable it, you can configure\n"
-            "the environment variable before relaunching the server:\n\n"
-            f'{"#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"}'
-        )
-        _LOGGER.warning(message)
+def track_server_startup() -> None:
+    """
+    Track server startup telemetry event if telemetry is enabled
+    """
+    if not settings.enable_telemetry:
+        return
+
+    _show_telemetry_warning()
+    get_telemetry_client().track_server_startup()
+
+
+def _show_telemetry_warning():
+    message = "\n"
+    message += inspect.cleandoc(
+        "Argilla uses telemetry to report anonymous usage and error information. You\n"
+        "can know more about what information is reported at:\n\n"
+        "    https://docs.argilla.io/latest/reference/argilla-server/telemetry/\n\n"
+        "Telemetry is currently enabled. If you want to disable it, you can configure\n"
+        "the environment variable before relaunching the server:\n\n"
+        f'{"#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"}'
+    )
+    _LOGGER.warning(message)
 
     message += "\n\n    "
     message += "#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"

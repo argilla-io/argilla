@@ -92,7 +92,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 ### Docker images only
 
-- `REINDEX_DATASET`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
+- `REINDEX_DATASETS`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
 
 - `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `""`).
 

@@ -12,7 +12,7 @@
           </div>
           <base-action-tooltip :tooltip="$t('copied')">
             <base-button
-              title="Copy to clipboard"
+              :title="$t('button.tooltip.copyToClipboard')"
               class="secondary small"
               @click.prevent="$copyToClipboard(datasetSettingsUrl)"
             >

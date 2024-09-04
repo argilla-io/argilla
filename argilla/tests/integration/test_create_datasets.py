@@ -21,6 +21,10 @@ from argilla import (
     Settings,
     TermsMetadataProperty,
     TextField,
+    ImageField,
+    RatingQuestion,
+    LabelQuestion,
+    Workspace,
     VectorField,
     Workspace,
 )
@@ -32,7 +36,7 @@ class TestCreateDatasets:
         dataset = Dataset(
             name=dataset_name,
             settings=Settings(
-                fields=[TextField(name="test_field")],
+                fields=[TextField(name="test_field"), ImageField(name="image")],
                 questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
             ),
         )

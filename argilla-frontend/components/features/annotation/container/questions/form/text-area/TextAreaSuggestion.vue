@@ -4,7 +4,7 @@
       class="textarea--markdown"
       :markdown="question.suggestion?.value"
     />
-    <BaseActionTooltip tooltip="Copied" class="button-copy">
+    <BaseActionTooltip :tooltip="$t('copied')" class="button-copy">
       <BaseButton @on-click="$copyToClipboard(question.suggestion?.value)">
         <svgicon name="copy" width="16" height="16" />
       </BaseButton>
@@ -32,7 +32,7 @@ export default {
   padding: $base-space * 2;
   border: 1px solid $black-20;
   border-radius: $border-radius-s;
-  min-height: 10em;
+  min-height: 5em;
   background: palette(white);
   &:hover {
     .button-copy {

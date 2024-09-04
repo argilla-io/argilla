@@ -115,6 +115,7 @@ $selector-width: 140px;
   list-style: none;
 }
 .option {
+  text-transform: capitalize;
   padding: $base-space;
   border-radius: $border-radius;
   &:focus {
@@ -158,6 +159,7 @@ $selector-width: 140px;
   padding: $base-space;
   background: palette(white);
   @include font-size(14px);
+  text-transform: capitalize;
   &.discarded {
     color: $black-54;
     border: 1px solid $discarded-color;

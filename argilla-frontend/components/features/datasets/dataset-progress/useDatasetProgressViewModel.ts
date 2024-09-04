@@ -9,7 +9,7 @@ export const useDatasetProgressViewModel = ({
 }: {
   datasetId: string;
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const isLoaded = ref(false);
   const progress = ref<Progress | null>(null);
   const progressRanges = ref([]);
