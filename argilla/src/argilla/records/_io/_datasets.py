@@ -23,6 +23,7 @@ from argilla._helpers._media import pil_to_data_uri, uncast_image
 
 if TYPE_CHECKING:
     from argilla.records import Record
+    from argilla.datasets import Dataset
 
 
 class HFDatasetsIO:
@@ -39,7 +40,7 @@ class HFDatasetsIO:
         return isinstance(dataset, HFDataset)
 
     @staticmethod
-    def to_datasets(records: List["Record"], schema: Dict) -> HFDataset:
+    def to_datasets(records: List["Record"], dataset: "Dataset") -> HFDataset:
         """
         Export the records to a Hugging Face dataset.
 
@@ -47,11 +48,11 @@ class HFDatasetsIO:
             The dataset containing the records.
         """
         record_dicts = GenericIO.to_dict(records, flatten=True)
-        dataset = HFDataset.from_dict(record_dicts)
-        image_fields = HFDatasetsIO._get_image_fields(schema=schema)
+        hf_dataset = HFDataset.from_dict(record_dicts)
+        image_fields = HFDatasetsIO._get_image_fields(schema=dataset.schema)
         if image_fields:
-            dataset = HFDatasetsIO._cast_uris_as_images(hf_dataset=dataset, columns=image_fields)
-        return dataset
+            hf_dataset = HFDatasetsIO._cast_uris_as_images(hf_dataset=hf_dataset, columns=image_fields)
+        return hf_dataset
 
     @staticmethod
     def _record_dicts_from_datasets(dataset: HFDataset) -> List[Dict[str, Union[str, float, int, list]]]:

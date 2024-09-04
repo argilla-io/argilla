@@ -121,7 +121,7 @@ class DatasetRecordsIterator:
         return JsonIO.to_json(records=list(self), path=path)
 
     def to_datasets(self) -> "HFDataset":
-        return HFDatasetsIO.to_datasets(records=list(self), schema=self.__dataset.schema)
+        return HFDatasetsIO.to_datasets(records=list(self), dataset=self.__dataset)
 
 
 class DatasetRecords(Iterable[Record], LoggingMixin):
