@@ -19,7 +19,7 @@ from datasets import Dataset as HFDataset
 from datasets import IterableDataset, Image
 
 from argilla.records._io._generic import GenericIO
-from argilla._helpers._media import pil_to_data_uri
+from argilla._helpers._media import pil_to_data_uri, uncast_image
 
 if TYPE_CHECKING:
     from argilla.records import Record
@@ -39,7 +39,7 @@ class HFDatasetsIO:
         return isinstance(dataset, HFDataset)
 
     @staticmethod
-    def to_datasets(records: List["Record"]) -> HFDataset:
+    def to_datasets(records: List["Record"], schema: Dict) -> HFDataset:
         """
         Export the records to a Hugging Face dataset.
 
@@ -48,6 +48,9 @@ class HFDatasetsIO:
         """
         record_dicts = GenericIO.to_dict(records, flatten=True)
         dataset = HFDataset.from_dict(record_dicts)
+        image_fields = HFDatasetsIO._get_image_fields(schema=schema)
+        if image_fields:
+            dataset = HFDatasetsIO._cast_uris_as_images(hf_dataset=dataset, columns=image_fields)
         return dataset
 
     @staticmethod
@@ -71,6 +74,18 @@ class HFDatasetsIO:
         for example in dataset:
             record_dicts.append(example)
         return record_dicts
+
+    @staticmethod
+    def _get_image_fields(schema: Dict) -> List[str]:
+        """Get the names of the Argilla fields that contain image data.
+
+        Parameters:
+            dataset (Dataset): The dataset to check.
+
+        Returns:
+            List[str]: The names of the Argilla fields that contain image data.
+        """
+        return [field_name for field_name, field in schema.items() if field.type == "image"]
 
     @staticmethod
     def _get_image_features(dataset: "HFDataset") -> List[str]:
@@ -102,6 +117,35 @@ class HFDatasetsIO:
         def batch_fn(batch):
             data_uris = [pil_to_data_uri(sample) for sample in batch]
             return {unique_identifier: data_uris}
+
+        for column in columns:
+            hf_dataset = hf_dataset.map(
+                function=batch_fn,
+                with_indices=False,
+                batched=True,
+                input_columns=[column],
+                remove_columns=[column],
+            )
+            hf_dataset = hf_dataset.rename_column(original_column_name=unique_identifier, new_column_name=column)
+
+        return hf_dataset
+
+    @staticmethod
+    def _cast_uris_as_images(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
+        """Cast the image features in the Hugging Face dataset as PIL images.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to cast.
+            columns (List[str]): The names of the columns containing the image features.
+
+        Returns:
+            HFDataset: The Hugging Face dataset with image features cast as PIL images.
+        """
+        unique_identifier = uuid4().hex
+
+        def batch_fn(batch):
+            images = [uncast_image(sample) for sample in batch]
+            return {unique_identifier: images}
 
         for column in columns:
             hf_dataset = hf_dataset.map(
