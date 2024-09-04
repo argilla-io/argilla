@@ -347,6 +347,8 @@ class TestHubImportExportMixin:
         )
         if with_records_export:
             with pytest.raises(SettingsError):
-                rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name)
+                rg.Dataset.from_hub(
+                    repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name
+                )
         else:
             rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name)
