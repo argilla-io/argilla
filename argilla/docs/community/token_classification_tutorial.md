@@ -1127,7 +1127,7 @@ The workflow came full circle as we applied our fine-tuned model to annotate the
 
 This iterative approach allows for continuous improvement, making it an invaluable tool for tackling a wide range of natural language processing tasks efficiently and effectively.
 
-## Acknowledgements
+## 9. Acknowledgements
 
 I would like to express my sincere gratitude to the following individuals who have contributed to this notebook:
 
