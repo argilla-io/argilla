@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import asyncio
 import contextlib
 import glob
 import inspect
@@ -51,6 +52,7 @@ async def app_lifespan(app: FastAPI):
     await configure_database()
     await configure_search_engine()
     track_server_startup()
+    await track_server_usage_information()
     yield
 
 
@@ -194,6 +196,10 @@ def track_server_startup() -> None:
 
     _show_telemetry_warning()
     get_telemetry_client().track_server_startup()
+
+
+async def track_server_usage_information() -> None:
+    asyncio.create_task(get_telemetry_client().track_usage_information())
 
 
 def _show_telemetry_warning():

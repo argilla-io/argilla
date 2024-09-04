@@ -11,7 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import asyncio
+import contextlib
 import dataclasses
 import json
 import logging
@@ -24,14 +25,16 @@ from huggingface_hub.utils import send_telemetry
 
 from argilla_server._version import __version__
 from argilla_server.api.errors.v1.exception_handlers import get_request_error
+from argilla_server.contexts import accounts, datasets
+from argilla_server.database import get_async_db
 from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS
 from argilla_server.security.authentication.provider import get_request_user
-from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 from argilla_server.telemetry._helpers import (
+    get_server_id,
     is_running_on_docker_container,
     server_deployment_type,
-    get_server_id,
 )
+from argilla_server.utils._fastapi import resolve_endpoint_path_for_request
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -109,6 +112,66 @@ class TelemetryClient:
             None
         """
         self.track_data(topic="startup")
+
+    async def track_number_of_resources_per_type(self) -> None:
+        """
+        This method is used to track the number of attributes per type.
+
+        Parameters:
+            users (List[User]): The list of users
+            workspaces (List[Workspace]): The list of workspaces
+            datasets (List[Dataset]): The list of datasets
+
+        Returns:
+            None
+        """
+        async with contextlib.asynccontextmanager(get_async_db)() as db:
+            user_resources = await accounts.list_users(db)
+            workspace_resources = await accounts.list_workspaces(db)
+            datasets_resources = await datasets.list_datasets(db)
+            print(f"Users: {len(user_resources)}")
+            print(f"Workspaces: {len(workspace_resources)}")
+            print(f"Datasets: {len(datasets_resources)}")
+
+    async def track_number_of_dataset_attributes_per_type(self) -> None:
+        async with contextlib.asynccontextmanager(get_async_db)() as db:
+            dataset_resources = await datasets.list_datasets(db)
+            for dataset in dataset_resources:
+                pass
+            print(f"Datasets: {len(dataset_resources)}")
+
+    async def track_number_of_records(self):
+        async with contextlib.asynccontextmanager(get_async_db)() as db:
+            dataset_resources = await datasets.list_datasets(db)
+            for dataset in dataset_resources:
+                pass
+            print(f"Datasets: {len(dataset_resources)}")
+
+    async def track_number_of_dataset_attributes_per_dataset_per_type(self) -> None:
+        async with contextlib.asynccontextmanager(get_async_db)() as db:
+            dataset_resources = await datasets.list_datasets(db)
+            for dataset in dataset_resources:
+                pass
+            print(f"Datasets: {len(dataset_resources)}")
+
+    async def track_usage_information(self, sleep_time_in_hours: int = 24) -> None:
+        """
+        This method is used to track the usage metric of the server.
+
+        Parameters:
+            sleep_time_in_hours (int): The time in hours to sleep
+
+        Returns:
+            None
+        """
+        while True:
+            print("Tracking usage information")
+            await self.track_number_of_records()
+            await self.track_number_of_resources_per_type()
+            await self.track_number_of_dataset_attributes_per_type()
+            await self.track_number_of_dataset_attributes_per_dataset_per_type()
+
+            await asyncio.sleep(sleep_time_in_hours * 60 * 60)
 
 
 _TELEMETRY_CLIENT = TelemetryClient()
