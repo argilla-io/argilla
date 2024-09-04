@@ -14,6 +14,9 @@
 
 import pytest
 from unittest import mock
+from datasets import Dataset, Features, Value, ClassLabel, Sequence
+
+import argilla as rg
 from argilla.settings._templates import DefaultSettingsMixin
 
 
@@ -48,3 +51,70 @@ class TestDefaultSettingsMixin:
         assert len(settings.questions) == 1
         assert settings.questions[0].name == "rating"
         assert settings.questions[0].values == [1, 2, 3, 4, 5]
+
+
+class TestAutoSettings:
+    def test_from_text_classification_dataset(self):
+        text_classification_dataset = Dataset.from_dict(
+            {
+                "text": ["This is a test", "This is another test"],
+                "label": ["pos", "neg"],
+            },
+            features=Features(
+                {
+                    "text": Value(dtype="string", id=None),
+                    "label": ClassLabel(names=["neg", "pos"], id=None),
+                }
+            )
+        )
+        settings = rg.Settings.from_dataset(text_classification_dataset, labels=["pos", "neg"])
+
+    def test_from_response_ranking_dataset(self):
+        response_rating_dataset = Dataset.from_dict(
+            {
+                "prompt": ["This is a test", "This is another test"],
+                "chosen": [
+                    {"content": "this is a test", "role": "pos"},
+                    {"content": "this is a test", "role": "pos"},
+                ],
+                "rejected": [
+                    {"content": "this is another test", "role": "neg"},
+                    {"content": "this is a test", "role": "pos"},
+                ],
+            },
+            features=Features(
+                {
+                    "prompt": Value(dtype="string"),
+                    "chosen": Sequence(
+                        feature={
+                            "content": Value(dtype="string"),
+                            "role": Value(dtype="string"),
+                        }
+                    ),
+                    "rejected": Sequence(
+                        feature={
+                            "content": Value(dtype="string"),
+                            "role": Value(dtype="string"),
+                        }
+                    ),
+                }
+            ),
+        )
+        settings = rg.Settings.from_dataset(response_rating_dataset)
+
+    def test_from_response_rating_dataset(self):
+        response_rating_dataset = Dataset.from_dict(
+            {
+                "instruction": ["This is a test", "This is another test"],
+                "input": ["this is a test", "this is another test"],
+                "output": ["this is a test", "this is another test"],
+            },
+            features=Features(
+                {
+                    "instruction": Value("string"),
+                    "input": Value("string"),
+                    "output": Value("string"),
+                }
+            ),
+        )
+        settings = rg.Settings.from_dataset(response_rating_dataset)
