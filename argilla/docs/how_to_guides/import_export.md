@@ -249,6 +249,9 @@ The records can be exported as a dictionary, a list of dictionaries, or a `Datas
     exported_dataset = dataset.records.to_datasets()
     ```
 
+!!! note "Exporting records with images"
+    If your dataset contains image fields, you can export them as well. The `to_datasets` method is ideal because it will export the images as PIL objects, encoded in `datasets.Image` objects in `datasets.Features`, so can take advantage of other `datasets` package features. The `to_dict` and `to_list` will export the images as base64 encoded data uri strings which can be decoded and saved to disk, but be aware that this can be a large amount of data.
+    
 ### Import records
 
 To import records to a dataset, use the `rg.Datasets.records.log` method. There is a guide on how to do this in [How-to guides - Record](./record.md), or you can check the [Record - Python Reference](../reference/argilla/records/records.md).
