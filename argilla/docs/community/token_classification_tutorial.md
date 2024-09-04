@@ -1127,6 +1127,17 @@ The workflow came full circle as we applied our fine-tuned model to annotate the
 
 This iterative approach allows for continuous improvement, making it an invaluable tool for tackling a wide range of natural language processing tasks efficiently and effectively.
 
+## Acknowledgements
+
+I would like to express my sincere gratitude to the following individuals who have contributed to this notebook:
+
+- **[David Berenstein](https://x.com/davidberenstei)** for his invaluable insights and guidance.
+- **[Sara Han](https://x.com/sdiazlor)** for answering my frequent queries on discord.
+
+This work would not have been possible without their support and expertise.
+
+Additionally, a nicer version of this notebook can be seen by replacing **github** in `https://github.com/bikash119/argilla/blob/argilla_with_autotrain/argilla/docs/community/token_classification_tutorial.ipynb` with **nbsanity**. Thanks to **[Hamel Hussain](https://x.com/HamelHusain)** for creating this notebook rendering utility.
+
 
 ```python
 
