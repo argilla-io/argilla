@@ -73,12 +73,5 @@ export default {
   min-width: 0;
   height: 100%;
   min-height: 0;
-
-  &__container {
-    &--image {
-      overflow-x: auto;
-      overflow-y: auto;
-    }
-  }
 }
 </style>
