@@ -100,6 +100,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `API_KEY`: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
 
+- `UVICORN_APP`: [Advanced] The name of the FastAPI app to run. This is useful when you want to extend the FastAPI app with additional routes or middleware. The default value is `argilla_server:app`.
 
 ## REST API docs
 
