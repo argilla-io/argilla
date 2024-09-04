@@ -32,7 +32,7 @@ class TestHFDatasetsIO:
                     rg.TextQuestion(name="question"),
                 ],
             ),
-            )
+        )
         records = [
             rg.Record(fields={"field": "The field"}, metadata={"a": "a"}),
             rg.Record(fields={"field": "Other field", "other": "Field"}, metadata={"b": "b"}),
