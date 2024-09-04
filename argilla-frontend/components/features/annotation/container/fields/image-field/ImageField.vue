@@ -1,7 +1,7 @@
 <template>
   <div class="image_field" :key="content">
     <span class="image_field_title" v-text="title" />
-    <template v-if="!hasError">
+    <div class="image_field__wrapper" v-if="!hasError">
       <BaseSpinner v-if="!isLoaded" />
       <img
         v-show="isLoaded"
@@ -9,7 +9,7 @@
         @error="handleError()"
         @load="onLoad()"
       />
-    </template>
+    </div>
     <div v-else class="image_field_placeholder">
       <img src="images/img-placeholder.svg" />
       <p v-text="$t('couldNotLoadImage')" />
@@ -57,8 +57,6 @@ export default {
   flex-direction: column;
   min-height: 100%;
   min-width: 100%;
-  height: fit-content;
-  width: fit-content;
   gap: $base-space * 2;
   padding: 2 * $base-space;
   background: palette(grey, 800);
@@ -74,16 +72,31 @@ export default {
     color: $black-37;
   }
 
-  img {
-    max-width: fit-content;
-    max-height: fit-content;
-    height: fit-content;
-    width: fit-content;
+  &__wrapper {
+    width: 100%;
+    height: 100%;
+    overflow-y: hidden;
+    overflow-x: scroll;
+    img {
+      min-width: fit-content;
+      min-height: fit-content;
+    }
   }
 
   &_title {
     word-break: break-word;
     width: calc(100% - 30px);
   }
+}
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 4px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: $base-space;
+  background-color: $black-54;
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
 </style>
