@@ -243,7 +243,7 @@ claims = pd.read_csv("/content/sample_publications.csv")
 claims.head(2)
 ```
 
-  
+
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
