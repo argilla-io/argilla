@@ -45,7 +45,11 @@ In this project, we aim to fine-tune a custom NER model for USPTO Patents. Our o
 - Demonstrating the effectiveness of transfer learning in NER tasks.
 
 
-## Data Background
+## 2. Data Background
+
+
+
+
 
 US Patent texts are typically long, descriptive documents about inventions. The data used in this tutorial can be accessed through the [Kaggle USPTO Competition](https://www.kaggle.com/competitions/uspto-explainable-ai). Each patent contains several fields:
 - Title
@@ -55,12 +59,12 @@ US Patent texts are typically long, descriptive documents about inventions. The 
 
 For this tutorial, we'll focus on the `claims` field.
 
-## Problem Statement
+### 2.1 Problem Statement
 
 
   Our goal is to fine-tune a model to classify tokens in the `claims` field of a given patent.
 
-## Breaking Down the Problem
+### 2.2 Breaking Down the Problem
 
 
 To achieve this goal, we need:
@@ -68,12 +72,12 @@ To achieve this goal, we need:
 1. High-quality data to fine-tune a pretrained token classification model
 2. Infrastructure to execute the training
 
-## Create High-Quality Data with Argilla
+## 3. Create High-Quality Data with Argilla
   [Argilla](https://github.com/argilla-io/argilla/) is an excellent tool for creating high-quality datasets with a user-friendly interface for labeling.
+  
 
 
-
-### Setting Up Argilla on Hugging Face Spaces
+### 3.1 Setting Up Argilla on Hugging Face Spaces
 
 #### 1. Visit [Hugging Face Spaces deployment page](https://huggingface.co/new-space?template=argilla/argilla-template-space)
 
@@ -94,7 +98,7 @@ Access the UI using the credentials:
 
 For more options and setting up the Argilla instance for production use-cases, please refer to [Configure Argilla on Huggingface](https://docs.argilla.io/dev/getting_started/how-to-configure-argilla-on-huggingface/)
 
-### Create a Dataset with Argilla Python SDK
+### 3.2 Create a Dataset with Argilla Python SDK
 
 #### Step 1: Install & Import packages
 
@@ -102,6 +106,7 @@ For more options and setting up the Argilla instance for production use-cases, p
 ```python
 !pip install -U datasets argilla autotrain-advanced==0.8.8 > install_logs.txt 2>&1
 ```
+
 
 ```python
 import argilla as rg
@@ -188,6 +193,10 @@ rg_dataset.create()
     /usr/local/lib/python3.10/dist-packages/argilla/datasets/_resource.py:202: UserWarning: Workspace not provided. Using default workspace: admin id: fd4fc24c-fc1f-4ffe-af41-d569432d6b50
       warnings.warn(f"Workspace not provided. Using default workspace: {workspace.name} id: {workspace.id}")
 
+
+
+
+
     Dataset(id=UUID('a187cdad-175e-4d87-989f-a529b9999bde') inserted_at=datetime.datetime(2024, 7, 28, 7, 23, 59, 902685) updated_at=datetime.datetime(2024, 7, 28, 7, 24, 1, 901701) name='claim_tokens' status='ready' guidelines='Classify individual tokens according to the specified categories, ensuring that any overlapping or nested entities are accurately captured.' allow_extra_metadata=False workspace_id=UUID('fd4fc24c-fc1f-4ffe-af41-d569432d6b50') last_activity_at=datetime.datetime(2024, 7, 28, 7, 24, 1, 901701) url=None)
 
 
@@ -206,9 +215,9 @@ display_image('/content/images/argilla_ds_list_settings.png')
 ```
 
 
-
-![png](token_classification_tutorial_files/token_classification_tutorial_26_0.png)
-
+    
+![png](token_classification_tutorial_files/token_classification_tutorial_25_0.png)
+    
 
 
  The Fields tab of settings screen lists down fields we configured while creating the dataset using Python SDK.
@@ -219,9 +228,9 @@ display_image('/content/images/argilla_ds_settings.png')
 ```
 
 
-
-![png](token_classification_tutorial_files/token_classification_tutorial_28_0.png)
-
+    
+![png](token_classification_tutorial_files/token_classification_tutorial_27_0.png)
+    
 
 
 #### Step 5: Insert records to the Argilla datasets
@@ -234,7 +243,26 @@ claims = pd.read_csv("/content/sample_publications.csv")
 claims.head(2)
 ```
 
-<table border="1">
+
+
+
+
+  <div id="df-48b0aed7-c331-4e4f-905d-c568eaa16721" class="colab-df-container">
+    <div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
@@ -259,6 +287,218 @@ claims.head(2)
   </tbody>
 </table>
 </div>
+    <div class="colab-df-buttons">
+
+  <div class="colab-df-container">
+    <button class="colab-df-convert" onclick="convertToInteractive('df-48b0aed7-c331-4e4f-905d-c568eaa16721')"
+            title="Convert this dataframe to an interactive table."
+            style="display:none;">
+
+  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960">
+    <path d="M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z"/>
+  </svg>
+    </button>
+
+  <style>
+    .colab-df-container {
+      display:flex;
+      gap: 12px;
+    }
+
+    .colab-df-convert {
+      background-color: #E8F0FE;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      fill: #1967D2;
+      height: 32px;
+      padding: 0 0 0 0;
+      width: 32px;
+    }
+
+    .colab-df-convert:hover {
+      background-color: #E2EBFA;
+      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);
+      fill: #174EA6;
+    }
+
+    .colab-df-buttons div {
+      margin-bottom: 4px;
+    }
+
+    [theme=dark] .colab-df-convert {
+      background-color: #3B4455;
+      fill: #D2E3FC;
+    }
+
+    [theme=dark] .colab-df-convert:hover {
+      background-color: #434B5C;
+      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
+      fill: #FFFFFF;
+    }
+  </style>
+
+    <script>
+      const buttonEl =
+        document.querySelector('#df-48b0aed7-c331-4e4f-905d-c568eaa16721 button.colab-df-convert');
+      buttonEl.style.display =
+        google.colab.kernel.accessAllowed ? 'block' : 'none';
+
+      async function convertToInteractive(key) {
+        const element = document.querySelector('#df-48b0aed7-c331-4e4f-905d-c568eaa16721');
+        const dataTable =
+          await google.colab.kernel.invokeFunction('convertToInteractive',
+                                                    [key], {});
+        if (!dataTable) return;
+
+        const docLinkHtml = 'Like what you see? Visit the ' +
+          '<a target="_blank" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'
+          + ' to learn more about interactive tables.';
+        element.innerHTML = '';
+        dataTable['output_type'] = 'display_data';
+        await google.colab.output.renderOutput(dataTable, element);
+        const docLink = document.createElement('div');
+        docLink.innerHTML = docLinkHtml;
+        element.appendChild(docLink);
+      }
+    </script>
+  </div>
+
+
+<div id="df-6972c075-3574-42c8-afb9-4bde476ffb34">
+  <button class="colab-df-quickchart" onclick="quickchart('df-6972c075-3574-42c8-afb9-4bde476ffb34')"
+            title="Suggest charts"
+            style="display:none;">
+
+<svg xmlns="http://www.w3.org/2000/svg" height="24px"viewBox="0 0 24 24"
+     width="24px">
+    <g>
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+    </g>
+</svg>
+  </button>
+
+<style>
+  .colab-df-quickchart {
+      --bg-color: #E8F0FE;
+      --fill-color: #1967D2;
+      --hover-bg-color: #E2EBFA;
+      --hover-fill-color: #174EA6;
+      --disabled-fill-color: #AAA;
+      --disabled-bg-color: #DDD;
+  }
+
+  [theme=dark] .colab-df-quickchart {
+      --bg-color: #3B4455;
+      --fill-color: #D2E3FC;
+      --hover-bg-color: #434B5C;
+      --hover-fill-color: #FFFFFF;
+      --disabled-bg-color: #3B4455;
+      --disabled-fill-color: #666;
+  }
+
+  .colab-df-quickchart {
+    background-color: var(--bg-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    fill: var(--fill-color);
+    height: 32px;
+    padding: 0;
+    width: 32px;
+  }
+
+  .colab-df-quickchart:hover {
+    background-color: var(--hover-bg-color);
+    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    fill: var(--button-hover-fill-color);
+  }
+
+  .colab-df-quickchart-complete:disabled,
+  .colab-df-quickchart-complete:disabled:hover {
+    background-color: var(--disabled-bg-color);
+    fill: var(--disabled-fill-color);
+    box-shadow: none;
+  }
+
+  .colab-df-spinner {
+    border: 2px solid var(--fill-color);
+    border-color: transparent;
+    border-bottom-color: var(--fill-color);
+    animation:
+      spin 1s steps(1) infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      border-color: transparent;
+      border-bottom-color: var(--fill-color);
+      border-left-color: var(--fill-color);
+    }
+    20% {
+      border-color: transparent;
+      border-left-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+    }
+    30% {
+      border-color: transparent;
+      border-left-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+      border-right-color: var(--fill-color);
+    }
+    40% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+      border-top-color: var(--fill-color);
+    }
+    60% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+    }
+    80% {
+      border-color: transparent;
+      border-right-color: var(--fill-color);
+      border-bottom-color: var(--fill-color);
+    }
+    90% {
+      border-color: transparent;
+      border-bottom-color: var(--fill-color);
+    }
+  }
+</style>
+
+  <script>
+    async function quickchart(key) {
+      const quickchartButtonEl =
+        document.querySelector('#' + key + ' button');
+      quickchartButtonEl.disabled = true;  // To prevent multiple clicks.
+      quickchartButtonEl.classList.add('colab-df-spinner');
+      try {
+        const charts = await google.colab.kernel.invokeFunction(
+            'suggestCharts', [key], {});
+      } catch (error) {
+        console.error('Error during call to suggestCharts:', error);
+      }
+      quickchartButtonEl.classList.remove('colab-df-spinner');
+      quickchartButtonEl.classList.add('colab-df-quickchart-complete');
+    }
+    (() => {
+      let quickchartButtonEl =
+        document.querySelector('#df-6972c075-3574-42c8-afb9-4bde476ffb34 button');
+      quickchartButtonEl.style.display =
+        google.colab.kernel.accessAllowed ? 'block' : 'none';
+    })();
+  </script>
+</div>
+
+    </div>
+  </div>
+
+
+
 
 Here we are reading rows of the csv and mapping them to the fields we created during Argilla dataset configuration step.
 
@@ -285,7 +525,13 @@ rg_dataset.records.log(records)
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">DatasetRecords: The provided batch size <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">256</span> was normalized. Using value <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">149</span>.
 </pre>
 
+
+
     Sending records...: 100%|██████████| 1/1 [00:00<00:00,  1.71batch/s]
+
+
+
+
 
     DatasetRecords(Dataset(id=UUID('a187cdad-175e-4d87-989f-a529b9999bde') inserted_at=datetime.datetime(2024, 7, 28, 7, 23, 59, 902685) updated_at=datetime.datetime(2024, 7, 28, 7, 24, 1, 901701) name='claim_tokens' status='ready' guidelines='Classify individual tokens according to the specified categories, ensuring that any overlapping or nested entities are accurately captured.' allow_extra_metadata=False workspace_id=UUID('fd4fc24c-fc1f-4ffe-af41-d569432d6b50') last_activity_at=datetime.datetime(2024, 7, 28, 7, 24, 1, 901701) url=None))
 
@@ -301,9 +547,9 @@ display_image("/content/images/annotation_screen.png")
 ```
 
 
-
-![png](token_classification_tutorial_files/token_classification_tutorial_35_0.png)
-
+    
+![png](token_classification_tutorial_files/token_classification_tutorial_34_0.png)
+    
 
 
 #### Step 6 : Annotate tokens in every records with appropriate labels.
@@ -321,7 +567,7 @@ password : `12345678`
 
 
 
-## Argilla Dataset to HuggingFace Dataset
+## 4. Argilla Dataset to HuggingFace Dataset
 
 #### Step 1: Load our annotated dataset
 
@@ -343,6 +589,9 @@ submitted = rg_dataset.records(status_filter).to_list(flatten=True)
 submitted[0]
 ```
 
+
+
+
     {'id': '01e9b4bb-9c98-4cec-acea-dd686cddf5f0',
      'status': 'pending',
      '_server_id': '0b6f16f3-c3dc-4947-ac77-8b65002bf350',
@@ -356,6 +605,8 @@ submitted[0]
        {'label': 'Chemical Compound', 'start': 162, 'end': 177}]],
      'span_label.responses.users': ['4e9588d6-e2d6-450d-82c6-b33324d94708'],
      'span_label.responses.status': ['submitted']}
+
+
 
 The annotated dataset cannot be fed as is to the model for fine-tuning. For token-classification task, we will have to make our data that adheres to the structure as described below.
 - Dataset Structure: The dataset should typically have two main columns:
@@ -612,15 +863,15 @@ assert span_dataset['train'].features['ner_tags'].feature.names is not None
 !huggingface-cli login
 ```
 
-
+    
         _|    _|  _|    _|    _|_|_|    _|_|_|  _|_|_|  _|      _|    _|_|_|      _|_|_|_|    _|_|      _|_|_|  _|_|_|_|
         _|    _|  _|    _|  _|        _|          _|    _|_|    _|  _|            _|        _|    _|  _|        _|
         _|_|_|_|  _|    _|  _|  _|_|  _|  _|_|    _|    _|  _|  _|  _|  _|_|      _|_|_|    _|_|_|_|  _|        _|_|_|
         _|    _|  _|    _|  _|    _|  _|    _|    _|    _|    _|_|  _|    _|      _|        _|    _|  _|        _|
         _|    _|    _|_|      _|_|_|    _|_|_|  _|_|_|  _|      _|    _|_|_|      _|        _|    _|    _|_|_|  _|_|_|_|
-
+    
         To login, `huggingface_hub` requires a token generated from https://huggingface.co/settings/tokens .
-    Enter your token (input will not be visible):
+    Enter your token (input will not be visible): 
     Add token as git credential? (Y/n) n
     Token is valid (permission: write).
     Your token has been saved to /root/.cache/huggingface/token
@@ -631,19 +882,31 @@ assert span_dataset['train'].features['ner_tags'].feature.names is not None
 ```python
 span_dataset.push_to_hub("bikashpatra/sample_claims_annotated_hf")
 ```
-    Uploading the dataset shards:   0%|          | 0/1 [00:00<?, ?it/s]
 
-    Creating parquet from Arrow format:   0%|          | 0/1 [00:00<?, ?ba/s]
 
     Uploading the dataset shards:   0%|          | 0/1 [00:00<?, ?it/s]
 
+
+
     Creating parquet from Arrow format:   0%|          | 0/1 [00:00<?, ?ba/s]
+
+
+
+    Uploading the dataset shards:   0%|          | 0/1 [00:00<?, ?it/s]
+
+
+
+    Creating parquet from Arrow format:   0%|          | 0/1 [00:00<?, ?ba/s]
+
+
+
+
 
     CommitInfo(commit_url='https://huggingface.co/datasets/bikashpatra/sample_claims_annotated_hf/commit/e9faaa35dda423fcb2bccde9f19cbacd832af80a', commit_message='Upload dataset', commit_description='', oid='e9faaa35dda423fcb2bccde9f19cbacd832af80a', pr_url=None, pr_revision=None, pr_num=None)
 
 
 
-## Model Fine-tuning using AutoTrain
+## 5. Model Fine-tuning using AutoTrain
 Huggingface [AutoTrain](https://huggingface.co/autotrain) is a simple tool to train model without writing a any code. We can use autotrain to fine-tune for a range of tasks like token-classification, text-generation, Image Classification and many more. In order to use AutoTrain, we will have to first create an instance of AutoTrain in HF space. Use the [create space](https://huggingface.co/new-space?template=autotrain-projects%2Fautotrain-advanced) link. For space SDK choose Docker and select AutoTrain as Docker template. We need to choose a hardware to train our model. Check the screenshots for a quick reference
 
 
@@ -654,15 +917,15 @@ display_image("/content/images/autotrain_screen2.png")
 ```
 
 
-
-![png](token_classification_tutorial_files/token_classification_tutorial_60_0.png)
-
-
-
+    
+![png](token_classification_tutorial_files/token_classification_tutorial_59_0.png)
+    
 
 
-![png](token_classification_tutorial_files/token_classification_tutorial_60_1.png)
 
+    
+![png](token_classification_tutorial_files/token_classification_tutorial_59_1.png)
+    
 
 
 ### Using AutoTrain UI
@@ -681,9 +944,9 @@ display_image("/content/images/autotrain_ui.png")
 ```
 
 
-
-![png](token_classification_tutorial_files/token_classification_tutorial_63_0.png)
-
+    
+![png](token_classification_tutorial_files/token_classification_tutorial_62_0.png)
+    
 
 
 ### Using AutoTrain CLI
@@ -727,7 +990,7 @@ AutoTrain automatically creates huggingface space for us and triggers the traini
 
 If the model training executes without any errors, our model is available with the value we provided to `--project-name`. In the above example it was `claims-token-classification`
 
-## Inference
+## 6. Inference
 With all the hardwork done, we have our model trained our custom dataset.We can use our trained model to predict labels for un-annotated rows.
 We will use [HF Pipelines](https://huggingface.co/docs/transformers/main_classes/pipelines) api. Pipelines are easy to use abstraction to load model and execute inference on un-seen data.In context of this tutorial _inference on un-seen text_ means predicting labels for tokens in un-annotated text.
 
@@ -764,7 +1027,7 @@ classifier.model.config.id2label
 
 
 
-## Push predictions to Argilla Dataset
+## 7. Push predictions to Argilla Dataset
 Using [`rg.Query`](https://docs.argilla.io/latest/how_to_guides/query/) api we filter un-annotated data and predict tokens.
 
 The filter `rg.Filter(("response.status","==","pending"))` allows us to create a Argilla filter which we pass to [`rg.Query`](https://docs.argilla.io/latest/how_to_guides/query/) to get us all the records in Argilla dataset which has not been annotated.
@@ -780,7 +1043,7 @@ claims = random.sample(submitted,k=10) # pick 10 random samples.
 spans = classifier(claims[0]['tokens'])
 ```
 
-### Helper function to predict the spans
+### 7.1 Helper function to predict the spans
 
 
 ```python
@@ -827,7 +1090,7 @@ updated_data[0]['span_label'][:2]
 
 
 
-### Insert records to Argilla Dataset.
+### 7.2 Insert records to Argilla Dataset.
 
 
 ```python
@@ -838,7 +1101,13 @@ rg_dataset.records.log(records=updated_data)
 <pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">DatasetRecords: The provided batch size <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">256</span> was normalized. Using value <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span>.
 </pre>
 
+
+
     Sending records...: 100%|██████████| 1/1 [00:00<00:00,  1.15batch/s]
+
+
+
+
 
     DatasetRecords(Dataset(id=UUID('a187cdad-175e-4d87-989f-a529b9999bde') inserted_at=datetime.datetime(2024, 7, 28, 7, 23, 59, 902685) updated_at=datetime.datetime(2024, 7, 28, 7, 35, 55, 80617) name='claim_tokens' status='ready' guidelines='Classify individual tokens according to the specified categories, ensuring that any overlapping or nested entities are accurately captured.' allow_extra_metadata=False distribution=None workspace_id=UUID('fd4fc24c-fc1f-4ffe-af41-d569432d6b50') last_activity_at=datetime.datetime(2024, 7, 28, 7, 35, 55, 80181)))
 
@@ -848,7 +1117,7 @@ The records we update here are stored as [`suggestions`](https://docs.argilla.io
 
 If we want to accept model predicted annotations for tokens in a text, we may save the [`suggestions`] as [`responses`], else we will have to add / remove / edit labels applied to tokens.
 
-## Conclusion
+## 8. Conclusion
 
 In this comprehensive tutorial, we've explored a complete workflow for data annotation and model fine-tuning. We began by setting up an [Argilla](https://argilla.io/) instance on [Hugging Face Spaces](https://huggingface.co/spaces), providing a robust platform for data management. We then configured and created a dataset within our Argilla instance, leveraging its user-friendly interface to manually annotate a subset of records.
 
@@ -857,3 +1126,8 @@ We continued as we exported the high-quality annotated data to a Hugging Face [d
 The workflow came full circle as we applied our fine-tuned model to annotate the remaining unlabeled records in the Argilla dataset, showcasing how machine learning can accelerate the annotation process. This tutorial should provide a solid foundation for implementing an iterative annotation and fine-tuning pipeline while illustrating the synergy between human expertise and machine learning capabilities.
 
 This iterative approach allows for continuous improvement, making it an invaluable tool for tackling a wide range of natural language processing tasks efficiently and effectively.
+
+
+```python
+
+```
