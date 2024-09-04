@@ -47,6 +47,8 @@ dependencies = [
     "httpx~=0.26.0",
     "oauthlib ~= 3.2.0",
     "social-auth-core ~= 4.5.0",
+    # Background processing
+    "rq ~= 1.16.2",
     # Info status
     "psutil >= 5.8, <5.10",
     # Telemetry
@@ -173,6 +175,7 @@ _.env_file = ".env.dev"
 cli = { cmd = "python -m argilla_server.cli" }
 server = { cmd = "uvicorn argilla_server:app --port 6900 --reload" }
 migrate = { cmd = "alembic upgrade head" }
+worker = { cmd = "rq worker --with-scheduler" }
 server-dev.composite = [
     "migrate",
     "cli database users create_default",

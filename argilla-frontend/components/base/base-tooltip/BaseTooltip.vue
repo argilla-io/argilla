@@ -160,7 +160,7 @@ export default {
   white-space: pre;
   line-height: 1.4;
   &--minimalist {
-    background: palette(grey, 150);
+    background: $tooltip-mini-bg;
     @include font-size(13px);
     padding: calc($base-space / 2);
   }

@@ -26,7 +26,7 @@ export const useOAuthViewModel = () => {
     } catch {
       notification.notify({
         message: t("argilla.api.errors::UnauthorizedError"),
-        type: "error",
+        type: "danger",
       });
     } finally {
       router.go("/");

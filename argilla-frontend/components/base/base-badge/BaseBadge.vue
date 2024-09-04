@@ -38,19 +38,19 @@ export default {
   align-items: center;
   height: $base-space * 3;
   width: fit-content;
-  padding: 1em;
-  border: 1px solid $black-37;
+  padding: 0.8em;
+  border: 1px solid var(--fg-tertiary);
   border-radius: $border-radius-rounded;
   margin: 0;
-  color: $black-54;
+  color: var(--fg-secondary);
   @include font-size(12px);
   @include line-height(12px);
   &.--clickable {
     cursor: pointer;
-    background-color: $black-4;
+    background-color: var(--bg-opacity-4);
     border: unset;
     &:hover {
-      background-color: $black-10;
+      background-color: var(--bg-opacity-10);
     }
   }
 }

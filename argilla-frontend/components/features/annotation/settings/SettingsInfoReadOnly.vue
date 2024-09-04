@@ -74,7 +74,7 @@ export default {
   &__area {
     max-width: 800px;
     padding-bottom: $base-space * 3;
-    border-bottom: 1px solid $black-10;
+    border-bottom: 1px solid var(--bg-opacity-10);
   }
 
   &__row {
@@ -105,22 +105,21 @@ export default {
       width: 80px;
       height: 24px;
       padding: $base-space * 2;
-      border: 1px solid $black-20;
+      border: 1px solid var(--bg-opacity-20);
       border-radius: $border-radius;
-      background: $black-4;
-      border: 1px solid $black-20;
+      background: var(--bg-opacity-4);
+      border: 1px solid var(--bg-opacity-20);
       opacity: 0.6;
     }
   }
-}
-
-.info-icon {
-  color: $black-37;
-  margin-right: $base-space * 2;
-  &[data-title] {
-    position: relative;
-    overflow: visible;
-    @include tooltip-mini("top", $base-space);
+  .info-icon {
+    color: var(--fg-tertiary);
+    margin-right: $base-space * 2;
+    &[data-title] {
+      position: relative;
+      overflow: visible;
+      @include tooltip-mini("top", $base-space);
+    }
   }
 }
 </styles>

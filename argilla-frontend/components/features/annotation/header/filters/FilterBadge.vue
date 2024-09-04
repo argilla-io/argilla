@@ -62,11 +62,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$badgeBgColor: palette(purple, 300);
-$badgeBgHoverColor: palette(purple, 400);
-$badgeColor: palette(purple, 200);
-$badgeBorderColor: #b6b9ff;
-$badgeBorderActiveColor: palette(purple, 200);
+$badgeBgColor: var(--bg-filter-badge);
+$badgeBgHoverColor: var(--bg-filter-badge-accent);
+$badgeColor: var(--fg-filter-badge);
+$badgeBorderColor: var(--fg-filter-badge-accent);
+$badgeBorderActiveColor: var(--fg-filter-badge);
 .badge {
   display: flex;
   align-items: center;
@@ -84,13 +84,13 @@ $badgeBorderActiveColor: palette(purple, 200);
   &--clickable {
     @extend .badge;
     &:not(.badge--active):hover {
-      background-color: darken($badgeBgColor, 2%);
+      background-color: $badgeBgHoverColor;
     }
   }
   &--active {
     @extend .badge;
-    background-color: darken($badgeBgColor, 5%);
-    border: 1px solid $badgeBorderActiveColor;
+    background-color: $badgeBgHoverColor;
+    border: 1px solid hsla(from $badgeBorderActiveColor h s l / 40%);
   }
   &__text {
     white-space: nowrap;
@@ -105,7 +105,7 @@ $badgeBorderActiveColor: palette(purple, 200);
       min-width: 10px;
       color: $badgeColor;
       &:hover {
-        color: darken($badgeColor, 90%);
+        color: $badgeColor;
       }
     }
   }

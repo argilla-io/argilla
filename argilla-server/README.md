@@ -271,6 +271,16 @@ The `argilla_server search-engine` group of commands offers functionality to wor
 
 - `python -m argilla_server search-engine reindex`: reindex all Argilla entities into search engine.
 
+### Background Jobs
+
+Argilla uses [RQ](https://python-rq.org) as background job manager. RQ depends on [Redis](https://redis.io) to store and retrieve information about the jobs to be processed.
+
+Once that you have correctly installed Redis on your system, you can start the RQ worker in development by running the following command:
+
+```sh
+pdm worker
+```
+
 ## 🫱🏾‍🫲🏼 Contribute
 
 To help our community with the creation of contributions, we have created our [community](https://docs.argilla.io/latest/community/) docs. Additionally, you can always [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min) with our Developer Advocacy team so they can get you up to speed.
