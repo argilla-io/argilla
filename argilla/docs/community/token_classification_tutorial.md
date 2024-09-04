@@ -74,7 +74,7 @@ To achieve this goal, we need:
 
 ## 3. Create High-Quality Data with Argilla
   [Argilla](https://github.com/argilla-io/argilla/) is an excellent tool for creating high-quality datasets with a user-friendly interface for labeling.
-
+  
 
 
 ### 3.1 Setting Up Argilla on Hugging Face Spaces
@@ -215,9 +215,9 @@ display_image('/content/images/argilla_ds_list_settings.png')
 ```
 
 
-
+    
 ![png](token_classification_tutorial_files/token_classification_tutorial_25_0.png)
-
+    
 
 
  The Fields tab of settings screen lists down fields we configured while creating the dataset using Python SDK.
@@ -228,9 +228,9 @@ display_image('/content/images/argilla_ds_settings.png')
 ```
 
 
-
+    
 ![png](token_classification_tutorial_files/token_classification_tutorial_27_0.png)
-
+    
 
 
 #### Step 5: Insert records to the Argilla datasets
@@ -547,9 +547,9 @@ display_image("/content/images/annotation_screen.png")
 ```
 
 
-
+    
 ![png](token_classification_tutorial_files/token_classification_tutorial_34_0.png)
-
+    
 
 
 #### Step 6 : Annotate tokens in every records with appropriate labels.
@@ -863,15 +863,15 @@ assert span_dataset['train'].features['ner_tags'].feature.names is not None
 !huggingface-cli login
 ```
 
-
+    
         _|    _|  _|    _|    _|_|_|    _|_|_|  _|_|_|  _|      _|    _|_|_|      _|_|_|_|    _|_|      _|_|_|  _|_|_|_|
         _|    _|  _|    _|  _|        _|          _|    _|_|    _|  _|            _|        _|    _|  _|        _|
         _|_|_|_|  _|    _|  _|  _|_|  _|  _|_|    _|    _|  _|  _|  _|  _|_|      _|_|_|    _|_|_|_|  _|        _|_|_|
         _|    _|  _|    _|  _|    _|  _|    _|    _|    _|    _|_|  _|    _|      _|        _|    _|  _|        _|
         _|    _|    _|_|      _|_|_|    _|_|_|  _|_|_|  _|      _|    _|_|_|      _|        _|    _|    _|_|_|  _|_|_|_|
-
+    
         To login, `huggingface_hub` requires a token generated from https://huggingface.co/settings/tokens .
-    Enter your token (input will not be visible):
+    Enter your token (input will not be visible): 
     Add token as git credential? (Y/n) n
     Token is valid (permission: write).
     Your token has been saved to /root/.cache/huggingface/token
@@ -917,15 +917,15 @@ display_image("/content/images/autotrain_screen2.png")
 ```
 
 
-
+    
 ![png](token_classification_tutorial_files/token_classification_tutorial_59_0.png)
+    
 
 
 
-
-
+    
 ![png](token_classification_tutorial_files/token_classification_tutorial_59_1.png)
-
+    
 
 
 ### 5.1 Using AutoTrain UI
@@ -944,9 +944,9 @@ display_image("/content/images/autotrain_ui.png")
 ```
 
 
-
+    
 ![png](token_classification_tutorial_files/token_classification_tutorial_62_0.png)
-
+    
 
 
 ### 5.2 Using AutoTrain CLI
