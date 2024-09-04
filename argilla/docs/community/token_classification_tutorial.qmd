@@ -73,7 +73,7 @@ To achieve this goal, we need:
 
 ## Create High-Quality Data with Argilla
   [Argilla](https://github.com/argilla-io/argilla/) is an excellent tool for creating high-quality datasets with a user-friendly interface for labeling.
-  
+
 
 ### Setting Up Argilla on Hugging Face Spaces
 
