@@ -65,7 +65,7 @@ class TestAutoSettings:
                     "text": Value(dtype="string", id=None),
                     "label": ClassLabel(names=["neg", "pos"], id=None),
                 }
-            )
+            ),
         )
         settings = rg.Settings.from_dataset(text_classification_dataset, labels=["pos", "neg"])
 
