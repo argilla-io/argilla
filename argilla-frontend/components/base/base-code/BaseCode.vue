@@ -1,5 +1,5 @@
 <template>
-  <base-action-tooltip class="button" :tooltip="$t('copied')">
+  <base-action-tooltip class="button" :tooltip="t('copied')">
     <a href="#" @click.prevent="copy(code)">
       <svgicon name="copy" width="16" height="16" />
     </a>
@@ -7,7 +7,9 @@
 </template>
 
 <script>
+import { useTranslate } from "~/v1/infrastructure/services";
 import "assets/icons/copy";
+
 export default {
   props: {
     code: {
@@ -19,6 +21,9 @@ export default {
     copy(code) {
       this.$copyToClipboard(code);
     },
+  },
+  setup() {
+    return useTranslate();
   },
 };
 </script>
