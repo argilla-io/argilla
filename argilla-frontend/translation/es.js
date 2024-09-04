@@ -136,7 +136,7 @@ export default {
     select_to_annotate: "Seleccionar todo",
     pageSize: "Tamaño de página",
     selectAllResults: "Selecciona todos los registros coincidentes {total}",
-    haveSelectedRecords: "Has seleccionado todos los registros {Total}",
+    haveSelectedRecords: "Has seleccionado todos los registros {total}",
     actionConfirmation: "Confirmación de acción en bloque",
     actionConfirmationText:
       "Esta acción afectará a {total} registros, ¿Quiere continuar?",
@@ -177,7 +177,7 @@ export default {
   suggestion: {
     agent: "\nagente: {agent}",
     score: "\npuntuación: {score}",
-    tooltip: "Esta pregunta contiene una sugerencia {agente} {stork}",
+    tooltip: "Esta pregunta contiene una sugerencia {agent} {score}",
     filter: {
       value: "Valores de sugerencia",
       score: "Puntuación",
@@ -209,7 +209,7 @@ export default {
     passwordDescription: "Introduce tu contraseña",
     claim: "Trabaja en equipo con tus datos.</br>Perfecciona tus modelos.",
     hf: {
-      title: "Bienvenido a {Space}",
+      title: "Bienvenido a {space}",
       subtitle:
         "Únete a <strong>{user}</strong> para construir mejores datasets para IA",
     },

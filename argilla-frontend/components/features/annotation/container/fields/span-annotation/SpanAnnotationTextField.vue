@@ -226,8 +226,9 @@ export default {
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
-  background: var(--bg-accent-grey-2);
+  background: var(--bg-field);
   border-radius: $border-radius-m;
+  border: 1px solid var(--bg-opacity-2);
   &:hover {
     #{$this}__copy-button {
       opacity: 1;
