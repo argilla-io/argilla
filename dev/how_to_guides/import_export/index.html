@@ -1268,6 +1268,48 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/image_classification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Image classification
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/image_preference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Image preference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2568,6 +2610,10 @@
 <p>The records alone can be exported from a dataset in Argilla.  This is useful if you want to process the records in Python, export them to a different platform, or use them in model training. All of these methods use the <code>rg.Dataset.records</code> attribute.</p>
 <h3 id="export-records">Export records<a class="headerlink" href="#export-records" title="Permanent link">&para;</a></h3>
 <p>The records can be exported as a dictionary, a list of dictionaries, or a <code>Dataset</code> of the <code>datasets</code> package.</p>
+<div class="admonition note">
+<p class="admonition-title">With images</p>
+<p>If your dataset includes images, the recommended approach for exporting records is to use the <code>to_datasets</code> method, which exports the images as rescaled PIL objects. With other methods, the images will be exported using the data URI schema.</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">To a python dictionary</label><label for="__tabbed_2_2">To a python list</label><label for="__tabbed_2_3">To the <code>datasets</code> package</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
