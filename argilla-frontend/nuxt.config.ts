@@ -178,6 +178,8 @@ const config: NuxtConfig = {
       local: {
         endpoints: {
           logout: false,
+          user: false,
+          login: false,
         },
       },
     },
