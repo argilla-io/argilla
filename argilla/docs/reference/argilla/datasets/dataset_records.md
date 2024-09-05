@@ -223,9 +223,9 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
 
     1. The image can be referenced as either a remote URL, a local file path, or a PIL object.
 
-=== "From a Hugging face"
+=== "From a Hugging Face dataset"
 
-    Hugging face datasets can be passed directly to the `log` method. The image field must be defined as an `Image` in the dataset's features.
+    Hugging Face datasets can be passed directly to the `log` method. The image field must be defined as an `Image` in the dataset's features.
 
     ```python
     hf_dataset = load_dataset("ylecun/mnist", split="train[:100]")
