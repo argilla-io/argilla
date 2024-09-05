@@ -196,7 +196,10 @@ Records can also be updated using the `log` method with records that contain an 
 
 ### Adding and updating records with images
 
-Argilla datasets can contain image fields. You can add images to a dataset by passing the image to the record object as either a remote URL, a local path to an image file, or a PIL object. The field names must be defined as an `rg.ImageField` in the dataset's `Settings` object to be accepted. Images will be stored in the Argilla database and returned as rescaled PIL objects.
+Argilla datasets can contain image fields. You can add images to a dataset by passing the image to the record object as either a remote URL, a local path to an image file, or a PIL object. The field names must be defined as an `rg.ImageField` in the dataset's `Settings` object to be accepted. Images will be stored in the Argilla database and returned using the data URI schema.
+
+!!! note "As PIL objects"
+    To retrieve the images as rescaled PIL objects, you can use the `to_datasets` method when exporting the records, as shown in this [how-to guide](../../../how_to_guides/import_export.md).
 
 === "From a data structure with local file paths"
 
