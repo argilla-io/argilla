@@ -42,3 +42,4 @@ data = rg.Dataset(
 
 
 ::: src.argilla.settings._field.TextField
+::: src.argilla.settings._field.ImageField
