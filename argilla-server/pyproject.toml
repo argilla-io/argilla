@@ -175,7 +175,7 @@ _.env_file = ".env.dev"
 cli = { cmd = "python -m argilla_server.cli" }
 server = { cmd = "uvicorn argilla_server:app --port 6900 --reload" }
 migrate = { cmd = "alembic upgrade head" }
-worker = { cmd = "rq worker --with-scheduler" }
+worker = { cmd = "rq worker --with-scheduler default high" }
 server-dev.composite = [
     "migrate",
     "cli database users create_default",

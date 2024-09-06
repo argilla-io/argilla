@@ -12,23 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import json
-import httpx
-
+from typing import List
 from datetime import datetime
 
+from rq.job import Job
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.models import Response, Webhook
+from argilla_server.jobs.webhook_jobs import enqueue_notify_events
+from argilla_server.models import Response
 from argilla_server.api.schemas.v1.responses import Response as ResponseSchema
-from argilla_server.api.webhooks.v1.commons import notify_event
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
+from argilla_server.api.webhooks.v1.enums import ResponseEvent
 
 
-def notify_response_created_event(webhook: Webhook, response: Response) -> httpx.Response:
-    return notify_event(
-        webhook=webhook,
-        type=WebhookEvent.response_created,
+async def notify_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> List[Job]:
+    return await enqueue_notify_events(
+        db,
+        event=response_event,
         timestamp=datetime.utcnow(),
         data=jsonable_encoder(ResponseSchema.from_orm(response)),
     )

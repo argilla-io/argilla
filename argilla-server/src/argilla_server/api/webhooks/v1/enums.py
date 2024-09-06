@@ -17,4 +17,17 @@ from enum import Enum
 
 class WebhookEvent(str, Enum):
     response_created = "response.created"
-    ping = "ping"
+    response_updated = "response.updated"
+    response_deleted = "response.deleted"
+
+    def __str__(self):
+        return str(self.value)
+
+
+class ResponseEvent(str, Enum):
+    created = WebhookEvent.response_created.value
+    updated = WebhookEvent.response_updated.value
+    deleted = WebhookEvent.response_deleted.value
+
+    def __str__(self):
+        return str(self.value)

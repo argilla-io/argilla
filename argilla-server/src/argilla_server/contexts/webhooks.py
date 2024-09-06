@@ -22,7 +22,15 @@ from argilla_server.validators.webhooks import WebhookCreateValidator
 
 
 async def list_webhooks(db: AsyncSession) -> Sequence[Webhook]:
-    return (await db.execute(select(Webhook).order_by(Webhook.inserted_at.asc()))).scalars().all()
+    result = await db.execute(select(Webhook).order_by(Webhook.inserted_at.asc()))
+
+    return result.scalars().all()
+
+
+async def list_enabled_webhooks(db: AsyncSession) -> Sequence[Webhook]:
+    result = await db.execute(select(Webhook).where(Webhook.enabled == True).order_by(Webhook.inserted_at.asc()))
+
+    return result.scalars().all()
 
 
 async def create_webhook(db: AsyncSession, webhook_attrs: dict) -> Webhook:

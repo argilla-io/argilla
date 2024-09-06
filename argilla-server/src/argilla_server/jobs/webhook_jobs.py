@@ -1,0 +1,51 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+import httpx
+
+from typing import List
+
+from uuid import UUID
+from datetime import datetime
+
+from rq.job import Retry, Job
+from rq.decorators import job
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from argilla_server.api.webhooks.v1.commons import notify_event
+from argilla_server.database import AsyncSessionLocal
+from argilla_server.jobs.queues import high_queue
+from argilla_server.contexts import webhooks
+from argilla_server.models import Webhook
+
+
+async def enqueue_notify_events(db: AsyncSession, event: str, timestamp: datetime, data: dict) -> List[Job]:
+    enabled_webhooks = await webhooks.list_enabled_webhooks(db)
+    if len(enabled_webhooks) == 0:
+        return []
+
+    enqueued_jobs = []
+    for enabled_webhook in enabled_webhooks:
+        if event in enabled_webhook.events:
+            enqueued_jobs.append(notify_event_job.delay(enabled_webhook.id, event, timestamp, data))
+
+    return enqueued_jobs
+
+
+@job(high_queue, retry=Retry(max=3))
+async def notify_event_job(webhook_id: UUID, event: str, timestamp: datetime, data: dict) -> httpx.Response:
+    async with AsyncSessionLocal() as db:
+        webhook = await Webhook.get_or_raise(db, webhook_id)
+
+    return notify_event(webhook, event, timestamp, data)

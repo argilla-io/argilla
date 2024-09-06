@@ -25,7 +25,7 @@ from argilla_server.api.webhooks.v1.enums import WebhookEvent
 def notify_ping_event(webhook: Webhook) -> httpx.Response:
     return notify_event(
         webhook=webhook,
-        type=WebhookEvent.ping,
+        event="ping",
         timestamp=datetime.utcnow(),
         data={
             "agent": "argilla-server",

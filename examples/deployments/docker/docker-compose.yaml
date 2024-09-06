@@ -46,7 +46,7 @@ services:
       - postgres
       - elasticsearch
       - redis
-    command: sh -c 'rq worker-pool --num-workers $${BACKGROUND_NUM_WORKERS} --url $${ARGILLA_REDIS_URL}'
+    command: sh -c 'rq worker-pool --num-workers $${BACKGROUND_NUM_WORKERS} --url $${ARGILLA_REDIS_URL} default high'
 
   postgres:
     image: postgres:14

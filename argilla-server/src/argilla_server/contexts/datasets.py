@@ -60,6 +60,8 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.api.webhooks.v1.enums import ResponseEvent
+from argilla_server.api.webhooks.v1.responses import notify_response_event as notify_response_event_v1
 from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole, RecordStatus
@@ -864,6 +866,7 @@ async def create_response(
 
     await db.commit()
     await distribution.update_record_status(search_engine, record.id)
+    await notify_response_event_v1(db, ResponseEvent.created, response)
 
     return response
 
@@ -888,6 +891,7 @@ async def update_response(
 
     await db.commit()
     await distribution.update_record_status(search_engine, response.record_id)
+    await notify_response_event_v1(db, ResponseEvent.updated, response)
 
     return response
 
@@ -930,6 +934,7 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
 
     await db.commit()
     await distribution.update_record_status(search_engine, response.record_id)
+    await notify_response_event_v1(db, ResponseEvent.deleted, response)
 
     return response
 

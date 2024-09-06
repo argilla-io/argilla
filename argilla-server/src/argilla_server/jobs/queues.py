@@ -22,3 +22,4 @@ from argilla_server.settings import settings
 redis_connection = redis.from_url(settings.redis_url)
 
 default_queue = Queue(connection=redis_connection)
+high_queue = Queue("high", connection=redis_connection)
