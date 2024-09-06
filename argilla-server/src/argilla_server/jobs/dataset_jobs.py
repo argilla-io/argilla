@@ -21,7 +21,7 @@ from sqlalchemy import func, select
 
 from argilla_server.models import Record
 from argilla_server.database import AsyncSessionLocal
-from argilla_server.jobs.queues import default_queue
+from argilla_server.jobs.queues import DEFAULT_QUEUE
 from argilla_server.search_engine.base import SearchEngine
 from argilla_server.settings import settings
 from argilla_server.contexts import distribution
@@ -30,7 +30,7 @@ JOB_TIMEOUT_DISABLED = -1
 JOB_RECORDS_YIELD_PER = 100
 
 
-@job(default_queue, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
+@job(DEFAULT_QUEUE, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
 async def update_dataset_records_status_job(dataset_id: UUID):
     """This Job updates the status of all the records in the dataset when the distribution strategy changes."""
 
