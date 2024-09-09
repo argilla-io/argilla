@@ -70,8 +70,8 @@ class TestCreateWebhook:
             },
         )
 
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 1
+        assert response.status_code == 403
+        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 0
 
     async def test_create_webhook_as_annotator(self, db: AsyncSession, async_client: AsyncClient):
         annotator = await AnnotatorFactory.create()

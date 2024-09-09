@@ -193,20 +193,10 @@ class TestUpdateWebhook:
             },
         )
 
-        assert response.status_code == 200
-        assert response.json() == {
-            "id": str(webhook.id),
-            "url": "https://example.com/webhook",
-            "secret": webhook.secret,
-            "events": [WebhookEvent.ping],
-            "enabled": True,
-            "description": None,
-            "inserted_at": webhook.inserted_at.isoformat(),
-            "updated_at": webhook.updated_at.isoformat(),
-        }
+        assert response.status_code == 403
 
-        assert webhook.url == "https://example.com/webhook"
-        assert webhook.events == [WebhookEvent.ping]
+        assert webhook.url != "https://example.com/webhook"
+        assert webhook.events != [WebhookEvent.ping]
 
     async def test_update_webhook_as_annotator(self, async_client: AsyncClient):
         annotator = await AnnotatorFactory.create()

@@ -72,7 +72,7 @@ class TestListWebhooks:
             headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 403
 
     async def test_list_webhooks_as_annotator(self, async_client: AsyncClient):
         annotator = await AnnotatorFactory.create()
