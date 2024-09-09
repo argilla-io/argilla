@@ -19,7 +19,7 @@ from rq.decorators import job
 
 from sqlalchemy import func, select
 
-from argilla_server.models import Record
+from argilla_server.models import Record, Response
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.jobs.queues import DEFAULT_QUEUE
 from argilla_server.search_engine.base import SearchEngine
@@ -41,6 +41,7 @@ async def update_dataset_records_status_job(dataset_id: UUID):
             select(Record.id)
             .where(Record.dataset_id == dataset_id)
             .order_by(Record.inserted_at.asc())
+            .join(Response)
             .execution_options(yield_per=JOB_RECORDS_YIELD_PER)
         )
 
