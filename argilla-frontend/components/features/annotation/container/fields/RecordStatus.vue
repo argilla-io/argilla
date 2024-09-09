@@ -29,24 +29,24 @@ export default {
       switch (this.record.status) {
         case "pending":
           return {
-            name: this.$t("recordStatus.pending"),
+            name: this.$tc("recordStatus.pending", 1),
             class: "--pending",
           };
         case "draft":
           return {
-            name: this.$t("recordStatus.draft"),
+            name: this.$tc("recordStatus.draft", 1),
             class: "--draft",
           };
 
         case "discarded":
           return {
-            name: this.$t("recordStatus.discarded"),
+            name: this.$tc("recordStatus.discarded", 1),
             class: "--discarded",
           };
 
         case "submitted":
           return {
-            name: this.$t("recordStatus.submitted"),
+            name: this.$tc("recordStatus.submitted", 1),
             class: "--submitted",
           };
       }
@@ -64,6 +64,7 @@ export default {
   border-radius: $border-radius-rounded;
 }
 .status-tag {
+  text-transform: capitalize;
   display: flex;
   align-items: center;
   gap: $base-space;
@@ -71,38 +72,38 @@ export default {
   font-weight: 500;
 
   &.--discarded {
-    color: $discarded-color;
+    color: var(--fg-status-discarded);
     .bullet:before {
       @extend %bullet;
-      background: $discarded-color;
+      background: var(--fg-status-discarded);
     }
   }
   &.--submitted {
-    color: $submitted-color;
+    color: var(--fg-status-submitted);
     .bullet:before {
       @extend %bullet;
-      background: $submitted-color;
+      background: var(--fg-status-submitted);
     }
   }
   &.--pending {
-    color: $pending-color;
+    color: var(--fg-status-pending);
     .bullet:before {
       @extend %bullet;
-      background: $pending-color;
+      background: var(--fg-status-pending);
     }
   }
   &.--draft {
-    color: $draft-color;
+    color: var(--fg-status-draft);
     .bullet:before {
       @extend %bullet;
-      background: $draft-color;
+      background: var(--fg-status-draft);
     }
     .check {
-      color: $draft-color;
+      color: var(--fg-status-draft);
       flex-shrink: 0;
     }
     .circle {
-      border: 2px solid $draft-color;
+      border: 2px solid var(--fg-status-draft);
     }
   }
 }

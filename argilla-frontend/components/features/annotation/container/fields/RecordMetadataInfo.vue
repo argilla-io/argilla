@@ -21,7 +21,7 @@
               {{ value }}
               <BaseActionTooltip
                 class="table-info__copy"
-                tooltip="Copied"
+                :tooltip="$t('copied')"
                 tooltip-position="left"
               >
                 <BaseButton
@@ -91,7 +91,7 @@ export default {
 
 <style lang="scss" scoped>
 .table-info {
-  background: palette(white);
+  background: var(--bg-accent-grey-2);
   min-width: 440px;
   border-radius: $border-radius-s;
   overflow: hidden;
@@ -110,9 +110,9 @@ export default {
       min-width: 100px;
     }
     .--table & {
-      background: $black-6;
-      border-top: 1px solid $black-10;
-      border-bottom: 1px solid $black-10;
+      background: var(--bg-opacity-6);
+      border-top: 1px solid var(--bg-opacity-10);
+      border-bottom: 1px solid var(--bg-opacity-10);
     }
   }
   &__row {
@@ -121,9 +121,9 @@ export default {
     gap: $base-space * 2;
     padding: $base-space $base-space * 2;
     .--table & {
-      border-bottom: 1px solid $black-10;
+      border-bottom: 1px solid var(--bg-opacity-10);
       &:nth-child(even) {
-        background: $black-4;
+        background: var(--bg-opacity-4);
       }
     }
     &:hover {
@@ -158,7 +158,7 @@ export default {
     flex-shrink: 0;
     &__button {
       padding: 0;
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
   :deep(.dropdown__content) {

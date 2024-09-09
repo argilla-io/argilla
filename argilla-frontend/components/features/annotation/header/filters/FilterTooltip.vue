@@ -93,7 +93,7 @@ $triangle-size: 6px;
   right: 50%;
   transform: translateX(50%);
   padding: $base-space * 2;
-  background: palette(white);
+  background: var(--bg-accent-grey-3);
   border-radius: $border-radius;
   box-shadow: $shadow;
   z-index: 4;
@@ -103,7 +103,12 @@ $triangle-size: 6px;
     left: 0;
     right: 0;
     margin: auto;
-    @include triangle(top, $triangle-size, $triangle-size, palette(white));
+    @include triangle(
+      top,
+      $triangle-size,
+      $triangle-size,
+      var(--bg-accent-grey-3)
+    );
   }
 }
 </style>

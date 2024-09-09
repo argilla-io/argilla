@@ -19,7 +19,7 @@ services:
   argilla:
     image: argilla/argilla-hf-spaces:latest
     environment:
-      ARGILLA_ENABLE_TELEMETRY: 0
+      HF_HUB_DISABLE_TELEMETRY: 1
       ARGILLA_BASE_URL: /argilla
       USERNAME: argilla
       PASSWORD: 12345678

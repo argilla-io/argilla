@@ -82,13 +82,12 @@ export default {
   gap: calc($base-space / 2);
   width: 14.5em;
   padding: 0 $base-space;
-  border: 1px solid $black-10;
+  border: 1px solid var(--bg-opacity-10);
   border-radius: $border-radius-l;
-  background: palette(white);
   overflow: hidden;
   transition: all 0.2s ease-out;
   &:focus-within {
-    border-color: $primary-color;
+    border-color: var(--bg-action);
   }
   &:hover {
     transition: all 0.2s ease-in;
@@ -109,7 +108,7 @@ export default {
     }
   }
   &.--focused {
-    border-color: $primary-color;
+    border-color: var(--bg-action);
   }
 }
 
@@ -118,11 +117,13 @@ export default {
   width: 100%;
   border: none;
   @include font-size(13px);
+  background: transparent;
+  color: var(--fg-primary);
   &:focus-visible {
     outline: 0;
   }
   @include input-placeholder {
-    color: $black-37;
+    color: var(--fg-tertiary);
   }
 }
 </style>

@@ -156,7 +156,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         if with_records:
             try:
                 hf_dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-                hf_dataset = cls._get_single_dataset(hf_dataset=hf_dataset, kwargs=kwargs)
+                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, **kwargs)
                 cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
             except EmptyDatasetError:
                 warnings.warn(
@@ -204,10 +204,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         records = []
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
-            if "id" in row:
-                record.id = row.pop("id")
             for question_name, values in response_questions.items():
-                response_users = {}
                 response_values = values["responses"][idx]
                 response_users = values["users"][idx]
                 response_status = values["status"][idx]
@@ -233,7 +230,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             ) from e
 
     @staticmethod
-    def _get_single_dataset(hf_dataset: "HFDataset", kwargs: Dict) -> "HFDataset":
+    def _get_dataset_split(hf_dataset: "HFDataset", split: Optional[str] = None, **kwargs: Dict) -> "HFDataset":
         """Get a single dataset from a Hugging Face dataset.
 
         Parameters:
@@ -243,11 +240,12 @@ class HubImportExportMixin(DiskImportExportMixin):
             HFDataset: The single dataset.
         """
 
-        if isinstance(hf_dataset, DatasetDict) and "split" not in kwargs:
+        if isinstance(hf_dataset, DatasetDict) and split is None:
             split = next(iter(hf_dataset.keys()))
             if len(hf_dataset.keys()) > 1:
                 warnings.warn(
-                    message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}. Available splits are: {', '.join(hf_dataset.keys())}."
+                    message=f"Multiple splits found in Hugging Face dataset. Using the first split: {split}. "
+                    f"Available splits are: {', '.join(hf_dataset.keys())}."
                 )
             hf_dataset = hf_dataset[split]
         return hf_dataset
