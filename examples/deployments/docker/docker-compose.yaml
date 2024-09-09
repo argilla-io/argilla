@@ -2,7 +2,7 @@ x-common-variables: &common-variables
   ARGILLA_HOME_PATH: /var/lib/argilla
   ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
   ARGILLA_DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/argilla
-  ARGILLA_REDIS_URL: redis://redis:6379
+  ARGILLA_REDIS_URL: redis://redis:6379/0
 
 services:
   argilla:
