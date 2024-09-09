@@ -25,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.api.webhooks.v1.commons import notify_event
 from argilla_server.database import AsyncSessionLocal
-from argilla_server.jobs.queues import high_queue
+from argilla_server.jobs.queues import HIGH_QUEUE
 from argilla_server.contexts import webhooks
 from argilla_server.models import Webhook
 
@@ -43,7 +43,7 @@ async def enqueue_notify_events(db: AsyncSession, event: str, timestamp: datetim
     return enqueued_jobs
 
 
-@job(high_queue, retry=Retry(max=3))
+@job(HIGH_QUEUE, retry=Retry(max=3))
 async def notify_event_job(webhook_id: UUID, event: str, timestamp: datetime, data: dict) -> httpx.Response:
     async with AsyncSessionLocal() as db:
         webhook = await Webhook.get_or_raise(db, webhook_id)

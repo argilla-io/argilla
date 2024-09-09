@@ -41,7 +41,7 @@ from argilla_server.models import User, Workspace
 from argilla_server.search_engine import get_search_engine
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
-from argilla_server.jobs.queues import redis_connection
+from argilla_server.jobs.queues import REDIS_CONNECTION
 from argilla_server.telemetry import get_telemetry_client
 
 _LOGGER = logging.getLogger("argilla")
@@ -273,7 +273,7 @@ def configure_redis():
     @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
     def ping_redis():
         try:
-            redis_connection.ping()
+            REDIS_CONNECTION.ping()
         except redis.exceptions.ConnectionError:
             raise ConnectionError(
                 f"Your redis instance at {settings.redis_url} is not available or not responding.\n"

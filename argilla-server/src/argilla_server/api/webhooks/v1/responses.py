@@ -19,8 +19,8 @@ from rq.job import Job
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.jobs.webhook_jobs import enqueue_notify_events
 from argilla_server.models import Response
+from argilla_server.jobs.webhook_jobs import enqueue_notify_events
 from argilla_server.api.schemas.v1.responses import Response as ResponseSchema
 from argilla_server.api.webhooks.v1.enums import ResponseEvent
 
