@@ -21,6 +21,7 @@ These are the section headers that we use:
 - Added [`rq`](https://python-rq.org) library to process background jobs using [Redis](https://redis.io) as a dependency. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
 - Added a new background job to update records status when a dataset distribution strategy is updated. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
 - Added new endpoints to create, update, ping and delete webhooks. ([#5453](https://github.com/argilla-io/argilla/pull/5453))
+- Added new webhook events when responses are created, updated or deleted. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.0...v2.1.0)
 
