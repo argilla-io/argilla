@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added new endpoints to create, update and delete webhooks. ([#5453](https://github.com/argilla-io/argilla/pull/5453))
+
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.0...v2.1.0)
 
 ### Added
