@@ -64,6 +64,7 @@ from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole, RecordStatus
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
+from argilla_server.jobs import dataset_jobs
 from argilla_server.models import (
     Dataset,
     Field,
@@ -170,7 +171,11 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
 async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict) -> Dataset:
     await DatasetUpdateValidator.validate(db, dataset, dataset_attrs)
 
-    return await dataset.update(db, **dataset_attrs)
+    dataset = await dataset.update(db, **dataset_attrs)
+
+    dataset_jobs.update_dataset_records_status_job.delay(dataset.id)
+
+    return dataset
 
 
 async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
