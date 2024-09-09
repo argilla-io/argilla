@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_5401-docs-add-basic-developer-documentation",
-    "title": "docs_5401-docs-add-basic-developer-documentation",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_queries-dsl",
     "title": "docs_queries-dsl",
     "aliases": [],
