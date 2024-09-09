@@ -1938,6 +1938,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Redis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#datasets" class="md-nav__link">
     <span class="md-ellipsis">
       Datasets
@@ -2486,6 +2495,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#redis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Redis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#datasets" class="md-nav__link">
     <span class="md-ellipsis">
       Datasets
@@ -2631,6 +2649,11 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <li>
 <p><code>ARGILLA_ELASTICSEARCH_CA_PATH</code>: Path to CA cert for ES host. For example: <code>/full/path/to/root-ca.pem</code> (Optional)</p>
 </li>
+</ul>
+<h3 id="redis">Redis<a class="headerlink" href="#redis" title="Permanent link">&para;</a></h3>
+<p>Redis is used by Argilla to store information about jobs to be processed on background. The following environment variables are useful to config how Argilla connects to Redis:</p>
+<ul>
+<li><code>ARGILLA_REDIS_URL</code>: A URL string that contains the necessary information to connect to a Redis instance (Default: <code>redis://localhost:6379/0</code>).</li>
 </ul>
 <h3 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">&para;</a></h3>
 <ul>
