@@ -333,6 +333,7 @@ class TestHubImportExportMixin:
         with_records_export: bool,
     ):
         repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_using_wrong_settings_with_records_{with_records_export}"
+        mock_unique_name = f"test_import_dataset_from_hub_using_wrong_settings_{uuid.uuid4()}"
         dataset.records.log(records=mock_data)
 
         dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
@@ -346,6 +347,8 @@ class TestHubImportExportMixin:
         )
         if with_records_export:
             with pytest.raises(SettingsError):
-                rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings)
+                rg.Dataset.from_hub(
+                    repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name
+                )
         else:
-            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings)
+            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name)

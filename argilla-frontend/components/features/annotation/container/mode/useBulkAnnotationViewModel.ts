@@ -61,7 +61,7 @@ export const useBulkAnnotationViewModel = ({
       if (!allSuccessful) {
         notification.notify({
           message: t("some_records_failed_to_annotate"),
-          type: "error",
+          type: "danger",
         });
       } else if (isAffectingAllRecords) {
         notification.notify({

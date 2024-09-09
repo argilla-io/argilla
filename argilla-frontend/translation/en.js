@@ -82,6 +82,7 @@ export default {
     apiKey: "API key",
     apiKeyDescription:
       "API key tokens allow you to manage datasets using the Python SDK.",
+    theme: "Theme",
     copyKey: "Copy key",
   },
   userAvatarTooltip: {
@@ -175,7 +176,7 @@ export default {
   suggestion: {
     agent: "\nagent: {agent}",
     score: "\nscore: {score}",
-    tooltip: "This question contains a suggestion{agent}{score}",
+    tooltip: "This question contains a suggestion {agent} {score}",
     filter: {
       value: "Suggestion values",
       score: "Score",

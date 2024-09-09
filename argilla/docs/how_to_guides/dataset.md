@@ -142,23 +142,36 @@ new_dataset.create()
 
 ### Fields
 
-The fields in a dataset consist of one or more data items requiring annotation. Currently, Argilla only supports plain text and markdown through the `TextField`, though we plan to introduce additional field types in future updates.
+The fields in a dataset consist of one or more data items requiring annotation. Currently, Argilla supports plain text and markdown through the `TextField` and images through the `ImageField`, though we plan to introduce additional field types in future updates.
 
 !!! note
     The order of the fields in the UI follows the order in which these are added to the fields attribute in the Python SDK.
 
 > Check the [Field - Python Reference](../reference/argilla/settings/fields.md) to see the field classes in detail.
 
-```python
-rg.TextField(
-    name="text",
-    title="Text",
-    use_markdown=False,
-    required=True,
-    description="Field description",
-)
-```
-![TextField](../assets/images/how_to_guides/dataset/fields.png)
+=== "Text"
+
+    ```python
+    rg.TextField(
+        name="text",
+        title="Text",
+        use_markdown=False,
+        required=True,
+        description="Field description",
+    )
+    ```
+    ![TextField](../assets/images/how_to_guides/dataset/fields.png)
+
+=== "Image"
+
+    ```python
+    rg.ImageField(
+        name="image",
+        title="Image",
+        required=True,
+        description="Field description",
+    )
+    ```
 
 ### Questions
 

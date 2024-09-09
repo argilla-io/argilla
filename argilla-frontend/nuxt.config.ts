@@ -75,6 +75,7 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/vue-draggable.js" },
     { src: "~/plugins/plugins/platform.ts" },
     { src: "~/plugins/plugins/language.ts" },
+    { src: "~/plugins/plugins/color-schema" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -177,6 +178,8 @@ const config: NuxtConfig = {
       local: {
         endpoints: {
           logout: false,
+          user: false,
+          login: false,
         },
       },
     },

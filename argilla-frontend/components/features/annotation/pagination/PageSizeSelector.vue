@@ -73,7 +73,7 @@ export default {
   cursor: pointer;
   &:hover {
     .page-size__text {
-      color: $black-54;
+      color: var(--fg-secondary);
     }
   }
   &__wrapper {
@@ -99,12 +99,12 @@ export default {
     min-width: 100%;
     cursor: pointer;
     &:hover {
-      background: $black-4;
+      background: var(--bg-opacity-4);
       transition: all 0.2s ease-out;
     }
     &--selected {
       @extend .page-size__option;
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
   &__text {
@@ -112,11 +112,11 @@ export default {
     @include font-size(13px);
   }
   :deep(.dropdown__header) {
-    color: $black-54;
+    color: var(--fg-secondary);
     background: transparent;
     padding: calc($base-space / 2);
     &:hover {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
   .svg-icon {

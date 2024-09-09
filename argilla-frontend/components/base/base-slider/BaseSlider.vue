@@ -70,7 +70,7 @@ export default {
   min-width: 33%;
   margin-right: 33%;
   margin-left: auto;
-  color: $black-54;
+  color: var(--fg-secondary);
   a {
     height: 20px;
     width: 20px;
@@ -84,12 +84,12 @@ export default {
     outline: none;
     @include font-size(13px);
     transition: all 0.2s ease-in-out;
-    background: palette(grey, 800);
+    background: var(--bg-solid-grey-1);
     .svg-icon {
-      fill: $black-87;
+      fill: var(--bg-opacity-87);
     }
     &:hover {
-      background: palette(grey, 700);
+      background: var(--bg-solid-grey-2);
       transition: all 0.2s ease-in-out;
     }
     &.disabled {

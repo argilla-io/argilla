@@ -48,11 +48,11 @@ export default {
   props: ["error"],
 };
 </script>
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 .error {
   position: relative;
   min-height: 100vh;
-  background: palette(white);
+  background: var(--bg-accent-grey-1);
   &__container {
     @extend %container;
     margin: auto;
@@ -61,15 +61,15 @@ export default {
   &__logo {
     max-width: 150px;
     path {
-      fill: $brand-primary-color;
+      fill: var(--color-brand);
     }
   }
   &__code {
     position: absolute;
     left: -3vw;
-    color: palette(white);
+    color: var(--bg-accent-grey-1);
     font-family: $secondary-font-family;
-    text-shadow: 0 0 2px $brand-primary-color;
+    text-shadow: 0 0 3px var(--color-brand);
     font-size: 34vw;
     line-height: 1em;
     @include media("<desktop") {
@@ -78,18 +78,18 @@ export default {
       margin-left: $base-space * 3;
       margin-bottom: 0.4em;
       @include font-size(75px);
-      color: $brand-primary-color;
+      color: var(--color-brand);
       text-shadow: none;
     }
   }
   &__pill {
     display: inline-block;
-    border: 1px solid #ffe5d9;
+    border: 1px solid var(--color-brand);
     padding: 5px 10px;
-    border: 1px solid $brand-primary-color;
+    border: 1px solid var(--color-brand);
     border-radius: 20px;
     margin-bottom: 20px;
-    color: $brand-primary-color;
+    color: var(--color-brand);
   }
   &__title {
     display: block;
@@ -115,15 +115,15 @@ export default {
     gap: $base-space;
     padding: 12px 20px;
     border-radius: $border-radius;
-    background: $brand-primary-color;
+    background: var(--color-brand);
     border: 0;
     outline: 0;
     text-decoration: none;
-    color: palette(white);
+    color: var(--color-white);
     @include font-size(16px);
     font-weight: 600;
     &:hover {
-      background: darken($brand-primary-color, 5%);
+      background: var(--color-brand);
     }
     @include media(">desktop") {
       margin-left: calc(4 / 12 * 100%);
@@ -139,4 +139,4 @@ export default {
     }
   }
 }
-</styles>
+</style>
