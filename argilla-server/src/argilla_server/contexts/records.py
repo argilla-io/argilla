@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Dict, Sequence, Union, List, Tuple
+from typing import Dict, Sequence, Union, List, Tuple, Optional
 from uuid import UUID
 
-from sqlalchemy import select, and_, func
+from sqlalchemy import select, and_, func, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, contains_eager
 
@@ -24,6 +24,7 @@ from argilla_server.models import Dataset, Record, VectorSettings, Vector
 
 
 async def list_records_by_dataset_id(
+    db: AsyncSession,
     dataset_id: UUID,
     offset: int,
     limit: int,
@@ -31,7 +32,7 @@ async def list_records_by_dataset_id(
     with_suggestions: bool = False,
     with_vectors: Union[bool, List[str]] = False,
 ) -> Tuple[Sequence[Record], int]:
-    query = Record.Select.by_dataset_id(
+    query = _record_by_dataset_id_query(
         dataset_id=dataset_id,
         offset=offset,
         limit=limit,
@@ -40,17 +41,16 @@ async def list_records_by_dataset_id(
         with_vectors=with_vectors,
     )
 
-    async for db in get_async_db():
-        records = (await db.scalars(query)).unique().all()
-        total = await db.scalar(Record.Select.count(dataset_id=dataset_id))
+    records = (await db.scalars(query)).unique().all()
+    total = await db.scalar(select(func.count(Record.id)).filter_by(dataset_id=dataset_id))
 
-        return records, total
+    return records, total
 
 
 async def list_dataset_records_by_ids(
     db: AsyncSession, dataset_id: UUID, record_ids: Sequence[UUID]
 ) -> Sequence[Record]:
-    query = Record.Select.by_dataset_id(dataset_id=dataset_id).where(Record.id.in_(record_ids))
+    query = _record_by_dataset_id_query(dataset_id).where(Record.id.in_(record_ids))
     return (await db.scalars(query)).unique().all()
 
 
@@ -58,7 +58,7 @@ async def list_dataset_records_by_external_ids(
     db: AsyncSession, dataset_id: UUID, external_ids: Sequence[str]
 ) -> Sequence[Record]:
     query = (
-        Record.Select.by_dataset_id(dataset_id=dataset_id)
+        _record_by_dataset_id_query(dataset_id)
         .where(Record.external_id.in_(external_ids))
         .options(selectinload(Record.dataset))
     )
@@ -78,3 +78,38 @@ async def fetch_records_by_external_ids_as_dict(
 ) -> Dict[str, Record]:
     records_by_external_ids = await list_dataset_records_by_external_ids(db, dataset.id, external_ids)
     return {record.external_id: record for record in records_by_external_ids}
+
+
+def _record_by_dataset_id_query(
+    dataset_id,
+    offset: Optional[int] = None,
+    limit: Optional[int] = None,
+    with_responses: bool = False,
+    with_suggestions: bool = False,
+    with_vectors: Union[bool, List[str]] = False,
+) -> Select:
+    query = select(Record).filter_by(dataset_id=dataset_id)
+
+    if with_responses:
+        query = query.options(selectinload(Record.responses))
+
+    if with_suggestions:
+        query = query.options(selectinload(Record.suggestions))
+
+    if with_vectors is True:
+        query = query.options(selectinload(Record.vectors))
+    elif isinstance(with_vectors, list):
+        subquery = select(VectorSettings.id).filter(
+            and_(VectorSettings.dataset_id == dataset_id, VectorSettings.name.in_(with_vectors))
+        )
+        query = query.outerjoin(
+            Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(subquery))
+        ).options(contains_eager(Record.vectors))
+
+    if offset is not None:
+        query = query.offset(offset)
+
+    if limit is not None:
+        query = query.limit(limit)
+
+    return query.order_by(Record.inserted_at)

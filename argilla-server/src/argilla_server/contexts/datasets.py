@@ -117,12 +117,6 @@ async def list_datasets_by_workspace_id(db: AsyncSession, workspace_id: UUID) ->
     return result.scalars().all()
 
 
-async def get_or_raise(dataset_id: UUID) -> Dataset:
-    """Get a dataset by ID or raise a NotFoundError"""
-    async for db in get_async_db():
-        return await Dataset.get_or_raise(db, id=dataset_id)
-
-
 async def create_dataset(db: AsyncSession, dataset_attrs: dict):
     dataset = Dataset(
         name=dataset_attrs["name"],

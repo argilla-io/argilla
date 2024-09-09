@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Security, status, Path
+from fastapi import APIRouter, Depends, Query, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -45,7 +45,7 @@ from argilla_server.api.schemas.v1.suggestions import (
 )
 from argilla_server.contexts import datasets, search, records
 from argilla_server.database import get_async_db
-from argilla_server.enums import RecordSortField, ResponseStatusFilter
+from argilla_server.enums import RecordSortField
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, Record, User, VectorSettings
@@ -193,26 +193,24 @@ async def _get_search_responses(
         return await search_engine.search(**search_params)
 
 
-async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset_id: UUID):
+async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset: Dataset):
     try:
         await search.validate_search_records_query(db, query, dataset)
     except (ValueError, NotFoundError) as e:
         raise UnprocessableEntityError(str(e))
 
 
-async def get_dataset_or_raise(dataset_id: UUID = Path) -> Dataset:
-    return await datasets.get_or_raise(dataset_id)
-
-
 @router.get("/datasets/{dataset_id}/records", response_model=Records, response_model_exclude_unset=True)
 async def list_dataset_records(
     *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = 0,
     limit: int = Query(default=LIST_DATASET_RECORDS_LIMIT_DEFAULT, ge=1, le=LIST_DATASET_RECORDS_LIMIT_LE),
     current_user: User = Security(auth.get_current_user),
-    dataset: Dataset = Depends(get_dataset_or_raise),
 ):
+    dataset = await Dataset.get_or_raise(db, dataset_id)
     await authorize(current_user, DatasetPolicy.list_records_with_all_responses(dataset))
 
     include_args = (
@@ -226,6 +224,7 @@ async def list_dataset_records(
     )
 
     dataset_records, total = await records.list_records_by_dataset_id(
+        db=db,
         dataset_id=dataset.id,
         offset=offset,
         limit=limit,
@@ -240,10 +239,11 @@ async def delete_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
+    dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
-    dataset: Dataset = Depends(get_dataset_or_raise),
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
 ):
+    dataset = await Dataset.get_or_raise(db, dataset_id)
     await authorize(current_user, DatasetPolicy.delete_records(dataset))
 
     record_ids = parse_uuids(ids)
@@ -391,9 +391,11 @@ async def search_dataset_records(
 async def list_dataset_records_search_suggestions_options(
     *,
     db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
-    dataset: Dataset = Depends(get_dataset_or_raise),
 ):
+    dataset = await Dataset.get_or_raise(db, dataset_id)
+
     await authorize(current_user, DatasetPolicy.search_records(dataset))
 
     suggestion_agents_by_question = await search.get_dataset_suggestion_agents_by_question(db, dataset.id)
