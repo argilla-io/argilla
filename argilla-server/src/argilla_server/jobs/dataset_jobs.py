@@ -39,9 +39,9 @@ async def update_dataset_records_status_job(dataset_id: UUID):
     async with AsyncSessionLocal() as db:
         stream = await db.stream(
             select(Record.id)
+            .join(Response)
             .where(Record.dataset_id == dataset_id)
             .order_by(Record.inserted_at.asc())
-            .join(Response)
             .execution_options(yield_per=JOB_RECORDS_YIELD_PER)
         )
 
