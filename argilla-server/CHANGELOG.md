@@ -16,9 +16,17 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.0...v2.1.0)
+
 ### Added
 
+- Added new `image` type dataset field supporting URLs and Data URLs. ([#5279](https://github.com/argilla-io/argilla/pull/5279))
 - Added new endpoint `GET /api/v1/datsets/:dataset_id/users/progress` to compute the users progress. ([#5367](https://github.com/argilla-io/argilla/pull/5367))
+- Added advanced dsl for text searches. ([#5222](https://github.com/argilla-io/argilla/pull/5222))
+
+### Changed
+
+- Change the telemetry module to use the HuggingFace telemetry client ([#5218](https://github.com/argilla-io/argilla/pull/5218))
 
 ### Fixed
 

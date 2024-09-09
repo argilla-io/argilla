@@ -33,8 +33,16 @@ export default {
   data() {
     return {
       tabs: [
-        { id: "0", name: "Write", component: "ContentEditableFeedbackTask" },
-        { id: "1", name: "Preview", component: "RenderMarkdownBaseComponent" },
+        {
+          id: "0",
+          name: this.$t("write"),
+          component: "ContentEditableFeedbackTask",
+        },
+        {
+          id: "1",
+          name: this.$t("preview"),
+          component: "RenderMarkdownBaseComponent",
+        },
       ],
     };
   },
@@ -59,12 +67,12 @@ export default {
   &__content {
     min-height: 65px;
     display: block;
-    background: palette(white);
+    background: var(--bg-accent-grey-1);
     padding: $base-space;
     border-radius: $border-radius;
-    border: 1px solid $black-10;
+    border: 1px solid var(--bg-opacity-10);
     &:focus-within {
-      border-color: $primary-color;
+      border-color: var(--fg-cuaternary);
     }
 
     :deep(.content__text) {

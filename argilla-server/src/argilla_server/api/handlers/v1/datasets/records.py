@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Security, status, Path
@@ -45,7 +45,7 @@ from argilla_server.api.schemas.v1.suggestions import (
 )
 from argilla_server.contexts import datasets, search, records
 from argilla_server.database import get_async_db
-from argilla_server.enums import RecordSortField
+from argilla_server.enums import RecordSortField, ResponseStatusFilter
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, Record, User, VectorSettings

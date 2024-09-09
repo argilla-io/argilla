@@ -20,6 +20,7 @@ from string import ascii_lowercase
 from tempfile import TemporaryDirectory
 
 import pytest
+from PIL import Image
 from datasets import Dataset as HFDataset
 
 import argilla as rg
@@ -331,3 +332,47 @@ def test_import_records_from_hf_dataset(dataset: rg.Dataset) -> None:
         assert record.fields["text"] == mock_data[i]["text"]
         assert record.suggestions["label"].value == mock_data[i]["label"]
         assert record.id == str(mock_data[i]["id"])
+
+
+def test_export_records_with_images_to_hf_datasets(client):
+    mock_dataset_name = "".join(random.choices(ascii_lowercase, k=16))
+    settings = rg.Settings(
+        fields=[
+            rg.ImageField(name="image"),
+        ],
+        questions=[
+            rg.TextQuestion(name="label", use_markdown=False),
+        ],
+    )
+    dataset = rg.Dataset(
+        name=mock_dataset_name,
+        settings=settings,
+        client=client,
+    )
+    dataset.create()
+    mock_data = [
+        {
+            "image": Image.new("RGB", (100, 100)),
+            "label": "positive",
+            "id": uuid.uuid4(),
+        },
+        {
+            "image": Image.new("RGB", (100, 100)),
+            "label": "negative",
+            "id": uuid.uuid4(),
+        },
+        {
+            "image": Image.new("RGB", (100, 100)),
+            "label": "positive",
+            "id": uuid.uuid4(),
+        },
+    ]
+    dataset.records.log(records=mock_data)
+    hf_dataset = dataset.records.to_datasets()
+
+    assert isinstance(hf_dataset, HFDataset)
+    assert hf_dataset.num_rows == len(mock_data)
+    assert "image" in hf_dataset.column_names
+    assert "label.suggestion" in hf_dataset.column_names
+    for i, image in enumerate(hf_dataset["image"]):
+        assert isinstance(image, Image.Image)

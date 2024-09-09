@@ -59,13 +59,13 @@ export default {
   &__title {
     @include font-size(30px);
     font-weight: 400;
-    color: $black-37;
+    color: var(--fg-tertiary);
   }
   &__message {
     max-width: 600px;
   }
 }
 .svg-icon {
-  fill: $black-37;
+  fill: var(--fg-tertiary);
 }
 </style>

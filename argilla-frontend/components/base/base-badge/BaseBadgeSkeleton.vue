@@ -21,7 +21,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$progressBackgroundColor: #f2f2f2;
+$progressBackgroundColor: var(--bg-opacity-4);
+$progressBackgroundColorSecondary: var(--bg-opacity-10);
 
 .container {
   display: flex;
@@ -32,14 +33,8 @@ $progressBackgroundColor: #f2f2f2;
 .badge {
   height: $base-space * 3;
   width: 5em;
-  padding: 1em;
   border-radius: $border-radius-rounded;
   margin: 0;
-  color: $black-54;
-  @include font-size(12px);
-  @include line-height(12px);
-  border: unset;
-
   animation-duration: 0.5s;
   animation-fill-mode: forwards;
   animation-iteration-count: infinite;
@@ -48,7 +43,7 @@ $progressBackgroundColor: #f2f2f2;
   background: linear-gradient(
     to right,
     $progressBackgroundColor 0%,
-    darken($progressBackgroundColor, 3%) 50%,
+    $progressBackgroundColorSecondary 50%,
     $progressBackgroundColor 100%
   );
   background-size: 200% 100%;

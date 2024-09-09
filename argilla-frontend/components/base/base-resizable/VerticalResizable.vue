@@ -159,7 +159,7 @@ $resizable-bar-width: $base-space;
 
     &__inner {
       height: 100%;
-      border-left: 1px solid $black-10;
+      border-left: 1px solid var(--bg-opacity-10);
       transition: all 0.1s ease-in;
     }
 

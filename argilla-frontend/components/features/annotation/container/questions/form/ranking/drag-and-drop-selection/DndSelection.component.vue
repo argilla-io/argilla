@@ -234,12 +234,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-primary-color: palette(purple, 200);
-$card-secondary-color: palette(white);
-$card-ghost-color: palette(purple, 300);
-$card-empty-color: palette(purple, 400);
+$card-bg-primary-color: var(--bg-label);
+$card-primary-color: var(--fg-label-2);
+$card-bg-secondary-color: var(--bg-accent-grey-2);
 $cards-separation: $base-space;
-$background-slot-color: $black-4;
+$background-slot-color: var(--bg-opacity-4);
 $slot-height: 50px;
 $card-height: $base-space * 4;
 $max-visible-card-items: 12;
@@ -288,13 +287,9 @@ $max-visible-card-items: 12;
     cursor: move;
 
     &.ghost-ticket {
-      background: $card-empty-color;
-      color: $card-empty-color;
       box-shadow: none;
     }
     &.sortable-ghost {
-      background: $card-empty-color;
-      color: $card-empty-color;
       box-shadow: none;
       &:hover {
         box-shadow: none;
@@ -302,12 +297,12 @@ $max-visible-card-items: 12;
     }
     &--unranked {
       @extend .draggable__rank-card;
-      background-color: $card-secondary-color;
+      background-color: $card-bg-secondary-color;
       color: $card-primary-color;
       transition: box-shadow 0.2s ease-out !important;
 
       &:focus {
-        outline: 2px solid $primary-color !important;
+        outline: 2px solid var(--fg-cuaternary) !important;
       }
       &:focus:not(:focus-visible) {
         outline: none;
@@ -319,10 +314,10 @@ $max-visible-card-items: 12;
     }
     &--ranked {
       @extend .draggable__rank-card;
-      background-color: $card-primary-color;
-      color: palette(white);
+      background-color: $card-bg-primary-color;
+      color: var(--color-white);
       &:focus {
-        outline: 2px solid $primary-color;
+        outline: 2px solid var(--fg-cuaternary);
       }
       &:focus:not(:focus-visible) {
         outline: none;
@@ -348,7 +343,7 @@ $max-visible-card-items: 12;
     border: 1px solid transparent;
     @supports (selector(:has(*))) {
       &:has([draggable="true"]) {
-        border: 1px dashed $black-10;
+        border: 1px dashed var(--bg-opacity-10);
       }
     }
     &--ranking {
@@ -357,11 +352,11 @@ $max-visible-card-items: 12;
       max-width: $slot-height;
       align-items: center;
       justify-content: space-around;
-      border-color: $black-10;
+      border-color: var(--bg-opacity-10);
       font-weight: bold;
-      color: $black-54;
+      color: var(--fg-secondary);
       .--active-slot & {
-        border-color: #cdcdff;
+        border-color: hsl(from var(--fg-label) h s l / 30%);
       }
     }
   }
