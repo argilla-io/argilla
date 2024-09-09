@@ -293,6 +293,9 @@ class Settings(Resource):
         if distribution:
             distribution = TaskDistribution.from_dict(distribution)
 
+        if mapping:
+            mapping = cls._validate_mapping(mapping)
+
         return cls(
             questions=questions,
             fields=fields,
@@ -375,6 +378,18 @@ class Settings(Resource):
                         f"but the name {property.name!r} is used by {type(property).__name__!r} and {type(dataset_properties_by_name[property.name]).__name__!r} "
                     )
                 dataset_properties_by_name[property.name] = property
+
+    @classmethod
+    def _validate_mapping(cls, mapping: Dict[str, Union[str, Sequence[str]]]) -> None:
+        validate_mapping = {}
+        for key, value in mapping.items():
+            if isinstance(value, str):
+                validate_mapping[key] = value
+            elif isinstance(value, list) or isinstance(value, tuple):
+                validate_mapping[key] = tuple(value)
+            else:
+                raise SettingsError(f"Invalid mapping value for key {key!r}: {value}")
+        return validate_mapping
 
     def __process_guidelines(self, guidelines):
         if guidelines is None:
