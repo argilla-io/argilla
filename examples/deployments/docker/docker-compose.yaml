@@ -8,7 +8,7 @@ services:
   argilla:
     # image: argilla/argilla-server:latest
     # TODO: Change this to use latest version of Argilla Server once it's working
-    image: argilladev/argilla-server:pr-5432
+    image: argilladev/argilla-server:develop
     restart: unless-stopped
     ports:
       - "6900:6900"
@@ -36,7 +36,7 @@ services:
 
   worker:
     # TODO: Change this to use latest version of Argilla Server once it's working
-    image: argilladev/argilla-server:pr-5432
+    image: argilladev/argilla-server:develop
     environment:
       <<: *common-variables
       BACKGROUND_NUM_WORKERS: 2
