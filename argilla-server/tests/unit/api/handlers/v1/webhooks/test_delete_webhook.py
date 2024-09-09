@@ -60,8 +60,8 @@ class TestDeleteWebhook:
             headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
-        assert response.status_code == 200
-        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 0
+        assert response.status_code == 403
+        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 1
 
     async def test_delete_webhook_as_annotator(self, db: AsyncSession, async_client: AsyncClient):
         annotator = await AnnotatorFactory.create()

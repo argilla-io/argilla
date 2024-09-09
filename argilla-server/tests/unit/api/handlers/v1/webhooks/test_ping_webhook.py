@@ -66,7 +66,7 @@ class TestPingWebhook:
             headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
-        assert response.status_code == 204
+        assert response.status_code == 403
 
     async def test_ping_webhook_as_annotator(self, async_client: AsyncClient):
         annotator = await AnnotatorFactory.create()
