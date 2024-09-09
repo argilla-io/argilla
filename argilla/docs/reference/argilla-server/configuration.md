@@ -46,7 +46,7 @@ You can set the following environment variables to further configure your server
 
 - `ARGILLA_DOCS_ENABLED`: If False, disables openapi docs endpoint at _/api/docs_.
 
-- `ARGILLA_ENABLE_TELEMETRY`: If False, disables telemetry for usage metrics.
+- `HF_HUB_DISABLE_TELEMETRY`: If True, disables telemetry for usage metrics. Alternatively, you can disable telemetry by setting `HF_HUB_OFFLINE=1`.
 
 #### Authentication
 
@@ -92,7 +92,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 ### Docker images only
 
-- `REINDEX_DATASET`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
+- `REINDEX_DATASETS`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
 
 - `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `""`).
 
@@ -100,6 +100,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `API_KEY`: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
 
+- `UVICORN_APP`: [Advanced] The name of the FastAPI app to run. This is useful when you want to extend the FastAPI app with additional routes or middleware. The default value is `argilla_server:app`.
 
 ## REST API docs
 

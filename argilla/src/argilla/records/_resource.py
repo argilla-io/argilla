@@ -13,18 +13,19 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Iterable
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
+from uuid import UUID
 
 from argilla._exceptions import ArgillaError
+from argilla._helpers._media import cast_image, uncast_image
 from argilla._models import (
-    MetadataModel,
-    RecordModel,
-    UserResponseModel,
-    SuggestionModel,
-    VectorModel,
-    MetadataValue,
     FieldValue,
+    MetadataModel,
+    MetadataValue,
+    RecordModel,
+    SuggestionModel,
+    UserResponseModel,
+    VectorModel,
     VectorValue,
 )
 from argilla._resource import Resource
@@ -87,8 +88,8 @@ class Record(Resource):
             raise ValueError("If fields are an empty dictionary, an id must be provided.")
 
         self._dataset = _dataset
-        self._model = RecordModel(external_id=id or uuid4(), id=_server_id)
-        self.__fields = RecordFields(fields=fields)
+        self._model = RecordModel(external_id=id, id=_server_id)
+        self.__fields = RecordFields(fields=fields, record=self)
         self.__vectors = RecordVectors(vectors=vectors)
         self.__metadata = RecordMetadata(metadata=metadata)
         self.__responses = RecordResponses(responses=responses, record=self)
@@ -272,11 +273,21 @@ class RecordFields(dict):
     It allows for accessing fields by attribute and key name.
     """
 
-    def __init__(self, fields: Optional[Dict[str, FieldValue]] = None) -> None:
+    def __init__(self, record: Record, fields: Optional[Dict[str, FieldValue]] = None) -> None:
         super().__init__(fields or {})
+        self.record = record
 
     def to_dict(self) -> dict:
-        return dict(self.items())
+        return {key: cast_image(value) if self._is_image(key) else value for key, value in self.items()}
+
+    def __getitem__(self, key: str) -> FieldValue:
+        value = super().__getitem__(key)
+        return uncast_image(value) if self._is_image(key) else value
+
+    def _is_image(self, key: str) -> bool:
+        if not self.record.dataset:
+            return False
+        return self.record.dataset.settings.schema[key].type == "image"
 
 
 class RecordMetadata(dict):

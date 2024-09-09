@@ -119,12 +119,12 @@ export default {
     min-width: 100%;
     cursor: pointer;
     &:hover {
-      background: $black-4;
+      background: var(--bg-opacity-4);
       transition: all 0.2s ease-out;
     }
     &--selected {
       @extend .similarity-config__option;
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
   .svg-icon {

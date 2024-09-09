@@ -14,7 +14,7 @@ export const useNotifications = () => {
     onClose,
   }: {
     message: string;
-    type?: "success" | "info" | "warning" | "error";
+    type?: "success" | "info" | "warning" | "danger";
     permanent?: boolean;
     buttonText?: string;
     onClick?: () => void;
