@@ -244,6 +244,7 @@ async def delete_dataset_records(
     ids: str = Query(..., description="A comma separated list with the IDs of the records to be removed"),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
+
     await authorize(current_user, DatasetPolicy.delete_records(dataset))
 
     record_ids = parse_uuids(ids)
