@@ -16,6 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added [`rq`](https://python-rq.org) library to process background jobs using [Redis](https://redis.io) as a dependency. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
+- Added a new background job to update records status when a dataset distribution strategy is updated. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
+
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.0...v2.1.0)
 
 ### Added
