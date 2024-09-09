@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_image-field-docs",
-    "title": "docs_image-field-docs",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_fix-wrong-env-var-name",
     "title": "docs_fix-wrong-env-var-name",
     "aliases": [],
