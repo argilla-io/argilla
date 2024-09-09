@@ -19,6 +19,7 @@ import pytest
 
 import argilla as rg
 
+
 @pytest.fixture
 def dataset():
     mock_mapping = {
@@ -83,6 +84,5 @@ def test_settings_with_record_mapping_export(dataset):
         dataset.settings.to_json(path)
         loaded_settings = rg.Settings.from_json(path)
 
-        
     assert dataset.settings.mapping == loaded_settings.mapping
     assert dataset.settings == loaded_settings
