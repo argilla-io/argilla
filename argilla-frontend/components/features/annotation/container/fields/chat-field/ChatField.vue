@@ -25,10 +25,11 @@
           :style="{
             borderColor: `hsl(from ${
               $color.generate(role).palette.dark
-            } h s l / 10%)`,
+            } h s l / 20%)`,
           }"
         >
-          <MarkdownRenderer :markdown="text" />
+          <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
+          <span v-else v-html="text" />
         </div>
       </span>
     </div>
@@ -49,6 +50,10 @@ export default {
     content: {
       type: Array,
       required: true,
+    },
+    useMarkdown: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
@@ -100,6 +105,7 @@ export default {
     border-radius: $border-radius-l;
     border-style: solid;
     border-width: 1px;
+    @include font-size(16px);
     @include line-height(24px);
   }
 
@@ -108,7 +114,6 @@ export default {
   }
 
   &__title {
-    color: var(--fg-secondary);
     word-break: break-word;
     width: calc(100% - 30px);
     margin-bottom: $base-space * 3;
