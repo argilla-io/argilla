@@ -52,5 +52,4 @@ async def notify_event_job(webhook_id: UUID, event: str, timestamp: datetime, da
         webhook = await Webhook.get_or_raise(db, webhook_id)
 
     response = notify_event(webhook, event, timestamp, data)
-    if not response.is_success:
-        raise Exception(f"Failed to notify event `{event}` to webhook with id `{webhook.id}` and URL `{webhook.url}`")
+    response.raise_for_status()
