@@ -16,7 +16,6 @@ from typing import List
 from datetime import datetime
 
 from rq.job import Job
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Response
@@ -30,5 +29,5 @@ async def notify_response_event(db: AsyncSession, response_event: ResponseEvent,
         db,
         event=response_event,
         timestamp=datetime.utcnow(),
-        data=jsonable_encoder(ResponseSchema.from_orm(response)),
+        data=ResponseSchema.from_orm(response).dict(),
     )

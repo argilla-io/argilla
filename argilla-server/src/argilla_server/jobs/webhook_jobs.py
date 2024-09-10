@@ -22,6 +22,7 @@ from datetime import datetime
 from rq.job import Retry, Job
 from rq.decorators import job
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
 from argilla_server.api.webhooks.v1.commons import notify_event
 from argilla_server.database import AsyncSessionLocal
@@ -36,9 +37,11 @@ async def enqueue_notify_events(db: AsyncSession, event: str, timestamp: datetim
         return []
 
     enqueued_jobs = []
+    jsonable_data = jsonable_encoder(data)
     for enabled_webhook in enabled_webhooks:
         if event in enabled_webhook.events:
-            enqueued_jobs.append(notify_event_job.delay(enabled_webhook.id, event, timestamp, data))
+            enqueue_job = notify_event_job.delay(enabled_webhook.id, event, timestamp, jsonable_data)
+            enqueued_jobs.append(enqueue_job)
 
     return enqueued_jobs
 
