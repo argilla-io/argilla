@@ -28,7 +28,7 @@ export const useDatasetSettingViewModel = () => {
   const notification = useNotifications();
   const routes = useRoutes();
   const beforeUnload = useBeforeUnload();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const { isAdminOrOwnerRole } = useRole();
   const { state: datasetSetting } = useDatasetSetting();

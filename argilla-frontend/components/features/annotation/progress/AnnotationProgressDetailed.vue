@@ -90,8 +90,8 @@ export default {
       ];
     },
   },
-  setup(props) {
-    return useAnnotationProgressViewModel(props);
+  setup() {
+    return useAnnotationProgressViewModel();
   },
 };
 </script>
@@ -102,7 +102,7 @@ $statusCounterMinHeight: 60px;
   display: flex;
   align-items: center;
   gap: $base-space * 4;
-  color: $black-54;
+  color: var(--fg-secondary);
   padding: $base-space * 3 0;
   &__donut {
     flex-shrink: 0;
@@ -111,7 +111,7 @@ $statusCounterMinHeight: 60px;
 .team-progress {
   &__title {
     text-transform: uppercase;
-    color: $black-54;
+    color: var(--fg-secondary);
     font-weight: 500;
   }
 }

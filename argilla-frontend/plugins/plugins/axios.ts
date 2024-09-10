@@ -43,7 +43,7 @@ export default ({ $axios, app }) => {
     if (handledTranslatedError !== errorHandledKey) {
       notification.notify({
         message: handledTranslatedError,
-        type: "error",
+        type: "danger",
       });
     }
 
@@ -54,7 +54,7 @@ export default ({ $axios, app }) => {
       if (handledTranslatedError !== errorHandledKey) {
         notification.notify({
           message: handledTranslatedError,
-          type: "error",
+          type: "danger",
         });
       }
     }

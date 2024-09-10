@@ -8,7 +8,7 @@ export const useDatasetViewModel = () => {
   const isLoadingDataset = ref(false);
   const route = useRoute();
   const notification = useNotifications();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const datasetId = route.value.params.id;
 
   const handleError = (response: string) => {
@@ -27,7 +27,7 @@ export const useDatasetViewModel = () => {
 
     notification.notify({
       message,
-      type: "error",
+      type: "danger",
     });
   };
 

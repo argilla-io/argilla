@@ -77,12 +77,12 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: palette(white);
-  border: 1px solid $black-6;
+  background: var(--bg-accent-grey-1);
+  border: 1px solid var(--bg-opacity-6);
   border-radius: $border-radius-m;
   &:has(.dropdown__content),
   &:has(.checkbox.checked) {
-    border-color: $black-20;
+    border-color: var(--bg-opacity-20);
   }
   &__wrapper {
     flex: 1;

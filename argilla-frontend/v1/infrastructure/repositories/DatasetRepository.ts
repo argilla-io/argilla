@@ -100,6 +100,7 @@ export class DatasetRepository implements IDatasetRepository {
         );
 
       revalidateCache(`/v1/datasets/${id}`);
+      revalidateCache(`/v1/datasets/${id}/progress`);
 
       return {
         when: data.updated_at,

@@ -46,7 +46,8 @@ export default {
         {
           id: "completed",
           name: this.$t("datasets.completed"),
-          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
+          color:
+            "linear-gradient(90deg, var(--fg-tertiary) 0%, var(--fg-primary) 100%)",
           value: this.progress.completed,
           tooltip: `${this.progress.completed}`,
         },
@@ -60,8 +61,8 @@ export default {
       ];
     },
   },
-  setup(props) {
-    return useTeamProgressViewModel(props);
+  setup() {
+    return useTeamProgressViewModel();
   },
 };
 </script>
@@ -73,7 +74,7 @@ export default {
   align-items: center;
   gap: $base-space * 2;
   width: 100%;
-  color: $black-54;
+  color: var(--fg-secondary);
   @include font-size(12px);
   z-index: 1;
   &__bar {

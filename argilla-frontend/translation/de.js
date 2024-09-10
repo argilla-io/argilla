@@ -31,6 +31,19 @@ export default {
   annotationGuidelines: "Annotationsrichtlinien",
   guidelines: "Richtlinien",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
+  noRecordsMessages: {
+    datasetEmptyForAnnotator:
+      "Der Datensatz ist leer. Bitten fragen Sie einen Admin, Einträge Hinzufügen und kommst du bald wieder.",
+    datasetEmptyForAdmin:
+      "Der Datensatz ist leer. Du kannst Einträgen mit dem Python SDK hinzufügen, siehe <a href='https://docs.argilla.io/latest/how_to_guides/record/'>dokumentation</a> zum Hinzufügen von Einträgen.",
+    taskDistributionCompleted: "🎉 Die Aufgabe ist erledigt!",
+    noSubmittedRecords: "Sie haben noch keinen Datensatz eingereicht",
+    noRecordsFound: "Sie haben keine {status}, die Ihrer Anfrage entsprechen",
+    noRecords: "Sie haben keine {status} Datensätze",
+    noPendingRecordsToAnnotate: "🎉 Die Aufgabe ist erledigt!",
+    noDraftRecordsToReview:
+      "Sie haben keine Entwürfe von Aufzeichnungen zu prüfen",
+  },
   breadcrumbs: {
     home: "start",
     datasetSettings: "einstellungen",
@@ -42,11 +55,11 @@ export default {
     pending: "Ausstehend",
   },
   recordStatus: {
-    pending: "Ausstehend",
-    draft: "Entwurf",
-    discarded: "Verworfen",
-    submitted: "Gesichert",
-    validated: "Validiert",
+    pending: "ausstehend",
+    draft: "entwurf",
+    discarded: "verworfen",
+    submitted: "gesichert",
+    validated: "validiert",
     completedTooltip:
       "Der Datensatz ist abgeschlossen, es hat die Anzahl der Antworten.",
   },
@@ -61,6 +74,7 @@ export default {
     apiKey: "API key",
     apiKeyDescription:
       "API key Token erlauben es die Datensätze über das Python SDK zu verwalten.",
+    theme: "Theme",
     copyKey: "API key kopieren",
   },
   userAvatarTooltip: {

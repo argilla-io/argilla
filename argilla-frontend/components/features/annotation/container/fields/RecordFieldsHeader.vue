@@ -62,7 +62,7 @@ export default {
   &__header {
     $this: &;
     border-radius: $border-radius-m;
-    background: palette(white);
+    background: var(--bg-accent-grey-1);
     display: flex;
     justify-content: space-between;
     #{$this}__header {
@@ -83,11 +83,11 @@ export default {
   &__checkbox {
     &:not(.checked):hover {
       :deep(.checkbox__container) {
-        border-color: $black-37;
+        border-color: var(--fg-tertiary);
       }
     }
     :deep(.checkbox__container) {
-      border-color: $black-20;
+      border-color: var(--bg-opacity-20);
     }
   }
 }
