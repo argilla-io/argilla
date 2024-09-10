@@ -100,7 +100,17 @@ class TestCreateWebhook:
         assert response.status_code == 401
         assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("invalid_url", ["", "example.com", "http:example.com", "https:example.com"])
+    @pytest.mark.parametrize(
+        "invalid_url",
+        [
+            "",
+            "example.com",
+            "http:example.com",
+            "https:example.com",
+            "http://localhost/webhooks",
+            "http://localhost:3000/webhooks",
+        ],
+    )
     async def test_create_webhook_with_invalid_url(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, invalid_url: str
     ):
