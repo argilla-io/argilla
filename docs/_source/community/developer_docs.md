@@ -20,6 +20,8 @@ the data.
 used as the default built-in option and is deployed separately with the Argilla Server but a separate `PostgreSQL`
 can be used too.
 
+- **Redis**: [Redis](https://redis.io) is used to store information about background jobs and it's a required dependency of Argilla server.
+
 - **Vector Database**: A vector database to store the records data and perform scalable vector similarity searches and
 basic document searches. We currently support `ElasticSearch` and `AWS OpenSearch` and they can be deployed as separate
 Docker images.

@@ -30,7 +30,7 @@ except ImportError:
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-__all__ = ["Field", "TextField", "ImageField", "ChatField"]
+__all__ = ["Field", "AbstractField", "TextField", "ImageField", "ChatField"]
 
 
 class AbstractField(ABC, SettingsPropertyBase):

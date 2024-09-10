@@ -189,6 +189,9 @@ The records alone can be exported from a dataset in Argilla.  This is useful if 
 
 The records can be exported as a dictionary, a list of dictionaries, or a `Dataset` of the `datasets` package.
 
+!!! note "With images"
+    If your dataset includes images, the recommended approach for exporting records is to use the `to_datasets` method, which exports the images as rescaled PIL objects. With other methods, the images will be exported using the data URI schema.
+
 === "To a python dictionary"
 
     Records can be exported from `Dataset.records` as a dictionary. The `to_dict` method can be used to export records as a dictionary. You can specify the orientation of the dictionary output. You can also decide if to flatten or not the dictionary.

@@ -92,20 +92,6 @@ class RecordValidatorBase(ABC):
                     "and extra metadata is not allowed for this dataset"
                 )
 
-    @staticmethod
-    def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
-        for field in dataset.fields:
-            if field.required and not (field.name in fields and fields.get(field.name) is not None):
-                raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
-
-    @staticmethod
-    def _validate_extra_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
-        fields_copy = copy.copy(fields)
-        for field in dataset.fields:
-            fields_copy.pop(field.name, None)
-        if fields_copy:
-            raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
-
     @classmethod
     def _validate_image_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in filter(lambda field: field.is_image, dataset.fields):
@@ -127,6 +113,36 @@ class RecordValidatorBase(ABC):
             return cls._validate_data_url(field_name, field_value, parse_result)
         else:
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+    @staticmethod
+    def _validate_web_url(
+        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+    ) -> None:
+        if not parse_result.netloc or not parse_result.path:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+        if len(field_value) > IMAGE_FIELD_WEB_URL_MAX_LENGTH:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_WEB_URL_MAX_LENGTH} characters for Web URLs"
+            )
+
+    @staticmethod
+    def _validate_data_url(
+        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+    ) -> None:
+        if not parse_result.path:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+        if len(field_value) > IMAGE_FIELD_DATA_URL_MAX_LENGTH:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_DATA_URL_MAX_LENGTH} characters for Data URLs"
+            )
+
+        type, encoding = mimetypes.guess_type(field_value)
+        if type not in IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is using an unsupported MIME type, supported MIME types are: {IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES!r}"
+            )
 
     @classmethod
     def _validate_chat_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
@@ -159,36 +175,6 @@ class RecordValidatorBase(ABC):
                 raise UnprocessableEntityError(
                     f"chat field {field_name!r} value must be a list of dictionaries with a 'role' key. Missing 'role' key at index {i}. Value is {value}"
                 )
-
-    @staticmethod
-    def _validate_web_url(
-        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
-    ) -> None:
-        if not parse_result.netloc or not parse_result.path:
-            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
-
-        if len(field_value) > IMAGE_FIELD_WEB_URL_MAX_LENGTH:
-            raise UnprocessableEntityError(
-                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_WEB_URL_MAX_LENGTH} characters for Web URLs"
-            )
-
-    @staticmethod
-    def _validate_data_url(
-        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
-    ) -> None:
-        if not parse_result.path:
-            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
-
-        if len(field_value) > IMAGE_FIELD_DATA_URL_MAX_LENGTH:
-            raise UnprocessableEntityError(
-                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_DATA_URL_MAX_LENGTH} characters for Data URLs"
-            )
-
-        type, encoding = mimetypes.guess_type(field_value)
-        if type not in IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES:
-            raise UnprocessableEntityError(
-                f"image field {field_name!r} value is using an unsupported MIME type, supported MIME types are: {IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES!r}"
-            )
 
 
 class RecordCreateValidator(RecordValidatorBase):

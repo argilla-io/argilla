@@ -121,7 +121,7 @@ class DatasetRecordsIterator:
         return JsonIO.to_json(records=list(self), path=path)
 
     def to_datasets(self) -> "HFDataset":
-        return HFDatasetsIO.to_datasets(records=list(self))
+        return HFDatasetsIO.to_datasets(records=list(self), dataset=self.__dataset)
 
 
 class DatasetRecords(Iterable[Record], LoggingMixin):
@@ -139,7 +139,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     DEFAULT_BATCH_SIZE = 256
     DEFAULT_DELETE_BATCH_SIZE = 64
 
-    def __init__(self, client: "Argilla", dataset: "Dataset"):
+    def __init__(
+        self, client: "Argilla", dataset: "Dataset", mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None
+    ):
         """Initializes a DatasetRecords object with a client and a dataset.
         Args:
             client: An Argilla client object.
@@ -147,6 +149,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         """
         self.__client = client
         self.__dataset = dataset
+        self._mapping = mapping or {}
         self._api = self.__client.api.records
 
     def __iter__(self):
@@ -380,6 +383,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     ) -> List[RecordModel]:
         """Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
 
+        mapping = mapping or self._mapping
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
 

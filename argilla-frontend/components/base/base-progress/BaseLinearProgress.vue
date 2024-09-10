@@ -102,7 +102,7 @@ export default {
 
 <styles lang="scss" scoped>
 $progressHeight: 14px;
-$tooltipBackgroundColor: palette(grey, 600);
+$tooltipBackgroundColor: var(--bg-solid-grey-3);
 $tooltipTriangleSize: 5px;
 $borderRadius: 3px;
 
@@ -118,15 +118,15 @@ $borderRadius: 3px;
     height: $progressHeight;
     border-radius: $borderRadius;
     overflow: hidden;
-    background: palette(grey, 600);
-    box-shadow: 0 0 0 1px palette(white);
+    background: var(--bg-solid-grey-3);
+    box-shadow: 0 0 0 1px var(--bg-accent-grey-2);
   }
   &__bar {
     position: relative;
     height: 100%;
     border-radius: $borderRadius;
     margin: 0 -1px;
-    box-shadow: 0 0 0 1px palette(white);
+    box-shadow: 0 0 0 1px var(--bg-accent-grey-2);
     z-index: 1;
     &:after {
       content: "";
@@ -144,7 +144,7 @@ $borderRadius: 3px;
     transform: translateX(-50%);
     padding: calc($base-space / 2);
     background: $tooltipBackgroundColor;
-    color: $black-54;
+    color: var(--fg-secondary);
     border-radius: $border-radius;
     transition: opacity 0.2s 0.2s;
     @include font-size(12px);
@@ -186,7 +186,7 @@ $borderRadius: 3px;
 .animate-progress-leave-to {
   .progress__range {
     max-width: 100%;
-    transition: all 0.5s $cb-slow;
+    transition: all 0.5s ease-in-out;
   }
 }
 </styles>

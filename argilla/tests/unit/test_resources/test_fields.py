@@ -19,7 +19,8 @@ import httpx
 from pytest_httpx import HTTPXMock
 
 import argilla as rg
-from argilla._models import FieldModel, ImageFieldSettings, ChatFieldSettings
+from argilla._models import FieldModel
+from argilla._models._settings._fields import ImageFieldSettings, ChatFieldSettings
 from argilla.settings._field import ImageField, ChatField
 
 

@@ -98,7 +98,11 @@ FieldSettings = Annotated[
 
 
 FieldSettingsCreate = Annotated[
-    Union[TextFieldSettingsCreate, ImageFieldSettingsCreate, ChatFieldSettingsCreate],
+    Union[
+        TextFieldSettingsCreate,
+        ImageFieldSettingsCreate,
+        ChatFieldSettingsCreate,
+    ],
     PydanticField(..., discriminator="type"),
 ]
 

@@ -92,13 +92,13 @@ export default {
       word-break: break-all;
     }
     code:not(.hljs) {
-      color: palette(orange-red-crayola);
-      background-color: palette(apricot, light);
+      color: var(--color-brand);
+      background-color: hsl(from var(--color-brand) h s l / 10%);
       border-radius: 4px;
     }
     a {
       word-break: break-all;
-      color: $primary-color;
+      color: var(--fg-cuaternary);
     }
     h1,
     h2,

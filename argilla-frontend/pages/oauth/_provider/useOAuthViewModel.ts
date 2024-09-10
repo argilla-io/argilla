@@ -6,7 +6,7 @@ import { useRoutes, useTranslate } from "~/v1/infrastructure/services";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 export const useOAuthViewModel = () => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const notification = useNotifications();
   const routes = useRoute();
   const router = useRoutes();
@@ -26,7 +26,7 @@ export const useOAuthViewModel = () => {
     } catch {
       notification.notify({
         message: t("argilla.api.errors::UnauthorizedError"),
-        type: "error",
+        type: "danger",
       });
     } finally {
       router.go("/");

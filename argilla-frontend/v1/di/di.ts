@@ -8,6 +8,9 @@ import {
   UpdateMetricsEventHandler,
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
+import { LoadUserUseCase } from "../domain/usecases/load-user-use-case";
+import { useAxiosExtension } from "@/v1/infrastructure/services/useAxiosExtension";
+
 import {
   DatasetRepository,
   RecordRepository,
@@ -20,6 +23,8 @@ import {
   OAuthRepository,
   EnvironmentRepository,
   WorkspaceRepository,
+  AuthRepository,
+  UserRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -55,15 +60,15 @@ import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
 import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-case";
 import { GetDatasetQuestionsGroupedUseCase } from "@/v1/domain/usecases/get-dataset-questions-grouped-use-case";
+import { AuthLoginUseCase } from "@/v1/domain/usecases/auth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
-  const useAxios = () => context.$axios;
+  const useAxios = useAxiosExtension(() => context.$axios);
   const useAuth = () => context.$auth;
 
   const dependencies = [
     register(UpdateMetricsEventHandler).build(),
     register(UpdateTeamProgressEventHandler).build(),
-
     register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
@@ -72,9 +77,12 @@ export const loadDependencyContainer = (context: Context) => {
     register(MetadataRepository).withDependency(useAxios).build(),
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
-    register(EnvironmentRepository).withDependency(useAxios).build(),
-    register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
     register(WorkspaceRepository).withDependency(useAxios).build(),
+
+    register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
+    register(EnvironmentRepository).withDependency(useAxios).build(),
+    register(AuthRepository).withDependency(useAxios).build(),
+    register(UserRepository).withDependency(useAxios).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
@@ -101,8 +109,17 @@ export const loadDependencyContainer = (context: Context) => {
       )
       .build(),
 
+    register(GetUserMetricsUseCase)
+      .withDependencies(MetricsRepository, useMetrics)
+      .build(),
+
     register(LoadRecordsToAnnotateUseCase)
-      .withDependencies(GetRecordsByCriteriaUseCase, useRecords)
+      .withDependencies(
+        GetRecordsByCriteriaUseCase,
+        GetDatasetProgressUseCase,
+        GetUserMetricsUseCase,
+        useRecords
+      )
       .build(),
 
     register(GetFieldsUseCase).withDependency(FieldRepository).build(),
@@ -126,10 +143,6 @@ export const loadDependencyContainer = (context: Context) => {
         RecordRepository,
         useEventDispatcher
       )
-      .build(),
-
-    register(GetUserMetricsUseCase)
-      .withDependencies(MetricsRepository, useMetrics)
       .build(),
 
     register(GetDatasetSettingsUseCase)
@@ -182,8 +195,14 @@ export const loadDependencyContainer = (context: Context) => {
       .withDependency(EnvironmentRepository)
       .build(),
 
+    register(LoadUserUseCase).withDependencies(useAuth, UserRepository).build(),
+
     register(OAuthLoginUseCase)
-      .withDependencies(OAuthRepository, useAuth)
+      .withDependencies(useAuth, OAuthRepository, LoadUserUseCase)
+      .build(),
+
+    register(AuthLoginUseCase)
+      .withDependencies(useAuth, AuthRepository, LoadUserUseCase)
       .build(),
   ];
 

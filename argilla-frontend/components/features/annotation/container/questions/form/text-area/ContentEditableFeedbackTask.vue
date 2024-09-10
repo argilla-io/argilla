@@ -136,7 +136,7 @@ export default {
 }
 [contenteditable="true"]:empty:before {
   content: attr(placeholder);
-  color: $black-37;
+  color: var(--fg-tertiary);
   pointer-events: none;
   display: block; /* For Firefox */
 }
@@ -149,7 +149,7 @@ export default {
       top: 100%;
       right: 0;
       @include font-size(12px);
-      color: palette(grey, verylight);
+      color: var(--bg-solid-grey-1);
       margin-top: 0.5em;
       display: none;
     }
@@ -159,7 +159,7 @@ export default {
     width: 100%;
     min-height: 30px;
     height: 100%;
-    color: $black-87;
+    color: var(--fg-primary);
     white-space: pre-wrap;
     margin: 0;
     word-break: break-word;

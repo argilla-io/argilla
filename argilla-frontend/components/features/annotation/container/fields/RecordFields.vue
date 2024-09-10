@@ -8,8 +8,9 @@
         content,
         settings,
         isTextType,
-        isChatType,
+        isImageType,
       } in fields"
+      :class="[isImageType ? 'fields__container--image' : '']"
       :key="id"
     >
       <SpanAnnotationTextField
