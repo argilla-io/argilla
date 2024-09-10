@@ -27,6 +27,7 @@ from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._vector import VectorField
+from argilla._helpers import build_settings_from_repo_id
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
@@ -256,6 +257,13 @@ class Settings(Resource):
         with open(path, "r") as file:
             settings_dict = json.load(file)
             return cls._from_dict(settings_dict)
+
+    @classmethod
+    def from_hub(cls, repo_id: str, version: str = "latest") -> "Settings":
+        """Load the settings from the Hub"""
+
+        settings = build_settings_from_repo_id(repo_id)
+        return settings
 
     def __eq__(self, other: "Settings") -> bool:
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
