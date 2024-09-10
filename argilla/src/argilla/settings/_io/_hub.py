@@ -36,13 +36,12 @@ class FeatureType(Enum):
     FLOAT = "float"
 
 
-def _get_dataset_features(repo_id: str, config: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
+def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
     """Get the features of a dataset from the datasets server using the repo_id and config.
     Extract the features from the response and return them as a dictionary.
 
     Parameters:
         repo_id (str): The repository ID of the dataset.
-        config (str, optional): The configuration of the dataset. Defaults to None.
 
     Returns:
         Dict[str, Dict[str, Any]]: The features of the dataset.
@@ -61,12 +60,7 @@ def _get_dataset_features(repo_id: str, config: Optional[str] = None) -> Dict[st
 
             if len(available_configs) > 1 and config is None:
                 warnings.warn("Multiple configurations found. Using the first one.")
-                config = available_configs[0]
-            elif len(available_configs) == 1:
-                config = available_configs[0]
-            elif config not in available_configs:
-                raise DatasetsServerException(f"Configuration '{config}' not found.")
-
+            config = available_configs[0]
             features = dataset_info[config]["features"]
             return features
 
@@ -112,12 +106,11 @@ def _is_chat_feature(sub_features):
     )
 
 
-def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]], config=None) -> "Settings":
+def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]]) -> "Settings":
     """Define the argilla settings from the features of a dataset.
 
     Parameters:
         features (Dict[str, Dict[str, Any]): The features of the dataset.
-        config (str, optional): The configuration of the dataset. Defaults to None.
 
     Returns:
         rg.Settings: The settings defined from the features.
@@ -169,6 +162,6 @@ def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]], 
     return settings
 
 
-def build_settings_from_repo_id(repo_id: str, config: str = None):
-    dataset_info = _get_dataset_features(repo_id, config)
-    return _define_settings_from_features(dataset_info, config)
+def build_settings_from_repo_id(repo_id: str):
+    dataset_info = _get_dataset_features(repo_id)
+    return _define_settings_from_features(dataset_info)
