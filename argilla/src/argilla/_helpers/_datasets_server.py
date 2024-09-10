@@ -1,11 +1,12 @@
 import requests
 import warnings
 from enum import Enum
-from typing import Any, Dict, Tuple, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union, List
 
-from argilla import ImageField, LabelQuestion, Settings, TextField, TextQuestion
 from argilla._exceptions._hub import DatasetsServerException
 
+if TYPE_CHECKING:
+    from argilla import Settings
 
 DATASETS_SERVER_BASE_URL = "https://datasets-server.huggingface.co"
 DATASETS_SERVER_HEADERS = {"Accept": "application/json"}
@@ -112,7 +113,7 @@ def _is_chat_feature(sub_features):
     )
 
 
-def _define_settings_from_features(features, config=None) -> Settings:
+def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]], config=None) -> "Settings":
     """Define the argilla settings from the features of a dataset.
 
     Parameters:
@@ -122,6 +123,8 @@ def _define_settings_from_features(features, config=None) -> Settings:
     Returns:
         rg.Settings: The settings defined from the features.
     """
+
+    from argilla import ImageField, LabelQuestion, TextQuestion, Settings, TextField
 
     fields = []
     questions = []
