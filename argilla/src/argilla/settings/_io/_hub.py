@@ -41,39 +41,23 @@ def _get_dataset_features(repo_id: str, config: Optional[str] = None) -> Dict[st
             response = client.get(url, headers=DATASETS_SERVER_HEADERS)
             response.raise_for_status()
             response_json = response.json()
-    except httpx.RequestError as e:
-        raise DatasetsServerException() from e
-    except httpx.HTTPStatusError as e:
-        raise DatasetsServerException(
-            f"Failed to get dataset info from the datasets server. Status code: {e.response.status}"
-        ) from e
-    except ValueError as e:
-        raise DatasetsServerException() from e
 
-    try:
-        dataset_info = response_json["dataset_info"]
-    except KeyError as e:
-        raise DatasetsServerException(
-            message="Failed to get dataset info from the datasets server. Malformed datasets-server response. 'dataset_info' key not found."
-        ) from e
+            dataset_info = response_json["dataset_info"]
+            available_configs = list(dataset_info.keys())
 
-    available_configs = list(dataset_info.keys())
+            if len(available_configs) > 1 and config is None:
+                warnings.warn("Multiple configurations found. Using the first one.")
+                config = available_configs[0]
+            elif len(available_configs) == 1:
+                config = available_configs[0]
+            elif config not in available_configs:
+                raise DatasetsServerException(f"Configuration '{config}' not found.")
 
-    if len(available_configs) > 1 and config is None:
-        raise DatasetsServerException("Multiple configurations found. Please specify a config.")
-    elif len(available_configs) == 1:
-        config = available_configs[0]
-    elif config not in available_configs:
-        raise DatasetsServerException(f"Configuration '{config}' not found.")
+            features = dataset_info[config]["features"]
+            return features
 
-    try:
-        features = dataset_info[config]["features"]
-    except KeyError as e:
-        raise DatasetsServerException(
-            message="Failed to get dataset info from the datasets server. Malformed datasets-server response. 'features' key not found."
-        ) from e
-
-    return features
+    except (httpx.RequestError, httpx.HTTPStatusError, KeyError) as e:
+        raise DatasetsServerException(f"Failed to get dataset info from the datasets server. Error: {str(e)}") from e
 
 
 def _map_feature_type(feature):
