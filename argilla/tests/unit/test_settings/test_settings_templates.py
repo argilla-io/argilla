@@ -20,7 +20,7 @@ from argilla.settings._templates import DefaultSettingsMixin
 class TestDefaultSettingsMixin:
     def test_for_document_classification(self):
         mock_labels = ["positive", "negative"]
-        settings = DefaultSettingsMixin.for_document_classification(labels=mock_labels)
+        settings = DefaultSettingsMixin.for_classification(labels=mock_labels)
         assert settings.guidelines == "Select a label for the document."
         assert len(settings.fields) == 1
         assert settings.fields[0].name == "text"
@@ -29,7 +29,7 @@ class TestDefaultSettingsMixin:
         assert settings.questions[0].labels == mock_labels
 
     def test_for_response_ranking(self):
-        settings = DefaultSettingsMixin.for_response_ranking()
+        settings = DefaultSettingsMixin.for_ranking()
         assert settings.guidelines == "Rank the responses."
         assert len(settings.fields) == 3
         assert settings.fields[0].name == "instruction"
@@ -40,7 +40,7 @@ class TestDefaultSettingsMixin:
         assert settings.questions[0].values == ["response1", "response2"]
 
     def test_for_response_rating(self):
-        settings = DefaultSettingsMixin.for_response_rating()
+        settings = DefaultSettingsMixin.for_rating()
         assert settings.guidelines == "Rate the response."
         assert len(settings.fields) == 2
         assert settings.fields[0].name == "instruction"
