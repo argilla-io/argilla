@@ -47,12 +47,10 @@ async def enqueue_notify_events(db: AsyncSession, event: str, timestamp: datetim
 
 
 @job(HIGH_QUEUE, retry=Retry(max=3, interval=[10, 60, 180]))
-async def notify_event_job(webhook_id: UUID, event: str, timestamp: datetime, data: dict) -> httpx.Response:
+async def notify_event_job(webhook_id: UUID, event: str, timestamp: datetime, data: dict) -> None:
     async with AsyncSessionLocal() as db:
         webhook = await Webhook.get_or_raise(db, webhook_id)
 
     response = notify_event(webhook, event, timestamp, data)
     if not response.is_success:
         raise Exception(f"Failed to notify event `{event}` to webhook with id `{webhook.id}` and URL `{webhook.url}`")
-
-    return response
