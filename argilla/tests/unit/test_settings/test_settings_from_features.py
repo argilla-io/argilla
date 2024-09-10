@@ -1,7 +1,7 @@
 import pytest
 import argilla as rg
 
-from argilla.datasets._io._datasets_server import _define_settings_from_features
+from argilla.settings._io._hub import _define_settings_from_features
 
 
 def test_define_settings_from_features_text():
