@@ -15,7 +15,7 @@
 import httpx
 import warnings
 from enum import Enum
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union, List
+from typing import Any, Dict, TYPE_CHECKING, Union, List
 
 from argilla._exceptions._hub import DatasetsServerException
 
