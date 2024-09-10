@@ -12,25 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from argilla.settings._resource import Settings
-    from argilla.settings._field import TextField as Field
+    from argilla.settings._field import TextField, ImageField
     from argilla.settings._question import QuestionType
+
+
+def _get_field_type(field_type: str) -> "TextField":
+    """Get the field type from the field type string."""
+    from argilla import TextField, ImageField
+
+    FIELD_MAPPING = {
+        "text": TextField,
+        "image": ImageField,
+    }
+
+    return FIELD_MAPPING[field_type]
 
 
 class DefaultSettingsMixin:
     """Mixin class for handling default templates of the `Settings` class."""
 
     @classmethod
-    def for_document_classification(
+    def for_classification(
         cls: "Settings",
         labels: List[str],
-        guidelines: Optional[str] = None,
-        fields: Optional[List["Field"]] = None,
-        questions: Optional[List["QuestionType"]] = None,
-        use_chat: Optional[bool] = False,
+        field_type: Optional[Literal["text", "image", "chat"]] = "text",
     ) -> "Settings":
         """Default settings for document classification task. Document classification template consists of a text field and a label question.
 
@@ -40,30 +49,21 @@ class DefaultSettingsMixin:
         questions (List[QuestionType]): List of questions.
         use_chat (bool): If True, the field will be replaced with a chat field.
         """
-        from argilla import Settings, TextField, LabelQuestion
+        from argilla import Settings, LabelQuestion
 
         settings = Settings(
             guidelines="Select a label for the document.",
-            fields=[TextField(name="text")],
+            fields=[_get_field_type(field_type)(name="text")],
             questions=[LabelQuestion(name="label", labels=labels)],
             mapping={"input": "text", "output": "label", "document": "text"},
         )
 
-        return DefaultSettingsMixin._update_settings(
-            settings=settings,
-            guidelines=guidelines,
-            fields=fields,
-            questions=questions,
-            use_chat=use_chat,
-        )
+        return settings
 
     @classmethod
-    def for_response_ranking(
+    def for_ranking(
         cls: "Settings",
-        guidelines: Optional[str] = None,
-        fields: Optional[List["Field"]] = None,
-        questions: Optional[List["QuestionType"]] = None,
-        use_chat: Optional[bool] = False,
+        field_type: Optional[Literal["text", "image", "chat"]] = "text",
     ) -> "Settings":
         """Default settings for response ranking task. Response ranking template consists of an instruction field, two response fields, and a ranking question.
 
@@ -74,11 +74,17 @@ class DefaultSettingsMixin:
         use_chat (bool): If True, the field will be replaced with a chat field.
 
         """
-        from argilla import Settings, TextField, RankingQuestion
+        from argilla import Settings, RankingQuestion
+
+        fields = [
+            _get_field_type(field_type)(name="instruction"),
+            _get_field_type(field_type)(name="response1"),
+            _get_field_type(field_type)(name="response2"),
+        ]
 
         settings = Settings(
             guidelines="Rank the responses.",
-            fields=[TextField(name="instruction"), TextField(name="response1"), TextField(name="response2")],
+            fields=fields,
             questions=[RankingQuestion(name="ranking", values=["response1", "response2"])],
             mapping={
                 "input": "instruction",
@@ -88,21 +94,12 @@ class DefaultSettingsMixin:
             },
         )
 
-        return DefaultSettingsMixin._update_settings(
-            settings=settings,
-            guidelines=guidelines,
-            fields=fields,
-            questions=questions,
-            use_chat=use_chat,
-        )
+        return settings
 
     @classmethod
-    def for_response_rating(
+    def for_rating(
         cls: "Settings",
-        guidelines: Optional[str] = None,
-        fields: Optional[List["Field"]] = None,
-        questions: Optional[List["QuestionType"]] = None,
-        use_chat: Optional[bool] = False,
+        field_type: Optional[Literal["text", "image", "chat"]] = "text",
     ) -> "Settings":
         """Default settings for response rating task. Response rating template consists of an instruction field, a response field, and a rating question.
 
@@ -113,11 +110,16 @@ class DefaultSettingsMixin:
         use_chat (bool): If True, the field will be replaced with a chat field.
 
         """
-        from argilla import Settings, TextField, RatingQuestion
+        from argilla import Settings, RatingQuestion
+
+        fields = [
+            _get_field_type(field_type)(name="instruction"),
+            _get_field_type(field_type)(name="response"),
+        ]
 
         settings = Settings(
             guidelines="Rate the response.",
-            fields=[TextField(name="instruction"), TextField(name="response")],
+            fields=fields,
             questions=[RatingQuestion(name="rating", values=[1, 2, 3, 4, 5])],
             mapping={
                 "input": "instruction",
@@ -126,34 +128,4 @@ class DefaultSettingsMixin:
                 "score": "rating",
             },
         )
-        return DefaultSettingsMixin._update_settings(
-            settings=settings,
-            guidelines=guidelines,
-            fields=fields,
-            questions=questions,
-            use_chat=use_chat,
-        )
-
-    @staticmethod
-    def _update_settings(
-        settings: "Settings",
-        guidelines: Optional[str] = None,
-        fields: Optional[List["Field"]] = None,
-        questions: Optional[List["QuestionType"]] = None,
-        use_chat: Optional[bool] = False,
-    ) -> "Settings":
-        """Utility method to update the settings with partial values."""
-        if guidelines:
-            settings.guidelines = guidelines
-        if fields:
-            settings.fields = fields
-        if questions:
-            settings.questions = questions
-        # if use_chat:
-        #     settings.fields = [
-        #         ChatField(
-        #             name=field.name,
-        #         )
-        #         for field in settings.fields
-        #     ]
         return settings
