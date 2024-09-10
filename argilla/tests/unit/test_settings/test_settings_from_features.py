@@ -1,6 +1,7 @@
 import pytest
 import argilla as rg
-from argilla._helpers._datasets_server import _define_settings_from_features, FeatureType
+
+from argilla.datasets._io._datasets_server import _define_settings_from_features
 
 
 def test_define_settings_from_features_text():
@@ -34,7 +35,6 @@ def test_define_settings_from_features_label():
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].labels == ["0", "1", "2"]
     assert settings.mapping == {"label_column": ("label_column_field", "label_column_question")}
-
 
 
 def test_define_settings_from_features_multiple():

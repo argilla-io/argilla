@@ -22,12 +22,12 @@ from uuid import UUID
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
+from argilla.settings._io import build_settings_from_repo_id
 from argilla.settings._field import Field, _field_from_dict, _field_from_model
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._vector import VectorField
-from argilla._helpers import build_settings_from_repo_id
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
