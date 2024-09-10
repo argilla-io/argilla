@@ -53,7 +53,7 @@ export default {
   border-radius: $border-radius-m;
 
   &_title {
-    color: $black-87;
+    color: var(--fg-primary);
     word-break: break-word;
     width: calc(100% - 30px);
   }

@@ -94,7 +94,7 @@ class TextField(AbstractField):
         name: str,
         title: Optional[str] = None,
         use_markdown: Optional[bool] = False,
-        required: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         client: Optional[Argilla] = None,
     ) -> None:
@@ -103,7 +103,7 @@ class TextField(AbstractField):
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
             use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to False.
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
 
         """
@@ -111,7 +111,7 @@ class TextField(AbstractField):
         super().__init__(
             name=name,
             title=title,
-            required=required or True,
+            required=required,
             description=description,
             settings=TextFieldSettings(use_markdown=use_markdown),
             _client=client,
