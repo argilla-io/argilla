@@ -12,5 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 class DatasetsServerException(Exception):
     message: str = "Error connecting to Hugging Face Hub datasets-server API"
