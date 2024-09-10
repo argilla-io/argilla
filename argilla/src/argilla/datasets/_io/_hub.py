@@ -25,7 +25,7 @@ from datasets.data_files import EmptyDatasetError
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
-from argilla.datasets._export._disk import DiskImportExportMixin
+from argilla.datasets._io._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
 
@@ -57,7 +57,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         from huggingface_hub import DatasetCardData, HfApi
 
-        from argilla.datasets._export.card import (
+        from argilla.datasets._io.card import (
             ArgillaDatasetCard,
             size_categories_parser,
         )
