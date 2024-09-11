@@ -22,7 +22,19 @@
   </div>
 </template>
 <script>
+const STYLES = `
+<script>
+if (parent) {
+  const currentHead = document.getElementsByTagName("head")[0];
+  const styles = parent.document.getElementsByTagName("style");
+  for (const style of styles) {
+    currentHead.appendChild(style.cloneNode(true));
+  }
+}
+<\/script>`;
+
 const BASIC_TEMPLATE = `
+${STYLES}
 <script>const record_object = #RECORD_OBJECT#;<\/script>
 <script src="./js/handlebars.min.js"><\/script>
 <div id="template" class="text-center">
@@ -33,8 +45,12 @@ const BASIC_TEMPLATE = `
   const compiledTemplate = Handlebars.compile(template);
   const html = compiledTemplate({ record_object });
   document.body.innerHTML = html;
-<\/script>`;
-const ADVANCE_TEMPLATE = `<script>const record_object = #RECORD_OBJECT#;<\/script>#TEMPLATE#`;
+<\/script>
+`;
+const ADVANCE_TEMPLATE = `
+${STYLES}
+<script>const record_object = #RECORD_OBJECT#;<\/script>#TEMPLATE#
+`;
 
 export default {
   props: {
@@ -61,7 +77,7 @@ export default {
   },
   computed: {
     isBasic() {
-      return this.settings.mode === "basic";
+      return true;
     },
     template() {
       const recordObject = JSON.stringify(this.record);
