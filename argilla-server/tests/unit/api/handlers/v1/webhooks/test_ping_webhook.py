@@ -48,6 +48,7 @@ class TestPingWebhook:
         wh = Webhook(webhook.secret)
         assert wh.verify(headers=request.headers, data=request.content) == {
             "type": "ping",
+            "version": 1,
             "timestamp": timestamp,
             "data": {
                 "agent": "argilla-server",
