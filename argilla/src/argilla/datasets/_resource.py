@@ -185,18 +185,18 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             dict: The progress of the dataset creation. The structure of the dictionary is:
             {
                 "total": int,
-                "annotated": int,
-                "progress": float,
+                "completed": int,
+                "pending": float,
                 "users": {
                     "username": int,
                     ...
                 }
             }
         """
-        progress = self._api.progress(dataset_id=self._model.id).model_dump()
+        progress = self._api.get_progress(dataset_id=self._model.id).model_dump()
 
         if with_users_distribution:
-            users_progress = self._api.users_progress(dataset_id=self._model.id)
+            users_progress = self._api.list_users_progress(dataset_id=self._model.id)
             progress_by_user = {user.username: user.completed.submitted for user in users_progress}
 
             progress.update({"users": progress_by_user})
