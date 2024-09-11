@@ -53,6 +53,12 @@
   --bg-label-unselected: hsl(0, 0%, 96%);
   --bg-label-unselected-hover: hsla(0, 0%, 0%, 0.06);
   --bg-field: linear-gradient(45deg, var(--bg-opacity-2), var(--bg-opacity-1));
+  --bg-bubble: linear-gradient(45deg, var(--bg-opacity-3), var(--bg-opacity-1));
+  --bg-bubble-inverse: linear-gradient(
+    45deg,
+    var(--bg-opacity-1),
+    var(--bg-opacity-3)
+  );
   --bg-form: hsl(0, 0%, 100%);
   --bg-form-button-area: hsl(228, 50%, 96%);
   --fg-shortcut-key: hsla(0, 0%, 0%, 0.2);
@@ -117,6 +123,12 @@
   --bg-label-unselected: hsl(214, 12%, 18%);
   --bg-label-unselected-hover: hsl(214, 12%, 20%);
   --bg-field: linear-gradient(45deg, var(--bg-opacity-4), var(--bg-opacity-2));
+  --bg-bubble: linear-gradient(45deg, var(--bg-opacity-4), var(--bg-opacity-2));
+  --bg-field-inverse: linear-gradient(
+    45deg,
+    var(--bg-opacity-2),
+    var(--bg-opacity-4)
+  );
   --bg-form: hsl(216 12% 14%);
   --bg-form-button-area: hsla(228, 40.18%, 59.31%, 0.2);
   --fg-shortcut-key: hsla(0, 0%, 100%, 0.4);
