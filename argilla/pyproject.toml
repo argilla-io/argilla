@@ -1,4 +1,3 @@
-# Force build -> DELETE ME
 [project]
 name = "argilla"
 description = "The Argilla python server SDK"
