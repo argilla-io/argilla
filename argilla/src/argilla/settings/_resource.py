@@ -259,10 +259,10 @@ class Settings(Resource):
             return cls._from_dict(settings_dict)
 
     @classmethod
-    def from_hub(cls, repo_id: str, version: str = "latest") -> "Settings":
+    def from_hub(cls, repo_id: str, feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]]) -> "Settings":
         """Load the settings from the Hub"""
 
-        settings = build_settings_from_repo_id(repo_id)
+        settings = build_settings_from_repo_id(repo_id=repo_id, feature_mapping=feature_mapping)
         return settings
 
     def __eq__(self, other: "Settings") -> bool:

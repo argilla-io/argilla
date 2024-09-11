@@ -195,6 +195,6 @@ def _define_settings_from_features(
     return settings
 
 
-def build_settings_from_repo_id(repo_id: str, mapping: Optional[Dict[str, str]] = None) -> "Settings":
+def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str, str]] = None) -> "Settings":
     dataset_info = _get_dataset_features(repo_id)
-    return _define_settings_from_features(dataset_info, mapping)
+    return _define_settings_from_features(dataset_info, feature_mapping)
