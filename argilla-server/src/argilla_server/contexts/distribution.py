@@ -12,19 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import backoff
-import sqlalchemy
-
 from typing import List
 from uuid import UUID
 
-from sqlalchemy.orm import selectinload
+import backoff
+import sqlalchemy
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
+from argilla_server.api.webhooks.v1.enums import RecordEvent
+from argilla_server.api.webhooks.v1.records import notify_record_event
+from argilla_server.database import _get_async_db
 from argilla_server.enums import DatasetDistributionStrategy, RecordStatus
 from argilla_server.models import Record
 from argilla_server.search_engine.base import SearchEngine
-from argilla_server.database import _get_async_db
 
 MAX_TIME_RETRY_SQLALCHEMY_ERROR = 15
 
@@ -50,6 +51,9 @@ async def update_record_status(search_engine: SearchEngine, record_id: UUID) -> 
         await search_engine.partial_record_update(record, status=record.status)
 
         await db.commit()
+
+        if record.is_completed():
+            await notify_record_event(db, RecordEvent.completed, record)
 
         return record
 

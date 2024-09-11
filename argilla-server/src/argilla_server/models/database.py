@@ -248,6 +248,9 @@ class Record(DatabaseModel):
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )
 
+    def is_completed(self) -> bool:
+        return self.status == RecordStatus.completed
+
 
 class Question(DatabaseModel):
     __tablename__ = "questions"
