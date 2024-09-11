@@ -83,7 +83,7 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
     ####################
 
     @api_error_handler
-    def progress(self, dataset_id: UUID) -> DatasetProgressModel:
+    def get_progress(self, dataset_id: UUID) -> DatasetProgressModel:
         response = self.http_client.get(f"{self.url_stub}/{dataset_id}/progress")
         response.raise_for_status()
         response_json = response.json()
@@ -92,7 +92,7 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
         return DatasetProgressModel.model_validate(response_json)
 
     @api_error_handler
-    def users_progress(self, dataset_id: UUID) -> List[UserProgressModel]:
+    def list_users_progress(self, dataset_id: UUID) -> List[UserProgressModel]:
         response = self.http_client.get(f"{self.url_stub}/{dataset_id}/users/progress")
         response.raise_for_status()
         response_json = response.json()
