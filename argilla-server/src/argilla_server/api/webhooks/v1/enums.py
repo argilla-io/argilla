@@ -51,6 +51,7 @@ class ResponseEvent(str, Enum):
     def __str__(self):
         return str(self.value)
 
+
 class RecordEvent(str, Enum):
     completed = WebhookEvent.record_completed.value
 
