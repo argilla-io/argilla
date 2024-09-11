@@ -12,30 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
-
-from argilla_server.pydantic_v1 import BaseModel, StrictStr, validator
+from argilla_server.pydantic_v1 import BaseModel
+from pydantic import Field
 
 MAX_MESSAGE_LENGTH = 5000
 MAX_MESSAGE_COUNT = 1000
 MAX_ROLE_LENGTH = 20
 
 
-class ChatMessage(BaseModel):
-    role: StrictStr
-    content: StrictStr
-
-    @validator("role")
-    def validate_role(cls, value):
-        # no spaces allowed
-        if any([c.isspace() for c in value]):
-            raise ValueError("Role must not contain spaces")
-        if len(value) > MAX_ROLE_LENGTH:
-            raise ValueError(f"Role must be less than {MAX_ROLE_LENGTH} characters")
-        return value
-
-    @validator("content")
-    def validate_content(cls, value):
-        if len(value) > MAX_MESSAGE_LENGTH:
-            raise ValueError(f"Content must be less than {MAX_MESSAGE_LENGTH} characters")
-        return value
+class ChatFieldValue(BaseModel):
+    role: Field(..., max_length=MAX_ROLE_LENGTH, regex=r"^\S+$")
+    content: Field(..., max_length=MAX_MESSAGE_LENGTH)
