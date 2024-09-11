@@ -16,7 +16,7 @@ import json
 import os
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence
+from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
 from uuid import UUID
 
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
