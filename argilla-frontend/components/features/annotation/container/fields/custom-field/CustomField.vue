@@ -22,6 +22,7 @@
   </div>
 </template>
 <script>
+/* eslint-disable */
 const STYLES = `
 <script>
 if (parent) {
@@ -47,9 +48,11 @@ ${STYLES}
   document.body.innerHTML = html;
 <\/script>
 `;
-const ADVANCE_TEMPLATE = `
-${STYLES}
-<script>const record_object = #RECORD_OBJECT#;<\/script>#TEMPLATE#
+const ADVANCE_TEMPLATE = ` ${STYLES}
+<script>
+  const record_object = #RECORD_OBJECT#;
+<\/script>
+#TEMPLATE#
 `;
 
 export default {
