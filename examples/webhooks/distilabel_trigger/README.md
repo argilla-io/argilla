@@ -11,6 +11,17 @@ pdm server start
 pdm worker
 ```
 
+2. Add the `localhost.org` alias in the `/etc/hosts` file to comply with the Top Level Domain URL requirement.
+```
+##
+# Host Database
+#
+# localhost is used to configure the loopback interface
+# when the system is booting.  Do not change this entry.
+##
+127.0.0.1       localhost localhost.org
+```
+
 2. Start the app
 ```bash
 uvicorn webhook:server
