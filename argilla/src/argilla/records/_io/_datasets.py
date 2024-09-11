@@ -196,9 +196,12 @@ class HFDatasetsIO:
         """
 
         for attribute_type, uncaster in ATTRIBUTE_UNCASTERS.items():
-            attribute_fields = [field_name for field_name, field in schema.items() if field.type == attribute_type]
-            hf_dataset = uncaster(hf_dataset, attribute_fields)
-
+            attributes = []
+            for attribute_name, attribute_schema in schema.items():
+                if hasattr(attribute_schema, "type") and attribute_schema.type == attribute_type:
+                    attributes.append(attribute_name)
+            if attributes:
+                hf_dataset = uncaster(hf_dataset, attributes)
         return hf_dataset
 
     @staticmethod
