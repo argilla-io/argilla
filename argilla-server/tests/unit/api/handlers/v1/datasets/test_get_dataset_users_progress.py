@@ -49,18 +49,18 @@ class TestGetDatasetUsersProgress:
             "users": [
                 {
                     "username": user_with_submitted.username,
-                    "completed": {"submitted": 3},
-                    "pending": {"submitted": 2},
+                    "completed": {"submitted": 3, "draft": 0, "discarded": 0},
+                    "pending": {"submitted": 2, "draft": 0, "discarded": 0},
                 },
                 {
                     "username": user_with_draft.username,
-                    "completed": {"draft": 3},
-                    "pending": {"draft": 2},
+                    "completed": {"draft": 3, "submitted": 0, "discarded": 0},
+                    "pending": {"draft": 2, "submitted": 0, "discarded": 0},
                 },
                 {
                     "username": user_with_discarded.username,
-                    "completed": {"discarded": 3},
-                    "pending": {"discarded": 2},
+                    "completed": {"discarded": 3, "submitted": 0, "draft": 0},
+                    "pending": {"discarded": 2, "submitted": 0, "draft": 0},
                 },
             ]
         }
