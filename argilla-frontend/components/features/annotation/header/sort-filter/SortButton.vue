@@ -1,6 +1,6 @@
 <template>
   <FilterButton
-    button-name="Sort"
+    :button-name="$t('sorting.label')"
     icon-name="sort"
     :is-button-active="isButtonActive"
   >
@@ -40,7 +40,7 @@ export default {
 .filter-button--active {
   background: none;
   &:hover {
-    background: $black-4;
+    background: var(--bg-opacity-4);
   }
 }
 </style>

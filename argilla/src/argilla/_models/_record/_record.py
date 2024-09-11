@@ -14,6 +14,7 @@
 
 import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union, Literal
+import uuid
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 
@@ -45,7 +46,7 @@ class RecordModel(ResourceModel):
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
     suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(default_factory=tuple)
-    external_id: Optional[Any] = None
+    external_id: Optional[Any] = Field(default=None)
 
     @field_serializer("external_id", when_used="unless-none")
     def serialize_external_id(self, value: str) -> str:
@@ -108,3 +109,11 @@ class RecordModel(ResourceModel):
                 message = {key: value for key, value in message.items() if key in ["role", "content"]}
             validated_chat_field_values.append(ChatFieldValue(**message))
         return validated_chat_field_values
+
+    @field_validator("external_id", mode="before")
+    @classmethod
+    def validate_external_id(cls, external_id: Any) -> Union[str, int, uuid.UUID]:
+        """Ensure external_id is captured correctly and only converted if None."""
+        if external_id is None:
+            external_id = uuid.uuid4()
+        return external_id

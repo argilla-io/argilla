@@ -133,7 +133,7 @@ export default {
   @include font-size(14px);
   line-height: 14px;
   padding: 12px 24px;
-  transition: background 0.3s $cb-normal;
+  transition: background 0.3s ease-in;
   cursor: pointer;
   &[disabled] {
     opacity: 0.5;
@@ -141,7 +141,7 @@ export default {
     pointer-events: none;
   }
   &:focus {
-    outline: 2px solid $primary-color;
+    outline: 2px solid var(--bg-action);
   }
   &:focus:not(:focus-visible) {
     outline: none;
@@ -151,8 +151,8 @@ export default {
   @extend %button;
   .spinner {
     flex-shrink: 0;
-    border: 3px solid #242323d8;
-    border-top-color: #00000021;
+    border: 3px solid var(--bg-opacity-54);
+    border-top-color: var(--bg-opacity-10);
   }
 }
 .small {
@@ -165,93 +165,76 @@ export default {
   justify-content: center;
 }
 .primary {
-  background-color: $primary-color;
-  color: palette(white);
+  background-color: var(--bg-action);
+  color: var(--color-white);
   .svg-icon {
-    fill: palette(white);
+    fill: var(--color-white);
   }
   .spinner {
     border-color: #ffffff40;
-    border-top-color: palette(white);
+    border-top-color: var(--color-white);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: $primary-darken-color;
+    background-color: var(--bg-action-accent);
   }
   &.outline {
     background: none;
-    border: 1px solid $primary-color;
-    color: $primary-color;
+    border: 1px solid var(--bg-action);
+    color: var(--bg-action);
     .svg-icon {
-      fill: $primary-color;
+      fill: var(--bg-action);
     }
     &:hover,
     &:active,
     &.active {
-      color: $primary-darken-color;
-      border-color: $primary-darken-color;
-    }
-  }
-  &.light {
-    background: lighten($black-4, 50%);
-    color: $primary-color;
-    &:hover,
-    &:active,
-    &.active {
-      background: $black-4;
+      color: var(--bg-action-accent);
+      border-color: var(--bg-action-accent);
     }
   }
   &.text {
     padding-left: 0;
     padding-right: 0;
     background: none;
-    color: $primary-color;
+    color: var(--bg-action);
     border-radius: 0;
     &:hover {
       background: none;
-      color: darken($primary-color, 10%);
-    }
-  }
-  &.link {
-    background: none;
-    color: $primary-color;
-    &:hover {
-      text-decoration: underline;
-      background: none;
+      color: var(--bg-action-accent);
     }
   }
 }
 
 .secondary {
-  background-color: palette(grey, 600);
-  color: palette(grey, 200);
+  background-color: var(--bg-opacity-4);
+  color: var(--fg-secondary);
   .svg-icon {
-    fill: palette(grey, 200);
+    fill: var(--fg-secondary);
   }
   .spinner {
-    border-color: palette(grey, 200);
+    border-color: var(--fg-secondary);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: darken(palette(grey, 600), 5%);
+    background-color: var(--bg-opacity-6);
   }
   &.outline {
     background: none;
-    border: 1px solid $black-54;
-    color: palette(grey, 200);
+    border: 1px solid var(--fg-secondary);
+    color: var(--fg-secondary);
   }
   &.light {
-    background: lighten($black-4, 50%);
-    color: $black-54;
+    background: hsl(from var(--bg-opacity-4) h s l / 3%);
+    color: var(--fg-secondary);
     &:hover,
     &:active,
     &.active {
-      background: $black-4;
+      background: var(--bg-opacity-6);
     }
     .svg-icon {
-      fill: $black-54;
+      fill: var(--fg-secondary);
     }
   }
 
@@ -259,60 +242,51 @@ export default {
     padding-left: 0;
     padding-right: 0;
     background: none;
-    color: $black-54;
+    color: var(--fg-secondary);
     border-radius: 0;
     &:hover {
       background: none;
-      color: $black-87;
-    }
-  }
-  &.link {
-    background: none;
-    color: $black-54;
-    padding: 0;
-    &:hover {
-      text-decoration: underline;
-      background: none;
+      color: var(--fg-primary);
     }
   }
 }
 .--danger {
-  background-color: $danger;
-  color: palette(white);
+  background-color: var(--color-danger);
+  color: var(--color-white);
   .svg-icon {
-    fill: palette(white);
+    fill: var(--color-white);
   }
   &:hover,
   &:active,
   &.active {
-    background-color: darken($danger, 10%);
+    background-color: hsl(from var(--color-danger) h s calc(l - 4));
   }
   &.outline {
     background: none;
-    border: 1px solid $danger;
-    color: $danger;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
     .svg-icon {
-      fill: $danger;
+      fill: var(--color-danger);
     }
     &:hover,
     &:active,
     &.active {
-      color: darken($danger, 10%);
-      border-color: darken($danger, 10%);
+      color: hsl(from var(--color-danger) h s calc(l - 4));
+      border-color: hsl(var(--color-danger) calc(l - 4));
     }
   }
   &.light {
-    background: lighten($black-4, 50%);
-    color: $danger;
+    background: var(--bg-opacity-2);
+    color: var(--color-danger);
     &:hover,
     &:active,
     &.active {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
   &.link {
     background: none;
-    color: $danger;
+    color: var(--color-danger);
     &:hover {
       text-decoration: underline;
       background: none;
@@ -325,7 +299,7 @@ export default {
   &:hover,
   &:active,
   &.active {
-    background: $black-4;
+    background: var(--bg-opacity-4);
   }
 }
 </style>

@@ -8,8 +8,9 @@
         content,
         settings,
         isTextType,
-        isChatType,
+        isImageType,
       } in fields"
+      :class="[isImageType ? 'fields__container--image' : '']"
       :key="id"
     >
       <SpanAnnotationTextField
@@ -33,6 +34,7 @@
         v-else-if="isChatType"
         :name="name"
         :title="title"
+        :useMarkdown="settings.use_markdown"
         :content="content"
       />
       <ImageField v-else :name="name" :title="title" :content="content" />

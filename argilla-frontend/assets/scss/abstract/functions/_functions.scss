@@ -29,18 +29,6 @@
 //  }
 
 @function calculateRem($size) {
-    $remSize: calc($size / 16px);
-    @return $remSize * 1rem;
-}
-
-// get KEY from MAP - COLOUR PALETTES
-// http://erskinedesign.com/blog/friendlier-colour-names-sass-maps/
-
-@function palette($palette, $tone: 'base') {
-    @if map-has-key($palettes, $palette) {
-      @return map-get(map-get($palettes, $palette), $tone);
-    }
-
-    @warn "Unknown `#{$palette}` in $palettes.";
-    @return null;
+  $remSize: calc($size / 16px);
+  @return $remSize * 1rem;
 }

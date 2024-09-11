@@ -62,7 +62,7 @@ export default {
     background: transparent;
     width: calc(100% - 20px);
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
   &__clear {

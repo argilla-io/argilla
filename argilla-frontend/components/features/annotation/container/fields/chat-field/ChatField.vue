@@ -1,24 +1,36 @@
 <template>
-  <div class="chat-field" :key="fieldText">
-    <span class="chat-field_title" v-text="title" />
+  <div class="chat" :key="title">
+    <span class="chat__title" v-text="title" />
 
-    <div
-      class="chat-field_container"
-      v-for="({ role, content }, index) in content"
-      :key="index"
-    >
+    <div v-for="({ role, content: text }, index) in content" :key="index">
       <span
         :class="[
-          'chat-field_message',
-          role === 'user' ? 'chat-field_user' : 'chat-field_agent',
+          'chat__item',
+          role === 'user' || (checkIfAreLessThanTwoRoles && index === 0)
+            ? 'chat__item--right'
+            : 'chat__item--left',
         ]"
-        :style="{
-          backgroundColor: $color.generate(role).palette.light,
-        }"
       >
-        <span v-text="role" />
+        <span
+          class="chat__role"
+          v-if="role !== content[index - 1]?.role"
+          v-text="role"
+          :style="{
+            color: $color.generate(role).palette.dark,
+          }"
+        />
 
-        <MarkdownRenderer :markdown="content" />
+        <div
+          class="chat__bubble"
+          :style="{
+            borderColor: `hsl(from ${
+              $color.generate(role).palette.dark
+            } h s l / 20%)`,
+          }"
+        >
+          <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
+          <span v-else v-html="text" />
+        </div>
       </span>
     </div>
   </div>
@@ -39,54 +51,72 @@ export default {
       type: Array,
       required: true,
     },
+    useMarkdown: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  computed: {
+    getAllUniqueRolesNames() {
+      return this.content
+        .map((item) => item.role)
+        .filter((role, index, self) => self.indexOf(role) === index);
+    },
+    checkIfAreLessThanTwoRoles() {
+      return this.getAllUniqueRolesNames.length <= 2;
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.chat-field {
+.chat {
+  $this: &;
   display: flex;
   flex-direction: column;
   gap: $base-space;
-  padding: 2 * $base-space;
-  background: palette(grey, 800);
-  border-radius: $border-radius-m;
-
-  &_title {
-    color: $black-87;
-    word-break: break-word;
-    width: calc(100% - 30px);
-  }
-
-  &_container {
+  margin-bottom: $base-space * 3;
+  &__item {
     display: flex;
     flex-direction: column;
-    width: 100%;
-  }
-
-  &_user {
-    background-color: #f5f5f5;
-    align-items: flex-end;
-    align-self: flex-end;
-  }
-
-  &_agent {
-    background-color: #c2e3f7;
-    align-items: flex-start;
-    align-self: flex-start;
-  }
-
-  &_message {
-    & > span {
-      font-weight: bold;
+    gap: $base-space;
+    &--right {
+      align-items: flex-end;
+      align-self: flex-end;
+      #{$this}__bubble {
+        background: var(--bg-bubble-inverse);
+        border-top-right-radius: 3px;
+      }
     }
 
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
+    &--left {
+      align-items: flex-start;
+      align-self: flex-start;
+      #{$this}__bubble {
+        background: var(--bg-bubble);
+        border-top-left-radius: 3px;
+      }
+    }
+  }
+
+  &__bubble {
     max-width: 80%;
-    border-radius: 10px;
-    padding: 10px;
+    padding: 2 * $base-space;
+    border-radius: $border-radius-l;
+    border-style: solid;
+    border-width: 1px;
+    @include font-size(16px);
+    @include line-height(24px);
+  }
+
+  &__role {
+    font-weight: 600;
+  }
+
+  &__title {
+    word-break: break-word;
+    width: calc(100% - 30px);
+    margin-bottom: $base-space * 3;
   }
 }
 </style>

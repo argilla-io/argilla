@@ -36,7 +36,11 @@ class ChatFieldSettings(BaseModel):
 
 
 FieldSettings = Annotated[
-    Union[TextFieldSettings, ImageFieldSettings, ChatFieldSettings],
+    Union[
+        TextFieldSettings,
+        ImageFieldSettings,
+        ChatFieldSettings,
+    ],
     Field(..., discriminator="type"),
 ]
 

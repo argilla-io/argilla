@@ -94,19 +94,19 @@ export default {
   border-collapse: collapse;
   border-radius: $border-radius;
   border-spacing: 0;
-  background: palette(grey, 800);
+  background: var(--bg-solig-grey-1);
   box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.05),
     0 0 0.0625rem rgba(0, 0, 0, 0.1);
   td,
   th {
     display: block;
-    border-bottom: 1px solid $black-4;
-    border-left: 1px solid $black-4;
-    border-right: 1px solid $black-4;
+    border-bottom: 1px solid var(--bg-opacity-4);
+    border-left: 1px solid var(--bg-opacity-4);
+    border-right: 1px solid var(--bg-opacity-4);
     padding: $base-space;
   }
   th {
-    background: $black-4;
+    background: var(--bg-opacity-4);
     border: none;
   }
   thead tr:last-child th:last-child {
@@ -134,10 +134,10 @@ export default {
   code {
     display: inline-block;
     padding: 2px 4px;
-    border: 1px solid $black-10;
+    border: 1px solid var(--bg-opacity-10);
     border-radius: $border-radius;
-    background: palette(white) !important;
-    color: $black-87 !important;
+    background: var(--bg-accent-grey-1) !important;
+    color: var(--fg-primary) !important;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       "Open Sans", "Helvetica Neue", sans-serif;
     min-width: 24px;

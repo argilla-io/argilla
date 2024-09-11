@@ -46,7 +46,7 @@ You can set the following environment variables to further configure your server
 
 - `ARGILLA_DOCS_ENABLED`: If False, disables openapi docs endpoint at _/api/docs_.
 
-- `ARGILLA_ENABLE_TELEMETRY`: If False, disables telemetry for usage metrics.
+- `HF_HUB_DISABLE_TELEMETRY`: If True, disables telemetry for usage metrics. Alternatively, you can disable telemetry by setting `HF_HUB_OFFLINE=1`.
 
 #### Authentication
 
@@ -80,6 +80,12 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_ELASTICSEARCH_CA_PATH`: Path to CA cert for ES host. For example: `/full/path/to/root-ca.pem` (Optional)
 
+### Redis
+
+Redis is used by Argilla to store information about jobs to be processed on background. The following environment variables are useful to config how Argilla connects to Redis:
+
+- `ARGILLA_REDIS_URL`: A URL string that contains the necessary information to connect to a Redis instance (Default: `redis://localhost:6379/0`).
+
 ### Datasets
 
 - `ARGILLA_LABEL_SELECTION_OPTIONS_MAX_ITEMS`: Set the number of maximum items to be allowed by label and multi label questions (Default: `500`).
@@ -92,7 +98,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 ### Docker images only
 
-- `REINDEX_DATASET`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
+- `REINDEX_DATASETS`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
 
 - `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `""`).
 
@@ -100,6 +106,7 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `API_KEY`: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
 
+- `UVICORN_APP`: [Advanced] The name of the FastAPI app to run. This is useful when you want to extend the FastAPI app with additional routes or middleware. The default value is `argilla_server:app`.
 
 ## REST API docs
 

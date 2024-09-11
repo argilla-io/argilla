@@ -16,19 +16,23 @@ export class Field {
     this.initializeOriginal();
   }
 
-  public get isTextType() {
-    return this.fieldType === "text";
+  get isTextType() {
+    return this.type === "text";
+  }
+
+  get isImageType() {
+    return this.type === "image";
   }
 
   public get isChatType() {
-    return this.fieldType === "chat";
+    return this.type === "chat";
   }
 
-  private get fieldType() {
+  private get type() {
     return this.settings?.type?.toLowerCase() ?? null;
   }
 
-  public get isModified(): boolean {
+  get isModified(): boolean {
     return (
       this.title.trim() !== this.original.title ||
       this.settings.use_markdown !== this.original.settings.use_markdown
@@ -36,7 +40,7 @@ export class Field {
   }
 
   private MAX_TITLE_LENGTH = 500;
-  public validate(): Record<"title", string[]> {
+  validate(): Record<"title", string[]> {
     const validations: Record<"title", string[]> = {
       title: [],
     };
@@ -49,7 +53,7 @@ export class Field {
     return validations;
   }
 
-  public get isFieldValid(): boolean {
+  get isFieldValid(): boolean {
     return this.validate().title.length === 0;
   }
 

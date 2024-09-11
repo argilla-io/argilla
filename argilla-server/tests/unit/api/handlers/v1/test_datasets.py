@@ -15,7 +15,7 @@ import math
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type
-from unittest.mock import ANY, MagicMock
+from unittest.mock import ANY
 from uuid import UUID, uuid4
 
 import pytest
@@ -40,9 +40,9 @@ from argilla_server.enums import (
     DatasetStatus,
     OptionsOrder,
     RecordInclude,
+    RecordStatus,
     ResponseStatusFilter,
     SimilarityOrder,
-    RecordStatus,
     SortOrder,
 )
 from argilla_server.models import (
@@ -60,17 +60,17 @@ from argilla_server.models import (
     VectorSettings,
 )
 from argilla_server.search_engine import (
+    AndFilter,
+    MetadataFilterScope,
+    Order,
+    RangeFilter,
+    RecordFilterScope,
+    ResponseFilterScope,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
-    TextQuery,
-    AndFilter,
     TermsFilter,
-    MetadataFilterScope,
-    RangeFilter,
-    ResponseFilterScope,
-    Order,
-    RecordFilterScope,
+    TextQuery,
 )
 from tests.factories import (
     AdminFactory,
@@ -1720,7 +1720,6 @@ class TestSuiteDatasets:
         self,
         async_client: "AsyncClient",
         mock_search_engine: SearchEngine,
-        test_telemetry: MagicMock,
         db: "AsyncSession",
         owner: User,
         owner_auth_header: dict,
@@ -1818,10 +1817,6 @@ class TestSuiteDatasets:
 
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
-
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
-        )
 
     async def test_create_dataset_records_with_response_for_multiple_users(
         self,
@@ -2534,7 +2529,6 @@ class TestSuiteDatasets:
         async_client: "AsyncClient",
         mock_search_engine: "SearchEngine",
         db: "AsyncSession",
-        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
@@ -2606,10 +2600,6 @@ class TestSuiteDatasets:
 
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
-
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
-        )
 
     async def test_create_dataset_records_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
@@ -4583,7 +4573,6 @@ class TestSuiteDatasets:
         async_client: "AsyncClient",
         db: "AsyncSession",
         mock_search_engine: SearchEngine,
-        test_telemetry: MagicMock,
         owner_auth_header,
     ) -> None:
         dataset = await DatasetFactory.create()
@@ -4598,7 +4587,6 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-        test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
         mock_search_engine.create_index.assert_called_once_with(dataset)
 
     async def test_publish_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
