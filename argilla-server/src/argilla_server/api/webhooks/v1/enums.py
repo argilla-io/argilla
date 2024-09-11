@@ -16,5 +16,35 @@ from enum import Enum
 
 
 class WebhookEvent(str, Enum):
+    dataset_created = "dataset.created"
+    dataset_updated = "dataset.updated"
+    dataset_deleted = "dataset.deleted"
+    dataset_published = "dataset.published"
+
     response_created = "response.created"
-    ping = "ping"
+    response_updated = "response.updated"
+    response_deleted = "response.deleted"
+    response_upserted = "response.upserted"
+
+    def __str__(self):
+        return str(self.value)
+
+
+class DatasetEvent(str, Enum):
+    created = WebhookEvent.dataset_created.value
+    updated = WebhookEvent.dataset_updated.value
+    deleted = WebhookEvent.dataset_deleted.value
+    published = WebhookEvent.dataset_published.value
+
+    def __str__(self):
+        return str(self.value)
+
+
+class ResponseEvent(str, Enum):
+    created = WebhookEvent.response_created.value
+    updated = WebhookEvent.response_updated.value
+    deleted = WebhookEvent.response_deleted.value
+    upserted = WebhookEvent.response_upserted.value
+
+    def __str__(self):
+        return str(self.value)

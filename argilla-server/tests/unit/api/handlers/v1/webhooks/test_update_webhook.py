@@ -37,7 +37,10 @@ class TestUpdateWebhook:
             headers=owner_auth_header,
             json={
                 "url": "https://example.com/webhook",
-                "events": [WebhookEvent.ping],
+                "events": [
+                    WebhookEvent.response_created,
+                    WebhookEvent.response_updated,
+                ],
                 "enabled": False,
                 "description": "Test webhook",
             },
@@ -48,7 +51,10 @@ class TestUpdateWebhook:
             "id": str(webhook.id),
             "url": "https://example.com/webhook",
             "secret": webhook.secret,
-            "events": [WebhookEvent.ping],
+            "events": [
+                WebhookEvent.response_created,
+                WebhookEvent.response_updated,
+            ],
             "enabled": False,
             "description": "Test webhook",
             "inserted_at": webhook.inserted_at.isoformat(),
@@ -56,7 +62,10 @@ class TestUpdateWebhook:
         }
 
         assert webhook.url == "https://example.com/webhook"
-        assert webhook.events == [WebhookEvent.ping]
+        assert webhook.events == [
+            WebhookEvent.response_created,
+            WebhookEvent.response_updated,
+        ]
 
     async def test_update_webhook_with_url(self, async_client: AsyncClient, owner_auth_header: dict):
         webhook = await WebhookFactory.create()
@@ -90,7 +99,7 @@ class TestUpdateWebhook:
             self.url(webhook.id),
             headers=owner_auth_header,
             json={
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
             },
         )
 
@@ -99,14 +108,14 @@ class TestUpdateWebhook:
             "id": str(webhook.id),
             "url": webhook.url,
             "secret": webhook.secret,
-            "events": [WebhookEvent.ping],
+            "events": [WebhookEvent.response_updated],
             "enabled": True,
             "description": None,
             "inserted_at": webhook.inserted_at.isoformat(),
             "updated_at": webhook.updated_at.isoformat(),
         }
 
-        assert webhook.events == [WebhookEvent.ping]
+        assert webhook.events == [WebhookEvent.response_updated]
 
     async def test_update_webhook_with_enabled(self, async_client: AsyncClient, owner_auth_header: dict):
         webhook = await WebhookFactory.create()
@@ -189,14 +198,14 @@ class TestUpdateWebhook:
             headers={API_KEY_HEADER_NAME: admin.api_key},
             json={
                 "url": "https://example.com/webhook",
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
             },
         )
 
         assert response.status_code == 403
 
         assert webhook.url != "https://example.com/webhook"
-        assert webhook.events != [WebhookEvent.ping]
+        assert webhook.events != [WebhookEvent.response_updated]
 
     async def test_update_webhook_as_annotator(self, async_client: AsyncClient):
         annotator = await AnnotatorFactory.create()
@@ -208,14 +217,14 @@ class TestUpdateWebhook:
             headers={API_KEY_HEADER_NAME: annotator.api_key},
             json={
                 "url": "https://example.com/webhook",
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
             },
         )
 
         assert response.status_code == 403
 
         assert webhook.url != "https://example.com/webhook"
-        assert webhook.events != [WebhookEvent.ping]
+        assert webhook.events != [WebhookEvent.response_updated]
 
     async def test_update_webhook_without_authentication(self, async_client: AsyncClient):
         webhook = await WebhookFactory.create()
@@ -224,14 +233,14 @@ class TestUpdateWebhook:
             self.url(webhook.id),
             json={
                 "url": "https://example.com/webhook",
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
             },
         )
 
         assert response.status_code == 401
 
         assert webhook.url != "https://example.com/webhook"
-        assert webhook.events != [WebhookEvent.ping]
+        assert webhook.events != [WebhookEvent.response_updated]
 
     @pytest.mark.parametrize("invalid_url", ["", "example.com", "http:example.com", "https:example.com"])
     async def test_update_webhook_with_invalid_url(
@@ -244,16 +253,18 @@ class TestUpdateWebhook:
             headers=owner_auth_header,
             json={
                 "url": invalid_url,
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
             },
         )
 
         assert response.status_code == 422
 
         assert webhook.url != invalid_url
-        assert webhook.events != [WebhookEvent.ping]
+        assert webhook.events != [WebhookEvent.response_updated]
 
-    @pytest.mark.parametrize("invalid_events", [[], ["invalid_event"], [WebhookEvent.ping, "invalid_event"]])
+    @pytest.mark.parametrize(
+        "invalid_events", [[], ["invalid_event"], [WebhookEvent.response_updated, "invalid_event"]]
+    )
     async def test_update_webhook_with_invalid_events(
         self, async_client: AsyncClient, owner_auth_header: dict, invalid_events: list
     ):
@@ -280,12 +291,12 @@ class TestUpdateWebhook:
             self.url(webhook.id),
             headers=owner_auth_header,
             json={
-                "events": [WebhookEvent.ping, WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated, WebhookEvent.response_updated],
             },
         )
 
         assert response.status_code == 422
-        assert webhook.events != [WebhookEvent.ping, WebhookEvent.ping]
+        assert webhook.events != [WebhookEvent.response_updated, WebhookEvent.response_updated]
 
     @pytest.mark.parametrize("invalid_enabled", ["", "invalid", 123])
     async def test_update_webhook_with_invalid_enabled(
@@ -329,14 +340,14 @@ class TestUpdateWebhook:
             headers=owner_auth_header,
             json={
                 "url": None,
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
             },
         )
 
         assert response.status_code == 422
 
         assert webhook.url != None
-        assert webhook.events != [WebhookEvent.ping]
+        assert webhook.events != [WebhookEvent.response_updated]
 
     async def test_update_webhook_with_enabled_as_none(self, async_client: AsyncClient, owner_auth_header: dict):
         webhook = await WebhookFactory.create()
@@ -377,7 +388,7 @@ class TestUpdateWebhook:
             headers=owner_auth_header,
             json={
                 "url": "https://example.com/webhook",
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
                 "description": None,
             },
         )
@@ -387,7 +398,7 @@ class TestUpdateWebhook:
             "id": str(webhook.id),
             "url": "https://example.com/webhook",
             "secret": webhook.secret,
-            "events": [WebhookEvent.ping],
+            "events": [WebhookEvent.response_updated],
             "enabled": True,
             "description": None,
             "inserted_at": webhook.inserted_at.isoformat(),
@@ -395,7 +406,7 @@ class TestUpdateWebhook:
         }
 
         assert webhook.url == "https://example.com/webhook"
-        assert webhook.events == [WebhookEvent.ping]
+        assert webhook.events == [WebhookEvent.response_updated]
         assert webhook.description == None
 
     async def test_update_webhook_with_nonexistent_webhook_id(self, async_client: AsyncClient, owner_auth_header: dict):
@@ -406,7 +417,7 @@ class TestUpdateWebhook:
             headers=owner_auth_header,
             json={
                 "url": "https://example.com/webhook",
-                "events": [WebhookEvent.ping],
+                "events": [WebhookEvent.response_updated],
             },
         )
 

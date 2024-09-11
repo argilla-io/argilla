@@ -60,6 +60,9 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.api.webhooks.v1.enums import DatasetEvent, ResponseEvent
+from argilla_server.api.webhooks.v1.responses import notify_response_event as notify_response_event_v1
+from argilla_server.api.webhooks.v1.datasets import notify_dataset_event as notify_dataset_event_v1
 from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole, RecordStatus
@@ -129,7 +132,11 @@ async def create_dataset(db: AsyncSession, dataset_attrs: dict) -> Dataset:
 
     await DatasetCreateValidator.validate(db, dataset)
 
-    return await dataset.save(db)
+    await dataset.save(db)
+
+    await notify_dataset_event_v1(db, DatasetEvent.created, dataset)
+
+    return dataset
 
 
 async def _count_required_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
@@ -165,6 +172,8 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
 
     await db.commit()
 
+    await notify_dataset_event_v1(db, DatasetEvent.published, dataset)
+
     return dataset
 
 
@@ -175,6 +184,8 @@ async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict
 
     dataset_jobs.update_dataset_records_status_job.delay(dataset.id)
 
+    await notify_dataset_event_v1(db, DatasetEvent.updated, dataset)
+
     return dataset
 
 
@@ -184,6 +195,8 @@ async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset:
         await search_engine.delete_index(dataset)
 
     await db.commit()
+
+    await notify_dataset_event_v1(db, DatasetEvent.deleted, dataset)
 
     return dataset
 
@@ -864,6 +877,7 @@ async def create_response(
 
     await db.commit()
     await distribution.update_record_status(search_engine, record.id)
+    await notify_response_event_v1(db, ResponseEvent.created, response)
 
     return response
 
@@ -888,6 +902,7 @@ async def update_response(
 
     await db.commit()
     await distribution.update_record_status(search_engine, response.record_id)
+    await notify_response_event_v1(db, ResponseEvent.updated, response)
 
     return response
 
@@ -916,6 +931,7 @@ async def upsert_response(
 
     await db.commit()
     await distribution.update_record_status(search_engine, record.id)
+    await notify_response_event_v1(db, ResponseEvent.upserted, response)
 
     return response
 
@@ -930,6 +946,7 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
 
     await db.commit()
     await distribution.update_record_status(search_engine, response.record_id)
+    await notify_response_event_v1(db, ResponseEvent.deleted, response)
 
     return response
 

@@ -30,9 +30,9 @@ NOTIFY_EVENT_DEFAULT_TIMEOUT = httpx.Timeout(timeout=5.0)
 
 # NOTE: We are using standard webhooks implementation.
 # For more information take a look to https://www.standardwebhooks.com
-def notify_event(webhook: WebhookModel, type: str, timestamp: datetime, data: Dict) -> httpx.Response:
+def notify_event(webhook: WebhookModel, event: str, timestamp: datetime, data: Dict) -> httpx.Response:
     msg_id = _generate_msg_id()
-    payload = json.dumps(_build_payload(type, timestamp, data))
+    payload = json.dumps(_build_payload(event, timestamp, data))
     signature = Webhook(webhook.secret).sign(msg_id, timestamp, payload)
 
     return httpx.post(
@@ -59,6 +59,7 @@ def _build_headers(msg_id: str, timestamp: datetime, signature: str) -> Dict:
 def _build_payload(type: str, timestamp: datetime, data: Dict) -> Dict:
     return {
         "type": type,
+        "version": 1,
         "timestamp": timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "data": data,
     }

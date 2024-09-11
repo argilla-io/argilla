@@ -18,16 +18,16 @@ from datetime import datetime
 from rq.job import Job
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.models import Response
+from argilla_server.models import Dataset
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
-from argilla_server.api.schemas.v1.responses import Response as ResponseSchema
-from argilla_server.api.webhooks.v1.enums import ResponseEvent
+from argilla_server.api.schemas.v1.datasets import Dataset as DatasetSchema
+from argilla_server.api.webhooks.v1.enums import DatasetEvent
 
 
-async def notify_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> List[Job]:
+async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, dataset: Dataset) -> List[Job]:
     return await enqueue_notify_events(
         db,
-        event=response_event,
+        event=dataset_event,
         timestamp=datetime.utcnow(),
-        data=ResponseSchema.from_orm(response).dict(),
+        data=DatasetSchema.from_orm(dataset).dict(),
     )

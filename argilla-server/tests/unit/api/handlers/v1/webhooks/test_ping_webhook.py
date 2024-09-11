@@ -22,7 +22,6 @@ from standardwebhooks.webhooks import Webhook
 
 from argilla_server.contexts import info
 from argilla_server.constants import API_KEY_HEADER_NAME
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
 
 from tests.factories import AdminFactory, AnnotatorFactory, WebhookFactory
 
@@ -48,7 +47,8 @@ class TestPingWebhook:
 
         wh = Webhook(webhook.secret)
         assert wh.verify(headers=request.headers, data=request.content) == {
-            "type": WebhookEvent.ping,
+            "type": "ping",
+            "version": 1,
             "timestamp": timestamp,
             "data": {
                 "agent": "argilla-server",
