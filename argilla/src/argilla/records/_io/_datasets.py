@@ -116,6 +116,8 @@ def _uncast_label_questions_as_classlabels(hf_dataset: "HFDataset", columns: Lis
     """
     for column in columns:
         column = f"{column}.suggestion"
+        if column not in hf_dataset.column_names:
+            continue
         values = list(hf_dataset.unique(column))
         features = hf_dataset.features.copy()
         features[column] = ClassLabel(names=values)
