@@ -161,6 +161,8 @@ def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]]) 
         else:
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
+    if not questions:
+        questions.append(rg.TextQuestion(name="comment",...)
     settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
 
     return settings
