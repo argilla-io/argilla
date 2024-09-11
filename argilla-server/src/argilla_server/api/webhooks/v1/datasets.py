@@ -16,7 +16,6 @@ from typing import List
 from datetime import datetime
 
 from rq.job import Job
-from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Dataset
@@ -29,19 +28,13 @@ async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, da
     if dataset_event == DatasetEvent.deleted:
         return await _notify_dataset_deleted_event(db, dataset)
 
-    extended_dataset = await Dataset.get_or_raise(
-        db,
-        dataset.id,
-        options=[
-            selectinload(Dataset.workspace),
-        ],
-    )
+    await dataset.awaitable_attrs.workspace
 
     return await enqueue_notify_events(
         db,
         event=dataset_event,
         timestamp=datetime.utcnow(),
-        data=DatasetEventSchema.from_orm(extended_dataset).dict(),
+        data=DatasetEventSchema.from_orm(dataset).dict(),
     )
 
 

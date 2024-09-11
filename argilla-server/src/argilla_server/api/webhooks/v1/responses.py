@@ -16,10 +16,9 @@ from typing import List
 from datetime import datetime
 
 from rq.job import Job
-from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.models import Response, Record, User, Dataset
+from argilla_server.models import Response
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
 from argilla_server.api.webhooks.v1.schemas import ResponseEventSchema
 from argilla_server.api.webhooks.v1.enums import ResponseEvent
@@ -29,20 +28,18 @@ async def notify_response_event(db: AsyncSession, response_event: ResponseEvent,
     if response_event == ResponseEvent.deleted:
         return await _notify_response_deleted_event(db, response)
 
-    extended_response = await Response.get_or_raise(
-        db,
-        response.id,
-        options=[
-            selectinload(Response.record).selectinload(Record.dataset).selectinload(Dataset.workspace),
-            selectinload(Response.user),
-        ],
-    )
+    # NOTE: Not using selectinload or other eager loading strategies here to
+    # avoid replacing the current state of the resource that we want to notify.
+    await response.awaitable_attrs.user
+    await response.awaitable_attrs.record
+    await response.record.awaitable_attrs.dataset
+    await response.record.dataset.awaitable_attrs.workspace
 
     return await enqueue_notify_events(
         db,
         event=response_event,
         timestamp=datetime.utcnow(),
-        data=ResponseEventSchema.from_orm(extended_response).dict(),
+        data=ResponseEventSchema.from_orm(response).dict(),
     )
 
 
