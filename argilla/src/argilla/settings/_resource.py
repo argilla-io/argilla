@@ -260,7 +260,7 @@ class Settings(Resource):
 
     @classmethod
     def from_hub(
-        cls, repo_id: str, feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]]
+        cls, repo_id: str, feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]] = None
     ) -> "Settings":
         """Load the settings from the Hub"""
 
