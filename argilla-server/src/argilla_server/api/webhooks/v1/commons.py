@@ -59,6 +59,7 @@ def _build_headers(msg_id: str, timestamp: datetime, signature: str) -> Dict:
 def _build_payload(type: str, timestamp: datetime, data: Dict) -> Dict:
     return {
         "type": type,
+        "version": 1,
         "timestamp": timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
         "data": data,
     }
