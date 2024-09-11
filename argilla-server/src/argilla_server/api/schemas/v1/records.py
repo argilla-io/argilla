@@ -83,19 +83,12 @@ class Record(BaseModel):
 
 
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[StrictStr, None, List[ChatMessage]]]
+    fields: Dict[str, Union[List[ChatMessage], StrictStr, None]]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
     suggestions: Optional[List[SuggestionCreate]]
     vectors: Optional[Dict[str, List[float]]]
-
-    @validator("fields")
-    def validate_chat_messages(cls, fields):
-        for key, value in fields.items():
-            if isinstance(value, list) and all(isinstance(item, ChatMessage) for item in value):
-                fields[key] = [msg.dict() for msg in value]
-        return fields
 
     @validator("responses")
     @classmethod
@@ -156,7 +149,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[StrictStr, None, List[ChatMessage]]]]
+    fields: Optional[Dict[str, Union[List[ChatMessage], StrictStr, None]]]
 
 
 class RecordIncludeParam(BaseModel):
