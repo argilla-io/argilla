@@ -87,20 +87,24 @@ class RecordModel(ResourceModel):
     @classmethod
     def validate_fields(cls, fields: Dict[str, Union[str, None, List[Dict[str, str]]]]) -> Dict[str, FieldValue]:
         """Ensure fields are a dictionary of field names and values."""
+        return {field_name: cls._validate_field_value(field_value) for field_name, field_value in fields.items()}
 
-        validated_fields = {}
-        for field_name, field_value in fields.items():
-            if isinstance(field_value, list) and all(isinstance(message, dict) for message in field_value):
-                validated_chat_field_values = []
-                for message in field_value:
-                    if "role" not in message or "content" not in message:
-                        raise ValueError("Chat field values must contain 'role' and 'content' keys.")
-                    if not all(key in ["role", "content"] for key in message.keys()):
-                        warnings.warn(
-                            "Chat field values should only contain 'role' and 'content' keys. Other keys will be ignored by Argilla."
-                        )
-                        message = {key: value for key, value in message.items() if key in ["role", "content"]}
-                        validated_chat_field_values.append(ChatFieldValue(**message))
-                field_value = validated_chat_field_values
-            validated_fields[field_name] = field_value
-        return validated_fields
+    @classmethod
+    def _validate_field_value(cls, field_value: Union[str, None, List[Dict[str, str]]]) -> FieldValue:
+        if isinstance(field_value, list) and all(isinstance(message, dict) for message in field_value):
+            return cls._validate_chat_field(field_value)
+        return field_value
+
+    @classmethod
+    def _validate_chat_field(cls, chat_field: List[Dict[str, str]]) -> List[ChatFieldValue]:
+        validated_chat_field_values = []
+        for message in chat_field:
+            if "role" not in message or "content" not in message:
+                raise ValueError("Chat field values must contain 'role' and 'content' keys.")
+            if not all(key in ["role", "content"] for key in message.keys()):
+                warnings.warn(
+                    "Chat field values should only contain 'role' and 'content' keys. Other keys will be ignored by Argilla."
+                )
+                message = {key: value for key, value in message.items() if key in ["role", "content"]}
+            validated_chat_field_values.append(ChatFieldValue(**message))
+        return validated_chat_field_values
