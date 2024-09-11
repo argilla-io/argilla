@@ -143,10 +143,14 @@ def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]]) 
 
         elif feature_type == FeatureType.LABEL:
             fields.append(TextField(name=f"{name}_field"))
+            names = feature.get("names")
+            if names is None:
+                warnings.warn(f"Feature '{name}' has no labels. Skipping.")
+                continue
             questions.append(
                 LabelQuestion(
                     name=f"{name}_question",
-                    labels={str(i): label for i, label in enumerate(feature.get("names", []))},
+                    labels=names,
                 )
             )
             mapping[name] = (f"{name}_field", f"{name}_question")
