@@ -24,8 +24,12 @@ export default {
 </script>
 
 <style lang="scss">
+#span-image-field-container {
+  overflow: scroll;
+}
 #canvas {
   position: relative;
+  max-width: none;
 }
 .delete-btn {
   position: absolute;
