@@ -126,7 +126,7 @@ def _define_settings_from_features(
         Settings,
         TextField,
         TermsMetadataProperty,
-        IntMetadataProperty,
+        IntegerMetadataProperty,
         FloatMetadataProperty,
     )
 
@@ -177,7 +177,7 @@ def _define_settings_from_features(
                 mapping[name].append(f"{name}_metadata")
 
         elif feature_type == FeatureType.INT:
-            metadata.append(IntMetadataProperty(name=name))
+            metadata.append(IntegerMetadataProperty(name=name))
         elif feature_type == FeatureType.FLOAT:
             metadata.append(FloatMetadataProperty(name=name))
         else:
