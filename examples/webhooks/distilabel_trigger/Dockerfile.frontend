@@ -1,0 +1,26 @@
+# Use an official Node runtime as the base image
+FROM node:current-bullseye-slim
+
+USER root
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install git and python
+RUN apt-get update && apt-get install -y git python3 python3-pip
+
+# Clone the Argilla repository and checkout the feat/update-fields branch
+RUN git clone https://github.com/argilla-io/argilla.git
+
+WORKDIR /app/argilla/argilla-frontend
+
+RUN npm i
+
+# Build the app
+RUN npm run build
+
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Start the app
+CMD ["npm", "run", "start"]

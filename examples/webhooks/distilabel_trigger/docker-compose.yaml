@@ -1,0 +1,82 @@
+services:
+  argilla:
+    build:
+      context: .
+      dockerfile: Dockerfile.argilla
+    restart: unless-stopped
+    ports:
+      - "6900:6900"
+    environment:
+      ARGILLA_HOME_PATH: /var/lib/argilla
+      ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+      USERNAME: argilla
+      PASSWORD: 12345678
+      API_KEY: argilla.apikey
+    networks:
+      - argilla
+    volumes:
+      - argilladata:/var/lib/argilla
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - argilla
+    depends_on:
+      - argilla
+    environment:
+      - "API_BASE_URL=http://argilla:6900"
+      - "HOST=0.0.0.0"
+      - "PORT=3000"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-argilla-local
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - argilla
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticdata:/usr/share/elasticsearch/data/
+
+  run:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      ARGILLA_API_KEY: argilla.apikey
+      ARGILLA_API_URL: http://argilla:6900
+      MAX_RECORDS: 10
+      LLAMA_MODEL_ID: meta-llama/Meta-Llama-3.1-8B-Instruct
+      GEMMA_MODEL_ID: google/gemma-1.1-7b-it
+      ULTRAFEEDBACK_MODEL_ID: meta-llama/Meta-Llama-3.1-70B-Instruct
+    networks:
+      - argilla
+    depends_on:
+      - argilla
+      - elasticsearch
+    restart: unless-stopped
+
+networks:
+  argilla:
+    driver: bridge
+
+volumes:
+  argilladata:
+  elasticdata:

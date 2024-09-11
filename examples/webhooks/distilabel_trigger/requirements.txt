@@ -1,0 +1,6 @@
+argilla
+distilabel
+transformers
+fastapi
+uvicorn[standard]
+standardwebhooks

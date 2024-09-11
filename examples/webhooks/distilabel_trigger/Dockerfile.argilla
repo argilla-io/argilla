@@ -1,0 +1,30 @@
+# Use the latest Argilla server image as the base
+FROM argilla/argilla-server:latest
+
+# Switch to root user to perform installations
+USER root
+
+# Set the working directory
+WORKDIR /app
+
+# Install git
+RUN apt-get update && \
+    apt-get install -y git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Clone the Argilla repository and checkout the feat/update-fields branch
+RUN git clone https://github.com/argilla-io/argilla.git && \
+    cd argilla && \
+    git checkout feat/update-fields
+
+# Install the updated Argilla version
+RUN pip install --no-cache-dir ./argilla/argilla-server
+
+
+# Switch back to the non-root user (assuming the base image uses a non-root user)
+WORKDIR /home/argilla
+RUN chmod +x start_argilla_server.sh
+
+USER argilla
+# just make the server
