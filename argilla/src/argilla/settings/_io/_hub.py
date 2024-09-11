@@ -14,8 +14,9 @@
 
 import httpx
 import warnings
+from collections import defaultdict
 from enum import Enum
-from typing import Any, Dict, TYPE_CHECKING, Union, List
+from typing import Any, Dict, TYPE_CHECKING, Union, List, Optional
 
 from argilla._exceptions._hub import DatasetsServerException
 
@@ -106,7 +107,9 @@ def _is_chat_feature(sub_features):
     )
 
 
-def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]]) -> "Settings":
+def _define_settings_from_features(
+    features: Union[List[Dict], Dict[str, Any]], feature_mapping: Optional[Dict[str, str]]
+) -> "Settings":
     """Define the argilla settings from the features of a dataset.
 
     Parameters:
@@ -116,12 +119,25 @@ def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]]) 
         rg.Settings: The settings defined from the features.
     """
 
-    from argilla import ImageField, LabelQuestion, TextQuestion, Settings, TextField
+    from argilla import (
+        ImageField,
+        LabelQuestion,
+        TextQuestion,
+        Settings,
+        TextField,
+        TermsMetadataProperty,
+        IntMetadataProperty,
+        FloatMetadataProperty,
+    )
 
     fields = []
     questions = []
     metadata = []
-    mapping = {}
+    mapping = defaultdict(list)
+    feature_mapping = feature_mapping or {}
+    mapped_questions = [key for key, value in feature_mapping.items() if value == "question"]
+    mapped_fields = [key for key, value in feature_mapping.items() if value == "field"]
+    mapped_metadata = [key for key, value in feature_mapping.items() if value == "metadata"]
 
     for name, feature in features.items():
         feature_type = _map_feature_type(feature)
@@ -133,41 +149,52 @@ def _define_settings_from_features(features: Union[List[Dict], Dict[str, Any]]) 
             pass
 
         elif feature_type == FeatureType.TEXT:
-            fields.append(TextField(name=f"{name}_field"))
-            questions.append(TextQuestion(name=f"{name}_question"))
-            mapping[name] = (f"{name}_field", f"{name}_question")
+            if name not in mapped_questions:
+                fields.append(TextField(name=name))
+                mapping[name].append(name)
+            if name not in mapped_fields:
+                questions.append(TextQuestion(name=f"{name}_question"))
+                mapping[name].append(f"{name}_question")
 
         elif feature_type == FeatureType.IMAGE:
-            fields.append(ImageField(name=f"{name}_field"))
-            mapping[name] = f"{name}_field"
+            fields.append(ImageField(name=name))
 
         elif feature_type == FeatureType.LABEL:
-            fields.append(TextField(name=f"{name}_field"))
             names = feature.get("names")
             if names is None:
                 warnings.warn(f"Feature '{name}' has no labels. Skipping.")
                 continue
-            questions.append(
-                LabelQuestion(
-                    name=f"{name}_question",
-                    labels=names,
+            if name not in mapped_metadata:
+                questions.append(
+                    LabelQuestion(
+                        name=name,
+                        labels=names,
+                    )
                 )
-            )
-            mapping[name] = (f"{name}_field", f"{name}_question")
+                mapping[name].append(name)
+            if name not in mapped_questions:
+                metadata.append(TermsMetadataProperty(name=f"{name}_metadata", options=names))
+                mapping[name].append(f"{name}_metadata")
 
-        elif feature_type in [FeatureType.INT, FeatureType.FLOAT]:
-            # TODO: Implement metadata support to create `rg.FloatMetadata` or `rg.IntMetadata`
-            pass
+        elif feature_type == FeatureType.INT:
+            metadata.append(IntMetadataProperty(name=name))
+        elif feature_type == FeatureType.FLOAT:
+            metadata.append(FloatMetadataProperty(name=name))
         else:
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
+    mapping = {
+        key: value[0] if isinstance(value, list) and len(value) == 1 else tuple(value)
+        for key, value in feature_mapping.items()
+    }
+
     if not questions:
-        questions.append(rg.TextQuestion(name="comment",...)
+        questions.append(TextQuestion(name="comment", required=True))
     settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
 
     return settings
 
 
-def build_settings_from_repo_id(repo_id: str):
+def build_settings_from_repo_id(repo_id: str, mapping: Optional[Dict[str, str]] = None) -> "Settings":
     dataset_info = _get_dataset_features(repo_id)
-    return _define_settings_from_features(dataset_info)
+    return _define_settings_from_features(dataset_info, mapping)
