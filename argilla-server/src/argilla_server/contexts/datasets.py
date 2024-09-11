@@ -931,6 +931,7 @@ async def upsert_response(
 
     await db.commit()
     await distribution.update_record_status(search_engine, record.id)
+    await notify_response_event_v1(db, ResponseEvent.upserted, response)
 
     return response
 

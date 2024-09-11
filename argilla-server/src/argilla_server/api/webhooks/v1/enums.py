@@ -24,6 +24,7 @@ class WebhookEvent(str, Enum):
     response_created = "response.created"
     response_updated = "response.updated"
     response_deleted = "response.deleted"
+    response_upserted = "response.upserted"
 
     def __str__(self):
         return str(self.value)
@@ -43,6 +44,7 @@ class ResponseEvent(str, Enum):
     created = WebhookEvent.response_created.value
     updated = WebhookEvent.response_updated.value
     deleted = WebhookEvent.response_deleted.value
+    upserted = WebhookEvent.response_upserted.value
 
     def __str__(self):
         return str(self.value)
