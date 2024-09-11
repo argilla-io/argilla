@@ -17,6 +17,8 @@ import os
 from typing import Optional
 
 import httpx
+
+from argilla._api._webhooks import WebhooksAPI
 from argilla._exceptions._api import UnauthorizedError
 from argilla._exceptions._client import ArgillaCredentialsError
 
@@ -46,14 +48,18 @@ class ArgillaAPI:
     def __init__(self, http_client: httpx.Client):
         self.http_client = http_client
 
-        self.__workspaces = WorkspacesAPI(http_client=self.http_client)
-        self.__datasets = DatasetsAPI(http_client=self.http_client)
         self.__users = UsersAPI(http_client=self.http_client)
+        self.__workspaces = WorkspacesAPI(http_client=self.http_client)
+
+        self.__datasets = DatasetsAPI(http_client=self.http_client)
         self.__fields = FieldsAPI(http_client=self.http_client)
         self.__questions = QuestionsAPI(http_client=self.http_client)
-        self.__records = RecordsAPI(http_client=self.http_client)
         self.__vectors = VectorsAPI(http_client=self.http_client)
         self.__metadata = MetadataAPI(http_client=self.http_client)
+
+        self.__records = RecordsAPI(http_client=self.http_client)
+
+        self.__webhooks = WebhooksAPI(http_client=self.http_client)
 
     @property
     def workspaces(self) -> "WorkspacesAPI":
@@ -86,6 +92,10 @@ class ArgillaAPI:
     @property
     def metadata(self) -> "MetadataAPI":
         return self.__metadata
+
+    @property
+    def webhooks(self) -> "WebhooksAPI":
+        return self.__webhooks
 
 
 class APIClient:
