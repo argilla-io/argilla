@@ -39,6 +39,8 @@ class RecordModel(ResourceModel):
     suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(default_factory=tuple)
     external_id: Optional[Any] = Field(default=None)
 
+    dataset_id: Optional[uuid.UUID] = Field(default=None)
+
     @field_serializer("external_id", when_used="unless-none")
     def serialize_external_id(self, value: str) -> str:
         return str(value)
@@ -77,3 +79,11 @@ class RecordModel(ResourceModel):
         if external_id is None:
             external_id = uuid.uuid4()
         return external_id
+
+    @field_validator("vectors", mode="before")
+    @classmethod
+    def empty_if_none(cls, vectors: Optional[List[VectorModel]]) -> Optional[List[VectorModel]]:
+        """Ensure vectors is None if not provided."""
+        if vectors is None:
+            return []
+        return vectors
