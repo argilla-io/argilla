@@ -53,7 +53,10 @@ async def update_record_status(search_engine: SearchEngine, record_id: UUID) -> 
         await db.commit()
 
         if record.is_completed():
-            await notify_record_event(db, RecordEvent.completed, record)
+            extended_record = record.get(
+                db, record.id, options=[selectinload(Record.responses), selectinload(Record.suggestions)]
+            )
+            await notify_record_event(db, RecordEvent.completed, extended_record)
 
         return record
 
