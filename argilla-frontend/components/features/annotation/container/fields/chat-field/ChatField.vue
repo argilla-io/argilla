@@ -1,12 +1,16 @@
 <template>
-  <div class="chat" :key="title">
+  <div
+    class="chat"
+    :key="title"
+    :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
+  >
     <span class="chat__title" v-text="title" />
 
     <div v-for="({ role, content: text }, index) in content" :key="index">
       <span
         :class="[
           'chat__item',
-          role === 'user' || (checkIfAreLessThanTwoRoles && index === 0)
+          checkIfAreLessThanTwoRoles && index === 0
             ? 'chat__item--right'
             : 'chat__item--left',
         ]"
@@ -16,16 +20,14 @@
           v-if="role !== content[index - 1]?.role"
           v-text="role"
           :style="{
-            color: $color.generate([...role].reverse()).palette.dark,
+            color: getColorForRole(role),
           }"
         />
 
         <div
           class="chat__bubble"
           :style="{
-            borderColor: `hsl(from ${
-              $color.generate([...role].reverse()).palette.dark
-            } h s l / 20%)`,
+            borderColor: `hsl(from ${getColorForRole(role)} h s l / 20%)`,
           }"
         >
           <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
@@ -64,6 +66,20 @@ export default {
     },
     checkIfAreLessThanTwoRoles() {
       return this.getAllUniqueRolesNames.length <= 2;
+    },
+    colorForRole() {
+      return [
+        "hsl(117, 47%, 58%)",
+        "hsl(288, 47%, 58%)",
+        "hsl(189, 47%, 58%)",
+        "hsl(0, 47%, 58%)",
+        "hsl(50, 47%, 58%)",
+      ];
+    },
+  },
+  methods: {
+    getColorForRole(role) {
+      return this.colorForRole[this.getAllUniqueRolesNames.indexOf(role)];
     },
   },
 };
@@ -107,6 +123,9 @@ export default {
     border-width: 1px;
     @include font-size(16px);
     @include line-height(24px);
+    .--simple & {
+      border-color: var(--bg-opacity-2) !important;
+    }
   }
 
   &__role {
