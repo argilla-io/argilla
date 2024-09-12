@@ -61,3 +61,63 @@ class TestCreateDatasetField:
             "inserted_at": image_field.inserted_at.isoformat(),
             "updated_at": image_field.updated_at.isoformat(),
         }
+
+    async def test_create_dataset_chat_field(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "title": "title",
+                "required": True,
+                "settings": {"type": FieldType.chat},
+            },
+        )
+
+        chat_field = (await db.execute(select(Field))).scalar_one()
+
+        assert response.status_code == 201
+        assert response.json() == {
+            "id": str(chat_field.id),
+            "name": "name",
+            "title": "title",
+            "required": True,
+            "settings": {"type": FieldType.chat, "use_markdown": True},
+            "dataset_id": str(dataset.id),
+            "inserted_at": chat_field.inserted_at.isoformat(),
+            "updated_at": chat_field.updated_at.isoformat(),
+        }
+
+    async def test_create_dataset_chat_field_with_use_markdown(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "name": "name",
+                "title": "title",
+                "required": True,
+                "settings": {"type": FieldType.chat, "use_markdown": False},
+            },
+        )
+
+        chat_field = (await db.execute(select(Field))).scalar_one()
+
+        assert response.status_code == 201
+        assert response.json() == {
+            "id": str(chat_field.id),
+            "name": "name",
+            "title": "title",
+            "required": True,
+            "settings": {"type": FieldType.chat, "use_markdown": False},
+            "dataset_id": str(dataset.id),
+            "inserted_at": chat_field.inserted_at.isoformat(),
+            "updated_at": chat_field.updated_at.isoformat(),
+        }
