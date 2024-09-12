@@ -60,6 +60,7 @@ export default {
     color: var(--fg-primary);
   }
 }
+
 :deep(.start-page__intro) {
   margin-bottom: $base-space * 3;
   text-align: center;
@@ -82,6 +83,7 @@ export default {
     @include font-size(16px);
   }
 }
+
 :deep(.start-page__content) {
   display: inline-block;
   background: var(--bg-accent-grey-1);
@@ -111,6 +113,13 @@ export default {
     background: var(--bg-opacity-4);
     padding-inline: 4px;
     @include font-size(14px);
+  }
+}
+</style>
+<style lang="scss">
+[data-theme="dark"] .start-page__intro {
+  h1:after {
+    background: url("/images/logo-white.svg") center / contain no-repeat;
   }
 }
 </style>
