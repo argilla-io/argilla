@@ -522,6 +522,7 @@ export default {
     .record__wrapper {
       min-height: auto;
       height: auto;
+      flex: 0;
       &--fixed-height {
         max-height: 80%;
         height: 100%;
