@@ -1,4 +1,4 @@
-from tests.integration.conftest import client---
+---
 description: In this section, we will provide a step-by-step guide to show how to distribute the annotation task among team members.
 ---
 
