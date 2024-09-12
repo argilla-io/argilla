@@ -16,7 +16,7 @@
           v-if="role !== content[index - 1]?.role"
           v-text="role"
           :style="{
-            color: $color.generate(role).palette.dark,
+            color: $color.generate([...role].reverse()).palette.dark,
           }"
         />
 
@@ -24,7 +24,7 @@
           class="chat__bubble"
           :style="{
             borderColor: `hsl(from ${
-              $color.generate(role).palette.dark
+              $color.generate([...role].reverse()).palette.dark
             } h s l / 20%)`,
           }"
         >
