@@ -69,11 +69,11 @@ export default {
     },
     colorForRole() {
       return [
-        "hsl(117, 47%, 58%)",
-        "hsl(288, 47%, 58%)",
-        "hsl(189, 47%, 58%)",
-        "hsl(0, 47%, 58%)",
-        "hsl(50, 47%, 58%)",
+        "hsl(117, 30%, 58%)",
+        "hsl(288, 30%, 58%)",
+        "hsl(189, 30%, 58%)",
+        "hsl(0, 30%, 58%)",
+        "hsl(50, 30%, 58%)",
       ];
     },
   },
@@ -95,7 +95,7 @@ export default {
   &__item {
     display: flex;
     flex-direction: column;
-    gap: $base-space;
+    gap: calc($base-space / 2);
     &--right {
       align-items: flex-end;
       align-self: flex-end;
@@ -123,6 +123,8 @@ export default {
     border-width: 1px;
     @include font-size(16px);
     @include line-height(24px);
+    white-space: pre-wrap;
+    word-break: break-word;
     .--simple & {
       border-color: var(--bg-opacity-2) !important;
     }
