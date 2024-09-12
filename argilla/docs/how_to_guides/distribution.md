@@ -118,12 +118,18 @@ progress = dataset.progress(with_users_distribution=True)
 ```json
 {
     "total": 100,
-    "completed": 10,
-    "pending": 90,
+    "completed": 50,
+    "pending": 50,
     "users": {
-        "user_1": 5,
-        "user_2": 5
-    }
+        "user1": {
+           "completed": { "submitted": 10, "draft": 5, "discarded": 5},
+           "pending": { "submitted: 5, "draft": 10, "discarded": 10},
+        },
+        "user2": {
+           "completed": { "submitted": 20, "draft": 10, "discarded": 5},
+           "pending": { "submitted: 2, "draft": 25, "discarded": 0},
+        },
+        ...
 }
 ```
 
