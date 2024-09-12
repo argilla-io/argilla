@@ -19,7 +19,7 @@
     <div :id="`fields-content-${name}`" class="content-area --body1">
       <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
       <Sandbox v-else-if="isHTML" :fieldText="fieldText" />
-      <RenderMarkdownBaseComponent v-else :markdown="fieldText" />
+      <MarkdownRenderer v-else :markdown="fieldText" />
       <template>
         <style :key="name" scoped>
           ::highlight(search-text-highlight-{{name}}) {
