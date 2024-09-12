@@ -1,4 +1,4 @@
----
+from tests.integration.conftest import client---
 description: In this section, we will provide a step-by-step guide to show how to distribute the annotation task among team members.
 ---
 
@@ -78,3 +78,54 @@ dataset.settings.distribution.min_submitted = 4
 
 dataset.update()
 ```
+
+## Dataset progress
+
+You can check the progress of the annotation task by using the `dataset.progress` method.
+This method will return the number of records that have the status `completed`, `pending`, and the
+total number of records in the dataset.
+
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets("my_dataset")
+
+progress = dataset.progress()
+```
+```json
+{
+    "total": 100,
+    "completed": 10,
+    "pending": 90
+}
+```
+
+You can see also include to the progress the users distribution by setting the `with_users_distribution` parameter to `True`.
+This will return the number of records that have the status `completed`, `pending`, and the total number of records in the dataset,
+as well as the number of completed submissions per user.
+
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets("my_dataset")
+
+progress = dataset.progress(with_users_distribution=True)
+```
+```json
+{
+    "total": 100,
+    "completed": 10,
+    "pending": 90,
+    "users": {
+        "user_1": 5,
+        "user_2": 5
+    }
+}
+```
+
+!!! note
+    Since the completed records can contain submissions from multiple users, the number of completed submissions per user may not match the total number of completed records.
