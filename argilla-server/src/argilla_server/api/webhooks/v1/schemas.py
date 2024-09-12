@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from uuid import UUID
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 from argilla_server.pydantic_v1 import BaseModel, Field
@@ -42,6 +42,62 @@ class WorkspaceEventSchema(BaseModel):
         orm_mode = True
 
 
+class DatasetQuestionEventSchema(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    description: Optional[str]
+    required: bool
+    settings: dict
+    # dataset_id: UUID
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class DatasetFieldEventSchema(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    required: bool
+    settings: dict
+    # dataset_id: UUID
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class DatasetMetadataPropertyEventSchema(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    settings: dict
+    visible_for_annotators: bool
+    # dataset_id: UUID
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class DatasetVectorSettingsEventSchema(BaseModel):
+    id: UUID
+    name: str
+    title: str
+    dimensions: int
+    # dataset_id: UUID
+    inserted_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
 class DatasetEventSchema(BaseModel):
     id: UUID
     name: str
@@ -50,15 +106,13 @@ class DatasetEventSchema(BaseModel):
     status: str
     distribution: dict
     workspace: WorkspaceEventSchema
+    questions: List[DatasetQuestionEventSchema]
+    fields: List[DatasetFieldEventSchema]
+    metadata_properties: List[DatasetMetadataPropertyEventSchema]
+    vectors_settings: List[DatasetVectorSettingsEventSchema]
     last_activity_at: datetime
     inserted_at: datetime
     updated_at: datetime
-
-    # TODO: Additional expanded resources that can be added to DatasetSchema:
-    # * questions
-    # * fields
-    # * metadata_properties
-    # * vector_settings
 
     class Config:
         orm_mode = True
@@ -67,12 +121,26 @@ class DatasetEventSchema(BaseModel):
 class RecordEventSchema(BaseModel):
     id: UUID
     status: str
+    # TODO: Truncate fields so we don't respond with big field values.
+    # Or find another possible solution.
     fields: dict
     metadata: Optional[dict] = Field(None, alias="metadata_")
     external_id: Optional[str]
-    # responses: Can be retrieved using the responses endpoint.
-    # suggestions: Can be retrieved using the suggestions endpoint.
-    # vectors: We don't have and endpoint for these.
+    # responses:
+    # - Create a new `GET /api/v1/records/{record_id}/responses` endpoint.
+    # - Or use `/api/v1/records/{record_id}` endpoint.
+    # - Other possible alternative is to expand the responses here but using
+    #   a RecordResponseEventSchema not including the record inside.
+    # suggestions:
+    # - Can use `GET /api/v1/records/{record_id}/suggestions` endpoint.
+    # - Or use `/api/v1/records/{record_id}` endpoint.
+    # - Other possible alternative is to expand the suggestions here but using
+    #   a RecordSuggestionEventSchema not including the record inside.
+    # vectors:
+    # - Create a new `GET /api/v1/records/{record_id}/vectors` endpoint.
+    # - Or use `/api/v1/records/{record_id}` endpoint.
+    # - Other possible alternative is to expand the vectors here but using
+    #   a RecordVectorEventSchema not including the record inside.
     dataset: DatasetEventSchema
     inserted_at: datetime
     updated_at: datetime

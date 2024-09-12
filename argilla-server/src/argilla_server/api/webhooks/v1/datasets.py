@@ -31,6 +31,10 @@ async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, da
     # NOTE: Not using selectinload or other eager loading strategies here to
     # avoid replacing the current state of the resource that we want to notify.
     await dataset.awaitable_attrs.workspace
+    await dataset.awaitable_attrs.questions
+    await dataset.awaitable_attrs.fields
+    await dataset.awaitable_attrs.metadata_properties
+    await dataset.awaitable_attrs.vectors_settings
 
     return await enqueue_notify_events(
         db,

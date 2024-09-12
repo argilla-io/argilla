@@ -34,6 +34,10 @@ async def notify_response_event(db: AsyncSession, response_event: ResponseEvent,
     await response.awaitable_attrs.record
     await response.record.awaitable_attrs.dataset
     await response.record.dataset.awaitable_attrs.workspace
+    await response.record.dataset.awaitable_attrs.questions
+    await response.record.dataset.awaitable_attrs.fields
+    await response.record.dataset.awaitable_attrs.metadata_properties
+    await response.record.dataset.awaitable_attrs.vectors_settings
 
     return await enqueue_notify_events(
         db,
