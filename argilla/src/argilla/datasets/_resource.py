@@ -179,14 +179,14 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
         Parameters:
             with_users_distribution (bool): If True, the progress of the dataset is returned
-                with users distribution.
+                with users distribution. This includes the number of completed submissions for each user.
 
         Returns:
             dict: The progress of the dataset creation. The structure of the dictionary is:
             {
                 "total": int,
                 "completed": int,
-                "pending": float,
+                "pending": int,
                 "users": {
                     "username": int,
                     ...
@@ -197,9 +197,9 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
         if with_users_distribution:
             users_progress = self._api.list_users_progress(dataset_id=self._model.id)
-            progress_by_user = {user.username: user.completed.submitted for user in users_progress}
+            users_distribution = {user.username: user.completed.submitted for user in users_progress}
 
-            progress.update({"users": progress_by_user})
+            progress.update({"users": users_distribution})
 
         return progress
 
