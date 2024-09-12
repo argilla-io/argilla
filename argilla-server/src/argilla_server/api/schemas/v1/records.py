@@ -20,7 +20,7 @@ from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
-from argilla_server.api.schemas.v1.chat import ChatMessage
+from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
@@ -83,7 +83,7 @@ class Record(BaseModel):
 
 
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[List[ChatMessage], StrictStr, None]]
+    fields: Dict[str, Union[List[ChatFieldValue], StrictStr, None]]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
@@ -149,7 +149,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[List[ChatMessage], StrictStr, None]]]
+    fields: Optional[Dict[str, Union[List[ChatFieldValue], StrictStr, None]]]
 
 
 class RecordIncludeParam(BaseModel):

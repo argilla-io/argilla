@@ -12,8 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla_server.pydantic_v1 import BaseModel
-from pydantic import Field
+from argilla_server.pydantic_v1 import BaseModel, Field
 
 MAX_MESSAGE_LENGTH = 5000
 MAX_MESSAGE_COUNT = 1000
@@ -21,5 +20,5 @@ MAX_ROLE_LENGTH = 20
 
 
 class ChatFieldValue(BaseModel):
-    role: Field(..., max_length=MAX_ROLE_LENGTH, regex=r"^\S+$")
-    content: Field(..., max_length=MAX_MESSAGE_LENGTH)
+    role: str = Field(..., max_length=MAX_ROLE_LENGTH, regex=r"^\\S+$")
+    content: str = Field(..., max_length=MAX_MESSAGE_LENGTH)
