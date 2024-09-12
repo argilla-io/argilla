@@ -123,11 +123,11 @@ progress = dataset.progress(with_users_distribution=True)
     "users": {
         "user1": {
            "completed": { "submitted": 10, "draft": 5, "discarded": 5},
-           "pending": { "submitted: 5, "draft": 10, "discarded": 10},
+           "pending": { "submitted": 5, "draft": 10, "discarded": 10},
         },
         "user2": {
            "completed": { "submitted": 20, "draft": 10, "discarded": 5},
-           "pending": { "submitted: 2, "draft": 25, "discarded": 0},
+           "pending": { "submitted": 2, "draft": 25, "discarded": 0},
         },
         ...
 }
