@@ -183,6 +183,20 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
         Returns:
             dict: The progress of the dataset creation
+
+        An example of response when `with_users_distribution` is `True`:
+        ```json
+        {
+            "total": 100,
+            "completed": 50,
+            "pending": 50,
+            "users": {
+                "user1": 10,
+                "user2": 20,
+                ...
+        }
+        ```
+
         """
 
         progress = self._api.get_progress(dataset_id=self._model.id).model_dump()
