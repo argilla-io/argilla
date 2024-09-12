@@ -164,6 +164,7 @@ class ChatField(AbstractField):
         self,
         name: str,
         title: Optional[str] = None,
+        use_markdown: Optional[bool] = True,
         required: Optional[bool] = True,
         description: Optional[str] = None,
         _client: Optional[Argilla] = None,
@@ -174,6 +175,7 @@ class ChatField(AbstractField):
         Parameters:
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
+            use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to True.
             required (Optional[bool], optional): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
@@ -183,9 +185,17 @@ class ChatField(AbstractField):
             title=title,
             required=required,
             description=description,
-            settings=ChatFieldSettings(),
+            settings=ChatFieldSettings(use_markdown=use_markdown),
             _client=_client,
         )
+
+    @property
+    def use_markdown(self) -> Optional[bool]:
+        return self._model.settings.use_markdown
+
+    @use_markdown.setter
+    def use_markdown(self, value: bool) -> None:
+        self._model.settings.use_markdown = value
 
 
 Field = Union[TextField, ImageField, ChatField]
