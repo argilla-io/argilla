@@ -90,6 +90,14 @@ class RecordCreate(BaseModel):
     suggestions: Optional[List[SuggestionCreate]]
     vectors: Optional[Dict[str, List[float]]]
 
+    @validator("fields")
+    @classmethod
+    def validate_chat_fields(cls, fields):
+        for key, value in fields.items():
+            if isinstance(value, list) and all(isinstance(item, ChatFieldValue) for item in value):
+                fields[key] = [msg.dict() for msg in value]
+        return fields
+
     @validator("responses")
     @classmethod
     def check_user_id_is_unique(
