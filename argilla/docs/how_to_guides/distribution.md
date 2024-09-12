@@ -79,7 +79,7 @@ dataset.settings.distribution.min_submitted = 4
 dataset.update()
 ```
 
-## Dataset progress
+## Track your team's progress
 
 You can check the progress of the annotation task by using the `dataset.progress` method.
 This method will return the number of records that have the status `completed`, `pending`, and the

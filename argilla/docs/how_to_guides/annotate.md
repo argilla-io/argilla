@@ -126,7 +126,7 @@ You can track the progress of an annotation task in the progress bar shown in th
 You can also track your own progress in real time expanding the right-bottom panel inside the dataset page. There you can see the number of records for which you have `Pending`, `Draft`, `Submitted` and `Discarded` responses.
 
 !!! note
-    You can also explore the dataset progress from the SDK. Check the [Dataset progress](./distribution.md#dataset-progress) to know more about it.
+    You can also explore the dataset progress from the SDK. Check the [Track your team's progress](./distribution.md#track-your-teams-progress) to know more about it.
 
 ## Use search, filters, and sort
 
