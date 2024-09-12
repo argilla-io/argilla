@@ -75,7 +75,7 @@ class ImageFieldSettingsUpdate(BaseModel):
 
 class ChatFieldSettings(BaseModel):
     type: Literal[FieldType.chat]
-    use_markdown: bool
+    use_markdown: bool = True  # Just for dev purposes. Otherwise getting old datasets will fail
 
 
 class ChatFieldSettingsCreate(BaseModel):
