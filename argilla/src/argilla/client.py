@@ -65,7 +65,7 @@ class Argilla(_api.APIClient):
                 Defaults to `None`.
             timeout: the maximum time in seconds to wait for a request to the Argilla API
                 to be completed before raising an exception. Defaults to `60`.
-            retries: the number of times to retry a failed HTTP request to the Argilla API
+            retries: the number of times to retry the HTTP connection to the Argilla API
                 before raising an exception. Defaults to `5`.
         """
         super().__init__(api_url=api_url, api_key=api_key, timeout=timeout, retries=retries, **http_client_args)
