@@ -20,5 +20,5 @@ MAX_ROLE_LENGTH = 20
 
 
 class ChatFieldValue(BaseModel):
-    role: str = Field(..., max_length=MAX_ROLE_LENGTH, regex=r"^\\S+$")
+    role: str = Field(..., max_length=MAX_ROLE_LENGTH, regex=r"^\S+$")
     content: str = Field(..., max_length=MAX_MESSAGE_LENGTH)
