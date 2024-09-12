@@ -182,24 +182,9 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
                 with users distribution. This includes the number of completed submissions for each user.
 
         Returns:
-            dict: The progress of the dataset creation. The structure of the dictionary is:
-
-        Example:
-        ```python
-
-        dataset.progress(with_users_distribution=True)
-        # Output:
-        {
-            "total": 100,
-            "completed": 50,
-            "pending": 50,
-            "users": {
-                "user1": 10,
-                "user2": 20,
-                ...
-            }
-        }
+            dict: The progress of the dataset creation
         """
+
         progress = self._api.get_progress(dataset_id=self._model.id).model_dump()
 
         if with_users_distribution:
