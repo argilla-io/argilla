@@ -28,7 +28,6 @@ FIELD_CREATE_NAME_MAX_LENGTH = 200
 FIELD_CREATE_TITLE_MIN_LENGTH = 1
 FIELD_CREATE_TITLE_MAX_LENGTH = 500
 
-
 FieldName = Annotated[
     constr(
         regex=FIELD_CREATE_NAME_REGEX,
@@ -37,7 +36,6 @@ FieldName = Annotated[
     ),
     PydanticField(..., description="The name of the field"),
 ]
-
 
 FieldTitle = Annotated[
     constr(
@@ -77,14 +75,17 @@ class ImageFieldSettingsUpdate(BaseModel):
 
 class ChatFieldSettings(BaseModel):
     type: Literal[FieldType.chat]
+    use_markdown: bool
 
 
 class ChatFieldSettingsCreate(BaseModel):
     type: Literal[FieldType.chat]
+    use_markdown: bool = True
 
 
 class ChatFieldSettingsUpdate(BaseModel):
     type: Literal[FieldType.chat]
+    use_markdown: bool
 
 
 FieldSettings = Annotated[
@@ -96,7 +97,6 @@ FieldSettings = Annotated[
     PydanticField(..., discriminator="type"),
 ]
 
-
 FieldSettingsCreate = Annotated[
     Union[
         TextFieldSettingsCreate,
@@ -106,9 +106,12 @@ FieldSettingsCreate = Annotated[
     PydanticField(..., discriminator="type"),
 ]
 
-
 FieldSettingsUpdate = Annotated[
-    Union[TextFieldSettingsUpdate, ImageFieldSettingsUpdate, ChatFieldSettingsUpdate],
+    Union[
+        TextFieldSettingsUpdate,
+        ImageFieldSettingsUpdate,
+        ChatFieldSettingsUpdate,
+    ],
     PydanticField(..., discriminator="type"),
 ]
 
