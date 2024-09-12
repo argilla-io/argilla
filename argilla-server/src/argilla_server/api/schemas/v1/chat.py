@@ -14,10 +14,13 @@
 
 from argilla_server.pydantic_v1 import BaseModel, Field
 
+MIN_MESSAGE_LENGTH = 1
 MAX_MESSAGE_LENGTH = 5000
+MIN_ROLE_LENGTH = 1
 MAX_ROLE_LENGTH = 20
+MAX_ROLE_REGEX = r"^\S+$"
 
 
 class ChatFieldValue(BaseModel):
-    role: str = Field(..., max_length=MAX_ROLE_LENGTH, regex=r"^\S+$")
-    content: str = Field(..., max_length=MAX_MESSAGE_LENGTH)
+    role: str = Field(..., min_role_length=MIN_ROLE_LENGTH, max_length=MAX_ROLE_LENGTH, regex=r"^\S+$")
+    content: str = Field(..., min_message_length=MIN_MESSAGE_LENGTH, max_length=MAX_MESSAGE_LENGTH)
