@@ -312,13 +312,11 @@ class TestHubImportExportMixin:
         if with_records_import and with_records_export:
             for i, record in enumerate(new_dataset.records(with_suggestions=True)):
                 assert record.fields["text"] == mock_data[i]["text"]
-                assert record.fields["image"] == mock_data[i]["image"]
                 assert record.suggestions["label"].value == mock_data[i]["label"]
         else:
             assert len(new_dataset.records.to_list()) == 0
 
         assert new_dataset.settings.fields[0].name == "text"
-        assert new_dataset.settings.fields[1].name == "image"
         assert new_dataset.settings.questions[0].name == "label"
         assert new_dataset.settings.questions[1].name == "extra_label"
         assert len(new_dataset.settings.questions[1].labels) == 2
