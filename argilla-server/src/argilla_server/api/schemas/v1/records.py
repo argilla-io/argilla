@@ -41,6 +41,8 @@ TERMS_FILTER_VALUES_MAX_ITEMS = 250
 SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
 SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
 
+CHAT_FIELDS_MAX_MESSAGES = 500
+
 
 class RecordGetterDict(GetterDict):
     def get(self, key: str, default: Any) -> Any:
@@ -95,6 +97,10 @@ class RecordCreate(BaseModel):
     def validate_chat_fields(cls, fields):
         for key, value in fields.items():
             if isinstance(value, list) and all(isinstance(item, ChatFieldValue) for item in value):
+                if len(value) > CHAT_FIELDS_MAX_MESSAGES:
+                    raise ValueError(
+                        f"Number of chat messages in field '{key}' exceeds the maximum allowed value of {CHAT_FIELDS_MAX_MESSAGES}"
+                    )
                 fields[key] = [msg.dict() for msg in value]
         return fields
 
