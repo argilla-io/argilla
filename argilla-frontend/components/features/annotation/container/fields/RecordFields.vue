@@ -9,6 +9,7 @@
         settings,
         isTextType,
         isImageType,
+        isChatType,
       } in fields"
       :class="[isImageType ? 'fields__container--image' : '']"
       :key="id"
