@@ -92,8 +92,11 @@ class RecordModel(ResourceModel):
 
     @classmethod
     def _validate_field_value(cls, field_value: Union[str, None, List[Dict[str, str]]]) -> FieldValue:
-        if isinstance(field_value, list) and all(isinstance(message, dict) for message in field_value):
-            return cls._validate_chat_field(field_value)
+        if isinstance(field_value, list):
+            if all(isinstance(message, dict) for message in field_value):
+                return cls._validate_chat_field(field_value)
+            else:
+                raise ValueError("Field is not valid. List field values must contain dictionaries.")
         return field_value
 
     @classmethod
