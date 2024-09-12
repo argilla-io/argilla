@@ -12,19 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from argilla import (
     Argilla,
     Dataset,
-    LabelQuestion,
-    RatingQuestion,
+    ChatField,
     Settings,
     TermsMetadataProperty,
     TextField,
     ImageField,
     RatingQuestion,
     LabelQuestion,
-    Workspace,
     VectorField,
     Workspace,
 )
@@ -36,7 +33,11 @@ class TestCreateDatasets:
         dataset = Dataset(
             name=dataset_name,
             settings=Settings(
-                fields=[TextField(name="test_field"), ImageField(name="image")],
+                fields=[
+                    TextField(name="test_field"),
+                    ImageField(name="image"),
+                    ChatField(name="chat", use_markdown=False),
+                ],
                 questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
             ),
         )
