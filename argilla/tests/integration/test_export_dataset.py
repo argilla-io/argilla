@@ -280,6 +280,7 @@ class TestHubImportExportMixin:
         settings = rg.Settings(
             fields=[
                 rg.TextField(name="text"),
+                rg.ImageField(name="image"),
             ],
             questions=[
                 rg.LabelQuestion(name="label", labels=["positive", "negative"]),
