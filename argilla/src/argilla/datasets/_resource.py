@@ -191,8 +191,14 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             "completed": 50,
             "pending": 50,
             "users": {
-                "user1": 10,
-                "user2": 20,
+                "user1": {
+                   "completed": { "submitted": 10, "draft": 5, "discarded": 5},
+                   "pending": { "submitted: 5, "draft": 10, "discarded": 10}, 
+                },
+                "user2": {
+                   "completed": { "submitted": 20, "draft": 10, "discarded": 5},
+                   "pending": { "submitted: 2, "draft": 25, "discarded": 0}, 
+                },
                 ...
         }
         ```
@@ -203,7 +209,13 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
         if with_users_distribution:
             users_progress = self._api.list_users_progress(dataset_id=self._model.id)
-            users_distribution = {user.username: user.completed.submitted for user in users_progress}
+            users_distribution = {
+                user.username: {
+                    "completed": user.completed.model_dump(), 
+                    "pending": user.pending.model_dump(),
+                }
+                for user in users_progress
+            }
 
             progress.update({"users": users_distribution})
 
