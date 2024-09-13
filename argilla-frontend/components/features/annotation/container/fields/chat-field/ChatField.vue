@@ -10,7 +10,7 @@
       <span
         :class="[
           'chat__item',
-          checkIfAreLessThanTwoRoles && index === 0
+          checkIfAreLessThanTwoRoles && index % 2 == 0
             ? 'chat__item--right'
             : 'chat__item--left',
         ]"
