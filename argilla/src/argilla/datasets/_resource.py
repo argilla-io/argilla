@@ -175,7 +175,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         return self
 
     def progress(self, with_users_distribution: bool = False) -> dict:
-        """Returns the progress of the dataset creation.
+        """Returns the team's progress on the dataset.
 
         Parameters:
             with_users_distribution (bool): If True, the progress of the dataset is returned
