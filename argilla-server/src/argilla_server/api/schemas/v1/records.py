@@ -101,7 +101,7 @@ class RecordCreate(BaseModel):
                     raise ValueError(
                         f"Number of chat messages in field '{key}' exceeds the maximum allowed value of {CHAT_FIELDS_MAX_MESSAGES}"
                     )
-                fields[key] = [msg.dict() for msg in value]
+
         return fields
 
     @validator("responses")

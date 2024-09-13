@@ -19,6 +19,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from fastapi.encoders import jsonable_encoder
 
 from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpsert
 from argilla_server.api.schemas.v1.records_bulk import (
@@ -55,7 +56,7 @@ class CreateRecordsBulk:
         async with self._db.begin_nested():
             records = [
                 Record(
-                    fields=record_create.fields,
+                    fields=jsonable_encoder(record_create.fields),
                     metadata_=record_create.metadata,
                     external_id=record_create.external_id,
                     dataset_id=dataset.id,
@@ -193,7 +194,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
                 record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
                 if not record:
                     record = Record(
-                        fields=record_upsert.fields,
+                        fields=jsonable_encoder(record_upsert.fields),
                         metadata_=record_upsert.metadata,
                         external_id=record_upsert.external_id,
                         dataset_id=dataset.id,
