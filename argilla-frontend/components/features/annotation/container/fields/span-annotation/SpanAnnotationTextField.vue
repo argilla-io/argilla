@@ -250,6 +250,7 @@ export default {
   &__title-content {
     word-break: break-word;
     width: calc(100% - 30px);
+    color: var(--fg-secondary);
   }
   &__tooltip {
     display: flex;

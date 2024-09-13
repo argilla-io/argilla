@@ -154,6 +154,7 @@ export default {
     word-break: break-word;
     width: calc(100% - 30px);
     margin-bottom: $base-space;
+    color: var(--fg-secondary);
   }
 }
 </style>

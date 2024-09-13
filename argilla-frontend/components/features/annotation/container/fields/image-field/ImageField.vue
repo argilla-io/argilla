@@ -87,6 +87,7 @@ export default {
   &_title {
     word-break: break-word;
     width: calc(100% - 30px);
+    color: var(--fg-secondary);
   }
 }
 ::-webkit-scrollbar {
