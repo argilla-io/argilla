@@ -137,7 +137,6 @@ export default {
   &__title {
     word-break: break-word;
     width: calc(100% - 30px);
-    margin-bottom: $base-space * 3;
   }
 }
 </style>
