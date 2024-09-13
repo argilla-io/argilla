@@ -53,7 +53,7 @@ class TestUpdateField:
             "updated_at": image_field.updated_at.isoformat(),
         }
 
-    async def test_update_chat_field(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_update_chat_field_title(self, async_client: AsyncClient, owner_auth_header: dict):
         chat_field = await ChatFieldFactory.create()
 
         response = await async_client.patch(
@@ -70,7 +70,38 @@ class TestUpdateField:
             "name": chat_field.name,
             "title": "Updated title",
             "required": False,
-            "settings": {"type": FieldType.chat},
+            "settings": chat_field.settings,
+            "dataset_id": str(chat_field.dataset_id),
+            "inserted_at": chat_field.inserted_at.isoformat(),
+            "updated_at": chat_field.updated_at.isoformat(),
+        }
+
+    async def test_update_chat_field_use_markdown(self, async_client: AsyncClient, owner_auth_header: dict):
+        chat_field = await ChatFieldFactory.create(
+            settings={
+                "type": FieldType.chat,
+                "use_markdown": True,
+            }
+        )
+
+        response = await async_client.patch(
+            self.url(chat_field.id),
+            headers=owner_auth_header,
+            json={
+                "settings": {
+                    "type": "chat",
+                    "use_markdown": False,
+                }
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(chat_field.id),
+            "name": chat_field.name,
+            "title": chat_field.title,
+            "required": False,
+            "settings": {"type": FieldType.chat, "use_markdown": False},
             "dataset_id": str(chat_field.dataset_id),
             "inserted_at": chat_field.inserted_at.isoformat(),
             "updated_at": chat_field.updated_at.isoformat(),

@@ -63,3 +63,23 @@ class TestTextField:
         mock_use_markdown = True
         text_field = rg.TextField(name=name, use_markdown=mock_use_markdown, title=title)
         assert text_field.title == expected
+
+
+class TestChatField:
+    def test_create_chat_field(self):
+        field = rg.ChatField(name="chat")
+
+        assert field.name == "chat"
+        assert field.use_markdown is True
+
+    def test_create_chat_field_with_use_markdown(self):
+        field = rg.ChatField(name="chat", use_markdown=False)
+
+        assert field.name == "chat"
+        assert field.use_markdown is False
+
+    def test_update_chat_field_use_markdown(self):
+        field = rg.ChatField(name="chat", use_markdown=True)
+        field.use_markdown = False
+
+        assert field.use_markdown is False
