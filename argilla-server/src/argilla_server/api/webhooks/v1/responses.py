@@ -20,14 +20,37 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Response
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
-from argilla_server.api.schemas.v1.responses import Response as ResponseSchema
+from argilla_server.api.webhooks.v1.schemas import ResponseEventSchema
 from argilla_server.api.webhooks.v1.enums import ResponseEvent
 
 
 async def notify_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> List[Job]:
+    if response_event == ResponseEvent.deleted:
+        return await _notify_response_deleted_event(db, response)
+
+    # NOTE: Not using selectinload or other eager loading strategies here to
+    # avoid replacing the current state of the resource that we want to notify.
+    await response.awaitable_attrs.user
+    await response.awaitable_attrs.record
+    await response.record.awaitable_attrs.dataset
+    await response.record.dataset.awaitable_attrs.workspace
+    await response.record.dataset.awaitable_attrs.questions
+    await response.record.dataset.awaitable_attrs.fields
+    await response.record.dataset.awaitable_attrs.metadata_properties
+    await response.record.dataset.awaitable_attrs.vectors_settings
+
     return await enqueue_notify_events(
         db,
         event=response_event,
         timestamp=datetime.utcnow(),
-        data=ResponseSchema.from_orm(response).dict(),
+        data=ResponseEventSchema.from_orm(response).dict(),
+    )
+
+
+async def _notify_response_deleted_event(db: AsyncSession, response: Response) -> List[Job]:
+    return await enqueue_notify_events(
+        db,
+        event=ResponseEvent.deleted,
+        timestamp=datetime.utcnow(),
+        data={"id": response.id},
     )

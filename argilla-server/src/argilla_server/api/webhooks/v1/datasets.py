@@ -20,14 +20,34 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Dataset
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
-from argilla_server.api.schemas.v1.datasets import Dataset as DatasetSchema
+from argilla_server.api.webhooks.v1.schemas import DatasetEventSchema
 from argilla_server.api.webhooks.v1.enums import DatasetEvent
 
 
 async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, dataset: Dataset) -> List[Job]:
+    if dataset_event == DatasetEvent.deleted:
+        return await _notify_dataset_deleted_event(db, dataset)
+
+    # NOTE: Not using selectinload or other eager loading strategies here to
+    # avoid replacing the current state of the resource that we want to notify.
+    await dataset.awaitable_attrs.workspace
+    await dataset.awaitable_attrs.questions
+    await dataset.awaitable_attrs.fields
+    await dataset.awaitable_attrs.metadata_properties
+    await dataset.awaitable_attrs.vectors_settings
+
     return await enqueue_notify_events(
         db,
         event=dataset_event,
         timestamp=datetime.utcnow(),
-        data=DatasetSchema.from_orm(dataset).dict(),
+        data=DatasetEventSchema.from_orm(dataset).dict(),
+    )
+
+
+async def _notify_dataset_deleted_event(db: AsyncSession, dataset: Dataset) -> List[Job]:
+    return await enqueue_notify_events(
+        db,
+        event=DatasetEvent.deleted,
+        timestamp=datetime.utcnow(),
+        data={"id": dataset.id},
     )
