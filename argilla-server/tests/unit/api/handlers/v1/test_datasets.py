@@ -2067,13 +2067,13 @@ class TestSuiteDatasets:
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "str type expected",
-                            "type": "type_error.str",
+                            "msg": "value is not a valid list",
+                            "type": "type_error.list",
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "value is not a valid list",
-                            "type": "type_error.list",
+                            "msg": "str type expected",
+                            "type": "type_error.str",
                         },
                     ]
                 },
@@ -2172,13 +2172,13 @@ class TestSuiteDatasets:
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "str type expected",
-                            "type": "type_error.str",
+                            "msg": "value is not a valid list",
+                            "type": "type_error.list",
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "value is not a valid list",
-                            "type": "type_error.list",
+                            "msg": "str type expected",
+                            "type": "type_error.str",
                         },
                     ]
                 },

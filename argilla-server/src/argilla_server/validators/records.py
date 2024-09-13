@@ -56,7 +56,6 @@ class RecordValidatorBase(ABC):
         cls._validate_required_fields(dataset=dataset, fields=fields)
         cls._validate_extra_fields(dataset=dataset, fields=fields)
         cls._validate_image_fields(dataset=dataset, fields=fields)
-        cls._validate_chat_fields(dataset=dataset, fields=fields)
 
     @staticmethod
     def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
@@ -143,38 +142,6 @@ class RecordValidatorBase(ABC):
             raise UnprocessableEntityError(
                 f"image field {field_name!r} value is using an unsupported MIME type, supported MIME types are: {IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES!r}"
             )
-
-    @classmethod
-    def _validate_chat_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
-        for field in filter(lambda field: field.is_chat, dataset.fields):
-            cls._validate_chat_field(field.name, fields.get(field.name))
-
-    @classmethod
-    def _validate_chat_field(cls, field_name: str, field_value: Union[str, None]) -> None:
-        if field_value is None:
-            return
-
-        if len(field_value) > CHAT_FIELD_MAX_LENGTH:
-            raise UnprocessableEntityError(
-                f"chat field {field_name!r} value is exceeding the maximum length of {CHAT_FIELD_MAX_LENGTH} characters"
-            )
-
-        if not isinstance(field_value, list):
-            raise UnprocessableEntityError(f"chat field {field_name!r} value must be a list of dictionaries")
-
-        for i, value in enumerate(field_value):
-            if not isinstance(value, dict):
-                raise UnprocessableEntityError(
-                    f"chat field {field_name!r} value must be a list of dictionaries. Found a non-dictionary value at index {i}. Value is {value}"
-                )
-            if "content" not in value:
-                raise UnprocessableEntityError(
-                    f"chat field {field_name!r} value must be a list of dictionaries with a 'content' key. Missing 'content' key at index {i}. Value is {value}"
-                )
-            if "role" not in value:
-                raise UnprocessableEntityError(
-                    f"chat field {field_name!r} value must be a list of dictionaries with a 'role' key. Missing 'role' key at index {i}. Value is {value}"
-                )
 
 
 class RecordCreateValidator(RecordValidatorBase):
