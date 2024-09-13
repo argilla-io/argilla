@@ -3,6 +3,7 @@
     class="chat"
     :key="title"
     :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
+    :id="`fields-content-${name}`"
   >
     <span class="chat__title" v-text="title" />
 
@@ -32,6 +33,13 @@
         >
           <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
           <span v-else v-html="text" />
+          <template>
+            <style :key="name" scoped>
+              ::highlight(search-text-highlight-{{name}}) {
+                color: #ff675f;
+              }
+            </style>
+          </template>
         </div>
       </span>
     </div>
@@ -39,6 +47,7 @@
 </template>
 
 <script>
+import { useChatFieldViewModel } from "./useChatFieldViewModel";
 export default {
   props: {
     name: {
@@ -48,6 +57,10 @@ export default {
     title: {
       type: String,
       required: true,
+    },
+    searchText: {
+      type: String,
+      default: "",
     },
     content: {
       type: Array,
@@ -81,6 +94,9 @@ export default {
     getColorForRole(role) {
       return this.colorForRole[this.getAllUniqueRolesNames.indexOf(role)];
     },
+  },
+  setup(props) {
+    return useChatFieldViewModel(props);
   },
 };
 </script>
@@ -137,6 +153,7 @@ export default {
   &__title {
     word-break: break-word;
     width: calc(100% - 30px);
+    margin-bottom: $base-space;
   }
 }
 </style>
