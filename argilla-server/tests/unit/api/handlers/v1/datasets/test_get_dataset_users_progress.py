@@ -49,18 +49,96 @@ class TestGetDatasetUsersProgress:
             "users": [
                 {
                     "username": user_with_submitted.username,
-                    "completed": {"submitted": 3},
-                    "pending": {"submitted": 2},
+                    "completed": {"submitted": 3, "discarded": 0, "draft": 0},
+                    "pending": {"submitted": 2, "discarded": 0, "draft": 0},
                 },
                 {
                     "username": user_with_draft.username,
-                    "completed": {"draft": 3},
-                    "pending": {"draft": 2},
+                    "completed": {"submitted": 0, "discarded": 0, "draft": 3},
+                    "pending": {"submitted": 0, "discarded": 0, "draft": 2},
                 },
                 {
                     "username": user_with_discarded.username,
-                    "completed": {"discarded": 3},
-                    "pending": {"discarded": 2},
+                    "completed": {"submitted": 0, "discarded": 3, "draft": 0},
+                    "pending": {"submitted": 0, "discarded": 2, "draft": 0},
+                },
+            ]
+        }
+
+    async def test_get_dataset_users_progress_only_with_pending(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        user_with_submitted = await AnnotatorFactory.create()
+        user_with_draft = await AnnotatorFactory.create()
+        user_with_discarded = await AnnotatorFactory.create()
+
+        records_pending = await RecordFactory.create_batch(2, status=RecordStatus.pending, dataset=dataset)
+
+        for record in records_pending:
+            await ResponseFactory.create(record=record, user=user_with_submitted, status=ResponseStatus.submitted)
+            await ResponseFactory.create(record=record, user=user_with_draft, status=ResponseStatus.draft)
+            await ResponseFactory.create(record=record, user=user_with_discarded, status=ResponseStatus.discarded)
+
+        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+
+        assert response.status_code == 200, response.json()
+        assert response.json() == {
+            "users": [
+                {
+                    "username": user_with_submitted.username,
+                    "completed": {"submitted": 0, "discarded": 0, "draft": 0},
+                    "pending": {"submitted": 2, "discarded": 0, "draft": 0},
+                },
+                {
+                    "username": user_with_draft.username,
+                    "completed": {"submitted": 0, "discarded": 0, "draft": 0},
+                    "pending": {"submitted": 0, "discarded": 0, "draft": 2},
+                },
+                {
+                    "username": user_with_discarded.username,
+                    "completed": {"submitted": 0, "discarded": 0, "draft": 0},
+                    "pending": {"submitted": 0, "discarded": 2, "draft": 0},
+                },
+            ]
+        }
+
+    async def test_get_dataset_users_progress_only_with_completed(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+
+        user_with_submitted = await AnnotatorFactory.create()
+        user_with_draft = await AnnotatorFactory.create()
+        user_with_discarded = await AnnotatorFactory.create()
+
+        records_completed = await RecordFactory.create_batch(3, status=RecordStatus.completed, dataset=dataset)
+
+        for record in records_completed:
+            await ResponseFactory.create(record=record, user=user_with_submitted, status=ResponseStatus.submitted)
+            await ResponseFactory.create(record=record, user=user_with_draft, status=ResponseStatus.draft)
+            await ResponseFactory.create(record=record, user=user_with_discarded, status=ResponseStatus.discarded)
+
+        response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
+
+        assert response.status_code == 200, response.json()
+        assert response.json() == {
+            "users": [
+                {
+                    "username": user_with_submitted.username,
+                    "completed": {"submitted": 3, "discarded": 0, "draft": 0},
+                    "pending": {"submitted": 0, "discarded": 0, "draft": 0},
+                },
+                {
+                    "username": user_with_draft.username,
+                    "completed": {"submitted": 0, "discarded": 0, "draft": 3},
+                    "pending": {"submitted": 0, "discarded": 0, "draft": 0},
+                },
+                {
+                    "username": user_with_discarded.username,
+                    "completed": {"submitted": 0, "discarded": 3, "draft": 0},
+                    "pending": {"submitted": 0, "discarded": 0, "draft": 0},
                 },
             ]
         }
