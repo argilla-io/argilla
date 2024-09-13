@@ -179,7 +179,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
         Parameters:
             with_users_distribution (bool): If True, the progress of the dataset is returned
-                with users distribution. This includes the number of completed submissions for each user.
+                with users distribution. This includes the number of responses made by each user.
 
         Returns:
             dict: The progress of the dataset creation
