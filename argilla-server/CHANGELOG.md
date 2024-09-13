@@ -23,7 +23,7 @@ These are the section headers that we use:
 
 ### Fixed
 
-- Fixed error when computing dataset progress by users without pending or completed infor ([#5484](https://github.com/argilla-io/argilla/pull/5484))
+- Fixed error when computing dataset progress by users without responses related to pending or completed records. ([#5484](https://github.com/argilla-io/argilla/pull/5484))
 
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.0...v2.1.0)
 
