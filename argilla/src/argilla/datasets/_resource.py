@@ -182,9 +182,9 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
                 with users distribution. This includes the number of responses made by each user.
 
         Returns:
-            dict: The progress of the dataset creation
+            dict: The team's progress on the dataset.
 
-        An example of response when `with_users_distribution` is `True`:
+        An example of a response when `with_users_distribution` is `True`:
         ```json
         {
             "total": 100,
