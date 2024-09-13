@@ -1,47 +1,46 @@
 <template>
-  <div
-    class="chat"
-    :key="title"
-    :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
-    :id="`fields-content-${name}`"
-  >
+  <div class="chat" :key="title">
     <span class="chat__title" v-text="title" />
-
-    <div v-for="({ role, content: text }, index) in content" :key="index">
-      <span
-        :class="[
-          'chat__item',
-          checkIfAreLessThanTwoRoles && index % 2 == 0
-            ? 'chat__item--right'
-            : 'chat__item--left',
-        ]"
-      >
+    <div
+      :id="`fields-content-${name}`"
+      class="chat__wrapper"
+      :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
+    >
+      <div v-for="({ role, content: text }, index) in content" :key="index">
         <span
-          class="chat__role"
-          v-if="role !== content[index - 1]?.role"
-          v-text="role"
-          :style="{
-            color: getColorForRole(role),
-          }"
-        />
-
-        <div
-          class="chat__bubble"
-          :style="{
-            borderColor: `hsl(from ${getColorForRole(role)} h s l / 20%)`,
-          }"
+          :class="[
+            'chat__item',
+            checkIfAreLessThanTwoRoles && index % 2 == 0
+              ? 'chat__item--right'
+              : 'chat__item--left',
+          ]"
         >
-          <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
-          <span v-else v-html="text" />
-          <template>
-            <style :key="name" scoped>
-              ::highlight(search-text-highlight-{{name}}) {
-                color: #ff675f;
-              }
-            </style>
-          </template>
-        </div>
-      </span>
+          <span
+            class="chat__role"
+            v-if="role !== content[index - 1]?.role"
+            v-text="role"
+            :style="{
+              color: getColorForRole(role),
+            }"
+          />
+
+          <div
+            class="chat__bubble"
+            :style="{
+              borderColor: `hsl(from ${getColorForRole(role)} h s l / 20%)`,
+            }"
+          >
+            <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
+            <span v-else v-html="text" /><template>
+              <style :key="name" scoped>
+                ::highlight(search-text-highlight-{{name}}) {
+                  color: #ff675f;
+                }
+              </style>
+            </template>
+          </div>
+        </span>
+      </div>
     </div>
   </div>
 </template>
@@ -82,11 +81,11 @@ export default {
     },
     colorForRole() {
       return [
-        "hsl(117, 30%, 58%)",
-        "hsl(288, 30%, 58%)",
-        "hsl(189, 30%, 58%)",
-        "hsl(0, 30%, 58%)",
-        "hsl(50, 30%, 58%)",
+        "var(--fg-chat-1)",
+        "var(--fg-chat-2)",
+        "var(--fg-chat-3)",
+        "var(--fg-chat-4)",
+        "var(--fg-chat-5)",
       ];
     },
   },
@@ -104,10 +103,13 @@ export default {
 <style lang="scss" scoped>
 .chat {
   $this: &;
-  display: flex;
-  flex-direction: column;
-  gap: $base-space;
   margin-bottom: $base-space * 3;
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
+    padding: 0 $base-space * 2;
+  }
   &__item {
     display: flex;
     flex-direction: column;
@@ -151,9 +153,10 @@ export default {
   }
 
   &__title {
+    display: inline-block;
     word-break: break-word;
     width: calc(100% - 30px);
-    margin-bottom: $base-space;
+    margin-bottom: $base-space * 2;
     color: var(--fg-secondary);
   }
 }
