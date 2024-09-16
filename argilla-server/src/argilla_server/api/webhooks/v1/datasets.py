@@ -16,6 +16,8 @@ from typing import List
 from datetime import datetime
 
 from rq.job import Job
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Dataset
@@ -28,13 +30,20 @@ async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, da
     if dataset_event == DatasetEvent.deleted:
         return await _notify_dataset_deleted_event(db, dataset)
 
-    # NOTE: Not using selectinload or other eager loading strategies here to
-    # avoid replacing the current state of the resource that we want to notify.
-    await dataset.awaitable_attrs.workspace
-    await dataset.awaitable_attrs.questions
-    await dataset.awaitable_attrs.fields
-    await dataset.awaitable_attrs.metadata_properties
-    await dataset.awaitable_attrs.vectors_settings
+    # NOTE: Force loading required association resources required by the event schema
+    (
+        await db.execute(
+            select(Dataset)
+            .where(Dataset.id == dataset.id)
+            .options(
+                selectinload(Dataset.workspace),
+                selectinload(Dataset.questions),
+                selectinload(Dataset.fields),
+                selectinload(Dataset.metadata_properties),
+                selectinload(Dataset.vectors_settings),
+            )
+        )
+    ).scalar_one()
 
     return await enqueue_notify_events(
         db,

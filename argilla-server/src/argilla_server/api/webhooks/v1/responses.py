@@ -15,10 +15,13 @@
 from typing import List
 from datetime import datetime
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 from rq.job import Job
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.models import Response
+from argilla_server.models import Response, Record, Dataset
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
 from argilla_server.api.webhooks.v1.schemas import ResponseEventSchema
 from argilla_server.api.webhooks.v1.enums import ResponseEvent
@@ -28,16 +31,25 @@ async def notify_response_event(db: AsyncSession, response_event: ResponseEvent,
     if response_event == ResponseEvent.deleted:
         return await _notify_response_deleted_event(db, response)
 
-    # NOTE: Not using selectinload or other eager loading strategies here to
-    # avoid replacing the current state of the resource that we want to notify.
-    await response.awaitable_attrs.user
-    await response.awaitable_attrs.record
-    await response.record.awaitable_attrs.dataset
-    await response.record.dataset.awaitable_attrs.workspace
-    await response.record.dataset.awaitable_attrs.questions
-    await response.record.dataset.awaitable_attrs.fields
-    await response.record.dataset.awaitable_attrs.metadata_properties
-    await response.record.dataset.awaitable_attrs.vectors_settings
+    # NOTE: Force loading required association resources required by the event schema
+    (
+        await db.execute(
+            select(Response)
+            .where(Response.id == response.id)
+            .options(
+                selectinload(Response.user),
+                selectinload(Response.record).options(
+                    selectinload(Record.dataset).options(
+                        selectinload(Dataset.workspace),
+                        selectinload(Dataset.questions),
+                        selectinload(Dataset.fields),
+                        selectinload(Dataset.metadata_properties),
+                        selectinload(Dataset.vectors_settings),
+                    ),
+                ),
+            ),
+        )
+    ).scalar_one()
 
     return await enqueue_notify_events(
         db,
