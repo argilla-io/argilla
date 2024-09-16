@@ -200,7 +200,6 @@ RecordStatusEnum = SAEnum(RecordStatus, name="record_status_enum")
 
 class Record(DatabaseModel):
     __tablename__ = "records"
-    __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
     fields: Mapped[dict] = mapped_column(JSON, default={})
     metadata_: Mapped[Optional[dict]] = mapped_column("metadata", MutableDict.as_mutable(JSON), nullable=True)
@@ -235,6 +234,8 @@ class Record(DatabaseModel):
         passive_deletes=True,
         order_by=Vector.inserted_at.asc(),
     )
+
+    __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
     def is_completed(self) -> bool:
         return self.status == RecordStatus.completed
