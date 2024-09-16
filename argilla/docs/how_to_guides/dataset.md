@@ -470,58 +470,57 @@ Once a dataset is published, there are limited things you can update. Here is a 
 
 === "Fields"
     | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|✅|✅|
-    |Required|❌|❌|
-    |Use markdown|✅|✅|
+    | ---------- | -------- | ------- |
+    |Name        |❌        |❌        |
+    |Title       |✅        |✅        |
+    |Required    |❌        |❌        |
+    |Use markdown|✅        |✅        |
 
 === "Questions"
-    | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|❌|✅|
-    |Description|❌|✅|
-    |Required|❌|❌|
-    |Labels|❌|❌|
-    |Values|❌|❌|
-    |Label order|❌|✅|
-    |Suggestions first|❌|✅|
-    |Visible labels|❌|✅|
-    |Field|❌|❌|
-    |Allow overlapping|❌|❌|
-    |Use markdown|❌|✅|
+    | Attributes      | From SDK | From UI |
+    | --------------- | -------- | ------- |
+    |Name             |❌        |❌        |
+    |Title            |❌        |✅        |
+    |Description      |❌        |✅        |
+    |Required         |❌        |❌        |
+    |Labels           |❌        |❌        |
+    |Values           |❌        |❌        |
+    |Label order      |❌        |✅        |
+    |Suggestions first|❌        |✅        |
+    |Visible labels   |❌        |✅        |
+    |Field            |❌        |❌        |
+    |Allow overlapping|❌        |❌        |
+    |Use markdown     |❌        |✅        |
 
 === "Metadata"
-    | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|✅|✅|
-    |Options|❌|❌|
-    |Minimum value|❌|❌|
-    |Maximum value|❌|❌|
-    |Visible for annotators|✅|✅|
-    |Allow extra metadata|✅|✅|
+    | Attributes           | From SDK | From UI |
+    | -------------------- | -------- | ------- |
+    |Name                  |❌        |❌        |
+    |Title                 |✅        |✅        |
+    |Options               |❌        |❌        |
+    |Minimum value         |❌        |❌        |
+    |Maximum value         |❌        |❌        |
+    |Visible for annotators|✅        |✅        |
+    |Allow extra metadata  |✅        |✅        |
 
 
 === "Vectors"
     | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|✅|✅|
-    |Dimensions|❌|❌|
+    | ---------- | -------- | ------- |
+    |Name        |❌        |❌        |
+    |Title       |✅        |✅        |
+    |Dimensions  |❌        |❌        |
 
 === "Guidelines"
     | From SDK | From UI |
-    | ----- | -------------- |
-    |✅|✅|
+    | -------- | ------- |
+    |✅        |✅        |
 
 === "Distribution"
-    | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Minimum submitted|✅*|✅*|
+    | Attributes      | From SDK | From UI |
+    | --------------- | -------- | ------- |
+    |Minimum submitted|✅        |✅        |
 
-    > \* Can be changed as long as the dataset doesn't have any responses.
 
 To modify these attributes, you can simply set the new value of the attributes you wish to change and call the `update` method on the `Dataset` object.
 
@@ -538,7 +537,7 @@ dataset.settings.metadata["my_metadata"].visible_for_annotators = False
 dataset.update()
 ```
 
-You can also add and delete metadata properties and vector fields using the `add` and `delete` methods.
+You can also **add and delete metadata properties and vector fields** using the `add` and `delete` methods.
 
 === "Add"
 
