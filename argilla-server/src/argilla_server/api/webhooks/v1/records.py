@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import List
 
 from rq.job import Job
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -29,19 +30,19 @@ async def notify_record_event(db: AsyncSession, record_event: RecordEvent, recor
     if record_event == RecordEvent.deleted:
         return await _notify_record_deleted_event(db, record)
 
-    await Record.get(
-        db,
-        record.id,
-        [
-            selectinload(Record.dataset).options(
+    (
+        await db.execute(
+            select(Dataset)
+            .filter_by(id=record.dataset_id)
+            .options(
                 selectinload(Dataset.workspace),
                 selectinload(Dataset.fields),
                 selectinload(Dataset.questions),
                 selectinload(Dataset.metadata_properties),
                 selectinload(Dataset.vectors_settings),
             )
-        ],
-    )
+        )
+    ).scalar_one()
 
     return await enqueue_notify_events(
         db,
