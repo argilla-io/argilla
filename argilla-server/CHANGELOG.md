@@ -23,6 +23,7 @@ These are the section headers that we use:
 - Added new endpoints to create, update, ping and delete webhooks. ([#5453](https://github.com/argilla-io/argilla/pull/5453))
 - Added new webhook events when responses are created, updated, deleted or upserted. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 - Added new webhook events when datasets are created, updated, deleted or published. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
+- Added new webhook events when records are created, updated, deleted or completed. ([#5489](https://github.com/argilla-io/argilla/pull/5489))
 
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.0...v2.1.0)
 
