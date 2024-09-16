@@ -20,8 +20,8 @@ import json
 from httpx import Response
 from standardwebhooks.webhooks import Webhook
 
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
-from argilla_server.api.webhooks.v1.ping import notify_ping_event
+from argilla_server.webhooks.v1.enums import WebhookEvent
+from argilla_server.webhooks.v1.ping import notify_ping_event
 from argilla_server.contexts import info
 
 from tests.factories import WebhookFactory

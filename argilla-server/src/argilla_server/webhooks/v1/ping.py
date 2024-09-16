@@ -18,8 +18,8 @@ from datetime import datetime
 
 from argilla_server.models import Webhook
 from argilla_server.contexts import info
-from argilla_server.api.webhooks.v1.commons import notify_event
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
+from argilla_server.webhooks.v1.commons import notify_event
+from argilla_server.webhooks.v1.enums import WebhookEvent
 
 
 def notify_ping_event(webhook: Webhook) -> httpx.Response:

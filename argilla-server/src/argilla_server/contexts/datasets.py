@@ -60,10 +60,10 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
-from argilla_server.api.webhooks.v1.enums import DatasetEvent, ResponseEvent, RecordEvent
-from argilla_server.api.webhooks.v1.records import notify_record_event as notify_record_event_v1
-from argilla_server.api.webhooks.v1.responses import notify_response_event as notify_response_event_v1
-from argilla_server.api.webhooks.v1.datasets import notify_dataset_event as notify_dataset_event_v1
+from argilla_server.webhooks.v1.enums import DatasetEvent, ResponseEvent, RecordEvent
+from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
+from argilla_server.webhooks.v1.responses import notify_response_event as notify_response_event_v1
+from argilla_server.webhooks.v1.datasets import notify_dataset_event as notify_dataset_event_v1
 from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole, RecordStatus

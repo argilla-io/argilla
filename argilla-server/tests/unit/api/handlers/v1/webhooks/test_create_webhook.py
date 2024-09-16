@@ -19,7 +19,7 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
+from argilla_server.webhooks.v1.enums import WebhookEvent
 from argilla_server.models import Webhook
 from argilla_server.constants import API_KEY_HEADER_NAME
 
