@@ -187,9 +187,7 @@ class HFDatasetsIO:
             hf_dataset: IterableDataset = hf_dataset.to_iterable_dataset()
         except AttributeError:
             pass
-        record_dicts = []
-        for example in hf_dataset:
-            record_dicts.append(example)
+        record_dicts = [example for example in hf_dataset]
         return record_dicts
 
     @staticmethod
