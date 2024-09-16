@@ -269,5 +269,5 @@ class HubImportExportMixin(DiskImportExportMixin):
                     try:
                         sample_huggingface_record[key] = pil_to_data_uri(value)
                     except TypeError:
-                        sample_huggingface_record[key] = "Value not serializable"            
+                        sample_huggingface_record[key] = "Value not serializable"
             return sample_huggingface_record
