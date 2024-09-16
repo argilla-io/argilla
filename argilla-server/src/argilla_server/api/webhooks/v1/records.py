@@ -18,17 +18,47 @@ from typing import List
 from fastapi.encoders import jsonable_encoder
 from rq.job import Job
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from argilla_server.api.schemas.v1.records import Record as RecordSchema
 from argilla_server.api.webhooks.v1.enums import RecordEvent
+from argilla_server.api.webhooks.v1.schemas import RecordEventSchema
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
-from argilla_server.models import Record
+from argilla_server.models import Record, Dataset
 
 
 async def notify_record_event(db: AsyncSession, record_event: RecordEvent, record: Record) -> List[Job]:
+    if record_event == RecordEvent.deleted:
+        return await _notify_record_deleted_event(db, record)
+
+    await Record.get(
+        db,
+        record.id,
+        [
+            selectinload(Record.dataset).options(
+                selectinload(Dataset.workspace),
+                selectinload(Dataset.fields),
+                selectinload(Dataset.questions),
+                selectinload(Dataset.metadata_properties),
+                selectinload(Dataset.vectors_settings),
+            )
+        ],
+    )
+
+    event = RecordEventSchema.from_orm(record)
+
+
     return await enqueue_notify_events(
         db,
         event=record_event,
         timestamp=datetime.utcnow(),
-        data=jsonable_encoder(RecordSchema.from_orm(record)),
+        data=jsonable_encoder(event),
+    )
+
+
+async def _notify_record_deleted_event(db: AsyncSession, record: Record) -> List[Job]:
+    return await enqueue_notify_events(
+        db,
+        event=RecordEvent.deleted,
+        timestamp=datetime.utcnow(),
+        data={"id": record.id},
     )
