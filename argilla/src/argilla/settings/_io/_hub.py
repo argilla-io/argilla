@@ -38,6 +38,12 @@ class FeatureType(Enum):
     FLOAT = "float"
 
 
+class AttributeType(Enum):
+    QUESTION = "question"
+    FIELD = "field"
+    METADATA = "metadata"
+
+
 def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
     """Get the features of a dataset from the datasets server using the repo_id and config.
     Extract the features from the response and return them as a dictionary.
@@ -96,6 +102,18 @@ def _map_feature_type(feature):
         warnings.warn(f"Unsupported feature type. hf_type: {hf_type}, dtype: {dtype}")
 
 
+def _map_attribute_type(attribute_type):
+    """Map the attribute type to the corresponding AttributeType enum."""
+    if attribute_type == "question":
+        return AttributeType.QUESTION
+    elif attribute_type == "field":
+        return AttributeType.FIELD
+    elif attribute_type == "metadata":
+        return AttributeType.METADATA
+    else:
+        warnings.warn(f"Unsupported attribute type: {attribute_type}")
+
+
 def _is_chat_feature(sub_features):
     """Check if the sub_features correspond to an rg.ChatField."""
     return (
@@ -136,13 +154,10 @@ def _define_settings_from_features(
     metadata = []
     mapping = defaultdict(list)
     feature_mapping = feature_mapping or {}
-    mapped_questions = [key for key, value in feature_mapping.items() if value == "question"]
-    mapped_fields = [key for key, value in feature_mapping.items() if value == "field"]
-    mapped_metadata = [key for key, value in feature_mapping.items() if value == "metadata"]
 
     for name, feature in features.items():
         feature_type = _map_feature_type(feature)
-
+        attribute_definition = _map_attribute_type(feature_mapping.get(name))
         if feature_type == FeatureType.CHAT:
             # TODO: Implement chat support to create `rg.ChatField`
             # fields.append(rg.ChatField(name=f"{name}_field"))
@@ -150,12 +165,19 @@ def _define_settings_from_features(
             pass
 
         elif feature_type == FeatureType.TEXT:
-            if name not in mapped_questions:
+            if attribute_definition == AttributeType.QUESTION:
+                questions.append(TextQuestion(name=name))
+            elif attribute_definition == AttributeType.FIELD:
+                fields.append(TextField(name=name))
+            elif attribute_definition is None:
+                questions.append(TextQuestion(name=f"{name}_question"))
                 fields.append(TextField(name=name))
                 mapping[name].append(name)
-            if name not in mapped_fields:
-                questions.append(TextQuestion(name=f"{name}_question"))
                 mapping[name].append(f"{name}_question")
+            else:
+                raise SettingsError(
+                    f"Attribute definition '{attribute_definition}' is not supported for feature '{name}'."
+                )
 
         elif feature_type == FeatureType.IMAGE:
             fields.append(ImageField(name=name))
@@ -165,18 +187,29 @@ def _define_settings_from_features(
             if names is None:
                 warnings.warn(f"Feature '{name}' has no labels. Skipping.")
                 continue
-            if name not in mapped_metadata:
+            if attribute_definition == AttributeType.QUESTION:
                 questions.append(
                     LabelQuestion(
                         name=name,
                         labels=names,
                     )
                 )
+            elif attribute_definition == AttributeType.FIELD:
+                metadata.append(TermsMetadataProperty(name=name))
+            elif attribute_definition is None:
+                questions.append(
+                    LabelQuestion(
+                        name=name,
+                        labels=names,
+                    )
+                )
+                metadata.append(TermsMetadataProperty(name=f"{name}_metadata"))
                 mapping[name].append(name)
-            if name not in mapped_questions:
-                metadata.append(TermsMetadataProperty(name=f"{name}_metadata", options=names))
                 mapping[name].append(f"{name}_metadata")
-
+            else:
+                raise SettingsError(
+                    f"Attribute definition '{attribute_definition}' is not supported for feature '{name}'."
+                )
         elif feature_type == FeatureType.INT:
             metadata.append(IntegerMetadataProperty(name=name))
         elif feature_type == FeatureType.FLOAT:
@@ -185,8 +218,7 @@ def _define_settings_from_features(
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
     mapping = {
-        key: value[0] if isinstance(value, list) and len(value) == 1 else tuple(value)
-        for key, value in feature_mapping.items()
+        key: value[0] if isinstance(value, list) and len(value) == 1 else tuple(value) for key, value in mapping.items()
     }
 
     if not questions:
@@ -199,5 +231,5 @@ def _define_settings_from_features(
 
 
 def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str, str]] = None) -> "Settings":
-    dataset_info = _get_dataset_features(repo_id)
-    return _define_settings_from_features(dataset_info, feature_mapping)
+    dataset_features = _get_dataset_features(repo_id)
+    return _define_settings_from_features(dataset_features, feature_mapping)
