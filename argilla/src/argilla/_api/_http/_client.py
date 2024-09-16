@@ -23,12 +23,8 @@ class HTTPClientConfig:
 
     api_url: str
     api_key: str
-    timeout: int = None
-
-    def __post_init__(self):
-        self.api_url = self.api_url
-        self.api_key = self.api_key
-        self.timeout = self.timeout or 60
+    timeout: int = 60
+    retries: int = 5
 
 
 def create_http_client(api_url: str, api_key: str, **client_args) -> httpx.Client:
@@ -37,5 +33,11 @@ def create_http_client(api_url: str, api_key: str, **client_args) -> httpx.Clien
 
     headers = client_args.pop("headers", {})
     headers["X-Argilla-Api-Key"] = api_key
+    retries = client_args.pop("retries", 0)
 
-    return httpx.Client(base_url=api_url, headers=headers, **client_args)
+    return httpx.Client(
+        base_url=api_url,
+        headers=headers,
+        transport=httpx.HTTPTransport(retries=retries),
+        **client_args,
+    )
