@@ -237,6 +237,9 @@ class Record(DatabaseModel):
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
+    def is_completed(self) -> bool:
+        return self.status == RecordStatus.completed
+
     def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
         for vector in self.vectors:
             if vector.vector_settings_id == vector_settings.id:
