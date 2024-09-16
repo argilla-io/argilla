@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
@@ -93,7 +94,7 @@ def _uncast_uris_as_images(hf_dataset: "HFDataset", columns: List[str]) -> "HFDa
     for column in columns:
         features = hf_dataset.features.copy()
         features[column] = Image()
-        hf_dataset = hf_dataset.map(
+        casted_hf_dataset = hf_dataset.map(
             function=lambda batch: {column: [uncast_image(sample) for sample in batch]},
             with_indices=False,
             batched=True,
@@ -101,7 +102,14 @@ def _uncast_uris_as_images(hf_dataset: "HFDataset", columns: List[str]) -> "HFDa
             remove_columns=[column],
             features=features,
         )
-    return hf_dataset
+        try:
+            casted_hf_dataset[0]
+        except FileNotFoundError:
+            warnings.warn(
+                f"Image file not found for column {column}. Image will be persisted as string (URL, path, or base64)."
+            )
+            casted_hf_dataset = hf_dataset
+    return casted_hf_dataset
 
 
 def _uncast_label_questions_as_classlabels(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
