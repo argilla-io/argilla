@@ -173,7 +173,7 @@ class HFDatasetsIO:
         return hf_dataset
 
     @staticmethod
-    def _record_dicts_from_datasets(dataset: HFDataset) -> List[Dict[str, Union[str, float, int, list]]]:
+    def _record_dicts_from_datasets(hf_dataset: HFDataset) -> List[Dict[str, Union[str, float, int, list]]]:
         """Creates a dictionaries from a HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
 
         Parameters:
@@ -182,13 +182,13 @@ class HFDatasetsIO:
         Returns:
             Generator[Dict[str, Union[str, float, int, list]], None, None]: A generator of dictionaries to be passed to DatasetRecords.add or DatasetRecords.update.
         """
-        dataset = HFDatasetsIO._cast_datasets_features_to_argilla(hf_dataset=dataset)
+        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset)
         try:
-            dataset: IterableDataset = dataset.to_iterable_dataset()
+            hf_dataset: IterableDataset = hf_dataset.to_iterable_dataset()
         except AttributeError:
             pass
         record_dicts = []
-        for example in dataset:
+        for example in hf_dataset:
             record_dicts.append(example)
         return record_dicts
 
@@ -213,7 +213,7 @@ class HFDatasetsIO:
         return hf_dataset
 
     @staticmethod
-    def _cast_datasets_features_to_argilla(hf_dataset: "HFDataset") -> List[str]:
+    def to_argilla(hf_dataset: "HFDataset") -> List[str]:
         """Check if the Hugging Face dataset contains image features.
 
         Parameters:
