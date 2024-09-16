@@ -1,0 +1,3 @@
+gradio
+argilla @ git+https://github.com/argilla-io/argilla.git@develop#subdirectory=argilla
+plotly
