@@ -99,6 +99,7 @@ def test_mapped_fields():
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "label_column"
 
+
 def test_define_settings_from_features_unsupported():
     features = {
         "unsupported_column": {"_type": "Unsupported"},
