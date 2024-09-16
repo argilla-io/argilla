@@ -46,7 +46,6 @@ async def notify_record_event(db: AsyncSession, record_event: RecordEvent, recor
 
     event = RecordEventSchema.from_orm(record)
 
-
     return await enqueue_notify_events(
         db,
         event=record_event,
