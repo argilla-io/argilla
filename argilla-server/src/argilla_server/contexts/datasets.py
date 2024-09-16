@@ -61,7 +61,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.api.webhooks.v1.enums import DatasetEvent, ResponseEvent, RecordEvent
-from argilla_server.api.webhooks.v1.records import notify_record_event
+from argilla_server.api.webhooks.v1.records import notify_record_event as notify_record_event_v1
 from argilla_server.api.webhooks.v1.responses import notify_response_event as notify_response_event_v1
 from argilla_server.api.webhooks.v1.datasets import notify_dataset_event as notify_dataset_event_v1
 from argilla_server.contexts import accounts, distribution
@@ -838,7 +838,7 @@ async def update_record(
 
     await db.commit()
 
-    await notify_record_event(db, RecordEvent.updated, record)
+    await notify_record_event_v1(db, RecordEvent.updated, record)
 
     return record
 
@@ -850,7 +850,7 @@ async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record:
 
     await db.commit()
 
-    await notify_record_event(db, RecordEvent.deleted, record)
+    await notify_record_event_v1(db, RecordEvent.deleted, record)
 
     return record
 

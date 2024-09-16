@@ -15,7 +15,6 @@
 from datetime import datetime
 from typing import List
 
-from fastapi.encoders import jsonable_encoder
 from rq.job import Job
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -44,13 +43,11 @@ async def notify_record_event(db: AsyncSession, record_event: RecordEvent, recor
         ],
     )
 
-    event = RecordEventSchema.from_orm(record)
-
     return await enqueue_notify_events(
         db,
         event=record_event,
         timestamp=datetime.utcnow(),
-        data=jsonable_encoder(event),
+        data=RecordEventSchema.from_orm(record).dict(),
     )
 
 

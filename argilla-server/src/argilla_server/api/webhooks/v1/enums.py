@@ -58,7 +58,7 @@ class ResponseEvent(str, Enum):
 class RecordEvent(str, Enum):
     created = WebhookEvent.record_created.value
     updated = WebhookEvent.record_updated.value
-    deleted = WebhookEvent.record_deleted
+    deleted = WebhookEvent.record_deleted.value
     completed = WebhookEvent.record_completed.value
 
     def __str__(self):
