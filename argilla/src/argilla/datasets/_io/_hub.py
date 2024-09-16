@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 import warnings
 from collections import defaultdict
@@ -25,6 +26,7 @@ from datasets.data_files import EmptyDatasetError
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
+from argilla._helpers._media import pil_to_data_uri
 from argilla.datasets._io._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
@@ -78,12 +80,8 @@ class HubImportExportMixin(DiskImportExportMixin):
 
             if generate_card:
                 sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
-                if hfds:
-                    sample_huggingface_record = hfds[0]
-                    size_categories = len(hfds)
-                else:
-                    sample_huggingface_record = "No sample records provided"
-                    size_categories = 0
+                sample_huggingface_record = self._get_sample_hf_record(hfds) if with_records else None
+                size_categories = len(hfds) if with_records else None
                 card = ArgillaDatasetCard.from_template(
                     card_data=DatasetCardData(
                         size_categories=size_categories_parser(size_categories),
@@ -249,3 +247,27 @@ class HubImportExportMixin(DiskImportExportMixin):
                 )
             hf_dataset = hf_dataset[split]
         return hf_dataset
+
+    @staticmethod
+    def _get_sample_hf_record(hf_dataset: "HFDataset") -> Dict:
+        """Get a sample record from a Hugging Face dataset.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to get a sample record from.
+
+        Returns:
+            Dict: The sample record.
+        """
+
+        if hf_dataset:
+            sample_huggingface_record = {}
+            for key, value in hf_dataset[0].items():
+                try:
+                    json.dumps(value)
+                    sample_huggingface_record[key] = value
+                except TypeError:
+                    try:
+                        sample_huggingface_record[key] = pil_to_data_uri(value)
+                    except TypeError:
+                        sample_huggingface_record[key] = "Value not serializable"            
+            return sample_huggingface_record
