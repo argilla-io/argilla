@@ -80,7 +80,7 @@ def token():
     return os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING")
 
 
-class TestExportFeaturesToHub:
+class TestImportFeaturesFromHub:
     def test_import_records_from_datasets_with_classlabel(
         self, token: str, dataset: rg.Dataset, client, mock_data: List[dict[str, Any]]
     ):
