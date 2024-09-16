@@ -809,6 +809,9 @@ async def delete_records(
 
     await db.commit()
 
+    for record in records:
+        await notify_record_event_v1(db, RecordEvent.deleted, record)
+
 
 async def update_record(
     db: AsyncSession, search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
