@@ -33,7 +33,7 @@ async def notify_record_event(db: AsyncSession, record_event: RecordEvent, recor
     (
         await db.execute(
             select(Dataset)
-            .filter_by(id=record.dataset_id)
+            .where(Dataset.id == record.dataset_id)
             .options(
                 selectinload(Dataset.workspace),
                 selectinload(Dataset.fields),
