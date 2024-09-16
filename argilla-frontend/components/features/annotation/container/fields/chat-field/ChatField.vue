@@ -107,7 +107,7 @@ export default {
   &__wrapper {
     display: flex;
     flex-direction: column;
-    gap: $base-space;
+    gap: $base-space + calc($base-space / 2);
     padding: 0 $base-space * 2;
   }
   &__item {
@@ -143,13 +143,20 @@ export default {
     @include line-height(24px);
     white-space: pre-wrap;
     word-break: break-word;
+    &:has(p) {
+      padding: 2 * $base-space 2 * $base-space $base-space 2 * $base-space;
+    }
     .--simple & {
-      border-color: var(--bg-opacity-2) !important;
+      border-color: var(--border-field) !important;
+    }
+    .--multiple & {
+      max-width: 100%;
     }
   }
 
   &__role {
-    font-weight: 600;
+    font-weight: 500;
+    @include font-size(13px);
   }
 
   &__title {

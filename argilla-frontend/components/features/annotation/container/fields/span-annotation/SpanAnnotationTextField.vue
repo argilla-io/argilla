@@ -228,7 +228,7 @@ export default {
   padding: 2 * $base-space;
   background: var(--bg-field);
   border-radius: $border-radius-m;
-  border: 1px solid var(--bg-opacity-2);
+  border: 1px solid var(--border-field);
   &:hover {
     #{$this}__copy-button {
       opacity: 1;
