@@ -24,6 +24,10 @@ These are the section headers that we use:
 - Added new webhook events when responses are created, updated, deleted or upserted. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 - Added new webhook events when datasets are created, updated, deleted or published. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 
+### Fixed
+
+- Fixed error when computing dataset progress by users without responses related to pending or completed records. ([#5484](https://github.com/argilla-io/argilla/pull/5484))
+
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.0...v2.1.0)
 
 ### Added

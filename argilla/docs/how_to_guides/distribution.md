@@ -78,3 +78,60 @@ dataset.settings.distribution.min_submitted = 4
 
 dataset.update()
 ```
+
+## Track your team's progress
+
+You can check the progress of the annotation task by using the `dataset.progress` method.
+This method will return the number of records that have the status `completed`, `pending`, and the
+total number of records in the dataset.
+
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets("my_dataset")
+
+progress = dataset.progress()
+```
+```json
+{
+    "total": 100,
+    "completed": 10,
+    "pending": 90
+}
+```
+
+You can see also include to the progress the users distribution by setting the `with_users_distribution` parameter to `True`.
+This will return the number of records that have the status `completed`, `pending`, and the total number of records in the dataset,
+as well as the number of completed submissions per user. You can visit the [Annotation Progress](../how_to_guides/annotate.md#annotation-progress) section for more information.
+
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets("my_dataset")
+
+progress = dataset.progress(with_users_distribution=True)
+```
+```json
+{
+    "total": 100,
+    "completed": 50,
+    "pending": 50,
+    "users": {
+        "user1": {
+           "completed": { "submitted": 10, "draft": 5, "discarded": 5},
+           "pending": { "submitted": 5, "draft": 10, "discarded": 10},
+        },
+        "user2": {
+           "completed": { "submitted": 20, "draft": 10, "discarded": 5},
+           "pending": { "submitted": 2, "draft": 25, "discarded": 0},
+        },
+        ...
+}
+```
+
+!!! note
+    Since the completed records can contain submissions from multiple users, the number of completed submissions per user may not match the total number of completed records.

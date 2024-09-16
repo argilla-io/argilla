@@ -115,8 +115,9 @@ class APIClient:
     def __init__(
         self,
         api_url: Optional[str] = DEFAULT_HTTP_CONFIG.api_url,
-        api_key: str = DEFAULT_HTTP_CONFIG.api_key,
+        api_key: Optional[str] = DEFAULT_HTTP_CONFIG.api_key,
         timeout: int = DEFAULT_HTTP_CONFIG.timeout,
+        retries: int = DEFAULT_HTTP_CONFIG.retries,
         **http_client_args,
     ):
         if not api_url:
@@ -130,6 +131,7 @@ class APIClient:
 
         http_client_args = http_client_args or {}
         http_client_args["timeout"] = timeout
+        http_client_args["retries"] = retries
 
         self.http_client = create_http_client(
             api_url=self.api_url,  # type: ignore

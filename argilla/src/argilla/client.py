@@ -41,13 +41,7 @@ class Argilla(_api.APIClient):
         datasets: A collection of datasets.
         users: A collection of users.
         me: The current user.
-
     """
-
-    workspaces: "Workspaces"
-    datasets: "Datasets"
-    users: "Users"
-    me: "User"
 
     # Default instance of Argilla
     _default_client: Optional["Argilla"] = None
@@ -57,9 +51,24 @@ class Argilla(_api.APIClient):
         api_url: Optional[str] = DEFAULT_HTTP_CONFIG.api_url,
         api_key: Optional[str] = DEFAULT_HTTP_CONFIG.api_key,
         timeout: int = DEFAULT_HTTP_CONFIG.timeout,
+        retries: int = DEFAULT_HTTP_CONFIG.retries,
         **http_client_args,
     ) -> None:
-        super().__init__(api_url=api_url, api_key=api_key, timeout=timeout, **http_client_args)
+        """Inits the `Argilla` client.
+
+        Args:
+            api_url: the URL of the Argilla API. If not provided, then the value will try
+                to be set from `ARGILLA_API_URL` environment variable. Defaults to
+                `"http://localhost:6900"`.
+            api_key: the key to be used to authenticate in the Argilla API. If not provided,
+                then the value will try to be set from `ARGILLA_API_KEY` environment variable.
+                Defaults to `None`.
+            timeout: the maximum time in seconds to wait for a request to the Argilla API
+                to be completed before raising an exception. Defaults to `60`.
+            retries: the number of times to retry the HTTP connection to the Argilla API
+                before raising an exception. Defaults to `5`.
+        """
+        super().__init__(api_url=api_url, api_key=api_key, timeout=timeout, retries=retries, **http_client_args)
 
         self._set_default(self)
 
