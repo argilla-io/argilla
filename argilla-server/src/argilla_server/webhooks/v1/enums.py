@@ -21,15 +21,14 @@ class WebhookEvent(str, Enum):
     dataset_deleted = "dataset.deleted"
     dataset_published = "dataset.published"
 
-    response_created = "response.created"
-    response_updated = "response.updated"
-    response_deleted = "response.deleted"
-    response_upserted = "response.upserted"
-
     record_created = "record.created"
     record_updated = "record.updated"
     record_deleted = "record.deleted"
     record_completed = "record.completed"
+
+    response_created = "response.created"
+    response_updated = "response.updated"
+    response_deleted = "response.deleted"
 
     def __str__(self):
         return str(self.value)
@@ -45,21 +44,20 @@ class DatasetEvent(str, Enum):
         return str(self.value)
 
 
-class ResponseEvent(str, Enum):
-    created = WebhookEvent.response_created.value
-    updated = WebhookEvent.response_updated.value
-    deleted = WebhookEvent.response_deleted.value
-    upserted = WebhookEvent.response_upserted.value
-
-    def __str__(self):
-        return str(self.value)
-
-
 class RecordEvent(str, Enum):
     created = WebhookEvent.record_created.value
     updated = WebhookEvent.record_updated.value
     deleted = WebhookEvent.record_deleted.value
     completed = WebhookEvent.record_completed.value
+
+    def __str__(self):
+        return str(self.value)
+
+
+class ResponseEvent(str, Enum):
+    created = WebhookEvent.response_created.value
+    updated = WebhookEvent.response_updated.value
+    deleted = WebhookEvent.response_deleted.value
 
     def __str__(self):
         return str(self.value)
