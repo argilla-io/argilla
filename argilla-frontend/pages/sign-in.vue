@@ -25,14 +25,15 @@
           v-model="username"
           :name="$t('login.username')"
           type="text"
-          :autofocus="true"
           autocomplete="on"
+          @onCheckAutoFilled="onNameAutoFilled"
         />
         <LoginInput
           v-model="password"
           :name="$t('login.password')"
           type="password"
           autocomplete="on"
+          @onCheckAutoFilled="onPasswordAutoFilled"
         />
         <base-button
           type="submit"
@@ -59,6 +60,8 @@ export default {
       username: "",
       password: "",
       hasAuthToken: false,
+      nameAutoFilled: false,
+      passwordAutoFilled: false,
     };
   },
   components: {
@@ -86,6 +89,9 @@ export default {
     }
   },
   computed: {
+    isAutoFilled() {
+      return this.username && this.password;
+    },
     formattedError() {
       if (this.error) {
         return this.error.toString().includes("401")
@@ -94,7 +100,10 @@ export default {
       }
     },
     isButtonEnabled() {
-      return !!this.username && !!this.password;
+      return (!!this.username && !!this.password) || this.formAutoFilled;
+    },
+    formAutoFilled() {
+      return this.nameAutoFilled && this.passwordAutoFilled;
     },
   },
   methods: {
@@ -120,6 +129,12 @@ export default {
       } catch (err) {
         this.error = err;
       }
+    },
+    onNameAutoFilled(value) {
+      this.nameAutoFilled = value;
+    },
+    onPasswordAutoFilled(value) {
+      this.passwordAutoFilled = value;
     },
   },
   setup() {

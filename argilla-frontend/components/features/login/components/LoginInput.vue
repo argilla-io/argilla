@@ -10,11 +10,11 @@
           :name="name"
           :type="inputType"
           :placeholder="placeholder"
-          :autofocus="autofocus"
           :autocomplete="autocomplete"
           :disabled="disabled"
           @keydown="onKeyDown"
           @blur="isBlurred = true"
+          @animationstart="checkAnimation"
         />
         <BaseButton
           v-if="type === 'password' && !!value"
@@ -115,6 +115,13 @@ export default {
     onKeyDown() {
       this.isTouched = true;
     },
+    checkAnimation(e) {
+      if (e.animationName == "onAutoFillStart") {
+        this.$emit("onCheckAutoFilled", true);
+      } else if (e.animationName == "onAutoFillCancel") {
+        this.$emit("onCheckAutoFilled", false);
+      }
+    },
   },
 };
 </script>
@@ -183,5 +190,18 @@ select {
       transition: background-color 5000s ease-in-out 0s;
     }
   }
+}
+:-webkit-autofill {
+  animation-name: onAutoFillStart;
+}
+:not(:-webkit-autofill) {
+  animation-name: onAutoFillCancel;
+}
+</style>
+
+<style>
+@keyframes onAutoFillStart {
+}
+@keyframes onAutoFillCancel {
 }
 </style>
