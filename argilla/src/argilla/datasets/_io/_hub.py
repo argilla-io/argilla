@@ -29,6 +29,7 @@ from argilla._exceptions._settings import SettingsError
 from argilla._helpers._media import pil_to_data_uri
 from argilla.datasets._io._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
+from argilla.records._io._datasets import HFDatasetsIO
 from argilla.responses import Response
 
 if TYPE_CHECKING:
@@ -81,10 +82,10 @@ class HubImportExportMixin(DiskImportExportMixin):
             if generate_card:
                 sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
                 sample_huggingface_record = self._get_sample_hf_record(hfds) if with_records else None
-                size_categories = len(hfds) if with_records else None
+                dataset_size = len(hfds) if with_records else 0
                 card = ArgillaDatasetCard.from_template(
                     card_data=DatasetCardData(
-                        size_categories=size_categories_parser(size_categories),
+                        size_categories=size_categories_parser(dataset_size),
                         tags=["rlfh", "argilla", "human-feedback"],
                     ),
                     repo_id=repo_id,
@@ -200,6 +201,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         # Extract responses and create Record objects
         records = []
+        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset)
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
             for question_name, values in response_questions.items():
