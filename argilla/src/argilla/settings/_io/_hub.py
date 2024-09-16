@@ -19,6 +19,7 @@ from enum import Enum
 from typing import Any, Dict, TYPE_CHECKING, Union, List, Optional
 
 from argilla._exceptions._hub import DatasetsServerException
+from argilla._exceptions._settings import SettingsError
 
 if TYPE_CHECKING:
     from argilla import Settings
@@ -190,6 +191,8 @@ def _define_settings_from_features(
 
     if not questions:
         questions.append(TextQuestion(name="comment", required=True))
+    if not fields:
+        raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
     settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
 
     return settings
