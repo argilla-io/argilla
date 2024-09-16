@@ -104,7 +104,7 @@ progress = dataset.progress()
 
 You can see also include to the progress the users distribution by setting the `with_users_distribution` parameter to `True`.
 This will return the number of records that have the status `completed`, `pending`, and the total number of records in the dataset,
-as well as the number of completed submissions per user.
+as well as the number of completed submissions per user. You can visit the [Annotation Progress](../how_to_guides/annotate.md#annotation-progress) section for more information.
 
 ```python
 import argilla as rg
