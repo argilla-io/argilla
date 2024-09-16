@@ -59,7 +59,7 @@ def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
             dataset_info = response_json["dataset_info"]
             available_configs = list(dataset_info.keys())
 
-            if len(available_configs) > 1 and config is None:
+            if len(available_configs) > 1:
                 warnings.warn("Multiple configurations found. Using the first one.")
             config = available_configs[0]
             features = dataset_info[config]["features"]
