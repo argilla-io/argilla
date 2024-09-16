@@ -21,7 +21,7 @@ from factory.builder import BuildStep, StepBuilder, parse_declarations
 from sqlalchemy.ext.asyncio import async_object_session
 
 from argilla_server.enums import DatasetDistributionStrategy, FieldType, MetadataPropertyType, OptionsOrder
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
+from argilla_server.webhooks.v1.enums import WebhookEvent
 from argilla_server.models import (
     Dataset,
     Field,

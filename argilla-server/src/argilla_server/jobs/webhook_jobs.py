@@ -24,7 +24,7 @@ from rq.decorators import job
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 
-from argilla_server.api.webhooks.v1.commons import notify_event
+from argilla_server.webhooks.v1.commons import notify_event
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.jobs.queues import HIGH_QUEUE
 from argilla_server.contexts import webhooks

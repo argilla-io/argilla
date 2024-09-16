@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-from argilla_server.api.webhooks.v1.enums import WebhookEvent
+from argilla_server.webhooks.v1.enums import WebhookEvent
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.pydantic_v1 import BaseModel, Field, HttpUrl
 

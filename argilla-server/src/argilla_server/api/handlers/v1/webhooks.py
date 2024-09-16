@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends, Security, status
 
 from argilla_server.database import get_async_db
 from argilla_server.api.policies.v1 import WebhookPolicy, authorize
-from argilla_server.api.webhooks.v1.ping import notify_ping_event
+from argilla_server.webhooks.v1.ping import notify_ping_event
 from argilla_server.security import auth
 from argilla_server.models import User
 from argilla_server.api.schemas.v1.webhooks import (

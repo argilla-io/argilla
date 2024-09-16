@@ -23,8 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Response, Record, Dataset
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
-from argilla_server.api.webhooks.v1.schemas import ResponseEventSchema
-from argilla_server.api.webhooks.v1.enums import ResponseEvent
+from argilla_server.webhooks.v1.schemas import ResponseEventSchema
+from argilla_server.webhooks.v1.enums import ResponseEvent
 
 
 async def notify_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> List[Job]:

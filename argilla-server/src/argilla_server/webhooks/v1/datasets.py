@@ -22,8 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Dataset
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
-from argilla_server.api.webhooks.v1.schemas import DatasetEventSchema
-from argilla_server.api.webhooks.v1.enums import DatasetEvent
+from argilla_server.webhooks.v1.schemas import DatasetEventSchema
+from argilla_server.webhooks.v1.enums import DatasetEvent
 
 
 async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, dataset: Dataset) -> List[Job]:

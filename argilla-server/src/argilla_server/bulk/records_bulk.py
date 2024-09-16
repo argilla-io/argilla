@@ -29,8 +29,8 @@ from argilla_server.api.schemas.v1.records_bulk import (
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
-from argilla_server.api.webhooks.v1.enums import RecordEvent
-from argilla_server.api.webhooks.v1.records import notify_record_event as notify_record_event_v1
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
 from argilla_server.contexts import distribution
 from argilla_server.contexts.accounts import fetch_users_by_ids_as_dict
 from argilla_server.contexts.records import (

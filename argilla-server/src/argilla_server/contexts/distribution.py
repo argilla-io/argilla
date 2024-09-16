@@ -21,8 +21,8 @@ from uuid import UUID
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.api.webhooks.v1.enums import RecordEvent
-from argilla_server.api.webhooks.v1.records import notify_record_event as notify_record_event_v1
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
 from argilla_server.enums import DatasetDistributionStrategy, RecordStatus
 from argilla_server.models import Record
 from argilla_server.search_engine.base import SearchEngine

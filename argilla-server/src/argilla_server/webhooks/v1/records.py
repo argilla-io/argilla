@@ -20,8 +20,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from argilla_server.api.webhooks.v1.enums import RecordEvent
-from argilla_server.api.webhooks.v1.schemas import RecordEventSchema
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.schemas import RecordEventSchema
 from argilla_server.jobs.webhook_jobs import enqueue_notify_events
 from argilla_server.models import Record, Dataset
 
