@@ -140,17 +140,31 @@ class HubImportExportMixin(DiskImportExportMixin):
             dataset = cls(name=name, settings=settings)
             dataset.create()
         else:
-            # download configuration files from the hub
-            folder_path = snapshot_download(
-                repo_id=repo_id,
-                repo_type="dataset",
-                allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
-                token=kwargs.get("token"),
-            )
+            try:
+                # download configuration files from the hub
+                folder_path = snapshot_download(
+                    repo_id=repo_id,
+                    repo_type="dataset",
+                    allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
+                    token=kwargs.get("token"),
+                )
 
-            dataset = cls.from_disk(
-                path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
-            )
+                dataset = cls.from_disk(
+                    path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
+                )
+            except NotADirectoryError:
+                from argilla import Settings
+
+                settings = Settings.from_hub(repo_id=repo_id)
+                dataset = cls.from_hub(
+                    repo_id=repo_id,
+                    name=name,
+                    workspace=workspace,
+                    client=client,
+                    with_records=with_records,
+                    settings=settings,
+                )
+                return dataset
 
         if with_records:
             try:

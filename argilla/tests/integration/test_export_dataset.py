@@ -18,11 +18,13 @@ import random
 import uuid
 from string import ascii_lowercase
 from tempfile import TemporaryDirectory
+from time import sleep
 from typing import Any, List
 
 import argilla as rg
 import pytest
 from argilla._exceptions import ConflictError, SettingsError
+from datasets import Dataset as HFDataset, Value, Features, ClassLabel
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -352,3 +354,40 @@ class TestHubImportExportMixin:
                 )
         else:
             rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name)
+
+    def test_import_dataset_from_hub_with_automatic_settings(
+        self, token: str, dataset: rg.Dataset, client, mock_data: List[dict[str, Any]], with_records_export: bool
+    ):
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_classlabel_{uuid.uuid4()}"
+
+        hf_dataset = HFDataset.from_dict(
+            {
+                "text": [record["text"] for record in mock_data],
+                "label": [record["label"] for record in mock_data],
+            },
+            features=Features(
+                {
+                    "text": Value("string"),
+                    "label": ClassLabel(names=["positive", "negative"]),
+                }
+            ),
+        )
+
+        hf_dataset.push_to_hub(repo_id=repo_id, token=token)
+        for _ in range(10):
+            try:
+                rg_dataset = rg.Dataset.from_hub(
+                    repo_id=repo_id,
+                    client=client,
+                    token=token,
+                    name=f"test_{uuid.uuid4()}",
+                    with_records=with_records_export,
+                )
+                break
+            except Exception as e:
+                sleep(5)
+
+        if with_records_export:
+            for i, record in enumerate(rg_dataset.records(with_suggestions=True)):
+                assert record.fields["text"] == mock_data[i]["text"]
+                assert record.suggestions["label"].value == mock_data[i]["label"]
