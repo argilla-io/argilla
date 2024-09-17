@@ -385,13 +385,20 @@ class TestHubImportExportMixin:
         )
 
         hf_dataset.push_to_hub(repo_id=repo_id, token=token)
-        rg_dataset = rg.Dataset.from_hub(
-            repo_id=repo_id,
-            client=client,
-            token=token,
-            name=mock_dataset_name,
-            with_records=with_records_export,
-        )
+        
+        for _ in range(10):
+            try:
+                rg_dataset = rg.Dataset.from_hub(
+                    repo_id=repo_id,
+                    client=client,
+                    token=token,
+                    name=mock_dataset_name,
+                    with_records=with_records_export,
+                )
+                break
+            except Exception as e:
+                sleep(5)
+
         if with_records_export:
             for i, record in enumerate(rg_dataset.records(with_suggestions=True)):
                 assert record.fields["text"] == mock_data[i]["text"]
