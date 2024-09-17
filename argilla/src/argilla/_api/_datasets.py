@@ -22,6 +22,8 @@ from argilla._models import DatasetModel
 
 __all__ = ["DatasetsAPI"]
 
+from argilla._models._dataset_progress import UserProgressModel, DatasetProgressModel
+
 
 class DatasetsAPI(ResourceAPI[DatasetModel]):
     """Manage datasets via the API"""
@@ -79,6 +81,24 @@ class DatasetsAPI(ResourceAPI[DatasetModel]):
     ####################
     # Utility methods #
     ####################
+
+    @api_error_handler
+    def get_progress(self, dataset_id: UUID) -> DatasetProgressModel:
+        response = self.http_client.get(f"{self.url_stub}/{dataset_id}/progress")
+        response.raise_for_status()
+        response_json = response.json()
+
+        self._log_message(message=f"Got progress for dataset {dataset_id}")
+        return DatasetProgressModel.model_validate(response_json)
+
+    @api_error_handler
+    def list_users_progress(self, dataset_id: UUID) -> List[UserProgressModel]:
+        response = self.http_client.get(f"{self.url_stub}/{dataset_id}/users/progress")
+        response.raise_for_status()
+        response_json = response.json()
+
+        self._log_message(message=f"Got users progress for dataset {dataset_id}")
+        return [UserProgressModel.model_validate(data) for data in response_json["users"]]
 
     @api_error_handler
     def publish(self, dataset_id: UUID) -> "DatasetModel":

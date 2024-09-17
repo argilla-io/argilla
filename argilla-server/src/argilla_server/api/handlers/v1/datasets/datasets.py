@@ -164,7 +164,7 @@ async def get_dataset_progress(
     return await datasets.get_dataset_progress(db, dataset.id)
 
 
-@router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress, response_model_exclude_unset=True)
+@router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress)
 async def get_dataset_users_progress(
     *,
     current_user: User = Security(auth.get_current_user),
