@@ -385,7 +385,7 @@ class TestHubImportExportMixin:
         )
 
         hf_dataset.push_to_hub(repo_id=repo_id, token=token)
-        
+
         for _ in range(10):
             try:
                 rg_dataset = rg.Dataset.from_hub(
@@ -397,7 +397,7 @@ class TestHubImportExportMixin:
                 )
                 break
             except Exception as e:
-                sleep(5)
+                sleep(10)
 
         if with_records_export:
             for i, record in enumerate(rg_dataset.records(with_suggestions=True)):
