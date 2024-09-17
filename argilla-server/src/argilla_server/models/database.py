@@ -17,6 +17,7 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy import (
     JSON,
     ForeignKey,
@@ -25,17 +26,11 @@ from sqlalchemy import (
     UniqueConstraint,
     and_,
     sql,
-    select,
-    func,
-    text,
-    Select,
-    ColumnExpressionArgument,
 )
-from sqlalchemy import Enum as SAEnum
 from sqlalchemy.engine.default import DefaultExecutionContext
 from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, selectinload, contains_eager
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from argilla_server.api.schemas.v1.questions import QuestionSettings
 from argilla_server.enums import (
@@ -43,7 +38,6 @@ from argilla_server.enums import (
     FieldType,
     MetadataPropertyType,
     QuestionType,
-    RecordStatus,
     ResponseStatus,
     SuggestionType,
     UserRole,
