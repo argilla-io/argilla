@@ -223,7 +223,7 @@ async def list_dataset_records(
         else {}
     )
 
-    dataset_records, total = await records.list_records_by_dataset_id(
+    dataset_records, total = await records.list_dataset_records(
         db=db,
         dataset_id=dataset.id,
         offset=offset,

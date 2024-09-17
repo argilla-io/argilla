@@ -23,7 +23,7 @@ from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, Record, VectorSettings, Vector
 
 
-async def list_records_by_dataset_id(
+async def list_dataset_records(
     db: AsyncSession,
     dataset_id: UUID,
     offset: int,
@@ -50,7 +50,7 @@ async def list_records_by_dataset_id(
 async def list_dataset_records_by_ids(
     db: AsyncSession, dataset_id: UUID, record_ids: Sequence[UUID]
 ) -> Sequence[Record]:
-    query = _record_by_dataset_id_query(dataset_id).where(Record.id.in_(record_ids))
+    query = select(Record).where(and_(Record.id.in_(record_ids), Record.dataset_id == dataset_id))
     return (await db.scalars(query)).unique().all()
 
 
@@ -58,8 +58,8 @@ async def list_dataset_records_by_external_ids(
     db: AsyncSession, dataset_id: UUID, external_ids: Sequence[str]
 ) -> Sequence[Record]:
     query = (
-        _record_by_dataset_id_query(dataset_id)
-        .where(Record.external_id.in_(external_ids))
+        select(Record)
+        .where(and_(Record.external_id.in_(external_ids), Record.dataset_id == dataset_id))
         .options(selectinload(Record.dataset))
     )
 
