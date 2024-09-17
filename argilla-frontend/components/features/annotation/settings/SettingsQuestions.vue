@@ -8,9 +8,16 @@
             @submit.prevent="onSubmit(question)"
             class="settings__edition-form__questions"
           >
-            <div class="settings__edition-form__name">
-              <h4 class="--body1 --medium" v-text="question.name" />
-              <BaseBadge class="--capitalized" :text="`${$t(question.type)}`" />
+            <div class="settings__edition-form__header">
+              <div class="settings__edition-form__name">
+                <h4 class="--body1 --medium" v-text="question.name" />
+                <BaseBadge
+                  class="--capitalized"
+                  :text="`${$t(question.type)}`"
+                />
+              </div>
+              <p v-if="question.isRequired" v-text="$t('required')" />
+              <p v-else v-text="$t('optional')" />
             </div>
 
             <Validation
@@ -195,18 +202,28 @@ export default {
       gap: $base-space * 2;
     }
 
-    &__name {
+    &__header {
       display: flex;
-      flex-direction: row;
-      align-items: center;
       justify-content: space-between;
-      gap: $base-space * 2;
+
       h4 {
         margin: 0;
       }
       .badge {
         margin-inline: 0 auto;
       }
+      p {
+        height: 14px;
+        color: var(--fg-secondary);
+      }
+    }
+
+    &__name {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: $base-space * 2;
     }
 
     &__switch.re-switch {

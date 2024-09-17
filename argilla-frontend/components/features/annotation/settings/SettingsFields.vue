@@ -13,6 +13,7 @@
               <BaseBadge class="--capitalized" :text="`${$t(field.type)}`" />
             </div>
             <p v-if="field.isRequired" v-text="$t('required')" />
+            <p v-else v-text="$t('optional')" />
           </div>
 
           <Validation
