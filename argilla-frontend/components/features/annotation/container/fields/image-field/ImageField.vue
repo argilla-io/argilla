@@ -78,6 +78,7 @@ export default {
     height: 100%;
     overflow-y: hidden;
     overflow-x: scroll;
+    text-align: center;
     img {
       max-width: 100%;
     }
