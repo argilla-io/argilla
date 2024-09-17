@@ -7,9 +7,12 @@
           @submit.prevent="onSubmit(field)"
           class="settings__edition-form__fields"
         >
-          <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium" v-text="field.name" />
-            <BaseBadge class="--capitalized" :text="`${$t(field.type)}`" />
+          <div class="settings__edition-form__header">
+            <div class="settings__edition-form__name">
+              <h4 class="--body1 --medium" v-text="field.name" />
+              <BaseBadge class="--capitalized" :text="`${$t(field.type)}`" />
+            </div>
+            <p v-if="field.isRequired" v-text="$t('required')" />
           </div>
 
           <Validation
@@ -25,13 +28,6 @@
             class="settings__edition-form__switch"
             v-model="field.settings.use_markdown"
             >{{ $t("useMarkdown") }}</BaseSwitch
-          >
-
-          <BaseSwitch
-            class="settings__edition-form__switch"
-            v-model="field.isRequired"
-            disabled="false"
-            >{{ $t("required") }}</BaseSwitch
           >
 
           <div class="settings__edition-form__footer">
@@ -103,18 +99,28 @@ export default {
       gap: $base-space * 2;
     }
 
-    &__name {
+    &__header {
       display: flex;
-      flex-direction: row;
-      align-items: center;
       justify-content: space-between;
-      gap: $base-space * 2;
+
       h4 {
         margin: 0;
       }
       .badge {
         margin-inline: 0 auto;
       }
+      p {
+        height: 14px;
+        color: var(--fg-secondary);
+      }
+    }
+
+    &__name {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: $base-space * 2;
     }
 
     &__group {
