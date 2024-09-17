@@ -364,13 +364,13 @@ class TestHubImportExportMixin:
                     repo_id=repo_id, client=client, token=token, settings=settings, name=mock_dataset_name
                 )
         else:
-            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name)
+            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_dataset_name)
 
     def test_import_dataset_from_hub_with_automatic_settings(
         self, token: str, dataset: rg.Dataset, client, mock_data: List[dict[str, Any]], with_records_export: bool
     ):
-        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_classlabel_{uuid.uuid4()}"
-
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_classlabel_{with_records_export}"
+        mock_dataset_name = f"test_import_dataset_from_hub_with_automatic_settings_{uuid.uuid4()}"
         hf_dataset = HFDataset.from_dict(
             {
                 "text": [record["text"] for record in mock_data],
@@ -385,19 +385,13 @@ class TestHubImportExportMixin:
         )
 
         hf_dataset.push_to_hub(repo_id=repo_id, token=token)
-        for _ in range(10):
-            try:
-                rg_dataset = rg.Dataset.from_hub(
-                    repo_id=repo_id,
-                    client=client,
-                    token=token,
-                    name=f"test_{uuid.uuid4()}",
-                    with_records=with_records_export,
-                )
-                break
-            except Exception as e:
-                sleep(5)
-
+        rg_dataset = rg.Dataset.from_hub(
+            repo_id=repo_id,
+            client=client,
+            token=token,
+            name=mock_dataset_name,
+            with_records=with_records_export,
+        )
         if with_records_export:
             for i, record in enumerate(rg_dataset.records(with_suggestions=True)):
                 assert record.fields["text"] == mock_data[i]["text"]
