@@ -24,7 +24,11 @@ export class Field {
     return this.type === "image";
   }
 
-  get type() {
+  public get isChatType() {
+    return this.type === "chat";
+  }
+
+  private get type() {
     return this.settings?.type?.toLowerCase() ?? null;
   }
 

@@ -16,7 +16,7 @@ import uuid
 
 import pytest
 
-from argilla import Dataset, Settings, TextField, LabelQuestion, Argilla, VectorField, FloatMetadataProperty
+from argilla import Dataset, Settings, TextField, ChatField, LabelQuestion, Argilla, VectorField, FloatMetadataProperty
 
 
 @pytest.fixture
@@ -24,7 +24,10 @@ def dataset(dataset_name: str):
     return Dataset(
         name=dataset_name,
         settings=Settings(
-            fields=[TextField(name="text", use_markdown=False)],
+            fields=[
+                TextField(name="text", use_markdown=False),
+                ChatField(name="chat", use_markdown=True),
+            ],
             questions=[LabelQuestion(name="label", labels=["a", "b", "c"])],
         ),
     ).create()
@@ -35,6 +38,7 @@ class TestUpdateDatasetSettings:
         settings = dataset.settings
 
         settings.fields["text"].use_markdown = True
+        settings.fields["chat"].use_markdown = False
         dataset.settings.vectors.add(VectorField(name="vector", dimensions=10))
         dataset.settings.metadata.add(FloatMetadataProperty(name="metadata"))
         dataset.settings.update()
@@ -42,6 +46,7 @@ class TestUpdateDatasetSettings:
         dataset = client.datasets(dataset.name)
         settings = dataset.settings
         assert settings.fields["text"].use_markdown is True
+        assert settings.fields["chat"].use_markdown is False
         assert settings.vectors["vector"].dimensions == 10
         assert isinstance(settings.metadata["metadata"], FloatMetadataProperty)
 

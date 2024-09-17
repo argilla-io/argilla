@@ -113,16 +113,14 @@
                 type="button"
                 class="secondary light small"
                 @on-click="restore(question)"
-                :disabled="!question.isSettingsModified"
+                :disabled="!question.isModified"
               >
                 <span v-text="$t('cancel')" />
               </BaseButton>
               <BaseButton
                 type="submit"
                 class="primary small"
-                :disabled="
-                  !question.isSettingsModified || !question.isQuestionValid
-                "
+                :disabled="!question.isModified || !question.isQuestionValid"
               >
                 <span v-text="$t('update')" />
               </BaseButton>
