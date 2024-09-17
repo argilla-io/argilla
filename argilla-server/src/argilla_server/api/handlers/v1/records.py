@@ -49,9 +49,10 @@ async def get_record(
         db,
         record_id,
         options=[
-            selectinload(Record.dataset).selectinload(Dataset.questions),
-            selectinload(Record.dataset).selectinload(Dataset.metadata_properties),
+            selectinload(Record.dataset),
             selectinload(Record.suggestions),
+            selectinload(Record.responses),
+            selectinload(Record.vectors),
         ],
     )
 
