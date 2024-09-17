@@ -16,8 +16,7 @@ from typing import List, Optional, Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from argilla.settings._resource import Settings
-    from argilla.settings._field import TextField, ImageField
-    from argilla.settings._question import QuestionType
+    from argilla.settings._field import TextField
 
 
 def _get_field_type(field_type: str) -> "TextField":
