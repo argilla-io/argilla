@@ -22,6 +22,7 @@ from uuid import UUID
 
 from datasets import DatasetDict
 from datasets.data_files import EmptyDatasetError
+from PIL import Image
 
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
@@ -282,8 +283,8 @@ class HubImportExportMixin(DiskImportExportMixin):
                     json.dumps(value)
                     sample_huggingface_record[key] = value
                 except TypeError:
-                    try:
+                    if isinstance(value, Image.Image):
                         sample_huggingface_record[key] = pil_to_data_uri(value)
-                    except TypeError:
-                        sample_huggingface_record[key] = "Value not serializable"
+                    else:
+                        sample_huggingface_record[key] = "Record value is not serializable"
             return sample_huggingface_record
