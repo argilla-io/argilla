@@ -16,9 +16,7 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
-
-TODO
+- Added `Required/Optional` label on `Field dataset settings tab` and `Question dataset settings tab` ([#5394](https://github.com/argilla-io/argilla/pull/5394))
 
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0)
 

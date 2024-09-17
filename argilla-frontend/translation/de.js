@@ -31,6 +31,8 @@ export default {
   annotationGuidelines: "Annotationsrichtlinien",
   guidelines: "Richtlinien",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
+  required: "Erforderlich",
+  optional: "Optional",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "Der Datensatz ist leer. Bitten fragen Sie einen Admin, Einträge Hinzufügen und kommst du bald wieder.",
