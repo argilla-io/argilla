@@ -73,12 +73,23 @@ class TestSettings:
         settings = rg.Settings(
             fields=[
                 rg.TextField(name="text", title="text"),
+                rg.ImageField(name="image", title="image"),
             ],
             metadata=[
                 rg.FloatMetadataProperty("source"),
             ],
             questions=[
                 rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"]),
+                # rg.MultiLabelQuestion(name="label", title="text", labels=["positive", "negative"]),
+                rg.RatingQuestion(name="rating", title="text", values=[1, 2, 3, 4, 5]),
+                rg.TextQuestion(name="text", title="text"),
+                rg.SpanQuestion(
+                    name="span",
+                    title="text",
+                    field="text",
+                    labels=["Apparatus", "Method", "Machine", "Manufacture", "Design"],
+                    visible_labels=3,
+                ),
             ],
             vectors=[rg.VectorField(name="text", dimensions=3)],
         )
