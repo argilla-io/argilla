@@ -26,8 +26,11 @@ class WebhookEvent(BaseModel):
     data: dict
 
     def normalize(self, client: Argilla) -> dict:
-        instance_type = self.type.split(".")[0]
+        instance_type, action_type = self.type.split(".")
         data = self.data or {}
+
+        if action_type == "deleted":
+            return {"type": self.type, "timestamp": self.timestamp, "data": data}
 
         arguments = {
             "type": self.type,
