@@ -80,7 +80,6 @@ class TestSettings:
             ],
             questions=[
                 rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"]),
-                # rg.MultiLabelQuestion(name="label", title="text", labels=["positive", "negative"]),
                 rg.RatingQuestion(name="rating", title="text", values=[1, 2, 3, 4, 5]),
                 rg.TextQuestion(name="text", title="text"),
                 rg.SpanQuestion(

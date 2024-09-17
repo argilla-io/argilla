@@ -18,6 +18,9 @@ These are the section headers that we use:
 
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0)
 
+### Changed
+
+- Changed the __repr__ method for `SettingsProperties` to display the details of all the properties in `Setting` object. ([#5380](https://github.com/argilla-io/argilla/issues/5380))
 ### Added
 
 - Added new `ImageField` supporting URLs and Data URLs. ([#5279](https://github.com/argilla-io/argilla/pull/5279))
