@@ -201,7 +201,19 @@ select {
 
 <style>
 @keyframes onAutoFillStart {
+  from {
+    /**/
+  }
+  to {
+    /**/
+  }
 }
 @keyframes onAutoFillCancel {
+  from {
+    /**/
+  }
+  to {
+    /**/
+  }
 }
 </style>
