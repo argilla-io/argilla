@@ -79,7 +79,7 @@ export default {
     overflow-y: hidden;
     overflow-x: scroll;
     img {
-      max-width: max(100vw, 1000px);
+      max-width: 100%;
     }
   }
 
