@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6f49f28d670ea9bd2cddad3e1b380bad7b6b236a6d15a8ea443bca0c3882b19c"
+content_hash = "sha256:344f869c491801601ba6165c094fea325ce823713cd0761164744a94431abf60"
 
 [[metadata.targets]]
 requires_python = ">=3.9,<3.13"
@@ -611,7 +611,7 @@ name = "deprecated"
 version = "1.2.14"
 requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 summary = "Python @deprecated decorator to deprecate old python classes, functions or methods."
-groups = ["dev"]
+groups = ["default", "dev"]
 dependencies = [
     "wrapt<2,>=1.10",
 ]
@@ -1860,7 +1860,7 @@ name = "pillow"
 version = "10.4.0"
 requires_python = ">=3.8"
 summary = "Python Imaging Library (Fork)"
-groups = ["dev"]
+groups = ["default", "dev"]
 files = [
     {file = "pillow-10.4.0-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:4d9667937cfa347525b319ae34375c37b9ee6b525440f3ef48542fcf66f2731e"},
     {file = "pillow-10.4.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:543f3dc61c18dafb755773efc89aae60d06b6596a63914107f75459cf984164d"},
@@ -2754,6 +2754,24 @@ files = [
 ]
 
 [[package]]
+name = "standardwebhooks"
+version = "1.0.0"
+requires_python = ">=3.6"
+summary = "Standard Webhooks"
+groups = ["default"]
+dependencies = [
+    "Deprecated",
+    "attrs>=21.3.0",
+    "httpx>=0.23.0",
+    "python-dateutil",
+    "types-Deprecated",
+    "types-python-dateutil",
+]
+files = [
+    {file = "standardwebhooks-1.0.0.tar.gz", hash = "sha256:d94b99c0dcea84156e03adad94f8dba32d5454cc68e12ec2c824051b55bb67ff"},
+]
+
+[[package]]
 name = "tinycss2"
 version = "1.3.0"
 requires_python = ">=3.8"
@@ -2837,6 +2855,28 @@ dependencies = [
 files = [
     {file = "typer-0.9.4-py3-none-any.whl", hash = "sha256:aa6c4a4e2329d868b80ecbaf16f807f2b54e192209d7ac9dd42691d63f7a54eb"},
     {file = "typer-0.9.4.tar.gz", hash = "sha256:f714c2d90afae3a7929fcd72a3abb08df305e1ff61719381384211c4070af57f"},
+]
+
+[[package]]
+name = "types-deprecated"
+version = "1.2.9.20240311"
+requires_python = ">=3.8"
+summary = "Typing stubs for Deprecated"
+groups = ["default"]
+files = [
+    {file = "types-Deprecated-1.2.9.20240311.tar.gz", hash = "sha256:0680e89989a8142707de8103f15d182445a533c1047fd9b7e8c5459101e9b90a"},
+    {file = "types_Deprecated-1.2.9.20240311-py3-none-any.whl", hash = "sha256:d7793aaf32ff8f7e49a8ac781de4872248e0694c4b75a7a8a186c51167463f9d"},
+]
+
+[[package]]
+name = "types-python-dateutil"
+version = "2.9.0.20240906"
+requires_python = ">=3.8"
+summary = "Typing stubs for python-dateutil"
+groups = ["default"]
+files = [
+    {file = "types-python-dateutil-2.9.0.20240906.tar.gz", hash = "sha256:9706c3b68284c25adffc47319ecc7947e5bb86b3773f843c73906fd598bc176e"},
+    {file = "types_python_dateutil-2.9.0.20240906-py3-none-any.whl", hash = "sha256:27c8cc2d058ccb14946eebcaaa503088f4f6dbc4fb6093d3d456a49aef2753f6"},
 ]
 
 [[package]]
@@ -2963,7 +3003,7 @@ name = "wrapt"
 version = "1.14.1"
 requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 summary = "Module for decorators, wrappers and monkey patching."
-groups = ["dev"]
+groups = ["default", "dev"]
 files = [
     {file = "wrapt-1.14.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:80bb5c256f1415f747011dc3604b59bc1f91c6e7150bd7db03b19170ee06b320"},
     {file = "wrapt-1.14.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:07f7a7d0f388028b2df1d916e94bbb40624c59b48ecc6cbc232546706fac74c2"},
