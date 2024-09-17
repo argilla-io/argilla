@@ -202,18 +202,18 @@ select {
 <style>
 @keyframes onAutoFillStart {
   from {
-    /**/
+    background: transparent;
   }
   to {
-    /**/
+    background: transparent;
   }
 }
 @keyframes onAutoFillCancel {
   from {
-    /**/
+    background: transparent;
   }
   to {
-    /**/
+    background: transparent;
   }
 }
 </style>
