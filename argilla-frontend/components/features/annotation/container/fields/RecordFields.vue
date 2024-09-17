@@ -13,29 +13,17 @@
       :class="[isImageType ? 'fields__container--image' : '']"
       :key="id"
     >
-      <SpanAnnotationTextField
+      <SpanAnnotationImageField
         v-if="hasSpanQuestion(name)"
-        :id="`${id}-${record.id}-span-field`"
-        :name="name"
-        :title="title"
-        :fieldText="content"
         :spanQuestion="getSpanQuestion(name)"
-        :searchText="recordCriteria.committed.searchText.value.text"
       />
-      <TextField
-        v-else-if="isTextType"
-        :name="name"
-        :title="title"
-        :fieldText="content"
-        :useMarkdown="settings.use_markdown"
-        :searchText="recordCriteria.committed.searchText.value.text"
-      />
-      <ImageField v-else :name="name" :title="title" :content="content" />
     </div>
   </div>
 </template>
 <script>
+import SpanAnnotationImageField from "./image-annotation/SpanAnnotationImageField.vue";
 export default {
+  components: { SpanAnnotationImageField },
   props: {
     record: {
       type: Object,
