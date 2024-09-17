@@ -96,10 +96,96 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
-            "vectors": None,
+            "vectors": {},
             "dataset_id": str(dataset.id),
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+
+    async def test_get_records_with_suggestions(self, async_client: "AsyncClient", owner_auth_header: dict):
+        record = await RecordFactory.create()
+        question = await TextQuestionFactory.create(dataset=record.dataset)
+        suggestion = await SuggestionFactory.create(question=question, record=record)
+
+        response = await async_client.get(f"/api/v1/records/{record.id}", headers=owner_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "status": RecordStatus.pending,
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [
+                {
+                    "id": str(suggestion.id),
+                    "type": None,
+                    "score": None,
+                    "value": suggestion.value,
+                    "agent": None,
+                    "question_id": str(question.id),
+                    "inserted_at": suggestion.inserted_at.isoformat(),
+                    "updated_at": suggestion.updated_at.isoformat(),
+                }
+            ],
+            "vectors": {},
+            "dataset_id": str(record.dataset_id),
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+
+    async def test_get_record_with_responses(self, async_client: "AsyncClient", owner_auth_header: dict):
+        record = await RecordFactory.create()
+        user_response = await ResponseFactory.create(record=record)
+
+        response = await async_client.get(f"/api/v1/records/{record.id}", headers=owner_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "status": RecordStatus.pending,
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": [
+                {
+                    "id": str(user_response.id),
+                    "values": user_response.values,
+                    "status": user_response.status,
+                    "record_id": str(record.id),
+                    "user_id": str(user_response.user_id),
+                    "inserted_at": user_response.inserted_at.isoformat(),
+                    "updated_at": user_response.updated_at.isoformat(),
+                }
+            ],
+            "suggestions": [],
+            "vectors": {},
+            "dataset_id": str(record.dataset_id),
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+
+    async def test_get_record_with_vectors(self, async_client: "AsyncClient", owner_auth_header: dict):
+        record = await RecordFactory.create()
+        vector_settings = await VectorSettingsFactory.create(dataset=record.dataset, dimensions=5)
+        vector = await VectorFactory.create(record=record, vector_settings=vector_settings, value=[1, 1, 1, 1, 1])
+
+        response = await async_client.get(f"/api/v1/records/{record.id}", headers=owner_auth_header)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "status": RecordStatus.pending,
+            "fields": {"text": "This is a text", "sentiment": "neutral"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [],
+            "vectors": {vector_settings.name: vector.value},
+            "dataset_id": str(record.dataset_id),
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
