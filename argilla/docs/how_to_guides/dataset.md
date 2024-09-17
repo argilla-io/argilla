@@ -173,6 +173,18 @@ The fields in a dataset consist of one or more data items requiring annotation. 
     )
     ```
 
+=== "Chat"
+
+    ```python
+    rg.ChatField(
+        name="chat",
+        title="Chat",
+        use_markdown=True,
+        required=True,
+        description="Field description",
+    )
+    ```
+
 ### Questions
 
 To collect feedback for your dataset, you need to formulate questions that annotators will be asked to answer.
