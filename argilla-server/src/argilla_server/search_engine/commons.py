@@ -165,6 +165,15 @@ def es_mapping_for_field(field: Field) -> dict:
 
     if field.is_text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
+    if field.is_chat:
+        es_field = {
+            "type": "object",
+            "properties": {
+                "content": {"type": "text"},
+                "role": {"type": "keyword"},
+            },
+        }
+        return {es_field_for_record_field(field.name): es_field}
     elif field.is_image:
         return {
             es_field_for_record_field(field.name): {

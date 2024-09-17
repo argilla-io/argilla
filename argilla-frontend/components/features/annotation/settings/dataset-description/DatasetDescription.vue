@@ -41,7 +41,7 @@ export default {
         {
           id: "1",
           name: this.$t("preview"),
-          component: "RenderMarkdownBaseComponent",
+          component: "MarkdownRenderer",
         },
       ],
     };

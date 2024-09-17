@@ -22,7 +22,7 @@ from typing import Any, List
 
 import argilla as rg
 import pytest
-from argilla._exceptions import ConflictError, SettingsError
+from argilla._exceptions import SettingsError
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -280,6 +280,7 @@ class TestHubImportExportMixin:
         settings = rg.Settings(
             fields=[
                 rg.TextField(name="text"),
+                rg.ImageField(name="image"),
             ],
             questions=[
                 rg.LabelQuestion(name="label", labels=["positive", "negative"]),
