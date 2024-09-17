@@ -429,6 +429,9 @@ class RecordSuggestions(Iterable[Suggestion]):
     def __getitem__(self, question_name: str):
         return self._suggestion_by_question_name[question_name]
 
+    def __len__(self):
+        return len(self._suggestion_by_question_name)
+
     def __repr__(self) -> str:
         return self.to_dict().__repr__()
 
