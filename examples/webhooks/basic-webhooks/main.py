@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 
 import argilla as rg
-from argilla.webhooks import get_webhook_server, webhook_listener
 
 # Environment variables with defaults
 API_KEY = os.environ.get("ARGILLA_API_KEY", "argilla.apikey")
@@ -32,7 +31,7 @@ for webhook in client.webhooks:
 # Related resources will be passed as keyword arguments to the decorated function
 # (for example the dataset for a record-related event, or the record for a response-related event)
 # When a resource is deleted
-@webhook_listener(events=["record.created", "record.completed"])
+@rg.webhook_listener(events=["record.created", "record.completed"])
 async def listen_record(
     record: rg.Record, dataset: rg.Dataset, type: str, timestamp: datetime
 ):
@@ -42,7 +41,7 @@ async def listen_record(
     print(f"A record with id {record.id} has been {action} for dataset {dataset.name}!")
 
 
-@webhook_listener(events="response.updated")
+@rg.webhook_listener(events="response.updated")
 async def trigger_something_on_response_updated(response: rg.UserResponse, **kwargs):
     print(
         f"The user response {response.id} has been updated with the following responses:"
@@ -50,7 +49,7 @@ async def trigger_something_on_response_updated(response: rg.UserResponse, **kwa
     print([response.serialize() for response in response.responses])
 
 
-@webhook_listener(events=["dataset.created", "dataset.updated", "dataset.published"])
+@rg.webhook_listener(events=["dataset.created", "dataset.updated", "dataset.published"])
 async def with_raw_payload(
     type: str,
     timestamp: datetime,
@@ -61,7 +60,7 @@ async def with_raw_payload(
     print(dataset.settings)
 
 
-@webhook_listener(events="dataset.deleted")
+@rg.webhook_listener(events="dataset.deleted")
 async def on_dataset_deleted(
     data: dict,
     **kwargs,
@@ -74,4 +73,4 @@ async def on_dataset_deleted(
 # uvicorn main:webhook_server --reload
 # ```
 
-server = get_webhook_server()
+server = rg.get_webhook_server()
