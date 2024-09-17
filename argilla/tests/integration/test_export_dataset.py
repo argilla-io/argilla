@@ -369,7 +369,7 @@ class TestHubImportExportMixin:
     def test_import_dataset_from_hub_with_automatic_settings(
         self, token: str, dataset: rg.Dataset, client, mock_data: List[dict[str, Any]], with_records_export: bool
     ):
-        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_classlabel_{with_records_export}"
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_automatic_settings_{with_records_export}"
         mock_dataset_name = f"test_import_dataset_from_hub_with_automatic_settings_{uuid.uuid4()}"
         hf_dataset = HFDataset.from_dict(
             {
