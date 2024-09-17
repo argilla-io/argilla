@@ -21,23 +21,15 @@ jobs:
   build:
     services:
       argilla-server:
-        image: argilladev/argilla-server:develop
+        image: argilladev/argilla-hf-spaces:develop
         ports:
           - 6900:6900
         env:
           ARGILLA_ENABLE_TELEMETRY: 0
-          ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
           # Set credentials
           USERNAME: argilla
           PASSWORD: 12345678
           API_KEY: argilla.apikey
-      elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
-        ports:
-          - 9200:9200
-        env:
-          discovery.type: single-node
-          xpack.security.enabled: false
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -77,3 +77,29 @@ class RecordModel(ResourceModel):
         if external_id is None:
             external_id = uuid.uuid4()
         return external_id
+
+    @field_validator("vectors", mode="before")
+    @classmethod
+    def empty_vectors_if_none(cls, vectors: Optional[List[VectorModel]]) -> Optional[List[VectorModel]]:
+        """Ensure vectors is None if not provided."""
+        if vectors is None:
+            return []
+        return vectors
+
+    @field_validator("responses", mode="before")
+    @classmethod
+    def empty_responses_if_none(cls, responses: Optional[List[UserResponseModel]]) -> Optional[List[UserResponseModel]]:
+        """Ensure responses is None if not provided."""
+        if responses is None:
+            return []
+        return responses
+
+    @field_validator("suggestions", mode="before")
+    @classmethod
+    def empty_suggestions_if_none(
+        cls, suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]]
+    ) -> Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]]:
+        """Ensure suggestions is None if not provided."""
+        if suggestions is None:
+            return []
+        return suggestions
