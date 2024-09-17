@@ -26,6 +26,7 @@ export class Environment {
       return {
         space: this.huggingface.spaceRepoName,
         user: this.huggingface.spaceAuthorName,
+        host: this.huggingface.spaceHost,
       };
     }
   }

@@ -96,7 +96,7 @@ $buttonSize: 34px;
   display: flex;
   gap: 25px;
   padding: $base-space $base-space * 2 $base-space * 2 $base-space * 2;
-  border-bottom: 1px solid palette(grey, 200);
+  border-bottom: 1px solid hsl(from var(--color-white) h s l / 10%);
   .right-head {
     flex: 1;
     display: flex;
@@ -113,10 +113,10 @@ $buttonSize: 34px;
     user-select: none;
     cursor: pointer;
     @extend %circle;
-    background: palette(orange-red-crayola);
+    background: var(--color-brand);
     transform: scale3d(1, 1, 1) translateZ(0);
     transition: all 0.2s ease-in-out;
-    color: palette(white);
+    color: var(--color-white);
     will-change: auto;
     &:hover {
       transform: scale3d(1.05, 1.05, 1.05) translateZ(0);
@@ -130,18 +130,18 @@ $buttonSize: 34px;
     top: 3.8em;
     right: -0.5em;
     padding-top: $base-space * 2;
-    background: palette(grey, 100);
+    background: var(--color-dark-grey);
     border-radius: $border-radius;
     @include font-size(14px);
     font-weight: 400;
-    color: palette(white);
+    color: var(--color-white);
     box-shadow: $shadow;
     min-width: 260px;
     &:after {
       position: absolute;
       top: -10px;
       right: 1em;
-      @include triangle(top, 10px, 10px, palette(grey, 100));
+      @include triangle(top, 10px, 10px, var(--color-dark-grey));
     }
     a {
       text-decoration: none;
@@ -153,19 +153,19 @@ $buttonSize: 34px;
     display: flex;
     flex-direction: column;
     padding: $base-space * 2 $base-space * 2 $base-space * 2 $base-space * 2;
-    color: darken(palette(white), 10%);
+    color: hsl(from var(--color-white) h s l / 80%);
     a {
-      color: darken(palette(white), 10%);
+      color: hsl(from var(--color-white) h s l / 80%);
     }
     &:hover {
-      color: palette(white);
+      color: var(--color-white);
       .svg-icon {
-        color: palette(white);
+        color: var(--color-white);
       }
     }
   }
   &__link:not(:last-child) {
-    border-bottom: 1px solid palette(grey, 200);
+    border-bottom: 1px solid hsl(from var(--color-white) h s l / 10%);
   }
 }
 
@@ -175,7 +175,7 @@ $buttonSize: 34px;
   font-weight: 400;
   line-height: 1em;
   padding: 1em;
-  background: $black-54;
+  background: rgba(0, 0, 0, 0.54);
   text-align: right;
   border-bottom-right-radius: $border-radius;
   border-bottom-left-radius: $border-radius;

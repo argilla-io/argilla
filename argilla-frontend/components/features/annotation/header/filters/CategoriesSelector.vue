@@ -88,7 +88,7 @@ export default {
       @include line-height(16px);
     }
     &:hover {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
     &:focus {
       outline: none;

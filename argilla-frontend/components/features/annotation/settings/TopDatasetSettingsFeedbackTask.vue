@@ -2,7 +2,7 @@
   <div class="top-content" :class="separator ? '--separator' : null">
     <h1 v-text="$t('settings.title')" />
     <base-button @click="$emit('goToDataset')" class="secondary text">
-      <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
+      <svgicon name="chevron-left" width="10" height="10" />
       {{ $t("settings.seeYourDataset") }}
     </base-button>
   </div>

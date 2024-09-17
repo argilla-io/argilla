@@ -109,7 +109,7 @@ export default {
   display: table;
   transition: opacity 0.3s ease;
   cursor: default;
-  background: $black-20;
+  background: var(--bg-opacity-20);
   &:not(.prevent-scroll) {
     pointer-events: none;
   }
@@ -147,8 +147,8 @@ export default {
   max-width: 460px;
   margin: 0px auto;
   padding: $base-space * 4;
-  background-color: palette(white);
-  color: $black-87;
+  background-color: var(--bg-accent-grey-1);
+  color: var(--fg-primary);
   border-radius: $border-radius;
   box-shadow: $shadow;
   transition: $swift-ease-in-out;

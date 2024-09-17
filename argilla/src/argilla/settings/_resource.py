@@ -22,7 +22,7 @@ from uuid import UUID
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
-from argilla.settings._field import TextField
+from argilla.settings._field import Field, _field_from_dict, _field_from_model
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._task_distribution import TaskDistribution
@@ -43,18 +43,19 @@ class Settings(Resource):
 
     def __init__(
         self,
-        fields: Optional[List[TextField]] = None,
+        fields: Optional[List[Field]] = None,
         questions: Optional[List[QuestionType]] = None,
         vectors: Optional[List[VectorField]] = None,
         metadata: Optional[List[MetadataType]] = None,
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = False,
         distribution: Optional[TaskDistribution] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         _dataset: Optional["Dataset"] = None,
     ) -> None:
         """
         Args:
-            fields (List[TextField]): A list of TextField objects that represent the fields in the Dataset.
+            fields (List[Field]): A list of Field objects that represent the fields in the Dataset.
             questions (List[Union[LabelQuestion, MultiLabelQuestion, RankingQuestion, TextQuestion, RatingQuestion]]):
                 A list of Question objects that represent the questions in the Dataset.
             vectors (List[VectorField]): A list of VectorField objects that represent the vectors in the Dataset.
@@ -64,11 +65,13 @@ class Settings(Resource):
                 Dataset. Defaults to False.
             distribution (TaskDistribution): The annotation task distribution configuration.
                 Default to DEFAULT_TASK_DISTRIBUTION
+            mapping (Dict[str, Union[str, Sequence[str]]]): A dictionary that maps incoming data names to Argilla dataset attributes in DatasetRecords.
         """
         super().__init__(client=_dataset._client if _dataset else None)
 
         self._dataset = _dataset
         self._distribution = distribution
+        self._mapping = mapping
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
@@ -86,7 +89,7 @@ class Settings(Resource):
         return self.__fields
 
     @fields.setter
-    def fields(self, fields: List[TextField]):
+    def fields(self, fields: List[Field]):
         self.__fields = SettingsProperties(self, fields)
 
     @property
@@ -138,6 +141,14 @@ class Settings(Resource):
         self._distribution = value
 
     @property
+    def mapping(self) -> Dict[str, Union[str, Sequence[str]]]:
+        return self._mapping
+
+    @mapping.setter
+    def mapping(self, value: Dict[str, Union[str, Sequence[str]]]):
+        self._mapping = value
+
+    @property
     def dataset(self) -> "Dataset":
         return self._dataset
 
@@ -165,7 +176,7 @@ class Settings(Resource):
         return schema_dict
 
     @cached_property
-    def schema_by_id(self) -> Dict[UUID, Union[TextField, QuestionType, MetadataType, VectorField]]:
+    def schema_by_id(self) -> Dict[UUID, Union[Field, QuestionType, MetadataType, VectorField]]:
         return {v.id: v for v in self.schema.values()}
 
     def validate(self) -> None:
@@ -220,6 +231,7 @@ class Settings(Resource):
                 "metadata": self.metadata.serialize(),
                 "allow_extra_metadata": self.allow_extra_metadata,
                 "distribution": self.distribution.to_dict(),
+                "mapping": self.mapping,
             }
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the settings. {e.__class__.__name__}") from e
@@ -271,14 +283,18 @@ class Settings(Resource):
         guidelines = settings_dict.get("guidelines")
         distribution = settings_dict.get("distribution")
         allow_extra_metadata = settings_dict.get("allow_extra_metadata")
+        mapping = settings_dict.get("mapping")
 
         questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
-        fields = [TextField.from_dict(field) for field in fields]
+        fields = [_field_from_dict(field) for field in fields]
         vectors = [VectorField.from_dict(vector) for vector in vectors]
         metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
 
         if distribution:
             distribution = TaskDistribution.from_dict(distribution)
+
+        if mapping:
+            mapping = cls._validate_mapping(mapping)
 
         return cls(
             questions=questions,
@@ -288,15 +304,16 @@ class Settings(Resource):
             guidelines=guidelines,
             allow_extra_metadata=allow_extra_metadata,
             distribution=distribution,
+            mapping=mapping,
         )
 
     def _copy(self) -> "Settings":
         instance = self.__class__._from_dict(self.serialize())
         return instance
 
-    def _fetch_fields(self) -> List[TextField]:
+    def _fetch_fields(self) -> List[Field]:
         models = self._client.api.fields.list(dataset_id=self._dataset.id)
-        return [TextField.from_model(model) for model in models]
+        return [_field_from_model(model) for model in models]
 
     def _fetch_questions(self) -> List[QuestionType]:
         models = self._client.api.questions.list(dataset_id=self._dataset.id)
@@ -362,6 +379,18 @@ class Settings(Resource):
                     )
                 dataset_properties_by_name[property.name] = property
 
+    @classmethod
+    def _validate_mapping(cls, mapping: Dict[str, Union[str, Sequence[str]]]) -> None:
+        validate_mapping = {}
+        for key, value in mapping.items():
+            if isinstance(value, str):
+                validate_mapping[key] = value
+            elif isinstance(value, list) or isinstance(value, tuple):
+                validate_mapping[key] = tuple(value)
+            else:
+                raise SettingsError(f"Invalid mapping value for key {key!r}: {value}")
+        return validate_mapping
+
     def __process_guidelines(self, guidelines):
         if guidelines is None:
             return guidelines
@@ -376,7 +405,7 @@ class Settings(Resource):
         return guidelines
 
 
-Property = Union[TextField, VectorField, MetadataType, QuestionType]
+Property = Union[Field, VectorField, MetadataType, QuestionType]
 
 
 class SettingsProperties(Sequence[Property]):

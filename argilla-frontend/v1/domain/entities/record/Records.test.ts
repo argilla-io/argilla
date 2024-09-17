@@ -1168,6 +1168,182 @@ describe("Records", () => {
       expect(records.total).toBe(200);
     });
   });
+
+  describe("hasNecessaryBuffering", () => {
+    test("should return false when the buffer has at least 50% extra records loaded", () => {
+      const pageCriteria = new PageCriteria();
+      pageCriteria.client = {
+        page: 1,
+        many: 4,
+      };
+
+      const records = new Records([
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+      ]);
+
+      const shouldBuffering = records.shouldBuffering(pageCriteria);
+
+      expect(shouldBuffering).toBeFalsy();
+    });
+
+    test("should return true when the buffer no have at least 50% extra records loaded", () => {
+      const pageCriteria = new PageCriteria();
+      pageCriteria.client = {
+        page: 1,
+        many: 10,
+      };
+
+      const records = new Records([
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+      ]);
+
+      const shouldBuffering = records.shouldBuffering(pageCriteria);
+
+      expect(shouldBuffering).toBeTruthy();
+    });
+
+    test("should return false when is end of the queue", () => {
+      const pageCriteria = new PageCriteria();
+      pageCriteria.client = {
+        page: 100,
+        many: 4,
+      };
+
+      const records = new Records(
+        [
+          new Record(
+            "4",
+            "1",
+            [],
+            [],
+            null,
+            [],
+            1,
+            100,
+            {},
+            "pending",
+            new Date("2021-01-01"),
+            new Date("2021-01-01")
+          ),
+        ],
+        100
+      );
+
+      const shouldBuffering = records.shouldBuffering(pageCriteria);
+
+      expect(shouldBuffering).toBeFalsy();
+    });
+  });
 });
 
 describe("EmptyQueueRecords", () => {

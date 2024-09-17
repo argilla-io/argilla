@@ -19,8 +19,6 @@ from unittest.mock import ANY, MagicMock
 from uuid import UUID, uuid4
 
 import pytest
-from sqlalchemy import func, inspect, select
-
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.api.schemas.v1.datasets import DATASET_GUIDELINES_MAX_LENGTH, DATASET_NAME_MAX_LENGTH
 from argilla_server.api.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
@@ -40,9 +38,9 @@ from argilla_server.enums import (
     DatasetStatus,
     OptionsOrder,
     RecordInclude,
+    RecordStatus,
     ResponseStatusFilter,
     SimilarityOrder,
-    RecordStatus,
     SortOrder,
 )
 from argilla_server.models import (
@@ -60,18 +58,20 @@ from argilla_server.models import (
     VectorSettings,
 )
 from argilla_server.search_engine import (
+    AndFilter,
+    MetadataFilterScope,
+    Order,
+    RangeFilter,
+    RecordFilterScope,
+    ResponseFilterScope,
     SearchEngine,
     SearchResponseItem,
     SearchResponses,
-    TextQuery,
-    AndFilter,
     TermsFilter,
-    MetadataFilterScope,
-    RangeFilter,
-    ResponseFilterScope,
-    Order,
-    RecordFilterScope,
+    TextQuery,
 )
+from sqlalchemy import func, inspect, select
+
 from tests.factories import (
     AdminFactory,
     AnnotatorFactory,
@@ -1720,7 +1720,6 @@ class TestSuiteDatasets:
         self,
         async_client: "AsyncClient",
         mock_search_engine: SearchEngine,
-        test_telemetry: MagicMock,
         db: "AsyncSession",
         owner: User,
         owner_auth_header: dict,
@@ -1818,10 +1817,6 @@ class TestSuiteDatasets:
 
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
-
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
-        )
 
     async def test_create_dataset_records_with_response_for_multiple_users(
         self,
@@ -2037,22 +2032,31 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-        records_json = {
-            "items": [
-                {
-                    "fields": {"input": "Say Hello", "output": 33},
-                },
-                {
-                    "fields": {"input": "Say Hello", "output": "Hi"},
-                },
-                {
-                    "fields": {"input": "Say Pello", "output": "Hello World"},
-                },
-            ]
-        }
-
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records/bulk",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                            "output": 33,
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                            "output": "Hi",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Pello",
+                            "output": "Hello World",
+                        },
+                    },
+                ],
+            },
         )
 
         assert response.status_code == 422
@@ -2065,7 +2069,7 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
-                        }
+                        },
                     ]
                 },
             }
@@ -2081,16 +2085,29 @@ class TestSuiteDatasets:
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
 
-        records_json = {
-            "items": [
-                {"fields": {"input": "Say Hello", "output": "unexpected"}},
-                {"fields": {"input": "Say Hello"}},
-                {"fields": {"input": "Say Pello"}},
-            ]
-        }
-
         response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
+            f"/api/v1/datasets/{dataset.id}/records/bulk",
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                            "output": "unexpected",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Hello",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "input": "Say Pello",
+                        },
+                    },
+                ],
+            },
         )
 
         assert response.status_code == 422
@@ -2152,7 +2169,7 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
-                        }
+                        },
                     ]
                 },
             }
@@ -2502,7 +2519,6 @@ class TestSuiteDatasets:
         async_client: "AsyncClient",
         mock_search_engine: "SearchEngine",
         db: "AsyncSession",
-        test_telemetry: MagicMock,
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
@@ -2574,10 +2590,6 @@ class TestSuiteDatasets:
 
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
-
-        test_telemetry.track_data.assert_called_once_with(
-            action="DatasetRecordsCreated", data={"records": len(records_json["items"])}
-        )
 
     async def test_create_dataset_records_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
         annotator = await AnnotatorFactory.create()
@@ -4551,7 +4563,6 @@ class TestSuiteDatasets:
         async_client: "AsyncClient",
         db: "AsyncSession",
         mock_search_engine: SearchEngine,
-        test_telemetry: MagicMock,
         owner_auth_header,
     ) -> None:
         dataset = await DatasetFactory.create()
@@ -4566,7 +4577,6 @@ class TestSuiteDatasets:
         response_body = response.json()
         assert response_body["status"] == "ready"
 
-        test_telemetry.track_data.assert_called_once_with(action="PublishedDataset", data={"questions": ["rating"]})
         mock_search_engine.create_index.assert_called_once_with(dataset)
 
     async def test_publish_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):

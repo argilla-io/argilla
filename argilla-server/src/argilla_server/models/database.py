@@ -27,6 +27,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 from argilla_server.api.schemas.v1.questions import QuestionSettings
 from argilla_server.enums import (
     DatasetStatus,
+    FieldType,
     MetadataPropertyType,
     QuestionType,
     RecordStatus,
@@ -72,6 +73,14 @@ class Field(DatabaseModel):
     dataset: Mapped["Dataset"] = relationship(back_populates="fields")
 
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="field_name_dataset_id_uq"),)
+
+    @property
+    def is_text(self):
+        return self.settings.get("type") == FieldType.text
+
+    @property
+    def is_image(self):
+        return self.settings.get("type") == FieldType.image
 
     def __repr__(self):
         return (
@@ -360,13 +369,6 @@ class Dataset(DatabaseModel):
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
-
-    @property
-    async def responses_count(self) -> int:
-        # TODO: This should be moved to proper repository
-        return await async_object_session(self).scalar(
-            select(func.count(Response.id)).join(Record).where(Record.dataset_id == self.id)
-        )
 
     @property
     def is_draft(self):

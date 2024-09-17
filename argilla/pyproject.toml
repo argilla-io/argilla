@@ -17,6 +17,7 @@ dependencies = [
     "tqdm>=4.60.0",
     "rich>=10.0.0",
     "datasets>=2.0.0",
+    "pillow>=9.5.0",
 ]
 
 legacy = [
@@ -57,6 +58,7 @@ dev = [
     "mkdocs-section-index >= 0.3.8",
     "mkdocs-gen-files >= 0.5.0",
     "mkdocs-open-in-new-tab >= 1.0.3",
+    "material-plausible-plugin>=0.2.0",
     "mike >= 2.0.0",
     "Pillow >= 9.5.0",
     "CairoSVG >= 2.7.1",

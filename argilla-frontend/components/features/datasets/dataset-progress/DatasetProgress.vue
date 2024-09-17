@@ -45,7 +45,7 @@ export default {
     max-width: 160px;
   }
   &__pending-info {
-    color: $black-37;
+    color: var(--fg-tertiary);
     @include font-size(12px);
     margin: 0 0 0 auto;
   }

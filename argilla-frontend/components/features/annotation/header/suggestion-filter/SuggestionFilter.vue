@@ -213,7 +213,7 @@ $suggestion-filter-width: 300px;
     padding: $base-space $base-space * 2;
     cursor: pointer;
     &:hover {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
   &__content {
@@ -221,7 +221,7 @@ $suggestion-filter-width: 300px;
   }
   &__categories {
     padding: $base-space;
-    background: palette(white);
+    background: var(--bg-accent-grey-2);
     border-radius: $border-radius;
   }
   &__button.button {

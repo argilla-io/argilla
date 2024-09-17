@@ -20,6 +20,35 @@ from pytest_httpx import HTTPXMock
 
 import argilla as rg
 from argilla._models import FieldModel
+from argilla._models._settings._fields import ImageFieldSettings
+from argilla.settings._field import ImageField
+
+
+class TestImageField:
+    def test_create_image_field_ony_with_required_arguments(self):
+        field = ImageField(name="image")
+
+        assert field.name == "image"
+        assert field.title == "image"
+        assert field.required is True
+        assert field.description is None
+
+    def test_create_image_field_from_dict(self):
+        field = ImageField.from_dict(
+            {
+                "name": "image",
+                "title": "Image title",
+                "required": "false",
+                "description": "Image description",
+                "settings": {"type": "image"},
+            }
+        )
+
+        assert field.name == "image"
+        assert field.title == "Image title"
+        assert field.description == "Image description"
+        assert field.required is False
+        assert isinstance(field._model.settings, ImageFieldSettings)
 
 
 class TestFieldsAPI:

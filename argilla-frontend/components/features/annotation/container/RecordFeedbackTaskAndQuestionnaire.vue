@@ -10,7 +10,7 @@
     :dataset-vectors="datasetVectors"
     :records="records"
     :record="record"
-    :no-records-message="noRecordsMessage"
+    :records-message="recordsMessage"
     :status-class="statusClass"
     @on-submit-responses="goToNext"
     @on-discard-responses="goToNext"
@@ -21,7 +21,7 @@
     :dataset-vectors="datasetVectors"
     :records="records"
     :record="record"
-    :no-records-message="noRecordsMessage"
+    :records-message="recordsMessage"
     :status-class="statusClass"
     @on-submit-responses="goToNext"
     @on-discard-responses="goToNext"
@@ -47,17 +47,6 @@ export default {
   computed: {
     record() {
       return this.records.getRecordOn(this.recordCriteria.committed.page);
-    },
-    noMoreDataMessage() {
-      return `You've reached the end of the data for the ${this.recordCriteria.committed.status} queue.`;
-    },
-    noRecordsMessage() {
-      const { status } = this.recordCriteria.committed;
-
-      if (this.recordCriteria.isFilteredByText)
-        return `You have no ${status} records matching the search input`;
-
-      return `You have no ${status} records`;
     },
     statusClass() {
       return `--${this.record?.status}`;
@@ -86,17 +75,7 @@ export default {
 
       this.fetching = true;
 
-      const isNextRecordExist = await this.paginateRecords(this.recordCriteria);
-
-      if (!isNextRecordExist) {
-        setTimeout(() => {
-          this.$notification.notify({
-            message: this.noMoreDataMessage,
-            numberOfChars: this.noMoreDataMessage.length,
-            type: "info",
-          });
-        }, 100);
-      }
+      await this.paginateRecords(this.recordCriteria);
 
       this.fetching = false;
     },

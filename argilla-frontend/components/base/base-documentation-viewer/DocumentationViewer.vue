@@ -81,7 +81,7 @@ export default {
     margin-bottom: $base-space * 2;
   }
   :deep(em) {
-    color: $black-54;
+    color: var(--fg-secondary);
   }
 }
 .library {
@@ -99,7 +99,7 @@ export default {
   &__section {
     &__title {
       margin-bottom: $base-space;
-      color: $black-54;
+      color: var(--fg-secondary);
       font-weight: 600;
       @include font-size(15px);
     }

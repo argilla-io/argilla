@@ -60,7 +60,6 @@ $header-button-color: #262a2e;
   left: 0;
   transform: translateY(0);
   position: sticky;
-  background: $bg;
   z-index: 3;
   :deep(.header__filters) {
     position: relative;
@@ -84,7 +83,7 @@ $header-button-color: #262a2e;
 }
 .header__button {
   background: $header-button-color;
-  color: palette(white);
+  color: var(--color-white);
   margin-right: $base-space;
   padding: 10px 12px 10px 10px;
   font-weight: 600;
@@ -94,7 +93,7 @@ $header-button-color: #262a2e;
     background: lighten($header-button-color, 3%);
   }
   svg {
-    fill: palette(white);
+    fill: var(--color-white);
   }
 }
 </style>

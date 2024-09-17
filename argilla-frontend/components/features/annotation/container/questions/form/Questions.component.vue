@@ -172,7 +172,7 @@ export default {
   flex-direction: column;
   gap: $base-space * 4;
   &__title {
-    color: $black-37;
+    color: var(--fg-tertiary);
     margin-top: 0;
     margin-bottom: $base-space * 3;
   }

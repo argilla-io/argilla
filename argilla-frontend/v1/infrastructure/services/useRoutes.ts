@@ -19,14 +19,11 @@ type QueryParam = {
 };
 
 export const ROUTES = {
-  datasets: "datasets",
-  annotationPage: {
-    oldDataset: (workspace: string, name: string) =>
-      `/datasets/${workspace}/${name}`,
-    feedbackDataset: (datasetId: string) =>
-      `/dataset/${datasetId}/annotation-mode`,
-  },
   signIn: "/sign-in",
+  datasets: "datasets",
+  annotationPage: (datasetId: string) =>
+    `/dataset/${datasetId}/annotation-mode`,
+  settings: (id: string) => `/dataset/${id}/settings`,
 };
 
 export const useRoutes = () => {
@@ -48,18 +45,15 @@ export const useRoutes = () => {
   };
 
   const getDatasetLink = ({ id }: Dataset): string => {
-    return ROUTES.annotationPage.feedbackDataset(id);
+    return ROUTES.annotationPage(id);
   };
 
   const goToFeedbackTaskAnnotationPage = (datasetId: string) => {
-    router.push(ROUTES.annotationPage.feedbackDataset(datasetId));
+    router.push(ROUTES.annotationPage(datasetId));
   };
 
-  const goToSetting = ({ id }: Dataset) => {
-    router.push({
-      name: "dataset-id-settings",
-      params: { id },
-    });
+  const goToSetting = (id: string) => {
+    router.push(ROUTES.settings(id));
   };
 
   const goToDatasetsList = () => {
@@ -90,6 +84,24 @@ export const useRoutes = () => {
         ...newQuery,
       },
     });
+  };
+
+  const setQueryParamsVirtually = (...params: QueryParam[]) => {
+    let newQuery = {};
+
+    params.forEach(({ key, value }) => {
+      if (!value) return;
+
+      newQuery = {
+        ...newQuery,
+        [key]: encodeURIComponent(value),
+      };
+    });
+
+    const url = new URL(window.location.href);
+    url.search = new URLSearchParams(newQuery).toString();
+
+    window.history.replaceState(null, "", url.toString());
   };
 
   const getQueryParams = <T>(key: KindOfParam): T => {
@@ -139,6 +151,7 @@ export const useRoutes = () => {
     goToSetting,
     getDatasetLink,
     setQueryParams,
+    setQueryParamsVirtually,
     getQueryParams,
     getParams,
     getPreviousRoute,

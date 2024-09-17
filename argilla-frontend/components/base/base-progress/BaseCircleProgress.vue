@@ -58,7 +58,7 @@ export default {
     bottom: 0;
     background-image: conic-gradient(
       transparent var(--a),
-      palette(grey, 800) 0deg
+      var(--bg-accent-grey-1) 0deg
     );
     animation: progress 0.5s ease-in-out;
   }

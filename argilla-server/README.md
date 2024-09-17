@@ -115,6 +115,12 @@ pdm migrate
 pdm server
 ```
 
+### Run RQ background workers
+
+```sh
+pdm worker
+```
+
 ## CLI commands
 
 This section list and describe the commands offered by the `argilla_server` Python package. If you need more information about the available
@@ -270,6 +276,16 @@ The `argilla_server database users` group of commands offers functionality for m
 The `argilla_server search-engine` group of commands offers functionality to work with the search engine used by Argilla.
 
 - `python -m argilla_server search-engine reindex`: reindex all Argilla entities into search engine.
+
+### Background Jobs
+
+Argilla uses [RQ](https://python-rq.org) as background job manager. RQ depends on [Redis](https://redis.io) to store and retrieve information about the jobs to be processed.
+
+Once that you have correctly installed Redis on your system, you can start the RQ worker by running the following CLI command:
+
+```sh
+python -m argilla_server worker
+```
 
 ## 🫱🏾‍🫲🏼 Contribute
 

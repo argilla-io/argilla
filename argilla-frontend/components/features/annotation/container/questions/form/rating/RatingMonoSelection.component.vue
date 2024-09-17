@@ -128,8 +128,8 @@ export default {
   min-width: $base-space * 4;
   padding-inline: $base-space;
   outline: none;
-  background: palette(grey, 700);
-  color: palette(purple, 200);
+  background: var(--bg-label-unselected);
+  color: var(--fg-label);
   font-weight: 500;
   overflow: hidden;
   transition: all 0.2s ease-in-out;
@@ -142,17 +142,17 @@ export default {
   }
 
   &.label-active {
-    color: white;
-    background: palette(purple, 200);
+    color: var(--color-white);
+    background: var(--bg-label);
     box-shadow: none;
     &:hover {
-      box-shadow: inset 0 -2px 6px 0 darken(palette(purple, 200), 8%);
-      background: darken(palette(purple, 200), 4%);
+      box-shadow: inset 0 -2px 6px 0 hsl(from var(--bg-label) h s l / 80%);
+      background: hsl(from var(--bg-label) h s l / 80%);
     }
   }
 
   &:not(.label-active):hover {
-    background: darken(palette(grey, 700), 5%);
+    background: var(--bg-label-unselected-hover);
     transition: all 0.2s ease-in-out;
   }
 }
@@ -160,7 +160,7 @@ input[type="checkbox"] {
   @extend %visuallyhidden;
   &:focus {
     & + .label-text {
-      outline: 2px solid $primary-color;
+      outline: 2px solid var(--fg-cuaternary);
     }
   }
 }

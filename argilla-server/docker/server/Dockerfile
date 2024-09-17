@@ -24,6 +24,8 @@ ENV API_KEY=""
 ENV ARGILLA_HOME_PATH=/var/lib/argilla
 ## Uvicorn defaults
 ENV UVICORN_PORT=6900
+### Uvicorn app. Extended apps can override this variable
+ENV UVICORN_APP=argilla_server:app
 
 RUN useradd -ms /bin/bash argilla
 
@@ -40,6 +42,7 @@ VOLUME $ARGILLA_HOME_PATH
 COPY scripts/start_argilla_server.sh /home/argilla
 # Destination folder must be the same as the builder one. Otherwise installed script won't work (since the installation fixes the path inside the script)
 COPY --chown=argilla:argilla --from=builder /opt/venv /opt/venv
+
 ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /home/argilla

@@ -35,8 +35,8 @@ export default {
   align-items: center;
   min-height: $topbarHeight;
   position: relative;
-  background: $black-87;
-  color: palette(white);
+  background: var(--bg-black);
+  color: var(--fg-lighter);
   padding-top: 0;
   padding-bottom: 0;
   padding-right: 1.2em;
