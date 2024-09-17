@@ -24,7 +24,7 @@ from typing import Any, List
 import argilla as rg
 import pytest
 from argilla._exceptions import ConflictError, SettingsError
-from datasets import Dataset as HFDataset, Value, Features, ClassLabel
+from datasets import Dataset as HFDataset, Value, Features, ClassLabel, load_dataset
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -371,6 +371,7 @@ class TestHubImportExportMixin:
     ):
         repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_automatic_settings_{with_records_export}"
         mock_dataset_name = f"test_import_dataset_from_hub_with_automatic_settings_{uuid.uuid4()}"
+        mocked_external_dataset = load_dataset(path=repo_id, split="train")
 
         rg_dataset = rg.Dataset.from_hub(
             repo_id=repo_id,
@@ -381,6 +382,7 @@ class TestHubImportExportMixin:
         )
 
         if with_records_export:
+            int2str = mocked_external_dataset.features["label"].int2str
             for i, record in enumerate(rg_dataset.records(with_suggestions=True)):
-                assert record.fields["text"] == mock_data[i]["text"]
-                assert record.suggestions["label"].value == mock_data[i]["label"]
+                assert record.fields["text"] == mocked_external_dataset[i]["text"]
+                assert record.suggestions["label"].value == int2str(mocked_external_dataset[i]["label"])
