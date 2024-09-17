@@ -153,7 +153,7 @@ def es_field_for_metadata_property(metadata_property: Union[str, MetadataPropert
 
 
 def es_field_for_record_field(field_name: str) -> str:
-    return f"fields.{field_name or '*'}"
+    return f"fields.{field_name}"
 
 
 def es_field_for_response_property(property: str) -> str:
@@ -647,7 +647,18 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if isinstance(text, str):
             text = TextQuery(q=text)
 
-        return es_simple_query_string(es_field_for_record_field(text.field), query=text.q)
+        if text.field:
+            field = dataset.field_by_name(text.field)
+            if field is None:
+                raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
+            if field.is_chat:
+                field_name = f"{text.field}.*"
+            else:
+                field_name = text.field
+        else:
+            field_name = "*"
+
+        return es_simple_query_string(es_field_for_record_field(field_name), query=text.q)
 
     @staticmethod
     def _mapping_for_fields(fields: List[Field]) -> dict:
