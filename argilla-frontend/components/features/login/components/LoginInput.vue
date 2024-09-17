@@ -109,18 +109,18 @@ export default {
     },
   },
   methods: {
-    toggleVisibility() {
-      this.isPasswordVisible = !this.isPasswordVisible;
-    },
-    onKeyDown() {
-      this.isTouched = true;
-    },
     checkAnimation(e) {
       if (e.animationName == "onAutoFillStart") {
         this.$emit("onCheckAutoFilled", true);
       } else if (e.animationName == "onAutoFillCancel") {
         this.$emit("onCheckAutoFilled", false);
       }
+    },
+    toggleVisibility() {
+      this.isPasswordVisible = !this.isPasswordVisible;
+    },
+    onKeyDown() {
+      this.isTouched = true;
     },
   },
 };
