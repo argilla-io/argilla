@@ -69,6 +69,7 @@ export default {
       await this.$auth.logout();
 
       this.goToSignIn();
+      this.goRefresh();
     },
   },
   setup() {

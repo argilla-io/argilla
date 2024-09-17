@@ -141,9 +141,14 @@ export const useRoutes = () => {
     router.go(-1);
   };
 
+  const goRefresh = () => {
+    router.go(0);
+  };
+
   return {
     go,
     goBack,
+    goRefresh,
     goToSignIn,
     getQuery,
     goToFeedbackTaskAnnotationPage,
