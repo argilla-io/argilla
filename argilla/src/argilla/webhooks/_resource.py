@@ -14,6 +14,7 @@
 
 from typing import List, Optional
 
+
 from argilla import Argilla
 from argilla._api._webhooks import WebhookModel, WebhooksAPI
 from argilla._resource import Resource
@@ -51,6 +52,14 @@ class Webhook(Resource):
     @events.setter
     def events(self, value: List[str]):
         self._model.events = value
+
+    @property
+    def enabled(self) -> bool:
+        return self._model.enabled
+
+    @enabled.setter
+    def enabled(self, value: bool):
+        self._model.enabled = value
 
     @property
     def description(self) -> Optional[str]:
