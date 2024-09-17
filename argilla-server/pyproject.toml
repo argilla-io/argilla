@@ -47,13 +47,15 @@ dependencies = [
     "httpx~=0.26.0",
     "oauthlib ~= 3.2.0",
     "social-auth-core ~= 4.5.0",
+    # Background processing
+    "rq ~= 1.16.2",
     # Info status
     "psutil >= 5.8, <5.10",
     # Telemetry
     "segment-analytics-python == 2.2.0",
     # For logging, tracebacks, printing, progressbars
     "rich != 13.1.0",
-    # for CLI
+    # For CLI
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
     "packaging>=23.2",
     "psycopg2-binary>=2.9.9",
@@ -169,10 +171,11 @@ _.env_file = ".env.dev"
 cli = { cmd = "python -m argilla_server.cli" }
 server = { cmd = "uvicorn argilla_server:app --port 6900 --reload" }
 migrate = { cmd = "alembic upgrade head" }
+worker = { cmd = "python -m argilla_server worker" }
 server-dev.composite = [
     "migrate",
     "cli database users create_default",
-    "server"
+    "server",
 ]
 test = { cmd = "pytest", env_file = ".env.test" }
 

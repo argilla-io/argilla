@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from tempfile import TemporaryDirectory
 from uuid import uuid4
 
 import pytest
@@ -19,7 +20,8 @@ import pytest
 import argilla as rg
 
 
-def test_settings_with_record_mapping():
+@pytest.fixture
+def dataset():
     mock_mapping = {
         "true_label": "label.response",
         "my_label": "label.suggestion.value",
@@ -27,7 +29,6 @@ def test_settings_with_record_mapping():
         "model": "label.suggestion.agent",
         "my_prompt": ("prompt_field", "prompt_question"),
     }
-    mock_user_id = uuid4()
     settings = rg.Settings(
         fields=[rg.TextField(name="prompt_field")],
         questions=[
@@ -44,6 +45,11 @@ def test_settings_with_record_mapping():
         settings=settings,
         workspace=workspace,
     )
+    return dataset
+
+
+def test_settings_with_record_mapping(dataset):
+    mock_user_id = uuid4()
     record_api_models = dataset.records._ingest_records(
         records=[
             {
@@ -70,3 +76,13 @@ def test_settings_with_record_mapping():
     assert record.fields["prompt_field"] == "What is the capital of France?"
     assert "positive" in suggestions
     assert "What is the capital of France?" in suggestions
+
+
+def test_settings_with_record_mapping_export(dataset):
+    with TemporaryDirectory() as temp_dir:
+        path = f"{temp_dir}/test_dataset.json"
+        dataset.settings.to_json(path)
+        loaded_settings = rg.Settings.from_json(path)
+
+    assert dataset.settings.mapping == loaded_settings.mapping
+    assert dataset.settings == loaded_settings

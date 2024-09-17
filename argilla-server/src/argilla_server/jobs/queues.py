@@ -12,21 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import typer
+import redis
 
-from .database import app as database_app
-from .search_engine import app as search_engine_app
-from .start import start
-from .worker import worker
+from rq import Queue
 
-app = typer.Typer(help="Commands for Argilla server management", no_args_is_help=True)
+from argilla_server.settings import settings
 
 
-app.add_typer(database_app, name="database")
-app.add_typer(search_engine_app, name="search-engine")
-app.command(name="worker", help="Starts rq workers")(worker)
-app.command(name="start", help="Starts the Argilla server")(start)
+REDIS_CONNECTION = redis.from_url(settings.redis_url)
 
-
-if __name__ == "__main__":
-    app()
+DEFAULT_QUEUE = Queue("default", connection=REDIS_CONNECTION)

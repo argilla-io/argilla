@@ -371,13 +371,6 @@ class Dataset(DatabaseModel):
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
 
     @property
-    async def responses_count(self) -> int:
-        # TODO: This should be moved to proper repository
-        return await async_object_session(self).scalar(
-            select(func.count(Response.id)).join(Record).where(Record.dataset_id == self.id)
-        )
-
-    @property
     def is_draft(self):
         return self.status == DatasetStatus.draft
 

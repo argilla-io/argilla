@@ -19,6 +19,7 @@ import logging
 import os
 import shutil
 import tempfile
+import redis
 from datetime import datetime
 from pathlib import Path
 
@@ -40,6 +41,7 @@ from argilla_server.models import User, Workspace
 from argilla_server.search_engine import get_search_engine
 from argilla_server.settings import settings
 from argilla_server.static_rewrite import RewriteStaticFiles
+from argilla_server.jobs.queues import REDIS_CONNECTION
 from argilla_server.telemetry import get_telemetry_client
 
 _LOGGER = logging.getLogger("argilla")
@@ -50,7 +52,9 @@ async def app_lifespan(app: FastAPI):
     # See https://fastapi.tiangolo.com/advanced/events/#lifespan
     await configure_database()
     await configure_search_engine()
+    configure_redis()
     track_server_startup()
+
     yield
 
 
@@ -263,6 +267,22 @@ async def configure_search_engine():
                 )
 
     await ping_search_engine()
+
+
+def configure_redis():
+    @backoff.on_exception(backoff.expo, ConnectionError, max_time=60)
+    def ping_redis():
+        try:
+            REDIS_CONNECTION.ping()
+        except redis.exceptions.ConnectionError:
+            raise ConnectionError(
+                f"Your redis instance at {settings.redis_url} is not available or not responding.\n"
+                "Please make sure your redis instance is launched and correctly running and\n"
+                "you have the necessary access permissions. Once you have verified this, restart "
+                "the argilla server.\n"
+            )
+
+    ping_redis()
 
 
 app = create_server_app()

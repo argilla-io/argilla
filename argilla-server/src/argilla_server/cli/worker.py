@@ -14,19 +14,24 @@
 
 import typer
 
-from .database import app as database_app
-from .search_engine import app as search_engine_app
-from .start import start
-from .worker import worker
+from typing import List
 
-app = typer.Typer(help="Commands for Argilla server management", no_args_is_help=True)
+from argilla_server.jobs.queues import DEFAULT_QUEUE
 
-
-app.add_typer(database_app, name="database")
-app.add_typer(search_engine_app, name="search-engine")
-app.command(name="worker", help="Starts rq workers")(worker)
-app.command(name="start", help="Starts the Argilla server")(start)
+DEFAULT_NUM_WORKERS = 2
 
 
-if __name__ == "__main__":
-    app()
+def worker(
+    queues: List[str] = typer.Option([DEFAULT_QUEUE.name], help="Name of queues to listen"),
+    num_workers: int = typer.Option(DEFAULT_NUM_WORKERS, help="Number of workers to start"),
+) -> None:
+    from rq.worker_pool import WorkerPool
+    from argilla_server.jobs.queues import REDIS_CONNECTION
+
+    worker_pool = WorkerPool(
+        connection=REDIS_CONNECTION,
+        queues=queues,
+        num_workers=num_workers,
+    )
+
+    worker_pool.start()
