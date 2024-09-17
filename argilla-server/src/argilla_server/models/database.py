@@ -386,6 +386,11 @@ class Dataset(DatabaseModel):
     def distribution_strategy(self) -> DatasetDistributionStrategy:
         return DatasetDistributionStrategy(self.distribution["strategy"])
 
+    def field_by_name(self, name: str) -> Union["Field", None]:
+        for field in self.fields:
+            if field.name == name:
+                return field
+
     def metadata_property_by_name(self, name: str) -> Union["MetadataProperty", None]:
         for metadata_property in self.metadata_properties:
             if metadata_property.name == name:
