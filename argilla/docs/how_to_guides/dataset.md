@@ -160,7 +160,7 @@ The fields in a dataset consist of one or more data items requiring annotation. 
         description="Field description",
     )
     ```
-    ![TextField](../assets/images/how_to_guides/dataset/fields.png)
+    ![TextField](../assets/images/how_to_guides/dataset/text_field.png)
 
 === "Image"
 
@@ -172,6 +172,7 @@ The fields in a dataset consist of one or more data items requiring annotation. 
         description="Field description",
     )
     ```
+    ![ImageField](../assets/images/how_to_guides/dataset/image_field.png)
 
 === "Chat"
 
@@ -184,6 +185,7 @@ The fields in a dataset consist of one or more data items requiring annotation. 
         description="Field description",
     )
     ```
+    ![ChatField](../assets/images/how_to_guides/dataset/chat_field.png)
 
 ### Questions
 
