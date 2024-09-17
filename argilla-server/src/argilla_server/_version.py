@@ -14,4 +14,4 @@
 
 # coding: utf-8
 #
-__version__ = "2.2.0dev0"
+__version__ = "2.2.0"
