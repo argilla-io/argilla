@@ -98,7 +98,7 @@ class DefaultSettingsMixin:
     @classmethod
     def for_rating(
         cls: "Settings",
-        field_type: Optional[Literal["text", "image", "chat"]] = "text",
+        field_type: Optional[Literal["text", "image"]] = "text",
     ) -> "Settings":
         """Default settings for response rating task. Response rating template consists of an instruction field, a response field, and a rating question.
 
