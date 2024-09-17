@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from httpx import Timeout
+from unittest.mock import MagicMock, patch
 
+import pytest
 from argilla import Argilla
+from httpx import Timeout
 
 
 class TestHTTPClient:
@@ -62,3 +64,15 @@ class TestHTTPClient:
         assert http_client.base_url == "http://localhost:6900"
         assert http_client.headers["X-Argilla-Api-Key"] == "argilla.apikey"
         assert http_client.cookies["session"] == "session_id"
+
+    @pytest.mark.parametrize("retries", [0, 1, 5, 10])
+    def test_create_client_with_various_retries(self, retries):
+        with patch("argilla._api._client.create_http_client") as mock_create_http_client:
+            mock_http_client = MagicMock()
+            mock_create_http_client.return_value = mock_http_client
+
+            Argilla(api_url="http://test.com", api_key="test_key", retries=retries)
+
+            mock_create_http_client.assert_called_once_with(
+                api_url="http://test.com", api_key="test_key", timeout=60, retries=retries
+            )
