@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from argilla.settings._field import TextField
 
 
-def _get_field_type(field_type: str) -> "TextField":
+def _get_field_by_type(field_type: str) -> "TextField":
     """Get the field type from the field type string."""
     from argilla import TextField, ImageField
 
@@ -52,7 +52,7 @@ class DefaultSettingsMixin:
 
         settings = Settings(
             guidelines="Select a label for the document.",
-            fields=[_get_field_type(field_type)(name="text")],
+            fields=[_get_field_by_type(field_type)(name="text")],
             questions=[LabelQuestion(name="label", labels=labels)],
             mapping={"input": "text", "output": "label", "document": "text"},
         )
@@ -62,7 +62,7 @@ class DefaultSettingsMixin:
     @classmethod
     def for_ranking(
         cls: "Settings",
-        field_type: Optional[Literal["text", "image", "chat"]] = "text",
+        field_type: Optional[Literal["text", "image"]] = "text",
     ) -> "Settings":
         """Default settings for response ranking task. Response ranking template consists of an instruction field, two response fields, and a ranking question.
 
@@ -76,9 +76,9 @@ class DefaultSettingsMixin:
         from argilla import Settings, RankingQuestion
 
         fields = [
-            _get_field_type(field_type)(name="instruction"),
-            _get_field_type(field_type)(name="response1"),
-            _get_field_type(field_type)(name="response2"),
+            _get_field_by_type(field_type)(name="instruction"),
+            _get_field_by_type(field_type)(name="response1"),
+            _get_field_by_type(field_type)(name="response2"),
         ]
 
         settings = Settings(
@@ -112,8 +112,8 @@ class DefaultSettingsMixin:
         from argilla import Settings, RatingQuestion
 
         fields = [
-            _get_field_type(field_type)(name="instruction"),
-            _get_field_type(field_type)(name="response"),
+            _get_field_by_type(field_type)(name="instruction"),
+            _get_field_by_type(field_type)(name="response"),
         ]
 
         settings = Settings(
