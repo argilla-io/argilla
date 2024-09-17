@@ -651,6 +651,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             field = dataset.field_by_name(text.field)
             if field is None:
                 raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
+
             if field.is_chat:
                 field_name = f"{text.field}.*"
             else:
