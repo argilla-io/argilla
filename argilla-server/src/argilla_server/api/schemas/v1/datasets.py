@@ -87,15 +87,15 @@ class DatasetProgress(BaseModel):
 
 
 class RecordResponseDistribution(BaseModel):
-    submitted: Optional[int]
-    discarded: Optional[int]
-    draft: Optional[int]
+    submitted: int = 0
+    discarded: int = 0
+    draft: int = 0
 
 
 class UserProgress(BaseModel):
     username: str
-    completed: RecordResponseDistribution
-    pending: RecordResponseDistribution
+    completed: RecordResponseDistribution = RecordResponseDistribution()
+    pending: RecordResponseDistribution = RecordResponseDistribution()
 
 
 class UsersProgress(BaseModel):
