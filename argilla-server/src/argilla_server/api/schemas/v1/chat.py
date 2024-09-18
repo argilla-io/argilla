@@ -15,7 +15,7 @@
 from argilla_server.pydantic_v1 import BaseModel, Field
 
 MIN_MESSAGE_LENGTH = 1
-MAX_MESSAGE_LENGTH = 5000
+MAX_MESSAGE_LENGTH = 20000
 
 MIN_ROLE_LENGTH = 1
 MAX_ROLE_LENGTH = 20

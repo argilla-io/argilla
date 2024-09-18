@@ -388,7 +388,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             raise ValueError("No records provided to ingest.")
 
         if HFDatasetsIO._is_hf_dataset(dataset=records):
-            records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
+            records = HFDatasetsIO._record_dicts_from_datasets(hf_dataset=records)
 
         ingested_records = []
         record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
