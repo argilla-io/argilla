@@ -20,7 +20,7 @@ These are the section headers that we use:
 
 - Added filtering by `name`, and `status` support to endpoint `GET /api/v1/me/datasets`. ([#5374](https://github.com/argilla-io/argilla/pull/5374))
 
-## [2.2.0]() 
+## [2.2.0]()
 
 ### Added
 
