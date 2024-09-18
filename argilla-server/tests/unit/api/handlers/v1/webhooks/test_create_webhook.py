@@ -58,6 +58,26 @@ class TestCreateWebhook:
             "updated_at": webhook.updated_at.isoformat(),
         }
 
+    async def test_create_webhook_with_ip_address_url(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "url": "http://1.1.1.1/webhook",
+                "events": [WebhookEvent.response_created],
+                "description": "Test webhook",
+            },
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Webhook.id)))).scalar() == 1
+        webhook = (await db.execute(select(Webhook))).scalar_one()
+
+        assert response.json()["url"] == "http://1.1.1.1/webhook"
+
     async def test_create_webhook_as_admin(self, db: AsyncSession, async_client: AsyncClient):
         admin = await AdminFactory.create()
 
