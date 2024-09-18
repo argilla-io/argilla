@@ -402,7 +402,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
 
 
 class Webhooks(Sequence["Webhook"], ResourceHTMLReprMixin):
-    """A collection of webhooks. It can be used to create a new webhook or to get an existing one."""
+    """A webhooks class. It can be used to create a new webhook or to get an existing one."""
 
     class _Iterator(GenericIterator["Webhook"]):
         pass
@@ -412,7 +412,7 @@ class Webhooks(Sequence["Webhook"], ResourceHTMLReprMixin):
         self._api = client.api.webhooks
 
     def __call__(self, id: Union[UUID, str]) -> Optional["Webhook"]:
-        """Get a workspace by id if exists. Otherwise, returns `None`"""
+        """Get a webhook by id if exists. Otherwise, returns `None`"""
 
         model = _get_model_by_id(self._api, id)
         if model:
@@ -443,7 +443,7 @@ class Webhooks(Sequence["Webhook"], ResourceHTMLReprMixin):
             webhook: Webhook object.
 
         Returns:
-            Workspace: The created workspace.
+            Webhook: The created webhook.
         """
         webhook._client = self._client
         return webhook.create()
