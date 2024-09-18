@@ -116,6 +116,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         client: Optional["Argilla"] = None,
         with_records: bool = True,
         settings: Optional["Settings"] = None,
+        split: Optional[str] = None,
         **kwargs: Any,
     ):
         """Loads a `Dataset` from the Hugging Face Hub.
@@ -164,13 +165,18 @@ class HubImportExportMixin(DiskImportExportMixin):
                     client=client,
                     with_records=with_records,
                     settings=settings,
+                    split=split,
                 )
                 return dataset
 
         if with_records:
             try:
-                hf_dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, **kwargs)
+                hf_dataset = load_dataset(
+                    path=repo_id,
+                    split=split,
+                    **kwargs,
+                )  # type: ignore
+                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, split=split, **kwargs)
                 cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
             except EmptyDatasetError:
                 warnings.warn(
