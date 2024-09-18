@@ -12,32 +12,44 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import UUID
 from datetime import datetime
 from typing import List, Literal, Optional, Union
-from uuid import UUID
+from typing_extensions import Annotated
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, constr
+
+# from argilla_server.pydantic_v1 import BaseModel, Field, constr
+from pydantic import StringConstraints, ConfigDict, BaseModel, Field
 
 try:
     from typing import Annotated
 except ImportError:
     from typing_extensions import Annotated
 
-DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
+# Pydantic v2 error: look-around, including look-ahead and look-behind, is not supported so rewriting it:
+# DATASET_NAME_REGEX = r"^(?!-|_)[a-zA-Z0-9-_ ]+$"
+DATASET_NAME_REGEX = r"^[a-zA-Z0-9 ][a-zA-Z0-9-_ ]*$"
 DATASET_NAME_MIN_LENGTH = 1
 DATASET_NAME_MAX_LENGTH = 200
 DATASET_GUIDELINES_MIN_LENGTH = 1
 DATASET_GUIDELINES_MAX_LENGTH = 10000
 
 DatasetName = Annotated[
-    constr(regex=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH),
+    Annotated[
+        str,
+        StringConstraints(
+            pattern=DATASET_NAME_REGEX, min_length=DATASET_NAME_MIN_LENGTH, max_length=DATASET_NAME_MAX_LENGTH
+        ),
+    ],
     Field(..., description="Dataset name"),
 ]
 
 DatasetGuidelines = Annotated[
-    constr(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH),
+    Annotated[
+        str, StringConstraints(min_length=DATASET_GUIDELINES_MIN_LENGTH, max_length=DATASET_GUIDELINES_MAX_LENGTH)
+    ],
     Field(..., description="Dataset guidelines"),
 ]
 
@@ -113,9 +125,7 @@ class Dataset(BaseModel):
     last_activity_at: datetime
     inserted_at: datetime
     updated_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Datasets(BaseModel):

@@ -18,10 +18,15 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import FieldType
-from argilla_server.pydantic_v1 import BaseModel, constr
-from argilla_server.pydantic_v1 import Field as PydanticField
 
-FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+# from argilla_server.pydantic_v1 import BaseModel, constr
+# from argilla_server.pydantic_v1 import Field as PydanticField
+from pydantic import StringConstraints, ConfigDict, BaseModel, Field as PydanticField
+from typing_extensions import Annotated
+
+# Pydantic v2 error: look-around, including look-ahead and look-behind, is not supported so rewriting it:
+# FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+FIELD_CREATE_NAME_REGEX = r"^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
 FIELD_CREATE_NAME_MAX_LENGTH = 200
 
@@ -30,20 +35,26 @@ FIELD_CREATE_TITLE_MAX_LENGTH = 500
 
 
 FieldName = Annotated[
-    constr(
-        regex=FIELD_CREATE_NAME_REGEX,
-        min_length=FIELD_CREATE_NAME_MIN_LENGTH,
-        max_length=FIELD_CREATE_NAME_MAX_LENGTH,
-    ),
+    Annotated[
+        str,
+        StringConstraints(
+            pattern=FIELD_CREATE_NAME_REGEX,
+            min_length=FIELD_CREATE_NAME_MIN_LENGTH,
+            max_length=FIELD_CREATE_NAME_MAX_LENGTH,
+        ),
+    ],
     PydanticField(..., description="The name of the field"),
 ]
 
 
 FieldTitle = Annotated[
-    constr(
-        min_length=FIELD_CREATE_TITLE_MIN_LENGTH,
-        max_length=FIELD_CREATE_TITLE_MAX_LENGTH,
-    ),
+    Annotated[
+        str,
+        StringConstraints(
+            min_length=FIELD_CREATE_TITLE_MIN_LENGTH,
+            max_length=FIELD_CREATE_TITLE_MAX_LENGTH,
+        ),
+    ],
     PydanticField(..., description="The title of the field"),
 ]
 
@@ -111,9 +122,7 @@ class Field(BaseModel):
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Fields(BaseModel):

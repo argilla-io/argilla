@@ -22,24 +22,26 @@ from argilla_server.api.schemas.v1.users import USER_USERNAME_REGEX
 from argilla_server.api.schemas.v1.workspaces import WORKSPACE_NAME_REGEX
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
-from argilla_server.pydantic_v1 import BaseModel, Field, constr
+# from argilla_server.pydantic_v1 import BaseModel, Field, constr
 
 from .utils import get_or_new_workspace
+from pydantic import StringConstraints, BaseModel, Field
+from typing_extensions import Annotated
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class WorkspaceCreate(BaseModel):
-    name: str = Field(..., regex=WORKSPACE_NAME_REGEX, min_length=1)
+    name: str = Field(..., pattern=WORKSPACE_NAME_REGEX, min_length=1)
 
 
 class UserCreate(BaseModel):
-    first_name: constr(strip_whitespace=True)
-    username: str = Field(..., regex=USER_USERNAME_REGEX, min_length=1)
+    first_name: Annotated[str, StringConstraints(strip_whitespace=True)]
+    username: str = Field(..., pattern=USER_USERNAME_REGEX, min_length=1)
     role: UserRole
-    api_key: constr(min_length=1)
-    password_hash: constr(min_length=1)
+    api_key: Annotated[str, StringConstraints(min_length=1)]
+    password_hash: Annotated[str, StringConstraints(min_length=1)]
     workspaces: Optional[List[WorkspaceCreate]]
 
 

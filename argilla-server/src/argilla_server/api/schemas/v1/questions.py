@@ -19,8 +19,11 @@ from uuid import UUID
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.fields import FieldName
 from argilla_server.enums import OptionsOrder, QuestionType
-from argilla_server.pydantic_v1 import BaseModel, Field, conlist, constr, root_validator
+
+# from argilla_server.pydantic_v1 import BaseModel, Field, conlist, constr, root_validator
 from argilla_server.settings import settings
+from pydantic import model_validator, BaseModel, Field, StringConstraints, ConfigDict
+from typing_extensions import Annotated
 
 try:
     from typing import Annotated
@@ -28,7 +31,9 @@ except ImportError:
     from typing_extensions import Annotated
 
 
-QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+# Pydantic v2 error: look-around, including look-ahead and look-behind, is not supported so rewriting it:
+# QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+QUESTION_CREATE_NAME_REGEX = r"^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$"
 QUESTION_CREATE_NAME_MIN_LENGTH = 1
 QUESTION_CREATE_NAME_MAX_LENGTH = 200
 
@@ -61,7 +66,8 @@ SPAN_MIN_VISIBLE_OPTIONS = 3
 
 
 class UniqueValuesCheckerMixin(BaseModel):
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def check_unique_values(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         options = values.get("options", [])
         seen = set()
@@ -84,19 +90,28 @@ class OptionSettings(BaseModel):
 
 
 class OptionSettingsCreate(BaseModel):
-    value: constr(
-        min_length=VALUE_TEXT_OPTION_VALUE_MIN_LENGTH,
-        max_length=VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
-    )
-    text: constr(
-        min_length=VALUE_TEXT_OPTION_TEXT_MIN_LENGTH,
-        max_length=VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
-    )
+    value: Annotated[
+        str,
+        StringConstraints(
+            min_length=VALUE_TEXT_OPTION_VALUE_MIN_LENGTH,
+            max_length=VALUE_TEXT_OPTION_VALUE_MAX_LENGTH,
+        ),
+    ]
+    text: Annotated[
+        str,
+        StringConstraints(
+            min_length=VALUE_TEXT_OPTION_TEXT_MIN_LENGTH,
+            max_length=VALUE_TEXT_OPTION_TEXT_MAX_LENGTH,
+        ),
+    ]
     description: Optional[
-        constr(
-            min_length=VALUE_TEXT_OPTION_DESCRIPTION_MIN_LENGTH,
-            max_length=VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
-        )
+        Annotated[
+            str,
+            StringConstraints(
+                min_length=VALUE_TEXT_OPTION_DESCRIPTION_MIN_LENGTH,
+                max_length=VALUE_TEXT_OPTION_DESCRIPTION_MAX_LENGTH,
+            ),
+        ]
     ] = None
 
 
@@ -135,8 +150,8 @@ class RatingQuestionSettings(BaseModel):
 class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.rating]
     options: List[RatingQuestionSettingsOptionCreate] = Field(
-        min_items=RATING_OPTIONS_MIN_ITEMS,
-        max_items=RATING_OPTIONS_MAX_ITEMS,
+        min_length=RATING_OPTIONS_MIN_ITEMS,
+        max_length=RATING_OPTIONS_MAX_ITEMS,
     )
 
 
@@ -153,14 +168,17 @@ class LabelSelectionQuestionSettings(BaseModel):
 
 class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.label_selection]
-    options: conlist(
-        item_type=OptionSettingsCreate,
-        min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
-        max_items=settings.label_selection_options_max_items,
-    )
+    options: Annotated[
+        List[OptionSettingsCreate],
+        Field(
+            min_length=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+            max_length=settings.label_selection_options_max_items,
+        ),
+    ]
     visible_options: Optional[int] = Field(None, ge=LABEL_SELECTION_MIN_VISIBLE_OPTIONS)
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         visible_options = values.get("visible_options")
         if visible_options is not None:
@@ -178,11 +196,13 @@ class LabelSelectionSettingsUpdate(UpdateSchema):
     type: Literal[QuestionType.label_selection]
     visible_options: Optional[int] = Field(None, ge=LABEL_SELECTION_MIN_VISIBLE_OPTIONS)
     options: Optional[
-        conlist(
-            item_type=OptionSettings,
-            min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
-            max_items=settings.label_selection_options_max_items,
-        )
+        Annotated[
+            List[OptionSettings],
+            Field(
+                min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+                max_items=settings.label_selection_options_max_items,
+            ),
+        ]
     ]
 
 
@@ -212,11 +232,13 @@ class RankingQuestionSettings(BaseModel):
 
 class RankingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.ranking]
-    options: conlist(
-        item_type=OptionSettingsCreate,
-        min_items=RANKING_OPTIONS_MIN_ITEMS,
-        max_items=RANKING_OPTIONS_MAX_ITEMS,
-    )
+    options: Annotated[
+        List[OptionSettingsCreate],
+        Field(
+            min_length=RANKING_OPTIONS_MIN_ITEMS,
+            max_length=RANKING_OPTIONS_MAX_ITEMS,
+        ),
+    ]
 
 
 class RankingQuestionSettingsUpdate(UpdateSchema):
@@ -237,15 +259,18 @@ class SpanQuestionSettings(BaseModel):
 class SpanQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.span]
     field: FieldName
-    options: conlist(
-        item_type=OptionSettingsCreate,
-        min_items=SPAN_OPTIONS_MIN_ITEMS,
-        max_items=settings.span_options_max_items,
-    )
+    options: Annotated[
+        List[OptionSettingsCreate],
+        Field(
+            min_length=SPAN_OPTIONS_MIN_ITEMS,
+            max_length=settings.span_options_max_items,
+        ),
+    ]
     visible_options: Optional[int] = Field(None, ge=SPAN_MIN_VISIBLE_OPTIONS)
     allow_overlapping: bool = False
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         visible_options = values.get("visible_options")
         if visible_options is not None:
@@ -262,11 +287,13 @@ class SpanQuestionSettingsCreate(UniqueValuesCheckerMixin):
 class SpanQuestionSettingsUpdate(UpdateSchema):
     type: Literal[QuestionType.span]
     options: Optional[
-        conlist(
-            item_type=OptionSettings,
-            min_items=SPAN_OPTIONS_MIN_ITEMS,
-            max_items=settings.span_options_max_items,
-        )
+        Annotated[
+            List[OptionSettings],
+            Field(
+                min_items=SPAN_OPTIONS_MIN_ITEMS,
+                max_items=settings.span_options_max_items,
+            ),
+        ]
     ]
     visible_options: Optional[int] = Field(None, ge=SPAN_MIN_VISIBLE_OPTIONS)
     allow_overlapping: Optional[bool]
@@ -286,29 +313,38 @@ QuestionSettings = Annotated[
 
 
 QuestionName = Annotated[
-    constr(
-        regex=QUESTION_CREATE_NAME_REGEX,
-        min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
-        max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
-    ),
+    Annotated[
+        str,
+        StringConstraints(
+            pattern=QUESTION_CREATE_NAME_REGEX,
+            min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
+            max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
+        ),
+    ],
     Field(..., description="The name of the question"),
 ]
 
 
 QuestionTitle = Annotated[
-    constr(
-        min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
-        max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
-    ),
+    Annotated[
+        str,
+        StringConstraints(
+            min_length=QUESTION_CREATE_TITLE_MIN_LENGTH,
+            max_length=QUESTION_CREATE_TITLE_MAX_LENGTH,
+        ),
+    ],
     Field(..., description="The title of the question"),
 ]
 
 
 QuestionDescription = Annotated[
-    constr(
-        min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
-        max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
-    ),
+    Annotated[
+        str,
+        StringConstraints(
+            min_length=QUESTION_CREATE_DESCRIPTION_MIN_LENGTH,
+            max_length=QUESTION_CREATE_DESCRIPTION_MAX_LENGTH,
+        ),
+    ],
     Field(..., description="The description of the question"),
 ]
 
@@ -349,9 +385,7 @@ class Question(BaseModel):
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Questions(BaseModel):

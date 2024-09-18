@@ -20,7 +20,9 @@ from fastapi import Body
 
 from argilla_server.api.schemas.v1.questions import QuestionName
 from argilla_server.enums import ResponseStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, root_validator
+
+# from argilla_server.pydantic_v1 import BaseModel, Field, StrictInt, StrictStr, root_validator
+from pydantic import model_validator, BaseModel, Field, ConfigDict, StrictInt, StrictStr
 
 RESPONSES_BULK_CREATE_MIN_ITEMS = 1
 RESPONSES_BULK_CREATE_MAX_ITEMS = 100
@@ -41,7 +43,8 @@ class SpanQuestionResponseValueItem(BaseModel):
     start: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_START_GREATER_THAN_OR_EQUAL)
     end: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL)
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def check_start_and_end(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         start, end = values.get("start"), values.get("end")
 
@@ -94,8 +97,7 @@ class Response(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ResponseCreate(BaseModel):

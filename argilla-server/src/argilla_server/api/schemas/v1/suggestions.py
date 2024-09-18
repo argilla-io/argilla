@@ -25,9 +25,13 @@ from argilla_server.api.schemas.v1.responses import (
     TextAndLabelSelectionQuestionResponseValue,
 )
 from argilla_server.enums import SuggestionType
-from argilla_server.pydantic_v1 import BaseModel, Field
 
-AGENT_REGEX = r"^(?=.*[a-zA-Z0-9])[a-zA-Z0-9-_:\.\/\s]+$"
+# from argilla_server.pydantic_v1 import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
+
+# Pydantic v2 error: look-around, including look-ahead and look-behind, is not supported so rewriting it:
+# AGENT_REGEX = r"^(?=.*[a-zA-Z0-9])[a-zA-Z0-9-_:\.\/\s]+$"
+AGENT_REGEX = r"^[a-zA-Z0-9-_:\.\/\s]*[a-zA-Z0-9][a-zA-Z0-9-_:\.\/\s]*$"
 AGENT_MIN_LENGTH = 1
 AGENT_MAX_LENGTH = 200
 
@@ -69,8 +73,7 @@ class Suggestion(BaseSuggestion):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Suggestions(BaseModel):
@@ -87,7 +90,7 @@ class SuggestionCreate(BaseSuggestion):
     ]
     agent: Optional[str] = Field(
         None,
-        regex=AGENT_REGEX,
+        pattern=AGENT_REGEX,
         min_length=AGENT_MIN_LENGTH,
         max_length=AGENT_MAX_LENGTH,
         description="Agent used to generate the suggestion",

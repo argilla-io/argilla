@@ -16,7 +16,8 @@ import os
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from argilla_server.pydantic_v1 import BaseSettings, PrivateAttr
+# from argilla_server.pydantic_v1 import BaseSettings, PrivateAttr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 if TYPE_CHECKING:
     from argilla_server.security.authentication.oauth2 import OAuth2Settings
@@ -46,7 +47,7 @@ class Settings(BaseSettings):
     token_expiration: int = 24 * 60 * 60  # 1 day
     oauth_cfg: str = ".oauth.yaml"
 
-    _oauth_settings: Optional["OAuth2Settings"] = PrivateAttr(None)
+    _oauth_settings: Optional["OAuth2Settings"] = None  # PrivateAttr(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -67,8 +68,7 @@ class Settings(BaseSettings):
 
         return self._oauth_settings
 
-    class Config:
-        env_prefix = "ARGILLA_AUTH_"
+    model_config = SettingsConfigDict(env_prefix="ARGILLA_AUTH_")
 
 
 settings = Settings()

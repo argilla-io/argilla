@@ -12,15 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import UUID
 from datetime import datetime
 from typing import Annotated, List, Optional
-from uuid import UUID
+from typing_extensions import Annotated
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
 
-VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+# from argilla_server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
+from pydantic import StringConstraints, ConfigDict, BaseModel, Field, PositiveInt
+
+
+# Pydantic v2 error: look-around, including look-ahead and look-behind, is not supported so rewriting it:
+# VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$"
 VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
 VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
 
@@ -29,10 +35,13 @@ VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH = 500
 
 
 VectorSettingsTitle = Annotated[
-    constr(
-        min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
-        max_length=VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
-    ),
+    Annotated[
+        str,
+        StringConstraints(
+            min_length=VECTOR_SETTINGS_CREATE_TITLE_MIN_LENGTH,
+            max_length=VECTOR_SETTINGS_CREATE_TITLE_MAX_LENGTH,
+        ),
+    ],
     Field(..., description="The title of the vector settings"),
 ]
 
@@ -45,9 +54,7 @@ class VectorSettings(BaseModel):
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
     def check_vector(self, value: List[float]) -> None:
         num_elements = len(value)
@@ -63,7 +70,7 @@ class VectorsSettings(BaseModel):
 class VectorSettingsCreate(BaseModel):
     name: str = Field(
         ...,
-        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
+        pattern=VECTOR_SETTINGS_CREATE_NAME_REGEX,
         min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
         max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
         description="The title of the vector settings",

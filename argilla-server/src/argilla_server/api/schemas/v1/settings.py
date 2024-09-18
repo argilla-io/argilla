@@ -15,7 +15,9 @@
 from typing import Optional
 
 from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
-from argilla_server.pydantic_v1 import BaseModel
+
+# from argilla_server.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 
 
 class ArgillaSettings(BaseModel):

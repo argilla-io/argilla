@@ -18,12 +18,17 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import MetadataPropertyType
-from argilla_server.pydantic_v1 import BaseModel, Field, constr, root_validator, validator
-from argilla_server.pydantic_v1.generics import GenericModel
+
+# from argilla_server.pydantic_v1 import BaseModel, Field, constr, root_validator, validator
+# from argilla_server.pydantic_v1.generics import GenericModel
+from pydantic import field_validator, model_validator, BaseModel, StringConstraints, ConfigDict, Field
+from typing_extensions import Annotated
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
-METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+# Pydantic v2 error: look-around, including look-ahead and look-behind, is not supported so rewriting it:
+# METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
+METADATA_PROPERTY_CREATE_NAME_REGEX = r"^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
 
@@ -44,7 +49,7 @@ class TermsMetadataMetrics(BaseModel):
         term: str
         count: int
 
-    type: Literal[MetadataPropertyType.terms] = Field(MetadataPropertyType.terms, const=True)
+    type: Literal[MetadataPropertyType.terms] = MetadataPropertyType.terms
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -52,19 +57,20 @@ class TermsMetadataMetrics(BaseModel):
 NT = TypeVar("NT", int, float)
 
 
-class NumericMetadataMetrics(GenericModel, Generic[NT]):
+class NumericMetadataMetrics(BaseModel, Generic[NT]):
     min: Optional[NT]
     max: Optional[NT]
 
 
 class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
-    type: Literal[MetadataPropertyType.integer] = Field(MetadataPropertyType.integer, const=True)
+    type: Literal[MetadataPropertyType.integer] = MetadataPropertyType.integer
 
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
-    type: Literal[MetadataPropertyType.float] = Field(MetadataPropertyType.float, const=True)
+    type: Literal[MetadataPropertyType.float] = MetadataPropertyType.float
 
-    @validator("min", "max")
+    @field_validator("min", "max")
+    @classmethod
     def round_result(cls, v: float):
         if v is not None:
             return round(v, FLOAT_METADATA_METRICS_PRECISION)
@@ -103,7 +109,7 @@ MetadataPropertyName = Annotated[
     str,
     Field(
         ...,
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
+        pattern=METADATA_PROPERTY_CREATE_NAME_REGEX,
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     ),
@@ -111,16 +117,22 @@ MetadataPropertyName = Annotated[
 
 
 MetadataPropertyTitle = Annotated[
-    constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
+    Annotated[
+        str,
+        StringConstraints(
+            min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH
+        ),
+    ],
     Field(..., description="The title of the metadata property"),
 ]
 
 
-class NumericMetadataProperty(GenericModel, Generic[NT]):
+class NumericMetadataProperty(BaseModel, Generic[NT]):
     min: Optional[NT] = None
     max: Optional[NT] = None
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         min = values.get("min")
         max = values.get("max")
@@ -161,9 +173,7 @@ class MetadataProperty(BaseModel):
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MetadataProperties(BaseModel):

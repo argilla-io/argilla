@@ -34,8 +34,10 @@ from argilla_server.enums import (
     SortOrder,
 )
 from argilla_server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
-from argilla_server.pydantic_v1 import BaseModel, Field
-from argilla_server.pydantic_v1.generics import GenericModel
+
+# from argilla_server.pydantic_v1 import BaseModel, Field
+# from argilla_server.pydantic_v1.generics import GenericModel
+from pydantic import BaseModel, ConfigDict, Field
 
 __all__ = [
     "SearchEngine",
@@ -123,8 +125,7 @@ class UserResponseStatusFilter(BaseModel):
     statuses: List[ResponseStatusFilter]
     user: Optional[User] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @property
     def response_statuses(self) -> List[ResponseStatus]:
@@ -145,8 +146,7 @@ class SortBy(BaseModel):
     field: Union[MetadataProperty, RecordSortField]
     order: SortOrder = SortOrder.asc
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class TermsMetadataMetrics(BaseModel):
@@ -162,7 +162,7 @@ class TermsMetadataMetrics(BaseModel):
 NT = TypeVar("NT", int, float)
 
 
-class NumericMetadataMetrics(GenericModel, Generic[NT]):
+class NumericMetadataMetrics(BaseModel, Generic[NT]):
     min: Optional[NT]
     max: Optional[NT]
 

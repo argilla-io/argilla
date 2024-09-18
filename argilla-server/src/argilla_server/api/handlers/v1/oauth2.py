@@ -25,7 +25,9 @@ from argilla_server.database import get_async_db
 from argilla_server.enums import UserRole
 from argilla_server.errors.future import NotFoundError
 from argilla_server.models import User
-from argilla_server.pydantic_v1 import Field
+
+# from argilla_server.pydantic_v1 import Field
+from pydantic import Field
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 from argilla_server.security.settings import settings
