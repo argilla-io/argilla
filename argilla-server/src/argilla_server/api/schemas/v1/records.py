@@ -73,13 +73,13 @@ class Record(BaseModel):
     id: UUID
     status: RecordStatus
     fields: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]]
-    external_id: Optional[str]
+    metadata: Optional[Dict[str, Any]] = None
+    external_id: Optional[str] = None
     # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
     # response: Optional[Response]
-    responses: Optional[List[Response]]
-    suggestions: Optional[List[Suggestion]]
-    vectors: Optional[Dict[str, List[float]]]
+    responses: Optional[List[Response]] = None
+    suggestions: Optional[List[Suggestion]] = None
+    vectors: Optional[Dict[str, List[float]]] = None
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
@@ -142,7 +142,7 @@ class RecordCreate(BaseModel):
 class RecordUpdate(UpdateSchema):
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
     suggestions: Optional[List[SuggestionCreate]] = None
-    vectors: Optional[Dict[str, List[float]]]
+    vectors: Optional[Dict[str, List[float]]] = None
 
     @property
     def metadata(self) -> Optional[Dict[str, Any]]:
@@ -168,8 +168,8 @@ class RecordUpdateWithId(RecordUpdate):
 
 
 class RecordUpsert(RecordCreate):
-    id: Optional[UUID]
-    fields: Optional[Dict[str, Union[List[ChatFieldValue], StrictStr, None]]]
+    id: Optional[UUID] = None
+    fields: Optional[Dict[str, Union[List[ChatFieldValue], StrictStr, None]]] = None
 
 
 class RecordIncludeParam(BaseModel):
@@ -226,12 +226,16 @@ class Records(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    items: List[RecordCreate] = Field(..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+    items: List[RecordCreate] = Field(..., min_length=RECORDS_CREATE_MIN_ITEMS, max_length=RECORDS_CREATE_MAX_ITEMS)
 
 
 class RecordsUpdate(BaseModel):
     # TODO: review this definition and align to create model
-    items: List[RecordUpdateWithId] = Field(..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS)
+    items: List[RecordUpdateWithId] = Field(
+        ...,
+        min_length=RECORDS_UPDATE_MIN_ITEMS,
+        max_length=RECORDS_UPDATE_MAX_ITEMS,
+    )
 
 
 class MetadataParsedQueryParam:
@@ -285,7 +289,7 @@ class Order(BaseModel):
 class TermsFilter(BaseModel):
     type: Literal["terms"]
     scope: FilterScope
-    values: List[str] = Field(..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS)
+    values: List[str] = Field(..., min_length=TERMS_FILTER_VALUES_MIN_ITEMS, max_length=TERMS_FILTER_VALUES_MAX_ITEMS)
 
 
 class RangeFilter(BaseModel):
@@ -312,20 +316,22 @@ Filter = Annotated[Union[TermsFilter, RangeFilter], Field(..., discriminator="ty
 
 
 class Filters(BaseModel):
-    and_: List[Filter] = Field(None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS)
+    and_: List[Filter] = Field(None, alias="and", min_length=FILTERS_AND_MIN_ITEMS, max_length=FILTERS_AND_MAX_ITEMS)
 
 
 class SearchRecordsQuery(BaseModel):
-    query: Optional[Query]
-    filters: Optional[Filters]
+    query: Optional[Query] = None
+    filters: Optional[Filters] = None
     sort: Optional[List[Order]] = Field(
-        None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
+        None,
+        min_length=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS,
+        max_length=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS,
     )
 
 
 class SearchRecord(BaseModel):
     record: Record
-    query_score: Optional[float]
+    query_score: Optional[float] = None
 
 
 class SearchRecordsResult(BaseModel):

@@ -35,7 +35,7 @@ SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL = 1
 
 class RankingQuestionResponseValueItem(BaseModel):
     value: str
-    rank: Optional[int]
+    rank: Optional[int] = None
 
 
 class SpanQuestionResponseValueItem(BaseModel):
@@ -56,7 +56,8 @@ class SpanQuestionResponseValueItem(BaseModel):
 
 RankingQuestionResponseValue = List[RankingQuestionResponseValueItem]
 SpanQuestionResponseValue = Annotated[
-    List[SpanQuestionResponseValueItem], Field(..., max_items=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS)
+    List[SpanQuestionResponseValueItem],
+    Field(..., max_length=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS),
 ]
 MultiLabelSelectionQuestionResponseValue = List[str]
 RatingQuestionResponseValue = StrictInt
@@ -90,7 +91,7 @@ ResponseValuesUpdate = Dict[QuestionName, ResponseValueUpdate]
 
 class Response(BaseModel):
     id: UUID
-    values: Optional[ResponseValues]
+    values: Optional[ResponseValues] = None
     status: ResponseStatus
     record_id: UUID
     user_id: UUID
@@ -101,14 +102,14 @@ class Response(BaseModel):
 
 
 class ResponseCreate(BaseModel):
-    values: Optional[ResponseValuesCreate]
+    values: Optional[ResponseValuesCreate] = None
     status: ResponseStatus
 
 
 class ResponseFilterScope(BaseModel):
     entity: Literal["response"]
-    question: Optional[QuestionName]
-    property: Optional[Literal["status"]]
+    question: Optional[QuestionName] = None
+    property: Optional[Literal["status"]] = None
 
 
 class SubmittedResponseUpdate(BaseModel):
@@ -117,12 +118,12 @@ class SubmittedResponseUpdate(BaseModel):
 
 
 class DiscardedResponseUpdate(BaseModel):
-    values: Optional[ResponseValuesUpdate]
+    values: Optional[ResponseValuesUpdate] = None
     status: Literal[ResponseStatus.discarded]
 
 
 class DraftResponseUpdate(BaseModel):
-    values: Optional[ResponseValuesUpdate]
+    values: Optional[ResponseValuesUpdate] = None
     status: Literal[ResponseStatus.draft]
 
 
@@ -139,13 +140,13 @@ class SubmittedResponseUpsert(BaseModel):
 
 
 class DiscardedResponseUpsert(BaseModel):
-    values: Optional[ResponseValuesUpdate]
+    values: Optional[ResponseValuesUpdate] = None
     status: Literal[ResponseStatus.discarded]
     record_id: UUID
 
 
 class DraftResponseUpsert(BaseModel):
-    values: Optional[ResponseValuesUpdate]
+    values: Optional[ResponseValuesUpdate] = None
     status: Literal[ResponseStatus.draft]
     record_id: UUID
 
@@ -159,8 +160,8 @@ ResponseUpsert = Annotated[
 class ResponsesBulkCreate(BaseModel):
     items: List[ResponseUpsert] = Field(
         ...,
-        min_items=RESPONSES_BULK_CREATE_MIN_ITEMS,
-        max_items=RESPONSES_BULK_CREATE_MAX_ITEMS,
+        min_length=RESPONSES_BULK_CREATE_MIN_ITEMS,
+        max_length=RESPONSES_BULK_CREATE_MAX_ITEMS,
     )
 
 
@@ -169,8 +170,8 @@ class ResponseBulkError(BaseModel):
 
 
 class ResponseBulk(BaseModel):
-    item: Optional[Response]
-    error: Optional[ResponseBulkError]
+    item: Optional[Response] = None
+    error: Optional[ResponseBulkError] = None
 
 
 class ResponsesBulk(BaseModel):
@@ -185,7 +186,7 @@ class UserDraftResponseCreate(BaseModel):
 
 class UserDiscardedResponseCreate(BaseModel):
     user_id: UUID
-    values: Optional[ResponseValuesCreate]
+    values: Optional[ResponseValuesCreate] = None
     status: Literal[ResponseStatus.discarded]
 
 

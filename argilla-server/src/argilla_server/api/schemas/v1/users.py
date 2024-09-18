@@ -32,7 +32,7 @@ USER_PASSWORD_MAX_LENGTH = 100
 class User(BaseModel):
     id: UUID
     first_name: str
-    last_name: Optional[str]
+    last_name: Optional[str] = None
     username: str
     role: UserRole
     # TODO: We need to move `api_key` outside of this schema and think about a more
@@ -46,9 +46,9 @@ class User(BaseModel):
 
 class UserCreate(BaseModel):
     first_name: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    last_name: Optional[Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]]
+    last_name: Optional[Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]] = None
     username: str = Field(pattern=USER_USERNAME_REGEX, min_length=1)
-    role: Optional[UserRole]
+    role: Optional[UserRole] = None
     password: str = Field(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
 
 

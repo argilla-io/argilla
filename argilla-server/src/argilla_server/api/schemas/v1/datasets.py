@@ -117,7 +117,7 @@ class UsersProgress(BaseModel):
 class Dataset(BaseModel):
     id: UUID
     name: str
-    guidelines: Optional[str]
+    guidelines: Optional[str] = None
     allow_extra_metadata: bool
     status: DatasetStatus
     distribution: DatasetDistribution
@@ -125,6 +125,7 @@ class Dataset(BaseModel):
     last_activity_at: datetime
     inserted_at: datetime
     updated_at: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -134,7 +135,7 @@ class Datasets(BaseModel):
 
 class DatasetCreate(BaseModel):
     name: DatasetName
-    guidelines: Optional[DatasetGuidelines]
+    guidelines: Optional[DatasetGuidelines] = None
     allow_extra_metadata: bool = True
     distribution: DatasetDistributionCreate = DatasetOverlapDistributionCreate(
         strategy=DatasetDistributionStrategy.overlap,
@@ -144,9 +145,9 @@ class DatasetCreate(BaseModel):
 
 
 class DatasetUpdate(UpdateSchema):
-    name: Optional[DatasetName]
-    guidelines: Optional[DatasetGuidelines]
-    allow_extra_metadata: Optional[bool]
-    distribution: Optional[DatasetDistributionUpdate]
+    name: Optional[DatasetName] = None
+    guidelines: Optional[DatasetGuidelines] = None
+    allow_extra_metadata: Optional[bool] = None
+    distribution: Optional[DatasetDistributionUpdate] = None
 
     __non_nullable_fields__ = {"name", "allow_extra_metadata", "distribution"}

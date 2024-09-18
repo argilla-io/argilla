@@ -74,6 +74,7 @@ class FloatMetadataMetrics(NumericMetadataMetrics[float]):
     def round_result(cls, v: float):
         if v is not None:
             return round(v, FLOAT_METADATA_METRICS_PRECISION)
+
         return v
 
 
@@ -146,7 +147,9 @@ class NumericMetadataProperty(BaseModel, Generic[NT]):
 class TermsMetadataPropertyCreate(BaseModel):
     type: Literal[MetadataPropertyType.terms]
     values: Optional[List[str]] = Field(
-        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
+        None,
+        min_length=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS,
+        max_length=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     )
 
 
@@ -173,6 +176,7 @@ class MetadataProperty(BaseModel):
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -188,7 +192,7 @@ class MetadataPropertyCreate(BaseModel):
 
 
 class MetadataPropertyUpdate(UpdateSchema):
-    title: Optional[MetadataPropertyTitle]
-    visible_for_annotators: Optional[bool]
+    title: Optional[MetadataPropertyTitle] = None
+    visible_for_annotators: Optional[bool] = None
 
     __non_nullable_fields__ = {"title", "visible_for_annotators"}

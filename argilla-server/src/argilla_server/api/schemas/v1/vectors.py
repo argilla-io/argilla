@@ -12,10 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import List
 from uuid import UUID
-
-# from argilla_server.pydantic_v1 import BaseModel
+from typing import List
 from pydantic import BaseModel
 
 

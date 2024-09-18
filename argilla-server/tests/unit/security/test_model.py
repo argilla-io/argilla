@@ -12,13 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-
 import pytest
+
+from pydantic import ValidationError
+
 from argilla_server.api.schemas.v1.users import User, UserCreate
 from argilla_server.api.schemas.v1.workspaces import WorkspaceCreate
 
 from tests.factories import UserFactory
-from tests.pydantic_v1 import ValidationError
 
 
 @pytest.mark.parametrize("invalid_name", ["work space", "work/space", "work.space", "_", "-"])

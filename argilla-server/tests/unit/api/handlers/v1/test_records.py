@@ -87,7 +87,10 @@ class TestSuiteRecords:
         record = await RecordFactory.create(dataset=dataset)
         user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
 
-        response = await async_client.get(f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key})
+        response = await async_client.get(
+            f"/api/v1/records/{record.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -1414,7 +1417,8 @@ class TestSuiteRecords:
         user = await UserFactory.create(role=role, workspaces=[dataset.workspace])
 
         response = await async_client.delete(
-            f"/api/v1/records/{record.id}", headers={API_KEY_HEADER_NAME: user.api_key}
+            f"/api/v1/records/{record.id}",
+            headers={API_KEY_HEADER_NAME: user.api_key},
         )
 
         assert response.status_code == 200

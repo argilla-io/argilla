@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# from argilla_server.pydantic_v1 import BaseModel
 from pydantic import BaseModel
 
 

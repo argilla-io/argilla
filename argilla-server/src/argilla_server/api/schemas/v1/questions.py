@@ -128,7 +128,7 @@ class TextQuestionSettingsCreate(BaseModel):
 
 class TextQuestionSettingsUpdate(UpdateSchema):
     type: Literal[QuestionType.text]
-    use_markdown: Optional[bool]
+    use_markdown: Optional[bool] = None
 
     __non_nullable_fields__ = {"use_markdown"}
 
@@ -199,11 +199,11 @@ class LabelSelectionSettingsUpdate(UpdateSchema):
         Annotated[
             List[OptionSettings],
             Field(
-                min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
-                max_items=settings.label_selection_options_max_items,
+                min_length=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+                max_length=settings.label_selection_options_max_items,
             ),
         ]
-    ]
+    ] = None
 
 
 # Multi-label selection question
@@ -219,7 +219,7 @@ class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCr
 
 class MultiLabelSelectionQuestionSettingsUpdate(LabelSelectionSettingsUpdate):
     type: Literal[QuestionType.multi_label_selection]
-    options_order: Optional[OptionsOrder]
+    options_order: Optional[OptionsOrder] = None
 
     __non_nullable_fields__ = {"options_order"}
 
@@ -290,13 +290,13 @@ class SpanQuestionSettingsUpdate(UpdateSchema):
         Annotated[
             List[OptionSettings],
             Field(
-                min_items=SPAN_OPTIONS_MIN_ITEMS,
-                max_items=settings.span_options_max_items,
+                min_length=SPAN_OPTIONS_MIN_ITEMS,
+                max_length=settings.span_options_max_items,
             ),
         ]
-    ]
+    ] = None
     visible_options: Optional[int] = Field(None, ge=SPAN_MIN_VISIBLE_OPTIONS)
-    allow_overlapping: Optional[bool]
+    allow_overlapping: Optional[bool] = None
 
 
 QuestionSettings = Annotated[
@@ -379,12 +379,13 @@ class Question(BaseModel):
     id: UUID
     name: str
     title: str
-    description: Optional[str]
+    description: Optional[str] = None
     required: bool
     settings: QuestionSettings
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -395,14 +396,14 @@ class Questions(BaseModel):
 class QuestionCreate(BaseModel):
     name: QuestionName
     title: QuestionTitle
-    description: Optional[QuestionDescription]
-    required: Optional[bool]
+    description: Optional[QuestionDescription] = None
+    required: Optional[bool] = None
     settings: QuestionSettingsCreate
 
 
 class QuestionUpdate(UpdateSchema):
-    title: Optional[QuestionTitle]
-    description: Optional[QuestionDescription]
-    settings: Optional[QuestionSettingsUpdate]
+    title: Optional[QuestionTitle] = None
+    description: Optional[QuestionDescription] = None
+    settings: Optional[QuestionSettingsUpdate] = None
 
     __non_nullable_fields__ = {"title", "settings"}

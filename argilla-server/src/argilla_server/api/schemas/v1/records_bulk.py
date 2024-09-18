@@ -38,11 +38,10 @@ class RecordsBulkWithUpdateInfo(RecordsBulk):
 
 class RecordsBulkCreate(BaseModel):
     items: List[RecordCreate] = Field(
-        ..., min_items=RECORDS_BULK_CREATE_MIN_ITEMS, max_items=RECORDS_BULK_CREATE_MAX_ITEMS
+        ..., min_length=RECORDS_BULK_CREATE_MIN_ITEMS, max_length=RECORDS_BULK_CREATE_MAX_ITEMS
     )
 
     @field_validator("items")
-    @classmethod
     @classmethod
     def check_unique_external_ids(cls, items: List[RecordCreate]) -> List[RecordCreate]:
         """Check that external_ids are unique"""
@@ -55,5 +54,5 @@ class RecordsBulkCreate(BaseModel):
 
 class RecordsBulkUpsert(RecordsBulkCreate):
     items: List[RecordUpsert] = Field(
-        ..., min_items=RECORDS_BULK_UPSERT_MIN_ITEMS, max_items=RECORDS_BULK_UPSERT_MAX_ITEMS
+        ..., min_length=RECORDS_BULK_UPSERT_MIN_ITEMS, max_length=RECORDS_BULK_UPSERT_MAX_ITEMS
     )

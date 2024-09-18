@@ -54,6 +54,7 @@ class VectorSettings(BaseModel):
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
     def check_vector(self, value: List[float]) -> None:
@@ -80,6 +81,6 @@ class VectorSettingsCreate(BaseModel):
 
 
 class VectorSettingsUpdate(UpdateSchema):
-    title: Optional[VectorSettingsTitle]
+    title: Optional[VectorSettingsTitle] = None
 
     __non_nullable_fields__ = {"title"}

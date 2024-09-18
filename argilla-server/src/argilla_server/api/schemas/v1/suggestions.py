@@ -12,9 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import UUID
 from datetime import datetime
 from typing import Any, List, Literal, Optional, Union
-from uuid import UUID
+from typing_extensions import Annotated
 
 from argilla_server.api.schemas.v1.questions import QuestionName
 from argilla_server.api.schemas.v1.responses import (
@@ -62,10 +63,10 @@ class SearchSuggestionsOptions(BaseModel):
 
 class BaseSuggestion(BaseModel):
     question_id: UUID
-    type: Optional[SuggestionType]
+    type: Optional[SuggestionType] = None
     value: Any
-    agent: Optional[str]
-    score: Optional[Union[float, List[float]]]
+    agent: Optional[str] = None
+    score: Optional[Union[float, List[float]]] = None
 
 
 class Suggestion(BaseSuggestion):
@@ -78,6 +79,17 @@ class Suggestion(BaseSuggestion):
 
 class Suggestions(BaseModel):
     items: List[Suggestion]
+
+
+SuggestionScore = Annotated[
+    float,
+    Field(..., ge=SCORE_GREATER_THAN_OR_EQUAL, le=SCORE_LESS_THAN_OR_EQUAL),
+]
+
+SuggestionScores = Annotated[
+    SuggestionScore,
+    Field(..., min_length=SCORE_MIN_ITEMS),
+]
 
 
 class SuggestionCreate(BaseSuggestion):
@@ -95,10 +107,13 @@ class SuggestionCreate(BaseSuggestion):
         max_length=AGENT_MAX_LENGTH,
         description="Agent used to generate the suggestion",
     )
-    score: Optional[Union[float, List[float]]] = Field(
-        None,
-        min_items=SCORE_MIN_ITEMS,
-        ge=SCORE_GREATER_THAN_OR_EQUAL,
-        le=SCORE_LESS_THAN_OR_EQUAL,
-        description="The score assigned to the suggestion",
+    # score: Optional[Union[float, List[float]]] = Field(
+    #     None,
+    #     min_length=SCORE_MIN_ITEMS,
+    #     ge=SCORE_GREATER_THAN_OR_EQUAL,
+    #     le=SCORE_LESS_THAN_OR_EQUAL,
+    #     description="The score assigned to the suggestion",
+    # )
+    score: Optional[Union[SuggestionScore, SuggestionScores]] = Field(
+        None, description="The score assigned to the suggestion"
     )

@@ -136,6 +136,7 @@ class Field(BaseModel):
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -146,12 +147,12 @@ class Fields(BaseModel):
 class FieldCreate(BaseModel):
     name: FieldName
     title: FieldTitle
-    required: Optional[bool]
+    required: Optional[bool] = None
     settings: FieldSettingsCreate
 
 
 class FieldUpdate(UpdateSchema):
-    title: Optional[FieldTitle]
-    settings: Optional[FieldSettingsUpdate]
+    title: Optional[FieldTitle] = None
+    settings: Optional[FieldSettingsUpdate] = None
 
     __non_nullable_fields__ = {"title", "settings"}

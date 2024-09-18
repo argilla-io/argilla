@@ -14,16 +14,16 @@
 
 from typing import Optional
 
-from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
-
 # from argilla_server.pydantic_v1 import BaseModel
 from pydantic import BaseModel
 
+from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
+
 
 class ArgillaSettings(BaseModel):
-    show_huggingface_space_persistent_storage_warning: Optional[bool]
+    show_huggingface_space_persistent_storage_warning: Optional[bool] = None
 
 
 class Settings(BaseModel):
     argilla: ArgillaSettings
-    huggingface: Optional[HuggingfaceSettings]
+    huggingface: Optional[HuggingfaceSettings] = None
