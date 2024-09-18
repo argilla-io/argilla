@@ -15,12 +15,11 @@ These are the section headers that we use:
 -->
 
 ## [Unreleased]()
-
-## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0)
-
 ### Fixed
 
 - Fixed the deployment yaml used to create a new Argilla server in K8s. Added `USERNAME` and `PASSWORD` to the environment variables of pod template. ([#5434](https://github.com/argilla-io/argilla/issues/5434))
+
+## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0)
 
 ### Added
 
