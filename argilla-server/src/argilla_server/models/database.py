@@ -85,6 +85,10 @@ class Field(DatabaseModel):
     def is_image(self):
         return self.settings.get("type") == FieldType.image
 
+    @property
+    def is_chat(self):
+        return self.settings.get("type") == FieldType.chat
+
     def __repr__(self):
         return (
             f"Field(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
@@ -478,16 +482,6 @@ class User(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=Response.inserted_at.asc(),
-    )
-    datasets: Mapped[List["Dataset"]] = relationship(
-        secondary="workspaces_users",
-        primaryjoin="User.id == WorkspaceUser.user_id",
-        secondaryjoin=and_(
-            Workspace.id == Dataset.workspace_id,
-            WorkspaceUser.workspace_id == Workspace.id,
-        ),
-        viewonly=True,
-        order_by=Dataset.inserted_at.asc(),
     )
 
     @property
