@@ -85,7 +85,7 @@ def webhook_listener(
             ).create()
 
         request_handler = WebhookHandler(webhook).handle(func, raw_event)
-        server.post(f"/{func.__name__}")(request_handler)
+        server.post(f"/{func.__name__}", tags=["Argilla Webhooks"])(request_handler)
 
         return request_handler
 
