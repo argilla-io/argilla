@@ -58,7 +58,9 @@ def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
     url = f"{DATASETS_SERVER_BASE_URL}/info?dataset={repo_id}"
 
     try:
-        with httpx.Client(base_url= DATASETS_SERVER_BASE_URL, headers=DATASETS_SERVER_HEADERS, timeout=DATASETS_SERVER_TIMEOUT) as client:
+        with httpx.Client(
+            base_url=DATASETS_SERVER_BASE_URL, headers=DATASETS_SERVER_HEADERS, timeout=DATASETS_SERVER_TIMEOUT
+        ) as client:
             response = client.get(url, headers=DATASETS_SERVER_HEADERS)
             response.raise_for_status()
             response_json = response.json()
