@@ -159,6 +159,7 @@ Fields are the main pieces of information of the record. These are shown at firs
 
 === "Text"
     Text fields expect input in the form of a `string`.
+
     ```python
     record = rg.Record(
         fields={"text": "Hello World, how are you?"}
@@ -167,14 +168,26 @@ Fields are the main pieces of information of the record. These are shown at firs
 
 === "Image"
     Image fields expect a remote URL or local path to an image file in the form of a `string`, or a PIL object.
+
+    > Check the [Dataset.records - Python Reference](../reference/argilla/datasets/dataset_records.md) to see how to add records with with images in detail.
+
     ```python
-    record = rg.Record(
-        fields={"image": "https://example.com/image.jpg"}
-    )
+    records = [
+        rg.Record(
+            fields={"image": "https://example.com/image.jpg"}
+        ),
+        rg.Record(
+            fields={"image": "path/to/image.jpg"}
+        ),
+        rg.Record(
+            fields={"image": Image.open("path/to/image.jpg")}
+        ),
+    ]
     ```
 
 === "Chat"
-    Chat fields expects a list of dictionaries with the keys `role` and `content`, where the `role` identifies the interlocutor type (e.g., user, assistant, model, etc.), whereas the `content` contains the text of the message.
+    Chat fields expect a list of dictionaries with the keys `role` and `content`, where the `role` identifies the interlocutor type (e.g., user, assistant, model, etc.), whereas the `content` contains the text of the message.
+
     ```python
     record = rg.Record(
         fields={
