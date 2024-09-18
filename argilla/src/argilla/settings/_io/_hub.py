@@ -85,7 +85,7 @@ def _map_feature_type(feature):
             return FeatureType.CHAT
     elif not isinstance(feature, dict):
         warnings.warn(f"Unsupported feature format: {feature}")
-        
+
     hf_type = feature.get("_type")
     dtype = feature.get("dtype")
 
