@@ -127,6 +127,8 @@ class HubImportExportMixin(DiskImportExportMixin):
             workspace (Union[Workspace, str], optional): The workspace to import the dataset to. Defaults to None and default workspace is used.
             client: the client to use to load the `Dataset`. If not provided, the default client will be used.
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
+            settings: the settings to use to load the `Dataset`. If not provided, the settings will be loaded from the Hugging Face dataset.
+            split: the split to load from the Hugging Face dataset. If not provided, the first split will be loaded.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
@@ -166,6 +168,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                     with_records=with_records,
                     settings=settings,
                     split=split,
+                    **kwargs,
                 )
                 return dataset
 
