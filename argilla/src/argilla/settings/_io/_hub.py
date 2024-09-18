@@ -80,10 +80,12 @@ def _map_feature_type(feature):
     """Map the feature type to the corresponding FeatureType enum."""
 
     if isinstance(feature, list) and len(feature) > 0 and isinstance(feature[0], dict):
-        sub_features = feature[0]
-        if _is_chat_feature(sub_features):
+        sub_feature = feature[0]
+        if _is_chat_feature(sub_feature):
             return FeatureType.CHAT
-
+    elif not isinstance(feature, dict):
+        warnings.warn(f"Unsupported feature format: {feature}")
+        
     hf_type = feature.get("_type")
     dtype = feature.get("dtype")
 
