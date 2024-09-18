@@ -40,6 +40,7 @@ IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES = [
     "image/svg",
     "image/webp",
 ]
+CHAT_FIELD_MAX_LENGTH = 500
 
 
 class RecordValidatorBase(ABC):
@@ -52,9 +53,9 @@ class RecordValidatorBase(ABC):
     def _validate_fields(cls, record: Union[RecordCreate, RecordUpdate], dataset: Dataset) -> None:
         fields = record.fields or {}
 
-        cls._validate_required_fields(dataset, fields)
-        cls._validate_extra_fields(dataset, fields)
-        cls._validate_image_fields(dataset, fields)
+        cls._validate_required_fields(dataset=dataset, fields=fields)
+        cls._validate_extra_fields(dataset=dataset, fields=fields)
+        cls._validate_image_fields(dataset=dataset, fields=fields)
 
     @staticmethod
     def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
@@ -89,20 +90,6 @@ class RecordValidatorBase(ABC):
                     f"metadata is not valid: '{name}' metadata property does not exists for dataset '{dataset.id}' "
                     "and extra metadata is not allowed for this dataset"
                 )
-
-    @staticmethod
-    def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
-        for field in dataset.fields:
-            if field.required and not (field.name in fields and fields.get(field.name) is not None):
-                raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
-
-    @staticmethod
-    def _validate_extra_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
-        fields_copy = copy.copy(fields)
-        for field in dataset.fields:
-            fields_copy.pop(field.name, None)
-        if fields_copy:
-            raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
 
     @classmethod
     def _validate_image_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:

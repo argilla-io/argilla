@@ -31,6 +31,7 @@ from tests.factories import (
     TextFieldFactory,
     ImageFieldFactory,
     TextQuestionFactory,
+    ChatFieldFactory,
 )
 
 
@@ -411,4 +412,142 @@ class TestCreateDatasetRecordsBulk:
             "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
         }
 
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                    "content": "Hello!",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
+
+    async def test_create_dataset_records_bulk_with_chat_field_with_value_exceeding_maximum_length(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                    "content": "a",
+                                }
+                            ]
+                            * 1000,
+                        },
+                    },
+                ],
+            },
+        )
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_without_role_key(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "content": "Hello!",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_without_content_key(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body", "items", 0, "fields", "chat", 0, "content"],
+                            "msg": "field required",
+                            "type": "value_error.missing",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "chat"],
+                            "msg": "str type expected",
+                            "type": "type_error.str",
+                        },
+                    ]
+                },
+            }
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0

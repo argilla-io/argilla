@@ -26,6 +26,7 @@ from argilla.settings._field import Field, _field_from_dict, _field_from_model
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._task_distribution import TaskDistribution
+from argilla.settings._templates import DefaultSettingsMixin
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
 __all__ = ["Settings"]
 
 
-class Settings(Resource):
+class Settings(DefaultSettingsMixin, Resource):
     """
     Settings class for Argilla Datasets.
 

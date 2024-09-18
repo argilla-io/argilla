@@ -1,20 +1,21 @@
-FROM python:3.10.12-slim AS builder
+FROM python:3.10-slim AS builder
 
 # Copying argilla distribution files
 COPY dist/*.whl /packages/
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN apt-get update && \
-  apt-get install -y python-dev-is-python3 libpq-dev gcc && \
-  pip install --upgrade pip && \
-  pip install uvicorn[standard] && \
-  for wheel in /packages/*.whl; do pip install "$wheel"[server,postgresql]; done && \
-  apt-get remove -y python-dev-is-python3 libpq-dev gcc && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /packages
+    apt-get upgrade -y && \
+    apt-get install -y python-dev-is-python3 libpq-dev gcc && \
+    pip install --upgrade pip && \
+    pip install uvicorn[standard] && \
+    for wheel in /packages/*.whl; do pip install "$wheel"[server,postgresql]; done && \
+    apt-get remove -y python-dev-is-python3 libpq-dev gcc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /packages
 
-FROM python:3.10.12-slim
+FROM python:3.10-slim
 
 # Environment Variables
 ENV USERNAME=""
@@ -31,12 +32,13 @@ RUN useradd -ms /bin/bash argilla
 
 # Create argilla volume
 RUN mkdir -p "$ARGILLA_HOME_PATH" && \
-  chown argilla:argilla "$ARGILLA_HOME_PATH" && \
-  apt-get update && \
-  apt-get install -y libpq-dev && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /packages
+    chown argilla:argilla "$ARGILLA_HOME_PATH" && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y libpq-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /packages
 VOLUME $ARGILLA_HOME_PATH
 
 COPY scripts/start_argilla_server.sh /home/argilla
