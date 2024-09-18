@@ -13,11 +13,15 @@
 # limitations under the License.
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from argilla import Argilla, Dataset, Record, UserResponse
+from argilla import Dataset, Record, UserResponse
 from argilla._models import DatasetModel, RecordModel, UserResponseModel
+
+if TYPE_CHECKING:
+    from argilla import Argilla
 
 
 class WebhookEvent(BaseModel):
@@ -25,7 +29,7 @@ class WebhookEvent(BaseModel):
     timestamp: datetime
     data: dict
 
-    def normalize(self, client: Argilla) -> dict:
+    def normalize(self, client: "Argilla") -> dict:
         instance_type, action_type = self.type.split(".")
         data = self.data or {}
 

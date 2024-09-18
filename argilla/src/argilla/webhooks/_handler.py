@@ -15,14 +15,14 @@
 from typing import Callable, TYPE_CHECKING
 
 from argilla.webhooks._event import WebhookEvent
-from argilla.webhooks._resource import Webhook
 
 if TYPE_CHECKING:
     from fastapi import Request
+    from argilla.webhooks._resource import Webhook
 
 
 class WebhookHandler:
-    def __init__(self, webhook: Webhook):
+    def __init__(self, webhook: "Webhook"):
         self.webhook = webhook
 
     def handle(self, func: Callable, raw_event: bool = False) -> Callable:
