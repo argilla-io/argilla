@@ -17,6 +17,7 @@ services:
       USERNAME: argilla
       PASSWORD: 12345678
       API_KEY: argilla.apikey
+      WORKSPACE: default
       # Uncomment the following line to reindex Argilla datasets into the search engine when starting up
       # REINDEX_DATASETS: 1
       # Opt-out for telemetry https://huggingface.co/docs/huggingface_hub/main/en/package_reference/utilities#huggingface_hub.utils.send_telemetry
