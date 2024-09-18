@@ -108,6 +108,7 @@ export default {
     yesDelete: "Yes, delete",
     write: "Write",
     preview: "Preview",
+    uiPreview: "UI Preview",
   },
   button: {
     ignore_and_continue: "Ignore and continue",

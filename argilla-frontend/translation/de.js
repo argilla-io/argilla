@@ -100,6 +100,7 @@ export default {
     yesDelete: "Ja, löschen",
     write: "Bearbeiten",
     preview: "Vorschau",
+    uiPreview: "UI Vorschau",
   },
   button: {
     ignore_and_continue: "Ignorieren und fortfahren",
