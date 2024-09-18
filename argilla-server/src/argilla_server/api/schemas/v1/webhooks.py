@@ -16,13 +16,16 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-from argilla_server.webhooks.v1.enums import WebhookEvent
 from argilla_server.api.schemas.v1.commons import UpdateSchema
-from argilla_server.pydantic_v1 import BaseModel, Field, HttpUrl
+from argilla_server.pydantic_v1 import BaseModel, Field, HttpUrl, AnyHttpUrl
+from argilla_server.settings import settings
+from argilla_server.webhooks.v1.enums import WebhookEvent
 
 WEBHOOK_EVENTS_MIN_ITEMS = 1
 WEBHOOK_DESCRIPTION_MIN_LENGTH = 1
 WEBHOOK_DESCRIPTION_MAX_LENGTH = 1000
+
+WebhookUrl = HttpUrl if settings.webhook_enable_required_top_level_domain else AnyHttpUrl
 
 
 class Webhook(BaseModel):
@@ -44,7 +47,7 @@ class Webhooks(BaseModel):
 
 
 class WebhookCreate(BaseModel):
-    url: HttpUrl
+    url: WebhookUrl
     events: List[WebhookEvent] = Field(
         min_items=WEBHOOK_EVENTS_MIN_ITEMS,
         unique_items=True,
@@ -56,7 +59,7 @@ class WebhookCreate(BaseModel):
 
 
 class WebhookUpdate(UpdateSchema):
-    url: Optional[HttpUrl]
+    url: Optional[WebhookUrl]
     events: Optional[List[WebhookEvent]] = Field(
         min_items=WEBHOOK_EVENTS_MIN_ITEMS,
         unique_items=True,
