@@ -116,6 +116,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         client: Optional["Argilla"] = None,
         with_records: bool = True,
         settings: Optional["Settings"] = None,
+        split: Optional[str] = None,
         **kwargs: Any,
     ):
         """Loads a `Dataset` from the Hugging Face Hub.
@@ -126,6 +127,8 @@ class HubImportExportMixin(DiskImportExportMixin):
             workspace (Union[Workspace, str], optional): The workspace to import the dataset to. Defaults to None and default workspace is used.
             client: the client to use to load the `Dataset`. If not provided, the default client will be used.
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
+            settings: the settings to use to load the `Dataset`. If not provided, the settings will be loaded from the Hugging Face dataset.
+            split: the split to load from the Hugging Face dataset. If not provided, the first split will be loaded.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
@@ -164,13 +167,19 @@ class HubImportExportMixin(DiskImportExportMixin):
                     client=client,
                     with_records=with_records,
                     settings=settings,
+                    split=split,
+                    **kwargs,
                 )
                 return dataset
 
         if with_records:
             try:
-                hf_dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, **kwargs)
+                hf_dataset = load_dataset(
+                    path=repo_id,
+                    split=split,
+                    **kwargs,
+                )  # type: ignore
+                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, split=split, **kwargs)
                 cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
             except EmptyDatasetError:
                 warnings.warn(

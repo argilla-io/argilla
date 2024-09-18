@@ -82,9 +82,12 @@ def _map_feature_type(feature):
     """Map the feature type to the corresponding FeatureType enum."""
 
     if isinstance(feature, list) and len(feature) > 0 and isinstance(feature[0], dict):
-        sub_features = feature[0]
-        if _is_chat_feature(sub_features):
+        sub_feature = feature[0]
+        if _is_chat_feature(sub_feature):
             return FeatureType.CHAT
+    elif not isinstance(feature, dict):
+        warnings.warn(f"Unsupported feature format: {feature}")
+        return None
 
     hf_type = feature.get("_type")
     dtype = feature.get("dtype")
@@ -146,6 +149,7 @@ def _define_settings_from_features(
         TextQuestion,
         Settings,
         TextField,
+        ChatField,
         TermsMetadataProperty,
         IntegerMetadataProperty,
         FloatMetadataProperty,
@@ -160,20 +164,17 @@ def _define_settings_from_features(
     for name, feature in features.items():
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
-        if feature_type == FeatureType.CHAT:
-            # TODO: Implement chat support to create `rg.ChatField`
-            # fields.append(rg.ChatField(name=f"{name}_field"))
-            # mapping[name] = f"{name}_field"
-            pass
 
+        if feature_type == FeatureType.CHAT:
+            fields.append(ChatField(name=name, required=False))
         elif feature_type == FeatureType.TEXT:
             if attribute_definition == AttributeType.QUESTION:
                 questions.append(TextQuestion(name=name))
             elif attribute_definition == AttributeType.FIELD:
-                fields.append(TextField(name=name))
+                fields.append(TextField(name=name, required=False))
             elif attribute_definition is None:
                 questions.append(TextQuestion(name=f"{name}_question"))
-                fields.append(TextField(name=name))
+                fields.append(TextField(name=name, required=False))
                 mapping[name].append(name)
                 mapping[name].append(f"{name}_question")
             else:
@@ -182,7 +183,7 @@ def _define_settings_from_features(
                 )
 
         elif feature_type == FeatureType.IMAGE:
-            fields.append(ImageField(name=name))
+            fields.append(ImageField(name=name, required=False))
 
         elif feature_type == FeatureType.LABEL:
             names = feature.get("names")
@@ -225,8 +226,13 @@ def _define_settings_from_features(
 
     if not questions:
         questions.append(TextQuestion(name="comment", required=True))
+
     if not fields:
         raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
+
+    questions[0].required = True
+    fields[0].required = True
+
     settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
 
     return settings
