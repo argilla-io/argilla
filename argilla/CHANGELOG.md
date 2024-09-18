@@ -22,6 +22,7 @@ These are the section headers that we use:
 - Added template settings to `rg.Settings` for classification, rating, and ranking questions. ([#5426](https://github.com/argilla-io/argilla/pull/5426))
 - Added `rg.Settings` definition based on `datasets.Features` within `rg.Dataset.from_hub`. ([#5426](https://github.com/argilla-io/argilla/pull/5472))
 - Added persistent record mapping to `rg.Settings` to be used in `rg.Dataset.records.log`. ([#5466](https://github.com/argilla-io/argilla/pull/5466))
+- Added multiple error handling methods to the `rg.Dataset.records.log` method to warn, ignore, or raise errors. ([#5466](https://github.com/argilla-io/argilla/pull/5463))
 - Changed dataset import and export of `rg.LabelQuestion` to use `datasets.ClassLabel` not `datasets.Value`. ([#5474](https://github.com/argilla-io/argilla/pull/5474))
 
 
