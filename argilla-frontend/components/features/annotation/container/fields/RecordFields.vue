@@ -9,6 +9,7 @@
         settings,
         isTextType,
         isImageType,
+        isChatType,
       } in fields"
       :class="[isImageType ? 'fields__container--image' : '']"
       :key="id"
@@ -28,6 +29,14 @@
         :title="title"
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
+        :searchText="recordCriteria.committed.searchText.value.text"
+      />
+      <ChatField
+        v-else-if="isChatType"
+        :name="name"
+        :title="title"
+        :useMarkdown="settings.use_markdown"
+        :content="content"
         :searchText="recordCriteria.committed.searchText.value.text"
       />
       <ImageField v-else :name="name" :title="title" :content="content" />

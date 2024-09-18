@@ -12,6 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# coding: utf-8
-#
-__version__ = "2.3.0dev0"
+from argilla_server.pydantic_v1 import BaseModel, Field
+
+MIN_MESSAGE_LENGTH = 1
+MAX_MESSAGE_LENGTH = 5000
+
+MIN_ROLE_LENGTH = 1
+MAX_ROLE_LENGTH = 20
+MAX_ROLE_REGEX = r"^\S+$"
+
+
+class ChatFieldValue(BaseModel):
+    role: str = Field(..., min_role_length=MIN_ROLE_LENGTH, max_length=MAX_ROLE_LENGTH, regex=MAX_ROLE_REGEX)
+    content: str = Field(..., min_message_length=MIN_MESSAGE_LENGTH, max_length=MAX_MESSAGE_LENGTH)

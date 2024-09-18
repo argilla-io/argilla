@@ -72,9 +72,9 @@ async def create_workspace(db: AsyncSession, workspace_attrs: dict) -> Workspace
 
 
 async def delete_workspace(db: AsyncSession, workspace: Workspace):
-    if await datasets.list_datasets_by_workspace_id(db, workspace.id):
+    if await datasets.list_datasets(db, workspace_id=workspace.id):
         raise NotUniqueError(
-            f"Cannot delete the workspace {workspace.id}. This workspace has some feedback datasets linked"
+            f"Cannot delete the workspace {workspace.id}. This workspace has some datasets linked"
         )
 
     return await workspace.delete(db)
