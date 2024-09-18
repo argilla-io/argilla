@@ -132,13 +132,6 @@ class Settings(BaseSettings):
         default=True, description="The telemetry configuration for Hugging Face hub telemetry. "
     )
 
-    # Webhooks settings
-    webhooks_top_level_domain_required: bool = Field(
-        default=True,
-        description="If True, the webhook URL must have a top-level domain. "
-        "If False, the webhook URL can be an IP address. This is useful for local development.",
-    )
-
     # See also the telemetry.py module
     @validator("enable_telemetry", pre=True, always=True)
     def set_enable_telemetry(cls, enable_telemetry: bool) -> bool:
