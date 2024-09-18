@@ -144,6 +144,7 @@ def _define_settings_from_features(
         TextQuestion,
         Settings,
         TextField,
+        ChatField,
         TermsMetadataProperty,
         IntegerMetadataProperty,
         FloatMetadataProperty,
@@ -158,20 +159,17 @@ def _define_settings_from_features(
     for name, feature in features.items():
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
-        if feature_type == FeatureType.CHAT:
-            # TODO: Implement chat support to create `rg.ChatField`
-            # fields.append(rg.ChatField(name=f"{name}_field"))
-            # mapping[name] = f"{name}_field"
-            pass
 
+        if feature_type == FeatureType.CHAT:
+            fields.append(ChatField(name=name, required=False))
         elif feature_type == FeatureType.TEXT:
             if attribute_definition == AttributeType.QUESTION:
                 questions.append(TextQuestion(name=name))
             elif attribute_definition == AttributeType.FIELD:
-                fields.append(TextField(name=name))
+                fields.append(TextField(name=name, required=False))
             elif attribute_definition is None:
                 questions.append(TextQuestion(name=f"{name}_question"))
-                fields.append(TextField(name=name))
+                fields.append(TextField(name=name, required=False))
                 mapping[name].append(name)
                 mapping[name].append(f"{name}_question")
             else:
@@ -180,7 +178,7 @@ def _define_settings_from_features(
                 )
 
         elif feature_type == FeatureType.IMAGE:
-            fields.append(ImageField(name=name))
+            fields.append(ImageField(name=name, required=False))
 
         elif feature_type == FeatureType.LABEL:
             names = feature.get("names")
@@ -225,6 +223,12 @@ def _define_settings_from_features(
         questions.append(TextQuestion(name="comment", required=True))
     if not fields:
         raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
+
+    # validate that atleast one field is required
+    if not any(field.required for field in fields):
+        # set the first field as required
+        fields[0].required = True
+
     settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
 
     return settings
