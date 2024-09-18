@@ -1,0 +1,71 @@
+name: argilla
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python~=3.9.7
+  - pip>=2.22.0
+  - openjdk=11
+  # pyparsing 3.0.5 seems to be buggy
+  - pyparsing!=3.0.5
+  # tests
+  - pytest
+  - pytest-cov
+  - pytest-mock
+  - pytest-asyncio==0.21.1 # Pinning version 0.21.1, version 0.23.2 is causing problems with GitHub workflows
+  - pytest-env
+  - factory_boy~=3.2.1
+  # docs, pandoc needs conda ...
+  - pandoc==2.12
+  # we need this to ensure syntax highlighting in the notebook code cells for the docs
+  - ipython<8.0.0
+  # for building the frontend
+  - nodejs~=18.16.0
+  - pip:
+      # docs
+      - sphinx==4.5.0
+      - sphinx-design==0.2.0
+      - furo==2022.6.4.1
+      - myst-parser==0.16.1
+      - nbsphinx==0.8.9
+      - sphinxext.opengraph==0.6.3
+      - sphinx-copybutton==0.5.0
+      - sphinx-notfound-page==0.8.3
+      # code formatting
+      - pre-commit~=3.2.0
+      # v1,v2 transition, updated to v2 in run-python-tests.yml
+      - pydantic>=1.10.7,<2
+      - pandas>=1.0.0,<2
+      # extra test dependencies
+      - cleanlab~=2.0.0 # With this version, tests are failing
+      - datasets>1.17.0,!= 2.3.2 # TODO: push_to_hub fails up to 2.3.2, check patches when they come out eventually
+      - huggingface_hub>=0.5.0, <0.24
+      - flair>=0.12.2
+      - scipy~=1.12.0 # To avoid error importing scipy.linalg (https://github.com/argilla-io/argilla/actions/runs/8689560057/job/23828206007#step:12:3851)
+      - faiss-cpu
+      - flyingsquid
+      - pgmpy
+      - plotly>=4.1.0
+      - snorkel>=0.9.7
+      - spacy~=3.6.0
+      - https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.6.0/en_core_web_sm-3.6.0.tar.gz
+      - sentence-transformers>=2.0.0,<3.0.0
+      - spacy-transformers>=1.2.5
+      - spacy-huggingface-hub >= 0.0.10
+      - transformers[torch]>=4.30.0 # <- required for DPO with TRL
+      - evaluate
+      - seqeval
+      - setfit>=1.0.0
+      - span_marker
+      - openai>=0.27.10,<1.0.0
+      - peft
+      - trl>=0.5.0
+      - sentence-transformers
+      - rich!=13.1.0
+      - textdescriptives>=2.7.0,<3.0.0
+      - ipynbname>=2023.2.0.0
+      - nltk < 4.0.0
+      - httpx~=0.26.0
+      # install Argilla packages in editable mode
+      - -e .[listeners]

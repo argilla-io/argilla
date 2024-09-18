@@ -1,0 +1,154 @@
+name: Build Argilla server docker images
+
+on:
+  workflow_call:
+    inputs:
+      is_release:
+        description: "True if the images should be built for release"
+        required: true
+        type: boolean
+
+      publish_latest:
+        description: "True if the images should be published as latest"
+        required: true
+        type: boolean
+
+jobs:
+  build:
+    name: Build Argilla server docker images
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version-file: argilla-server/pyproject.toml
+          cache-dependency-path: argilla-server/pdm.lock
+          cache: true
+
+      - name: Read package info
+        id: package-info
+        working-directory: argilla-server
+        run: |
+          PACKAGE_VERSION=$(pdm show --version)
+          PACKAGE_NAME=$(pdm show --name)
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
+
+      - name: Get Docker image tag from GITHUB_REF
+        if: ${{ !inputs.is_release }}
+        id: docker-image-tag-from-ref
+        uses: ./.github/actions/docker-image-tag-from-ref
+
+      - name: Setup environment variables
+        run: |
+          if [[ $IS_RELEASE == true ]]; then
+            echo "PLATFORMS=linux/amd64,linux/arm64" >> $GITHUB_ENV
+            echo "IMAGE_TAG=v$PACKAGE_VERSION" >> $GITHUB_ENV
+            echo "SERVER_DOCKER_IMAGE=argilla/argilla-server" >> $GITHUB_ENV
+            echo "HF_SPACES_DOCKER_IMAGE=argilla/argilla-hf-spaces" >> $GITHUB_ENV
+            echo "DOCKER_USERNAME=$DOCKER_USERNAME" >> $GITHUB_ENV
+            echo "DOCKER_PASSWORD=$DOCKER_PASSWORD" >> $GITHUB_ENV
+            echo "PUBLISH_LATEST=$PUBLISH_LATEST" >> $GITHUB_ENV
+          else
+            echo "PLATFORMS=linux/amd64" >> $GITHUB_ENV
+            echo "IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
+            echo "SERVER_DOCKER_IMAGE=argilladev/argilla-server" >> $GITHUB_ENV
+            echo "HF_SPACES_DOCKER_IMAGE=argilladev/argilla-hf-spaces" >> $GITHUB_ENV
+            echo "DOCKER_USERNAME=$DOCKER_USERNAME_DEV" >> $GITHUB_ENV
+            echo "DOCKER_PASSWORD=$DOCKER_PASSWORD_DEV" >> $GITHUB_ENV
+            echo "PUBLISH_LATEST=true" >> $GITHUB_ENV
+          fi
+        env:
+          IS_RELEASE: ${{ inputs.is_release }}
+          PUBLISH_LATEST: ${{ inputs.publish_latest }}
+          PACKAGE_VERSION: ${{ steps.package-info.outputs.PACKAGE_VERSION }}
+          DOCKER_IMAGE_TAG: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
+          DOCKER_USERNAME: ${{ secrets.AR_DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.AR_DOCKER_PASSWORD }}
+          DOCKER_USERNAME_DEV: ${{ secrets.AR_DOCKER_USERNAME_DEV }}
+          DOCKER_PASSWORD_DEV: ${{ secrets.AR_DOCKER_PASSWORD_DEV }}
+
+      - name: Set up QEMU
+        if: ${{ inputs.is_release }}
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Download python package
+        uses: actions/download-artifact@v4
+        with:
+          name: argilla-server
+          path: argilla-server/docker/server/dist
+
+      - name: Build and push `argilla-server` image
+        uses: docker/build-push-action@v5
+        with:
+          context: argilla-server/docker/server
+          platforms: ${{ env.PLATFORMS }}
+          tags: ${{ env.SERVER_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+
+      - name: Push latest `argilla-server` image
+        if: ${{ env.PUBLISH_LATEST == 'true' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: argilla-server/docker/server
+          platforms: ${{ env.PLATFORMS }}
+          tags: ${{ env.SERVER_DOCKER_IMAGE }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+
+      - name: Build and push `argilla-hf-spaces` image
+        uses: docker/build-push-action@v5
+        with:
+          context: argilla-server/docker/argilla-hf-spaces
+          platforms: ${{ env.PLATFORMS }}
+          tags: ${{ env.HF_SPACES_DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ARGILLA_SERVER_IMAGE=${{ env.SERVER_DOCKER_IMAGE }}
+            ARGILLA_VERSION=${{ env.IMAGE_TAG }}
+          push: true
+
+      - name: Push latest `argilla-hf-spaces` image
+        if: ${{ env.PUBLISH_LATEST == 'true' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: argilla-server/docker/argilla-hf-spaces
+          platforms: ${{ env.PLATFORMS }}
+          tags: ${{ env.HF_SPACES_DOCKER_IMAGE }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ARGILLA_SERVER_IMAGE=${{ env.SERVER_DOCKER_IMAGE }}
+            ARGILLA_VERSION=${{ env.IMAGE_TAG }}
+          push: true
+      # TODO: uncomment this once the step works again
+      # - name: Docker Hub Description for `argilla-server`
+      #   uses: peter-evans/dockerhub-description@v4
+      #   if: ${{ env.PUBLISH_LATEST == 'true' }}
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     repository: $${{ env.SERVER_DOCKER_IMAGE }}
+      #     readme-filepath: argilla-server/docker/server/README.md
+      # TODO: uncomment this once the step works again
+      # - name: Docker Hub Description for `argilla-hf-spaces`
+      #   uses: peter-evans/dockerhub-description@v4
+      #   if: ${{ env.PUBLISH_LATEST == 'true' }}
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     repository: $${{ env.HF_SPACES_DOCKER_IMAGE }}
+      #     readme-filepath: argilla-server/docker/argilla-hf-spaces/README.md

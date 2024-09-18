@@ -24,11 +24,12 @@ A **Field** defines the schema or structure for a specific data element within a
 
 A **Question** represents a specific query or instruction presented to labelers for feedback. Questions play a crucial role in guiding labelers and capturing their input. Argilla Feedback supports different types of questions to accommodate various feedback scenarios.
 
-- **TextQuestion**: This type of question is suitable for collecting natural language feedback or textual responses from labelers. It allows them to provide detailed and descriptive feedback in response to the question.
-- **RatingQuestion**: This type of question is designed for capturing numerical rating feedback. Labelers can rate a given aspect or attribute using a predefined scale or set of options. It is useful for obtaining quantitative feedback or evaluating specific criteria.
 - **LabelQuestion**: This type of question is designed for capturing feedback in the form of a single label. Labelers can classify a given aspect or attribute using a predefined set of options. It is useful for obtaining a classification where options are mutually exclusive.
 - **MultiLabelQuestion**: This type of question is designed for capturing feedback in the form of one or multiple labels. Labelers can classify a given aspect or attribute using a predefined set of options. It is useful for obtaining a classification where options are not exclusive.
 - **RankingQuestion**: This type of question is designed to capture the labeler's preferences. Labelers can order a predefined set of options according to their preference or relevance. It is useful for obtaining feedback on the labeler's preference among multiple options.
+- **RatingQuestion**: This type of question is designed for capturing numerical rating feedback. Labelers can rate a given aspect or attribute using a predefined scale or set of options. It is useful for obtaining quantitative feedback or evaluating specific criteria.
+- **SpanQuestion**: This type of question is meant to highlight relevant pieces of text within record fields. It is useful for tasks such as named entity recognition or information extraction.
+- **TextQuestion**: This type of question is suitable for collecting natural language feedback or textual responses from labelers. It allows them to provide detailed and descriptive feedback in response to the question.
 
 #### Guidelines
 
@@ -44,9 +45,18 @@ A **Record** represents an individual feedback data point within a dataset. It c
 Argilla allows for multiple concurrent annotators, seamlessly gathering feedback from many labelers. Each **Response** represents the input provided by a labeler in response to specific questions within a dataset. It includes the labeler's identification, the feedback value itself, and a status indicating whether the response has been submitted or discarded. These responses form the foundation of the collected feedback data, capturing the diverse perspectives and insights of the labelers.
 
 #### Suggestions
+
 **Suggestions** enhance the feedback collection process by providing machine-generated feedback to labelers. Suggestions serve as automated decision-making aids, leveraging rules, models, or language models (LLMs) to accelerate the feedback process.
 
 With Suggestions, each record can be equipped with multiple machine-generated recommendations (one per question). These suggestions can act as weak signals, seamlessly combining with human feedback to enhance the efficiency and accuracy of the feedback collection workflow. By leveraging the power of automated suggestions, labelers can make more informed decisions, resulting in a more streamlined, partially automated, and effective feedback collection process.
+
+#### Metadata
+
+**Metadata** will hold extra information that you want your record to have. For example, if it belongs to the training or the test dataset, a quick fact about something regarding that specific record. Feel free to use it as you need!
+
+#### Vector
+
+**Vectors** can be added to a record to represent the semantic meaning of a **field** or a combination of them. They can be used within the UI or the SDK to search the most or least similar records within your dataset.
 
 
 ## Other datasets
@@ -75,7 +85,7 @@ Records are defined by the type of **task** they are related to. Let's see three
 #### Examples
 
 ```{note}
-For information about the Data model for the new `FeedbackDataset`, check [this guide](/practical_guides/create_dataset.md) instead.
+For information about the Data model for the new `FeedbackDataset`, check [this guide](/practical_guides/create_update_dataset/create_dataset.md) instead.
 ```
 
 ##### Text Classification

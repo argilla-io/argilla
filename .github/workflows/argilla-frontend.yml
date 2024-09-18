@@ -1,0 +1,84 @@
+name: Build Argilla frontend package
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_call:
+
+  pull_request:
+    paths:
+      - "argilla-frontend/**"
+
+jobs:
+  build:
+    name: Build argilla-frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: argilla-frontend
+
+    steps:
+      - name: Checkout Code 🛎
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ⚙️
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies 📦
+        run: |
+          npm install
+
+      - name: Run lint 🧹
+        run: |
+          npm run lint
+
+      - name: Run tests 🧪
+        run: |
+          npm run test
+
+      - name: Build package 📦
+        env:
+          # BASE_URL is used in the server to support parameterizable base root path
+          # See scripts/build_frontend.sh
+          BASE_URL: "@@baseUrl@@"
+          DIST_FOLDER: ./dist
+        run: |
+          npm run build
+
+      - name: Upload frontend statics as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: argilla-frontend
+          path: argilla-frontend/dist
+
+  build_dev_docker_image:
+    name: Build development argilla-fronted docker image
+    needs: build
+    uses: ./.github/workflows/argilla-frontend.build-push-dev-frontend-docker.yml
+    if: |
+      !cancelled() &&
+      github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    with:
+      image-name: argilla/argilla-frontend-for-dev
+      dockerfile: argilla-frontend/dev.frontend.Dockerfile
+      platforms: linux/amd64
+      build-args: |
+        ARGILLA_SERVER_TAG=main
+    secrets: inherit
+
+  deploy:
+    name: Deploy pr environment
+    uses: ./.github/workflows/argilla-frontend.deploy-environment.yml
+    needs: build_dev_docker_image
+    if: |
+      !cancelled() &&
+      needs.build_dev_docker_image.result == 'success' &&
+      github.event_name == 'pull_request' && github.event.pull_request.draft == false
+    with:
+      image-name: argilla/argilla-frontend-for-dev
+      image-version: ${{ needs.build_dev_docker_image.outputs.version }}
+    secrets: inherit

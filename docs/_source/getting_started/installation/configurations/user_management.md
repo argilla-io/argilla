@@ -35,7 +35,7 @@ An admin user can only access the workspaces it has been assigned to and cannot 
 - **Annotation**: It can annotate datasets in the assigned workspaces via the Argilla UI.
 - **Feedback**: It can provide feedback with the Argilla UI.
 
-## Annotator
+### Annotator
 
 An annotator user is limited to accessing only the datasets assigned to it within the workspace. It has two specific permissions:
 
@@ -113,7 +113,7 @@ argilla users create
 So for example, to create a new user with `admin` role and member of `ws1` and `ws2` workspaces, you can run the following command:
 
 ```bash
-argilla users create --username new-user --first-name New --last-name User --role admin --workspace ws1 --workspace ws2
+argilla users create --username new-user --password new-password --first-name New --last-name User --role admin --workspace ws1 --workspace ws2
 ```
 
 :::
@@ -182,7 +182,7 @@ import argilla as rg
 
 rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
-user = rg.User.from_id("new-user")
+user = rg.User.from_id("00000000-0000-0000-0000-000000000000")
 ```
 
 ### Assign a `User` to a `Workspace`
@@ -369,6 +369,7 @@ Then open the provided `docker-compose.yaml` file and modify your Argilla instan
     environment:
       ARGILLA_HOME_PATH: /var/lib/argilla
       ARGILLA_ELASTICSEARCH: http://elasticsearch:9200
+      ARGILLA_AUTH_SECRET_KEY: ${ARGILLA_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
 +     ARGILLA_LOCAL_AUTH_USERS_DB_FILE: /var/lib/argilla-migrate/users.yaml
     networks:
       - argilla

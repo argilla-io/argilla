@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`FilterUncoveredByRules renders properly 1`] = `
-<base-checkbox-stub value="true" class="re-checkbox--dark">
-  Only records not covered by rules
-</base-checkbox-stub>
-`;

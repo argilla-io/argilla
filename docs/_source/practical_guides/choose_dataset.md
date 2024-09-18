@@ -20,7 +20,7 @@ At the moment, the older datasets are better when doing basic Text Classificatio
 
 **When should I use `FeedbackDataset` better?**
 
-The `FeedbackDataset` is better when you need to do more `complex tasks` that need to be represented in `one coherent UI`. This is extremely useful for `LLM` workflows where you need to do `multiple tasks` on the same record. The `FeedbackDataset` also supports `multiple annotators` per record, `customizable tasks` and `synchronization with a database`. However, it does not support `vector search`, `weak supervision` or `active learning` yet.
+The `FeedbackDataset` is better when you need to do more `complex tasks` that need to be represented in `one coherent UI`. This is extremely useful for `LLM` workflows where you need to do `multiple tasks` on the same record. The `FeedbackDataset` also supports `multiple annotators` per record, `customizable tasks` and `synchronization with a database`. However, it does not support `weak supervision` or `active learning` yet.
 
 **When will all the cool features of the older datasets be available in the `FeedbackDataset`?**
 
@@ -33,11 +33,11 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 | Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
 |-------------------------------	|-----------------	|-------------------|
 | Text classification           	| ✔️               	| ✔️                  |
-| Token classificaiton          	|                 	| ✔️                  |
+| Token classification          	| ✔️               	| ✔️                  |
 | Summarization                  	| ✔️               	| ✔️                   |
-| Translation                  	| ✔️               	| ✔️                   |
-| NLI                  	| ✔️               	| ✔️                   |
-| Sentence Similarity               	| ✔️               	|                              	|
+| Translation                  	    | ✔️               	| ✔️                   |
+| NLI                  	            | ✔️               	| ✔️                   |
+| Sentence Similarity               | ✔️               	|                              	|
 | Question Answering               	| ✔️               	|                              	|
 | RLHF (SFT)               	| ✔️               	|                              	|
 | RLHF (RM)               	| ✔️               	|                              	|
@@ -45,14 +45,15 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 | RLHF (DPO)               	| ✔️               	|                              	|
 | RAG               	| ✔️               	|                              	|
 | Image support               	| ✔️               	|                              	|
+| Overlapping spans           	|✔️                	|                  |
 | And many more               	| ✔️               	|                              	|
 
 ### Annotation workflows
 
 | Task / Dataset                    | FeedbackDataset 	| Older datasets 	|
 |-------------------------------	|-----------------	|-------------------|
-| bulk annotation           	|                	| ✔️                  |
-| vector search          	|                 	| ✔️                  |
+| bulk annotation           	|✔️                	| ✔️                  |
+| vector search          	|✔️                 	| ✔️                  |
 | active learning                     	|                	| ✔️                   |
 | weak supervision               	|                	| ✔️                             	|
 
@@ -72,8 +73,6 @@ We are working on it! We will be adding new features to the `FeedbackDataset` ov
 | Text query 	            | ✔️               	| ✔️                   |
 | Metadata filters       	| ✔️               	| ✔️                   |
 | Sorting 	                | ✔️             	| ✔️                   |
-| Prediction filters 	            |                	| ✔️                   |
-| Annotation filters 	            |                	| ✔️                   |
-| Similarity search 	            |                	| ✔️                   |
-
-
+| Prediction filters 	            |✔️                	| ✔️                   |
+| Annotation filters 	            |✔️               	| ✔️                   |
+| Similarity search 	            |✔️                	| ✔️                   |

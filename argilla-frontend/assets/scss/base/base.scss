@@ -1,0 +1,255 @@
+/*!
+ * coding=utf-8
+ * Copyright 2021-present, the Recognai S.L. team.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+html {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  font-size: 100%;
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
+}
+
+body {
+  margin: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-family: $primary-font-family;
+  font-size: $base-font-size;
+  line-height: $base-line-height;
+  background: var(--bg-solid-grey-1);
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  color: var(--fg-primary);
+  @include media("<desktop") {
+    min-height: 100svh;
+    max-height: 100svh;
+  }
+}
+
+a,
+button {
+  color: var(--fg-secondary);
+}
+
+audio,
+img,
+svg,
+object,
+embed,
+canvas,
+video,
+iframe {
+  max-width: 100%;
+  font-style: italic;
+  vertical-align: middle;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  margin: 0;
+  vertical-align: baseline;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+a {
+  background: transparent;
+  &:focus {
+    outline: thin dotted;
+  }
+  &:hover,
+  &:active {
+    outline: 0;
+  }
+}
+
+[tabindex="-1"]:focus {
+  outline: none !important;
+}
+
+// Icons svg
+.svg-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+}
+
+.svg-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+// transitions
+// FADE
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease-in-out;
+}
+
+.fade-enter,
+.fade-leave-to,
+.fade-leave-active {
+  opacity: 0;
+}
+
+// FADE LIST
+.list-enter-active,
+.list-enter-active p,
+.list-leave-active p {
+  transition: all 1s;
+}
+
+.list-enter p,
+.list-leave-to p
+/* .list-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+
+// TRANSITIONS
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.5s;
+}
+
+.page-enter,
+.page-leave-to {
+  opacity: 0;
+}
+
+.layout-enter-active,
+.layout-leave-active {
+  transition: opacity 0.3s;
+}
+
+.layout-enter,
+.layout-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// sr only
+.sr-only {
+  @extend %visuallyhidden;
+}
+
+.hidden-input {
+  @extend %visuallyhidden;
+}
+
+.highlight-text {
+  display: inline;
+  color: var(--fg-highlight);
+}
+
+// TYPE //
+.--heading1 {
+  @include font-size(40px);
+  @include line-height(50px);
+}
+.--heading2 {
+  @include font-size(32px);
+  @include line-height(40px);
+}
+.--heading3 {
+  @include font-size(24px);
+  @include line-height(36px);
+}
+.--heading4 {
+  @include font-size(20px);
+  @include line-height(30px);
+}
+.--heading5 {
+  @include font-size(18px);
+  @include line-height(26px);
+}
+.--body1 {
+  @include font-size(16px);
+  @include line-height(24px);
+}
+.--body2 {
+  @include font-size(14px);
+  @include line-height(18px);
+}
+.--body3 {
+  @include font-size(13px);
+  @include line-height(18px);
+}
+.--body4 {
+  @include font-size(12px);
+  @include line-height(16px);
+}
+
+.--semibold {
+  font-weight: 600;
+}
+.--medium {
+  font-weight: 500;
+}
+.--light {
+  font-weight: 300;
+}
+
+.code pre code.python.hljs.language-python {
+  white-space: break-spaces;
+}
+
+.--capitalized {
+  text-transform: capitalize;
+}
+
+.--rtl {
+  direction: rtl;
+}
+.--ltr {
+  direction: ltr;
+}

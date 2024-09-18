@@ -211,3 +211,33 @@ dataset.push_to_argilla(name=f"{dataset.name}_copy")
 :::
 
 ::::
+
+Additionally from Argilla version `1.21.0` a CLI task is available to reindex all feedback datasets into search engine:
+
+::::{tab-set}
+
+:::{tab-item} Argilla 1.21.0 or higher
+```sh
+argilla server search-engine reindex
+```
+:::
+
+::::
+
+Or alternatively reindex only a specific feedback dataset providing an id:
+
+::::{tab-set}
+
+:::{tab-item} Argilla 1.21.0 or higher
+```sh
+argilla server search-engine reindex --feedback-dataset-id 08476931-ac30-4eec-9a35-bb59b48aea91
+```
+:::
+
+::::
+
+You can set the `REINDEX_DATASETS` environment variable to `true` to reindex the datasets.
+
+:::
+
+::::

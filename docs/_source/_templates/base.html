@@ -39,13 +39,6 @@
   <link rel="shortcut icon" href="{{ favicon_url }}" />
   {%- endif -%}
 
-  <!-- Calendly badge widget begin -->
-  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
-  <script
-    type="text/javascript">window.onload = function () { Calendly.initBadgeWidget({ url: 'https://calendly.com/argilla-office-hours/30min?primary_color=ff675f', text: 'Free Office Hours', color: '#ff675f', textColor: '#ffffff', branding: true }); }</script>
-  <!-- Calendly badge widget end -->
-
   {#- Generator banner -#}
   <meta name="generator" content="sphinx-{{ sphinx_version }}, furo {{ furo_version }}" />
 
@@ -110,6 +103,18 @@
     document.body.dataset.theme = localStorage.getItem("theme") || "auto";
   </script>
   {% endblock %}
+  <!-- Luna badge widget begin -->
+  <a
+    href="https://lu.ma/event/evt-IQtRiSuXZCIW6FB"
+    class="floating-button"
+    data-luma-action="checkout"
+    data-luma-event-id="evt-IQtRiSuXZCIW6FB"
+  >
+  Signup Here For<br>Our Community Meetup
+  </a>
+
+  <script id="luma-checkout" src="https://embed.lu.ma/checkout-button.js"></script>
+  <!-- Luma badge widget end -->
 </body>
 
 </html>

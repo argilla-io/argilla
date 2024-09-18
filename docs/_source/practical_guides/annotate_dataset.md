@@ -9,7 +9,7 @@
 
 After pushing a `FeedbackDataset` to Argilla, as explained in [Create a Dataset](create_dataset.md), you can start annotating it through the Argilla UI.
 
-As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and to the right is the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar to filter the records based on specific words or phrases.
+As you open the dataset in the UI, you will see by default the records with `Pending` responses, i.e. records that still don't have a response (annotation), in a single-record view. On the left, you can find the record to annotate and to the right is the form with the questions to answer. You can navigate through the records using the `Prev` and `Next` buttons in the bottom bar. You may use the search bar and filters --as explained in the [🔎 Filter and query datasets page](/practical_guides/filter_dataset.md)-- to make the process faster and more efficient.
 
 ```{hint}
 It is important that the dataset has annotations for a wide variety of records with diverse content. Try not to restrict your annotations to records retrieved in a single search or records with very similar content.
@@ -55,6 +55,13 @@ Select a single value from a list of values.
 ![Rating question](/_static/images/llms/questions/rating_question.png)
 :::
 
+:::{tab-item} Span
+
+Select pieces of text in the field linked to the span question and apply a label.
+
+![Span question](/_static/images/llms/questions/span_question.png)
+:::
+
 :::{tab-item} Text
 
 Provide a text response inside the text area.
@@ -68,16 +75,39 @@ Some questions may include a suggested response as well. Those questions will be
 
 Additionally, you may find questions that are marked as required. Those questions will be marked with a red asterisk (<span style="color:red; font-weight:bold;">*</span>) and you will not be able to submit the response until you provide a response for those questions.
 
-Once all required questions have responses, the `Submit` button will be enabled and you will be able to submit your response for the questions of the given record. If you decide not to provide responses for a record, you can either move to the next record or you discard it instead using the `Discard` button.
+Once all required questions have responses, the `Submit` button will be enabled and you will be able to submit your response for the questions of the given record. In case you prefer to save a partial or complete response for review before submission, you can save it by clicking the `Save as draft` button. If you decide not to provide responses for a record, you can either move to the next record or discard it instead using the `Discard` button.
 
-If you need to review your submitted or discarded responses, you can select the queue you need. From there, you can modify, submit or discard responses. You can also use the `Clear` button to remove the response and send the record back to the `Pending` queue.
+If you need to review your drafts, submitted or discarded responses, you can select the queue you need. From there, you can modify, save drafts, submit or discard responses.
 
-You can track your progress and the number of `Pending`, `Submitted` and `Discarded` responses by clicking the `Progress` icon in the sidebar.
+You can track your progress and the number of `Pending`, `Draft`, `Submitted` and `Discarded` responses by clicking the `Progress` icon in the sidebar.
 
 ### Shortcuts
 
 ```{include} /_common/shortcuts.md
 ```
+
+### Focus vs Bulk view
+
+In Argilla's Feedback Task datasets, you can annotate and process records in two ways:
+
+- **Focus view**: you can only see, respond and perfom actions on one record at a time. This is better for records that need to be examined closely and individually before responding.
+- **Bulk view**: you can see multiple records in a list so you can respond and perform actions on more than one record at a time. This is useful for actions that can be taken on many records that have similar characteristics e.g., apply the same label to the results of a similarity search, discard all records in a specific language or save/submit records with a suggestion score over a safe threshold.
+
+```{hint}
+Use the **Find Similar** feature, other filters (Suggestions, Metadata, etc.) and sorting to get a list of records where it's safe to do bulk actions and labelling. Learn more about how to use filters [here](/practical_guides/filter_dataset.md).
+```
+
+```{note}
+**Span questions** cannot be answered from the _Bulk view_. You will need to switch to _Focus view_ to answer them.
+
+If you have a Span question in your dataset, you can always answer other questions in bulk and save your responses as a draft. Later, you will be able to answer to the Span question in the _Focus view_ of the _Draft_ queue.
+```
+
+In the queue of **Pending** records, you can change from _Focus_ to _Bulk_ view. Once in the _Bulk view_, you can expand or collapse records --i.e. see the full length of all records in the page or set a fixed height-- and select the number of records you want to see per page.
+
+To select or unselect all records in the page, click on the checkbox above the record list. To select or unselect specific records, click on the checkbox inside the individual record card. When you use filters inside the bulk view and the results are higher than the records visible in the page but lower than 1000, you will also have the option to select all of the results after you click on the checkbox. You can cancel this selection clicking on the _Cancel_ button.
+
+Once records are selected, choose the responses that apply to all selected records (if any) and do the desired action: _Discard_, _Save as draft_ or even _Submit_. Note that you can only submit the records if all required questions have been answered.
 
 ## Other datasets
 
@@ -96,13 +126,13 @@ If the dataset is set up as a **single label** text classification, you can anno
 
 ![Single label text classification record](/_static/reference/webapp/features-single_textclass_record.png)
 
-To annotate a record in a **multi-label** text classification task, click on one or multiple labels. Once a label is selected, its status will show as *Pending*. Click *Reset* if you want to discard your changes and recover the previous state of the record or *Validate* to save your annotation into the dataset. The status will then change to *Validated* in the upper left corner of the record card.
+To annotate a record in a **multi-label** text classification task, click on one or multiple labels. Once a label is selected, its status will show as _Pending_. Click _Reset_ if you want to discard your changes and recover the previous state of the record or _Validate_ to save your annotation into the dataset. The status will then change to _Validated_ in the upper left corner of the record card.
 
-If the **multi-label** record contains predictions and you would like to simply validate the predicted labels, click on *Validate* and all labels with a percentage above 50% will be automatically selected. You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
+If the **multi-label** record contains predictions and you would like to simply validate the predicted labels, click on _Validate_ and all labels with a percentage above 50% will be automatically selected. You can also remove all annotations using the _Clear_ button or discard a record from the dataset by clicking _Discard_.
 
 ![Multi-label text classification record](/_static/reference/webapp/features-multi_textclass_record.png)
 
-You can also remove all annotations using the *Clear* button or discard a record from the dataset by clicking *Discard*.
+You can also remove all annotations using the _Clear_ button or discard a record from the dataset by clicking _Discard_.
 
 ```{note}
 When the dataset contains a large list of labels (10 +), we encourage viewing the record cards one by one (select 1 record per page from the footer) and using the arrow keys to move quickly between records.
@@ -116,14 +146,14 @@ For token classification datasets, you can highlight words (tokens) in the text 
 
 To remove specific labels, hover over the highlights and press the _X_ button or double-click directly on the colored area. You can also click the _Clear_ button to remove all annotations in the record.
 
-After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click *Validate* to save the changes. The status will change to *Validated* in the upper left corner of the record card. Alternatively, you can use the *Reset* button to discard your changes and recover the previous state of the record. If you want to discard the record from the dataset, click *Discard*.
+After modifying a record, either by adding or removing annotations, its status will change to _Pending_. When you have finished your annotation of the whole record, click _Validate_ to save the changes. The status will change to _Validated_ in the upper left corner of the record card. Alternatively, you can use the _Reset_ button to discard your changes and recover the previous state of the record. If you want to discard the record from the dataset, click _Discard_.
 
 #### Text2Text
 
 ![Text2Text record](/_static/reference/webapp/features-text2text_record.png)
-For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can validate the prediction by clicking on the *Validate* button or edit the text making the changes directly in the text box. If you make any changes, the status will change to *Pending* and you will need to press shift+Enter or click the *Validate* button to save the changes. After validating, predictions can still be accessed in the prediction panel on the right side of the record card.
+For Text2Text datasets, there is a text box available for drafting or editing annotations. If a record has one or more predictions, the prediction with the highest score will be pre-filled. You can validate the prediction by clicking on the _Validate_ button or edit the text making the changes directly in the text box. If you make any changes, the status will change to _Pending_ and you will need to press shift+Enter or click the _Validate_ button to save the changes. After validating, predictions can still be accessed in the prediction panel on the right side of the record card.
 
-Alternatively, you can discard your changes and revert to the previous state of the record using the *Reset* button or empty the text field by clicking the *Clear* button. If you want to discard the record from the dataset, click *Discard*.
+Alternatively, you can discard your changes and revert to the previous state of the record using the _Reset_ button or empty the text field by clicking the _Clear_ button. If you want to discard the record from the dataset, click _Discard_.
 
 ### Search and filter records
 
@@ -147,7 +177,6 @@ This filter allows you to filter records with respect of their predictions:
 - **Predicted by**: filter records by the [prediction agent](/reference/python/python_client.rst#module-argilla.client.models).
 
 ##### Annotations filter
-
 
 This filter allows you to filter records with respect to their annotations:
 
@@ -199,7 +228,7 @@ For all tasks, you can use **bulk actions**. You can either select the records o
 
 For the text classification task, you can additionally **bulk annotate** the selected records by simply clicking on the pencil icon next to the global selection box and selecting the label(s) from the list.
 
-In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click *Select* to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
+In multi-label text classification, you can remove labels from selected records by clicking the cross next to the label. You can also assign a partially used label to the whole selection by clicking on the tag button. Once you have made your selection, click _Select_ to apply the annotations to all selected records. To finalize the validation, click on the "validate" icon.
 
 ![Multi-label bulk annotation](/_static/reference/webapp/features-multiclass-bulk-labels.png)
 

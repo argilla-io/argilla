@@ -1,4 +1,4 @@
-We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification`, `Text2Text` and LLM-related `Feedback`. To know more about creation, take a look [here](/practical_guides/create_dataset.md).
+We support different tasks within the Argilla eco-system focused on NLP: `Text Classification`, `Token Classification`, `Text2Text` and LLM-related `Feedback`. To know more about creation, take a look [here](/practical_guides/create_update_dataset/create_dataset.md).
 
 
 ::::{tab-set}

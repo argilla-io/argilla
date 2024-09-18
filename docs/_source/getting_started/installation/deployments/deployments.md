@@ -16,7 +16,7 @@
 - Argilla Server and UI
 ```
 ```{grid-item-card} Docker Quickstart
-:link: docker.md
+:link: docker-quickstart.md
 
 - A combined Docker image
 - Environment Variables
@@ -35,7 +35,7 @@
 - Azure
 - Google Cloud Platform (GCP)
 ```
-```{grid-item-card} HugginFace Spaces
+```{grid-item-card} Hugging Face Spaces
 :link: huggingface-spaces.md
 
 - Your first Argilla Hugging Face Space

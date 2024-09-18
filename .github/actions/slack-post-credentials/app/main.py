@@ -74,7 +74,9 @@ def get_slack_channel_id(client: WebClient) -> Union[str, None]:
         for channel in result["channels"]:
             if channel["name"] == SLACK_CHANNEL_NAME:
                 channel_id = channel["id"]
-                logging.info(f"Found channel id for '{SLACK_CHANNEL_NAME}' channel: '{channel_id}'")
+                logging.info(
+                    f"Found channel id for '{SLACK_CHANNEL_NAME}' channel: '{channel_id}'"
+                )
                 return channel_id
 
 
@@ -87,7 +89,9 @@ def get_pr_url(pr_number: int) -> str:
     return f"https://github.com/argilla-io/argilla/pull/{pr_number}"
 
 
-def get_thread_ts_pr_message(client: WebClient, channel_id: str, pr_number: int) -> Union[str, None]:
+def get_thread_ts_pr_message(
+    client: WebClient, channel_id: str, pr_number: int
+) -> Union[str, None]:
     response = client.conversations_history(channel=channel_id, limit=1000)
     response.validate()
 
@@ -119,7 +123,9 @@ def bot_already_replied(client: WebClient, channel_id: str, thread_ts: str) -> b
     return False
 
 
-def reply_thread_with_credentials(client: WebClient, channel_id: str, thread_ts: str) -> None:
+def reply_thread_with_credentials(
+    client: WebClient, channel_id: str, thread_ts: str
+) -> None:
     client.chat_postMessage(
         channel=channel_id,
         text=f"Credentials for PR deployed environment (use as password and API key):\n- URL: {URL}\n- owner: '{OWNER}'\n- admin: '{ADMIN}'\n- annotator: '{ANNOTATOR}'",
@@ -153,7 +159,9 @@ if __name__ == "__main__":
     pr_number = get_pull_request_number()
     if pr_number is None:
         logging.error(f"Could not parse `GITHUB_REF` ({GITHUB_REF}) to get PR number")
-        raise ValueError(f"Could not parse `GITHUB_REF` ({GITHUB_REF}) to get PR number")
+        raise ValueError(
+            f"Could not parse `GITHUB_REF` ({GITHUB_REF}) to get PR number"
+        )
 
     client = get_slack_client()
 

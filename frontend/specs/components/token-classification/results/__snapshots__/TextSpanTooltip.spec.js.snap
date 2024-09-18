@@ -1,6 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`TextSpanTooltip renders properly 1`] = `
-<span class="highlight__label"><span class="highlight__tooltip__container"><span class="highlight__tooltip"><span class="highlight__tooltip__origin">annot.</span> <span>Arreglo
-        <!----></span></span></span></span>
-`;

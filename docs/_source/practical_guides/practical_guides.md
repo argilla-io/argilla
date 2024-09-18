@@ -9,26 +9,20 @@ This guide will help you with all the practical aspects of setting up an annotat
 
 Find the dataset type needed for your project.
 ```
-```{grid-item-card} 🧑‍💻 Create a dataset
-:link: create_dataset.html
+```{grid-item-card} 🧑‍💻 Create and update a dataset
+:link: create_update_dataset/create_dataset.html
 
-Methods to configure a dataset and push it to Argilla.
+Methods to create and configure a dataset.
 ```
 ```{grid-item-card} 🗂️ Assign records to your team
 :link: assign_records.html
 
 Workflows to organize your annotation team.
 ```
-```{grid-item-card} 💫 Update a dataset
-:link: update_dataset.html
-
-Make changes to an existing dataset.
-```
 ```{grid-item-card} 🔎 Filter and query datasets
 :link: filter_dataset.html
 
 Obtain a filtered version of your dataset.
-
 ```
 ```{grid-item-card} ✍️ Annotate a dataset
 :link: annotate_dataset.html
@@ -56,5 +50,7 @@ Export your dataset and save it in the Hugging Face Hub or locally.
 Fine-tune an LLM or other models with the feedback collected from Argilla.
 ```
 ````
+
+![workflow](/_static/tutorials/end2end/base/workflow.svg)
 
 ![Feedback Dataset snapshot](/_static/images/llms/snapshot-feedback-demo.png)

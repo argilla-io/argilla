@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: "nginx_proxy"
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  argilla:
+    image: argilla/argilla-hf-spaces:latest
+    environment:
+      HF_HUB_DISABLE_TELEMETRY: 1
+      ARGILLA_BASE_URL: /argilla
+
+      USERNAME: argilla
+      PASSWORD: 12345678
+      API_KEY: argilla.apikey
+    ports:
+      - "6900:6900"
+

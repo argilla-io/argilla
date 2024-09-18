@@ -24,6 +24,11 @@ Find similar and dissimilar records in your dataset by using semantic vectors.
 
 Schedule jobs to run at a specific time or periodically.
 ```
+```{grid-item-card} 📇 Text Descriptives as Metadata
+:link: add_text_descriptives_as_metadata.html
+
+Add text descriptives to your metadata to simplify the data annotation and filtering process.
+```
 ````
 
 ```{toctree}
@@ -33,4 +38,5 @@ active_learning
 weak_supervision
 semantic_search
 job_scheduling
+add_text_descriptives_as_metadata
 ```

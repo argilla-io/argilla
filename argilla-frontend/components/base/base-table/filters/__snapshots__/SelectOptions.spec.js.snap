@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SelectOptions renders properly 1`] = `
+<ul>
+  <li>
+    <base-checkbox-stub id="NEGATIVE" value="" class="checkbox--dark">
+      NEGATIVE
+      <!---->
+    </base-checkbox-stub>
+  </li>
+  <li>
+    <base-checkbox-stub id="POSITIVE" value="" class="checkbox--dark">
+      POSITIVE
+      <!---->
+    </base-checkbox-stub>
+  </li>
+  <li>
+    <base-checkbox-stub id="OTHER" value="" class="checkbox--dark">
+      OTHER
+      <!---->
+    </base-checkbox-stub>
+  </li>
+  <!---->
+</ul>
+`;

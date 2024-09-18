@@ -1,0 +1,104 @@
+name: Publish documentation
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+
+  push:
+    tags:
+      - "v[2-9]+.[0-9]+.[0-9]+"
+    branches:
+      - "main"
+      - "develop"
+      - "docs/**"
+
+defaults:
+  run:
+    working-directory: argilla
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+
+    steps:
+      - name: checkout docs-site
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.10"
+          cache: true
+          cache-dependency-path: |
+            argilla/pdm.lock
+
+      - name: Install dependencies
+        run: |
+          pdm install
+
+      - name: Set git credentials
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Print GitHub ref info
+        run: echo "${{ github.ref }}"
+          echo "${{ github.head_ref }}"
+
+      - name: Deploy Argilla docs (branch /main)
+        run: |
+          pdm run mike deploy latest --push
+          pdm run mike set-default --push latest
+        if: github.ref == 'refs/heads/main'
+
+      - name: Deploy Argilla docs (branch /develop)
+        run: pdm run mike deploy dev --push
+        if: github.ref == 'refs/heads/develop'
+
+      - name: Deploy Argilla docs (release $version)
+        run: |
+          version=$(echo $TAG_VERSION | awk -F \. {'print $1"."$2'})
+          echo "Deploying version ${version}"
+          pdm run mike deploy $version --push
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          TAG_VERSION: ${{ github.ref_name }}
+
+      - name: Delete Argilla docs (versions 'docs_*')
+        id: delete_deployment
+        run: |
+          versions=$(pdm run mike list)
+          formatted_versions=$(echo "$versions" | tr ',' '\n' | tr -d '[]')
+          for version in $versions; do
+            if [[ $version == docs_* ]]; then
+              echo "Deleting version: $version"
+              pdm run mike delete "$version" --push
+            fi
+          done
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Extract branch name
+        id: extract_branch_name
+        shell: bash
+        run: echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" | sed 's/\//_/g'  >> $GITHUB_OUTPUT
+
+      - name: Deploy Argilla docs (branch /docs/*)
+        run: pdm run mike deploy ${{ steps.extract_branch_name.outputs.branch_name }} --prop-set hidden=true --push
+        if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
+
+      - name: Add deployment message in PR
+        uses: mshick/add-pr-comment@v2
+        if: startsWith(github.ref, 'refs/heads/docs') || startsWith(github.head_ref, 'docs/')
+        with:
+          message: |
+            Docs for this PR have been deployed hidden from versioning: [https://docs.argilla.io/${{ steps.extract_branch_name.outputs.branch_name }}](https://docs.argilla.io/${{ steps.extract_branch_name.outputs.branch_name }})

@@ -1,0 +1,183 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "argilla-v1"
+description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
+readme = "README.md"
+requires-python = ">=3.8,<3.13"
+license = { text = "Apache-2.0" }
+keywords = [
+    "data-science",
+    "natural-language-processing",
+    "text-labeling",
+    "data-annotation",
+    "artificial-intelligence",
+    "knowledged-graph",
+    "developers-tools",
+    "human-in-the-loop",
+    "mlops",
+]
+authors = [{ name = "argilla", email = "contact@argilla.io" }]
+maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
+dependencies = [
+    # Client
+    "httpx >= 0.15,<= 0.26",
+    "deprecated ~= 1.2.0",
+    "packaging >= 20.0",
+    # pandas -> For data loading
+    "pandas >=1.0.0",
+    # Aligned pydantic version with server fastAPI
+    "pydantic >= 1.10.7",
+    # monitoring
+    "wrapt >= 1.14,< 1.15",
+    # weaksupervision
+    "numpy < 1.27.0",
+    # for progressbars
+    "tqdm >= 4.27.0",
+    # monitor background consumers
+    "backoff",
+    "monotonic",
+    # for logging, tracebacks, printing, progressbars
+    "rich != 13.1.0",
+    # for CLI
+    "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
+]
+dynamic = ["version"]
+# This line is just to force the build
+[project.optional-dependencies]
+server = [
+    # "argilla-server"
+    # Comment previous line and uncomment the next line when we have a release
+    "argilla-server ~= 1.29.0"
+]
+server-postgresql = [
+    # "argilla-server[postgresql]"
+    # Comment previos line and uncomment the next line when we have a release
+    "argilla-server[postgresql] ~= 1.29.0"
+]
+listeners = ["schedule ~= 1.1.0"]
+integrations = [
+    "PyYAML >= 5.4.1,< 6.1.0", # Required by `argilla.client.feedback.config` just used in `HuggingFaceDatasetMixin`
+    # TODO: `push_to_hub` fails up to 2.3.2, check patches when they come out eventually
+    "datasets > 1.17.0,!= 2.3.2",
+    # TODO: some backward comp. problems introduced in 0.5.0
+    "huggingface_hub >= 0.5.0,< 0.24",
+    # Version 0.12 fixes a known installation issue related to `sentencepiece` and `tokenizers`, more at https://github.com/flairNLP/flair/issues/3129
+    # Version 0.12.2 relaxes the `huggingface_hub` dependency
+    "flair >= 0.12.2",
+    "faiss-cpu",
+    "flyingsquid",
+    "pgmpy",
+    "plotly >= 4.1.0",
+    "snorkel >= 0.9.7",
+    "spacy>=3.5.0,<3.7.0",
+    "spacy-transformers >= 1.2.5",
+    "spacy-huggingface-hub >= 0.0.10",
+    "transformers[torch] >= 4.30.0",
+    "evaluate",
+    "seqeval",
+    "sentence-transformers",
+    "setfit>=1.0.0",
+    "span_marker",
+    "sentence-transformers>=2.0.0,<3.0.0",
+    "textdescriptives>=2.7.0,<3.0.0",
+    "openai>=0.27.10,<1.0.0",
+    "peft",
+    "trl>=0.5.0",
+    # To find the notebook name from within a notebook
+    "ipynbname",
+]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-asyncio",
+    "pytest-env",
+    "factory_boy ~= 3.2.1",
+]
+
+[project.urls]
+homepage = "https://www.argilla.io"
+documentation = "https://docs.v1.argilla.io"
+repository = "https://github.com/argilla-io/argilla"
+
+[project.scripts]
+argilla = "argilla_v1.cli.app:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "argilla_v1.__version__" }
+
+[tool.setuptools.package-data]
+"argilla_v1.client.feedback.integrations.huggingface.card" = [
+    "argilla_template.md",
+]
+"argilla_v1.client.feedback.integrations.huggingface.model_card" = [
+    "argilla_model_template.md",
+]
+
+[tool.pytest.ini_options]
+log_format = "%(asctime)s %(name)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli = "True"
+testpaths = ["tests"]
+env = ["ARGILLA_ENABLE_TELEMETRY=0"]
+
+
+[tool.coverage.run]
+concurrency = ["greenlet", "thread", "multiprocessing"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "if _TYPE_CHECKING:",
+    "if typing.TYPE_CHECKING:",
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff]
+# Ignore line length violations
+ignore = ["E501"]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+line-length = 120
+
+[tool.ruff.per-file-ignores]
+# Ignore imported but unused;
+"__init__.py" = ["F401"]
+
+[tool.black]
+line-length = 120

@@ -1,0 +1,192 @@
+// tooltip
+$tooltip-bg: var(--bg-tooltip);
+$tooltip-mini-bg: var(--bg-tooltip);
+$tooltip-color: var(--color-white);
+$tooltip-title-font-size: 11px;
+$tooltip-font-size: 13px;
+$tooltip-triangle-size: 7px;
+$tooltip-border-radius: $border-radius-s;
+
+%tooltip {
+  position: absolute;
+  margin: auto;
+  max-width: 266px;
+  overflow-wrap: break-word;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
+  padding: 6px $base-space;
+  transform: none;
+  background: $tooltip-bg;
+  color: $tooltip-color;
+  border-radius: $tooltip-border-radius;
+  @include font-size($tooltip-font-size);
+  font-weight: 500;
+}
+
+%has-tooltip--left {
+  @extend %has-tooltip;
+  &:after {
+    top: 50%;
+    transform: translateY(-50%);
+    right: calc(100% + 10px);
+  }
+  &:before {
+    @extend %triangle-right;
+  }
+}
+%has-tooltip--bottom {
+  @extend %has-tooltip;
+  &:after {
+    top: calc(100% + $tooltip-triangle-size);
+    right: 50%;
+    transform: translateX(50%);
+  }
+  &:before {
+    right: calc(50% - $tooltip-triangle-size);
+    top: 100%;
+    @include triangle(
+      top,
+      $tooltip-triangle-size,
+      $tooltip-triangle-size,
+      $tooltip-bg
+    );
+  }
+}
+%has-tooltip--top {
+  @extend %has-tooltip;
+  &:after {
+    bottom: calc(100% + 10px);
+    right: 50%;
+    transform: translateX(50%);
+  }
+  &:before {
+    right: calc(50% - $tooltip-triangle-size);
+    top: -10px;
+    @include triangle(
+      bottom,
+      $tooltip-triangle-size,
+      $tooltip-triangle-size,
+      $tooltip-bg
+    );
+  }
+}
+%has-tooltip--right {
+  @extend %has-tooltip;
+  &:after {
+    top: 50%;
+    transform: translateY(-50%);
+    left: calc(100% + 10px);
+  }
+  &:before {
+    @extend %triangle-left;
+  }
+}
+%tooltip-large-text {
+  &:after {
+    min-width: 216px;
+    white-space: break-spaces;
+    text-align: left;
+    line-height: 1.4em;
+  }
+}
+%has-tooltip {
+  &:after {
+    content: attr(data-title);
+    @extend %tooltip;
+    opacity: 0;
+    z-index: -1;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  &:before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  &:hover {
+    &:after {
+      width: auto;
+      height: auto;
+      opacity: 1;
+      transition: opacity 0.3s ease 0.2s;
+      z-index: 2;
+    }
+    &:before {
+      opacity: 1;
+      transition: opacity 0.3s ease 0.2s;
+    }
+  }
+}
+
+%triangle-left {
+  left: calc(100% + $tooltip-triangle-size/2);
+  top: 50%;
+  transform: translateY(-50%);
+  @include triangle(
+    left,
+    $tooltip-triangle-size,
+    $tooltip-triangle-size,
+    $tooltip-bg
+  );
+}
+
+%triangle-right {
+  right: calc(100% + $tooltip-triangle-size/2);
+  top: 50%;
+  transform: translateY(-50%);
+  @include triangle(
+    right,
+    $tooltip-triangle-size,
+    $tooltip-triangle-size,
+    $tooltip-bg
+  );
+}
+
+@mixin tooltip-mini($position, $offset: 4px) {
+  @if $position == "left" {
+    @extend %has-tooltip--left;
+    &:after {
+      right: calc(100% + $offset);
+    }
+  } @else if $position == "bottom" {
+    @extend %has-tooltip--bottom;
+    &:after {
+      top: calc(100% + $offset);
+    }
+  } @else if $position == "top" {
+    @extend %has-tooltip--top;
+    &:after {
+      bottom: calc(100% + $offset);
+    }
+  } @else if $position == "right" {
+    @extend %has-tooltip--right;
+    &:after {
+      left: calc(100% + $offset);
+    }
+  } @else if $position == "top-right" {
+    @extend %has-tooltip--right;
+    &:after {
+      left: -$offset;
+      bottom: calc(100% + $offset);
+      top: auto;
+      transform: none;
+    }
+  }
+  &:before {
+    content: none !important;
+  }
+  &:after {
+    padding: calc($base-space / 2);
+    background: $tooltip-mini-bg;
+    @include font-size(12px);
+    line-height: 1.2;
+    white-space: pre;
+    text-transform: none;
+  }
+}

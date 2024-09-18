@@ -1,0 +1,199 @@
+# Project information
+site_name: Argilla Docs
+site_url: https://docs.argilla.io/
+site_author: Argilla, Inc.
+site_description: Data-centric tool for AI builders
+copyright: Copyright &copy; 2017 - 2024 Argilla
+
+# Repository
+repo_name: argilla-io/argilla
+repo_url: https://github.com/argilla-io/argilla/
+edit_uri: edit/main/argilla/docs/
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/argilla-io
+    - icon: fontawesome/brands/x-twitter
+      link: https://twitter.com/argilla_io
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/channel/UCAIz8TmvQQrLqbD7sd-5S2A
+    - icon: fontawesome/brands/discord
+      link: http://hf.co/join/discord
+  analytics:
+    provider: plausible
+    domain: docs.argilla.io
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/thumb-up-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/thumb-down-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback! Help us improve this page by
+            <a href="https://github.com/argilla-io/argilla/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">opening a GitHub issue</a>.
+extra_css:
+  - stylesheets/extra.css
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.footer
+    - navigation.top
+    - navigation.tracking
+    - navigation.path
+    - toc.follow
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+    - search.share
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme)"
+      primary: white
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+watch:
+  - src/argilla
+
+# Extensions
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - footnotes
+  - tables
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  # activating permalink: true makes the anchor link works in the notebooks
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - open-in-new-tab
+  - gen-files:
+      scripts:
+        - docs/scripts/gen_changelog.py
+        - docs/scripts/gen_popular_issues.py
+        # - docs/scripts/gen_ref_pages.py
+      enabled: !ENV [CI, false] # enables the plugin only during continuous integration (CI), disabled on local build
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_inheritance_diagram: false
+            show_source: true # include source code
+            # Headings
+            heading_level: 3
+            show_root_heading: true # show the python path of the class
+            show_root_toc_entry: true # show the toc entry for the root class
+            show_root_full_path: false # display "diffrax.asdf" not just "asdf"
+            show_object_full_path: false # display "diffrax.asdf" not just "asdf"
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            # Members
+            inherited_members: true # allow looking up inherited methods
+            members_order: source # order methods according to their order of definition in the source code, not alphabetical order
+            show_labels : true
+            # Docstring
+            docstring_style: google  # more info: https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+            show_if_no_docstring: false
+            # Signature
+            separate_signature: false
+            show_signature_annotations: false
+  - social:
+      enabled: !ENV [CI, false] # enables the plugin only during continuous integration (CI), disabled on local build
+  - mknotebooks
+  - material-plausible
+
+nav:
+  - Argilla: index.md
+  - Getting started:
+      - Quickstart: getting_started/quickstart.md
+      - Deploy with Docker: getting_started/how-to-deploy-argilla-with-docker.md
+      - Hugging Face Spaces settings: getting_started/how-to-configure-argilla-on-huggingface.md
+      - FAQ: getting_started/faq.md
+  - How-to guides:
+      - how_to_guides/index.md
+      - Basic:
+        - Manage users and credentials: how_to_guides/user.md
+        - Manage workspaces: how_to_guides/workspace.md
+        - Create, update and delete datasets: how_to_guides/dataset.md
+        - Add, update, and delete records: how_to_guides/record.md
+        - Distribute the annotation task: how_to_guides/distribution.md
+        - Annotate datasets: how_to_guides/annotate.md
+        - Query and filter records: how_to_guides/query.md
+        - Import and export datasets: how_to_guides/import_export.md
+      - Advanced:
+        - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
+        - Migrate users, workspaces and datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
+  - Tutorials:
+      - tutorials/index.md
+      - Text classification: tutorials/text_classification.ipynb
+      - Token classification: tutorials/token_classification.ipynb
+      - Image classification: tutorials/image_classification.ipynb
+      - Image preference: tutorials/image_preference.ipynb
+  - API Reference:
+      - Python SDK: reference/argilla/
+      - FastAPI Server:
+        - Server configuration: reference/argilla-server/configuration.md
+      - Telemetry:
+        - Server Telemetry: reference/argilla-server/telemetry.md
+  - Community:
+      - community/index.md
+      - How to contribute?: community/contributor.md
+      - Developer documentation: community/developer.md
+      - Issue dashboard: community/popular_issues.md
+      - Changelog: community/changelog.md
+      - Integrations:
+        - LlamaIndex: community/integrations/llamaindex_rag_github.ipynb
+  - UI Demo ↗:
+      - https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==

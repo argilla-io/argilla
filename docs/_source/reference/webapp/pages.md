@@ -176,7 +176,7 @@ Support for editing this will only be added for the Feedback Task dataset.
 
 ### Labels
 
-Here you can [define your labeling schema](/practical_guides/create_dataset) for this dataset, see the current one and add new labels to it.
+Here you can [define your labeling schema](/practical_guides/create_update_dataset/create_dataset) for this dataset, see the current one and add new labels to it.
 
 ### Danger zone
 

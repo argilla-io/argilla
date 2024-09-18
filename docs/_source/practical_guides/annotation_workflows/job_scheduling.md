@@ -2,7 +2,7 @@
 
 ## Feedback Dataset
 
-```{warning}
+```{note}
 The `FeedbackDataset` does not offer support for job scheduling as of now. If you would like to use it, you will need to use one of the other datasets. To get more info about the dataset differences, you can have a look [here](/practical_guides/choose_dataset).
 ```
 
@@ -35,7 +35,7 @@ from argilla.listeners import listener
 
 @listener(
     dataset="my_dataset", # dataset to get record from
-    query="lucene query", # https://docs.argilla.io/en/latest/guides/query_datasets.html
+    query="lucene query", # https://docs.v1.argilla.io/en/latest/guides/query_datasets.html
     execution_interval_in_seconds=3, # interval to check execution of `update_records`
 )
 def update_records(records, ctx):

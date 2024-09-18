@@ -3,7 +3,7 @@ title: Question Answering
 description: When two TextFields and a TextQuestion are present in the datasets, we can define a TrainingTaskForQuestionAnswering to use our ArgillaTrainer integration for fine-tuning with "transformers".
 links:
   - linkText: Practical guide to Question Answering
-    linkLink: https://docs.argilla.io/en/latest/practical_guides/fine_tune.html#question-answering
+    linkLink: https://docs.v1.argilla.io/en/latest/practical_guides/fine_tune.html#question-answering
 ---
 
 ```python

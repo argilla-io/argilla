@@ -21,9 +21,3 @@ sphinx:
 python:
   install:
     - requirements: docs/_source/requirements.txt
-    -  method: pip
-       path: .
-       extra_requirements:
-       - server
-       - postgresql
-       - listeners

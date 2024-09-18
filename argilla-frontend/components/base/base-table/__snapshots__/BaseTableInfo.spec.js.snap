@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BaseTableInfo renders properly 1`] = `
+<transition-stub name="fade" appear="true" actions="" deletemodalcontent="[object Object]" filterfromroute="workspace">
+  <div class="table-info">
+    <div class="table-info__header">
+      <div class="table-info__item">
+        <div class="table-info__item__col text">
+          <lazy-table-filtrable-column-stub column="[object Object]" data="[object Object],[object Object]" filters="[object Object]"></lazy-table-filtrable-column-stub>
+        </div>
+      </div>
+    </div>
+    <div class="table-info__body">
+      <ul>
+        <li id="data1">
+          <nuxt-link-stub to="() => {}" class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span>
+            <!----></span></span></nuxt-link-stub>
+        </li>
+        <li id="data2">
+          <nuxt-link-stub to="() => {}" class="table-info__item"><span class="table-info__item__col text"><span class="text"><span>recognai</span>
+            <!----></span></span></nuxt-link-stub>
+        </li>
+      </ul>
+    </div>
+  </div>
+</transition-stub>
+`;

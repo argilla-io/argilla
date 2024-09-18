@@ -104,46 +104,179 @@ In our case http://52.213.178.33
 
 ## Azure
 
-The easiest way to deploy Argilla on Azure is using the Azure Container Instances (ACI) service. This service allows you to run containers in a serverless way, without the need to manage the underlying infrastructure. ACI integrates with Docker compose files, so you can easily deploy your application using the same file you use for local development.
+The easiest way to deploy Argilla on Azure is using the Azure Container Instances (ACI) service. This service allows you to run containers in a serverless way, without the need to manage the underlying infrastructure. This guide will take you through deploying Argilla using the Azure CLI tool, and is based on the [Azure documentation](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-quickstart) for the same service.
 
-### 1. Install Docker with compose
+<!-- breakout box -->
+> 🚒  At the time of writing, it is still possible to deploy Argilla using the `docker run` command and `docker context` integration with Azure, but [this method](https://learn.microsoft.com/en-us/azure/container-instances/quickstart-docker-cli) is soon to be deprecated in the [docker cli](https://docs.docker.com/cloud/).
 
-Install the latest Docker with the compose method described as described in the [official documentation](https://docs.docker.com/compose/install/). Note that this is not the independent `docker-compose` application.
+### 1. Authenticate to Azure
 
-### 2. Log in to Azure
-
-Using `docker` and `az` CLI, log in to Azure:
-
-```bash
-docker login azure
-```
-You can install the `az` CLI using the [official documentation](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
-
-### 3. Create an Azure context
-
-Create a separate context with Azure credentials and the subscription where you want to deploy the Argilla Server:
+First, you need to authenticate to Azure using the `az` CLI:
 
 ```bash
-docker context create aci azurecontext --subscription-id <subscription-id> --resource-group <resource-group> --location <location>
+az login
 ```
-You can also switch back to the default context with:
+
+### 2. Setup an Azure resource group
+
+Create a resource group where you want to deploy the Argilla Server:
 
 ```bash
-docker context use default
+az group create --name <resource-group> --location <location>
 ```
 
-### 4. Deploy the Argilla Server
+### 3. Create an Azure Container Instance
 
-To deploy the Argilla Server, you can use the Docker Compose file provided in the [Argilla repository](https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml) and the `docker-compose up` command:
+Create an Azure Container Instance with the `az container create` command:
 
 ```bash
-wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml && docker-compose up -d
+az container create --resource-group <resource-group> --name <deployment-name> --image argilla/argilla-quickstart:latest --dns-name-label <dns-name> --ports 6900
 ```
 
-This guide is adapted from this [blog post by Ben Burtenshaw](https://medium.com/@ben.burtenshaw/zero-to-demo-on-azure-with-docker-compose-and-container-instances-4e83b78003b). There's also an official [tutorial](https://learn.microsoft.com/en-us/azure/container-instances/tutorial-docker-compose) on Microsoft Learn.
+Once the container is deployed you can check the deployment with:
 
-## Google Cloud Platform (GCP)
+```bash
+az container show --resource-group <resource-group> --name argilla --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}" --out table
+```
 
-Coming soon!
+Argilla should now be accessible at the FQDN provided in the output, on the port `6900`.
 
-> 🚒 **If you'd like support with this and/or want to contribute this guide, join the [Slack Community](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g)**
+## Google Cloud Platform (GCP) via Cloud Run
+
+First, we will deploy Argilla using Cloud Run, a managed platform that scales stateless containers. To deploy Argilla on GCP, you can use Cloud Run, a managed platform that scales stateless containers. This guide will take you through deploying Argilla using the `gcloud` CLI tool, and is based on the [GCP documentation](https://cloud.google.com/run/docs/quickstarts/deploy-container).
+
+> 🚒 **We will deploy the Argilla quickstart image for simplicity which means we have a pre-packaged storage layer, and cannot use Cloud Run's horizontal scaling features.**
+
+### 1. Authenticate to GCP
+
+First, you need to authenticate to GCP using the `gcloud` CLI:
+
+```bash
+gcloud auth login
+```
+
+### 2. Build and deploy the container
+
+We will use the `gcloud run deploy` command to deploy the Argilla container directly from the Docker Hub. We can point the cloud run url to the container's default port (6900) and define relevant compute resouces.
+
+```bash
+gcloud run deploy <deployment-name> \
+--region <region> \
+--image argilla/argilla-quickstart:latest \
+--allow-unauthenticated \
+--port 6900 \
+--cpu 2 \
+--memory 4Gi \
+--max-instances 1 \
+--min-instances 1
+```
+
+Now you can access Argilla at the URL provided in the output or by running:
+
+```bash
+gcloud run services describe <deployment-name> \
+--region <region> \
+--format 'value(status.url)'
+```
+
+## Google Cloud Platform (GCP) on a Dedicated Virtual Machine
+
+If [deploying via Cloud Run](#google-cloud-platform-gcp-via-cloud-run) is not suitable for your use case, you can deploy Argilla on a dedicated virtual machine via Cloud Compute. Deploying Argilla Server to Cloud Compute involves creating a compute instance, setting up Docker and Docker Compose, and configuring network settings for external traffic. Follow these steps:
+
+### 1. Create an Instance
+
+Create a new Google Cloud VM instance with the necessary specifications:
+
+```bash
+gcloud compute instances create "argilla-instance" \
+  --machine-type "n1-standard-2" \
+  --image-family "debian-10" \
+  --image-project "debian-cloud" \
+  --boot-disk-size "50GB" \
+  --zone "asia-south2-a"
+```
+
+### 2. SSH into the Instance
+
+Once the instance is running, connect to it using SSH:
+
+```bash
+gcloud compute ssh argilla-instance --zone asia-south2-a
+```
+
+### 3. Install Dependencies
+
+Update the package manager and install necessary dependencies:
+
+```bash
+sudo apt-get update
+
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common gnupg2 lsb-release
+```
+
+### 4. Install Docker and Docker Compose
+
+Install Docker Engine and Docker Compose on the instance:
+
+```bash
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+```
+
+### 5. Launch Argilla with Docker Compose
+
+Grab the `docker-compose.yaml` file from the repository and start the Argilla Server:
+
+```bash
+mkdir argilla && cd argilla
+
+wget -O docker-compose.yaml https://raw.githubusercontent.com/argilla-io/argilla/main/docker/docker-compose.yaml
+
+sudo docker compose up -d
+```
+
+### 6. Allow External Traffic
+
+Configure the firewall rules to allow incoming traffic on the required ports:
+
+```bash
+gcloud compute instances add-tags argilla-instance --zone asia-south2-a --tags=argilla-instance
+
+gcloud compute firewall-rules create allow-6900 --allow tcp:6900 --target-tags argilla-instance --description "Allow incoming traffic on port 6900"
+```
+
+### 7. Assign a Static IP Address
+
+Reserve and assign a static IP address to ensure that the server can be consistently accessed via the same IP:
+
+```bash
+gcloud compute addresses create my-static-ip --region asia-south2
+```
+
+### 8. Configure Instance with Static IP
+
+Bind the static IP address to the instance:
+
+```bash
+STATIC_IP=$(gcloud compute addresses list --format="value(address)" --filter="name=my-static-ip")
+
+gcloud compute instances delete-access-config argilla-instance --zone asia-south2-a --access-config-name "external-nat"
+
+gcloud compute instances add-access-config argilla-instance --zone asia-south2-a --address $STATIC_IP
+```
+
+### 9. Test Connection
+
+Confirm the server is accessible by making an HTTP request to the Argilla server:
+
+```bash
+curl -vI $STATIC_IP:6900
+```
+
+Now you can access the Argilla instance in your browser using the URL `http://[STATIC_IP]:6900`.
+
