@@ -15,6 +15,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
+from enum import Enum
 
 from tqdm import tqdm
 
@@ -30,6 +31,12 @@ from argilla.records._search import Query
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
+
+
+class RecordErrorHandling(Enum):
+    RAISE = "raise"
+    WARN = "warn"
+    IGNORE = "ignore"
 
 
 class DatasetRecordsIterator:
@@ -210,6 +217,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
+        on_error: RecordErrorHandling = RecordErrorHandling.RAISE,
     ) -> "DatasetRecords":
         """Add or update records in a dataset on the server using the provided records.
         If the record includes a known `id` field, the record will be updated.
@@ -228,7 +236,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         Returns:
             A list of Record objects representing the updated records.
         """
-        record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
+        record_models = self._ingest_records(
+            records=records, mapping=mapping, user_id=user_id or self.__client.me.id, on_error=on_error
+        )
         batch_size = self._normalize_batch_size(
             batch_size=batch_size,
             records_length=len(record_models),
@@ -380,6 +390,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         records: Union[List[Dict[str, Any]], List[Record], HFDataset],
         mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
+        on_error: RecordErrorHandling = RecordErrorHandling.RAISE,
     ) -> List[RecordModel]:
         """Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
 
@@ -405,7 +416,16 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                         f"Found a record of type {type(record)}: {record}."
                     )
             except Exception as e:
-                raise RecordsIngestionError(f"Failed to ingest record from dict {record}: {e}")
+                if on_error == RecordErrorHandling.IGNORE:
+                    self._log_message(
+                        message=f"Failed to ingest record from dict {record}: {e}",
+                        level="info",
+                    )
+                    continue
+                elif on_error == RecordErrorHandling.WARN:
+                    warnings.warn(f"Failed to ingest record from dict {record}: {e}")
+                    continue
+                raise RecordsIngestionError(f"Failed to ingest record from dict {record}") from e
             ingested_records.append(record.api_model())
         return ingested_records
 
