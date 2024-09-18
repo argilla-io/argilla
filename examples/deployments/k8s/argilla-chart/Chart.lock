@@ -1,0 +1,6 @@
+dependencies:
+- name: elasticsearch
+  repository: file://../elasticsearch-chart
+  version: 0.1.0
+digest: sha256:90a85839b3c964d22d94f0c17a673933fd9339c51837f71b5e9e83fd711629ad
+generated: "2024-09-18T12:02:22.945615+05:30"

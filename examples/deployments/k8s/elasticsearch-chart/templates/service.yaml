@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-elasticsearch
+  labels:
+    app: elasticsearch
+    {{- include "elasticsearch.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+  - name: http
+    port: 9200

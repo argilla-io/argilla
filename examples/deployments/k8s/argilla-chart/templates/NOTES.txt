@@ -1,0 +1,23 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+{{- if .Values.ingress.enabled }}
+You can access the Argilla server at:
+  http://{{ .Values.ingress.host }}
+{{- else }}
+To access the Argilla server, run these commands:
+
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "argilla.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 6900:6900
+
+Then access the Argilla server at http://localhost:6900
+{{- end }}
+
+Elasticsearch is running as a dependency of this chart. You can access it at:
+  http://{{ .Release.Name }}-elasticsearch:9200

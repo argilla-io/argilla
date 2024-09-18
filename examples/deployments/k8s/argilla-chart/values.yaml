@@ -1,0 +1,28 @@
+argilla:
+  replicaCount: 1
+  image:
+    repository: argilla/argilla-server
+    tag: latest
+  resources:
+    requests:
+      cpu: "0.5"
+    limits:
+      cpu: "1"
+  authSecretKey: "CHANGE_ME"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  host: "argilla.local"
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
+
+elasticsearch:
+  enabled: true
+
+serviceAccount:
+  create: false

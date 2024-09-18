@@ -1,0 +1,22 @@
+elasticsearch:
+  image:
+    repository: docker.elastic.co/elasticsearch/elasticsearch
+    tag: 8.5.3
+  replicas: 1
+  resources:
+    requests:
+      cpu: 0.25
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+  javaOpts: "-Xms256m -Xmx256m"
+  storage:
+    size: 2Gi
+service:
+  type: ClusterIP
+  port: 9200
+ingress:
+  enabled: false
+autoscaling:
+  enabled: false

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "argilla.fullname" . }}
+  labels:
+    {{- include "argilla.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.argilla.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "argilla.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "argilla.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
+          env:
+            - name: ARGILLA_ELASTICSEARCH
+              value: "http://{{ .Release.Name }}-elasticsearch:9200"
+            - name: ARGILLA_AUTH_SECRET_KEY
+              value: {{ .Values.argilla.authSecretKey | quote }}
+          ports:
+            - containerPort: 6900
+          resources:
+            {{- toYaml .Values.argilla.resources | nindent 12 }}
