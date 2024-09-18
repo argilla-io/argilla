@@ -224,13 +224,12 @@ def _define_settings_from_features(
 
     if not questions:
         questions.append(TextQuestion(name="comment", required=True))
+
     if not fields:
         raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
 
-    # validate that atleast one field is required
-    if not any(field.required for field in fields):
-        # set the first field as required
-        fields[0].required = True
+    questions[0].required = True
+    fields[0].required = True
 
     settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
 
