@@ -477,16 +477,6 @@ class User(DatabaseModel):
         passive_deletes=True,
         order_by=Response.inserted_at.asc(),
     )
-    datasets: Mapped[List["Dataset"]] = relationship(
-        secondary="workspaces_users",
-        primaryjoin="User.id == WorkspaceUser.user_id",
-        secondaryjoin=and_(
-            Workspace.id == Dataset.workspace_id,
-            WorkspaceUser.workspace_id == Workspace.id,
-        ),
-        viewonly=True,
-        order_by=Dataset.inserted_at.asc(),
-    )
 
     @property
     def is_owner(self):
