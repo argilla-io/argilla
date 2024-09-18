@@ -82,6 +82,10 @@ class Field(DatabaseModel):
     def is_image(self):
         return self.settings.get("type") == FieldType.image
 
+    @property
+    def is_chat(self):
+        return self.settings.get("type") == FieldType.chat
+
     def __repr__(self):
         return (
             f"Field(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "

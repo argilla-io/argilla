@@ -61,7 +61,7 @@ export default {
   padding: 2 * $base-space;
   background: var(--bg-field);
   border-radius: $border-radius-m;
-  border: 1px solid var(--bg-opacity-2);
+  border: 1px solid var(--border-field);
 
   &_placeholder {
     display: flex;
@@ -87,6 +87,7 @@ export default {
   &_title {
     word-break: break-word;
     width: calc(100% - 30px);
+    color: var(--fg-secondary);
   }
 }
 ::-webkit-scrollbar {

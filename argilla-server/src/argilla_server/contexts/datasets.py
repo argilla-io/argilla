@@ -583,7 +583,7 @@ async def _build_record(
     await _validate_record_metadata(db, dataset, record_create.metadata, caches["metadata_properties_cache"])
 
     return Record(
-        fields=record_create.fields,
+        fields=jsonable_encoder(record_create.fields),
         metadata_=record_create.metadata,
         external_id=record_create.external_id,
         dataset=dataset,
