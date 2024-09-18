@@ -23,7 +23,7 @@ from argilla.webhooks._handler import WebhookHandler
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-WEBHOOK_SERVER_URL = os.getenv("WEBHOOK_SERVER_URL", "http://localhost.org:8000")
+WEBHOOK_SERVER_URL = os.getenv("WEBHOOK_SERVER_URL", "http://127.0.0.1:8000")
 
 
 def _webhook_url_for_func(func: Callable) -> str:
