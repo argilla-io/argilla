@@ -25,7 +25,7 @@ WEBHOOK_EVENTS_MIN_ITEMS = 1
 WEBHOOK_DESCRIPTION_MIN_LENGTH = 1
 WEBHOOK_DESCRIPTION_MAX_LENGTH = 1000
 
-WebhookUrl = HttpUrl if settings.webhook_enable_required_top_level_domain else AnyHttpUrl
+WebhookUrl = HttpUrl if settings.webhooks_top_level_domain_required else AnyHttpUrl
 
 
 class Webhook(BaseModel):
