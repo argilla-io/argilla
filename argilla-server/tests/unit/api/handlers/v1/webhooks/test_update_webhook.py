@@ -92,6 +92,20 @@ class TestUpdateWebhook:
 
         assert webhook.url == "https://example.com/webhook"
 
+    async def test_update_webhook_with_ip_address_url(self, async_client: AsyncClient, owner_auth_header: dict):
+        webhook = await WebhookFactory.create()
+
+        response = await async_client.patch(
+            self.url(webhook.id),
+            headers=owner_auth_header,
+            json={
+                "url": "https://1.1.1.1:9999/webhook",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["url"] == "https://1.1.1.1:9999/webhook"
+
     async def test_update_webhook_with_events(self, async_client: AsyncClient, owner_auth_header: dict):
         webhook = await WebhookFactory.create()
 
