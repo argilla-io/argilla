@@ -2591,8 +2591,11 @@
 </span></code></pre></div>
 <p>You could then log the dataset's records using the <code>load_dataset</code> method of the <code>datasets</code> package and pass the dataset to the <code>rg.Dataset.log</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;&lt;my_org&gt;/&lt;my_dataset&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)</span> <span class="c1"># (1)</span>
 </span></code></pre></div>
+<ol>
+<li>You could also use the <code>mapping</code> parameter to map record field names to argilla field and question names.</li>
+</ol>
 </div>
 <h4 id="import-settings-from-hub">Import settings from Hub<a class="headerlink" href="#import-settings-from-hub" title="Permanent link">&para;</a></h4>
 <p>When importing datasets from the hub, Argilla will load settings from the hub in three ways:</p>
