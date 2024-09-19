@@ -61,8 +61,14 @@ from argilla_server.api.schemas.v1.vector_settings import (
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.webhooks.v1.enums import DatasetEvent, ResponseEvent, RecordEvent
-from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
-from argilla_server.webhooks.v1.responses import notify_response_event as notify_response_event_v1
+from argilla_server.webhooks.v1.records import (
+    notify_record_event as notify_record_event_v1,
+    build_record_event as build_record_event_v1,
+)
+from argilla_server.webhooks.v1.responses import (
+    notify_response_event as notify_response_event_v1,
+    build_response_event as build_response_event_v1,
+)
 from argilla_server.webhooks.v1.datasets import notify_dataset_event as notify_dataset_event_v1
 from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
@@ -812,6 +818,7 @@ async def preload_records_relationships_before_validate(db: AsyncSession, record
     )
 
 
+# TODO: Use build_record_event_v1 instead
 async def delete_records(
     db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
 ) -> None:
@@ -860,13 +867,14 @@ async def update_record(
 
 
 async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record: Record) -> Record:
+    deleted_record_event_v1 = await build_record_event_v1(db, RecordEvent.deleted, record)
+
     async with db.begin_nested():
         record = await record.delete(db=db, autocommit=False)
         await search_engine.delete_records(dataset=record.dataset, records=[record])
 
     await db.commit()
-
-    await notify_record_event_v1(db, RecordEvent.deleted, record)
+    await deleted_record_event_v1.notify(db)
 
     return record
 
@@ -962,6 +970,8 @@ async def upsert_response(
 
 
 async def delete_response(db: AsyncSession, search_engine: SearchEngine, response: Response) -> Response:
+    deleted_response_event_v1 = await build_response_event_v1(db, ResponseEvent.deleted, response)
+
     async with db.begin_nested():
         response = await response.delete(db, autocommit=False)
 
@@ -971,7 +981,8 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
 
     await db.commit()
     await distribution.update_record_status(search_engine, response.record_id)
-    await notify_response_event_v1(db, ResponseEvent.deleted, response)
+    # TODO: think about the record status being updated after the event being build
+    await deleted_response_event_v1.notify(db)
 
     return response
 
