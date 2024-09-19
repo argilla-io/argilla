@@ -133,8 +133,12 @@ The `rg.Dataset.from_hub` method loads the configuration and records from the da
 
     ```python
     hf_dataset = load_dataset("<my_org>/<my_dataset>")
-    dataset.records.log(hf_dataset)
+    dataset.records.log(hf_dataset) # (1)
     ```
+
+    1. You could also use the `mapping` parameter to map record field names to argilla field and question names.
+
+    ```python
 
 #### Import settings from Hub
 
