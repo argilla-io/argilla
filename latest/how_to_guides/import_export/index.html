@@ -985,6 +985,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#import-settings-from-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import settings from Hub
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2373,6 +2382,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#import-settings-from-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Import settings from Hub
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2568,18 +2586,34 @@
 <p>The <code>rg.Dataset.from_hub</code> method loads the configuration and records from the dataset repo. If you only want to load records, you can pass a <code>datasets.Dataset</code> object to the <code>rg.Dataset.log</code> method. This enables you to configure your own dataset and reuse existing Hub datasets. See the <a href="../record/">guide on records</a> for more information.</p>
 <div class="admonition note">
 <p class="admonition-title">With or without records</p>
-<p>The example above will pull the dataset's <code>Settings</code> and records from the hub. If you only want to pull the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.</p>
+<p>The example above will pull the dataset's <code>Settings</code> and records from the hub. If you only want to pull the dataset's configuration, you can set the <code>with_records</code> parameter to <code>False</code>. This is useful if you're just interested in a specific dataset template or you want to make changes in the records.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;my_org&gt;/&lt;my_dataset&gt;&quot;</span><span class="p">,</span> <span class="n">with_records</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
-<p>With the dataset's configuration, you could then make changes to the dataset. For example, you could adapt the dataset's settings for a different task:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">questions</span> <span class="o">=</span> <span class="p">[</span><span class="n">rg</span><span class="o">.</span><span class="n">TextQuestion</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">)]</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-</span></code></pre></div>
 <p>You could then log the dataset's records using the <code>load_dataset</code> method of the <code>datasets</code> package and pass the dataset to the <code>rg.Dataset.log</code> method.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;&lt;my_org&gt;/&lt;my_dataset&gt;&quot;</span><span class="p">)</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">hf_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;&lt;my_org&gt;/&lt;my_dataset&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">hf_dataset</span><span class="p">)</span> <span class="c1"># (1)</span>
 </span></code></pre></div>
+<ol>
+<li>You could also use the <code>mapping</code> parameter to map record field names to argilla field and question names.</li>
+</ol>
 </div>
+<h4 id="import-settings-from-hub">Import settings from Hub<a class="headerlink" href="#import-settings-from-hub" title="Permanent link">&para;</a></h4>
+<p>When importing datasets from the hub, Argilla will load settings from the hub in three ways:</p>
+<ol>
+<li>If the dataset was pushed to hub by Argilla, then the settings will be loaded from the hub via the configuration file.</li>
+<li>If the dataset was loaded by another source, then Argilla will define the settings based on the dataset's features in <code>datasets.Features</code>. For example, creating a <code>TextField</code> for a text feature or a <code>LabelQuestion</code> for a label class.</li>
+<li>You can pass a custom <code>rg.Settings</code> object to the <code>rg.Dataset.from_hub</code> method via the <code>settings</code> parameter. This will override the settings loaded from the hub.</li>
+</ol>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="n">rg</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">)],</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="n">questions</span><span class="o">=</span><span class="p">[</span><span class="n">rg</span><span class="o">.</span><span class="n">TextQuestion</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">)]</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">)</span> <span class="c1"># (1)</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;my_org&gt;/&lt;my_dataset&gt;&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</span></code></pre></div>
+<ol>
+<li>The settings that you pass to the <code>rg.Dataset.from_hub</code> method will override the settings loaded from the hub, and need to align with the dataset being loaded.</li>
+</ol>
 <h3 id="local-disk">Local Disk<a class="headerlink" href="#local-disk" title="Permanent link">&para;</a></h3>
 <h4 id="export-to-disk">Export to Disk<a class="headerlink" href="#export-to-disk" title="Permanent link">&para;</a></h4>
 <p>You can save a dataset from Argilla to your local disk. This is useful if you want to back up your dataset. You can use the <code>rg.Dataset.to_disk</code> method. We recommend you to use an empty directory.</p>
