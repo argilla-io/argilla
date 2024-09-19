@@ -166,6 +166,16 @@ class UserResponse(Resource):
         """Returns the list of responses"""
         return self.__model_as_responses_list(self._model)
 
+    @property
+    def record(self) -> "Record":
+        """Returns the record associated with the UserResponse"""
+        return self._record
+
+    @record.setter
+    def record(self, record: "Record") -> None:
+        """Sets the record associated with the UserResponse"""
+        self._record = record
+
     @classmethod
     def from_model(cls, model: UserResponseModel, dataset: "Dataset") -> "UserResponse":
         """Creates a UserResponse from a ResponseModel"""
