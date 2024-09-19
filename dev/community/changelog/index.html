@@ -2044,6 +2044,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#220" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.0
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       2.1.0
@@ -3816,6 +3825,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#220" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.0
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#210" class="md-nav__link">
     <span class="md-ellipsis">
       2.1.0
@@ -5425,11 +5443,21 @@ These are the section headers that we use:
 -->
 
 <h2 id="unreleased"><a href="">Unreleased</a><a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h2 id="220"><a href="https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0">2.2.0</a><a class="headerlink" href="#220" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Added new <code>ChatField</code> supporting chat messages. (<a href="https://github.com/argilla-io/argilla/pull/5376">#5376</a>)</li>
+<li>Added template settings to <code>rg.Settings</code> for classification, rating, and ranking questions. (<a href="https://github.com/argilla-io/argilla/pull/5426">#5426</a>)</li>
+<li>Added <code>rg.Settings</code> definition based on <code>datasets.Features</code> within <code>rg.Dataset.from_hub</code>. (<a href="https://github.com/argilla-io/argilla/pull/5472">#5426</a>)</li>
+<li>Added persistent record mapping to <code>rg.Settings</code> to be used in <code>rg.Dataset.records.log</code>. (<a href="https://github.com/argilla-io/argilla/pull/5466">#5466</a>)</li>
+<li>Added multiple error handling methods to the <code>rg.Dataset.records.log</code> method to warn, ignore, or raise errors. (<a href="https://github.com/argilla-io/argilla/pull/5463">#5466</a>)</li>
+<li>Changed dataset import and export of <code>rg.LabelQuestion</code> to use <code>datasets.ClassLabel</code> not <code>datasets.Value</code>. (<a href="https://github.com/argilla-io/argilla/pull/5474">#5474</a>)</li>
+</ul>
 <h2 id="210"><a href="https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0">2.1.0</a><a class="headerlink" href="#210" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Added new <code>ImageField</code> supporting URLs and Data URLs. (<a href="https://github.com/argilla-io/argilla/pull/5279">#5279</a>)</li>
 <li>Added dark mode (<a href="https://github.com/argilla-io/argilla/pull/5412">#5412</a>)</li>
+<li>Added settings parameter to <code>rg.Dataset.from_hub</code> to define the dataset settings before ingesting a dataset from the hub. (<a href="https://github.com/argilla-io/argilla/pull/5418">#5418</a>)</li>
 </ul>
 <h2 id="201"><a href="https://github.com/argilla-io/argilla/compare/v2.0.0...releases/2.0.1">2.0.1</a><a class="headerlink" href="#201" title="Permanent link">&para;</a></h2>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
