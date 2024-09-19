@@ -19,7 +19,7 @@ from argilla._resource import Resource
 from argilla.settings import RankingQuestion
 
 if TYPE_CHECKING:
-    from argilla import Dataset, QuestionType, Record
+    from argilla import QuestionType, Record
 
 __all__ = ["Suggestion"]
 
@@ -54,7 +54,7 @@ class Suggestion(Resource):
         if value is None:
             raise ValueError("value is required")
 
-        self.record = _record
+        self._record = _record
         self._model = SuggestionModel(
             question_name=question_name,
             value=value,
@@ -104,13 +104,22 @@ class Suggestion(Resource):
     def agent(self, value: str) -> None:
         self._model.agent = value
 
+    @property
+    def record(self) -> Optional["Record"]:
+        """The record that the suggestion is for."""
+        return self._record
+
+    @record.setter
+    def record(self, value: "Record") -> None:
+        self._record = value
+
     @classmethod
-    def from_model(cls, model: SuggestionModel, dataset: "Dataset") -> "Suggestion":
-        question = dataset.settings.questions[model.question_id]
+    def from_model(cls, model: SuggestionModel, record: "Record") -> "Suggestion":
+        question = record.dataset.settings.questions[model.question_id]
         model.question_name = question.name
         model.value = cls.__from_model_value(model.value, question)
 
-        instance = cls(question.name, model.value)
+        instance = cls(question.name, model.value, _record=record)
         instance._model = model
 
         return instance
