@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from argilla import Dataset, Record, UserResponse, Workspace
+from argilla._exceptions import ArgillaAPIError
 from argilla._models import RecordModel, UserResponseModel, WorkspaceModel
 
 if TYPE_CHECKING:
@@ -40,8 +41,13 @@ def _parse_record_from_webhook_data(data: dict, client: "Argilla") -> Record:
     dataset = _parse_dataset_from_webhook_data(data["dataset"], client)
 
     record = Record.from_model(RecordModel.model_validate(data), dataset=dataset)
-    # TODO: Fetch suggestions, responses and vectors
-    return record
+    try:
+        record.get()
+    except ArgillaAPIError as _:
+        # TODO: Show notification
+        pass
+    finally:
+        return record
 
 
 def _parse_response_from_webhook_data(data: dict, client: "Argilla") -> UserResponse:
@@ -49,11 +55,9 @@ def _parse_response_from_webhook_data(data: dict, client: "Argilla") -> UserResp
 
     # TODO: Link the user resource to the response
     user_response = UserResponse.from_model(
-        UserResponseModel(**data, user_id=data["user"]["id"]), dataset=record.dataset
+        model=UserResponseModel(**data, user_id=data["user"]["id"]),
+        record=record,
     )
-    # TODO: Expose record and dataset as properties and maybe pass record instead of dataset when creating the response
-    #  from model.
-    user_response._record = record
 
     return user_response
 
@@ -67,29 +71,24 @@ class WebhookEvent(BaseModel):
         instance_type, action_type = self.type.split(".")
         data = self.data or {}
 
-        if action_type == "deleted":
-            return {"type": self.type, "timestamp": self.timestamp, "data": data}
+        arguments = {"type": self.type, "timestamp": self.timestamp}
 
-        arguments = {
-            "type": self.type,
-            "timestamp": self.timestamp,
-        }
+        if action_type == "deleted":
+            return {**arguments, "data": data}
 
         if instance_type == "dataset":
             dataset = _parse_dataset_from_webhook_data(data, client)
-            arguments.update({"dataset": dataset})
+            arguments["dataset"] = dataset
 
         elif instance_type == "record":
             record = _parse_record_from_webhook_data(data, client)
-            arguments.update({"record": record, "dataset": record.dataset})
+            arguments["record"] = record
 
         elif instance_type == "response":
             user_response = _parse_response_from_webhook_data(data, client)
-            arguments.update(
-                {"response": user_response, "record": user_response._record, "dataset": user_response._record.dataset}
-            )
+            arguments["response"] = user_response
 
         else:
-            arguments.update({"data": data})
+            arguments["data"] = data
 
         return arguments

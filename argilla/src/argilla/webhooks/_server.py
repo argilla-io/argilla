@@ -112,8 +112,9 @@ def webhook_listener(
 
         for argilla_webhook in client.webhooks:
             if argilla_webhook.url == webhook.url and argilla_webhook.id != webhook.id:
-                warnings.warn(f"Deleting existing webhook with URL {argilla_webhook.url}: {argilla_webhook}")
-                argilla_webhook.delete()
+                warnings.warn(f"Disabling existing webhook with for URL {argilla_webhook.url}: {argilla_webhook}")
+                argilla_webhook.enabled = False
+                argilla_webhook.update()
 
         request_handler = WebhookHandler(webhook).handle(func, raw_event)
         server.post(f"/{func.__name__}", tags=["Argilla Webhooks"])(request_handler)
