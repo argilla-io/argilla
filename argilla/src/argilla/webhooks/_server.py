@@ -104,17 +104,23 @@ def webhook_listener(
         events = [events]
 
     def wrapper(func: Callable) -> Callable:
-        webhook = Webhook(
-            url=_webhook_url_for_func(func),
-            events=events,
-            description=description or f"Webhook for {func.__name__}",
-        ).create()
+        webhook_url = _webhook_url_for_func(func)
 
+        webhook = None
         for argilla_webhook in client.webhooks:
-            if argilla_webhook.url == webhook.url and argilla_webhook.id != webhook.id:
-                warnings.warn(f"Disabling existing webhook with for URL {argilla_webhook.url}: {argilla_webhook}")
-                argilla_webhook.enabled = False
-                argilla_webhook.update()
+            if argilla_webhook.url == webhook_url and argilla_webhook.events == events:
+                warnings.warn(f"Found existing webhook with for URL {argilla_webhook.url}: {argilla_webhook}")
+                webhook = argilla_webhook
+                webhook.description = description or webhook.description
+                webhook.update()
+                break
+
+        if not webhook:
+            webhook = Webhook(
+                url=webhook_url,
+                events=events,
+                description=description or f"Webhook for {func.__name__}",
+            ).create()
 
         request_handler = WebhookHandler(webhook).handle(func, raw_event)
         server.post(f"/{func.__name__}", tags=["Argilla Webhooks"])(request_handler)
