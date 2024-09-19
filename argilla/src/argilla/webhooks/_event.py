@@ -14,14 +14,48 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from pydantic import BaseModel
 
-from argilla import Dataset, Record, UserResponse
-from argilla._models import DatasetModel, RecordModel, UserResponseModel
+from argilla import Dataset, Record, UserResponse, Workspace
+from argilla._models import RecordModel, UserResponseModel, WorkspaceModel
 
 if TYPE_CHECKING:
     from argilla import Argilla
+
+
+def _parse_dataset_from_webhook_data(data: dict, client: "Argilla") -> Dataset:
+    workspace = Workspace.from_model(WorkspaceModel.model_validate(data["workspace"]), client=client)
+    # TODO: Parse settings from the data
+    # settings = Settings._from_dict(data)
+
+    dataset = Dataset(name=data["name"], workspace=workspace, client=client)
+    dataset.id = UUID(data["id"])
+
+    return dataset.get()
+
+
+def _parse_record_from_webhook_data(data: dict, client: "Argilla") -> Record:
+    dataset = _parse_dataset_from_webhook_data(data["dataset"], client)
+
+    record = Record.from_model(RecordModel.model_validate(data), dataset=dataset)
+    # TODO: Fetch suggestions, responses and vectors
+    return record
+
+
+def _parse_response_from_webhook_data(data: dict, client: "Argilla") -> UserResponse:
+    record = _parse_record_from_webhook_data(data["record"], client)
+
+    # TODO: Link the user resource to the response
+    user_response = UserResponse.from_model(
+        UserResponseModel(**data, user_id=data["user"]["id"]), dataset=record.dataset
+    )
+    # TODO: Expose record and dataset as properties and maybe pass record instead of dataset when creating the response
+    #  from model.
+    user_response._record = record
+
+    return user_response
 
 
 class WebhookEvent(BaseModel):
@@ -42,22 +76,18 @@ class WebhookEvent(BaseModel):
         }
 
         if instance_type == "dataset":
-            dataset = Dataset.from_model(DatasetModel.model_validate(data), client=client).get()
+            dataset = _parse_dataset_from_webhook_data(data, client)
             arguments.update({"dataset": dataset})
 
         elif instance_type == "record":
-            dataset = Dataset.from_model(DatasetModel.model_validate(data["dataset"]), client=client).get()
-            record = Record.from_model(RecordModel.model_validate(data), dataset=dataset).get()
-
-            arguments.update({"record": record, "dataset": dataset})
+            record = _parse_record_from_webhook_data(data, client)
+            arguments.update({"record": record, "dataset": record.dataset})
 
         elif instance_type == "response":
-            dataset = Dataset.from_model(DatasetModel.model_validate(data["record"]["dataset"]), client=client)
-            record = Record.from_dict(data["record"], dataset=dataset)
-            user_response = UserResponse.from_model(
-                UserResponseModel(**data, user_id=data["user"]["id"]), dataset=dataset
+            user_response = _parse_response_from_webhook_data(data, client)
+            arguments.update(
+                {"response": user_response, "record": user_response._record, "dataset": user_response._record.dataset}
             )
-            arguments.update({"response": user_response, "record": record, "dataset": dataset})
 
         else:
             arguments.update({"data": data})
