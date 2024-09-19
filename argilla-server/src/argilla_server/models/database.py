@@ -40,7 +40,9 @@ from argilla_server.enums import (
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
 from argilla_server.models.mixins import inserted_at_current_value
-from argilla_server.pydantic_v1 import parse_obj_as
+
+# from argilla_server.pydantic_v1 import parse_obj_as
+from pydantic.tools import parse_obj_as
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
 __all__ = [

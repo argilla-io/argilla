@@ -27,7 +27,9 @@ from sqlalchemy.sql.base import ExecutableOption
 from typing_extensions import Self
 
 from argilla_server.errors.future import NotFoundError
-from argilla_server.pydantic_v1 import BaseModel
+
+# from argilla_server.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import InstrumentedAttribute

@@ -12,19 +12,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla_server.pydantic_v1 import BaseSettings, Field
+from typing import Optional
+
+# from argilla_server.pydantic_v1 import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class HuggingfaceSettings(BaseSettings):
-    space_id: str = Field(None, env="SPACE_ID")
-    space_title: str = Field(None, env="SPACE_TITLE")
-    space_subdomain: str = Field(None, env="SPACE_SUBDOMAIN")
-    space_host: str = Field(None, env="SPACE_HOST")
-    space_repo_name: str = Field(None, env="SPACE_REPO_NAME")
-    space_author_name: str = Field(None, env="SPACE_AUTHOR_NAME")
+    space_id: Optional[str] = Field(None, alias="SPACE_ID")
+    space_title: Optional[str] = Field(None, alias="SPACE_TITLE")
+    space_subdomain: Optional[str] = Field(None, alias="SPACE_SUBDOMAIN")
+    space_host: Optional[str] = Field(None, alias="SPACE_HOST")
+    space_repo_name: Optional[str] = Field(None, alias="SPACE_REPO_NAME")
+    space_author_name: Optional[str] = Field(None, alias="SPACE_AUTHOR_NAME")
     # NOTE: Hugging Face has a typo in their environment variable name,
     # using PERSISTANT instead of PERSISTENT. We will use the correct spelling in our code.
-    space_persistent_storage_enabled: bool = Field(False, env="PERSISTANT_STORAGE_ENABLED")
+    space_persistent_storage_enabled: bool = Field(False, alias="PERSISTANT_STORAGE_ENABLED")
 
     @property
     def is_running_on_huggingface(self) -> bool:

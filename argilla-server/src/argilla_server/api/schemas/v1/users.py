@@ -17,9 +17,14 @@ from typing import List, Optional
 from uuid import UUID
 
 from argilla_server.enums import UserRole
-from argilla_server.pydantic_v1 import BaseModel, Field, constr
 
-USER_USERNAME_REGEX = "^(?!-|_)[A-za-z0-9-_]+$"
+# from argilla_server.pydantic_v1 import BaseModel, Field, constr
+from pydantic import StringConstraints, ConfigDict, BaseModel, Field
+from typing_extensions import Annotated
+
+# Pydantic v2 error: look-around, including look-ahead and look-behind, is not supported so rewriting it:
+# USER_USERNAME_REGEX = "^(?!-|_)[A-za-z0-9-_]+$"
+USER_USERNAME_REGEX = r"^[A-Za-z0-9][A-Za-z0-9-_]*$"
 USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
 
@@ -27,7 +32,7 @@ USER_PASSWORD_MAX_LENGTH = 100
 class User(BaseModel):
     id: UUID
     first_name: str
-    last_name: Optional[str]
+    last_name: Optional[str] = None
     username: str
     role: UserRole
     # TODO: We need to move `api_key` outside of this schema and think about a more
@@ -36,15 +41,14 @@ class User(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreate(BaseModel):
-    first_name: constr(min_length=1, strip_whitespace=True)
-    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
-    username: str = Field(regex=USER_USERNAME_REGEX, min_length=1)
-    role: Optional[UserRole]
+    first_name: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
+    last_name: Optional[Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]] = None
+    username: str = Field(pattern=USER_USERNAME_REGEX, min_length=1)
+    role: Optional[UserRole] = None
     password: str = Field(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
 
 

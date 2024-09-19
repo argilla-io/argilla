@@ -33,7 +33,9 @@ from argilla_server.errors.base_errors import (
     ValidationError,
     WrongTaskError,
 )
-from argilla_server.pydantic_v1 import BaseModel
+
+# from argilla_server.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 
 
 class ErrorDetail(BaseModel):

@@ -12,12 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from uuid import UUID
 from datetime import datetime
 from typing import List
-from uuid import UUID
+
+from pydantic import ConfigDict, BaseModel, Field
 
 from argilla_server.constants import ES_INDEX_REGEX_PATTERN
-from argilla_server.pydantic_v1 import BaseModel, Field
 
 WORKSPACE_NAME_REGEX = ES_INDEX_REGEX_PATTERN
 
@@ -28,12 +29,11 @@ class Workspace(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class WorkspaceCreate(BaseModel):
-    name: str = Field(regex=WORKSPACE_NAME_REGEX, min_length=1)
+    name: str = Field(pattern=WORKSPACE_NAME_REGEX, min_length=1)
 
 
 class Workspaces(BaseModel):

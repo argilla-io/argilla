@@ -12,10 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import uuid
-
 import pytest
+
 from httpx import AsyncClient
-from pydantic.schema import timedelta
+from datetime import timedelta
 
 from argilla_server.enums import DatasetStatus
 from tests.factories import DatasetFactory

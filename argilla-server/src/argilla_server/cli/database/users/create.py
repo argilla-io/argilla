@@ -21,15 +21,17 @@ from argilla_server.api.schemas.v1.workspaces import WorkspaceCreate
 from argilla_server.contexts import accounts
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
-from argilla_server.pydantic_v1 import constr
+# from argilla_server.pydantic_v1 import constr
 
 from .utils import get_or_new_workspace
+from pydantic import StringConstraints
+from typing_extensions import Annotated
 
 USER_API_KEY_MIN_LENGTH = 8
 
 
 class UserCreateForTask(UserCreate):
-    api_key: Optional[constr(min_length=USER_API_KEY_MIN_LENGTH)]
+    api_key: Optional[Annotated[str, StringConstraints(min_length=USER_API_KEY_MIN_LENGTH)]]
     workspaces: Optional[List[WorkspaceCreate]]
 
 

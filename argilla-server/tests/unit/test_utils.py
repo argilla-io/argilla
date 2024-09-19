@@ -12,13 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, List, Set
-
 import pytest
-from argilla_server.utils import parse_query_param
-from fastapi import HTTPException
 
-from tests.pydantic_v1 import BaseModel, Field
+from typing import Any, Dict, List, Set
+from fastapi import HTTPException
+from pydantic import BaseModel, Field
+
+from argilla_server.utils import parse_query_param
 
 
 @pytest.mark.parametrize(

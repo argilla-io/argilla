@@ -19,7 +19,8 @@ from uuid import UUID
 
 from fastapi import HTTPException, Query
 
-from argilla_server.pydantic_v1 import BaseModel
+# from argilla_server.pydantic_v1 import BaseModel
+from pydantic import BaseModel
 
 
 # TODO: remove this function at some point

@@ -14,7 +14,8 @@
 
 from typing import Any, Dict, Set, Union
 
-from argilla_server.pydantic_v1 import BaseModel, root_validator
+# from argilla_server.pydantic_v1 import BaseModel, root_validator
+from pydantic import model_validator, BaseModel
 
 
 class UpdateSchema(BaseModel):
@@ -25,7 +26,8 @@ class UpdateSchema(BaseModel):
 
     __non_nullable_fields__: Union[Set[str], None] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def validate_non_nullable_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if cls.__non_nullable_fields__ is None:
             return values

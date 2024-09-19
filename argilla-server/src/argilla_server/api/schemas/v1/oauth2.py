@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from typing import List
-
 from pydantic import BaseModel
 
 
