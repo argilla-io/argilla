@@ -99,6 +99,7 @@ class TextField(AbstractField):
         client: Optional[Argilla] = None,
     ) -> None:
         """Text field for use in Argilla `Dataset` `Settings`
+
         Parameters:
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.

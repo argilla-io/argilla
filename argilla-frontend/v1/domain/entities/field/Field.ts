@@ -10,7 +10,7 @@ export class Field {
     public title: string,
     public readonly content: string,
     public readonly datasetId: string,
-    public readonly required: boolean,
+    public readonly isRequired: boolean,
     public settings: any
   ) {
     this.initializeOriginal();
