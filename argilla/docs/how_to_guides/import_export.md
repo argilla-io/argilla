@@ -125,7 +125,7 @@ The `rg.Dataset.from_hub` method loads the configuration and records from the da
 
     === "Argilla configured dataset"
 
-        The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.
+        The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the records.
 
         ```python
         dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", with_records=False)
