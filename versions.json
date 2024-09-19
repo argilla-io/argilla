@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_update-docs-on-from_hub-settings",
+    "title": "docs_update-docs-on-from_hub-settings",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_chat-field",
     "title": "docs_chat-field",
     "aliases": [],
