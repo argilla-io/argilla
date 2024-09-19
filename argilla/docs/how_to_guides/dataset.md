@@ -140,6 +140,9 @@ new_dataset.create()
 
 ## Define dataset settings
 
+!!! tip
+    Instead of defining your own custom settings, you can use some of our pre-built templates for text classification, ranking and rating. Learn more [here](../reference/argilla/settings/settings.md#creating-settings-using-built-in-templates).
+
 ### Fields
 
 The fields in a dataset consist of one or more data items requiring annotation. Currently, Argilla supports plain text and markdown through the `TextField` and images through the `ImageField`, though we plan to introduce additional field types in future updates.
