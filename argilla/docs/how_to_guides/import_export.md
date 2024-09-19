@@ -123,42 +123,18 @@ The `rg.Dataset.from_hub` method loads the configuration and records from the da
 
 !!! note "With or without records"
 
-    === "Argilla configured dataset"
+    The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the records.
 
-        The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the records.
+    ```python
+    dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", with_records=False)
+    ```
 
-        ```python
-        dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", with_records=False)
-        ```
+    You could then log the dataset's records using the `load_dataset` method of the `datasets` package and pass the dataset to the `rg.Dataset.log` method.
 
-        With the dataset's configuration, you could then make changes to the dataset. For example, you could adapt the dataset's settings for a different task:
-
-        ```python
-        dataset.settings.questions = [rg.TextQuestion(name="answer")]
-        dataset.update()
-        ```
-
-        You could then log the dataset's records using the `load_dataset` method of the `datasets` package and pass the dataset to the `rg.Dataset.log` method.
-
-        ```python
-        hf_dataset = load_dataset("<my_org>/<my_dataset>")
-        dataset.records.log(hf_dataset)
-        ```
-
-    === "Automatically"
-
-        The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.
-
-        ```python
-        dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", with_records=False)
-        ```
-
-        You could then log the dataset's records using the `load_dataset` method of the `datasets` package and pass the dataset to the `rg.Dataset.log` method.
-
-        ```python
-        hf_dataset = load_dataset("<my_org>/<my_dataset>")
-        dataset.records.log(hf_dataset)
-        ```
+    ```python
+    hf_dataset = load_dataset("<my_org>/<my_dataset>")
+    dataset.records.log(hf_dataset)
+    ```
 
 #### Import settings from Hub
 
