@@ -54,7 +54,7 @@ async def build_response_event(db: AsyncSession, response_event: ResponseEvent, 
     ).scalar_one()
 
     return Event(
-        type=response_event,
+        event=response_event,
         timestamp=datetime.utcnow(),
         data=ResponseEventSchema.from_orm(response).dict(),
     )

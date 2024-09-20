@@ -49,7 +49,7 @@ async def build_record_event(db: AsyncSession, record_event: RecordEvent, record
     ).scalar_one()
 
     return Event(
-        type=record_event,
+        event=record_event,
         timestamp=datetime.utcnow(),
         data=RecordEventSchema.from_orm(record).dict(),
     )

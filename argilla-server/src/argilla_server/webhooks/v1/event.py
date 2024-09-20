@@ -22,15 +22,15 @@ from argilla_server.jobs.webhook_jobs import enqueue_notify_events
 
 
 class Event:
-    def __init__(self, type: str, timestamp: datetime, data: dict):
-        self.type = type
+    def __init__(self, event: str, timestamp: datetime, data: dict):
+        self.event = event
         self.timestamp = timestamp
         self.data = data
 
     async def notify(self, db: AsyncSession) -> List[Job]:
         return await enqueue_notify_events(
             db,
-            event=self.type,
+            event=self.event,
             timestamp=self.timestamp,
             data=self.data,
         )

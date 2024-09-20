@@ -49,7 +49,7 @@ async def build_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, dat
     ).scalar_one()
 
     return Event(
-        type=dataset_event,
+        event=dataset_event,
         timestamp=datetime.utcnow(),
         data=DatasetEventSchema.from_orm(dataset).dict(),
     )
