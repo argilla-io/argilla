@@ -15,6 +15,9 @@ ingress:
   className: "nginx"
   host: "argilla.local"
 
+configmap:
+  minikubeIP: "192.168.64.2"
+
 hpa:
   enabled: true
   minReplicas: 1
@@ -22,7 +25,12 @@ hpa:
   targetCPUUtilizationPercentage: 50
 
 elasticsearch:
-  enabled: true
+  enabled: false
+
+externalElasticsearch:
+  host: "argilla.local"
+  port: 9200
+  path: "/es"
 
 serviceAccount:
   create: false

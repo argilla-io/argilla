@@ -19,5 +19,14 @@ To access the Argilla server, run these commands:
 Then access the Argilla server at http://localhost:6900
 {{- end }}
 
+{{- if .Values.elasticsearch.enabled }}
 Elasticsearch is running as a dependency of this chart. You can access it at:
   http://{{ .Release.Name }}-elasticsearch:9200
+{{- else }}
+Using external Elasticsearch at:
+  http://{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}
+{{- end }}
+
+{{- if .Values.serviceAccount.create }}
+A service account has been created for the Argilla server.
+{{- end }}

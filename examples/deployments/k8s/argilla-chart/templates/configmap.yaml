@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-hosts
+data:
+  {{ if not .Values.elasticsearch.enabled }}
+    hosts: |
+    127.0.0.1 localhost
+    ::1 localhost
+    {{ .Values.configmap.minikubeIP }} {{ .Values.ingress.host }}
+  {{ end }}
+

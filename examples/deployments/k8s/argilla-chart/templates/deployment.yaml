@@ -14,15 +14,24 @@ spec:
       labels:
         {{- include "argilla.selectorLabels" . | nindent 8 }}
     spec:
+      volumes:
+        - name: hosts-file
+          configMap:
+            name: custom-hosts
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
           env:
             - name: ARGILLA_ELASTICSEARCH
-              value: "http://{{ .Release.Name }}-elasticsearch:9200"
+              value: "http://{{ .Release.Name }}-elasticsearch:9200" {{ if .Values.elasticsearch.enabled }} {{ else }} "http://{{ .Values.externalElasticsearch.host }}/{{ .Values.externalElasticsearch.path }}" {{ end }}
             - name: ARGILLA_AUTH_SECRET_KEY
               value: {{ .Values.argilla.authSecretKey | quote }}
           ports:
             - containerPort: 6900
+          volumeMounts:
+            - name: hosts-file
+              mountPath: /etc/hosts
+              subPath: hosts
+              mode: 256
           resources:
             {{- toYaml .Values.argilla.resources | nindent 12 }}

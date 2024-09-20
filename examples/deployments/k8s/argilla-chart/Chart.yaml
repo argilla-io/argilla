@@ -1,5 +1,5 @@
 apiVersion: v2
-name: argilla-chart
+name: argilla
 description: A Helm chart for Argilla Server on Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -26,3 +26,4 @@ dependencies:
   - name: elasticsearch
     version: 0.1.0
     repository: "file://../elasticsearch-chart"
+    condition: elasticsearch.enabled

@@ -34,6 +34,12 @@ spec:
           volumeMounts:
             - mountPath: /usr/share/elasticsearch/data
               name: elasticsearch-data
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health
+              port: 9200
+            initialDelaySeconds: 20
+            periodSeconds: 10
       volumes:
         - name: elasticsearch-data
           persistentVolumeClaim:
