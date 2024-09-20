@@ -28,8 +28,8 @@ def test_define_settings_from_features_text():
     assert settings.fields[0].name == "text_column"
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.TextQuestion)
-    assert settings.questions[0].name == "text_column_question"
-    assert settings.mapping == {"text_column": ("text_column", "text_column_question")}
+    assert settings.questions[0].name == "comment"
+    assert settings.mapping == {}
 
 
 def test_define_settings_from_features_image():
@@ -57,15 +57,10 @@ def test_define_settings_from_features_multiple():
     assert settings.fields[0].name == "text_column"
     assert isinstance(settings.fields[1], rg.ImageField)
     assert settings.fields[1].name == "image_column"
-    assert len(settings.questions) == 2
-    assert isinstance(settings.questions[0], rg.TextQuestion)
-    assert settings.questions[0].name == "text_column_question"
-    assert isinstance(settings.questions[1], rg.LabelQuestion)
-    assert settings.questions[1].name == "label_column"
-    assert settings.mapping == {
-        "label_column": ("label_column", "label_column_metadata"),
-        "text_column": ("text_column", "text_column_question"),
-    }
+    assert len(settings.questions) == 1
+    assert isinstance(settings.questions[0], rg.LabelQuestion)
+    assert settings.questions[0].name == "label_column"
+    assert settings.mapping == {}
 
 
 def test_mapped_question():
@@ -84,7 +79,7 @@ def test_mapped_question():
     assert settings.questions[0].name == "text_column"
     assert isinstance(settings.questions[1], rg.LabelQuestion)
     assert settings.questions[1].name == "label_column"
-    assert settings.mapping == {"label_column": ("label_column", "label_column_metadata")}
+    assert settings.mapping == {}
 
 
 def test_mapped_fields():
@@ -103,7 +98,7 @@ def test_mapped_fields():
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "label_column"
-    assert settings.mapping == {"label_column": ("label_column", "label_column_metadata")}
+    assert settings.mapping == {}
 
 
 def test_define_settings_from_features_unsupported():
@@ -116,7 +111,7 @@ def test_define_settings_from_features_unsupported():
         settings = _define_settings_from_features(features, feature_mapping={})
 
     assert len(settings.fields) == 1
-    assert len(settings.questions) == 2
+    assert len(settings.questions) == 1
 
 
 def test_define_settings_from_only_label_raises():

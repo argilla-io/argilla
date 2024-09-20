@@ -172,14 +172,11 @@ def _define_settings_from_features(
             fields.append(ChatField(name=name, required=False))
         elif feature_type == FeatureType.TEXT:
             if attribute_definition == AttributeType.QUESTION:
-                questions.append(TextQuestion(name=name))
+                questions.append(TextQuestion(name=name, required=False))
             elif attribute_definition == AttributeType.FIELD:
                 fields.append(TextField(name=name, required=False))
             elif attribute_definition is None:
-                questions.append(TextQuestion(name=f"{name}_question"))
                 fields.append(TextField(name=name, required=False))
-                mapping[name].append(name)
-                mapping[name].append(f"{name}_question")
             else:
                 raise SettingsError(
                     f"Attribute definition '{attribute_definition}' is not supported for feature '{name}'."
@@ -193,25 +190,10 @@ def _define_settings_from_features(
             if names is None:
                 warnings.warn(f"Feature '{name}' has no labels. Skipping.")
                 continue
-            if attribute_definition == AttributeType.QUESTION:
-                questions.append(
-                    LabelQuestion(
-                        name=name,
-                        labels=names,
-                    )
-                )
+            if attribute_definition == AttributeType.QUESTION or attribute_definition is None:
+                questions.append(LabelQuestion(name=name, labels=names, required=False))
             elif attribute_definition == AttributeType.FIELD:
                 metadata.append(TermsMetadataProperty(name=name))
-            elif attribute_definition is None:
-                questions.append(
-                    LabelQuestion(
-                        name=name,
-                        labels=names,
-                    )
-                )
-                metadata.append(TermsMetadataProperty(name=f"{name}_metadata"))
-                mapping[name].append(name)
-                mapping[name].append(f"{name}_metadata")
             else:
                 raise SettingsError(
                     f"Attribute definition '{attribute_definition}' is not supported for feature '{name}'."
