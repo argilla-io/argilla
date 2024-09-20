@@ -24,6 +24,7 @@ from datasets import DatasetDict
 from datasets.data_files import EmptyDatasetError
 from PIL import Image
 
+from argilla._exceptions import ImportDatasetError
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
@@ -156,7 +157,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                 dataset = cls.from_disk(
                     path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
                 )
-            except NotADirectoryError:
+            except ImportDatasetError:
                 from argilla import Settings
 
                 settings = Settings.from_hub(repo_id=repo_id)
