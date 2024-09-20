@@ -13,6 +13,13 @@ argilla:
     username: "argilla"
     password: "12345678"
 
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 2Gi
+  storageClass: "manual"
+  mountPath: "/data"
+
 ingress:
   enabled: true
   className: "nginx"

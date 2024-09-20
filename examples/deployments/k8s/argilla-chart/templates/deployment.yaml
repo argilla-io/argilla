@@ -20,6 +20,12 @@ spec:
           configMap:
             name: custom-hosts
       {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: argilla-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-argilla-pvc
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
@@ -34,6 +40,10 @@ spec:
               value: {{ .Values.argilla.auth.username }}
             - name: PASSWORD
               value: "{{ .Values.argilla.auth.password }}"
+            {{- if .Values.persistence.enabled }}
+            - name: ARGILLA_HOME_PATH
+              value: {{ .Values.persistence.mountPath}}
+            {{- end }}
           ports:
             - containerPort: 6900
           {{- if not .Values.elasticsearch.enabled }}
@@ -41,6 +51,11 @@ spec:
             - name: hosts-file
               mountPath: /etc/hosts
               subPath: hosts
+          {{- end }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: argilla-data
+              mountPath: {{ .Values.persistence.mountPath}}
           {{- end }}
           resources:
             {{- toYaml .Values.argilla.resources | nindent 12 }}
