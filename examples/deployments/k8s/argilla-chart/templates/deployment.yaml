@@ -28,6 +28,12 @@ spec:
               value: {{ if .Values.elasticsearch.enabled }}"http://{{ .Release.Name }}-elasticsearch:9200"{{ else }}"http://{{ .Values.externalElasticsearch.host }}/{{ .Values.externalElasticsearch.path }}"{{ end }}
             - name: ARGILLA_AUTH_SECRET_KEY
               value: {{ .Values.argilla.authSecretKey | quote }}
+            - name: ARGILLA_REDIS_URL
+              value: redis://{{ .Release.Name }}-redis-master:6379/0
+            - name: USERNAME
+              value: {{ .Values.argilla.auth.username }}
+            - name: PASSWORD
+              value: {{ .Values.argilla.auth.password }}
           ports:
             - containerPort: 6900
           {{- if not .Values.elasticsearch.enabled }}
