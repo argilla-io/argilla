@@ -12,23 +12,25 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import httpx
-
+from typing import List
 from datetime import datetime
 
-from argilla_server.contexts import info
-from argilla_server.models import Webhook
-from argilla_server.webhooks.v1.commons import notify_event
-from argilla_server.webhooks.v1.enums import WebhookEvent
+from rq.job import Job
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from argilla_server.jobs.webhook_jobs import enqueue_notify_events
 
 
-def notify_ping_event(webhook: Webhook) -> httpx.Response:
-    return notify_event(
-        webhook=webhook,
-        event="ping",
-        timestamp=datetime.utcnow(),
-        data={
-            "agent": "argilla-server",
-            "version": info.argilla_version(),
-        },
-    )
+class Event:
+    def __init__(self, event: str, timestamp: datetime, data: dict):
+        self.event = event
+        self.timestamp = timestamp
+        self.data = data
+
+    async def notify(self, db: AsyncSession) -> List[Job]:
+        return await enqueue_notify_events(
+            db,
+            event=self.event,
+            timestamp=self.timestamp,
+            data=self.data,
+        )

@@ -15,22 +15,24 @@
 from typing import List
 from datetime import datetime
 
+from rq.job import Job
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-
-from rq.job import Job
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Response, Record, Dataset
-from argilla_server.jobs.webhook_jobs import enqueue_notify_events
-from argilla_server.webhooks.v1.schemas import ResponseEventSchema
+from argilla_server.webhooks.v1.event import Event
 from argilla_server.webhooks.v1.enums import ResponseEvent
+from argilla_server.webhooks.v1.schemas import ResponseEventSchema
 
 
 async def notify_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> List[Job]:
-    if response_event == ResponseEvent.deleted:
-        return await _notify_response_deleted_event(db, response)
+    event = await build_response_event(db, response_event, response)
 
+    return await event.notify(db)
+
+
+async def build_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> Event:
     # NOTE: Force loading required association resources required by the event schema
     (
         await db.execute(
@@ -51,18 +53,8 @@ async def notify_response_event(db: AsyncSession, response_event: ResponseEvent,
         )
     ).scalar_one()
 
-    return await enqueue_notify_events(
-        db,
+    return Event(
         event=response_event,
         timestamp=datetime.utcnow(),
         data=ResponseEventSchema.from_orm(response).dict(),
-    )
-
-
-async def _notify_response_deleted_event(db: AsyncSession, response: Response) -> List[Job]:
-    return await enqueue_notify_events(
-        db,
-        event=ResponseEvent.deleted,
-        timestamp=datetime.utcnow(),
-        data={"id": response.id},
     )
