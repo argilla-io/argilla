@@ -21,15 +21,18 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Dataset
-from argilla_server.jobs.webhook_jobs import enqueue_notify_events
+from argilla_server.webhooks.v1.event import Event
 from argilla_server.webhooks.v1.schemas import DatasetEventSchema
 from argilla_server.webhooks.v1.enums import DatasetEvent
 
 
 async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, dataset: Dataset) -> List[Job]:
-    if dataset_event == DatasetEvent.deleted:
-        return await _notify_dataset_deleted_event(db, dataset)
+    event = await build_dataset_event(db, dataset_event, dataset)
 
+    return await event.notify(db)
+
+
+async def build_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, dataset: Dataset) -> Event:
     # NOTE: Force loading required association resources required by the event schema
     (
         await db.execute(
@@ -45,18 +48,8 @@ async def notify_dataset_event(db: AsyncSession, dataset_event: DatasetEvent, da
         )
     ).scalar_one()
 
-    return await enqueue_notify_events(
-        db,
-        event=dataset_event,
+    return Event(
+        type=dataset_event,
         timestamp=datetime.utcnow(),
         data=DatasetEventSchema.from_orm(dataset).dict(),
-    )
-
-
-async def _notify_dataset_deleted_event(db: AsyncSession, dataset: Dataset) -> List[Job]:
-    return await enqueue_notify_events(
-        db,
-        event=DatasetEvent.deleted,
-        timestamp=datetime.utcnow(),
-        data={"id": dataset.id},
     )

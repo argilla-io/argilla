@@ -15,16 +15,21 @@
 from typing import List
 from datetime import datetime
 
+from rq.job import Job
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-
-from rq.job import Job
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import Response, Record, Dataset
 from argilla_server.webhooks.v1.event import Event
+from argilla_server.webhooks.v1.enums import ResponseEvent
 from argilla_server.webhooks.v1.schemas import ResponseEventSchema
-from argilla_server.webhooks.v1.enums import ResponseEvent, WebhookEvent
+
+
+async def notify_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> List[Job]:
+    event = await build_response_event(db, response_event, response)
+
+    return await event.notify(db)
 
 
 async def build_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> Event:
@@ -53,9 +58,3 @@ async def build_response_event(db: AsyncSession, response_event: ResponseEvent, 
         timestamp=datetime.utcnow(),
         data=ResponseEventSchema.from_orm(response).dict(),
     )
-
-
-async def notify_response_event(db: AsyncSession, response_event: ResponseEvent, response: Response) -> List[Job]:
-    event = await build_response_event(db, response_event, response)
-
-    return await event.notify(db)

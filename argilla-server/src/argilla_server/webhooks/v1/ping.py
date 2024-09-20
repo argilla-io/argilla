@@ -16,8 +16,8 @@ import httpx
 
 from datetime import datetime
 
-from argilla_server.models import Webhook
 from argilla_server.contexts import info
+from argilla_server.models import Webhook
 from argilla_server.webhooks.v1.commons import notify_event
 from argilla_server.webhooks.v1.enums import WebhookEvent
 

@@ -17,13 +17,13 @@ from typing import List
 
 from rq.job import Job
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.models import Record, Dataset
 from argilla_server.webhooks.v1.event import Event
 from argilla_server.webhooks.v1.enums import RecordEvent
 from argilla_server.webhooks.v1.schemas import RecordEventSchema
-from argilla_server.models import Record, Dataset
 
 
 async def notify_record_event(db: AsyncSession, record_event: RecordEvent, record: Record) -> List[Job]:
