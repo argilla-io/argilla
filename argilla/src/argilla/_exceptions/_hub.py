@@ -11,7 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from argilla._exceptions import ArgillaError
+
+__all__ = [
+    "ImportDatasetError",
+    "DatasetsServerException",
+]
 
 
-class DatasetsServerException(Exception):
-    message: str = "Error connecting to Hugging Face Hub datasets-server API"
+class ImportDatasetError(ArgillaError):
+    def __init__(self, message: str = "Error importing dataset") -> None:
+        super().__init__(message)
+
+
+class DatasetsServerException(ArgillaError):
+    def __init__(self, message: str = "Error connecting to Hugging Face Hub datasets-server API") -> None:
+        super().__init__(message)
