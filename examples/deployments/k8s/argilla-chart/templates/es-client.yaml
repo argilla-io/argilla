@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: es-client
+  labels:
+    app: es-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: es-client
+  template:
+    metadata:
+      labels:
+        app: es-client
+    spec:
+      {{- if not .Values.elasticsearch.enabled }}
+      volumes:
+        - name: hosts-file
+          configMap:
+            name: custom-hosts
+      {{- end }}
+      containers:
+      - name: es-client
+        image: curlimages/curl:latest  # Using a curl image for simplicity
+        {{- if not .Values.elasticsearch.enabled }}
+        volumeMounts:
+          - name: hosts-file
+            mountPath: /etc/hosts
+            subPath: hosts
+        {{- end }}
+        command: ["sh", "-c", "while true; do sleep 30; done"]  # Keep container running
+        env:
+        - name: ELASTICSEARCH_URL
+          value: "http://argilla.local/es"  # Assuming you created this service for the Ingress
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - curl -s -o /dev/null -w "%{http_code}" $ELASTICSEARCH_URL/_cluster/health | grep 200
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3

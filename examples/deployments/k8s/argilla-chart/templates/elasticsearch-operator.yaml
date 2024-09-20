@@ -1,0 +1,28 @@
+{{- if and .Values.elasticsearch.useOperator }}
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: {{ include "argilla.fullname" . }}
+spec:
+  version: {{ .Values.elasticsearch.version }}
+  nodeSets:
+  - name: default
+    count: {{ .Values.elasticsearch.nodeCount }}
+    config:
+      node.store.allow_mmap: false
+      {{- if .Values.elasticsearch.disableAuthentication }}
+      xpack.security.enabled: false
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+      {{- end }}
+  {{- if .Values.elasticsearch.disableAuthentication }}
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  {{- end }}
+  {{- with .Values.elasticsearch.resources }}
+  resources:
+    {{- toYaml . | nindent 6 }}
+  {{- end }}
+{{- end }}

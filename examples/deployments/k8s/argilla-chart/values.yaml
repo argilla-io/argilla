@@ -11,7 +11,7 @@ argilla:
   authSecretKey: "CHANGE_ME"
   auth:
     username: "argilla"
-    password: 12345678
+    password: "12345678"
 
 ingress:
   enabled: true
@@ -28,7 +28,18 @@ hpa:
   targetCPUUtilizationPercentage: 50
 
 elasticsearch:
-  enabled: true
+  enabled: false
+  useOperator: true
+  version: 8.5.3
+  nodeCount: 1
+  disableAuthentication: true
+  resources:
+    requests:
+      cpu: 0.25
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
 
 
 externalElasticsearch:
