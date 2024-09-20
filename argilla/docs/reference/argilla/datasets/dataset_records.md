@@ -201,11 +201,27 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
 !!! note "As PIL objects"
     To retrieve the images as rescaled PIL objects, you can use the `to_datasets` method when exporting the records, as shown in this [how-to guide](../../../how_to_guides/import_export.md).
 
-=== "From a data structure with local file paths"
+
+=== "From a data structure with remote URLs"
 
     ```python
+    data = [
+        {
+            "image": "https://example.com/image1.jpg",
+        },
+        {
+            "image": "https://example.com/image2.jpg",
+        },
+    ]
 
+    dataset.records.log(data)
+    ```
+
+=== "From a data structure with local files or PIL objects"
+
+    ```python
     import os
+    from PIL import Image
 
     image_dir = "path/to/images"
 
@@ -214,14 +230,15 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
             "image": os.path.join(image_dir, "image1.jpg"), # (1)
         },
         {
-            "image": os.path.join(image_dir, "image2.jpg"),
+            "image": Image.open(os.path.join(image_dir, "image2.jpg")), # (2)
         },
     ]
 
     dataset.records.log(data)
     ```
 
-    1. The image can be referenced as either a remote URL, a local file path, or a PIL object.
+    1. The image is a local file path.
+    2. The image is a PIL object.
 
 === "From a Hugging Face dataset"
 

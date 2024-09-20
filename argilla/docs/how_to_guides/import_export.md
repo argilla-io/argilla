@@ -120,27 +120,43 @@ dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>")
 
 The `rg.Dataset.from_hub` method loads the configuration and records from the dataset repo. If you only want to load records, you can pass a `datasets.Dataset` object to the `rg.Dataset.log` method. This enables you to configure your own dataset and reuse existing Hub datasets. See the [guide on records](record.md) for more information.
 
+
 !!! note "With or without records"
 
-    The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the dataset settings and/or records.
+    The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the records.
 
     ```python
     dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", with_records=False)
-    ```
-
-    With the dataset's configuration, you could then make changes to the dataset. For example, you could adapt the dataset's settings for a different task:
-
-    ```python
-    dataset.settings.questions = [rg.TextQuestion(name="answer")]
-    dataset.update()
     ```
 
     You could then log the dataset's records using the `load_dataset` method of the `datasets` package and pass the dataset to the `rg.Dataset.log` method.
 
     ```python
     hf_dataset = load_dataset("<my_org>/<my_dataset>")
-    dataset.records.log(hf_dataset)
+    dataset.records.log(hf_dataset) # (1)
     ```
+
+    1. You could also use the `mapping` parameter to map record field names to argilla field and question names.
+
+
+#### Import settings from Hub
+
+When importing datasets from the hub, Argilla will load settings from the hub in three ways:
+
+1. If the dataset was pushed to hub by Argilla, then the settings will be loaded from the hub via the configuration file.
+2. If the dataset was loaded by another source, then Argilla will define the settings based on the dataset's features in `datasets.Features`. For example, creating a `TextField` for a text feature or a `LabelQuestion` for a label class.
+3. You can pass a custom `rg.Settings` object to the `rg.Dataset.from_hub` method via the `settings` parameter. This will override the settings loaded from the hub.
+
+```python
+settings = rg.Settings(
+    fields=[rg.TextField(name="text")],
+    questions=[rg.TextQuestion(name="answer")]
+) # (1)
+
+dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", settings=settings)
+```
+
+1. The settings that you pass to the `rg.Dataset.from_hub` method will override the settings loaded from the hub, and need to align with the dataset being loaded.
 
 ### Local Disk
 
