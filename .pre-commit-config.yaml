@@ -3,7 +3,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-yaml
-        exclude: argilla/mkdocs.yml|examples/deployments/k8s|@k8s
+        exclude: argilla/mkdocs.yml|examples/deployments/k8s
       - id: end-of-file-fixer
         exclude_types: [text, jupyter]
       - id: trailing-whitespace
@@ -79,8 +79,8 @@ repos:
     hooks:
       - id: helmlint
         name: Helm lint
-        files: '^@k8s/.*\.yaml$'
-        args: ['helm', 'lint']
+        files: '^examples/deployments/k8s/.*\.yaml$'
+        args: ['helm', 'lint','examples/deployments/k8s/']
 
 ci:
   autofix_commit_msg: |

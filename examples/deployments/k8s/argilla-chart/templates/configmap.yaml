@@ -4,9 +4,8 @@ metadata:
   name: custom-hosts
 data:
   {{ if not .Values.elasticsearch.enabled }}
-    hosts: |
+  hosts: |
     127.0.0.1 localhost
     ::1 localhost
     {{ .Values.configmap.minikubeIP }} {{ .Values.ingress.host }}
   {{ end }}
-
