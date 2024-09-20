@@ -1,9 +1,0 @@
-argilladeployment:
-  elasticurl: http://elasticsearch:9200
-  name: ARGILLA_ELASTICSEARCH
-
-replicas:
-  min: 1
-  max: 3
-
-enableOptionalResource: true
