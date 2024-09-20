@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
+from typing import Any, Dict, List, Optional, Tuple, Union, Literal
 import uuid
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-from pydantic import Field, field_serializer, field_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator
 
 from argilla._models._record._metadata import MetadataModel, MetadataValue
 from argilla._models._record._response import UserResponseModel
@@ -25,7 +26,15 @@ from argilla._models._resource import ResourceModel
 
 __all__ = ["RecordModel", "FieldValue"]
 
-FieldValue = Union[str, None]
+
+class ChatFieldValue(BaseModel):
+    """Schema for the chat field values of a `Record`"""
+
+    role: str
+    content: str
+
+
+FieldValue = Union[str, None, List[ChatFieldValue]]
 
 
 class RecordModel(ResourceModel):
@@ -54,10 +63,15 @@ class RecordModel(ResourceModel):
         return {metadata.name: metadata.value for metadata in value}
 
     @field_serializer("fields", when_used="always")
-    def serialize_empty_fields(self, value: Dict[str, Union[str, None]]) -> Optional[Dict[str, Union[str, None]]]:
+    def serialize_fields(
+        self, value: Dict[str, Union[str, None, List[Dict[str, str]]]]
+    ) -> Optional[Dict[str, Union[str, None, List[Dict[str, str]]]]]:
         """Serialize empty fields to None."""
         if isinstance(value, dict) and len(value) == 0:
             return None
+        for field_name, field_value in value.items():
+            if isinstance(field_value, list) and all(isinstance(chat_field, dict) for chat_field in field_value):
+                value[field_name] = [chat_field.model_dump() for chat_field in field_value]
         return value
 
     @field_validator("metadata", mode="before")
@@ -69,6 +83,35 @@ class RecordModel(ResourceModel):
         if isinstance(metadata, dict):
             return [MetadataModel(name=key, value=value) for key, value in metadata.items()]
         return metadata
+
+    @field_validator("fields", mode="before")
+    @classmethod
+    def validate_fields(cls, fields: Dict[str, Union[str, None, List[Dict[str, str]]]]) -> Dict[str, FieldValue]:
+        """Ensure fields are a dictionary of field names and values."""
+        return {field_name: cls._validate_field_value(field_value) for field_name, field_value in fields.items()}
+
+    @classmethod
+    def _validate_field_value(cls, field_value: Union[str, None, List[Dict[str, str]]]) -> FieldValue:
+        if isinstance(field_value, list):
+            if all(isinstance(message, dict) for message in field_value):
+                return cls._validate_chat_field(field_value)
+            else:
+                raise ValueError("Field is not valid. List field values must contain dictionaries.")
+        return field_value
+
+    @classmethod
+    def _validate_chat_field(cls, chat_field: List[Dict[str, str]]) -> List[ChatFieldValue]:
+        validated_chat_field_values = []
+        for message in chat_field:
+            if "role" not in message or "content" not in message:
+                raise ValueError("Chat field values must contain 'role' and 'content' keys.")
+            if not all(key in ["role", "content"] for key in message.keys()):
+                warnings.warn(
+                    "Chat field values should only contain 'role' and 'content' keys. Other keys will be ignored by Argilla."
+                )
+                message = {key: value for key, value in message.items() if key in ["role", "content"]}
+            validated_chat_field_values.append(ChatFieldValue(**message))
+        return validated_chat_field_values
 
     @field_validator("external_id", mode="before")
     @classmethod

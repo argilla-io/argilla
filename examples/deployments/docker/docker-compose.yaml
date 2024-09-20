@@ -6,9 +6,7 @@ x-common-variables: &common-variables
 
 services:
   argilla:
-    # image: argilla/argilla-server:latest
-    # TODO: Change this to use latest version of Argilla Server once it's working
-    image: argilladev/argilla-server:develop
+    image: argilla/argilla-server:latest
     restart: unless-stopped
     ports:
       - "6900:6900"
@@ -35,8 +33,7 @@ services:
       - redis
 
   worker:
-    # TODO: Change this to use latest version of Argilla Server once it's working
-    image: argilladev/argilla-server:develop
+    image: argilla/argilla-server:latest
     environment:
       <<: *common-variables
       BACKGROUND_NUM_WORKERS: 2
