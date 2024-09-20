@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 import warnings
 from collections import defaultdict
@@ -21,12 +22,15 @@ from uuid import UUID
 
 from datasets import DatasetDict
 from datasets.data_files import EmptyDatasetError
+from PIL import Image
 
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
-from argilla.datasets._export._disk import DiskImportExportMixin
+from argilla._helpers._media import pil_to_data_uri
+from argilla.datasets._io._disk import DiskImportExportMixin
 from argilla.records._mapping import IngestedRecordMapper
+from argilla.records._io._datasets import HFDatasetsIO
 from argilla.responses import Response
 
 if TYPE_CHECKING:
@@ -57,7 +61,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         from huggingface_hub import DatasetCardData, HfApi
 
-        from argilla.datasets._export.card import (
+        from argilla.datasets._io.card import (
             ArgillaDatasetCard,
             size_categories_parser,
         )
@@ -78,15 +82,11 @@ class HubImportExportMixin(DiskImportExportMixin):
 
             if generate_card:
                 sample_argilla_record = next(iter(self.records(with_suggestions=True, with_responses=True)))
-                if hfds:
-                    sample_huggingface_record = hfds[0]
-                    size_categories = len(hfds)
-                else:
-                    sample_huggingface_record = "No sample records provided"
-                    size_categories = 0
+                sample_huggingface_record = self._get_sample_hf_record(hfds) if with_records else None
+                dataset_size = len(hfds) if with_records else 0
                 card = ArgillaDatasetCard.from_template(
                     card_data=DatasetCardData(
-                        size_categories=size_categories_parser(size_categories),
+                        size_categories=size_categories_parser(dataset_size),
                         tags=["rlfh", "argilla", "human-feedback"],
                     ),
                     repo_id=repo_id,
@@ -116,6 +116,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         client: Optional["Argilla"] = None,
         with_records: bool = True,
         settings: Optional["Settings"] = None,
+        split: Optional[str] = None,
         **kwargs: Any,
     ):
         """Loads a `Dataset` from the Hugging Face Hub.
@@ -126,6 +127,8 @@ class HubImportExportMixin(DiskImportExportMixin):
             workspace (Union[Workspace, str], optional): The workspace to import the dataset to. Defaults to None and default workspace is used.
             client: the client to use to load the `Dataset`. If not provided, the default client will be used.
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
+            settings: the settings to use to load the `Dataset`. If not provided, the settings will be loaded from the Hugging Face dataset.
+            split: the split to load from the Hugging Face dataset. If not provided, the first split will be loaded.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
@@ -141,22 +144,42 @@ class HubImportExportMixin(DiskImportExportMixin):
             dataset = cls(name=name, settings=settings)
             dataset.create()
         else:
-            # download configuration files from the hub
-            folder_path = snapshot_download(
-                repo_id=repo_id,
-                repo_type="dataset",
-                allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
-                token=kwargs.get("token"),
-            )
+            try:
+                # download configuration files from the hub
+                folder_path = snapshot_download(
+                    repo_id=repo_id,
+                    repo_type="dataset",
+                    allow_patterns=cls._DEFAULT_CONFIGURATION_FILES,
+                    token=kwargs.get("token"),
+                )
 
-            dataset = cls.from_disk(
-                path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
-            )
+                dataset = cls.from_disk(
+                    path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
+                )
+            except NotADirectoryError:
+                from argilla import Settings
+
+                settings = Settings.from_hub(repo_id=repo_id)
+                dataset = cls.from_hub(
+                    repo_id=repo_id,
+                    name=name,
+                    workspace=workspace,
+                    client=client,
+                    with_records=with_records,
+                    settings=settings,
+                    split=split,
+                    **kwargs,
+                )
+                return dataset
 
         if with_records:
             try:
-                hf_dataset = load_dataset(path=repo_id, **kwargs)  # type: ignore
-                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, **kwargs)
+                hf_dataset = load_dataset(
+                    path=repo_id,
+                    split=split,
+                    **kwargs,
+                )  # type: ignore
+                hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, split=split, **kwargs)
                 cls._log_dataset_records(hf_dataset=hf_dataset, dataset=dataset)
             except EmptyDatasetError:
                 warnings.warn(
@@ -202,6 +225,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         # Extract responses and create Record objects
         records = []
+        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset)
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
             for question_name, values in response_questions.items():
@@ -249,3 +273,27 @@ class HubImportExportMixin(DiskImportExportMixin):
                 )
             hf_dataset = hf_dataset[split]
         return hf_dataset
+
+    @staticmethod
+    def _get_sample_hf_record(hf_dataset: "HFDataset") -> Dict:
+        """Get a sample record from a Hugging Face dataset.
+
+        Parameters:
+            hf_dataset (HFDataset): The Hugging Face dataset to get a sample record from.
+
+        Returns:
+            Dict: The sample record.
+        """
+
+        if hf_dataset:
+            sample_huggingface_record = {}
+            for key, value in hf_dataset[0].items():
+                try:
+                    json.dumps(value)
+                    sample_huggingface_record[key] = value
+                except TypeError:
+                    if isinstance(value, Image.Image):
+                        sample_huggingface_record[key] = pil_to_data_uri(value)
+                    else:
+                        sample_huggingface_record[key] = "Record value is not serializable"
+            return sample_huggingface_record

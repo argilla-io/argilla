@@ -16,6 +16,14 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
+
+### Added
+
+- Added filtering by `name`, and `status` support to endpoint `GET /api/v1/me/datasets`. ([#5374](https://github.com/argilla-io/argilla/pull/5374))
+
+## [2.2.0]()
+
 ### Added
 
 - Added [`rq`](https://python-rq.org) library to process background jobs using [Redis](https://redis.io) as a dependency. ([#5432](https://github.com/argilla-io/argilla/pull/5432))

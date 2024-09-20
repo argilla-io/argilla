@@ -78,9 +78,9 @@ export default {
     height: 100%;
     overflow-y: hidden;
     overflow-x: scroll;
+    text-align: center;
     img {
-      min-width: fit-content;
-      min-height: fit-content;
+      max-width: 100%;
     }
   }
 

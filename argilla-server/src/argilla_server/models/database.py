@@ -386,6 +386,11 @@ class Dataset(DatabaseModel):
     def distribution_strategy(self) -> DatasetDistributionStrategy:
         return DatasetDistributionStrategy(self.distribution["strategy"])
 
+    def field_by_name(self, name: str) -> Union["Field", None]:
+        for field in self.fields:
+            if field.name == name:
+                return field
+
     def metadata_property_by_name(self, name: str) -> Union["MetadataProperty", None]:
         for metadata_property in self.metadata_properties:
             if metadata_property.name == name:
@@ -476,16 +481,6 @@ class User(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=Response.inserted_at.asc(),
-    )
-    datasets: Mapped[List["Dataset"]] = relationship(
-        secondary="workspaces_users",
-        primaryjoin="User.id == WorkspaceUser.user_id",
-        secondaryjoin=and_(
-            Workspace.id == Dataset.workspace_id,
-            WorkspaceUser.workspace_id == Workspace.id,
-        ),
-        viewonly=True,
-        order_by=Dataset.inserted_at.asc(),
     )
 
     @property
