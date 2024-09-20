@@ -37,7 +37,7 @@ def notify_event(webhook: WebhookModel, event: str, timestamp: datetime, data: D
 
     return httpx.post(
         webhook.url,
-        headers=_build_headers(msg_id, timestamp, signature),
+        headers=_build_headers(msg_id, signature),
         content=payload,
         timeout=NOTIFY_EVENT_DEFAULT_TIMEOUT,
     )
@@ -47,10 +47,10 @@ def _generate_msg_id() -> str:
     return f"msg_{secrets.token_urlsafe(MSG_ID_BYTES_LENGTH)}"
 
 
-def _build_headers(msg_id: str, timestamp: datetime, signature: str) -> Dict:
+def _build_headers(msg_id: str, signature: str) -> Dict:
     return {
         "webhook-id": msg_id,
-        "webhook-timestamp": str(floor(timestamp.replace(tzinfo=timezone.utc).timestamp())),
+        "webhook-timestamp": str(floor(datetime.utcnow().replace(tzinfo=timezone.utc).timestamp())),
         "webhook-signature": signature,
         "content-type": "application/json",
     }
