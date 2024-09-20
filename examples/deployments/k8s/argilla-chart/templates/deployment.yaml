@@ -14,10 +14,12 @@ spec:
       labels:
         {{- include "argilla.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if not .Values.elasticsearch.enabled }}
       volumes:
         - name: hosts-file
           configMap:
             name: custom-hosts
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
@@ -28,9 +30,11 @@ spec:
               value: {{ .Values.argilla.authSecretKey | quote }}
           ports:
             - containerPort: 6900
+          {{- if not .Values.elasticsearch.enabled }}
           volumeMounts:
             - name: hosts-file
               mountPath: /etc/hosts
               subPath: hosts
+          {{- end }}
           resources:
             {{- toYaml .Values.argilla.resources | nindent 12 }}

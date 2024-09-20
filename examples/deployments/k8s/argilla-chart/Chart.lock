@@ -2,5 +2,5 @@ dependencies:
 - name: elasticsearch
   repository: file://../elasticsearch-chart
   version: 0.1.0
-digest: sha256:90a85839b3c964d22d94f0c17a673933fd9339c51837f71b5e9e83fd711629ad
-generated: "2024-09-18T12:02:22.945615+05:30"
+digest: sha256:1490ac2fa578c635286589c9b81d2429786f418df724a11c508551eee5ef19f8
+generated: "2024-09-20T10:54:44.222649+05:30"

@@ -25,7 +25,7 @@ hpa:
   targetCPUUtilizationPercentage: 50
 
 elasticsearch:
-  enabled: false
+  enabled: true
 
 externalElasticsearch:
   host: "argilla.local"
