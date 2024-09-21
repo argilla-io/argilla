@@ -26,3 +26,29 @@ Elasticsearch is running as a dependency of this chart. You can access it at:
 Using external Elasticsearch at:
   http://{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}
 {{- end }}
+
+{{- if .Values.argilla.persistence.enabled }}
+Persistence for Argilla is enabled. Your Argilla data will be stored in a Persistent Volume Claim named:
+  {{ .Release.Name }}-argilla-pvc
+{{- end }}
+
+{{- if .Values.elasticsearch.persistence.enabled }}
+Persistence for Elasticsearch is enabled. Your Elasticsearch data will be stored in a Persistent Volume Claim named:
+  {{ .Release.Name }}-elasticsearch-pvc
+{{- end }}
+
+{{- if .Values.redis.master.persistence.enabled }}
+Persistence for Redis is enabled. Your Redis data will be stored in a Persistent Volume Claim named:
+  {{ .Release.Name }}-redis-pvc
+{{- end }}
+{{- if and (not .Values.redis.master.persistence.enabled) (not .Values.elasticsearch.persistence.enabled) (not .Values.argilla.persistence.enabled)}}
+Persistence is disabled. Your data will not be preserved across pod restarts.
+{{- end }}
+
+{{- if .Values.redis.enabled }}
+Redis is running as a dependency of this chart. You can access it at:
+  {{ .Release.Name }}-redis-master:6379
+{{- else }}
+Using external Redis at:
+  {{ .Values.externalRedis.host }}:{{ .Values.externalRedis.port }}
+{{- end }}

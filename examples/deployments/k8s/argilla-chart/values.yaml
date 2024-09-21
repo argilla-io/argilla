@@ -45,10 +45,12 @@ elasticsearch:
     limits:
       cpu: 1
       memory: 2Gi
-  storage:
-    size: 1Gi
-    storageClass: "standard"
-    accessModes:
+  persistence:
+    enabled: true
+    storage:
+      size: 1Gi
+      storageClass: "standard"
+      accessModes:
       - ReadWriteOnce
 
 externalElasticsearch:

@@ -23,9 +23,9 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: {{ .Values.elasticsearch.storage.size }}
-        {{- if .Values.elasticsearch.storage.storageClass }}
-        storageClassName: {{ .Values.elasticsearch.storage.storageClass }}
+            storage: {{ .Values.elasticsearch.persistence.storage.size }}
+        {{- if .Values.elasticsearch.persistence.storage.storageClass }}
+        storageClassName: {{ .Values.elasticsearch.persistence.storage.storageClass }}
         {{- end }}
   {{- if .Values.elasticsearch.disableAuthentication }}
   http:
