@@ -1,9 +1,6 @@
 dependencies:
-- name: elasticsearch
-  repository: file://../elasticsearch-chart
-  version: 0.1.0
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 17.3.14
-digest: sha256:8280715497a367961e1a03e3b08d2163031db2b442385f4089cacd1c2060acff
-generated: "2024-09-20T11:52:23.603708+05:30"
+digest: sha256:71d2c604edd00d02c85a62e0da12f7a481cec0bd2ebc6cf8dce5544c9595da5a
+generated: "2024-09-21T08:31:14.356995+05:30"

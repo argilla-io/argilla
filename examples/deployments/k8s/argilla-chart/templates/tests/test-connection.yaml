@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['http://{{ .Values.ingress.host }}']
+      args: ['http://{{ .Values.argilla.ingress.host }}']
   restartPolicy: Never

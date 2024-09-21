@@ -7,9 +7,9 @@ To learn more about the release, try:
   $ helm status {{ .Release.Name }}
   $ helm get all {{ .Release.Name }}
 
-{{- if .Values.ingress.enabled }}
+{{- if .Values.argilla.ingress.enabled }}
 You can access the Argilla server at:
-  http://{{ .Values.ingress.host }}
+  http://{{ .Values.argilla.ingress.host }}
 {{- else }}
 To access the Argilla server, run these commands:
 
@@ -19,14 +19,10 @@ To access the Argilla server, run these commands:
 Then access the Argilla server at http://localhost:6900
 {{- end }}
 
-{{- if .Values.elasticsearch.enabled }}
+{{- if .Values.elasticsearch.useOperator }}
 Elasticsearch is running as a dependency of this chart. You can access it at:
   http://{{ .Release.Name }}-elasticsearch:9200
 {{- else }}
 Using external Elasticsearch at:
   http://{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}
-{{- end }}
-
-{{- if .Values.serviceAccount.create }}
-A service account has been created for the Argilla server.
 {{- end }}

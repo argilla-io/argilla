@@ -1,4 +1,4 @@
-{{- if .Values.hpa.enabled }}
+{{- if .Values.argilla.hpa.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -10,13 +10,13 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "argilla.fullname" . }}
-  minReplicas: {{ .Values.hpa.minReplicas }}
-  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  minReplicas: {{ .Values.argilla.hpa.minReplicas }}
+  maxReplicas: {{ .Values.argilla.hpa.maxReplicas }}
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}
+        averageUtilization: {{ .Values.argilla.hpa.targetCPUUtilizationPercentage }}
 {{- end }}

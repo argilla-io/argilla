@@ -1,4 +1,4 @@
-{{- if not .Values.elasticsearch.enabled }}
+{{- if not .Values.elasticsearch.useOperator }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

@@ -23,10 +23,6 @@ version: 0.1.0
 # It is recommended to use it with quotes.
 appVersion: "latest"
 dependencies:
-  - name: elasticsearch
-    version: 0.1.0
-    repository: "file://../elasticsearch-chart"
-    condition: elasticsearch.enabled
   - name: redis
     version: "17.3.14"
     repository: "https://charts.bitnami.com/bitnami"

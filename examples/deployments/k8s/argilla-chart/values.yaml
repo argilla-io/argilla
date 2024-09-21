@@ -12,30 +12,28 @@ argilla:
   auth:
     username: "argilla"
     password: "12345678"
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 2Gi
+    storageClass: "standard"
+    mountPath: "/data"
+  ingress:
+    enabled: true
+    className: "nginx"
+    host: "argilla.local"
+  configmap:
+    minikubeIP: "192.168.64.2"
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 50
 
-persistence:
-  enabled: true
-  accessMode: ReadWriteOnce
-  size: 2Gi
-  storageClass: "manual"
-  mountPath: "/data"
-
-ingress:
-  enabled: true
-  className: "nginx"
-  host: "argilla.local"
-
-configmap:
-  minikubeIP: "192.168.64.2"
-
-hpa:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 50
-
+# Elasticsearch installation is enabled by default.
+# To disable it, set `elasticsearch.useOperator` to `false`
+# and set `externalElasticsearch.host` to the host of your existing Elasticsearch instance.
 elasticsearch:
-  enabled: false
   useOperator: true
   version: 8.5.3
   nodeCount: 1
@@ -47,7 +45,11 @@ elasticsearch:
     limits:
       cpu: 1
       memory: 2Gi
-
+  storage:
+    size: 1Gi
+    storageClass: "standard"
+    accessModes:
+      - ReadWriteOnce
 
 externalElasticsearch:
   host: "argilla.local"
@@ -59,6 +61,19 @@ redis:
   architecture: standalone
   auth:
     enabled: false
-
+  master:
+    persistence:
+      enabled: true
+      storageClass: "standard"
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+      resources:
+        requests:
+          cpu: 0.25
+          memory: 1Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
 serviceAccount:
   create: false

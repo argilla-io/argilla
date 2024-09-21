@@ -1,18 +1,18 @@
-{{- if .Values.ingress.enabled }}
+{{- if .Values.argilla.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "argilla.fullname" . }}
   labels:
     {{- include "argilla.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  {{- with .Values.argilla.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: {{ .Values.ingress.className }}
+  ingressClassName: {{ .Values.argilla.ingress.className }}
   rules:
-    - host: {{ .Values.ingress.host | quote }}
+    - host: {{ .Values.argilla.ingress.host | quote }}
       http:
         paths:
           - path: /

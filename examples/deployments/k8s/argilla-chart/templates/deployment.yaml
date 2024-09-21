@@ -14,13 +14,13 @@ spec:
       labels:
         {{- include "argilla.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if not .Values.elasticsearch.enabled }}
+      {{- if not .Values.elasticsearch.useOperator }}
       volumes:
         - name: hosts-file
           configMap:
             name: custom-hosts
       {{- end }}
-      {{- if .Values.persistence.enabled }}
+      {{- if .Values.argilla.persistence.enabled }}
       volumes:
         - name: argilla-data
           persistentVolumeClaim:
@@ -31,7 +31,8 @@ spec:
           image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
           env:
             - name: ARGILLA_ELASTICSEARCH
-              value: "http://{{ include "argilla.fullname" . }}-es-http:9200"
+              # TODO: modify this to use externalElasticsearch.host if elasticsearch.useOperator is false
+              value: {{if .Values.elasticsearch.useOperator}}"http://{{ include "argilla.fullname" . }}-es-http:9200"{{else}}"{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}"{{end}}
             - name: ARGILLA_AUTH_SECRET_KEY
               value: {{ .Values.argilla.authSecretKey | quote }}
             - name: ARGILLA_REDIS_URL
@@ -40,22 +41,22 @@ spec:
               value: {{ .Values.argilla.auth.username }}
             - name: PASSWORD
               value: "{{ .Values.argilla.auth.password }}"
-            {{- if .Values.persistence.enabled }}
+            {{- if .Values.argilla.persistence.enabled }}
             - name: ARGILLA_HOME_PATH
-              value: {{ .Values.persistence.mountPath}}
+              value: {{ .Values.argilla.persistence.mountPath}}
             {{- end }}
           ports:
             - containerPort: 6900
-          {{- if not .Values.elasticsearch.enabled }}
+          {{- if not .Values.elasticsearch.useOperator }}
           volumeMounts:
             - name: hosts-file
               mountPath: /etc/hosts
               subPath: hosts
           {{- end }}
-          {{- if .Values.persistence.enabled }}
+          {{- if .Values.argilla.persistence.enabled }}
           volumeMounts:
             - name: argilla-data
-              mountPath: {{ .Values.persistence.mountPath}}
+              mountPath: {{ .Values.argilla.persistence.mountPath}}
           {{- end }}
           resources:
             {{- toYaml .Values.argilla.resources | nindent 12 }}

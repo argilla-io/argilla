@@ -15,6 +15,18 @@ spec:
       xpack.security.http.ssl.enabled: false
       xpack.security.transport.ssl.enabled: false
       {{- end }}
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.elasticsearch.storage.size }}
+        {{- if .Values.elasticsearch.storage.storageClass }}
+        storageClassName: {{ .Values.elasticsearch.storage.storageClass }}
+        {{- end }}
   {{- if .Values.elasticsearch.disableAuthentication }}
   http:
     tls:
