@@ -87,6 +87,7 @@ class TestChatField:
         assert field.template == "template"
         assert field.advanced is False
 
+
 class TestFieldsAPI:
     def test_create_field(self, httpx_mock: HTTPXMock):
         # TODO: Add a test for the delete method in client
