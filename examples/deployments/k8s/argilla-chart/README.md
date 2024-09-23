@@ -96,7 +96,7 @@ helm unittest --help
 To execute the unit tests for this chart, run the following command from the root of the chart directory:
 
 ```bash
-helm unittest .
+helm unittest examples/deployments/k8s/argilla-chart
 ```
 
 This will run all the test files located in the `tests/` directory of the chart.
