@@ -85,8 +85,11 @@ class Record(BaseModel):
         getter_dict = RecordGetterDict
 
 
+FieldValueCreate = Union[List[ChatFieldValue], Dict[StrictStr, StrictStr], StrictStr, None]
+
+
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[Dict[StrictStr, StrictStr], List[ChatFieldValue], StrictStr, None]]
+    fields: Dict[str, FieldValueCreate]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
