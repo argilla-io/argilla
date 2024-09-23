@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from datetime import datetime
-from re import S
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
@@ -85,8 +84,11 @@ class Record(BaseModel):
         getter_dict = RecordGetterDict
 
 
+FieldValueCreate = Union[List[ChatFieldValue], Dict[StrictStr, Any], StrictStr, None]
+
+
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[Dict[StrictStr, StrictStr], List[ChatFieldValue], StrictStr, None]]
+    fields: Dict[str, FieldValueCreate]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
@@ -164,7 +166,6 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[Dict[StrictStr, StrictStr], List[ChatFieldValue], StrictStr, None]]]
 
 
 class RecordIncludeParam(BaseModel):
