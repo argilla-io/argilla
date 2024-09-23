@@ -18,7 +18,7 @@ import argilla as rg
 from argilla._models import MetadataFieldModel, TermsMetadataPropertySettings
 
 
-class TestTermsMetadata:
+class TestMetadata:
     def test_create_metadata_terms(self):
         property = rg.TermsMetadataProperty(
             title="A metadata property", name="metadata", options=["option1", "option2"]
@@ -81,3 +81,11 @@ class TestTermsMetadata:
         assert property.name == "metadata"
         assert property.visible_for_annotators is True
         assert property.options == ["option1", "option2"]
+
+    def test_create_integer_metadata_with_visible_for_annotators(self):
+        metadata = rg.IntegerMetadataProperty(name="integer", min=10, visible_for_annotators=False)
+        assert metadata.visible_for_annotators is False
+
+    def test_create_float_metadata_with_visible_for_annotators(self):
+        metadata = rg.FloatMetadataProperty(name="integer", min=3.5, max=10.5, visible_for_annotators=False)
+        assert metadata.visible_for_annotators is False

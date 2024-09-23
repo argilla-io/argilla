@@ -64,7 +64,7 @@ export default {
   width: $base-space * 4;
   height: $base-space * 4;
   border-radius: 50%;
-  border: 5px solid palette(apricot);
+  border: 5px solid var(--color-brand-secondary);
   border-top-color: transparent;
   animation-name: spin;
   animation-iteration-count: infinite;
@@ -93,7 +93,7 @@ export default {
       mask: radial-gradient(
         farthest-side,
         transparent calc(100% - 3px),
-        palette(white) calc(100% - 3px + 1px)
+        var(--color-white) calc(100% - 3px + 1px)
       );
     }
   }

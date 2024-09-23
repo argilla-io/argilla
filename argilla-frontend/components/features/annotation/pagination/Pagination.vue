@@ -110,7 +110,7 @@ export default {
     justify-content: center;
     padding: $base-space;
     &:hover:not([disabled]) {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
 }

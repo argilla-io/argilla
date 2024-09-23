@@ -4,6 +4,7 @@ export default {
   label_selection: "Label",
   span: "Span",
   text: "Text",
+  image: "Bild",
   rating: "Bewertung",
   minimize: "Minimieren",
   select: "Auswählen",
@@ -12,7 +13,6 @@ export default {
   searchDatasets: "Durchsuche Datensätze",
   expand: "Erweitern",
   copied: "Kopiert",
-  copyClipboard: "In Zwischenablage kopieren",
   copyLink: "Link kopieren",
   copyRecord: "Eintrag kopieren",
   refresh: "Refresh",
@@ -31,6 +31,21 @@ export default {
   annotationGuidelines: "Annotationsrichtlinien",
   guidelines: "Richtlinien",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
+  required: "Erforderlich",
+  optional: "Optional",
+  noRecordsMessages: {
+    datasetEmptyForAnnotator:
+      "Der Datensatz ist leer. Bitten fragen Sie einen Admin, Einträge Hinzufügen und kommst du bald wieder.",
+    datasetEmptyForAdmin:
+      "Der Datensatz ist leer. Du kannst Einträgen mit dem Python SDK hinzufügen, siehe <a href='https://docs.argilla.io/latest/how_to_guides/record/'>dokumentation</a> zum Hinzufügen von Einträgen.",
+    taskDistributionCompleted: "🎉 Die Aufgabe ist erledigt!",
+    noSubmittedRecords: "Sie haben noch keinen Datensatz eingereicht",
+    noRecordsFound: "Sie haben keine {status}, die Ihrer Anfrage entsprechen",
+    noRecords: "Sie haben keine {status} Datensätze",
+    noPendingRecordsToAnnotate: "🎉 Die Aufgabe ist erledigt!",
+    noDraftRecordsToReview:
+      "Sie haben keine Entwürfe von Aufzeichnungen zu prüfen",
+  },
   breadcrumbs: {
     home: "start",
     datasetSettings: "einstellungen",
@@ -42,11 +57,11 @@ export default {
     pending: "Ausstehend",
   },
   recordStatus: {
-    pending: "Ausstehend",
-    draft: "Entwurf",
-    discarded: "Verworfen",
-    submitted: "Gesichert",
-    validated: "Validiert",
+    pending: "ausstehend",
+    draft: "entwurf",
+    discarded: "verworfen",
+    submitted: "gesichert",
+    validated: "validiert",
     completedTooltip:
       "Der Datensatz ist abgeschlossen, es hat die Anzahl der Antworten.",
   },
@@ -61,6 +76,7 @@ export default {
     apiKey: "API key",
     apiKeyDescription:
       "API key Token erlauben es die Datensätze über das Python SDK zu verwalten.",
+    theme: "Theme",
     copyKey: "API key kopieren",
   },
   userAvatarTooltip: {
@@ -84,6 +100,7 @@ export default {
     yesDelete: "Ja, löschen",
     write: "Bearbeiten",
     preview: "Vorschau",
+    uiPreview: "UI Vorschau",
   },
   button: {
     ignore_and_continue: "Ignorieren und fortfahren",
@@ -93,6 +110,13 @@ export default {
     cancel: "Abbrechen",
     continue: "Fortfahren",
     delete: "Löschen",
+    tooltip: {
+      copyToClipboard: "In Zwischenablage kopieren",
+      copyNameToClipboard: "Datensatznamen in die Zwischenablage kopieren",
+      copyLinkToClipboard: "Datensatzlink in die Zwischenablage kopieren",
+      goToDatasetSettings: "Zu den Datensatzeinstellungen gehen",
+      datasetSettings: "Datensatzeinstellungen",
+    },
   },
   to_submit_complete_required:
     "Zum Absenden beantworten \nSie benötigte Fragen",
@@ -135,6 +159,7 @@ export default {
     draft: "Entwurf speichern",
   },
   sorting: {
+    label: "Sortieren",
     addOtherField: "+ Ein weiteres Feld hinzufügen",
     suggestion: {
       score: "Vorschlagsbewertung",
@@ -178,12 +203,14 @@ export default {
     hide: "Ausblenden",
     passwordDescription: "Gebe Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
+    error: "Falscher Benutzername oder Passwort. Versuchen Sie es erneut",
     hf: {
       title: "Willkommen bei {space}",
       subtitle:
         "Helfe <strong>{user}</strong> um bessere Datensätze für KI zu erstellen",
     },
   },
+  of: "von",
   status: "Status",
   filters: "Filter",
   filterBy: "Filter nach...",
@@ -204,6 +231,8 @@ export default {
   update: "Aktualisieren",
   youAreOnlineAgain: "Sie sind wieder online",
   youAreOffline: "Sie sind offline",
+  write: "Schreiben",
+  preview: "Vorschau",
   datasetTable: {
     name: "Dataset",
     workspace: "Arbeitsbereich",

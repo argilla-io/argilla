@@ -15,14 +15,13 @@
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Security, status
+from fastapi import APIRouter, Depends, Security, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from argilla_server.api.policies.v1 import DatasetPolicy, MetadataPropertyPolicy, authorize, is_authorized
 from argilla_server.api.schemas.v1.datasets import (
     Dataset as DatasetSchema,
-    UsersProgress,
 )
 from argilla_server.api.schemas.v1.datasets import (
     DatasetCreate,
@@ -30,6 +29,7 @@ from argilla_server.api.schemas.v1.datasets import (
     DatasetProgress,
     Datasets,
     DatasetUpdate,
+    UsersProgress,
 )
 from argilla_server.api.schemas.v1.fields import Field, FieldCreate, Fields
 from argilla_server.api.schemas.v1.metadata_properties import (
@@ -40,6 +40,7 @@ from argilla_server.api.schemas.v1.metadata_properties import (
 from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
+from argilla_server.enums import DatasetStatus
 from argilla_server.models import Dataset, User
 from argilla_server.search_engine import (
     SearchEngine,
@@ -71,19 +72,22 @@ async def _filter_metadata_properties_by_policy(
 async def list_current_user_datasets(
     *,
     db: AsyncSession = Depends(get_async_db),
-    workspace_id: Optional[UUID] = None,
     current_user: User = Security(auth.get_current_user),
+    workspace_id: Optional[UUID] = Query(None, description="Filter by workspace_id"),
+    name: Optional[str] = Query(None, description="Filter by dataset name"),
+    status: Optional[DatasetStatus] = Query(None, description="Filter by dataset status"),
 ):
     await authorize(current_user, DatasetPolicy.list(workspace_id))
 
-    if not workspace_id:
-        if current_user.is_owner:
-            dataset_list = await datasets.list_datasets(db)
-        else:
-            await current_user.awaitable_attrs.datasets
-            dataset_list = current_user.datasets
-    else:
-        dataset_list = await datasets.list_datasets_by_workspace_id(db, workspace_id)
+    filters = {
+        "workspace_id": workspace_id,
+        "name": name,
+        "status": status,
+    }
+
+    dataset_list = await datasets.list_datasets(
+        db, user=current_user, **{k: v for k, v in filters.items() if v is not None}
+    )
 
     return Datasets(items=dataset_list)
 
@@ -164,7 +168,7 @@ async def get_dataset_progress(
     return await datasets.get_dataset_progress(db, dataset.id)
 
 
-@router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress, response_model_exclude_unset=True)
+@router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress)
 async def get_dataset_users_progress(
     *,
     current_user: User = Security(auth.get_current_user),
@@ -248,7 +252,6 @@ async def publish_dataset(
     *,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
     dataset_id: UUID,
     current_user: User = Security(auth.get_current_user),
 ) -> Dataset:
@@ -266,11 +269,6 @@ async def publish_dataset(
     await authorize(current_user, DatasetPolicy.publish(dataset))
 
     dataset = await datasets.publish_dataset(db, search_engine, dataset)
-
-    telemetry_client.track_data(
-        action="PublishedDataset",
-        data={"questions": list(set([question.settings["type"] for question in dataset.questions]))},
-    )
 
     return dataset
 

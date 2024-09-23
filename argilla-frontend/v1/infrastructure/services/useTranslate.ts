@@ -7,5 +7,9 @@ export const useTranslate = () => {
     return context.app.i18n.t(key, values) as string;
   };
 
-  return t;
+  const tc = (key: string, choice: number) => {
+    return context.app.i18n.tc(key, choice) as string;
+  };
+
+  return { t, tc };
 };

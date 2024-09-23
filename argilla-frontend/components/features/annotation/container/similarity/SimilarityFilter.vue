@@ -123,7 +123,7 @@ export default {
 }
 .similarity-config {
   :deep(.dropdown__header) {
-    background: $black-4;
+    background: var(--bg-opacity-4);
     padding: calc($base-space / 2);
   }
   :deep(.dropdown__content) {

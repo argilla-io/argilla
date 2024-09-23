@@ -270,6 +270,13 @@ class ImageFieldFactory(FieldFactory):
 class ChatFieldFactory(FieldFactory):
     settings = {
         "type": FieldType.chat,
+        "use_markdown": True,
+    }
+
+
+class CustomFieldFactory(FieldFactory):
+    settings = {
+        "type": FieldType.custom,
     }
 
 

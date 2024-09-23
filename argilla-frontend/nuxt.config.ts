@@ -75,7 +75,8 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/vue-draggable.js" },
     { src: "~/plugins/plugins/platform.ts" },
     { src: "~/plugins/plugins/language.ts" },
-    { src: "~/plugins/plugins/color-generator" },
+    { src: "~/plugins/plugins/color-schema" },
+    { src: "~/plugins/plugins/color-generator.ts" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -114,6 +115,10 @@ const config: NuxtConfig = {
       {
         code: "de",
         file: "de.js",
+      },
+      {
+        code: "es",
+        file: "es.js",
       },
     ],
     detectBrowserLanguage: false,
@@ -171,24 +176,11 @@ const config: NuxtConfig = {
 
   auth: {
     strategies: {
-      basic: {
-        scheme: "local",
-        token: {
-          property: "access_token",
-        },
-        user: {
-          property: false,
-          autoFetch: true,
-        },
+      local: {
         endpoints: {
-          login: {
-            url: "/v1/token",
-            method: "post",
-            propertyName: "access_token",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          },
           logout: false,
-          user: { url: "/v1/me", propertyName: false },
+          user: false,
+          login: false,
         },
       },
     },
@@ -198,7 +190,7 @@ const config: NuxtConfig = {
   },
 
   router: {
-    middleware: ["auth-guard"],
+    middleware: ["route-guard", "me"],
     base: process.env.BASE_URL ?? "/",
   },
 

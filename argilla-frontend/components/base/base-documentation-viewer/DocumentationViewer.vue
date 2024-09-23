@@ -16,19 +16,19 @@
         <h2 v-if="currentTab.description" class="snippet__description --body2">
           {{ currentTab.description }}
         </h2>
-        <render-markdown-base-component
+        <MarkdownRenderer
           v-if="currentTab.markdown"
           :markdown="currentTab.markdown"
         />
         <div class="library__buttons" v-if="currentTab.links">
           <p class="library__section__title">Links</p>
-          <base-button
+          <BaseButton
             v-for="(button, index) in currentTab.links"
             :key="index"
             class="library__button primary small text"
             :href="button.linkLink"
             target="_blank"
-            >{{ button.linkText }}</base-button
+            >{{ button.linkText }}</BaseButton
           >
         </div>
       </div>
@@ -81,7 +81,7 @@ export default {
     margin-bottom: $base-space * 2;
   }
   :deep(em) {
-    color: $black-54;
+    color: var(--fg-secondary);
   }
 }
 .library {
@@ -99,7 +99,7 @@ export default {
   &__section {
     &__title {
       margin-bottom: $base-space;
-      color: $black-54;
+      color: var(--fg-secondary);
       font-weight: 600;
       @include font-size(15px);
     }

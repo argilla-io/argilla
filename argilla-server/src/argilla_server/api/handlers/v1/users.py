@@ -17,7 +17,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request, Security, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server import telemetry
 from argilla_server.api.policies.v1 import UserPolicy, authorize
 from argilla_server.api.schemas.v1.users import User as UserSchema
 from argilla_server.api.schemas.v1.users import UserCreate, Users
@@ -31,9 +30,9 @@ router = APIRouter(tags=["users"])
 
 
 @router.get("/me", response_model=UserSchema)
-async def get_current_user(request: Request, current_user: User = Security(auth.get_current_user)):
-    await telemetry.track_login(request, current_user)
-
+async def get_current_user(
+    current_user: User = Security(auth.get_current_user),
+):
     return current_user
 
 
@@ -72,8 +71,6 @@ async def create_user(
     await authorize(current_user, UserPolicy.create)
 
     user = await accounts.create_user(db, user_create.dict())
-
-    telemetry.track_user_created(user)
 
     return user
 

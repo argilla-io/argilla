@@ -5,7 +5,7 @@
 groups = ["default", "postgresql", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:fc41d2f6356e480655b11ad3b6dc544bc19aaa84d8494aeb319771bc9dd54261"
+content_hash = "sha256:c333424e19e30dc22ae7475a8f8cec7c965c90d6d551b7efef2a724fd7354245"
 
 [[metadata.targets]]
 requires_python = ">=3.8,<3.11"
@@ -152,6 +152,7 @@ version = "4.0.3"
 requires_python = ">=3.7"
 summary = "Timeout context manager for asyncio programs"
 groups = ["default", "postgresql", "test"]
+marker = "python_version < \"3.12.0\""
 dependencies = [
     "typing-extensions>=3.6.5; python_version < \"3.8\"",
 ]
@@ -777,6 +778,7 @@ version = "1.2.0"
 requires_python = ">=3.7"
 summary = "Backport of PEP 654 (exception groups)"
 groups = ["default", "test"]
+marker = "python_version < \"3.11\""
 files = [
     {file = "exceptiongroup-1.2.0-py3-none-any.whl", hash = "sha256:4bfd3996ac73b41e9b9628b04e079f193850720ea5945fc96a08633c66912f14"},
     {file = "exceptiongroup-1.2.0.tar.gz", hash = "sha256:91f5c769735f051a4290d52edd0858999b57e5876e9f85937691bd4c9fa3ed68"},
@@ -832,7 +834,7 @@ name = "filelock"
 version = "3.13.1"
 requires_python = ">=3.8"
 summary = "A platform independent file lock."
-groups = ["test"]
+groups = ["default", "test"]
 files = [
     {file = "filelock-3.13.1-py3-none-any.whl", hash = "sha256:57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c"},
     {file = "filelock-3.13.1.tar.gz", hash = "sha256:521f5f56c50f8426f5e03ad3b281b490a87ef15bc6c526f168290f0c7148d44e"},
@@ -899,7 +901,7 @@ name = "fsspec"
 version = "2023.10.0"
 requires_python = ">=3.8"
 summary = "File-system specification"
-groups = ["test"]
+groups = ["default", "test"]
 files = [
     {file = "fsspec-2023.10.0-py3-none-any.whl", hash = "sha256:346a8f024efeb749d2a5fca7ba8854474b1ff9af7c3faaf636a4548781136529"},
     {file = "fsspec-2023.10.0.tar.gz", hash = "sha256:330c66757591df346ad3091a53bd907e15348c2ba17d63fd54f5c39c4457d2a5"},
@@ -1044,7 +1046,7 @@ name = "huggingface-hub"
 version = "0.20.2"
 requires_python = ">=3.8.0"
 summary = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
-groups = ["test"]
+groups = ["default", "test"]
 dependencies = [
     "filelock",
     "fsspec>=2023.5.0",
@@ -1963,6 +1965,22 @@ files = [
 ]
 
 [[package]]
+name = "redis"
+version = "5.0.8"
+requires_python = ">=3.7"
+summary = "Python client for Redis database and key-value store"
+groups = ["default"]
+dependencies = [
+    "async-timeout>=4.0.3; python_full_version < \"3.11.3\"",
+    "importlib-metadata>=1.0; python_version < \"3.8\"",
+    "typing-extensions; python_version < \"3.8\"",
+]
+files = [
+    {file = "redis-5.0.8-py3-none-any.whl", hash = "sha256:56134ee08ea909106090934adc36f65c9bcbbaecea5b21ba704ba6fb561f8eb4"},
+    {file = "redis-5.0.8.tar.gz", hash = "sha256:0c5b10d387568dfe0698c6fad6615750c24170e548ca2deac10c649d463e9870"},
+]
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 requires_python = ">=3.7"
@@ -2008,6 +2026,21 @@ dependencies = [
 files = [
     {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
     {file = "rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
+]
+
+[[package]]
+name = "rq"
+version = "1.16.2"
+requires_python = ">=3.7"
+summary = "RQ is a simple, lightweight, library for creating background jobs, and processing them."
+groups = ["default"]
+dependencies = [
+    "click>=5",
+    "redis>=3.5",
+]
+files = [
+    {file = "rq-1.16.2-py3-none-any.whl", hash = "sha256:52e619f6cb469b00e04da74305045d244b75fecb2ecaa4f26422add57d3c5f09"},
+    {file = "rq-1.16.2.tar.gz", hash = "sha256:5c5b9ad5fbaf792b8fada25cc7627f4d206a9a4455aced371d4f501cc3f13b34"},
 ]
 
 [[package]]
@@ -2377,6 +2410,7 @@ version = "2.0.1"
 requires_python = ">=3.7"
 summary = "A lil' TOML parser"
 groups = ["test"]
+marker = "python_version < \"3.11\""
 files = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
@@ -2387,7 +2421,7 @@ name = "tqdm"
 version = "4.66.1"
 requires_python = ">=3.7"
 summary = "Fast, Extensible Progress Meter"
-groups = ["test"]
+groups = ["default", "test"]
 dependencies = [
     "colorama; platform_system == \"Windows\"",
 ]

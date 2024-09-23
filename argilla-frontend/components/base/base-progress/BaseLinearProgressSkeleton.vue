@@ -8,9 +8,10 @@
 export default {};
 </script>
 
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 $progressHeight: 14px;
-$progressBackgroundColor: #f2f2f2;
+$progressBackgroundColor: var(--bg-opacity-4);
+$progressBackgroundColorSecondary: var(--bg-opacity-10);
 $borderRadius: 3px;
 
 .progress__wrapper {
@@ -32,7 +33,7 @@ $borderRadius: 3px;
   background: linear-gradient(
     to right,
     $progressBackgroundColor 0%,
-    darken($progressBackgroundColor, 10%) 50%,
+    $progressBackgroundColorSecondary 50%,
     $progressBackgroundColor 100%
   );
   background-size: 200% 100%;
@@ -47,4 +48,4 @@ $borderRadius: 3px;
     background-position: -100% 0;
   }
 }
-</styles>
+</style>

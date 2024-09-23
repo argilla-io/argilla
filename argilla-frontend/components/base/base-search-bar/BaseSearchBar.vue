@@ -74,17 +74,14 @@ $searchBarSize: $base-space * 4;
   align-items: center;
   gap: $base-space * 1.5;
   padding: $base-space * 1.2 $base-space * 1.5;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--bg-opacity-10);
   border-radius: $border-radius-l;
-  background: palette(white);
+  background: var(--bg-accent-grey-1);
   transition: all 0.2s ease;
-  &:hover {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-  }
+
   &.active,
   &.re-input-focused {
-    border: 1px solid $primary-color;
+    border: 1px solid var(--fg-cuaternary);
   }
   &__icon {
     display: flex;
@@ -103,8 +100,9 @@ $searchBarSize: $base-space * 4;
     outline: 0;
     background: none;
     line-height: 1rem;
+    color: var(--fg-secondary);
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
 }

@@ -28,7 +28,7 @@ export const useDatasetSettingViewModel = () => {
   const notification = useNotifications();
   const routes = useRoutes();
   const beforeUnload = useBeforeUnload();
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const { isAdminOrOwnerRole } = useRole();
   const { state: datasetSetting } = useDatasetSetting();
@@ -105,7 +105,9 @@ export const useDatasetSettingViewModel = () => {
   });
 
   const goToDataset = () => {
-    if (routes.previousRouteMatchWith(datasetId)) return routes.goBack();
+    if (routes.previousRouteMatchWith(`${datasetId}/annotation-mode`)) {
+      return routes.goBack();
+    }
 
     routes.goToFeedbackTaskAnnotationPage(datasetId);
   };
@@ -159,10 +161,7 @@ export const useDatasetSettingViewModel = () => {
   );
 
   const onTabChanged = async (tabId: Tab["id"]) => {
-    await routes.setQueryParams({
-      key: "tab",
-      value: tabId,
-    });
+    await routes.setQueryParamsVirtually({ key: "tab", value: tabId });
   };
 
   const onTabLoaded = () => {

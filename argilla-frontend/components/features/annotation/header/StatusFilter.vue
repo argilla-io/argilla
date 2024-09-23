@@ -43,22 +43,22 @@ export default {
       options: [
         {
           id: RecordStatus.pending.name,
-          name: this.$t(`recordStatus.${RecordStatus.pending.name}`),
+          name: this.$tc(`recordStatus.${RecordStatus.pending.name}`, 1),
           color: RecordStatus.pending.color,
         },
         {
           id: RecordStatus.draft.name,
-          name: this.$t(`recordStatus.${RecordStatus.draft.name}`),
+          name: this.$tc(`recordStatus.${RecordStatus.draft.name}`, 1),
           color: RecordStatus.draft.color,
         },
         {
           id: RecordStatus.discarded.name,
-          name: this.$t(`recordStatus.${RecordStatus.discarded.name}`),
+          name: this.$tc(`recordStatus.${RecordStatus.discarded.name}`, 1),
           color: RecordStatus.discarded.color,
         },
         {
           id: RecordStatus.submitted.name,
-          name: this.$t(`recordStatus.${RecordStatus.submitted.name}`),
+          name: this.$tc(`recordStatus.${RecordStatus.submitted.name}`, 1),
           color: RecordStatus.submitted.color,
         },
       ],

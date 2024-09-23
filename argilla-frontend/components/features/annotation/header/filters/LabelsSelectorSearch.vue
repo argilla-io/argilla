@@ -83,13 +83,12 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 0 $base-space;
-  border: 1px solid $black-10;
+  border: 1px solid var(--bg-opacity-10);
   border-radius: $border-radius;
-  background: palette(white);
   overflow: hidden;
   transition: all 0.2s ease-out;
   &:focus-within {
-    border-color: $primary-color;
+    border-color: var(--fg-cuaternary);
   }
   &:hover {
     transition: all 0.2s ease-in;
@@ -107,12 +106,14 @@ export default {
     height: 26px;
     width: 100%;
     border: none;
+    background: transparent;
     @include font-size(13px);
+    color: var(--fg-primary);
     &:focus-visible {
       outline: 0;
     }
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
   &__close-button {
@@ -120,13 +121,13 @@ export default {
     top: $base-space;
     right: $base-space;
     padding: calc($base-space / 2);
-    background: $black-37;
+    background: var(--bg-opacity-37);
     border-radius: $border-radius-rounded;
     &:hover {
-      background: $black-54;
+      background: var(--bg-opacity-54);
     }
     &__icon {
-      color: palette(white);
+      color: var(--bg-accent-grey-1);
     }
   }
 }

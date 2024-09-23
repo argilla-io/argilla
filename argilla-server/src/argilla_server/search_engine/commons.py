@@ -674,14 +674,21 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if isinstance(text, str):
             text = TextQuery(q=text)
 
-        if not text.field:
-            field_name = "*"
-        elif _is_custom_field(text.field, dataset):
-            field_name = f"{text.field}.*"
-        else:
-            field_name = text.field
+        if text.field:
+            field = dataset.field_by_name(text.field)
+            if field is None:
+                raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
 
-        return es_simple_query_string(field_name=es_field_for_record_field(field_name), query=text.q)
+            if field.is_chat:
+                field_name = f"{text.field}.*"
+            elif _is_custom_field(text.field, dataset):
+                field_name = f"{text.field}.*"
+            else:
+                field_name = text.field
+        else:
+            field_name = "*"
+
+        return es_simple_query_string(es_field_for_record_field(field_name), query=text.q)
 
     @staticmethod
     def _mapping_for_fields(fields: List[Field]) -> dict:

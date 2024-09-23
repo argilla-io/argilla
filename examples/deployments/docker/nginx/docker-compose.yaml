@@ -12,7 +12,7 @@ services:
   argilla:
     image: argilla/argilla-hf-spaces:latest
     environment:
-      ARGILLA_ENABLE_TELEMETRY: 0
+      HF_HUB_DISABLE_TELEMETRY: 1
       ARGILLA_BASE_URL: /argilla
 
       USERNAME: argilla
@@ -20,3 +20,4 @@ services:
       API_KEY: argilla.apikey
     ports:
       - "6900:6900"
+

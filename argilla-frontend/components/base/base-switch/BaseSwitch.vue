@@ -137,7 +137,7 @@ $switch-thumb-size: 18px;
     pointer-events: none;
     cursor: default;
     .re-switch-thumb {
-      background-color: palette(white) !important;
+      background-color: var(--color-white) !important;
       transform: translate3d(-1px, -50%, 0px) !important;
     }
     &:active {
@@ -152,7 +152,7 @@ $switch-thumb-size: 18px;
     position: relative;
     border-radius: $switch-height;
     transition: $swift-ease-out;
-    background-color: $black-20;
+    background-color: var(--bg-opacity-20);
     cursor: pointer;
     .re-switch-thumb {
       width: $switch-thumb-size;
@@ -160,7 +160,7 @@ $switch-thumb-size: 18px;
       position: absolute;
       top: 50%;
       left: 0;
-      background-color: $primary-color;
+      background-color: var(--bg-action);
       border-radius: 50%;
       transition: $swift-linear;
     }
@@ -185,7 +185,7 @@ $switch-thumb-size: 18px;
   }
   .re-switch-label {
     margin-right: 1em;
-    color: $black-54;
+    color: var(--fg-secondary);
   }
 }
 </style>

@@ -8,9 +8,16 @@
             @submit.prevent="onSubmit(question)"
             class="settings__edition-form__questions"
           >
-            <div class="settings__edition-form__name">
-              <h4 class="--body1 --medium" v-text="question.name" />
-              <BaseBadge class="--capitalized" :text="`${$t(question.type)}`" />
+            <div class="settings__edition-form__header">
+              <div class="settings__edition-form__name">
+                <h4 class="--body1 --medium" v-text="question.name" />
+                <BaseBadge
+                  class="--capitalized"
+                  :text="`${$t(question.type)}`"
+                />
+              </div>
+              <p v-if="question.isRequired" v-text="$t('required')" />
+              <p v-else v-text="$t('optional')" />
             </div>
 
             <Validation
@@ -106,16 +113,14 @@
                 type="button"
                 class="secondary light small"
                 @on-click="restore(question)"
-                :disabled="!question.isSettingsModified"
+                :disabled="!question.isModified"
               >
                 <span v-text="$t('cancel')" />
               </BaseButton>
               <BaseButton
                 type="submit"
                 class="primary small"
-                :disabled="
-                  !question.isSettingsModified || !question.isQuestionValid
-                "
+                :disabled="!question.isModified || !question.isQuestionValid"
               >
                 <span v-text="$t('update')" />
               </BaseButton>
@@ -126,7 +131,7 @@
     </div>
     <div class="settings__preview">
       <QuestionsComponent
-        legend="UI preview"
+        :legend="$t('settings.uiPreview')"
         class="settings__preview__content"
         :questions="settings.questions"
       />
@@ -176,7 +181,7 @@ export default {
       &.--subcategory {
         display: block;
         @include font-size(13px);
-        color: $black-87;
+        color: var(--fg-primary);
       }
     }
 
@@ -195,23 +200,33 @@ export default {
       gap: $base-space * 2;
     }
 
-    &__name {
+    &__header {
       display: flex;
-      flex-direction: row;
-      align-items: center;
       justify-content: space-between;
-      gap: $base-space * 2;
+
       h4 {
         margin: 0;
       }
       .badge {
         margin-inline: 0 auto;
       }
+      p {
+        height: 14px;
+        color: var(--fg-secondary);
+      }
+    }
+
+    &__name {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: $base-space * 2;
     }
 
     &__switch.re-switch {
       :deep(label) {
-        color: $black-87;
+        color: var(--fg-primary);
       }
       @include media(">desktop") {
         :deep(label) {
@@ -225,7 +240,7 @@ export default {
 
     &__slider {
       :deep(label) {
-        color: $black-87;
+        color: var(--fg-primary);
         line-height: 1;
         margin-right: 1em;
       }
@@ -272,7 +287,7 @@ export default {
       & > label {
         width: fit-content;
         height: 14px;
-        color: $black-87;
+        color: var(--fg-primary);
       }
 
       & input {
@@ -282,12 +297,13 @@ export default {
         width: 100%;
         height: 24px;
         padding: 16px;
-        background: palette(white);
-        border: 1px solid $black-20;
+        background: var(--bg-accent-grey-2);
+        color: var(--fg-primary);
+        border: 1px solid var(--bg-opacity-20);
         border-radius: $border-radius;
         outline: 0;
         &:focus {
-          border: 1px solid $primary-color;
+          border: 1px solid var(--bg-action);
         }
       }
 
@@ -296,13 +312,14 @@ export default {
         min-height: 50px;
         max-height: 300px;
         padding: 16px;
-        background: palette(white);
-        border: 1px solid $black-20;
+        background: var(--bg-accent-grey-2);
+        color: var(--fg-primary);
+        border: 1px solid var(--bg-opacity-20);
         border-radius: $border-radius;
         outline: 0;
 
         &:focus {
-          border: 1px solid $primary-color;
+          border: 1px solid var(--bg-action);
         }
       }
     }
@@ -313,7 +330,7 @@ export default {
       justify-content: flex-end;
       align-items: center;
       padding: $base-space * 2 0;
-      border-bottom: 1px solid $black-10;
+      border-bottom: 1px solid var(--bg-opacity-10);
       display: inline-flex;
       gap: $base-space;
     }
@@ -326,15 +343,15 @@ export default {
     overflow: auto;
     &__content {
       padding: $base-space * 3;
-      background: palette(grey, 800);
+      background: var(--bg-solid-grey-1);
       border-radius: $border-radius-m;
       margin: $base-space 0;
     }
   }
 }
 
-$label-color: palette(grey, 700);
-$label-dark-color: $black-54;
+$label-color: var(--bg-solid-grey-2);
+$label-dark-color: var(--fg-secondary);
 
 .label__container {
   display: inline-flex;
@@ -363,12 +380,12 @@ $label-dark-color: $black-54;
   @include font-size(12px);
   span {
     border-radius: calc($border-radius-s - 2px);
-    background: $black-6;
+    background: var(--bg-opacity-6);
     padding: 2px 4px;
     line-height: 1.2;
   }
   svg {
-    fill: $black-20;
+    fill: var(--bg-opacity-20);
   }
   &:hover {
     background: $label-color;

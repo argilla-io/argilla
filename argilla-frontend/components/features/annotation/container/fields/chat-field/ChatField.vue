@@ -1,30 +1,52 @@
 <template>
-  <div class="chat-field" :key="fieldText">
-    <span class="chat-field_title" v-text="title" />
-
+  <div class="chat" :key="title">
+    <span class="chat__title" v-text="title" />
     <div
-      class="chat-field_container"
-      v-for="({ role, content }, index) in content"
-      :key="index"
+      :id="`fields-content-${name}`"
+      class="chat__wrapper"
+      :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
     >
-      <span
-        :class="[
-          'chat-field_message',
-          role === 'user' ? 'chat-field_user' : 'chat-field_agent',
-        ]"
-        :style="{
-          backgroundColor: $color.generate(role).palette.light,
-        }"
-      >
-        <span v-text="role" />
+      <div v-for="({ role, content: text }, index) in content" :key="index">
+        <span
+          :class="[
+            'chat__item',
+            checkIfAreLessThanTwoRoles && index % 2 == 0
+              ? 'chat__item--right'
+              : 'chat__item--left',
+          ]"
+        >
+          <span
+            class="chat__role"
+            v-if="role !== content[index - 1]?.role"
+            v-text="role"
+            :style="{
+              color: getColorForRole(role),
+            }"
+          />
 
-        <MarkdownRenderer :markdown="content" />
-      </span>
+          <div
+            class="chat__bubble"
+            :style="{
+              borderColor: `hsl(from ${getColorForRole(role)} h s l / 20%)`,
+            }"
+          >
+            <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
+            <span v-else v-html="text" /><template>
+              <style :key="name" scoped>
+                ::highlight(search-text-highlight-{{name}}) {
+                  color: #ff675f;
+                }
+              </style>
+            </template>
+          </div>
+        </span>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { useChatFieldViewModel } from "./useChatFieldViewModel";
 export default {
   props: {
     name: {
@@ -35,58 +57,114 @@ export default {
       type: String,
       required: true,
     },
+    searchText: {
+      type: String,
+      default: "",
+    },
     content: {
       type: Array,
       required: true,
     },
+    useMarkdown: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  computed: {
+    getAllUniqueRolesNames() {
+      return this.content
+        .map((item) => item.role)
+        .filter((role, index, self) => self.indexOf(role) === index);
+    },
+    checkIfAreLessThanTwoRoles() {
+      return this.getAllUniqueRolesNames.length <= 2;
+    },
+    colorForRole() {
+      return [
+        "var(--fg-chat-1)",
+        "var(--fg-chat-2)",
+        "var(--fg-chat-3)",
+        "var(--fg-chat-4)",
+        "var(--fg-chat-5)",
+      ];
+    },
+  },
+  methods: {
+    getColorForRole(role) {
+      return this.colorForRole[this.getAllUniqueRolesNames.indexOf(role)];
+    },
+  },
+  setup(props) {
+    return useChatFieldViewModel(props);
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.chat-field {
-  display: flex;
-  flex-direction: column;
-  gap: $base-space;
-  padding: 2 * $base-space;
-  background: palette(grey, 800);
-  border-radius: $border-radius-m;
-
-  &_title {
-    color: $black-87;
-    word-break: break-word;
-    width: calc(100% - 30px);
-  }
-
-  &_container {
+.chat {
+  $this: &;
+  margin-bottom: $base-space * 3;
+  &__wrapper {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    gap: $base-space + calc($base-space / 2);
+    padding: 0 $base-space * 2;
   }
-
-  &_user {
-    background-color: #f5f5f5;
-    align-items: flex-end;
-    align-self: flex-end;
-  }
-
-  &_agent {
-    background-color: #c2e3f7;
-    align-items: flex-start;
-    align-self: flex-start;
-  }
-
-  &_message {
-    & > span {
-      font-weight: bold;
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: calc($base-space / 2);
+    &--right {
+      align-items: flex-end;
+      align-self: flex-end;
+      #{$this}__bubble {
+        background: var(--bg-bubble-inverse);
+        border-top-right-radius: 3px;
+      }
     }
 
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
+    &--left {
+      align-items: flex-start;
+      align-self: flex-start;
+      #{$this}__bubble {
+        background: var(--bg-bubble);
+        border-top-left-radius: 3px;
+      }
+    }
+  }
+
+  &__bubble {
     max-width: 80%;
-    border-radius: 10px;
-    padding: 10px;
+    padding: 2 * $base-space;
+    border-radius: $border-radius-l;
+    border-style: solid;
+    border-width: 1px;
+    @include font-size(16px);
+    @include line-height(24px);
+    white-space: pre-wrap;
+    word-break: break-word;
+    &:has(p) {
+      padding: 2 * $base-space 2 * $base-space $base-space 2 * $base-space;
+    }
+    .--simple & {
+      border-color: var(--border-field) !important;
+    }
+    .--multiple & {
+      max-width: 100%;
+    }
+  }
+
+  &__role {
+    font-weight: 500;
+    @include font-size(13px);
+  }
+
+  &__title {
+    display: inline-block;
+    word-break: break-word;
+    width: calc(100% - 30px);
+    margin-bottom: $base-space * 2;
+    color: var(--fg-secondary);
   }
 }
 </style>

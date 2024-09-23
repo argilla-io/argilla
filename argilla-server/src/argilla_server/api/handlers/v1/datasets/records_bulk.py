@@ -60,8 +60,6 @@ async def create_dataset_records_bulk(
 
     records_bulk = await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, records_bulk_create)
 
-    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": len(records_bulk.items)})
-
     return records_bulk
 
 
@@ -92,8 +90,5 @@ async def upsert_dataset_records_bulk(
 
     updated = len(records_bulk.updated_item_ids)
     created = len(records_bulk.items) - updated
-
-    telemetry_client.track_data(action="DatasetRecordsCreated", data={"records": created})
-    telemetry_client.track_data(action="DatasetRecordsUpdated", data={"records": updated})
 
     return records_bulk

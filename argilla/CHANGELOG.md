@@ -16,9 +16,48 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
+
+- Added new `ChatField` supporting chat messages. ([#5376](https://github.com/argilla-io/argilla/pull/5376))
+- Added template settings to `rg.Settings` for classification, rating, and ranking questions. ([#5426](https://github.com/argilla-io/argilla/pull/5426))
+- Added `rg.Settings` definition based on `datasets.Features` within `rg.Dataset.from_hub`. ([#5426](https://github.com/argilla-io/argilla/pull/5472))
+- Added persistent record mapping to `rg.Settings` to be used in `rg.Dataset.records.log`. ([#5466](https://github.com/argilla-io/argilla/pull/5466))
+- Added multiple error handling methods to the `rg.Dataset.records.log` method to warn, ignore, or raise errors. ([#5466](https://github.com/argilla-io/argilla/pull/5463))
+- Changed dataset import and export of `rg.LabelQuestion` to use `datasets.ClassLabel` not `datasets.Value`. ([#5474](https://github.com/argilla-io/argilla/pull/5474))
+
+## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0)
+
 ### Added
 
-- Added test mock for ArgillaAPI validation step so that the validation method is mocked instead of the entire API.
+- Added new `ImageField` supporting URLs and Data URLs. ([#5279](https://github.com/argilla-io/argilla/pull/5279))
+- Added dark mode ([#5412](https://github.com/argilla-io/argilla/pull/5412))
+- Added settings parameter to `rg.Dataset.from_hub` to define the dataset settings before ingesting a dataset from the hub. ([#5418](https://github.com/argilla-io/argilla/pull/5418))
+
+## [2.0.1](https://github.com/argilla-io/argilla/compare/v2.0.0...releases/2.0.1)
+
+### Fixed
+
+- Fixed error when creating optional fields. ([#5362](https://github.com/argilla-io/argilla/pull/5362))
+- Fixed error creating integer and float metadata with `visible_for_annotators`. ([#5364](https://github.com/argilla-io/argilla/pull/5364))
+- Fixed error when logging records with `suggestions` or `responses` for non-existent questions. ([#5396](https://github.com/argilla-io/argilla/pull/5396) by @maxserras)
+- Fixed error from conflicts in testing suite when running tests in parallel. ([#5349](https://github.com/argilla-io/argilla/commit/1119b164d0623170d44561c6b75d439d2dc96bd0))
+- Fixed error in response model when creating a response with a `None` value. ([#5343](https://github.com/argilla-io/argilla/commit/9e3705061a2dd88a7852288d9f6fd1aaeaa9b062))
+
+### Changed
+
+- Changed `from_hub` method to raise an error when a dataset with the same name exists. ([#5258](https://github.com/argilla-io/argilla/pull/5358))
+- Changed `log` method when ingesting records with no known keys to raise a descriptive error. ([#5356](https://github.com/argilla-io/argilla/pull/5356))
+- Changed `code snippets` to add new datasets ([#5395](https://github.com/argilla-io/argilla/pull/5395))
+
+### Added
+
+- Added Google Analytics to the documentation site. ([#5366](https://github.com/argilla-io/argilla/pull/5366))
+- Added frontend skeletons to progress metrics to optimise load time and improve user experience. ([#5391](https://github.com/argilla-io/argilla/pull/5391))
+- Added documentation in methods in API references for the Python SDK. ([#5400](https://github.com/argilla-io/argilla/commit/a6fc0117bc4923aec0be80df27eb79ddf3f007c7))
+
+### Fixed
+
+- Fix bug when submit the latest record, sometimes you navigate to non existing page [#5419](https://github.com/argilla-io/argilla/pull/5419)
 
 ## [2.0.0](https://github.com/argilla-io/argilla/compare/v2.0.0rc1...v2.0.0)
 

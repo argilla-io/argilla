@@ -2,7 +2,12 @@
   <div class="user-settings__header">
     <h1 v-text="$t('userSettings.title')" />
     <BaseButton :to="datasetsURL" class="secondary text">
-      <svgicon name="chevron-left" width="10" height="10" color="#4C4EA3" />
+      <svgicon
+        name="chevron-left"
+        width="10"
+        height="10"
+        color="var(--bg-secondary)"
+      />
       {{ $t("breadcrumbs.home") }}
     </BaseButton>
   </div>
@@ -24,7 +29,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid var(--bg-opacity-20);
   @include media(">tablet") {
     min-height: 100px;
   }

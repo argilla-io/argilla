@@ -45,7 +45,7 @@ export default {
     showNotification(message) {
       this.$notification.notify({
         message: message,
-        type: "error",
+        type: "danger",
       });
     },
   },

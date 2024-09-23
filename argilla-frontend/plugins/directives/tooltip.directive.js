@@ -1,10 +1,8 @@
 import Vue from "vue";
 
 // NOTE - to use tooltip directive, add to your html element where to put a tooltip :
-//  v-tooltip="{ content: tooltipMessage, backgroundColor: '#FFF', borderColor: '#FFF', tooltipPosition: 'bottom' }"
+//  v-tooltip="{ content: tooltipMessage, tooltipPosition: 'bottom' }"
 //    => content (String) the message to show in the tooltip
-//    => backgroundColor (String) the background color of the tooltip
-//    => borderColor (String) the border colon of the tooltip (bottom, top, right, left) =>
 // TODO - implement the other tooltip direction top/right/left
 
 Vue.directive("tooltip", {
@@ -18,8 +16,6 @@ Vue.directive("tooltip", {
     let elementOffset = initElementOffset(element);
     const {
       content,
-      backgroundColor,
-      borderColor,
       color,
       width = content.length < 40 ? 100 : 400,
       tooltipPosition = TOOLTIP_DIRECTION.BOTTOM,
@@ -57,7 +53,7 @@ Vue.directive("tooltip", {
       textWrapper = initTextStyle(textWrapper, color);
 
       // NOTE - tooltip styles
-      tooltip = initTooltipStyle(tooltip, backgroundColor, borderColor, width);
+      tooltip = initTooltipStyle(tooltip, width);
 
       // NOTE - init tooltip position
       tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
@@ -191,23 +187,18 @@ const destroyEventsListener = (element) => {
   window.removeEventListener("resize", element.resize);
 };
 
-const initTooltipStyle = (
-  tooltip,
-  backgroundColor = "white",
-  borderColor = "transparent",
-  width
-) => {
+const initTooltipStyle = (tooltip, width) => {
   tooltip.style.position = "fixed";
   tooltip.style.width = `${width}px`;
   tooltip.style.display = "none";
   tooltip.style.flexDirection = "column";
   tooltip.style.zIndex = "99999";
-  tooltip.style.backgroundColor = backgroundColor;
+  tooltip.style.backgroundColor = "var(--bg-accent-grey-2)";
   tooltip.style.borderRadius = "5px";
   tooltip.style.padding = "20px 8px 8px 8px";
   tooltip.style.boxShadow = "0 8px 20px 0 rgba(0,0,0,.2)";
   tooltip.style.transition = "opacity 0.3s ease 0.2s";
-  tooltip.style.border = `2px ${borderColor} solid`;
+  tooltip.style.border = `2px transparent solid`;
   tooltip.style.cursor = "default";
   return tooltip;
 };
@@ -229,7 +220,8 @@ const initTooltipTriangleInnerStyle = (tooltipTriangleInner) => {
   tooltipTriangleInner.style.position = "relative";
   tooltipTriangleInner.style.width = "0";
   tooltipTriangleInner.style.height = "0";
-  tooltipTriangleInner.style.borderBottom = "10px solid white";
+  tooltipTriangleInner.style.borderBottom =
+    "10px solid var(--bg-accent-grey-2)";
   tooltipTriangleInner.style.borderRight = "10px solid transparent";
   tooltipTriangleInner.style.borderLeft = "10px solid transparent";
   return tooltipTriangleInner;
@@ -281,7 +273,7 @@ const initTooltipPosition = (tooltip, tooltipPosition, elementOffset) => {
   return tooltip;
 };
 
-const initTextStyle = (textWrapper, color = "rgba(0, 0, 0, 0.87)") => {
+const initTextStyle = (textWrapper) => {
   textWrapper.style.textAlign = "left";
   textWrapper.style.fontSize = "13px";
   textWrapper.style.fontStyle = "normal";
@@ -290,7 +282,7 @@ const initTextStyle = (textWrapper, color = "rgba(0, 0, 0, 0.87)") => {
   textWrapper.style.whiteSpace = "pre-wrap";
   textWrapper.style.overflow = "auto";
   textWrapper.style.maxHeight = "360px";
-  textWrapper.style.color = `${color}`;
+  textWrapper.style.color = "var(--fg-primary)";
   return textWrapper;
 };
 

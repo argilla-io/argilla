@@ -4,11 +4,11 @@
       <span class="text_field_component__title-content" v-text="title" />
       <BaseActionTooltip
         class="text_field_component__tooltip"
-        tooltip="Copied"
+        :tooltip="$t('copied')"
         tooltip-position="left"
       >
         <BaseButton
-          title="Copy to clipboard"
+          :title="$t('button.tooltip.copyToClipboard')"
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
         >
@@ -18,6 +18,7 @@
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
       <div :class="classes" v-if="!useMarkdown" v-html="fieldText" />
+      <Sandbox v-else-if="isHTML" :fieldText="fieldText" />
       <MarkdownRenderer v-else :markdown="fieldText" />
       <template>
         <style :key="name" scoped>
@@ -63,6 +64,9 @@ export default {
     classes() {
       return this.$language.isRTL(this.fieldText) ? "--rtl" : "--ltr";
     },
+    isHTML() {
+      return /<([A-Za-z][A-Za-z0-9]*)\b[^>]*>(.*?)<\/\1>/.test(this.fieldText);
+    },
   },
   setup(props) {
     return useTextFieldViewModel(props);
@@ -77,8 +81,9 @@ export default {
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
-  background: palette(grey, 800);
+  background: var(--bg-field);
   border-radius: $border-radius-m;
+  border: 1px solid var(--border-field);
   &:hover {
     #{$this}__copy-button {
       opacity: 1;
@@ -89,7 +94,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: $base-space;
-    color: $black-87;
+    color: var(--fg-primary);
   }
   .content-area {
     white-space: pre-wrap;
@@ -98,6 +103,7 @@ export default {
   &__title-content {
     word-break: break-word;
     width: calc(100% - 30px);
+    color: var(--fg-secondary);
   }
   &__tooltip {
     display: flex;

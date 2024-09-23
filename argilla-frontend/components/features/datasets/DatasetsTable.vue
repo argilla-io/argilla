@@ -58,20 +58,20 @@ export default {
             {
               name: "copy-name",
               icon: "copy",
-              title: "Copy name to clipboard",
-              tooltip: "Copied",
+              title: this.$t("button.tooltip.copyNameToClipboard"),
+              tooltip: this.$t("copied"),
             },
             {
               name: "copy-url",
               icon: "link",
-              title: "Copy url to clipboard",
-              tooltip: "Copied",
+              title: this.$t("button.tooltip.copyLinkToClipboard"),
+              tooltip: this.$t("copied"),
             },
             {
               name: "go-to-settings",
               icon: "settings",
-              title: "Go to dataset settings",
-              tooltip: "Dataset settings",
+              title: this.$t("button.tooltip.goToDatasetSettings"),
+              tooltip: this.$t("button.tooltip.datasetSettings"),
             },
           ],
         },
@@ -177,7 +177,7 @@ export default {
     onActionClicked(action, dataset) {
       switch (action) {
         case "go-to-settings":
-          this.goToSetting(dataset);
+          this.goToSetting(dataset.id);
           break;
         case "copy-url":
           this.copyUrl(dataset);

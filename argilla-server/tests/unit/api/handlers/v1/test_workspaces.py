@@ -99,7 +99,7 @@ class TestSuiteWorkspaces:
 
         assert response.status_code == 409
         assert response.json() == {
-            "detail": f"Cannot delete the workspace {workspace.id}. This workspace has some feedback datasets linked"
+            "detail": f"Cannot delete the workspace {workspace.id}. This workspace has some datasets linked"
         }
 
     async def test_delete_missing_workspace(self, async_client: "AsyncClient", owner_auth_header: dict):

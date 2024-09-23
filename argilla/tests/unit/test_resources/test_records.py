@@ -16,9 +16,20 @@ import uuid
 
 import pytest
 
-from argilla import Record, Suggestion, Response
+from argilla import Record, Response, Suggestion, Dataset, Settings, TextQuestion, TextField
 from argilla._exceptions import ArgillaError
-from argilla._models import MetadataModel
+from argilla._models import MetadataModel, RecordModel
+
+
+@pytest.fixture()
+def dataset():
+    return Dataset(
+        name="test_dataset",
+        settings=Settings(
+            fields=[TextField(name="name", required=True), TextField(name="age", required=True)],
+            questions=[TextQuestion(name="question", required=True)],
+        ),
+    )
 
 
 class TestRecords:
@@ -40,6 +51,15 @@ class TestRecords:
             "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
             f"responses={{'question': [{{'value': 'answer'}}]}})"
         )
+
+    def test_record_external_id(self):
+        for id in [0, "1", "0"]:
+            record = Record(id=id, fields={"name": "John", "age": "30"})
+            assert record.id == id
+        record = Record(id=None, fields={"name": "John", "age": "30"})
+        assert record.id
+        record = Record(fields={"name": "John", "age": "30"})
+        assert record.id
 
     def test_update_record_metadata_by_key(self):
         record = Record(fields={"name": "John", "age": "30"}, metadata={"key": "value"})
@@ -80,3 +100,18 @@ class TestRecords:
 
         with pytest.raises(ArgillaError):
             record.responses.add(response)
+
+    def test_record_from_model_with_none_vectors(self, dataset: Dataset):
+        record = Record.from_model(RecordModel(fields={"name": "John"}, vectors=None), dataset=dataset)
+
+        assert len(record.vectors) == 0
+
+    def test_record_from_model_with_none_suggestions(self, dataset: Dataset):
+        record = Record.from_model(RecordModel(fields={"name": "John"}, suggestions=None), dataset=dataset)
+
+        assert len(record.suggestions) == 0
+
+    def test_record_from_model_with_none_responses(self, dataset: Dataset):
+        record = Record.from_model(RecordModel(fields={"name": "John"}, responses=None), dataset=dataset)
+
+        assert len(record.responses) == 0

@@ -30,7 +30,7 @@ export const useDeleteDatasetViewModel = () => {
 
       notification.notify({
         message: `It is not possible to delete ${dataset.name}`,
-        type: "error",
+        type: "danger",
       });
     }
   };
