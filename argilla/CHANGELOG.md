@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed `from_hub` errors when columns names contain uppercase letters. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+- Fixed `from_hub` errors when class feature values contains unlabelled values. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+- Fixed `from_hub` errors when loading cached datasets. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+
 ## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 
 - Added new `ChatField` supporting chat messages. ([#5376](https://github.com/argilla-io/argilla/pull/5376))
