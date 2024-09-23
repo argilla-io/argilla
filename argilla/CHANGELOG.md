@@ -20,6 +20,8 @@ These are the section headers that we use:
 
 - Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
 
+## [2.2.1](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.2.1)
+
 ### Fixed
 
 - Fixed `from_hub` errors when columns names contain uppercase letters. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
