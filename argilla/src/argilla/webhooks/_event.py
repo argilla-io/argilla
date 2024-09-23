@@ -72,7 +72,7 @@ class WebhookEvent(BaseModel):
     timestamp: datetime
     data: dict
 
-    def normalize(self, client: "Argilla") -> dict:
+    def parsed(self, client: "Argilla") -> dict:
         instance_type, action_type = self.type.split(".")
         data = self.data or {}
 

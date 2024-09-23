@@ -36,7 +36,7 @@ class WebhookHandler:
             if raw_event:
                 return await func(event)
 
-            return await func(**event.normalize(self.webhook._client))
+            return await func(**event.parsed(self.webhook._client))
 
         return request_handler
 
