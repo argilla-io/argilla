@@ -2,11 +2,11 @@ suite: test argilla chart
 templates:
   - templates/configmap.yaml
   - templates/deployment.yaml
-  # - templates/elasticsearch-operator.yaml
-  # - templates/pvc.yaml
-  # - templates/service.yaml
-  # - templates/hpa.yaml
-  # - templates/ingress.yaml
+  - templates/elasticsearch-operator.yaml
+  - templates/pvc.yaml
+  - templates/service.yaml
+  - templates/hpa.yaml
+  - templates/ingress.yaml
 
 tests:
   - it: should render configmap when elasticsearch.useOperator is false
@@ -60,121 +60,133 @@ tests:
             name: PASSWORD
             value: 12345678
 
-  # - it: should render elasticsearch operator resources when enabled
-  #   set:
-  #     elasticsearch.useOperator: true
-  #     elasticsearch.version: 7.17.0
-  #     elasticsearch.nodeCount: 3
-  #     elasticsearch.persistence.storage.size: 10Gi
-  #   asserts:
-  #     - isKind:
-  #         of: Elasticsearch
-  #     - equal:
-  #         path: spec.version
-  #         value: 7.17.0
-  #     - equal:
-  #         path: spec.nodeSets[0].count
-  #         value: 3
-  #     - equal:
-  #         path: spec.nodeSets[0].volumeClaimTemplates[0].spec.resources.requests.storage
-  #         value: 10Gi
+  - it: should render elasticsearch operator resources when enabled
+    set:
+      elasticsearch.useOperator: true
+      elasticsearch.version: 7.17.0
+      elasticsearch.nodeCount: 3
+      elasticsearch.persistence.storage.size: 10Gi
+    templates:
+      - templates/elasticsearch-operator.yaml
+    asserts:
+      - isKind:
+          of: Elasticsearch
+      - equal:
+          path: spec.version
+          value: 7.17.0
+      - equal:
+          path: spec.nodeSets[0].count
+          value: 3
+      - equal:
+          path: spec.nodeSets[0].volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 10Gi
 
-  # - it: should render PVC when persistence is enabled
-  #   set:
-  #     argilla.persistence.enabled: true
-  #     argilla.persistence.accessMode: ReadWriteOnce
-  #     argilla.persistence.size: 5Gi
-  #     argilla.persistence.storageClass: standard
-  #   asserts:
-  #     - isKind:
-  #         of: PersistentVolumeClaim
-  #     - equal:
-  #         path: spec.accessModes[0]
-  #         value: ReadWriteOnce
-  #     - equal:
-  #         path: spec.resources.requests.storage
-  #         value: 5Gi
-  #     - equal:
-  #         path: spec.storageClassName
-  #         value: standard
+  - it: should render PVC when persistence is enabled
+    set:
+      argilla.persistence.enabled: true
+      argilla.persistence.accessMode: ReadWriteOnce
+      argilla.persistence.size: 5Gi
+      argilla.persistence.storageClass: standard
+    templates:
+      - templates/pvc.yaml
+    asserts:
+      - isKind:
+          of: PersistentVolumeClaim
+      - equal:
+          path: spec.accessModes[0]
+          value: ReadWriteOnce
+      - equal:
+          path: spec.resources.requests.storage
+          value: 5Gi
+      - equal:
+          path: spec.storageClassName
+          value: standard
 
-  # - it: should render service correctly
-  #   asserts:
-  #     - isKind:
-  #         of: Service
-  #     - equal:
-  #         path: spec.ports[0].port
-  #         value: 6900
-  #     - equal:
-  #         path: spec.ports[0].name
-  #         value: http
+  - it: should render service correctly
+    templates:
+      - templates/service.yaml
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.ports[0].port
+          value: 6900
+      - equal:
+          path: spec.ports[0].name
+          value: http
 
-  # - it: should render HPA when enabled
-  #   set:
-  #     argilla.hpa.enabled: true
-  #     argilla.hpa.minReplicas: 2
-  #     argilla.hpa.maxReplicas: 5
-  #     argilla.hpa.targetCPUUtilizationPercentage: 80
-  #   asserts:
-  #     - isKind:
-  #         of: HorizontalPodAutoscaler
-  #     - equal:
-  #         path: spec.minReplicas
-  #         value: 2
-  #     - equal:
-  #         path: spec.maxReplicas
-  #         value: 5
-  #     - equal:
-  #         path: spec.metrics[0].resource.target.averageUtilization
-  #         value: 80
-  #     - equal:
-  #         path: spec.scaleTargetRef.kind
-  #         value: Deployment
-  #     - equal:
-  #         path: apiVersion
-  #         value: autoscaling/v2
+  - it: should render HPA when enabled
+    set:
+      argilla.hpa.enabled: true
+      argilla.hpa.minReplicas: 2
+      argilla.hpa.maxReplicas: 5
+      argilla.hpa.targetCPUUtilizationPercentage: 80
+    templates:
+      - templates/hpa.yaml
+    asserts:
+      - isKind:
+          of: HorizontalPodAutoscaler
+      - equal:
+          path: spec.minReplicas
+          value: 2
+      - equal:
+          path: spec.maxReplicas
+          value: 5
+      - equal:
+          path: spec.metrics[0].resource.target.averageUtilization
+          value: 80
+      - equal:
+          path: spec.scaleTargetRef.kind
+          value: Deployment
+      - equal:
+          path: apiVersion
+          value: autoscaling/v2
 
-  # - it: should not render HPA when disabled
-  #   set:
-  #     argilla.hpa.enabled: false
-  #   asserts:
-  #     - hasDocuments:
-  #         count: 0
-  #       template: hpa.yaml
+  - it: should not render HPA when disabled
+    set:
+      argilla.hpa.enabled: false
+    templates:
+      - templates/hpa.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
 
-  # - it: should render Ingress when enabled
-  #   set:
-  #     argilla.ingress.enabled: true
-  #     argilla.ingress.className: nginx
-  #     argilla.ingress.host: argilla.example.com
-  #     argilla.ingress.annotations:
-  #       kubernetes.io/ingress.class: nginx
-  #   asserts:
-  #     - isKind:
-  #         of: Ingress
-  #     - equal:
-  #         path: spec.ingressClassName
-  #         value: nginx
-  #     - equal:
-  #         path: spec.rules[0].host
-  #         value: argilla.example.com
-  #     - equal:
-  #         path: spec.rules[0].http.paths[0].path
-  #         value: /
-  #     - equal:
-  #         path: spec.rules[0].http.paths[0].pathType
-  #         value: Prefix
-  #     - equal:
-  #         path: spec.rules[0].http.paths[0].backend.service.port.number
-  #         value: 6900
-  #     - equal:
-  #         path: metadata.annotations.[kubernetes.io/ingress.class]
-  #         value: nginx
+  - it: should render Ingress when enabled
+    set:
+      argilla.ingress.enabled: true
+      argilla.ingress.className: nginx
+      argilla.ingress.host: argilla.example.com
+      argilla.ingress.annotations:
+        kubernetes.io/ingress.class: nginx
+    templates:
+      - templates/ingress.yaml
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+      - equal:
+          path: spec.rules[0].host
+          value: argilla.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: Prefix
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.number
+          value: 6900
+      - equal:
+          path: metadata.annotations["kubernetes.io/ingress.class"]
+          value: nginx
 
-  # - it: should not render Ingress when disabled
-  #   set:
-  #     argilla.ingress.enabled: false
-  #   asserts:
-  #     - hasDocuments:
-  #         count: 0
-  #       template: ingress.yaml
+  - it: should not render Ingress when disabled
+    set:
+      argilla.ingress.enabled: false
+    templates:
+      - templates/ingress.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
