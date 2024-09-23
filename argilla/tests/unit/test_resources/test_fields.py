@@ -20,7 +20,7 @@ from pytest_httpx import HTTPXMock
 
 import argilla as rg
 from argilla._models import FieldModel
-from argilla._models._settings._fields import ImageFieldSettings, ChatFieldSettings, CustomFieldSettings
+from argilla._models._settings._fields import ImageFieldSettings, ChatFieldSettings
 from argilla.settings._field import ImageField, ChatField, CustomField
 
 
@@ -85,7 +85,7 @@ class TestChatField:
         assert field.required is True
         assert field.description is None
         assert field.template == "template"
-        assert field.advanced is False
+        assert field.advanced_mode is False
 
 class TestFieldsAPI:
     def test_create_field(self, httpx_mock: HTTPXMock):

@@ -204,19 +204,23 @@ class CustomField(AbstractField):
         self,
         name: str,
         template: Optional[str] = "",
-        advanced: Optional[bool] = False,
+        advanced_mode: Optional[bool] = False,
         title: Optional[str] = None,
         required: Optional[bool] = True,
         description: Optional[str] = None,
         _client: Optional[Argilla] = None,
     ) -> None:
         """
-        Custom field for use in Argilla `Dataset` `Settings` for working with custom HTML and CSS templates
+        Custom field for use in Argilla `Dataset` `Settings` for working with custom HTML and CSS templates.
+        By default argilla will use a brackets syntax engine for the templates, which converts
+        `{{ field.key }}` to the values of record's field's object.
 
         Parameters:
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
             template (str): The template of the field (HTML and CSS)
+            advanced_mode (Optional[bool], optional): Whether to use advanced mode. Defaults to False.
+                Deactivate the brackets syntax engine and use custom javascript to render the field.
             required (Optional[bool], optional): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
@@ -226,7 +230,7 @@ class CustomField(AbstractField):
             title=title,
             required=required,
             description=description,
-            settings=CustomFieldSettings(template=template, advanced=advanced),
+            settings=CustomFieldSettings(template=template, advanced_mode=advanced_mode),
             _client=_client,
         )
 
@@ -239,12 +243,12 @@ class CustomField(AbstractField):
         self._model.settings.template = self._load_template(value)
 
     @property
-    def advanced(self) -> Optional[bool]:
-        return self._model.settings.advanced
+    def advanced_mode(self) -> Optional[bool]:
+        return self._model.settings.advanced_mode
 
-    @advanced.setter
-    def advanced(self, value: bool) -> None:
-        self._model.settings.advanced = value
+    @advanced_mode.setter
+    def advanced_mode(self, value: bool) -> None:
+        self._model.settings.advanced_mode = value
 
     def _load_template(self, template: str) -> str:
         if template.endswith(".html") and os.path.exists(template):

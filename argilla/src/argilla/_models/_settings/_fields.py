@@ -39,7 +39,7 @@ class ChatFieldSettings(BaseModel):
 class CustomFieldSettings(BaseModel):
     type: Literal["custom"] = "custom"
     template: str
-    advanced: Optional[bool] = False
+    advanced_mode: Optional[bool] = False
 
 
 FieldSettings = Annotated[
