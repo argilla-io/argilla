@@ -14,14 +14,13 @@ spec:
       labels:
         {{- include "argilla.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if not .Values.elasticsearch.useOperator }}
       volumes:
+      {{- if not .Values.elasticsearch.useOperator }}
         - name: hosts-file
           configMap:
             name: custom-hosts
       {{- end }}
       {{- if .Values.argilla.persistence.enabled }}
-      volumes:
         - name: argilla-data
           persistentVolumeClaim:
             claimName: {{ .Release.Name }}-argilla-pvc
@@ -40,21 +39,20 @@ spec:
             - name: USERNAME
               value: {{ .Values.argilla.auth.username }}
             - name: PASSWORD
-              value: "{{ .Values.argilla.auth.password }}"
+              value: {{ .Values.argilla.auth.password }}
             {{- if .Values.argilla.persistence.enabled }}
             - name: ARGILLA_HOME_PATH
               value: {{ .Values.argilla.persistence.mountPath}}
             {{- end }}
           ports:
             - containerPort: 6900
-          {{- if not .Values.elasticsearch.useOperator }}
           volumeMounts:
+          {{- if not .Values.elasticsearch.useOperator }}
             - name: hosts-file
               mountPath: /etc/hosts
               subPath: hosts
           {{- end }}
           {{- if .Values.argilla.persistence.enabled }}
-          volumeMounts:
             - name: argilla-data
               mountPath: {{ .Values.argilla.persistence.mountPath}}
           {{- end }}
