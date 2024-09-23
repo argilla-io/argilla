@@ -243,25 +243,6 @@ def es_path_for_question_response(question_name: str) -> str:
     return f"{question_name}"
 
 
-def _is_custom_field(field_name: str, dataset: Dataset) -> bool:
-    """
-    Check if the field is a custom field in the dataset
-
-    Parameters
-    ----------
-        field_name : str : The name of the field
-        dataset : Dataset : The dataset object
-
-    Returns
-    -------
-        bool : True if the field is a custom field, False otherwise
-    """
-    for field in dataset.fields:
-        if field.name == field_name:
-            return field.is_custom
-    return False
-
-
 @dataclasses.dataclass
 class BaseElasticAndOpenSearchEngine(SearchEngine):
     """
@@ -679,9 +660,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             if field is None:
                 raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
 
-            if field.is_chat:
-                field_name = f"{text.field}.*"
-            elif _is_custom_field(text.field, dataset):
+            if field.is_chat or field.is_custom:
                 field_name = f"{text.field}.*"
             else:
                 field_name = text.field
