@@ -11,11 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from argilla._exceptions import ArgillaError
 
-from argilla._exceptions._api import *  # noqa: F403
-from argilla._exceptions._client import *  # noqa: F403
-from argilla._exceptions._metadata import *  # noqa: F403
-from argilla._exceptions._serialization import *  # noqa: F403
-from argilla._exceptions._settings import *  # noqa: F403
-from argilla._exceptions._records import *  # noqa: F403
-from argilla._exceptions._hub import *  # noqa: F403
+__all__ = [
+    "ImportDatasetError",
+    "DatasetsServerException",
+]
+
+
+class ImportDatasetError(ArgillaError):
+    def __init__(self, message: str = "Error importing dataset") -> None:
+        super().__init__(message)
+
+
+class DatasetsServerException(ArgillaError):
+    def __init__(self, message: str = "Error connecting to Hugging Face Hub datasets-server API") -> None:
+        super().__init__(message)

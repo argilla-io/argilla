@@ -39,6 +39,8 @@ export default {
   taskDistributionTooltip:
     "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
+  required: "Required",
+  optional: "Optional",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",
@@ -106,6 +108,7 @@ export default {
     yesDelete: "Yes, delete",
     write: "Write",
     preview: "Preview",
+    uiPreview: "UI Preview",
   },
   button: {
     ignore_and_continue: "Ignore and continue",

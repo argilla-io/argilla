@@ -35,6 +35,8 @@ from argilla.vectors import Vector
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
+    from argilla import Argilla
+    from argilla._api import RecordsAPI
 
 
 class Record(Resource):
@@ -80,6 +82,7 @@ class Record(Resource):
             _server_id: An id for the record. (Read-only and set by the server)
             _dataset: The dataset object to which the record belongs.
         """
+
         if fields is None and metadata is None and vectors is None and responses is None and suggestions is None:
             raise ValueError("At least one of fields, metadata, vectors, responses, or suggestions must be provided.")
         if fields is None and id is None:
@@ -152,6 +155,14 @@ class Record(Resource):
     ############################
     # Public methods
     ############################
+
+    def get(self) -> "Record":
+        """Retrieves the record from the server."""
+        model = self._client.api.records.get(self._server_id)
+        instance = self.from_model(model, dataset=self.dataset)
+        self.__dict__ = instance.__dict__
+
+        return self
 
     def api_model(self) -> RecordModel:
         return RecordModel(
@@ -266,6 +277,16 @@ class Record(Resource):
         instance._model.status = model.status
 
         return instance
+
+    @property
+    def _client(self) -> Optional["Argilla"]:
+        if self._dataset:
+            return self.dataset._client
+
+    @property
+    def _api(self) -> Optional["RecordsAPI"]:
+        if self._client:
+            return self._client.api.records
 
 
 class RecordFields(dict):
