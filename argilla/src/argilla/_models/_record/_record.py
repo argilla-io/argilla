@@ -36,7 +36,7 @@ class ChatFieldValue(BaseModel):
 
 CustomFieldValue = dict
 
-FieldValue = Union[CustomFieldValue, List[ChatFieldValue], str, None]
+FieldValue = Union[List[ChatFieldValue], List[dict], CustomFieldValue, str, None]
 
 
 class RecordModel(ResourceModel):
