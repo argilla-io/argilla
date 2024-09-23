@@ -20,7 +20,7 @@ from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 
-from argilla._exceptions import RecordsIngestionError, ArgillaError
+from argilla._exceptions import RecordsIngestionError, ArgillaError, ImportDatasetError
 from argilla._models import DatasetModel
 from argilla.client import Argilla
 from argilla.settings import Settings
@@ -82,11 +82,15 @@ class DiskImportExportMixin(ABC):
 
         client = client or Argilla._get_default()
 
-        dataset_path, settings_path, records_path = cls._define_child_paths(path=path)
-        logging.info(f"Loading dataset from {dataset_path}")
-        logging.info(f"Loading settings from {settings_path}")
-        logging.info(f"Loading records from {records_path}")
-        dataset_model = cls._load_dataset_model(path=dataset_path)
+        try:
+            dataset_path, settings_path, records_path = cls._define_child_paths(path=path)
+            logging.info(f"Loading dataset from {dataset_path}")
+            logging.info(f"Loading settings from {settings_path}")
+            logging.info(f"Loading records from {records_path}")
+
+            dataset_model = cls._load_dataset_model(path=dataset_path)
+        except (NotADirectoryError, FileNotFoundError) as e:
+            raise ImportDatasetError(f"Error loading dataset from disk. {e}") from e
 
         # Get the relevant workspace_id of the incoming dataset
         if isinstance(workspace, str):
@@ -112,6 +116,9 @@ class DiskImportExportMixin(ABC):
             dataset = cls.from_model(model=dataset_model, client=client)
         else:
             # Create a new dataset and load the settings and records
+            if not os.path.exists(settings_path):
+                raise ImportDatasetError(f"Settings file not found at {settings_path}")
+
             dataset = cls.from_model(model=dataset_model, client=client)
             dataset.settings = Settings.from_json(path=settings_path)
             dataset.create()
@@ -121,8 +128,10 @@ class DiskImportExportMixin(ABC):
                 dataset.records.from_json(path=records_path)
             except RecordsIngestionError as e:
                 raise RecordsIngestionError(
-                    message="Error importing dataset records from disk. Records and datasets settings are not compatible."
+                    message="Error importing dataset records from disk. "
+                    "Records and datasets settings are not compatible."
                 ) from e
+
         return dataset
 
     ############################
