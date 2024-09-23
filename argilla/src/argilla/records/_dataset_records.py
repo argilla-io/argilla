@@ -52,6 +52,7 @@ class DatasetRecordsIterator:
         with_suggestions: bool = False,
         with_responses: bool = False,
         with_vectors: Optional[Union[str, List[str], bool]] = None,
+        limit: Optional[int] = None,
     ):
         self.__dataset = dataset
         self.__client = client
@@ -62,19 +63,37 @@ class DatasetRecordsIterator:
         self.__with_responses = with_responses
         self.__with_vectors = with_vectors
         self.__records_batch = []
+        self.__limit = 1 if limit == 0 else limit
+
+        if self.__limit is not None and self.__limit < self.__batch_size:
+            self.__batch_size = limit
 
     def __iter__(self):
         return self
 
     def __next__(self) -> Record:
+        if self._limit_reached():
+            raise StopIteration()
+
         if not self._has_local_records():
             self._fetch_next_batch()
             if not self._has_local_records():
                 raise StopIteration()
+
         return self._next_record()
 
+    def _limit_reached(self) -> bool:
+        if self.__limit is None:
+            return False
+        return self.__limit == 0
+
     def _next_record(self) -> Record:
-        return self.__records_batch.pop(0)
+        record = self.__records_batch.pop(0)
+
+        if self.__limit is not None:
+            self.__limit -= 1
+
+        return record
 
     def _has_local_records(self) -> bool:
         return len(self.__records_batch) > 0
@@ -170,6 +189,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         with_suggestions: bool = True,
         with_responses: bool = True,
         with_vectors: Optional[Union[List, bool, str]] = None,
+        limit: Optional[int] = None,
     ) -> DatasetRecordsIterator:
         """Returns an iterator over the records in the dataset on the server.
 
@@ -182,6 +202,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             with_vectors: A list of vector names to include in the records. The default is None.
                 If a list is provided, only the specified vectors will be included.
                 If True is provided, all vectors will be included.
+            limit: The maximum number of records to fetch. The default is None.
 
         Returns:
             An iterator over the records in the dataset on the server.
@@ -202,6 +223,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             with_suggestions=with_suggestions,
             with_responses=with_responses,
             with_vectors=with_vectors,
+            limit=limit,
         )
 
     def __repr__(self) -> str:
