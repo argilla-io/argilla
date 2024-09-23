@@ -275,9 +275,7 @@ class ChatFieldFactory(FieldFactory):
 
 
 class CustomFieldFactory(FieldFactory):
-    settings = {
-        "type": FieldType.custom,
-    }
+    settings = {"type": FieldType.custom}
 
 
 class MetadataPropertyFactory(BaseFactory):
