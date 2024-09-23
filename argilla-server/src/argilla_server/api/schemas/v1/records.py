@@ -85,7 +85,7 @@ class Record(BaseModel):
         getter_dict = RecordGetterDict
 
 
-FieldValueCreate = Union[List[ChatFieldValue], Dict[StrictStr, StrictStr], StrictStr, None]
+FieldValueCreate = Union[List[ChatFieldValue], Dict[StrictStr, Any], StrictStr, None]
 
 
 class RecordCreate(BaseModel):
