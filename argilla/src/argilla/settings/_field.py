@@ -102,9 +102,9 @@ class TextField(AbstractField):
         self,
         name: str,
         title: Optional[str] = None,
-        required: Optional[bool] = True,
-        description: Optional[str] = None,
         use_markdown: Optional[bool] = False,
+        required: bool = True,
+        description: Optional[str] = None,
         client: Optional[Argilla] = None,
     ) -> None:
         """Text field for use in Argilla `Dataset` `Settings`
@@ -112,7 +112,7 @@ class TextField(AbstractField):
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
             use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to False.
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
 
         """
@@ -120,7 +120,7 @@ class TextField(AbstractField):
         super().__init__(
             name=name,
             title=title,
-            required=required or True,
+            required=required,
             description=description,
             settings=TextFieldSettings(use_markdown=use_markdown),
             _client=client,
@@ -173,7 +173,8 @@ class ChatField(AbstractField):
         self,
         name: str,
         title: Optional[str] = None,
-        required: Optional[bool] = True,
+        use_markdown: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         _client: Optional[Argilla] = None,
     ) -> None:
@@ -183,7 +184,8 @@ class ChatField(AbstractField):
         Parameters:
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
 
@@ -192,9 +194,17 @@ class ChatField(AbstractField):
             title=title,
             required=required,
             description=description,
-            settings=ChatFieldSettings(),
+            settings=ChatFieldSettings(use_markdown=use_markdown),
             _client=_client,
         )
+
+    @property
+    def use_markdown(self) -> Optional[bool]:
+        return self._model.settings.use_markdown
+
+    @use_markdown.setter
+    def use_markdown(self, value: bool) -> None:
+        self._model.settings.use_markdown = value
 
 
 class CustomField(AbstractField):
@@ -205,7 +215,7 @@ class CustomField(AbstractField):
         name: str,
         template: Optional[str] = "",
         title: Optional[str] = None,
-        required: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         _client: Optional[Argilla] = None,
     ) -> None:
@@ -216,7 +226,7 @@ class CustomField(AbstractField):
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
             template (str): The template of the field (HTML and CSS)
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
         template = self._load_template(template)
