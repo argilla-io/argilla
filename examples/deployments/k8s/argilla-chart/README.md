@@ -72,3 +72,33 @@ helm delete my-release
 ```
 
 This command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Running Unit Tests
+
+This chart includes unit tests using the helm-unittest plugin. To run these tests, follow these steps:
+
+### Installing helm-unittest plugin
+
+1. Install the helm-unittest plugin:
+
+```bash
+helm plugin install https://github.com/helm-unittest/helm-unittest.git
+```
+
+2. Verify the installation:
+
+```bash
+helm unittest --help
+```
+
+### Running the tests
+
+To execute the unit tests for this chart, run the following command from the root of the chart directory:
+
+```bash
+helm unittest .
+```
+
+This will run all the test files located in the `tests/` directory of the chart.
+
+For more information on writing and running helm unit tests, please refer to the [helm-unittest documentation](https://github.com/helm-unittest/helm-unittest).
