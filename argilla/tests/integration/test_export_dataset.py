@@ -18,11 +18,13 @@ import random
 import uuid
 from string import ascii_lowercase
 from tempfile import TemporaryDirectory
+from time import sleep
 from typing import Any, List
 
 import argilla as rg
 import pytest
 from argilla._exceptions import ConflictError, SettingsError
+from datasets import Dataset as HFDataset, Value, Features, ClassLabel, load_dataset
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -149,7 +151,7 @@ class TestDiskImportExportMixin:
 
 
 @pytest.mark.flaky(
-    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError, OSError]
+    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError, OSError, FileNotFoundError]
 )  # Hub consistency CICD pipline
 @pytest.mark.skipif(
     not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"),
@@ -225,6 +227,7 @@ class TestHubImportExportMixin:
         repo_id = (
             f"argilla-internal-testing/test_import_dataset_from_hub_using_settings_with_records{with_records_export}"
         )
+        mock_dataset_name = f"test_import_dataset_from_hub_using_settings_{uuid.uuid4()}"
         dataset.records.log(records=mock_data)
 
         dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
@@ -243,11 +246,21 @@ class TestHubImportExportMixin:
                 match="Trying to load a dataset `with_records=True` but dataset does not contain any records.",
             ):
                 new_dataset = rg.Dataset.from_hub(
-                    repo_id=repo_id, client=client, with_records=with_records_import, token=token, settings=settings
+                    repo_id=repo_id,
+                    client=client,
+                    with_records=with_records_import,
+                    token=token,
+                    settings=settings,
+                    name=mock_dataset_name,
                 )
         else:
             new_dataset = rg.Dataset.from_hub(
-                repo_id=repo_id, client=client, with_records=with_records_import, token=token, settings=settings
+                repo_id=repo_id,
+                client=client,
+                with_records=with_records_import,
+                token=token,
+                settings=settings,
+                name=mock_dataset_name,
             )
 
         if with_records_import and with_records_export:
@@ -280,6 +293,7 @@ class TestHubImportExportMixin:
         settings = rg.Settings(
             fields=[
                 rg.TextField(name="text"),
+                rg.ImageField(name="image"),
             ],
             questions=[
                 rg.LabelQuestion(name="label", labels=["positive", "negative"]),
@@ -333,9 +347,8 @@ class TestHubImportExportMixin:
         with_records_export: bool,
     ):
         repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_using_wrong_settings_with_records_{with_records_export}"
-        mock_unique_name = f"test_import_dataset_from_hub_using_wrong_settings_{uuid.uuid4()}"
         dataset.records.log(records=mock_data)
-
+        mock_dataset_name = f"test_import_dataset_from_hub_using_wrong_settings_{uuid.uuid4()}"
         dataset.to_hub(repo_id=repo_id, with_records=with_records_export, token=token)
         settings = rg.Settings(
             fields=[
@@ -348,7 +361,28 @@ class TestHubImportExportMixin:
         if with_records_export:
             with pytest.raises(SettingsError):
                 rg.Dataset.from_hub(
-                    repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name
+                    repo_id=repo_id, client=client, token=token, settings=settings, name=mock_dataset_name
                 )
         else:
-            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_unique_name)
+            rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_dataset_name)
+
+    def test_import_dataset_from_hub_with_automatic_settings(
+        self, token: str, dataset: rg.Dataset, client, mock_data: List[dict[str, Any]], with_records_export: bool
+    ):
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_automatic_settings_{with_records_export}"
+        mock_dataset_name = f"test_import_dataset_from_hub_with_automatic_settings_{uuid.uuid4()}"
+        mocked_external_dataset = load_dataset(path=repo_id, split="train")
+
+        rg_dataset = rg.Dataset.from_hub(
+            repo_id=repo_id,
+            client=client,
+            token=token,
+            name=mock_dataset_name,
+            with_records=with_records_export,
+        )
+
+        if with_records_export:
+            int2str = mocked_external_dataset.features["label"].int2str
+            for i, record in enumerate(rg_dataset.records(with_suggestions=True)):
+                assert record.fields["text"] == mocked_external_dataset[i]["text"]
+                assert record.suggestions["label"].value == int2str(mocked_external_dataset[i]["label"])

@@ -38,6 +38,8 @@ export default {
   taskDistributionTooltip:
     "Una tarea se completa cuando todos los \nregistros tienen el número mínimo \nde respuestas entregadas",
   noAnnotationGuidelines: "Este dataset no tiene guía de anotación",
+  required: "Requerido",
+  optional: "Opcional",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",

@@ -10,7 +10,7 @@ export class Field {
     public title: string,
     public readonly content: string,
     public readonly datasetId: string,
-    public readonly required: boolean,
+    public readonly isRequired: boolean,
     public settings: any
   ) {
     this.initializeOriginal();
@@ -24,7 +24,11 @@ export class Field {
     return this.type === "image";
   }
 
-  get type() {
+  public get isChatType() {
+    return this.type === "chat";
+  }
+
+  private get type() {
     return this.settings?.type?.toLowerCase() ?? null;
   }
 
