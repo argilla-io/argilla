@@ -30,7 +30,7 @@ export class Field {
   }
 
   get isCustomType() {
-    return this.fieldType === "custom";
+    return this.type === "custom";
   }
 
   get content() {
