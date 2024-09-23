@@ -34,7 +34,12 @@ def _parse_dataset_from_webhook_data(data: dict, client: "Argilla") -> Dataset:
     dataset = Dataset(name=data["name"], workspace=workspace, client=client)
     dataset.id = UUID(data["id"])
 
-    return dataset.get()
+    try:
+        dataset.get()
+    except ArgillaAPIError as _:
+        pass
+    finally:
+        return dataset
 
 
 def _parse_record_from_webhook_data(data: dict, client: "Argilla") -> Record:
@@ -72,9 +77,6 @@ class WebhookEvent(BaseModel):
         data = self.data or {}
 
         arguments = {"type": self.type, "timestamp": self.timestamp}
-
-        if action_type == "deleted":
-            return {**arguments, "data": data}
 
         if instance_type == "dataset":
             dataset = _parse_dataset_from_webhook_data(data, client)
