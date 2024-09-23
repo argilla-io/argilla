@@ -112,6 +112,7 @@ def webhook_listener(
                 warnings.warn(f"Found existing webhook with for URL {argilla_webhook.url}: {argilla_webhook}")
                 webhook = argilla_webhook
                 webhook.description = description or webhook.description
+                webhook.enabled = True
                 webhook.update()
                 break
 
