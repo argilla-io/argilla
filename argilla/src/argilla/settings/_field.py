@@ -238,6 +238,14 @@ class CustomField(AbstractField):
     def template(self, value: str) -> None:
         self._model.settings.template = self._load_template(value)
 
+    @property
+    def advanced(self) -> Optional[bool]:
+        return self._model.settings.advanced
+
+    @advanced.setter
+    def advanced(self, value: bool) -> None:
+        self._model.settings.advanced = value
+
     def _load_template(self, template: str) -> str:
         if template.endswith(".html") and os.path.exists(template):
             with open(template, "r") as f:
