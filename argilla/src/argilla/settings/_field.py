@@ -204,6 +204,7 @@ class CustomField(AbstractField):
         self,
         name: str,
         template: Optional[str] = "",
+        advanced: Optional[bool] = False,
         title: Optional[str] = None,
         required: Optional[bool] = True,
         description: Optional[str] = None,
@@ -225,7 +226,7 @@ class CustomField(AbstractField):
             title=title,
             required=required,
             description=description,
-            settings=CustomFieldSettings(template=template),
+            settings=CustomFieldSettings(template=template, advanced=advanced),
             _client=_client,
         )
 
