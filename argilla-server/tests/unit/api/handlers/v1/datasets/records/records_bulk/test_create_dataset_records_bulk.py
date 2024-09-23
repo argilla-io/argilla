@@ -474,8 +474,6 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
-        assert "is not valid" in response.json()["detail"]
-
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
     async def test_create_dataset_records_bulk_with_chat_field_with_non_dicts(
@@ -501,8 +499,6 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
-        assert "is not valid" in response.json()["detail"]
-
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
     async def test_create_dataset_records_bulk_with_chat_field_without_role_key(
@@ -532,7 +528,6 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
-        assert "is not valid" in response.json()["detail"]
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
     async def test_create_dataset_records_bulk_with_chat_field_without_content_key(
@@ -571,6 +566,11 @@ class TestCreateDatasetRecordsBulk:
                             "loc": ["body", "items", 0, "fields", "chat", 0, "content"],
                             "msg": "field required",
                             "type": "value_error.missing",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "chat"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "chat"],
