@@ -165,6 +165,9 @@ def _define_settings_from_features(
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
 
+        # Lowercase the name to avoid case sensitivity issues when mapping the features to the settings.
+        name = name.lower()
+
         if feature_type == FeatureType.CHAT:
             fields.append(ChatField(name=name, required=False))
         elif feature_type == FeatureType.TEXT:
