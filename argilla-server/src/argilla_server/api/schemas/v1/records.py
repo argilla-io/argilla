@@ -167,7 +167,6 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[Dict[StrictStr, StrictStr], List[ChatFieldValue], StrictStr, None]]]
 
 
 class RecordIncludeParam(BaseModel):
