@@ -65,7 +65,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: $base-space;
-    color: $black-87;
+    color: var(--fg-secondary);
   }
   .content-area {
     white-space: pre-wrap;
