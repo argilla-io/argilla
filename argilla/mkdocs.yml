@@ -22,7 +22,23 @@ extra:
       link: https://www.youtube.com/channel/UCAIz8TmvQQrLqbD7sd-5S2A
     - icon: fontawesome/brands/discord
       link: http://hf.co/join/discord
-
+  analytics:
+    provider: plausible
+    domain: docs.argilla.io
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/thumb-up-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/thumb-down-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback! Help us improve this page by
+            <a href="https://github.com/argilla-io/argilla/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">opening a GitHub issue</a>.
 extra_css:
   - stylesheets/extra.css
 
@@ -105,27 +121,38 @@ plugins:
         - docs/scripts/gen_changelog.py
         - docs/scripts/gen_popular_issues.py
         # - docs/scripts/gen_ref_pages.py
+      enabled: !ENV [CI, false] # enables the plugin only during continuous integration (CI), disabled on local build
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index
   - mkdocstrings:
       handlers:
         python:
-          selection:
-            inherited_members: true # Allow looking up inherited methods
-          rendering:
-            show_root_toc_entry: true
-            show_root_heading: true # actually display anything at all...
-            # show_root_full_path: true  # display "diffrax.asdf" not just "asdf"
-            show_if_no_docstring: true
-            show_signature_annotations: true
-            show_source: false # don't include source code
+          options:
+            show_inheritance_diagram: false
+            show_source: true # include source code
+            # Headings
+            heading_level: 3
+            show_root_heading: true # show the python path of the class
+            show_root_toc_entry: true # show the toc entry for the root class
+            show_root_full_path: false # display "diffrax.asdf" not just "asdf"
+            show_object_full_path: false # display "diffrax.asdf" not just "asdf"
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            # Members
+            inherited_members: true # allow looking up inherited methods
             members_order: source # order methods according to their order of definition in the source code, not alphabetical order
-            heading_level: 4
-            # hide private members
-            private: true
-  - social
+            show_labels : true
+            # Docstring
+            docstring_style: google  # more info: https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+            show_if_no_docstring: false
+            # Signature
+            separate_signature: false
+            show_signature_annotations: false
+  - social:
+      enabled: !ENV [CI, false] # enables the plugin only during continuous integration (CI), disabled on local build
   - mknotebooks
+  - material-plausible
 
 nav:
   - Argilla: index.md
@@ -147,11 +174,13 @@ nav:
         - Import and export datasets: how_to_guides/import_export.md
       - Advanced:
         - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
-        - Migrate your legacy datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
+        - Migrate users, workspaces and datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:
       - tutorials/index.md
       - Text classification: tutorials/text_classification.ipynb
       - Token classification: tutorials/token_classification.ipynb
+      - Image classification: tutorials/image_classification.ipynb
+      - Image preference: tutorials/image_preference.ipynb
   - API Reference:
       - Python SDK: reference/argilla/
       - FastAPI Server:
@@ -161,7 +190,10 @@ nav:
   - Community:
       - community/index.md
       - How to contribute?: community/contributor.md
+      - Developer documentation: community/developer.md
       - Issue dashboard: community/popular_issues.md
       - Changelog: community/changelog.md
+      - Integrations:
+        - LlamaIndex: community/integrations/llamaindex_rag_github.ipynb
   - UI Demo ↗:
       - https://demo.argilla.io/sign-in?auth=ZGVtbzoxMjM0NTY3OA==

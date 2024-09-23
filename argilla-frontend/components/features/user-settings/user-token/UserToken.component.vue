@@ -12,9 +12,9 @@
     <span class="user-token-value --body1" v-text="'**** **** **** ****'" />
 
     <div class="user-token-button">
-      <base-action-tooltip tooltip="Copied">
+      <base-action-tooltip :tooltip="$t('copied')">
         <BaseButton
-          title="Copy to clipboard"
+          :title="$t('button.tooltip.copyToClipboard')"
           class="secondary small"
           @click.prevent="$copyToClipboard(userToken)"
         >
@@ -56,7 +56,7 @@ export default {
 }
 .user-token-description {
   grid-area: b;
-  color: $black-37;
+  color: var(--fg-tertiary);
   margin-top: 0;
 }
 .user-token-value {

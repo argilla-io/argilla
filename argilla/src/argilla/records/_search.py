@@ -67,6 +67,9 @@ class Condition(Tuple[str, str, Any]):
         elif "score" in field:
             question, _ = field.split(".")
             return SuggestionFilterScopeModel(question=question, property="score")
+        elif "agent" in field:
+            question, _ = field.split(".")
+            return SuggestionFilterScopeModel(question=question, property="agent")
         elif "response" in field:
             question, _ = field.split(".")
             return ResponseFilterScopeModel(question=question)

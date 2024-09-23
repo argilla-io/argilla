@@ -50,16 +50,17 @@ export default {
     width: auto;
     padding-top: $base-space * 2;
     padding-bottom: $base-space * 4;
-    color: $black-54;
+    color: var(--fg-secondary);
     line-height: 1.5;
   }
   :deep(h1),
   :deep(h2),
   :deep(h3),
   :deep(h4) {
-    color: $black-87;
+    color: var(--fg-primary);
   }
 }
+
 :deep(.start-page__intro) {
   margin-bottom: $base-space * 3;
   text-align: center;
@@ -82,11 +83,12 @@ export default {
     @include font-size(16px);
   }
 }
+
 :deep(.start-page__content) {
   display: inline-block;
-  background: palette(white);
+  background: var(--bg-accent-grey-1);
   padding: $base-space * 3;
-  border: 1px solid $black-10;
+  border: 1px solid var(--bg-opacity-10);
   border-radius: $border-radius-m;
   p,
   li {
@@ -99,18 +101,25 @@ export default {
   }
   a {
     text-decoration: none;
-    color: $primary-color;
+    color: var(--fg-cuaternary);
     &:hover {
-      color: darken($primary-color, 10%);
+      color: var(--bg-action-accent);
     }
   }
   p > code:not(.hljs),
   li > code:not(.hljs) {
-    color: $black-54;
-    border: 1px solid $black-10;
-    background: $black-4;
+    color: var(--fg-secondary);
+    border: 1px solid var(--bg-opacity-10);
+    background: var(--bg-opacity-4);
     padding-inline: 4px;
     @include font-size(14px);
+  }
+}
+</style>
+<style lang="scss">
+[data-theme="dark"] .start-page__intro {
+  h1:after {
+    background: url("/images/logo-white.svg") center / contain no-repeat;
   }
 }
 </style>

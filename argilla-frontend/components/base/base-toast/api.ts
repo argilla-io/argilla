@@ -56,13 +56,13 @@ export const toast = (globalOptions = {}) => {
         )
       );
     },
-    error(message, options = {}) {
+    danger(message, options = {}) {
       return this.open(
         Object.assign(
           {},
           {
             message,
-            type: "error",
+            type: "danger",
           },
           options
         )

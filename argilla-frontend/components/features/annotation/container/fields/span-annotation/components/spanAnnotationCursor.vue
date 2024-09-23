@@ -107,11 +107,11 @@ export default {
     z-index: 1;
     position: fixed;
     transform: translate(-50%, calc(-50% - 30px));
-    color: $black-87;
+    color: var(--color-white);
     padding: calc($base-space / 2);
     border-radius: $border-radius;
     box-shadow: $shadow-100;
-    background: palette(white);
+    background: var(--color-dark-grey);
     @include font-size(12px);
     line-height: 1;
   }
@@ -123,7 +123,10 @@ export default {
   height: 22px;
   width: 4px;
   background: v-bind(cursorColor);
-  border: 1px solid palette(white);
+  border: 1px solid var(--bg-accent-grey-2);
+  [data-theme="dark"] & {
+    background: v-bind("cursorColor.palette.veryDark");
+  }
   &.entity {
     z-index: 200;
     &:before {
@@ -135,7 +138,6 @@ export default {
       bottom: $base-space * 2;
       transform: translate(-50%, -50%);
       left: 50%;
-      color: $black-87;
       padding: calc($base-space / 2);
       border-radius: $border-radius;
       box-shadow: $shadow-100;
@@ -143,6 +145,9 @@ export default {
       @include font-size(10px);
       text-transform: uppercase;
       line-height: 1em;
+      [data-theme="dark"] & {
+        background: v-bind("cursorColor.palette.veryDark");
+      }
     }
   }
 }

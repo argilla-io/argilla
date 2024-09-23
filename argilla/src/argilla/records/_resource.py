@@ -13,18 +13,19 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Iterable
-from uuid import UUID, uuid4
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
+from uuid import UUID
 
 from argilla._exceptions import ArgillaError
+from argilla._helpers._media import cast_image, uncast_image
 from argilla._models import (
-    MetadataModel,
-    RecordModel,
-    UserResponseModel,
-    SuggestionModel,
-    VectorModel,
-    MetadataValue,
     FieldValue,
+    MetadataModel,
+    MetadataValue,
+    RecordModel,
+    SuggestionModel,
+    UserResponseModel,
+    VectorModel,
     VectorValue,
 )
 from argilla._resource import Resource
@@ -34,6 +35,8 @@ from argilla.vectors import Vector
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
+    from argilla import Argilla
+    from argilla._api import RecordsAPI
 
 
 class Record(Resource):
@@ -79,6 +82,7 @@ class Record(Resource):
             _server_id: An id for the record. (Read-only and set by the server)
             _dataset: The dataset object to which the record belongs.
         """
+
         if fields is None and metadata is None and vectors is None and responses is None and suggestions is None:
             raise ValueError("At least one of fields, metadata, vectors, responses, or suggestions must be provided.")
         if fields is None and id is None:
@@ -87,8 +91,8 @@ class Record(Resource):
             raise ValueError("If fields are an empty dictionary, an id must be provided.")
 
         self._dataset = _dataset
-        self._model = RecordModel(external_id=id or uuid4(), id=_server_id)
-        self.__fields = RecordFields(fields=fields)
+        self._model = RecordModel(external_id=id, id=_server_id)
+        self.__fields = RecordFields(fields=fields, record=self)
         self.__vectors = RecordVectors(vectors=vectors)
         self.__metadata = RecordMetadata(metadata=metadata)
         self.__responses = RecordResponses(responses=responses, record=self)
@@ -151,6 +155,14 @@ class Record(Resource):
     ############################
     # Public methods
     ############################
+
+    def get(self) -> "Record":
+        """Retrieves the record from the server."""
+        model = self._client.api.records.get(self._server_id)
+        instance = self.from_model(model, dataset=self.dataset)
+        self.__dict__ = instance.__dict__
+
+        return self
 
     def api_model(self) -> RecordModel:
         return RecordModel(
@@ -266,17 +278,37 @@ class Record(Resource):
 
         return instance
 
+    @property
+    def _client(self) -> Optional["Argilla"]:
+        if self._dataset:
+            return self.dataset._client
+
+    @property
+    def _api(self) -> Optional["RecordsAPI"]:
+        if self._client:
+            return self._client.api.records
+
 
 class RecordFields(dict):
     """This is a container class for the fields of a Record.
     It allows for accessing fields by attribute and key name.
     """
 
-    def __init__(self, fields: Optional[Dict[str, FieldValue]] = None) -> None:
+    def __init__(self, record: Record, fields: Optional[Dict[str, FieldValue]] = None) -> None:
         super().__init__(fields or {})
+        self.record = record
 
     def to_dict(self) -> dict:
-        return dict(self.items())
+        return {key: cast_image(value) if self._is_image(key) else value for key, value in self.items()}
+
+    def __getitem__(self, key: str) -> FieldValue:
+        value = super().__getitem__(key)
+        return uncast_image(value) if self._is_image(key) else value
+
+    def _is_image(self, key: str) -> bool:
+        if not self.record.dataset:
+            return False
+        return self.record.dataset.settings.schema[key].type == "image"
 
 
 class RecordMetadata(dict):
@@ -396,6 +428,9 @@ class RecordSuggestions(Iterable[Suggestion]):
 
     def __getitem__(self, question_name: str):
         return self._suggestion_by_question_name[question_name]
+
+    def __len__(self):
+        return len(self._suggestion_by_question_name)
 
     def __repr__(self) -> str:
         return self.to_dict().__repr__()

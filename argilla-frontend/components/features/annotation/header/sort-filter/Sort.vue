@@ -144,7 +144,7 @@ $sort-filter-width: 312px;
   }
   &__categories {
     padding: $base-space;
-    background: palette(white);
+    background: var(--color-white);
     border-radius: $border-radius;
   }
   :deep(.dropdown__header) {

@@ -56,7 +56,7 @@ export default {
 .message {
   @include font-size(14px);
   margin: 0;
-  color: $black-54;
+  color: var(--fg-secondary);
   word-break: break-word;
 }
 
@@ -77,6 +77,6 @@ export default {
 }
 
 :deep(a:hover) {
-  color: $black-87;
+  color: var(--fg-primary);
 }
 </style>

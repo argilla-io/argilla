@@ -7,6 +7,7 @@ interface Parts {
 }
 
 interface Palette {
+  veryDark: string;
   dark: string;
   light: string;
   veryLight: string;
@@ -29,6 +30,7 @@ export class Color extends String {
     this.parts = { hue, saturation, lightness };
 
     this.palette = {
+      veryDark: `hsl(${hue}, 50%, 40%)`,
       dark: `hsl(${hue}, 60%, 60%)`,
       light: `hsl(${hue}, 80%, 92%)`,
       veryLight: `hsl(${hue}, 30%, 96%)`,

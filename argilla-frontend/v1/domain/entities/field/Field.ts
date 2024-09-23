@@ -11,22 +11,22 @@ export class Field {
     public title: string,
     private readonly record: any,
     public readonly datasetId: string,
-    public readonly required: boolean,
+    public readonly isRequired: boolean,
     public settings: any
   ) {
     this.initializeOriginal();
   }
 
   get isTextType() {
-    return this.fieldType === "text";
+    return this.type === "text";
   }
 
   get isImageType() {
-    return this.fieldType === "image";
+    return this.type === "image";
   }
 
-  get isChatType() {
-    return this.fieldType === "chat";
+  public get isChatType() {
+    return this.type === "chat";
   }
 
   get isCustomType() {
@@ -44,7 +44,7 @@ export class Field {
     return this.record.fields[this.name];
   }
 
-  private get fieldType() {
+  private get type() {
     return this.settings?.type?.toLowerCase() ?? null;
   }
 

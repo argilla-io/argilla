@@ -29,6 +29,7 @@ class TestRecordsBulkValidators:
         dataset = await DatasetFactory.create(status="ready")
 
         await TextFieldFactory.create(name="text", dataset=dataset)
+        await TextFieldFactory.create(name="optional", dataset=dataset, required=False)
         await dataset.awaitable_attrs.fields
 
         await dataset.awaitable_attrs.metadata_properties
@@ -40,7 +41,9 @@ class TestRecordsBulkValidators:
 
         records_create = RecordsBulkCreate(
             items=[
-                RecordCreate(fields={"text": "hello world"}, metadata={"source": "test"}),
+                RecordCreate(fields={"text": "hello world", "optional": "optional"}, metadata={"source": "test"}),
+                RecordCreate(fields={"text": "hello world", "optional": ""}, metadata={"source": "test"}),
+                RecordCreate(fields={"text": "hello world", "optional": None}, metadata={"source": "test"}),
             ]
         )
 

@@ -66,6 +66,26 @@ def test_list_records_with_start_offset(client: Argilla, dataset: Dataset):
     ]
 
 
+def test_get_record_by_id(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1, "comment": "The comment", "sentiment": "positive"},
+            {"text": "The record text field", "id": 2, "comment": "The comment", "sentiment": "negative"},
+        ],
+        mapping={
+            "comment": "comment.response",
+            "sentiment": "sentiment.response",
+        },
+    )
+
+    record = list(dataset.records(with_responses=False))[0]
+    assert not record.responses
+
+    record.get()
+    assert record.responses["comment"][0].value == "The comment"
+    assert record.responses["sentiment"][0].value == "positive"
+
+
 def test_list_records_with_responses(client: Argilla, dataset: Dataset):
     dataset.records.log(
         [

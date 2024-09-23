@@ -157,8 +157,8 @@ export default {
         height: 100%;
         background: linear-gradient(
           90deg,
-          rgba(255, 255, 255, 0) 0%,
-          rgb(250 250 250) 50%
+          transparent 0%,
+          var(--bg-solid-grey-1) 50%
         );
         transition: all 0.3s ease;
       }
@@ -180,10 +180,10 @@ export default {
       background: none;
       &,
       :deep(.button) {
-        color: $primary-color;
+        color: var(--fg-cuaternary);
       }
       &:hover {
-        background: lighten($primary-color, 44%);
+        background: hsl(from var(--fg-cuaternary) h s l / 6%);
       }
     }
   }

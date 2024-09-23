@@ -4,7 +4,7 @@
       card-type="danger"
       :title="`<strong>${dataset.name}</strong>`"
       :text="$t('settings.deleteWarning')"
-      buttonText="Delete"
+      :buttonText="$t('button.delete')"
       @card-action="toggleDeleteModal(true)"
     />
 

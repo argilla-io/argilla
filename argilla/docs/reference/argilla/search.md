@@ -42,16 +42,6 @@ for record in dataset.records(query=query):
 
 ---
 
-## `rg.Query`
-
 ::: src.argilla.records._search.Query
-    options:
-        heading_level: 3
-        show_root_toc_entry: false
-
-## `rg.Filter`
 
 ::: src.argilla.records._search.Filter
-    options:
-        heading_level: 3
-        show_root_toc_entry: false

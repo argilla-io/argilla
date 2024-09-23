@@ -16,16 +16,18 @@ import json
 import os
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence
+from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
 from uuid import UUID
 
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
+from argilla.settings._io import build_settings_from_repo_id
 from argilla.settings._field import Field, _field_from_dict, _field_from_model
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._task_distribution import TaskDistribution
+from argilla.settings._templates import DefaultSettingsMixin
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
@@ -34,7 +36,7 @@ if TYPE_CHECKING:
 __all__ = ["Settings"]
 
 
-class Settings(Resource):
+class Settings(DefaultSettingsMixin, Resource):
     """
     Settings class for Argilla Datasets.
 
@@ -50,6 +52,7 @@ class Settings(Resource):
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = False,
         distribution: Optional[TaskDistribution] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         _dataset: Optional["Dataset"] = None,
     ) -> None:
         """
@@ -64,11 +67,13 @@ class Settings(Resource):
                 Dataset. Defaults to False.
             distribution (TaskDistribution): The annotation task distribution configuration.
                 Default to DEFAULT_TASK_DISTRIBUTION
+            mapping (Dict[str, Union[str, Sequence[str]]]): A dictionary that maps incoming data names to Argilla dataset attributes in DatasetRecords.
         """
         super().__init__(client=_dataset._client if _dataset else None)
 
         self._dataset = _dataset
         self._distribution = distribution
+        self._mapping = mapping
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
@@ -136,6 +141,14 @@ class Settings(Resource):
     @distribution.setter
     def distribution(self, value: TaskDistribution) -> None:
         self._distribution = value
+
+    @property
+    def mapping(self) -> Dict[str, Union[str, Sequence[str]]]:
+        return self._mapping
+
+    @mapping.setter
+    def mapping(self, value: Dict[str, Union[str, Sequence[str]]]):
+        self._mapping = value
 
     @property
     def dataset(self) -> "Dataset":
@@ -220,6 +233,7 @@ class Settings(Resource):
                 "metadata": self.metadata.serialize(),
                 "allow_extra_metadata": self.allow_extra_metadata,
                 "distribution": self.distribution.to_dict(),
+                "mapping": self.mapping,
             }
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the settings. {e.__class__.__name__}") from e
@@ -244,6 +258,15 @@ class Settings(Resource):
         with open(path, "r") as file:
             settings_dict = json.load(file)
             return cls._from_dict(settings_dict)
+
+    @classmethod
+    def from_hub(
+        cls, repo_id: str, feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]] = None
+    ) -> "Settings":
+        """Load the settings from the Hub"""
+
+        settings = build_settings_from_repo_id(repo_id=repo_id, feature_mapping=feature_mapping)
+        return settings
 
     def __eq__(self, other: "Settings") -> bool:
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
@@ -271,6 +294,7 @@ class Settings(Resource):
         guidelines = settings_dict.get("guidelines")
         distribution = settings_dict.get("distribution")
         allow_extra_metadata = settings_dict.get("allow_extra_metadata")
+        mapping = settings_dict.get("mapping")
 
         questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
         fields = [_field_from_dict(field) for field in fields]
@@ -280,6 +304,9 @@ class Settings(Resource):
         if distribution:
             distribution = TaskDistribution.from_dict(distribution)
 
+        if mapping:
+            mapping = cls._validate_mapping(mapping)
+
         return cls(
             questions=questions,
             fields=fields,
@@ -288,6 +315,7 @@ class Settings(Resource):
             guidelines=guidelines,
             allow_extra_metadata=allow_extra_metadata,
             distribution=distribution,
+            mapping=mapping,
         )
 
     def _copy(self) -> "Settings":
@@ -361,6 +389,18 @@ class Settings(Resource):
                         f"but the name {property.name!r} is used by {type(property).__name__!r} and {type(dataset_properties_by_name[property.name]).__name__!r} "
                     )
                 dataset_properties_by_name[property.name] = property
+
+    @classmethod
+    def _validate_mapping(cls, mapping: Dict[str, Union[str, Sequence[str]]]) -> None:
+        validate_mapping = {}
+        for key, value in mapping.items():
+            if isinstance(value, str):
+                validate_mapping[key] = value
+            elif isinstance(value, list) or isinstance(value, tuple):
+                validate_mapping[key] = tuple(value)
+            else:
+                raise SettingsError(f"Invalid mapping value for key {key!r}: {value}")
+        return validate_mapping
 
     def __process_guidelines(self, guidelines):
         if guidelines is None:

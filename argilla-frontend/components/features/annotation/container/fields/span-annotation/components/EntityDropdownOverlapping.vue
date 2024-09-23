@@ -173,14 +173,14 @@ export default {
     display: flex;
     flex-direction: column;
     border-radius: $border-radius;
-    background-color: palette(white);
+    background-color: var(--bg-accent-grey-2);
     box-shadow: $shadow;
     z-index: 100;
     &__header {
       display: flex;
       flex-direction: column;
       gap: $base-space;
-      background: $black-4;
+      background: var(--bg-opacity-4);
       padding: calc($base-space / 2);
     }
     &__content {
@@ -208,12 +208,12 @@ export default {
       }
       &.checkbox :deep(.checkbox__container .svg-icon) {
         display: inline-block;
-        fill: $black-37;
+        fill: var(--bg-opacity-37);
         min-width: 16px;
         min-height: 16px;
       }
       &.--preselected {
-        background-color: $black-4;
+        background-color: var(--bg-opacity-4);
       }
     }
   }
@@ -227,30 +227,32 @@ export default {
       top: calc($base-space / 2);
       right: calc($base-space / 2);
       padding: calc($base-space / 2);
-      background: $black-37;
+      background: var(--bg-opacity-37);
       border-radius: $border-radius-rounded;
       &:hover {
-        background: $black-54;
+        background: var(--bg-opacity-54);
       }
       &__icon {
-        color: palette(white);
+        color: var(--bg-accent-grey-1);
       }
     }
   }
   &__badge.badge {
     @include font-size(12px);
+    cursor: pointer;
   }
   &__input {
     height: $base-space * 2;
     width: 160px;
     background: transparent;
     border: none;
+    color: var(--fg-primary);
     @include font-size(12px);
     &:focus-visible {
       outline: 0;
     }
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
 }

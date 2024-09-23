@@ -13,10 +13,42 @@
 #  limitations under the License.
 import logging
 import os
+import uuid
+from uuid import UUID
 
 from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS
+from argilla_server.settings import settings
 
 _LOGGER = logging.getLogger(__name__)
+
+_SERVER_ID_DAT_FILE = "server_id.dat"
+
+
+def get_server_id() -> UUID:
+    """
+    Returns the server ID. If it is not set, it generates a new one and stores it
+    in $ARGILLA_HOME/server_id.dat
+
+    Returns:
+        UUID: The server ID
+
+    """
+
+    server_id_file = os.path.join(settings.home_path, _SERVER_ID_DAT_FILE)
+
+    if os.path.exists(server_id_file):
+        with open(server_id_file, "r") as f:
+            server_id = f.read().strip()
+            try:
+                return UUID(server_id)
+            except ValueError:
+                _LOGGER.warning(f"Invalid server ID in {server_id_file}. Generating a new one.")
+
+    server_id = uuid.uuid4()
+    with open(server_id_file, "w") as f:
+        f.write(str(server_id))
+
+    return server_id
 
 
 def server_deployment_type() -> str:

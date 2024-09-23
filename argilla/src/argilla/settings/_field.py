@@ -39,7 +39,7 @@ except ImportError:
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-__all__ = ["Field", "TextField", "ImageField", "ChatField", "CustomField"]
+__all__ = ["Field", "AbstractField", "TextField", "ImageField", "ChatField", "CustomField"]
 
 
 class AbstractField(ABC, SettingsPropertyBase):
@@ -102,9 +102,9 @@ class TextField(AbstractField):
         self,
         name: str,
         title: Optional[str] = None,
-        use_markdown: Optional[bool] = False,
         required: Optional[bool] = True,
         description: Optional[str] = None,
+        use_markdown: Optional[bool] = False,
         client: Optional[Argilla] = None,
     ) -> None:
         """Text field for use in Argilla `Dataset` `Settings`

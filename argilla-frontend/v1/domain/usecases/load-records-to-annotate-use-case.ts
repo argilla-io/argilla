@@ -1,19 +1,28 @@
 import { RecordCriteria } from "../entities/record/RecordCriteria";
 import { IRecordStorage } from "../services/IRecordStorage";
+import { GetDatasetProgressUseCase } from "./get-dataset-progress-use-case";
 import { GetRecordsByCriteriaUseCase } from "./get-records-by-criteria-use-case";
+import { GetUserMetricsUseCase } from "./get-user-metrics-use-case";
 
 export class LoadRecordsToAnnotateUseCase {
   private isBuffering = false;
 
   constructor(
     private readonly getRecords: GetRecordsByCriteriaUseCase,
+    private readonly getProgress: GetDatasetProgressUseCase,
+    private readonly getMetrics: GetUserMetricsUseCase,
     private readonly recordsStorage: IRecordStorage
   ) {}
 
-  async load(criteria: RecordCriteria): Promise<void> {
+  async load(criteria: RecordCriteria) {
     const { page } = criteria;
 
-    let newRecords = await this.getRecords.execute(criteria);
+    let [newRecords] = await Promise.all([
+      this.getRecords.execute(criteria),
+      this.getProgress.execute(criteria.datasetId),
+      this.getMetrics.execute(criteria.datasetId),
+    ]);
+
     let isRecordExistForCurrentPage = newRecords.existsRecordOn(page);
 
     if (!isRecordExistForCurrentPage && !page.isFirstPage()) {
@@ -33,6 +42,8 @@ export class LoadRecordsToAnnotateUseCase {
     criteria.commit();
 
     this.recordsStorage.save(newRecords);
+
+    return newRecords;
   }
 
   async paginate(criteria: RecordCriteria) {
@@ -71,7 +82,7 @@ export class LoadRecordsToAnnotateUseCase {
 
     const records = this.recordsStorage.get();
 
-    if (!records.hasNecessaryBuffering(page)) {
+    if (records.shouldBuffering(page)) {
       this.loadBufferedRecords(criteria);
     }
   }
@@ -93,7 +104,7 @@ export class LoadRecordsToAnnotateUseCase {
 
       const newRecords = await this.getRecords.execute(newCriteria);
 
-      records.append(newRecords);
+      if (newRecords.hasRecordsToAnnotate) records.append(newRecords);
 
       this.recordsStorage.save(records);
     } catch {

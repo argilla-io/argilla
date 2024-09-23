@@ -562,5 +562,23 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
-        assert "is not valid" in response.json()["detail"]
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body", "items", 0, "fields", "chat", 0, "content"],
+                            "msg": "field required",
+                            "type": "value_error.missing",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "chat"],
+                            "msg": "str type expected",
+                            "type": "type_error.str",
+                        },
+                    ]
+                },
+            }
+        }
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0

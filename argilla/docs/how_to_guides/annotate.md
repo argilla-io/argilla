@@ -125,6 +125,9 @@ You can track the progress of an annotation task in the progress bar shown in th
 
 You can also track your own progress in real time expanding the right-bottom panel inside the dataset page. There you can see the number of records for which you have `Pending`, `Draft`, `Submitted` and `Discarded` responses.
 
+!!! note
+    You can also explore the dataset progress from the SDK. Check the [Track your team's progress](./distribution.md#track-your-teams-progress) to know more about it.
+
 ## Use search, filters, and sort
 
 The UI offers various features designed for data exploration and understanding. Combining these features with bulk labelling can save you and your team hours of time.
@@ -135,6 +138,12 @@ The UI offers various features designed for data exploration and understanding. 
 ### Search
 
 From the **control panel** at the top of the left pane, you can search by keyword across the entire dataset. If you have more than one field in your records, you may specify if the search is to be performed “All” fields or on a specific one. Matched results are highlighted in color.
+
+!!! note
+    If you introduce more than one keyword, the search will return results where **all** keywords have a match.
+
+!!! tip
+    For more advanced searches, take a look at the [advanced queries DSL](query.md#advanced-queries).
 
 ### Order by record semantic similarity
 

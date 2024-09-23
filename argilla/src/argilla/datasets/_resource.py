@@ -20,7 +20,7 @@ from argilla._exceptions import NotFoundError, SettingsError
 from argilla._models import DatasetModel
 from argilla._resource import Resource
 from argilla.client import Argilla
-from argilla.datasets._export import DiskImportExportMixin, HubImportExportMixin
+from argilla.datasets._io import DiskImportExportMixin, HubImportExportMixin
 from argilla.records import DatasetRecords
 from argilla.settings import Settings
 from argilla.settings._task_distribution import TaskDistribution
@@ -73,7 +73,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         self._model = DatasetModel(name=name)
         self._settings = settings._copy() if settings else Settings(_dataset=self)
         self._settings.dataset = self
-        self.__records = DatasetRecords(client=self._client, dataset=self)
+        self.__records = DatasetRecords(client=self._client, dataset=self, mapping=self._settings.mapping)
 
     #####################
     #  Properties       #
@@ -173,6 +173,53 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         """
         self.settings.update()
         return self
+
+    def progress(self, with_users_distribution: bool = False) -> dict:
+        """Returns the team's progress on the dataset.
+
+        Parameters:
+            with_users_distribution (bool): If True, the progress of the dataset is returned
+                with users distribution. This includes the number of responses made by each user.
+
+        Returns:
+            dict: The team's progress on the dataset.
+
+        An example of a response when `with_users_distribution` is `True`:
+        ```json
+        {
+            "total": 100,
+            "completed": 50,
+            "pending": 50,
+            "users": {
+                "user1": {
+                   "completed": { "submitted": 10, "draft": 5, "discarded": 5},
+                   "pending": { "submitted": 5, "draft": 10, "discarded": 10},
+                },
+                "user2": {
+                   "completed": { "submitted": 20, "draft": 10, "discarded": 5},
+                   "pending": { "submitted": 2, "draft": 25, "discarded": 0},
+                },
+                ...
+        }
+        ```
+
+        """
+
+        progress = self._api.get_progress(dataset_id=self._model.id).model_dump()
+
+        if with_users_distribution:
+            users_progress = self._api.list_users_progress(dataset_id=self._model.id)
+            users_distribution = {
+                user.username: {
+                    "completed": user.completed.model_dump(),
+                    "pending": user.pending.model_dump(),
+                }
+                for user in users_progress
+            }
+
+            progress.update({"users": users_distribution})
+
+        return progress
 
     @classmethod
     def from_model(cls, model: DatasetModel, client: "Argilla") -> "Dataset":

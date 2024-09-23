@@ -3,7 +3,7 @@
     <span
       class="suggestion-info"
       v-text="question.title"
-      v-required-field="{ show: question.isRequired, color: 'red' }"
+      v-required-field="{ show: question.isRequired, color: '#cf3832' }"
     />
     <BaseIconWithBadge
       class="icon-info"
@@ -18,7 +18,6 @@
       v-tooltip="{
         content: tooltipMessage,
         open: openTooltip,
-        backgroundColor: '#FFF',
       }"
     />
   </div>
@@ -64,16 +63,16 @@ export default {
 
 <style lang="scss" scoped>
 .title-area {
-  color: $black-87;
+  color: var(--fg-primary);
   font-weight: 500;
   &__suggestion-icon {
     cursor: default;
-    fill: $black-54;
+    fill: var(--bg-opacity-54);
   }
 }
 
 .icon {
-  color: $black-37;
+  color: var(--fg-tertiary);
 }
 
 .info-icon {
