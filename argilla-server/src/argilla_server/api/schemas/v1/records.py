@@ -166,6 +166,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
+    fields: Optional[Dict[str, FieldValueCreate]] = None
 
 
 class RecordIncludeParam(BaseModel):
