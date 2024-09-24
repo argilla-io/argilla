@@ -21,26 +21,26 @@ from argilla.settings._io._hub import _define_settings_from_features
 
 def test_define_settings_from_features_text():
     features = {"text_column": {"_type": "Value", "dtype": "string"}}
-    settings = _define_settings_from_features(features, feature_mapping={})
+    settings = _define_settings_from_features(features, feature_mapping={}, repo_id="repo_id")
 
     assert len(settings.fields) == 1
     assert isinstance(settings.fields[0], rg.TextField)
     assert settings.fields[0].name == "text_column"
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.TextQuestion)
-    assert settings.questions[0].name == "comment"
+    assert settings.questions[0].name == "quality"
     assert settings.mapping == {}
 
 
 def test_define_settings_from_features_image():
     features = {"image_column": {"_type": "Image"}}
-    settings = _define_settings_from_features(features, feature_mapping={})
+    settings = _define_settings_from_features(features, feature_mapping={}, repo_id="repo_id")
 
     assert len(settings.fields) == 1
     assert isinstance(settings.fields[0], rg.ImageField)
     assert settings.fields[0].name == "image_column"
     assert len(settings.questions) == 1
-    assert settings.questions[0].name == "comment"
+    assert settings.questions[0].name == "quality"
     assert settings.mapping == {}
 
 
@@ -50,7 +50,7 @@ def test_define_settings_from_features_multiple():
         "image_column": {"_type": "Image"},
         "label_column": {"_type": "ClassLabel", "names": ["A", "B"]},
     }
-    settings = _define_settings_from_features(features, feature_mapping={})
+    settings = _define_settings_from_features(features, feature_mapping={}, repo_id="repo_id")
 
     assert len(settings.fields) == 2
     assert isinstance(settings.fields[0], rg.TextField)
@@ -69,7 +69,7 @@ def test_mapped_question():
         "image_column": {"_type": "Image"},
         "label_column": {"_type": "ClassLabel", "names": ["A", "B"]},
     }
-    settings = _define_settings_from_features(features, feature_mapping={"text_column": "question"})
+    settings = _define_settings_from_features(features, feature_mapping={"text_column": "question"}, repo_id="repo_id")
 
     assert len(settings.fields) == 1
     assert isinstance(settings.fields[0], rg.ImageField)
@@ -88,7 +88,7 @@ def test_mapped_fields():
         "image_column": {"_type": "Image"},
         "label_column": {"_type": "ClassLabel", "names": ["A", "B"]},
     }
-    settings = _define_settings_from_features(features, feature_mapping={"text_column": "field"})
+    settings = _define_settings_from_features(features, feature_mapping={"text_column": "field"}, repo_id="repo_id")
 
     assert len(settings.fields) == 2
     assert isinstance(settings.fields[0], rg.TextField)
@@ -108,7 +108,7 @@ def test_define_settings_from_features_unsupported():
         "label_column": {"_type": "ClassLabel", "names": ["A", "B"]},
     }
     with pytest.warns(UserWarning, match="Feature 'unsupported_column' has an unsupported type"):
-        settings = _define_settings_from_features(features, feature_mapping={})
+        settings = _define_settings_from_features(features, feature_mapping={}, repo_id="repo_id")
 
     assert len(settings.fields) == 1
     assert len(settings.questions) == 1
@@ -118,4 +118,4 @@ def test_define_settings_from_only_label_raises():
     features = {"label_column": {"_type": "ClassLabel", "names": ["A", "B", "C"]}}
 
     with pytest.raises(SettingsError):
-        _define_settings_from_features(features, feature_mapping={})
+        _define_settings_from_features(features, feature_mapping={}, repo_id="repo_id")
