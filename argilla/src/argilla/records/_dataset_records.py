@@ -63,10 +63,14 @@ class DatasetRecordsIterator:
         self.__with_responses = with_responses
         self.__with_vectors = with_vectors
         self.__records_batch = []
-        self.__limit = 1 if limit == 0 else limit
+        self.__limit = limit
+
+        if self.__limit is not None and self.__limit <= 0:
+            warnings.warn(f"Limit {self.__limit} is invalid: must be greater than 0. Setting limit to 1.")
+            self.__limit = 1
 
         if self.__limit is not None and self.__limit < self.__batch_size:
-            self.__batch_size = limit
+            self.__batch_size = self.__limit
 
     def __iter__(self):
         return self
