@@ -85,7 +85,7 @@ def _map_feature_type(feature):
         sub_feature = feature[0]
         if _is_chat_feature(sub_feature):
             return FeatureType.CHAT
-    elif not isinstance(feature, dict):
+    if not isinstance(feature, dict):
         warnings.warn(f"Unsupported feature format: {feature}")
         return None
 
