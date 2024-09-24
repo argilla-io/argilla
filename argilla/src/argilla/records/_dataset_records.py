@@ -89,7 +89,7 @@ class DatasetRecordsIterator:
     def _limit_reached(self) -> bool:
         if self.__limit is None:
             return False
-        return self.__limit == 0
+        return self.__limit <= 0
 
     def _next_record(self) -> Record:
         record = self.__records_batch.pop(0)
