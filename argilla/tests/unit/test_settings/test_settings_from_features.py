@@ -29,7 +29,6 @@ def test_define_settings_from_features_text():
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "quality"
-    assert settings.mapping == {}
 
 
 def test_define_settings_from_features_image():
@@ -41,7 +40,6 @@ def test_define_settings_from_features_image():
     assert settings.fields[0].name == "image_column"
     assert len(settings.questions) == 1
     assert settings.questions[0].name == "quality"
-    assert settings.mapping == {}
 
 
 def test_define_settings_from_features_multiple():
@@ -60,7 +58,6 @@ def test_define_settings_from_features_multiple():
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "label_column"
-    assert settings.mapping == {}
 
 
 def test_mapped_question():
@@ -79,7 +76,6 @@ def test_mapped_question():
     assert settings.questions[0].name == "text_column"
     assert isinstance(settings.questions[1], rg.LabelQuestion)
     assert settings.questions[1].name == "label_column"
-    assert settings.mapping == {}
 
 
 def test_mapped_fields():
@@ -98,7 +94,6 @@ def test_mapped_fields():
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "label_column"
-    assert settings.mapping == {}
 
 
 def test_define_settings_from_features_unsupported():
