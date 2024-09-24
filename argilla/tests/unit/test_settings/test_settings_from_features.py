@@ -27,7 +27,7 @@ def test_define_settings_from_features_text():
     assert isinstance(settings.fields[0], rg.TextField)
     assert settings.fields[0].name == "text_column"
     assert len(settings.questions) == 1
-    assert isinstance(settings.questions[0], rg.TextQuestion)
+    assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "quality"
     assert settings.mapping == {}
 
