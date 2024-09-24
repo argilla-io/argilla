@@ -106,7 +106,7 @@ import argilla as rg
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 webhook = rg.Webhook(
-    url="http://my-webhook-server.com",
+    url="http://127.0.0.1:8000",
     events=["dataset.created"],
     description="My webhook"
 ).create()
@@ -115,6 +115,7 @@ webhook.events = ["dataset.updated"]
 webhook.update()
 
 ```
+> You should use IP address instead of localhost since the webhook validation expect a Top Level Domain (TLD) in the URL.
 
 ### Delete a webhook
 
