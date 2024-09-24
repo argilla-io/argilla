@@ -14,7 +14,6 @@
 
 import httpx
 import warnings
-from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, TYPE_CHECKING, Union, List, Optional
 
@@ -136,13 +135,13 @@ def _render_code_snippet(repo_id: str):
     from rich.console import Console
     from rich.syntax import Syntax
 
-    message = f"""
+    message = """
     You can assign the dataset's columns to questions, fields, or metadata properties using the feature_mapping argument.
     You can also add custom settings to the dataset by manipulting the settings object.
     """
     code_block = f"""
     settings = rg.Settings(
-        repo_id="{repo_id}", 
+        repo_id="{repo_id}",
         feature_mapping={{{{"<column_name>": "question"}}}}
     )
     # add more custom settings here
