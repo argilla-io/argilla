@@ -84,7 +84,7 @@ def _map_feature_type(feature):
         sub_feature = feature[0]
         if _is_chat_feature(sub_feature):
             return FeatureType.CHAT
-    elif not isinstance(feature, dict):
+    if not isinstance(feature, dict):
         warnings.warn(f"Unsupported feature format: {feature}")
         return None
 
@@ -189,6 +189,9 @@ def _define_settings_from_features(
     for name, feature in features.items():
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
+
+        # Lowercase the name to avoid case sensitivity issues when mapping the features to the settings.
+        name = name.lower()
 
         if feature_type == FeatureType.CHAT:
             fields.append(ChatField(name=name, required=False))

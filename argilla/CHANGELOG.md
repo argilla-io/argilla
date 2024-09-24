@@ -15,6 +15,17 @@ These are the section headers that we use:
 -->
 
 ## [Unreleased]()
+### Fixed
+
+- Fixed the deployment yaml used to create a new Argilla server in K8s. Added `USERNAME` and `PASSWORD` to the environment variables of pod template. ([#5434](https://github.com/argilla-io/argilla/issues/5434))
+
+## [2.2.1](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.2.1)
+
+### Fixed
+
+- Fixed `from_hub` errors when columns names contain uppercase letters. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+- Fixed `from_hub` errors when class feature values contains unlabelled values. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+- Fixed `from_hub` errors when loading cached datasets. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
 
 ## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 

@@ -51,6 +51,10 @@ You can set the following environment variables to further configure your server
 #### Authentication
 
 - `ARGILLA_AUTH_SECRET_KEY`: The secret key used to sign the API token data. You can use `openssl rand -hex 32` to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.
+- `USERNAME`: If provided, the owner username (Default: `None`).
+- `PASSWORD`: If provided, the owner password (Default: `None`).
+
+If `USERNAME` and `PASSWORD` are provided, the owner user will be created with these credentials on the server startup.
 
 #### Database
 
@@ -103,6 +107,8 @@ Redis is used by Argilla to store information about jobs to be processed on back
 - `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default: `""`).
 
 - `PASSWORD`: If provided, the owner password. If `USERNAME` and `PASSWORD` are provided, the owner user will be created with these credentials on the server startup (Default: `""`).
+
+- `WORKSPACE`: If provided, the workspace name. If `USERNAME`, `PASSWORD` and `WORSPACE` are provided, a default workspace will be created with this name (Default: `""`).
 
 - `API_KEY`: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
 
