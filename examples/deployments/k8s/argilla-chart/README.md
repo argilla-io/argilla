@@ -26,6 +26,7 @@ For more detailed installation instructions, please refer to the [official Helm 
 
 - Redis
 - Elasticsearch
+
 ## Adding the Helm Repository
 
 To add the Argilla Helm repository to your Helm installation, run the following command:
