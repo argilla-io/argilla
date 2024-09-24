@@ -131,8 +131,35 @@ def _is_chat_feature(sub_features):
     )
 
 
+def _render_code_snippet(repo_id: str):
+    """Render the code snippet to use feature_mapping load a dataset and log its records."""
+    from rich.console import Console
+    from rich.syntax import Syntax
+
+    message = f"""
+    You can assign the dataset's columns to questions, fields, or metadata properties using the feature_mapping argument.
+    You can also add custom settings to the dataset by manipulting the settings object.
+    """
+    code_block = f"""
+    settings = rg.Settings(
+        repo_id="{repo_id}", 
+        feature_mapping={{{{"<column_name>": "question"}}}}
+    )
+    # add more custom settings here
+    # via settings.questions, settings.fields, settings.vectors, or settings.metadata
+    dataset = rg.Dataset(name="{repo_id}", settings=settings)
+    ds = load_dataset("{repo_id}")
+    dataset.records.log(ds)
+    """
+
+    console = Console()
+    code_block = Syntax(code_block, "python", theme="monokai", line_numbers=True)
+    console.print(f"[bold yellow]{message}[/bold yellow]")
+    console.print(code_block)
+
+
 def _define_settings_from_features(
-    features: Union[List[Dict], Dict[str, Any]], feature_mapping: Optional[Dict[str, str]]
+    features: Union[List[Dict], Dict[str, Any]], feature_mapping: Optional[Dict[str, str]], repo_id: str
 ) -> "Settings":
     """Define the argilla settings from the features of a dataset.
 
@@ -158,7 +185,6 @@ def _define_settings_from_features(
     fields = []
     questions = []
     metadata = []
-    mapping = defaultdict(list)
     feature_mapping = feature_mapping or {}
 
     for name, feature in features.items():
@@ -202,12 +228,12 @@ def _define_settings_from_features(
         else:
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
-    mapping = {
-        key: value[0] if isinstance(value, list) and len(value) == 1 else tuple(value) for key, value in mapping.items()
-    }
-
     if not questions:
-        questions.append(TextQuestion(name="comment", required=True))
+        questions.append(LabelQuestion(name="quality", required=True, labels=["good", "bad"]))
+        warnings.warn(
+            "No questions found in the dataset features. A default question 'quality' with labels ['good', 'bad'] has been added"
+        )
+        _render_code_snippet(repo_id)
 
     if not fields:
         raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
@@ -215,11 +241,11 @@ def _define_settings_from_features(
     questions[0].required = True
     fields[0].required = True
 
-    settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
+    settings = Settings(fields=fields, questions=questions, metadata=metadata)
 
     return settings
 
 
 def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str, str]] = None) -> "Settings":
     dataset_features = _get_dataset_features(repo_id)
-    return _define_settings_from_features(dataset_features, feature_mapping)
+    return _define_settings_from_features(dataset_features, feature_mapping, repo_id)
