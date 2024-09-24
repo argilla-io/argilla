@@ -4,6 +4,7 @@ export * from "./AxiosCache";
 export * from "./DatasetRepository";
 export * from "./EnvironmentRepository";
 export * from "./FieldRepository";
+export * from "./HubRepository";
 export * from "./MetadataMetricsRepository";
 export * from "./MetadataRepository";
 export * from "./MetricsRepository";

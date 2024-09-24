@@ -25,6 +25,7 @@ import {
   WorkspaceRepository,
   AuthRepository,
   UserRepository,
+  HubRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -34,6 +35,7 @@ import { useDatasets } from "@/v1/infrastructure/storage/DatasetsStorage";
 import { useMetrics } from "@/v1/infrastructure/storage/MetricsStorage";
 import { useDatasetSetting } from "@/v1/infrastructure/storage/DatasetSettingStorage";
 
+import { GetDatasetCreationUseCase } from "@/v1/domain/usecases/get-dataset-creation-use-case";
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { GetDatasetProgressUseCase } from "@/v1/domain/usecases/get-dataset-progress-use-case";
@@ -69,6 +71,7 @@ export const loadDependencyContainer = (context: Context) => {
   const dependencies = [
     register(UpdateMetricsEventHandler).build(),
     register(UpdateTeamProgressEventHandler).build(),
+    register(HubRepository).withDependency(useAxios).build(),
     register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
@@ -83,6 +86,8 @@ export const loadDependencyContainer = (context: Context) => {
     register(EnvironmentRepository).withDependency(useAxios).build(),
     register(AuthRepository).withDependency(useAxios).build(),
     register(UserRepository).withDependency(useAxios).build(),
+
+    register(GetDatasetCreationUseCase).withDependency(HubRepository).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
