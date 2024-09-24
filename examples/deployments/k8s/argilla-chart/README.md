@@ -39,28 +39,10 @@ helm repo update
 
 ## Installing the Chart
 
-After adding the repository, you can install the chart with the release name `my-release`:
+After adding the repository, you can install the chart with the release name `my-argilla-server`:
 
 ```bash
-helm install my-release examples/deployments/k8s/argilla-chart
-```
-
-## Configuration
-
-To override default values, override the values in `values.yaml` file and install the chart using:
-
-```bash
-helm install my-release examples/deployments/k8s/argilla-chart
-```
-
-## Upgrading
-
-To upgrade the chart to a newer version:
-
-```bash
-helm repo update
-helm upgrade my-release argilla/argilla
-```
+helm install my-argilla-server examples/deployments/k8s/argilla-chart
 
 TODO: Add information about any backwards incompatible changes and how to handle them.
 
