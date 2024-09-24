@@ -122,6 +122,22 @@ def test_list_records_with_limit_greater_than_batch_size(client: Argilla, datase
     assert records[1].id == "2"
 
 
+@pytest.mark.parametrize("limit", [0, -1, -10])
+def test_list_records_with_invalid_limit(client: Argilla, dataset: Dataset, limit: int):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+    with pytest.warns(UserWarning, match=f"Limit {limit} is invalid: must be greater than 0. Setting limit to 1."):
+        records = list(dataset.records(limit=limit))
+        assert len(records) == 1
+
+
 def test_list_records_with_limit_greater_than_total(client: Argilla, dataset: Dataset):
     dataset.records.log(
         [
