@@ -140,14 +140,14 @@ def _render_code_snippet(repo_id: str):
     If you want to customize the dataset differently, you can do the following:
     """
     code_block = f"""
-    # 1. map the dataset columns to question, field, vector, or metadata                                      
-    settings = rg.Settings.from_hub(                                                                               
-        repo_id="{repo_id}",                                                                            
-        feature_mapping={"{"}"<column_name>": "question"{"}"},                                         
-    )                                                                                                              
-    # 2. or, create new questions, fields, vectors, or metadata properties                                         
-    settings.questions = [rg.TextQuestion(name="new_question", required=True)]                                     
-    dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings) 
+    # 1. map the dataset columns to question, field, vector, or metadata
+    settings = rg.Settings.from_hub(
+        repo_id="{repo_id}",
+        feature_mapping={"{"}"<column_name>": "question"{"}"},
+    )
+    # 2. or, create new questions, fields, vectors, or metadata properties
+    settings.questions = [rg.TextQuestion(name="new_question", required=True)]
+    dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
     """
 
     console = Console()
