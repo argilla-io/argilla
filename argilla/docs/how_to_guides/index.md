@@ -106,7 +106,4 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     [:octicons-arrow-right-24: How-to guide](migrate_from_legacy_datasets.md)
 
-
-
-
 </div>
