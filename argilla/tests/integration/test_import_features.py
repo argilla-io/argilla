@@ -80,6 +80,7 @@ def token():
     return os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING")
 
 
+@pytest.mark.skipif(not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"), reason="No HF token provided")
 class TestImportFeaturesFromHub:
     def test_import_records_from_datasets_with_classlabel(
         self, token: str, dataset: rg.Dataset, client, mock_data: List[dict[str, Any]]
@@ -111,3 +112,21 @@ class TestImportFeaturesFromHub:
 
         assert exported_dataset.features["label.suggestion"].names == ["positive", "negative"]
         assert exported_dataset["label.suggestion"] == [0, 1, 0]
+
+    def test_import_from_hub_with_upper_case_columns(self, client: rg.Argilla, token: str, dataset_name: str):
+        created_dataset = rg.Dataset.from_hub(
+            "argilla-internal-testing/test_import_from_hub_with_upper_case_columns",
+            token=token,
+            name=dataset_name,
+        )
+
+        assert created_dataset.settings.fields[0].name == "text"
+        assert list(created_dataset.records)[0].fields["text"] == "Hello World, how are you?"
+
+    def test_import_from_hub_with_unlabelled_classes(self, client: rg.Argilla, token: str, dataset_name: str):
+        created_dataset = rg.Dataset.from_hub(
+            "argilla-internal-testing/test_import_from_hub_with_unlabelled_classes", token=token, name=dataset_name
+        )
+
+        assert created_dataset.settings.fields[0].name == "text"
+        assert list(created_dataset.records)[0].fields["text"] == "Hello World, how are you?"

@@ -24,6 +24,7 @@ from datasets import DatasetDict
 from datasets.data_files import EmptyDatasetError
 from PIL import Image
 
+from argilla._exceptions import ImportDatasetError
 from argilla._exceptions._api import UnprocessableEntityError
 from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
@@ -156,7 +157,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                 dataset = cls.from_disk(
                     path=folder_path, workspace=workspace, name=name, client=client, with_records=with_records
                 )
-            except NotADirectoryError:
+            except ImportDatasetError:
                 from argilla import Settings
 
                 settings = Settings.from_hub(repo_id=repo_id)
@@ -192,8 +193,11 @@ class HubImportExportMixin(DiskImportExportMixin):
     @staticmethod
     def _log_dataset_records(hf_dataset: "HFDataset", dataset: "Dataset"):
         """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
+        # THIS IS REQUIRED SINCE NAME IN ARGILLA ARE LOWERCASE. The Settings BaseModel models apply this logic
+        # Ideally, the restrictions in Argilla should be removed and the names should be case-insensitive
+        hf_dataset = hf_dataset.rename_columns({col: col.lower() for col in hf_dataset.column_names})
 
-        # Identify columns that colunms that contain responses
+        # Identify columns that columns that contain responses
         responses_columns = [col for col in hf_dataset.column_names if ".responses" in col]
         response_questions = defaultdict(dict)
         user_ids = {}

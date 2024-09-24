@@ -6,20 +6,19 @@ python -m argilla_server database migrate
 
 if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
   echo "Creating owner user with username ${USERNAME}"
+
+  cmd_args="--first-name $USERNAME --username $USERNAME --password $PASSWORD --role owner"
+
   if [ -n "$API_KEY" ]; then
-    python -m argilla_server database users create \
-    --first-name "$USERNAME" \
-    --username "$USERNAME" \
-    --password "$PASSWORD" \
-    --api-key "$API_KEY" \
-    --role owner
-  else
-    python -m argilla_server database users create \
-    --first-name "$USERNAME" \
-    --username "$USERNAME" \
-    --password "$PASSWORD" \
-    --role owner
+    cmd_args="$cmd_args --api-key $API_KEY"
   fi
+
+  if [ -n "$WORKSPACE" ]; then
+    cmd_args="$cmd_args --workspace $WORKSPACE"
+  fi
+
+  python -m argilla_server database users create $cmd_args
+
 else
   echo "No username and password was provided. Skipping user creation"
 fi
