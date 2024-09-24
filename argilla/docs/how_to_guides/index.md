@@ -82,11 +82,11 @@ These guides provide step-by-step instructions for common scenarios, including d
 
 <div class="grid cards" markdown>
 
--   __User Argilla webhooks__
+-   __Use Argilla webhooks__
 
     ---
 
-    Learn how to use Argilla webhooks to receive notifications about events in your workspace.
+    Learn how to use Argilla webhooks to receive notifications about events in your Argilla Server.
 
     [:octicons-arrow-right-24: How-to guide](webhooks.md)
 
