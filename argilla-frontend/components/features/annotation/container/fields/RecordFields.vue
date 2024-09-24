@@ -41,10 +41,10 @@
         :searchText="recordCriteria.committed.searchText.value.text"
       />
       <ImageField
-          v-else-if="isImageType"
-          :name="name"
-          :title="title"
-          :content="content"
+        v-else-if="isImageType"
+        :name="name"
+        :title="title"
+        :content="content"
       />
       <CustomField v-else :name="name" :title="title" :content="content" />
     </div>
