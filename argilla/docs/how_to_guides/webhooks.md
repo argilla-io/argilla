@@ -2,19 +2,15 @@
 description: In this section, we will provide a step-by-step guide to create a webhook in Argilla.
 ---
 
-# Webhooks
+# Use Argilla webhooks
 
-In this section, we will provide a step-by-step guide to create a webhook in Argilla.
+This guide provides an overview of how to create and use webhooks in Argilla. 
 
-## What is a webhook?
-
-A webhook is a way for an app to provide other applications with real-time information. A webhook delivers data to other applications as it happens, meaning you get data immediately. Unlike typical APIs where you would need to poll for data very frequently in order to get it real-time.
-This makes webhooks much more efficient for both provider and consumer.
+A **webhook** allows an application to submit real-time information to other applications whenever a specific event occurs. Unlike traditional APIs, you won’t need to poll for data very frequently in order to get it in real time. This makes webhooks much more efficient for both the provider and the consumer.
 
 ## How to create a webhook in Argilla?
 
-The python SDK provides a simple way to create a webhook in Argilla. Its allow you focus on the use case of the webhook
-and not on the implementation details. You only need to create your event handler function with the `webhook_listener` decorator.
+The python SDK provides a simple way to create a webhook in Argilla. It allows you to focus on the use case of the webhook and not on the implementation details. You only need to create your event handler function with the `webhook_listener` decorator.
 
 ```python
 import argilla as rg
@@ -27,13 +23,14 @@ async def my_webhook_handler(dataset: rg.Dataset, type: str, timestamp: datetime
     print(dataset, type, timestamp)
 ```
 
-In the example above, we have created a webhook that listens to the `dataset.created` event. (You can find the list of events in the [Events](#events) section).
+In the example above, we have created a webhook that listens to the `dataset.created` event. 
+> You can find the list of events in the [Events](#events) section.
 
 The python SDK will automatically create a webhook in Argilla and listen to the specified event. When the event is triggered,
 the `my_webhook_handler` function will be called with the event data. The SDK will also parse the incoming webhook event into
-a proper resource object (rg.Dataset, rg.Record, and rg.UserResponse). The SDK will also take care of request authentication and error handling.
+a proper resource object (`rg.Dataset`, `rg.Record`, and `rg.Response`). The SDK will also take care of request authentication and error handling.
 
-## How to run the webhook?
+## How to run the webhook server?
 
 Under the hood, the SDK uses the `FastAPI` framework to create the webhook server and the POST endpoint to receive the webhook events.
 
@@ -68,12 +65,12 @@ The Python SDK provides a simple way to manage webhooks in Argilla. You can crea
 
 ### Create a webhook
 
-You can create a webhook using the `create_webhook` method.
+To create a new webhook in Argilla, you can define it in the `Webhook` class and then call the `create` method.
 
 ```python
 import argilla as rg
 
-client = rg.Argilla(...)
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 webhook = rg.Webhook(
     url="https://my-webhook-server.com",
@@ -87,12 +84,12 @@ webhook.create()
 
 ### List webhooks
 
-You can list all webhooks using the Python SDK.
+You can list all the existing webhooks in Argilla by accessing the `webhooks` attribute on the Argilla class and iterating over them.
 
 ```python
 import argilla as rg
 
-client = rg.Argilla(...)
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 for webhook in client.webhooks:
     print(webhook)
@@ -106,7 +103,7 @@ You can update a webhook using the `update` method.
 ```python
 import argilla as rg
 
-client = rg.Argilla(...)
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 webhook = rg.Webhook(
     url="http://my-webhook-server.com",
@@ -126,7 +123,7 @@ You can delete a webhook using the `delete` method.
 ```python
 import argilla as rg
 
-client = rg.Argilla(...)
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 for webhook in client.webhooks:
     webhook.delete()
