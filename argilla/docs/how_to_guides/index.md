@@ -82,6 +82,14 @@ These guides provide step-by-step instructions for common scenarios, including d
 
 <div class="grid cards" markdown>
 
+-   __User Argilla webhooks__
+
+    ---
+
+    Learn how to use Argilla webhooks to receive notifications about events in your workspace.
+
+    [:octicons-arrow-right-24: How-to guide](webhooks.md)
+
 -   __Use Markdown to format rich content__
 
     ---
@@ -97,5 +105,8 @@ These guides provide step-by-step instructions for common scenarios, including d
     Learn how to migrate users, workspaces and datasets from Argilla V1 to V2.
 
     [:octicons-arrow-right-24: How-to guide](migrate_from_legacy_datasets.md)
+
+
+
 
 </div>
