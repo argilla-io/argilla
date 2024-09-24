@@ -26,7 +26,7 @@
     
     
       
-        <title>Use Argilla webhooks - Argilla Docs</title>
+        <title>Use webhooks to respond to server events - Argilla Docs</title>
       
     
     
@@ -123,7 +123,7 @@
       
         <meta  property="og:type"  content="website" >
       
-        <meta  property="og:title"  content="Use Argilla webhooks - Argilla Docs" >
+        <meta  property="og:title"  content="Use webhooks to respond to server events - Argilla Docs" >
       
         <meta  property="og:description"  content="In this section, we will provide a step-by-step guide to create a webhook in Argilla." >
       
@@ -139,7 +139,7 @@
       
         <meta  name="twitter:card"  content="summary_large_image" >
       
-        <meta  name="twitter:title"  content="Use Argilla webhooks - Argilla Docs" >
+        <meta  name="twitter:title"  content="Use webhooks to respond to server events - Argilla Docs" >
       
         <meta  name="twitter:description"  content="In this section, we will provide a step-by-step guide to create a webhook in Argilla." >
       
@@ -203,7 +203,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Use Argilla webhooks
+              Use webhooks to respond to server events
             
           </span>
         </div>
@@ -987,7 +987,7 @@
           
   
   <span class="md-ellipsis">
-    Use Argilla webhooks
+    Use webhooks to respond to server events
   </span>
   
 
@@ -998,7 +998,7 @@
         
   
   <span class="md-ellipsis">
-    Use Argilla webhooks
+    Use webhooks to respond to server events
   </span>
   
 
@@ -1020,18 +1020,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-to-create-a-webhook-in-argilla" class="md-nav__link">
+  <a href="#creating-a-webhook-listener-in-argilla" class="md-nav__link">
     <span class="md-ellipsis">
-      How to create a webhook in Argilla?
+      Creating a webhook listener in Argilla
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-run-the-webhook-server" class="md-nav__link">
+  <a href="#running-the-webhook-server" class="md-nav__link">
     <span class="md-ellipsis">
-      How to run the webhook server?
+      Running the webhook server
     </span>
   </a>
   
@@ -2363,18 +2363,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-to-create-a-webhook-in-argilla" class="md-nav__link">
+  <a href="#creating-a-webhook-listener-in-argilla" class="md-nav__link">
     <span class="md-ellipsis">
-      How to create a webhook in Argilla?
+      Creating a webhook listener in Argilla
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-run-the-webhook-server" class="md-nav__link">
+  <a href="#running-the-webhook-server" class="md-nav__link">
     <span class="md-ellipsis">
-      How to run the webhook server?
+      Running the webhook server
     </span>
   </a>
   
@@ -2508,7 +2508,7 @@
 <h1 id="use-argilla-webhooks">Use Argilla webhooks<a class="headerlink" href="#use-argilla-webhooks" title="Permanent link">&para;</a></h1>
 <p>This guide provides an overview of how to create and use webhooks in Argilla.</p>
 <p>A <strong>webhook</strong> allows an application to submit real-time information to other applications whenever a specific event occurs. Unlike traditional APIs, you won’t need to poll for data very frequently in order to get it in real time. This makes webhooks much more efficient for both the provider and the consumer.</p>
-<h2 id="how-to-create-a-webhook-in-argilla">How to create a webhook in Argilla?<a class="headerlink" href="#how-to-create-a-webhook-in-argilla" title="Permanent link">&para;</a></h2>
+<h2 id="creating-a-webhook-listener-in-argilla">Creating a webhook listener in Argilla<a class="headerlink" href="#creating-a-webhook-listener-in-argilla" title="Permanent link">&para;</a></h2>
 <p>The python SDK provides a simple way to create a webhook in Argilla. It allows you to focus on the use case of the webhook and not on the implementation details. You only need to create your event handler function with the <code>webhook_listener</code> decorator.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
@@ -2526,7 +2526,7 @@
 <p>The python SDK will automatically create a webhook in Argilla and listen to the specified event. When the event is triggered,
 the <code>my_webhook_handler</code> function will be called with the event data. The SDK will also parse the incoming webhook event into
 a proper resource object (<code>rg.Dataset</code>, <code>rg.Record</code>, and <code>rg.Response</code>). The SDK will also take care of request authentication and error handling.</p>
-<h2 id="how-to-run-the-webhook-server">How to run the webhook server?<a class="headerlink" href="#how-to-run-the-webhook-server" title="Permanent link">&para;</a></h2>
+<h2 id="running-the-webhook-server">Running the webhook server<a class="headerlink" href="#running-the-webhook-server" title="Permanent link">&para;</a></h2>
 <p>Under the hood, the SDK uses the <code>FastAPI</code> framework to create the webhook server and the POST endpoint to receive the webhook events.</p>
 <p>To run the webhook, you need to define the webhook server in your code and start it using the <code>uvicorn</code> command.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">argilla</span> <span class="kn">import</span> <span class="n">get_webhook_server</span>
@@ -2573,7 +2573,7 @@ a proper resource object (<code>rg.Dataset</code>, <code>rg.Record</code>, and <
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">webhook</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Webhook</span><span class="p">(</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://my-webhook-server.com&quot;</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:8000&quot;</span><span class="p">,</span>
 </span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">events</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dataset.created&quot;</span><span class="p">],</span>
 </span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;My webhook&quot;</span>
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
@@ -2581,6 +2581,9 @@ a proper resource object (<code>rg.Dataset</code>, <code>rg.Record</code>, and <
 </span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="n">webhook</span><span class="o">.</span><span class="n">events</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dataset.updated&quot;</span><span class="p">]</span>
 </span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">webhook</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 </span></code></pre></div>
+<blockquote>
+<p>You should use IP address instead of localhost since the webhook validation expect a Top Level Domain (TLD) in the URL.</p>
+</blockquote>
 <h3 id="delete-a-webhook">Delete a webhook<a class="headerlink" href="#delete-a-webhook" title="Permanent link">&para;</a></h3>
 <p>You can delete a webhook using the <code>delete</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
@@ -2663,7 +2666,7 @@ to expore an example of a webhook server deployed in a Hugging Face Space.</p>
               
                 
               
-              Thanks for your feedback! Help us improve this page by <a href="https://github.com/argilla-io/argilla/issues/new/?title=[Feedback]+Use%20Argilla%20webhooks+-+/how_to_guides/webhooks/" target="_blank" rel="noopener">opening a GitHub issue</a>.
+              Thanks for your feedback! Help us improve this page by <a href="https://github.com/argilla-io/argilla/issues/new/?title=[Feedback]+Use%20webhooks%20to%20respond%20to%20server%20events+-+/how_to_guides/webhooks/" target="_blank" rel="noopener">opening a GitHub issue</a>.
             </div>
           
         </div>
