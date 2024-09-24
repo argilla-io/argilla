@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from fastapi import FastAPI
 
 
-def _compute_webhook_server_url() -> str:
+def _compute_default_webhook_server_url() -> str:
     """
     Compute the webhook server URL.
 
@@ -36,6 +36,7 @@ def _compute_webhook_server_url() -> str:
     """
     if space_host := os.getenv("SPACE_HOST"):
         return f"https://{space_host}"
+
     return os.getenv("WEBHOOK_SERVER_URL", "http://127.0.0.1:8000")
 
 
@@ -50,7 +51,7 @@ def _webhook_url_for_func(func: Callable) -> str:
         str: The full webhook URL.
 
     """
-    webhook_server_url = _compute_webhook_server_url()
+    webhook_server_url = _compute_default_webhook_server_url()
 
     return f"{webhook_server_url}/{func.__name__}"
 
