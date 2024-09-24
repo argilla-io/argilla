@@ -16,15 +16,15 @@ This makes webhooks much more efficient for both provider and consumer.
 The python SDK provides a simple way to create a webhook in Argilla. Its allow you focus on the use case of the webhook
 and not on the implementation details. You only need to create your event handler function with the `webhook_listener` decorator.
 
-```
+```python
 import argilla as rg
 
 from datetime import datetime
-from argilla_sdk import webhook_listener
+from argilla import webhook_listener
 
 @webhook_listener(events="dataset.created")
 async def my_webhook_handler(dataset: rg.Dataset, type: str, timestamp: datetime):
-    print(event)
+    print(dataset, type, timestamp)
 ```
 
 In the example above, we have created a webhook that listens to the `dataset.created` event. (You can find the list of events in the [Events](#events) section).
@@ -39,7 +39,7 @@ Under the hood, the SDK uses the `FastAPI` framework to create the webhook serve
 
 To run the webhook, you need to define the webhook server in your code and start it using the `uvicorn` command.
 
-```
+```python
 from argilla import get_webhook_server
 
 server = get_webhook_server()
