@@ -11,12 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import List, Optional
-
 
 from argilla import Argilla
 from argilla._api._webhooks import WebhookModel, WebhooksAPI
+from argilla._models import EventType
 from argilla._resource import Resource
 
 
@@ -46,11 +45,11 @@ class Webhook(Resource):
         self._model.url = value
 
     @property
-    def events(self) -> List[str]:
+    def events(self) -> List[EventType]:
         return self._model.events
 
     @events.setter
-    def events(self, value: List[str]):
+    def events(self, value: List[EventType]):
         self._model.events = value
 
     @property
@@ -79,3 +78,9 @@ class Webhook(Resource):
         instance._model = model
 
         return instance
+
+    def _with_client(self, client: "Argilla") -> "Webhook":
+        self._client = client
+        self._api = client.api.webhooks
+
+        return self
