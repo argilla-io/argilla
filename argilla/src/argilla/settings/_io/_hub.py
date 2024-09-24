@@ -142,7 +142,7 @@ def _render_code_snippet(repo_id: str):
     code_block = f"""
     # 1. map the dataset columns to question, field, vector, or metadata                                      
     settings = rg.Settings.from_hub(                                                                               
-        repo_id="yahma/alpaca-cleaned",                                                                            
+        repo_id="{repo_id}",                                                                            
         feature_mapping={"{"}"<column_name>": "question"{"}"},                                         
     )                                                                                                              
     # 2. or, create new questions, fields, vectors, or metadata properties                                         
@@ -172,6 +172,7 @@ def _define_settings_from_features(
         ImageField,
         LabelQuestion,
         TextQuestion,
+        RatingQuestion,
         Settings,
         TextField,
         ChatField,
@@ -227,7 +228,15 @@ def _define_settings_from_features(
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
     if not questions:
-        questions.append(LabelQuestion(name="quality", required=True, labels=["good", "bad"]))
+        questions.append(
+            RatingQuestion(
+                name="quality",
+                title="Quality",
+                description="How would you rate the quality of the record?",
+                required=True,
+                values=[0, 1, 2, 3, 4, 5],
+            )
+        )
         warnings.warn(
             "No questions found in the dataset features. A default question 'quality' with labels ['good', 'bad'] has been added"
         )
