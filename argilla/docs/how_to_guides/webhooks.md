@@ -133,8 +133,7 @@ for webhook in client.webhooks:
 
 ## Deploying a webhooks server in a Hugging Face Space
 
-You can deploy your webhook in a Hugging Face Space. You can visit this [link](https://huggingface.co/spaces/frascuchon/argilla-webhooks/tree/main)
-to expore an example of a webhook server deployed in a Hugging Face Space.
+You can deploy your webhook in a Hugging Face Space. You can visit this [link](https://huggingface.co/spaces/frascuchon/argilla-webhooks/tree/main) to explore an example of a webhook server deployed in a Hugging Face Space.
 
 
 ## Events
