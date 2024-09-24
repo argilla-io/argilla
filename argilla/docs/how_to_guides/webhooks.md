@@ -73,7 +73,7 @@ import argilla as rg
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 webhook = rg.Webhook(
-    url="https://my-webhook-server.com",
+    url="http://127.0.0.1:8000",
     events=["dataset.created"],
     description="My webhook"
 )
