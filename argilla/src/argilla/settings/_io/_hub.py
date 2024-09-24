@@ -136,7 +136,7 @@ def _render_code_snippet(repo_id: str):
     from rich.syntax import Syntax
 
     message = """
-    No questions found in the dataset features. A default question 'quality' has been added. 
+    No questions found in the dataset features. A default question 'quality' has been added.
     If you want to customize the dataset differently, you can do the following:
     """
     code_block = f"""
