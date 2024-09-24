@@ -166,7 +166,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#webhooks" class="md-skip">
+        <a href="#use-argilla-webhooks" class="md-skip">
           Skip to content
         </a>
       
@@ -1020,15 +1020,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-webhook" class="md-nav__link">
-    <span class="md-ellipsis">
-      What is a webhook?
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#how-to-create-a-webhook-in-argilla" class="md-nav__link">
     <span class="md-ellipsis">
       How to create a webhook in Argilla?
@@ -1038,9 +1029,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-run-the-webhook" class="md-nav__link">
+  <a href="#how-to-run-the-webhook-server" class="md-nav__link">
     <span class="md-ellipsis">
-      How to run the webhook?
+      How to run the webhook server?
     </span>
   </a>
   
@@ -2372,15 +2363,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-webhook" class="md-nav__link">
-    <span class="md-ellipsis">
-      What is a webhook?
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#how-to-create-a-webhook-in-argilla" class="md-nav__link">
     <span class="md-ellipsis">
       How to create a webhook in Argilla?
@@ -2390,9 +2372,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-run-the-webhook" class="md-nav__link">
+  <a href="#how-to-run-the-webhook-server" class="md-nav__link">
     <span class="md-ellipsis">
-      How to run the webhook?
+      How to run the webhook server?
     </span>
   </a>
   
@@ -2523,14 +2505,11 @@
   
 
 
-<h1 id="webhooks">Webhooks<a class="headerlink" href="#webhooks" title="Permanent link">&para;</a></h1>
-<p>In this section, we will provide a step-by-step guide to create a webhook in Argilla.</p>
-<h2 id="what-is-a-webhook">What is a webhook?<a class="headerlink" href="#what-is-a-webhook" title="Permanent link">&para;</a></h2>
-<p>A webhook is a way for an app to provide other applications with real-time information. A webhook delivers data to other applications as it happens, meaning you get data immediately. Unlike typical APIs where you would need to poll for data very frequently in order to get it real-time.
-This makes webhooks much more efficient for both provider and consumer.</p>
+<h1 id="use-argilla-webhooks">Use Argilla webhooks<a class="headerlink" href="#use-argilla-webhooks" title="Permanent link">&para;</a></h1>
+<p>This guide provides an overview of how to create and use webhooks in Argilla.</p>
+<p>A <strong>webhook</strong> allows an application to submit real-time information to other applications whenever a specific event occurs. Unlike traditional APIs, you won’t need to poll for data very frequently in order to get it in real time. This makes webhooks much more efficient for both the provider and the consumer.</p>
 <h2 id="how-to-create-a-webhook-in-argilla">How to create a webhook in Argilla?<a class="headerlink" href="#how-to-create-a-webhook-in-argilla" title="Permanent link">&para;</a></h2>
-<p>The python SDK provides a simple way to create a webhook in Argilla. Its allow you focus on the use case of the webhook
-and not on the implementation details. You only need to create your event handler function with the <code>webhook_listener</code> decorator.</p>
+<p>The python SDK provides a simple way to create a webhook in Argilla. It allows you to focus on the use case of the webhook and not on the implementation details. You only need to create your event handler function with the <code>webhook_listener</code> decorator.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
@@ -2540,11 +2519,14 @@ and not on the implementation details. You only need to create your event handle
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="k">async</span> <span class="k">def</span> <span class="nf">my_webhook_handler</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span><span class="p">):</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
 </span></code></pre></div>
-<p>In the example above, we have created a webhook that listens to the <code>dataset.created</code> event. (You can find the list of events in the <a href="#events">Events</a> section).</p>
+<p>In the example above, we have created a webhook that listens to the <code>dataset.created</code> event.</p>
+<blockquote>
+<p>You can find the list of events in the <a href="#events">Events</a> section.</p>
+</blockquote>
 <p>The python SDK will automatically create a webhook in Argilla and listen to the specified event. When the event is triggered,
 the <code>my_webhook_handler</code> function will be called with the event data. The SDK will also parse the incoming webhook event into
-a proper resource object (rg.Dataset, rg.Record, and rg.UserResponse). The SDK will also take care of request authentication and error handling.</p>
-<h2 id="how-to-run-the-webhook">How to run the webhook?<a class="headerlink" href="#how-to-run-the-webhook" title="Permanent link">&para;</a></h2>
+a proper resource object (<code>rg.Dataset</code>, <code>rg.Record</code>, and <code>rg.Response</code>). The SDK will also take care of request authentication and error handling.</p>
+<h2 id="how-to-run-the-webhook-server">How to run the webhook server?<a class="headerlink" href="#how-to-run-the-webhook-server" title="Permanent link">&para;</a></h2>
 <p>Under the hood, the SDK uses the <code>FastAPI</code> framework to create the webhook server and the POST endpoint to receive the webhook events.</p>
 <p>To run the webhook, you need to define the webhook server in your code and start it using the <code>uvicorn</code> command.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">argilla</span> <span class="kn">import</span> <span class="n">get_webhook_server</span>
@@ -2562,10 +2544,10 @@ a proper resource object (rg.Dataset, rg.Record, and rg.UserResponse). The SDK w
 <h2 id="webhooks-management">Webhooks management<a class="headerlink" href="#webhooks-management" title="Permanent link">&para;</a></h2>
 <p>The Python SDK provides a simple way to manage webhooks in Argilla. You can create, list, update, and delete webhooks using the SDK.</p>
 <h3 id="create-a-webhook">Create a webhook<a class="headerlink" href="#create-a-webhook" title="Permanent link">&para;</a></h3>
-<p>You can create a webhook using the <code>create_webhook</code> method.</p>
+<p>To create a new webhook in Argilla, you can define it in the <code>Webhook</code> class and then call the <code>create</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">webhook</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Webhook</span><span class="p">(</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://my-webhook-server.com&quot;</span><span class="p">,</span>
@@ -2576,10 +2558,10 @@ a proper resource object (rg.Dataset, rg.Record, and rg.UserResponse). The SDK w
 </span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="n">webhook</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 </span></code></pre></div>
 <h3 id="list-webhooks">List webhooks<a class="headerlink" href="#list-webhooks" title="Permanent link">&para;</a></h3>
-<p>You can list all webhooks using the Python SDK.</p>
+<p>You can list all the existing webhooks in Argilla by accessing the <code>webhooks</code> attribute on the Argilla class and iterating over them.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">for</span> <span class="n">webhook</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">webhooks</span><span class="p">:</span>
 </span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">webhook</span><span class="p">)</span>
@@ -2588,7 +2570,7 @@ a proper resource object (rg.Dataset, rg.Record, and rg.UserResponse). The SDK w
 <p>You can update a webhook using the <code>update</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">webhook</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Webhook</span><span class="p">(</span>
 </span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;http://my-webhook-server.com&quot;</span><span class="p">,</span>
@@ -2603,7 +2585,7 @@ a proper resource object (rg.Dataset, rg.Record, and rg.UserResponse). The SDK w
 <p>You can delete a webhook using the <code>delete</code> method.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="k">for</span> <span class="n">webhook</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">webhooks</span><span class="p">:</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">webhook</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
