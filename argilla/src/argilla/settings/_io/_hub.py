@@ -140,20 +140,19 @@ def _render_code_snippet(repo_id: str):
     You can also add custom settings to the dataset by manipulting the settings object.
     """
     code_block = f"""
-    settings = rg.Settings(
-        repo_id="{repo_id}",
-        feature_mapping={{{{"<column_name>": "question"}}}}
-    )
-    # add more custom settings here
-    # via settings.questions, settings.fields, settings.vectors, or settings.metadata
-    dataset = rg.Dataset(name="{repo_id}", settings=settings)
-    ds = load_dataset("{repo_id}")
-    dataset.records.log(ds)
+    # 1. map the dataset columns to question, field, vector, or metadata                                      
+    settings = rg.Settings.from_hub(                                                                               
+        repo_id="yahma/alpaca-cleaned",                                                                            
+        feature_mapping={"{"}"<column_name>": "question"{"}"},                                         
+    )                                                                                                              
+    # 2. or, create new questions, fields, vectors, or metadata properties                                         
+    settings.questions = [rg.TextQuestion(name="new_question", required=True)]                                     
+    dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings) 
     """
 
     console = Console()
-    code_block = Syntax(code_block, "python", theme="monokai", line_numbers=True)
-    console.print(f"[bold yellow]{message}[/bold yellow]")
+    code_block = Syntax(code_block, "python", theme="github-dark", line_numbers=False, indent_guides=False)
+    console.print(message)
     console.print(code_block)
 
 
