@@ -277,6 +277,8 @@ class ChatFieldFactory(FieldFactory):
 class CustomFieldFactory(FieldFactory):
     settings = {
         "type": FieldType.custom,
+        "template": "<div>{{ value }}</div>",
+        "advanced_mode": False,
     }
 
 

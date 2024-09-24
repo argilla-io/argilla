@@ -91,16 +91,19 @@ class ChatFieldSettingsUpdate(BaseModel):
 class CustomFieldSettings(BaseModel):
     type: Literal[FieldType.custom]
     template: str
+    advanced_mode: bool
 
 
 class CustomFieldSettingsCreate(BaseModel):
     type: Literal[FieldType.custom]
     template: str
+    advanced_mode: bool = False
 
 
 class CustomFieldSettingsUpdate(BaseModel):
     type: Literal[FieldType.custom]
     template: str
+    advanced_mode: bool
 
 
 FieldSettings = Annotated[
