@@ -1,11 +1,24 @@
-export class QuestionSetting {
-  type:
-    | "text"
-    | "ranking"
-    | "multi_label_selection"
-    | "label_selection"
-    | "span";
+import { QuestionType } from "./QuestionType";
 
+export interface QuestionPrototype {
+  type:
+    | "label_selection"
+    | "multi_label_selection"
+    | "ranking"
+    | "text"
+    | "span"
+    | "rating";
+  use_markdown?: boolean;
+  visible_options?: number;
+  options?: any[];
+  options_order?: "natural" | "suggestion";
+  allow_overlapping?: boolean;
+  allow_character_annotation?: boolean;
+  field?: string;
+}
+
+export class QuestionSetting {
+  type: QuestionType;
   use_markdown: boolean;
   visible_options: number;
   allow_overlapping: boolean;
@@ -14,8 +27,8 @@ export class QuestionSetting {
   options: any;
   options_order: "natural" | "suggestion";
 
-  constructor(private readonly settings: any) {
-    this.type = settings.type;
+  constructor(private readonly settings: QuestionPrototype) {
+    this.type = QuestionType.from(settings.type);
 
     this.use_markdown = settings.use_markdown;
     this.visible_options = settings.visible_options;

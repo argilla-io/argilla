@@ -70,7 +70,7 @@ export class Question {
   }
 
   public get type(): QuestionType {
-    return QuestionType.from(this.settings.type);
+    return this.settings.type;
   }
 
   public get isRankingType(): boolean {
