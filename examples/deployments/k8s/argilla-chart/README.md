@@ -51,7 +51,7 @@ TODO: Add information about any backwards incompatible changes and how to handle
 To uninstall/delete the `my-argilla-server` deployment:
 
 ```bash
-helm delete my-release
+helm delete my-argilla-server
 ```
 
 This command removes all the Kubernetes components associated with the chart and deletes the release.
