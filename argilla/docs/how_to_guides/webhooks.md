@@ -4,7 +4,7 @@ description: In this section, we will provide a step-by-step guide to create a w
 
 # Use Argilla webhooks
 
-This guide provides an overview of how to create and use webhooks in Argilla. 
+This guide provides an overview of how to create and use webhooks in Argilla.
 
 A **webhook** allows an application to submit real-time information to other applications whenever a specific event occurs. Unlike traditional APIs, you won’t need to poll for data very frequently in order to get it in real time. This makes webhooks much more efficient for both the provider and the consumer.
 
@@ -23,7 +23,7 @@ async def my_webhook_handler(dataset: rg.Dataset, type: str, timestamp: datetime
     print(dataset, type, timestamp)
 ```
 
-In the example above, we have created a webhook that listens to the `dataset.created` event. 
+In the example above, we have created a webhook that listens to the `dataset.created` event.
 > You can find the list of events in the [Events](#events) section.
 
 The python SDK will automatically create a webhook in Argilla and listen to the specified event. When the event is triggered,
