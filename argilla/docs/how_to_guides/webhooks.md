@@ -8,7 +8,7 @@ This guide provides an overview of how to create and use webhooks in Argilla.
 
 A **webhook** allows an application to submit real-time information to other applications whenever a specific event occurs. Unlike traditional APIs, you won’t need to poll for data very frequently in order to get it in real time. This makes webhooks much more efficient for both the provider and the consumer.
 
-## How to create a webhook in Argilla?
+## How to create a webhook listener in Argilla?
 
 The python SDK provides a simple way to create a webhook in Argilla. It allows you to focus on the use case of the webhook and not on the implementation details. You only need to create your event handler function with the `webhook_listener` decorator.
 
