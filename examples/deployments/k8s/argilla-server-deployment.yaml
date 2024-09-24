@@ -29,7 +29,7 @@ spec:
               value: "http://elasticsearch:9200"
             - name: ARGILLA_AUTH_SECRET_KEY
               value: "CHANGE_ME"
-            ## Uncomment these lines to create owner user
+            # Uncomment these lines to create owner user
             # - name: USERNAME
             #   value: "argilla"
             # - name: PASSWORD
