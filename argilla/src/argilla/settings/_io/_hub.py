@@ -189,8 +189,11 @@ def _define_settings_from_features(
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
 
-        # Lowercase the name to avoid case sensitivity issues when mapping the features to the settings.
-        name = name.lower()
+        name = Settings._curated_settings_name(name)
+
+        if not Settings._is_valid_name(name):
+            warnings.warn(f"Feature '{name}' has an invalid name. Skipping.")
+            continue
 
         if feature_type == FeatureType.CHAT:
             fields.append(ChatField(name=name, required=False))

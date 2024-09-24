@@ -195,7 +195,9 @@ class HubImportExportMixin(DiskImportExportMixin):
         """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
         # THIS IS REQUIRED SINCE NAME IN ARGILLA ARE LOWERCASE. The Settings BaseModel models apply this logic
         # Ideally, the restrictions in Argilla should be removed and the names should be case-insensitive
-        hf_dataset = hf_dataset.rename_columns({col: col.lower() for col in hf_dataset.column_names})
+        hf_dataset = hf_dataset.rename_columns(
+            {col: dataset.settings._curated_settings_name(col) for col in hf_dataset.column_names}
+        )
 
         # Identify columns that columns that contain responses
         responses_columns = [col for col in hf_dataset.column_names if ".responses" in col]
