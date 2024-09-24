@@ -42,6 +42,32 @@ def test_define_settings_from_features_image():
     assert settings.questions[0].name == "quality"
 
 
+@pytest.mark.parametrize(
+    "column,name",
+    [
+        ("Text column", "text_column"),
+        ("text column", "text_column"),
+        ("text:column", "text_column"),
+        ("text.column", "text_column"),
+    ],
+)
+def test_define_settings_from_features_with_non_curated_column_name(column: str, name: str):
+    features = {column: {"_type": "Value", "dtype": "string"}}
+
+    settings = _define_settings_from_features(features, feature_mapping={}, repo_id="repo_id")
+
+    assert len(settings.fields) == 1
+    assert settings.fields[0].name == name
+
+
+@pytest.mark.parametrize("column", ["text<column", "text>column", "text|column", "text]column", "text/column"])
+def test_define_settings_from_features_with_unsupported_column_name(column: str):
+    features = {column: {"_type": "Value", "dtype": "string"}}
+
+    with pytest.raises(SettingsError):
+        _define_settings_from_features(features, feature_mapping={}, repo_id="repo_id")
+
+
 def test_define_settings_from_features_multiple():
     features = {
         "text_column": {"_type": "Value", "dtype": "string"},
