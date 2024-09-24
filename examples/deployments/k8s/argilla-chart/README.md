@@ -48,7 +48,7 @@ TODO: Add information about any backwards incompatible changes and how to handle
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `my-release` deployment:
+To uninstall/delete the `my-argilla-server` deployment:
 
 ```bash
 helm delete my-release
