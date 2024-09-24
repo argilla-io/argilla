@@ -136,8 +136,8 @@ def _render_code_snippet(repo_id: str):
     from rich.syntax import Syntax
 
     message = """
-    You can assign the dataset's columns to questions, fields, or metadata properties using the feature_mapping argument.
-    You can also add custom settings to the dataset by manipulting the settings object.
+    No questions found in the dataset features. A default question 'quality' has been added. 
+    If you want to customize the dataset differently, you can do the following:
     """
     code_block = f"""
     # 1. map the dataset columns to question, field, vector, or metadata                                      
@@ -152,8 +152,7 @@ def _render_code_snippet(repo_id: str):
 
     console = Console()
     code_block = Syntax(code_block, "python", theme="github-dark", line_numbers=False, indent_guides=False)
-    console.print(message)
-    console.print(code_block)
+    console.print(message, code_block)
 
 
 def _define_settings_from_features(
@@ -239,9 +238,6 @@ def _define_settings_from_features(
                 required=True,
                 values=[0, 1, 2, 3, 4, 5],
             )
-        )
-        warnings.warn(
-            "No questions found in the dataset features. A default question 'quality' with labels ['good', 'bad'] has been added"
         )
         _render_code_snippet(repo_id)
 
