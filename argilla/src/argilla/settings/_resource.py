@@ -490,7 +490,8 @@ class SettingsProperties(Sequence[Property]):
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""
-        return f"{repr([prop for prop in self])}"
+
+        return f"{type(self).__name__}({', '.join([repr(prop) for prop in self])})"
 
 
 class QuestionsProperties(SettingsProperties[QuestionType]):

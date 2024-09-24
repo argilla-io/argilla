@@ -92,7 +92,6 @@ class TestSettings:
             ],
             vectors=[rg.VectorField(name="text", dimensions=3)],
         )
-
         assert (
             settings.__repr__() == f"Settings(guidelines=None, allow_extra_metadata=False, "
             "distribution=OverlapTaskDistribution(min_submitted=1), "
