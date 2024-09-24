@@ -20,77 +20,78 @@ from pydantic import BaseModel
 
 from argilla import Dataset, Record, UserResponse, Workspace
 from argilla._exceptions import ArgillaAPIError
-from argilla._models import RecordModel, UserResponseModel, WorkspaceModel
+from argilla._models import RecordModel, UserResponseModel, WorkspaceModel, EventType
 
 if TYPE_CHECKING:
     from argilla import Argilla
 
 
-def _parse_dataset_from_webhook_data(data: dict, client: "Argilla") -> Dataset:
-    workspace = Workspace.from_model(WorkspaceModel.model_validate(data["workspace"]), client=client)
-    # TODO: Parse settings from the data
-    # settings = Settings._from_dict(data)
-
-    dataset = Dataset(name=data["name"], workspace=workspace, client=client)
-    dataset.id = UUID(data["id"])
-
-    try:
-        dataset.get()
-    except ArgillaAPIError as _:
-        pass
-    finally:
-        return dataset
-
-
-def _parse_record_from_webhook_data(data: dict, client: "Argilla") -> Record:
-    dataset = _parse_dataset_from_webhook_data(data["dataset"], client)
-
-    record = Record.from_model(RecordModel.model_validate(data), dataset=dataset)
-    try:
-        record.get()
-    except ArgillaAPIError as _:
-        # TODO: Show notification
-        pass
-    finally:
-        return record
-
-
-def _parse_response_from_webhook_data(data: dict, client: "Argilla") -> UserResponse:
-    record = _parse_record_from_webhook_data(data["record"], client)
-
-    # TODO: Link the user resource to the response
-    user_response = UserResponse.from_model(
-        model=UserResponseModel(**data, user_id=data["user"]["id"]),
-        record=record,
-    )
-
-    return user_response
-
-
 class WebhookEvent(BaseModel):
-    type: str
+    type: EventType
     timestamp: datetime
     data: dict
 
     def parsed(self, client: "Argilla") -> dict:
-        instance_type, action_type = self.type.split(".")
+        resource = self.type.resource
         data = self.data or {}
 
         arguments = {"type": self.type, "timestamp": self.timestamp}
 
-        if instance_type == "dataset":
-            dataset = _parse_dataset_from_webhook_data(data, client)
+        if resource == "dataset":
+            dataset = self._parse_dataset_from_webhook_data(data, client)
             arguments["dataset"] = dataset
 
-        elif instance_type == "record":
-            record = _parse_record_from_webhook_data(data, client)
+        elif resource == "record":
+            record = self._parse_record_from_webhook_data(data, client)
             arguments["record"] = record
 
-        elif instance_type == "response":
-            user_response = _parse_response_from_webhook_data(data, client)
+        elif resource == "response":
+            user_response = self._parse_response_from_webhook_data(data, client)
             arguments["response"] = user_response
 
         else:
             arguments["data"] = data
 
         return arguments
+
+    @classmethod
+    def _parse_dataset_from_webhook_data(cls, data: dict, client: "Argilla") -> Dataset:
+        workspace = Workspace.from_model(WorkspaceModel.model_validate(data["workspace"]), client=client)
+        # TODO: Parse settings from the data
+        # settings = Settings._from_dict(data)
+
+        dataset = Dataset(name=data["name"], workspace=workspace, client=client)
+        dataset.id = UUID(data["id"])
+
+        try:
+            dataset.get()
+        except ArgillaAPIError as _:
+            # TODO: Show notification
+            pass
+        finally:
+            return dataset
+
+    @classmethod
+    def _parse_record_from_webhook_data(cls, data: dict, client: "Argilla") -> Record:
+        dataset = cls._parse_dataset_from_webhook_data(data["dataset"], client)
+
+        record = Record.from_model(RecordModel.model_validate(data), dataset=dataset)
+        try:
+            record.get()
+        except ArgillaAPIError as _:
+            # TODO: Show notification
+            pass
+        finally:
+            return record
+
+    @classmethod
+    def _parse_response_from_webhook_data(cls, data: dict, client: "Argilla") -> UserResponse:
+        record = cls._parse_record_from_webhook_data(data["record"], client)
+
+        # TODO: Link the user resource to the response
+        user_response = UserResponse.from_model(
+            model=UserResponseModel(**data, user_id=data["user"]["id"]),
+            record=record,
+        )
+
+        return user_response
