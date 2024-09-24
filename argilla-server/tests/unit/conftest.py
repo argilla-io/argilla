@@ -22,7 +22,7 @@ from httpx import AsyncClient
 from opensearchpy import OpenSearch
 
 from argilla_server import telemetry
-from argilla_server.contexts import distribution, datasets
+from argilla_server.contexts import distribution, datasets, records
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.database import get_async_db
@@ -91,6 +91,7 @@ async def async_client(
 
     mocker.patch.object(distribution, "_get_async_db", override_get_async_db)
     mocker.patch.object(datasets, "get_async_db", override_get_async_db)
+    mocker.patch.object(records, "get_async_db", override_get_async_db)
 
     api_v1.dependency_overrides.update(
         {

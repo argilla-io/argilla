@@ -17,7 +17,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from datasets import Dataset as HFDataset
-from datasets import IterableDataset, Image, ClassLabel, Value
+from datasets import Image, ClassLabel, Value
 
 from argilla.records._io._generic import GenericIO
 from argilla._helpers._media import pil_to_data_uri, uncast_image
@@ -32,7 +32,7 @@ def _cast_images_as_urls(hf_dataset: "HFDataset", columns: List[str]) -> "HFData
 
     Parameters:
         hf_dataset (HFDataset): The Hugging Face dataset to cast.
-        repo_id (str): The ID of the Hugging Face Hub repo.
+        columns (List[str]): The names of the columns containing the image features.
 
     Returns:
         HFDataset: The Hugging Face dataset with image features cast as URLs.
@@ -65,12 +65,23 @@ def _cast_classlabels_as_strings(hf_dataset: "HFDataset", columns: List[str]) ->
     Returns:
         HFDataset: The Hugging Face dataset with class label features cast as strings.
     """
+
+    def label_column2str(x: dict, column: str, features: dict) -> Dict[str, Union[str, None]]:
+        try:
+            value = features[column].int2str(x[column])
+        except Exception as ex:
+            warnings.warn(f"Could not cast {x[column]} to string. Error: {ex}")
+            value = None
+
+        return {column: value}
+
     for column in columns:
         features = hf_dataset.features.copy()
         features[column] = Value("string")
         hf_dataset = hf_dataset.map(
-            lambda x: {column: hf_dataset.features[column].int2str(x[column])}, features=features
+            label_column2str, fn_kwargs={"column": column, "features": hf_dataset.features}, features=features
         )
+
     return hf_dataset
 
 
@@ -91,6 +102,8 @@ def _uncast_uris_as_images(hf_dataset: "HFDataset", columns: List[str]) -> "HFDa
         HFDataset: The Hugging Face dataset with image features cast as PIL images.
     """
 
+    casted_hf_dataset = hf_dataset
+
     for column in columns:
         features = hf_dataset.features.copy()
         features[column] = Image()
@@ -109,6 +122,7 @@ def _uncast_uris_as_images(hf_dataset: "HFDataset", columns: List[str]) -> "HFDa
                 f"Image file not found for column {column}. Image will be persisted as string (URL, path, or base64)."
             )
             casted_hf_dataset = hf_dataset
+
     return casted_hf_dataset
 
 
@@ -173,32 +187,34 @@ class HFDatasetsIO:
         return hf_dataset
 
     @staticmethod
-    def _record_dicts_from_datasets(hf_dataset: HFDataset) -> List[Dict[str, Union[str, float, int, list]]]:
-        """Creates a dictionaries from a HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
+    def _record_dicts_from_datasets(hf_dataset: "HFDataset") -> List[Dict[str, Union[str, float, int, list]]]:
+        """Creates a dictionaries from an HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
 
         Parameters:
-            dataset (Dataset): The dataset containing the records.
+            hf_dataset (HFDataset): The dataset containing the records.
 
         Returns:
             Generator[Dict[str, Union[str, float, int, list]], None, None]: A generator of dictionaries to be passed to DatasetRecords.add or DatasetRecords.update.
         """
         hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset)
+
         try:
-            hf_dataset: IterableDataset = hf_dataset.to_iterable_dataset()
+            hf_dataset = hf_dataset.to_iterable_dataset()
         except AttributeError:
             pass
+
         record_dicts = [example for example in hf_dataset]
         return record_dicts
 
     @staticmethod
-    def _uncast_argilla_attributes_to_datasets(hf_dataset: "HFDataset", schema: Dict) -> List[str]:
+    def _uncast_argilla_attributes_to_datasets(hf_dataset: "HFDataset", schema: Dict) -> "HFDataset":
         """Get the names of the Argilla fields that contain image data.
 
         Parameters:
-            dataset (Dataset): The dataset to check.
+            hf_dataset (Dataset): The dataset to check.
 
         Returns:
-            List[str]: The names of the Argilla fields that contain image data.
+            HFDataset: The dataset with argilla attributes uncasted.
         """
 
         for attribute_type, uncaster in ATTRIBUTE_UNCASTERS.items():
@@ -211,7 +227,7 @@ class HFDatasetsIO:
         return hf_dataset
 
     @staticmethod
-    def to_argilla(hf_dataset: "HFDataset") -> List[str]:
+    def to_argilla(hf_dataset: "HFDataset") -> "HFDataset":
         """Check if the Hugging Face dataset contains image features.
 
         Parameters:
