@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from argilla import Dataset, Record, UserResponse, Workspace
 from argilla._exceptions import ArgillaAPIError
@@ -42,6 +42,8 @@ class RecordEvent(BaseModel):
     timestamp: datetime
     record: Record
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
 
 class DatasetEvent(BaseModel):
     """
@@ -57,6 +59,8 @@ class DatasetEvent(BaseModel):
     timestamp: datetime
     dataset: Dataset
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
 
 class UserResponseEvent(BaseModel):
     """
@@ -71,6 +75,8 @@ class UserResponseEvent(BaseModel):
     type: EventType
     timestamp: datetime
     response: UserResponse
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class WebhookEvent(BaseModel):
