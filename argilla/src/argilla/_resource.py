@@ -13,7 +13,7 @@
 # limitations under the License.
 from abc import abstractmethod
 from datetime import datetime
-from typing import Any, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID
 
 try:
@@ -25,9 +25,9 @@ from argilla._exceptions import ArgillaSerializeError
 from argilla._helpers import LoggingMixin
 
 if TYPE_CHECKING:
-    from argilla.client import Argilla
-    from argilla._models import ResourceModel
     from argilla._api._base import ResourceAPI
+    from argilla._models import ResourceModel
+    from argilla.client import Argilla
 
 
 class Resource(LoggingMixin):
@@ -62,6 +62,14 @@ class Resource(LoggingMixin):
     @id.setter
     def id(self, value: UUID) -> None:
         self._model.id = value
+
+    @property
+    def inserted_at(self) -> datetime:
+        return self._model.inserted_at
+
+    @property
+    def updated_at(self) -> datetime:
+        return self._model.updated_at
 
     @property
     def is_outdated(self) -> bool:
