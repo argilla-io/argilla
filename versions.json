@@ -13,6 +13,14 @@
     }
   },
   {
+    "version": "docs_argilla-webhooks",
+    "title": "docs_argilla-webhooks",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
