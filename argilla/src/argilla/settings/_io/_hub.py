@@ -90,7 +90,7 @@ def _get_dataset_features(
             else:
                 config = config or available_configs[0]
             features = dataset_info[config]["features"]
-            return features, config
+            return features
 
     except (httpx.RequestError, httpx.HTTPStatusError, KeyError) as e:
         raise DatasetsServerException(f"Failed to get dataset info from the datasets server. Error: {str(e)}") from e
@@ -152,13 +152,19 @@ def _is_chat_feature(sub_features):
     )
 
 
-def _render_code_snippet(repo_id: str, subset: str):
+def _render_code_snippet(repo_id: str, subset: Optional[str] = None):
     """Render the code snippet to use feature_mapping to load a dataset and log its records."""
 
     from rich.console import Console, Group
     from rich.syntax import Syntax
     from rich.panel import Panel
     from rich import box
+
+    from_hub_args = [f'repo_id="{repo_id}"']
+    if subset:
+        from_hub_args.append(f'subset="{subset}"')
+
+    from_hub_args = ", ".join(from_hub_args)
 
     title = "Customize the dataset settings"
     message = """
@@ -167,16 +173,16 @@ def _render_code_snippet(repo_id: str, subset: str):
     """
     code_block = f"""
     # 1. Create new questions, fields, vectors, or metadata properties in the settings
-    settings = rg.Settings.from_hub(repo_id="{repo_id}", subset="{subset}")
+    settings = rg.Settings.from_hub({from_hub_args})
     settings.questions.add(rg.TextQuestion(name="new_question", required=True))
-    dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
+    dataset = rg.Dataset.from_hub({from_hub_args}", settings=settings)
 
     # 2. Map the dataset's columns to question, field, or metadata
     settings = rg.Settings.from_hub(
-        repo_id="{repo_id}",
-        feature_mapping={{"<column_name>": "question"}},
+            {from_hub_args},
+            feature_mapping={{"<column_name>": "question"}},
     )
-    dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
+    dataset = rg.Dataset.from_hub({from_hub_args}, settings=settings)
     """
 
     console = Console()
@@ -278,7 +284,7 @@ def build_settings_from_repo_id(
         subset (str): The subset of the dataset to use. If provided, 'config' should not be provided.
 
     """
-    dataset_features, validated_subset = _get_dataset_features(repo_id=repo_id, config=subset)
+    dataset_features = _get_dataset_features(repo_id=repo_id, config=subset)
     settings = _define_settings_from_features(dataset_features, feature_mapping)
 
     if not settings.questions:
@@ -291,7 +297,7 @@ def build_settings_from_repo_id(
                 values=[0, 1, 2, 3, 4, 5],
             )
         )
-        _render_code_snippet(repo_id=repo_id, subset=validated_subset)
+        _render_code_snippet(repo_id=repo_id, subset=subset)
 
     settings.questions[0].required = True
     settings.fields[0].required = True
