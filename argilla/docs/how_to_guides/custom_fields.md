@@ -25,7 +25,7 @@ This guide demonstrates how to create custom fields in Argilla using HTML, CSS, 
 
 If you are somewhat familiar with web development and thestructure of resources in Argilla, you might will easiliy be able to grasp the `record` object structure you can access within your custom fields definition.The `record` object is the main object that contains all the information about the resource, like `fields`, `metadata`, etc.
 
-## Basic Mode (advanced_mode=False)
+## Basic Mode
 
 When `advanced_mode=False`, you can use the `template` argument to only pass basic HTML and CSS templates. To render information, we rely on the [handlebars syntax engine](https://handlebarsjs.com/). This engine will convert the content inside the brackets `{{}}` to the values of record's field's object within your template. As described in the [Accessing record information](#accessing-record-information) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data.
 
@@ -122,7 +122,7 @@ Instead of explaining the syntax, let's just show you an example.
     )
     ```
 
-## Advanced Mode (advanced_mode=True)
+## Advanced Mode
 
 When `advanced_mode=True`, you can use the `template` argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript.
 
