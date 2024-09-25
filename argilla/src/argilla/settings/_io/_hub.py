@@ -58,7 +58,10 @@ class AttributeType(Enum):
     METADATA = "metadata"
 
 
-def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
+def _get_dataset_features(
+    repo_id: str,
+    config: Optional[str] = None,
+) -> Dict[str, Dict[str, Any]]:
     """Get the features of a dataset from the datasets server using the repo_id and config.
     Extract the features from the response and return them as a dictionary.
 
@@ -82,11 +85,12 @@ def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
             dataset_info = response_json["dataset_info"]
             available_configs = list(dataset_info.keys())
 
-            if len(available_configs) > 1:
-                warnings.warn("Multiple configurations found. Using the first one.")
-            config = available_configs[0]
+            if config is not None and config not in available_configs:
+                raise DatasetsServerException(f"Configuration '{config}' not found in the dataset.")
+            else:
+                config = config or available_configs[0]
             features = dataset_info[config]["features"]
-            return features
+            return features, config
 
     except (httpx.RequestError, httpx.HTTPStatusError, KeyError) as e:
         raise DatasetsServerException(f"Failed to get dataset info from the datasets server. Error: {str(e)}") from e
@@ -148,7 +152,7 @@ def _is_chat_feature(sub_features):
     )
 
 
-def _render_code_snippet(repo_id: str):
+def _render_code_snippet(repo_id: str, subset: str):
     """Render the code snippet to use feature_mapping to load a dataset and log its records."""
 
     from rich.console import Console, Group
@@ -163,7 +167,7 @@ def _render_code_snippet(repo_id: str):
     """
     code_block = f"""
     # 1. Create new questions, fields, vectors, or metadata properties in the settings
-    settings = rg.Settings.from_hub(repo_id="{repo_id}")
+    settings = rg.Settings.from_hub(repo_id="{repo_id}", subset="{subset}")
     settings.questions.add(rg.TextQuestion(name="new_question", required=True))
     dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
 
@@ -261,8 +265,20 @@ def _define_settings_from_features(
     return settings
 
 
-def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str, str]] = None) -> "Settings":
-    dataset_features = _get_dataset_features(repo_id)
+def build_settings_from_repo_id(
+    repo_id: str,
+    feature_mapping: Optional[Dict[str, str]] = None,
+    subset: Optional[str] = None,
+) -> "Settings":
+    """Build the argilla settings from the features of a dataset.
+
+    Parameters:
+        repo_id (str): The repository ID of the dataset on the hub.
+        feature_mapping (Dict[str, str]): A mapping of dataset features to questions, fields, or metadata properties.
+        subset (str): The subset of the dataset to use. If provided, 'config' should not be provided.
+
+    """
+    dataset_features, validated_subset = _get_dataset_features(repo_id=repo_id, config=subset)
     settings = _define_settings_from_features(dataset_features, feature_mapping)
 
     if not settings.questions:
@@ -275,7 +291,7 @@ def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str
                 values=[0, 1, 2, 3, 4, 5],
             )
         )
-        _render_code_snippet(repo_id)
+        _render_code_snippet(repo_id=repo_id, subset=validated_subset)
 
     settings.questions[0].required = True
     settings.fields[0].required = True
