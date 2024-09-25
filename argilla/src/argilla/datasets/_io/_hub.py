@@ -162,7 +162,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             except ImportDatasetError:
                 from argilla import Settings
 
-                settings = Settings.from_hub(repo_id=repo_id)
+                settings = Settings.from_hub(repo_id=repo_id, subset=subset)
                 dataset = cls.from_hub(
                     repo_id=repo_id,
                     name=name,
