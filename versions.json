@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_custom-field",
+    "title": "docs_custom-field",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_argilla-webhooks",
     "title": "docs_argilla-webhooks",
     "aliases": [],
