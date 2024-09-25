@@ -175,12 +175,12 @@ def _render_code_snippet(repo_id: str, subset: Optional[str] = None):
     # 1. Create new questions, fields, vectors, or metadata properties in the settings
     settings = rg.Settings.from_hub({from_hub_args})
     settings.questions.add(rg.TextQuestion(name="new_question", required=True))
-    dataset = rg.Dataset.from_hub({from_hub_args}", settings=settings)
+    dataset = rg.Dataset.from_hub({from_hub_args}, settings=settings)
 
     # 2. Map the dataset's columns to question, field, or metadata
     settings = rg.Settings.from_hub(
-            {from_hub_args},
-            feature_mapping={{"<column_name>": "question"}},
+        {from_hub_args},
+        feature_mapping={{"<column_name>": "question"}},
     )
     dataset = rg.Dataset.from_hub({from_hub_args}, settings=settings)
     """
