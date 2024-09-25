@@ -21,8 +21,11 @@ These are the section headers that we use:
 ### Fixed
 
 - Fixed `from_hub` with unsupported column names. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
-- Fixed `from_hub` generating extra questions from fields. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
 - Fixed `from_hub` with missing dataset `subset` configuration value. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+
+### Changed
+
+- Changed `from_hub` to only generate fields not questions for strings in dataset. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
 
 ## [2.2.1](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.2.1)
 
