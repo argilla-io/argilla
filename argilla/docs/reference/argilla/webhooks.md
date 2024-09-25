@@ -41,46 +41,20 @@ for webhook in client.webhooks():
 ---
 
 ::: src.argilla.webhooks._resource.Webhook
-    options:
-        heading_level: 4
 
 ::: src.argilla.webhooks._helpers.webhook_listener
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._helpers.get_webhook_server
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._helpers.set_webhook_server
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._handler.WebhookHandler
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._event.WebhookEvent
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._event.DatasetEvent
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._event.RecordEvent
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._event.UserResponseEvent
-    options:
-        heading_level: 4
-        hide: footer
 
