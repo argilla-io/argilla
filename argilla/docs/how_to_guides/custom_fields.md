@@ -1,10 +1,10 @@
 ---
-description: In this section, we will provide a step-by-step guide to show how to create custom fields with HTML and CSS templates.
+description: Learn how to create custom fields using HTML, CSS, and JavaScript templates in Argilla.
 ---
 
 # Custom fields with JavaScript, HTML and CSS templates
 
-This guide provides a step-by-step guide to show how to create custom fields with JavaScript, HTML and CSS templates.
+This guide demonstrates how to create custom fields in Argilla using HTML, CSS, and JavaScript templates.
 
 !!! info "Main Class"
 
@@ -21,13 +21,11 @@ This guide provides a step-by-step guide to show how to create custom fields wit
 
     > Check the [CustomField - Python Reference](../reference/argilla/settings/fields.md#src.argilla.settings._field.CustomField) to see the attributes, arguments, and methods of the `CustomField` class in detail.
 
-## Accessing record information
+## Understanding the Record Object
 
 If you are somewhat familiar with web development and thestructure of resources in Argilla, you might will easiliy be able to grasp the `record` object structure you can access within your custom fields definition.The `record` object is the main object that contains all the information about the resource, like `fields`, `metadata`, etc.
 
-For example, if you want to access the context of a `TextField` with name `text` you can do so by navigating to `record.fields.text`. However, you do need to take into account that depending on the type of resource you are working with, the structure object you are trying to access might vary. In case of a `CustomField` with name `custom`, the field is populated with a dictionary object containing the field's key and value, hence you can access the key by navigating to `record.fields.custom.key`.
-
-## Without advanced mode
+## Basic Mode (advanced_mode=False)
 
 When `advanced_mode=False`, you can use the `template` argument to only pass basic HTML and CSS templates. To render information, we rely on the [handlebars syntax engine](https://handlebarsjs.com/). This engine will convert the content inside the brackets `{{}}` to the values of record's field's object within your template. As described in the [Accessing record information](#accessing-record-information) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data.
 
@@ -124,15 +122,9 @@ Instead of explaining the syntax, let's just show you an example.
     )
     ```
 
-=== "Show metadata in a table"
+## Advanced Mode (advanced_mode=True)
 
-    ```python
-    import argilla as rg
-    ```
-
-## With advanced mode
-
-When `advanced_mode=True`, you can use the `template` argument to pass JavaScript, HTML and CSS templates. In this case, we won't rely on the [handlebars syntax engine](https://handlebarsjs.com/). Instead, you have the full flexibility to use any JavaScript libraries you might need to represent your data.
+When `advanced_mode=True`, you can use the `template` argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript.
 
 ### Minimal example
 
