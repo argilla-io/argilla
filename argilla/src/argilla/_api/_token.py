@@ -2,7 +2,7 @@ import os
 import warnings
 from threading import Lock
 from typing import Optional
-from huggingface_hub.utils import is_google_colab, is_colab_enterprise
+from huggingface_hub.utils._runtime import is_google_colab, is_colab_enterprise
 from argilla._constants import _DEFAULT_API_URL
 
 
