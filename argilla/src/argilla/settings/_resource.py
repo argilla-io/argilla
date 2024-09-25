@@ -272,6 +272,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
         Parameters:
             repo_id (str): The ID of the repository to load the settings from on the Hub.
+            subset (Optional[str]): The subset of the repository to load the settings from.
             feature_mapping (Dict[str, Literal["question", "field", "metadata"]]): A dictionary that maps incoming column names to Argilla attributes.
         """
 
