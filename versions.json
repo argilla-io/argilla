@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_custom-field",
+    "title": "docs_custom-field",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
