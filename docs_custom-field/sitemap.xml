@@ -66,6 +66,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/custom_fields/</loc>
+         <lastmod>2024-09-25</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/dataset/</loc>
          <lastmod>2024-09-25</lastmod>
          <changefreq>daily</changefreq>

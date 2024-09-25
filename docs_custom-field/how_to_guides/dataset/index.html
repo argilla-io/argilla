@@ -1161,6 +1161,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../custom_fields/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Custom fields with HTML and CSS templates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
@@ -2715,7 +2736,8 @@
 <img alt="ChatField" src="../../assets/images/how_to_guides/dataset/chat_field.png" /></p>
 </div>
 <div class="tabbed-block">
-<p>A <code>CustomField</code> allows you to use a custom template for the field. This is useful if you want to use a custom UI for the field. You can use the <code>template</code> argument to pass a string that will be rendered as the field's UI. By default argilla will use a brackets syntax engine for the templates, which converts <code>{{ record.fields.field.key }}</code> to the values of record's field's object. You can also use <code>advanced_mode</code>, which deactivates the above brackets syntax engine and allows you to use custom javascript to render the field.</p>
+<p>A <code>CustomField</code> allows you to use a custom template for the field. This is useful if you want to use a custom UI for the field. You can use the <code>template</code> argument to pass a string that will be rendered as the field's UI.</p>
+<p>By default, <code>advanced_mode=False</code>, which will use a brackets syntax engine for the templates. This engine converts <code>{{record.fields.field.key}}</code> to the values of record's field's object. You can also use <code>advanced_mode=True</code>, which deactivates the above brackets syntax engine and allows you to add custom javascript to your template to render the field.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">rg</span><span class="o">.</span><span class="n">CustomField</span><span class="p">(</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;custom&quot;</span><span class="p">,</span>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Custom&quot;</span><span class="p">,</span>
@@ -2725,6 +2747,10 @@
 </span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Field description&quot;</span><span class="p">,</span>
 </span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="p">)</span>
 </span></code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To learn more about how to create custom fields with HTML and CSS templates, check this <a href="../custom_fields/">how-to guide</a>.</p>
+</div>
 </div>
 </div>
 </div>
