@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -25,34 +25,107 @@ from argilla._models import RecordModel, UserResponseModel, WorkspaceModel, Even
 if TYPE_CHECKING:
     from argilla import Argilla
 
+__all__ = ["RecordEvent", "DatasetEvent", "UserResponseEvent", "WebhookEvent"]
+
+
+class RecordEvent(BaseModel):
+    """
+    A parsed record event.
+
+    Attributes:
+        type (EventType): The type of the event.
+        timestamp (datetime): The timestamp of the event.
+        record (Record): The record of the event.
+    """
+
+    type: EventType
+    timestamp: datetime
+    record: Record
+
+
+class DatasetEvent(BaseModel):
+    """
+    A parsed dataset event.
+
+    Attributes:
+        type (EventType): The type of the event.
+        timestamp (datetime): The timestamp of the event.
+        dataset (Dataset): The dataset of the event.
+    """
+
+    type: EventType
+    timestamp: datetime
+    dataset: Dataset
+
+
+class UserResponseEvent(BaseModel):
+    """
+    A parsed user response event.
+
+    Attributes:
+        type (EventType): The type of the event.
+        timestamp (datetime): The timestamp of the event.
+        response (UserResponse): The user response of the event.
+    """
+
+    type: EventType
+    timestamp: datetime
+    response: UserResponse
+
 
 class WebhookEvent(BaseModel):
+    """
+    A webhook event.
+
+    Attributes:
+        type (EventType): The type of the event.
+        timestamp (datetime): The timestamp of the event.
+        data (dict): The data of the event.
+    """
+
     type: EventType
     timestamp: datetime
     data: dict
 
-    def parsed(self, client: "Argilla") -> dict:
+    def parsed(self, client: "Argilla") -> Union[RecordEvent, DatasetEvent, UserResponseEvent, "WebhookEvent"]:
+        """
+        Parse the webhook event.
+
+        Args:
+            client: The Argilla client.
+
+        Returns:
+            Event: The parsed event.
+
+        """
         resource = self.type.resource
         data = self.data or {}
 
-        arguments = {"type": self.type, "timestamp": self.timestamp}
-
         if resource == "dataset":
             dataset = self._parse_dataset_from_webhook_data(data, client)
-            arguments["dataset"] = dataset
+            return DatasetEvent(
+                type=self.type,
+                timestamp=self.timestamp,
+                dataset=dataset,
+            )
 
         elif resource == "record":
             record = self._parse_record_from_webhook_data(data, client)
-            arguments["record"] = record
+            return RecordEvent(
+                type=self.type,
+                timestamp=self.timestamp,
+                record=record,
+            )
 
         elif resource == "response":
             user_response = self._parse_response_from_webhook_data(data, client)
-            arguments["response"] = user_response
+            return UserResponseEvent(
+                type=self.type,
+                timestamp=self.timestamp,
+                response=user_response,
+            )
 
-        else:
-            arguments["data"] = data
-
-        return arguments
+        return self
 
     @classmethod
     def _parse_dataset_from_webhook_data(cls, data: dict, client: "Argilla") -> Dataset:
@@ -95,3 +168,6 @@ class WebhookEvent(BaseModel):
         )
 
         return user_response
+
+
+Event = Union[RecordEvent, DatasetEvent, UserResponseEvent, WebhookEvent]

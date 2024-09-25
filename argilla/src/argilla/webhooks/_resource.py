@@ -21,13 +21,20 @@ from argilla._resource import Resource
 
 class Webhook(Resource):
     """
-    Webhook resource.
+    The `Webhook` resource. It represents a webhook that can be used to receive events from the Argilla Server.
+
+    Args:
+        url (str): The URL of the webhook endpoint.
+        events (List[EventType]): The events that the webhook is subscribed to.
+        description (Optional[str]): The description of the webhook.
+        _client (Argilla): The client used to interact with the Argilla Server.
+
     """
 
     _model: WebhookModel
     _api: WebhooksAPI
 
-    def __init__(self, url: str, events: List[str], description: Optional[str] = None, _client: Argilla = None):
+    def __init__(self, url: str, events: List[EventType], description: Optional[str] = None, _client: Argilla = None):
         client = _client or Argilla._get_default()
         api = client.api.webhooks
         events = events or []
@@ -38,6 +45,7 @@ class Webhook(Resource):
 
     @property
     def url(self) -> str:
+        """The URL of the webhook."""
         return self._model.url
 
     @url.setter
@@ -46,6 +54,7 @@ class Webhook(Resource):
 
     @property
     def events(self) -> List[EventType]:
+        """The events that the webhook is subscribed to."""
         return self._model.events
 
     @events.setter
@@ -54,6 +63,7 @@ class Webhook(Resource):
 
     @property
     def enabled(self) -> bool:
+        """Whether the webhook is enabled."""
         return self._model.enabled
 
     @enabled.setter
@@ -62,6 +72,7 @@ class Webhook(Resource):
 
     @property
     def description(self) -> Optional[str]:
+        """The description of the webhook."""
         return self._model.description
 
     @description.setter
@@ -70,6 +81,7 @@ class Webhook(Resource):
 
     @property
     def secret(self) -> str:
+        """The secret of the webhook."""
         return self._model.secret
 
     @classmethod
