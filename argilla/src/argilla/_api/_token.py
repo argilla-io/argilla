@@ -88,7 +88,7 @@ def _get_token_from_google_colab() -> Optional[str]:
             _GOOGLE_COLAB_SECRET = None
         except userdata.SecretNotFoundError:
             # Means the user did not define a `ARGILLA_API_URL` and `ARGILLA_API_KEY` secret => warn
-            warnings.warn("\nThe secrets `ARGILLA_API_URL` and`ARGILLA_API_KEY` do not exist in your Colab secrets.")
+            warnings.warn("\nThe secrets `ARGILLA_API_URL` and `ARGILLA_API_KEY` do not exist in your Colab secrets.")
             _GOOGLE_COLAB_SECRET = None
         except ColabError as e:
             # Something happen but we don't know what => recommend to open a GitHub issue
