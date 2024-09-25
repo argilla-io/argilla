@@ -8,5 +8,5 @@ data:
   hosts: |
     127.0.0.1 localhost
     ::1 localhost
-    {{ .Values.configmap.minikubeIP }} {{ .Values.ingress.host }}
+    {{ .Values.argilla.configmap.minikubeIP }} {{ .Values.argilla.ingress.host }}
 {{- end }}

@@ -37,6 +37,20 @@ helm repo add elastic https://helm.elastic.co
 helm repo update
 ```
 
+## Minikube
+> Assumes you have Docker Desktop installed
+```bash
+minikube stop
+minikube delete
+minikube config set memory 3g
+minikube config set cpus 2
+minikube start
+```
+## Installing ECK
+As we want to use the operator to manage our Elasticsearch cluster, we need to install the ECK operator.
+```bash
+helm install elasticsearch-operator elastic/eck --namespace elastic-system --create-namespace
+```
 ## Installing the Chart
 
 After adding the repository, you can install the chart with the release name `my-argilla-server`:

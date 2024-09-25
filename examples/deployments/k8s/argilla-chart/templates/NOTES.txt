@@ -7,48 +7,56 @@ To learn more about the release, try:
   $ helm status {{ .Release.Name }}
   $ helm get all {{ .Release.Name }}
 
-{{- if .Values.argilla.ingress.enabled }}
-You can access the Argilla server at:
-  http://{{ .Values.argilla.ingress.host }}
-{{- else }}
-To access the Argilla server, run these commands:
 
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "argilla.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 6900:6900
+Argilla:
+
+{{- if .Values.argilla.ingress.enabled }}
+  You can access the Argilla server at: http://{{ .Values.argilla.ingress.host }}
+{{- else }}
+  To access the Argilla server, run these commands:
+  $ export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "argilla.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  $ kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 6900:6900
 
 Then access the Argilla server at http://localhost:6900
 {{- end }}
+{{- if .Values.argilla.persistence.enabled }}
+  Persistence is enabled for Argilla.
+  Your Argilla data will be stored in a Persistent Volume Claim named: {{ .Release.Name }}-argilla-pvc
+  To find the actual storage location of your Argilla data, run the following command:
+  $ kubectl get pvc {{ .Release.Name }}-argilla-pvc -o jsonpath="{.spec.volumeName}"
+  $ kubectl get pv <volume-name> -o jsonpath="{.spec.hostPath.path}"
+{{- end }}
+
+
+Elasticsearch:
+
 
 {{- if .Values.elasticsearch.useOperator }}
-Elasticsearch is running as a dependency of this chart. You can access it at:
+  Elasticsearch is running as a dependency of this chart. You can access it at:
   http://{{ .Release.Name }}-elasticsearch:9200
+  {{- if .Values.elasticsearch.persistence.enabled }}
+  Persistence is enabled for Elasticsearch.
+  Your Elasticsearch data will be stored in a Persistent Volume Claim named: {{ .Release.Name }}-elasticsearch-pvc
+  {{- end }}
 {{- else }}
-Using external Elasticsearch at:
-  http://{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}
+  Using external Elasticsearch at: http://{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}
 {{- end }}
 
-{{- if .Values.argilla.persistence.enabled }}
-Persistence for Argilla is enabled. Your Argilla data will be stored in a Persistent Volume Claim named:
-  {{ .Release.Name }}-argilla-pvc
-{{- end }}
 
-{{- if .Values.elasticsearch.persistence.enabled }}
-Persistence for Elasticsearch is enabled. Your Elasticsearch data will be stored in a Persistent Volume Claim named:
-  {{ .Release.Name }}-elasticsearch-pvc
-{{- end }}
+Redis:
 
 {{- if .Values.redis.enabled }}
-Redis is running as a dependency of this chart. You can access it at:
-  {{ .Release.Name }}-redis-master:6379
+  Redis is running as a dependency of this chart. You can access it at: {{ .Release.Name }}-redis-master:6379
+  {{- if .Values.redis.master.persistence.enabled }}
+  Persistence is enabled for Redis.
+  Your Redis data will be stored in a Persistent Volume Claim named: {{ .Release.Name }}-redis-pvc
+  {{- end }}
 {{- else }}
-Using external Redis at:
-  {{ .Values.externalRedis.host }}:{{ .Values.externalRedis.port }}
+  Using external Redis at: {{ .Values.externalRedis.host }}:{{ .Values.externalRedis.port }}
 {{- end }}
 
-{{- if .Values.redis.master.persistence.enabled }}
-Persistence for Redis is enabled. Your Redis data will be stored in a Persistent Volume Claim named:
-  {{ .Release.Name }}-redis-pvc
-{{- end }}
 {{- if and (not .Values.redis.master.persistence.enabled) (not .Values.elasticsearch.persistence.enabled) (not .Values.argilla.persistence.enabled)}}
-Persistence is disabled. Your data will not be preserved across pod restarts.
+  Persistence is disabled. Your data will not be preserved across pod restarts.
 {{- end }}
+
+
