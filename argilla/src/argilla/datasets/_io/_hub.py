@@ -139,7 +139,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         from huggingface_hub import snapshot_download
 
         if name is None:
-            name = repo_id.replace("/", "_")
+            name = Dataset._sanitize_name(repo_id)
 
         if settings is not None:
             dataset = cls(name=name, settings=settings)
@@ -200,7 +200,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             if ".responses" in column or ".suggestion" in column:
                 columns_map[column] = column.lower()
             else:
-                columns_map[column] = dataset.settings._curated_settings_name(column)
+                columns_map[column] = dataset.settings._sanitize_settings_name(column)
 
         hf_dataset = hf_dataset.rename_columns(columns_map)
 

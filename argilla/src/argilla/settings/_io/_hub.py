@@ -210,7 +210,7 @@ def _define_settings_from_features(
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
 
-        name = Settings._curated_settings_name(name)
+        name = Settings._sanitize_settings_name(name)
 
         if not Settings._is_valid_name(name):
             warnings.warn(f"Feature '{name}' has an invalid name. Skipping.")
