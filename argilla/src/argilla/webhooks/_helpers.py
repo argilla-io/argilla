@@ -24,6 +24,8 @@ from argilla.webhooks._resource import Webhook
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
+__all__ = ["webhook_listener", "get_webhook_server", "set_webhook_server"]
+
 
 def _compute_default_webhook_server_url() -> str:
     """
@@ -56,41 +58,6 @@ def _webhook_url_for_func(func: Callable) -> str:
     return f"{webhook_server_url}/{func.__name__}"
 
 
-def get_webhook_server() -> "FastAPI":
-    """
-    Get the webhook server.
-
-    Returns:
-        FastAPI: The webhook server.
-
-    """
-    from fastapi import FastAPI
-
-    global _server
-    if not _server:
-        _server = FastAPI()
-    return _server
-
-
-def set_webhook_server(app: "FastAPI"):
-    """
-    Set the webhook server. It can only be set once.
-
-    Parameters:
-        app (FastAPI): The webhook server.
-
-    """
-    global _server
-
-    if _server:
-        raise ValueError("Server already set")
-
-    _server = app
-
-
-_server: Optional["FastAPI"] = None
-
-
 def webhook_listener(
     events: Union[str, List[str]],
     description: Optional[str] = None,
@@ -98,6 +65,21 @@ def webhook_listener(
     server: Optional["FastAPI"] = None,
     raw_event: bool = False,
 ) -> Callable:
+    """
+    Decorator to create a webhook listener for a function.
+
+    Parameters:
+        events (Union[str, List[str]]): The events to listen to.
+        description (Optional[str]): The description of the webhook.
+        client (Optional[Argilla]): The Argilla client to use. Defaults to the default client.
+        server (Optional[FastAPI]): The FastAPI server to use. Defaults to the default server.
+        raw_event (bool): Whether to pass the raw event to the function. Defaults to False.
+
+    Returns:
+        Callable: The decorated function.
+
+    """
+
     client = client or rg.Argilla._get_default()
     server = server or get_webhook_server()
 
@@ -130,3 +112,38 @@ def webhook_listener(
         return request_handler
 
     return wrapper
+
+
+def get_webhook_server() -> "FastAPI":
+    """
+    Get the current webhook server. If it does not exist, it will create one.
+
+    Returns:
+        FastAPI: The webhook server.
+
+    """
+    from fastapi import FastAPI
+
+    global _server
+    if not _server:
+        _server = FastAPI()
+    return _server
+
+
+def set_webhook_server(app: "FastAPI"):
+    """
+    Set the webhook server. This should only be called once.
+
+    Parameters:
+        app (FastAPI): The webhook server.
+
+    """
+    global _server
+
+    if _server:
+        raise ValueError("Server already set")
+
+    _server = app
+
+
+_server: Optional["FastAPI"] = None
