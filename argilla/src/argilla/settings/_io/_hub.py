@@ -275,7 +275,6 @@ def build_settings_from_repo_id(
     Parameters:
         repo_id (str): The repository ID of the dataset on the hub.
         feature_mapping (Dict[str, str]): A mapping of dataset features to questions, fields, or metadata properties.
-        config (str): The configuration of the dataset to use. If provided, 'subset' should not be provided.
         subset (str): The subset of the dataset to use. If provided, 'config' should not be provided.
 
     """
