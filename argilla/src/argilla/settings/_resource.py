@@ -417,11 +417,6 @@ class Settings(DefaultSettingsMixin, Resource):
     def _curated_settings_name(cls, name: str) -> str:
         """Curate the name of the settings"""
 
-        for ending in [".sugggestions", ".responses"]:
-            if name.endswith(ending):
-                name = name[: -len(ending)]
-                break
-
         for char in [" ", ":", ".", "&", "?", "!"]:
             name = name.replace(char, "_")
 
