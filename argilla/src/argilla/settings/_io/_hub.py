@@ -279,10 +279,7 @@ def build_settings_from_repo_id(
         subset (str): The subset of the dataset to use. If provided, 'config' should not be provided.
 
     """
-    if config and subset:
-        raise SettingsError("Only one of 'config' or 'subset' can be provided.")
-
-    dataset_features = _get_dataset_features(repo_id=repo_id, config=config or subset)
+    dataset_features = _get_dataset_features(repo_id=repo_id, config=subset)
     settings = _define_settings_from_features(dataset_features, feature_mapping)
 
     if not settings.questions:
