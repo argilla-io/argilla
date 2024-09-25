@@ -16,17 +16,15 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
-
 ### Added
 
 - Added filtering by `name`, and `status` support to endpoint `GET /api/v1/me/datasets`. ([#5374](https://github.com/argilla-io/argilla/pull/5374))
 - Added new endpoints to create, update, ping and delete webhooks. ([#5453](https://github.com/argilla-io/argilla/pull/5453))
-- Added new webhook events when responses are created, updated, deleted or upserted. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
+- Added new webhook events when responses are created, updated, deleted. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 - Added new webhook events when datasets are created, updated, deleted or published. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 - Added new webhook events when records are created, updated, deleted or completed. ([#5489](https://github.com/argilla-io/argilla/pull/5489))
 
-## [2.2.0]()
+## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 
 ### Added
 
