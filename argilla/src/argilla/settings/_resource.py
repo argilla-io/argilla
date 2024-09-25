@@ -275,7 +275,7 @@ class Settings(DefaultSettingsMixin, Resource):
             feature_mapping (Dict[str, Literal["question", "field", "metadata"]]): A dictionary that maps incoming column names to Argilla attributes.
         """
 
-        settings = build_settings_from_repo_id(repo_id=repo_id, feature_mapping=feature_mapping, **kwargs)
+        settings = build_settings_from_repo_id(repo_id=repo_id, feature_mapping=feature_mapping, subset=subset)
         return settings
 
     def __eq__(self, other: "Settings") -> bool:
