@@ -27,8 +27,6 @@ def test_define_settings_from_features_text():
     assert isinstance(settings.fields[0], rg.TextField)
     assert settings.fields[0].name == "text_column"
     assert len(settings.questions) == 0
-    # assert isinstance(settings.questions[0], rg.RatingQuestion)
-    # assert settings.questions[0].name == "quality"
 
 
 def test_define_settings_from_features_image():
@@ -38,8 +36,6 @@ def test_define_settings_from_features_image():
     assert len(settings.fields) == 1
     assert isinstance(settings.fields[0], rg.ImageField)
     assert settings.fields[0].name == "image_column"
-    # assert len(settings.questions) == 0
-    # assert settings.questions[0].name == "quality"
 
 
 @pytest.mark.parametrize(
