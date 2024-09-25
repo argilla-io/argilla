@@ -12,19 +12,30 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from datetime import datetime
-from uuid import UUID
-
 import pytest
-from httpx import AsyncClient
 
+from uuid import UUID
+from datetime import datetime
+from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
-from argilla_server.enums import ResponseStatus, DatasetDistributionStrategy, RecordStatus
 from argilla_server.models import Response, User
+from argilla_server.jobs.queues import HIGH_QUEUE
+from argilla_server.webhooks.v1.enums import RecordEvent, ResponseEvent
+from argilla_server.webhooks.v1.responses import build_response_event
+from argilla_server.webhooks.v1.records import build_record_event
+from argilla_server.enums import ResponseStatus, DatasetDistributionStrategy, RecordStatus
 
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, SpanQuestionFactory, TextQuestionFactory
+from tests.factories import (
+    DatasetFactory,
+    RecordFactory,
+    ResponseFactory,
+    SpanQuestionFactory,
+    TextQuestionFactory,
+    WebhookFactory,
+)
 
 
 @pytest.mark.asyncio
@@ -625,3 +636,147 @@ class TestUpdateResponse:
 
         assert resp.status_code == 200
         assert record.status == RecordStatus.pending
+
+    async def test_update_response_enqueue_webhook_response_updated_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner: User, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 2,
+            },
+        )
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+
+        response = await ResponseFactory.create(
+            values={
+                "text-question": {
+                    "value": "Hello",
+                },
+            },
+            status=ResponseStatus.submitted,
+            user=owner,
+            record=record,
+        )
+
+        webhook = await WebhookFactory.create(events=[ResponseEvent.updated])
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "text-question": {
+                        "value": "Update value",
+                    },
+                },
+                "status": ResponseStatus.submitted,
+            },
+        )
+
+        assert resp.status_code == 200
+
+        event = await build_response_event(db, ResponseEvent.updated, response)
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == ResponseEvent.updated
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)
+
+    async def test_update_response_enqueue_webhook_record_updated_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner: User, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            },
+        )
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+
+        response = await ResponseFactory.create(
+            values={
+                "text-question": {
+                    "value": "Hello",
+                },
+            },
+            status=ResponseStatus.draft,
+            user=owner,
+            record=record,
+        )
+
+        webhook = await WebhookFactory.create(events=[RecordEvent.updated])
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "text-question": {
+                        "value": "Update value",
+                    },
+                },
+                "status": ResponseStatus.submitted,
+            },
+        )
+
+        assert resp.status_code == 200
+
+        event = await build_record_event(db, RecordEvent.updated, record)
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.updated
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)
+
+    async def test_update_response_enqueue_webhook_record_completed_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner: User, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 1,
+            },
+        )
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"field-a": "Hello"}, dataset=dataset)
+
+        response = await ResponseFactory.create(
+            values={
+                "text-question": {
+                    "value": "Hello",
+                },
+            },
+            status=ResponseStatus.draft,
+            user=owner,
+            record=record,
+        )
+
+        webhook = await WebhookFactory.create(events=[RecordEvent.completed])
+
+        resp = await async_client.put(
+            self.url(response.id),
+            headers=owner_auth_header,
+            json={
+                "values": {
+                    "text-question": {
+                        "value": "Update value",
+                    },
+                },
+                "status": ResponseStatus.submitted,
+            },
+        )
+
+        assert resp.status_code == 200
+
+        event = await build_record_event(db, RecordEvent.completed, record)
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.completed
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)
