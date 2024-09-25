@@ -145,7 +145,7 @@ new_dataset.create()
 
 ### Fields
 
-The fields in a dataset consist of one or more data items requiring annotation. Currently, Argilla supports plain text and markdown through the `TextField` and images through the `ImageField`, though we plan to introduce additional field types in future updates.
+The fields in a dataset consist of one or more data items requiring annotation. Currently, Argilla supports plain text and markdown through the `TextField`, images through the `ImageField`, chat formatted data through the `ChatField` and full custom templates through our `CustomField`.
 
 !!! note
     The order of the fields in the UI follows the order in which these are added to the fields attribute in the Python SDK.
@@ -189,6 +189,20 @@ The fields in a dataset consist of one or more data items requiring annotation. 
     )
     ```
     ![ChatField](../assets/images/how_to_guides/dataset/chat_field.png)
+
+=== "Custom"
+    A `CustomField` allows you to use a custom template for the field. This is useful if you want to use a custom UI for the field. You can use the `template` argument to pass a string that will be rendered as the field's UI. By default argilla will use a brackets syntax engine for the templates, which converts `{{ record.fields.field.key }}` to the values of record's field's object. You can also use `advanced_mode`, which deactivates the above brackets syntax engine and allows you to use custom javascript to render the field.
+
+    ```python
+    rg.CustomField(
+        name="custom",
+        title="Custom",
+        template="<div>{{record.fields.custom.key}}</div>",
+        advanced_mode=False,
+        required=True,
+        description="Field description",
+    )
+    ```
 
 ### Questions
 
