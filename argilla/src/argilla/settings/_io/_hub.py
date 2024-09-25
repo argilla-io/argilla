@@ -19,6 +19,21 @@ from typing import Any, Dict, TYPE_CHECKING, Union, List, Optional
 
 from argilla._exceptions._hub import DatasetsServerException
 from argilla._exceptions._settings import SettingsError
+from argilla.settings._field import (
+    ImageField,
+    TextField,
+    ChatField,
+)
+from argilla.settings._question import (
+    LabelQuestion,
+    TextQuestion,
+    RatingQuestion,
+)
+from argilla.settings._metadata import (
+    TermsMetadataProperty,
+    IntegerMetadataProperty,
+    FloatMetadataProperty,
+)
 
 if TYPE_CHECKING:
     from argilla import Settings
@@ -114,8 +129,11 @@ def _map_attribute_type(attribute_type):
         return AttributeType.FIELD
     elif attribute_type == "metadata":
         return AttributeType.METADATA
+    elif attribute_type is None:
+        return None
     else:
         warnings.warn(f"Unsupported attribute type: {attribute_type}")
+        return None
 
 
 def _is_chat_feature(sub_features):
@@ -131,32 +149,46 @@ def _is_chat_feature(sub_features):
 
 
 def _render_code_snippet(repo_id: str):
-    """Render the code snippet to use feature_mapping load a dataset and log its records."""
-    from rich.console import Console
-    from rich.syntax import Syntax
+    """Render the code snippet to use feature_mapping to load a dataset and log its records."""
 
+    from rich.console import Console, Group
+    from rich.syntax import Syntax
+    from rich.panel import Panel
+    from rich import box
+
+    title = "Customize the dataset settings"
     message = """
-    No questions found in the dataset features. A default question 'quality' has been added.
+    No questions were found in the dataset's features. A default question for 'quality' has been added.
     If you want to customize the dataset differently, you can do the following:
     """
     code_block = f"""
-    # 1. map the dataset columns to question, field, vector, or metadata
+    # 1. Create new questions, fields, vectors, or metadata properties in the settings
+    settings = rg.Settings.from_hub(repo_id="{repo_id}")
+    settings.questions.add(rg.TextQuestion(name="new_question", required=True))
+    dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
+    
+    # 2. Map the dataset's columns to question, field, or metadata
     settings = rg.Settings.from_hub(
         repo_id="{repo_id}",
-        feature_mapping={"{"}"<column_name>": "question"{"}"},
+        feature_mapping={{"<column_name>": "question"}},
     )
-    # 2. or, create new questions, fields, vectors, or metadata properties
-    settings.questions = [rg.TextQuestion(name="new_question", required=True)]
     dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
     """
 
     console = Console()
-    code_block = Syntax(code_block, "python", theme="github-dark", line_numbers=False, indent_guides=False)
-    console.print(message, code_block)
+    console.print(
+        Panel(
+            Group(Syntax(message, "markdown"), Syntax(code_block, "python", theme="github-dark", line_numbers=False)),
+            title=title,
+            box=box.SQUARE,
+            width=100,
+            expand=False,
+        )
+    )
 
 
 def _define_settings_from_features(
-    features: Union[List[Dict], Dict[str, Any]], feature_mapping: Optional[Dict[str, str]], repo_id: str
+    features: Union[List[Dict], Dict[str, Any]], feature_mapping: Optional[Dict[str, str]]
 ) -> "Settings":
     """Define the argilla settings from the features of a dataset.
 
@@ -167,18 +199,7 @@ def _define_settings_from_features(
         rg.Settings: The settings defined from the features.
     """
 
-    from argilla import (
-        ImageField,
-        LabelQuestion,
-        TextQuestion,
-        RatingQuestion,
-        Settings,
-        TextField,
-        ChatField,
-        TermsMetadataProperty,
-        IntegerMetadataProperty,
-        FloatMetadataProperty,
-    )
+    from argilla import Settings
 
     fields = []
     questions = []
@@ -232,8 +253,20 @@ def _define_settings_from_features(
         else:
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
-    if not questions:
-        questions.append(
+    settings = Settings(fields=fields, questions=questions, metadata=metadata)
+
+    if not settings.fields:
+        raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
+
+    return settings
+
+
+def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str, str]] = None) -> "Settings":
+    dataset_features = _get_dataset_features(repo_id)
+    settings = _define_settings_from_features(dataset_features, feature_mapping)
+
+    if not settings.questions:
+        settings.questions.add(
             RatingQuestion(
                 name="quality",
                 title="Quality",
@@ -244,17 +277,7 @@ def _define_settings_from_features(
         )
         _render_code_snippet(repo_id)
 
-    if not fields:
-        raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
-
-    questions[0].required = True
-    fields[0].required = True
-
-    settings = Settings(fields=fields, questions=questions, metadata=metadata)
+    settings.questions[0].required = True
+    settings.fields[0].required = True
 
     return settings
-
-
-def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str, str]] = None) -> "Settings":
-    dataset_features = _get_dataset_features(repo_id)
-    return _define_settings_from_features(dataset_features, feature_mapping, repo_id)
