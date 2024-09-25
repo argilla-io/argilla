@@ -170,7 +170,7 @@ def _render_code_snippet(repo_id: str):
     settings = rg.Settings.from_hub(repo_id="{repo_id}")
     settings.questions.add(rg.TextQuestion(name="new_question", required=True))
     dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
-    
+
     # 2. Map the dataset's columns to question, field, or metadata
     settings = rg.Settings.from_hub(
         repo_id="{repo_id}",
@@ -214,7 +214,7 @@ def _define_settings_from_features(
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
 
-        name = Settings._curated_settings_name(name)
+        name = Settings._sanitize_settings_name(name)
 
         if not Settings._is_valid_name(name):
             warnings.warn(f"Feature '{name}' has an invalid name. Skipping.")
