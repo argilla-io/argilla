@@ -138,6 +138,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         """
         from datasets import load_dataset
         from huggingface_hub import snapshot_download
+        from argilla import Dataset
 
         if name is None:
             name = Dataset._sanitize_name(repo_id)
