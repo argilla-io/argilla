@@ -16,6 +16,14 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.2.2](https://github.com/argilla-io/argilla/compare/v2.2.1...v2.2.2)
+
+### Fixed
+
+- Fixed `from_hub` with unsupported column names. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+- Fixed `from_hub` generating extra questions from fields. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+- Fixed `from_hub` with missing dataset `subset` configuration value. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+
 ## [2.2.1](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.2.1)
 
 ### Fixed
