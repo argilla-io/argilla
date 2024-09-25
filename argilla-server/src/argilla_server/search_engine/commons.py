@@ -20,7 +20,7 @@ from uuid import UUID
 from elasticsearch8 import AsyncElasticsearch
 from opensearchpy import AsyncOpenSearch
 
-from argilla_server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla_server.models import (
     Dataset,
     Field,
@@ -106,6 +106,21 @@ def es_ids_query(ids: List[str]) -> dict:
     return {"ids": {"values": ids}}
 
 
+def es_simple_query_string(field_name: str, query: str) -> dict:
+    # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html
+    return {
+        "simple_query_string": {
+            "query": query,
+            "fields": [field_name],
+            "default_operator": "AND",
+            "analyze_wildcard": False,
+            "auto_generate_synonyms_phrase_query": False,
+            "fuzzy_max_expansions": 10,
+            "fuzzy_transpositions": False,
+        }
+    }
+
+
 def es_nested_query(path: str, query: dict) -> dict:
     return {
         "nested": {
@@ -150,7 +165,7 @@ def es_mapping_for_field(field: Field) -> dict:
 
     if field.is_text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
-    if field.is_chat:
+    elif field.is_chat:
         es_field = {
             "type": "object",
             "properties": {
@@ -159,7 +174,15 @@ def es_mapping_for_field(field: Field) -> dict:
             },
         }
         return {es_field_for_record_field(field.name): es_field}
-    elif field.is_image or field.is_custom:
+    elif field.is_custom:
+        return {
+            es_field_for_record_field(field.name): {
+                "type": "object",
+                "dynamic": True,
+                "properties": {},
+            }
+        }
+    elif field.is_image:
         return {
             es_field_for_record_field(field.name): {
                 "type": "object",
@@ -632,17 +655,19 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if isinstance(text, str):
             text = TextQuery(q=text)
 
-        if not text.field:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html
-            field_names = [
-                es_field_for_record_field(field.name)
-                for field in dataset.fields
-                if field.settings.get("type") == FieldType.text
-            ]
-            return {"multi_match": {"query": text.q, "type": "cross_fields", "fields": field_names, "operator": "and"}}
+        if text.field:
+            field = dataset.field_by_name(text.field)
+            if field is None:
+                raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
+
+            if field.is_chat or field.is_custom:
+                field_name = f"{text.field}.*"
+            else:
+                field_name = text.field
         else:
-            # See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-query.html
-            return {"match": {es_field_for_record_field(text.field): {"query": text.q, "operator": "and"}}}
+            field_name = "*"
+
+        return es_simple_query_string(es_field_for_record_field(field_name), query=text.q)
 
     @staticmethod
     def _mapping_for_fields(fields: List[Field]) -> dict:

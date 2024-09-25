@@ -61,7 +61,6 @@ class User(Resource):
 
         Returns:
             User: The initialized user object
-        ```
         """
         client = client or Argilla._get_default()
         super().__init__(client=client, api=client.api.users)
@@ -83,7 +82,6 @@ class User(Resource):
 
         Returns:
             User: The user that was created in Argilla.
-
         """
         model_create = self.api_model()
         model = self._api.create(model_create)

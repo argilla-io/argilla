@@ -25,4 +25,3 @@ Besides the common environment variables defined in docs, this Docker image prov
 - `API_KEY`: If provided, the owner api key. When `USERNAME` and `PASSWORD` are provided and `API_KEY` is empty, a new random value will be generated (Default: `""`).
 
 - `REINDEX_DATASET`: If `true` or `1`, the datasets will be reindexed in the search engine. This is needed when some search configuration changed or data must be refreshed (Default: `0`).
-

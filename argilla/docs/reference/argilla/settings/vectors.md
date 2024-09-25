@@ -7,7 +7,7 @@ Vector fields in Argilla are used to define the vector form of a record that wil
 
 ## Usage Examples
 
-To define a vector field, instantiate the `VectorField` class with a name and dimenstions, then pass it to the `vectors` parameter of the `Settings` class.
+To define a vector field, instantiate the `VectorField` class with a name and dimensions, then pass it to the `vectors` parameter of the `Settings` class.
 
 ```python
 settings = rg.Settings(
@@ -28,9 +28,4 @@ settings = rg.Settings(
 
 ---
 
-## `rg.VectorField`
-
 ::: src.argilla.settings._vector.VectorField
-    options:
-        heading_level: 3
-        show_root_toc_entry: false

@@ -16,22 +16,25 @@
   -->
 
 <template>
-  <div v-if="metrics.hasMetrics">
+  <div>
     <ul class="my-progress__list">
-      <li
-        v-for="(status, index) in progressItems"
-        :key="index"
-        class="my-progress__list__item"
-      >
-        <span>
-          <span
-            class="color-bullet"
-            :style="{ backgroundColor: status.color }"
-          ></span>
-          <label class="my-progress__list__name" v-text="status.name" />
-        </span>
-        <span class="my-progress__list__counter" v-text="status.value" />
-      </li>
+      <template v-if="!metrics.hasMetrics">
+        <StatusCounterSkeleton
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="my-progress__status--skeleton"
+        />
+      </template>
+      <template v-else>
+        <StatusCounter
+          v-for="(status, index) in progressItems"
+          :key="index"
+          class="my-progress__status"
+          :color="status.color"
+          :name="status.name"
+          :value="status.value"
+        />
+      </template>
     </ul>
     <p class="team-progress__title" v-text="$t('metrics.progress.team')" />
     <TeamProgress
@@ -87,19 +90,19 @@ export default {
       ];
     },
   },
-  setup(props) {
-    return useAnnotationProgressViewModel(props);
+  setup() {
+    return useAnnotationProgressViewModel();
   },
 };
 </script>
 
 <style lang="scss" scoped>
-$bullet-size: 8px;
+$statusCounterMinHeight: 60px;
 .my-progress {
   display: flex;
   align-items: center;
   gap: $base-space * 4;
-  color: $black-54;
+  color: var(--fg-secondary);
   padding: $base-space * 3 0;
   &__donut {
     flex-shrink: 0;
@@ -108,43 +111,27 @@ $bullet-size: 8px;
 .team-progress {
   &__title {
     text-transform: uppercase;
-    color: $black-54;
+    color: var(--fg-secondary);
     font-weight: 500;
   }
 }
-.color-bullet {
-  display: inline-flex;
-  height: $bullet-size;
-  width: $bullet-size;
-  margin-right: 4px;
-  border-radius: $border-radius-rounded;
-}
 
-.my-progress__list {
-  display: flex;
-  list-style: none;
-  gap: $base-space;
-  padding-left: 0;
-  margin-top: 0;
-  margin-bottom: $base-space * 3;
-  &__item {
-    background: $black-3;
+.my-progress {
+  &__list {
     display: flex;
-    flex-direction: column;
+    list-style: none;
     gap: $base-space;
-    padding: $base-space;
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: $base-space * 3;
+  }
+  &__status.status-counter {
+    flex-direction: column;
     width: 100%;
-    border-radius: $border-radius;
   }
-  &__name {
-    text-transform: capitalize;
-    color: $black-54;
-    @include font-size(12px);
-  }
-  &__counter {
-    font-weight: 600;
-    color: $black-87;
-    @include font-size(14px);
+  &__status--skeleton {
+    @extend .my-progress__status;
+    height: $statusCounterMinHeight;
   }
 }
 </style>

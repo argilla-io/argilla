@@ -33,11 +33,13 @@ class ImageFieldSettings(BaseModel):
 
 class ChatFieldSettings(BaseModel):
     type: Literal["chat"] = "chat"
+    use_markdown: Optional[bool] = True
 
 
 class CustomFieldSettings(BaseModel):
     type: Literal["custom"] = "custom"
     template: str
+    advanced_mode: Optional[bool] = False
 
 
 FieldSettings = Annotated[

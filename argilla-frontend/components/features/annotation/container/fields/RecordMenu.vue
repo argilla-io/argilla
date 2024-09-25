@@ -68,10 +68,10 @@ export default {
 .record-menu {
   &__header {
     padding: 0;
-    color: $black-54;
+    color: var(--fg-secondary);
     margin-right: -$base-space;
     &:hover {
-      color: $black-87;
+      color: var(--fg-primary);
     }
   }
   &__content {
@@ -82,7 +82,7 @@ export default {
       border-radius: $border-radius-s;
       transition: background-color 0.3s ease;
       &:hover {
-        background: $black-4;
+        background: var(--bg-opacity-4);
         cursor: pointer;
         transition: background-color 0.3s ease;
       }
@@ -94,6 +94,11 @@ export default {
       padding: $base-space;
       font-weight: normal;
       @include truncate;
+    }
+  }
+  :deep(.dropdown__header) {
+    &:hover {
+      background: none;
     }
   }
   :deep(.dropdown__content) {

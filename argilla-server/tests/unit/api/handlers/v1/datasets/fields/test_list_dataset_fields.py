@@ -63,7 +63,9 @@ class TestListDatasetFields:
     async def test_list_dataset_fields_with_chat_field(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create()
         chat_field_a = await ChatFieldFactory.create(dataset=dataset)
-        chat_field_b = await ChatFieldFactory.create(dataset=dataset)
+        chat_field_b = await ChatFieldFactory.create(
+            dataset=dataset, settings={"type": FieldType.chat, "use_markdown": False}
+        )
 
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
@@ -75,7 +77,7 @@ class TestListDatasetFields:
                     "name": chat_field_a.name,
                     "title": chat_field_a.title,
                     "required": False,
-                    "settings": {"type": FieldType.chat},
+                    "settings": {"type": FieldType.chat, "use_markdown": True},
                     "dataset_id": str(dataset.id),
                     "inserted_at": chat_field_a.inserted_at.isoformat(),
                     "updated_at": chat_field_a.updated_at.isoformat(),
@@ -85,7 +87,7 @@ class TestListDatasetFields:
                     "name": chat_field_b.name,
                     "title": chat_field_b.title,
                     "required": False,
-                    "settings": {"type": FieldType.chat},
+                    "settings": {"type": FieldType.chat, "use_markdown": False},
                     "dataset_id": str(dataset.id),
                     "inserted_at": chat_field_b.inserted_at.isoformat(),
                     "updated_at": chat_field_b.updated_at.isoformat(),

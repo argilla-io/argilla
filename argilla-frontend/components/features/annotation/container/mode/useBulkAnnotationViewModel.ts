@@ -25,7 +25,7 @@ export const useBulkAnnotationViewModel = ({
   const isSubmitting = ref(false);
   const bulkAnnotationUseCase = useResolve(BulkAnnotationUseCase);
 
-  const t = useTranslate();
+  const { t } = useTranslate();
 
   const checkIfSomeFilterIsActive = (criteria: RecordCriteria) => {
     return (
@@ -61,7 +61,7 @@ export const useBulkAnnotationViewModel = ({
       if (!allSuccessful) {
         notification.notify({
           message: t("some_records_failed_to_annotate"),
-          type: "error",
+          type: "danger",
         });
       } else if (isAffectingAllRecords) {
         notification.notify({

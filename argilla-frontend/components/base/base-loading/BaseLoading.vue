@@ -81,7 +81,7 @@ export default {
 
 <style lang="scss" scoped>
 .loading {
-  background: $bg;
+  background: var(--bg-solid-grey-1);
   height: 100vh;
   width: 100vw;
   position: absolute;
@@ -107,13 +107,13 @@ export default {
 
 @keyframes letterflash {
   0% {
-    fill: #ff675f;
+    fill: hsla(0, 92%, 60%, 40%);
   }
   50% {
-    fill: #f73d3d;
+    fill: hsl(0, 92%, 60%);
   }
   100% {
-    fill: #ff675f;
+    fill: hsla(0, 92%, 60%, 40%);
   }
 }
 .one,
@@ -123,7 +123,7 @@ export default {
 .five,
 .six,
 .seven {
-  animation: letterflash 2s linear infinite;
+  animation: letterflash 1.8s linear infinite;
   animation-fill-mode: backwards;
 }
 
@@ -131,7 +131,7 @@ export default {
   animation-delay: 0.5s;
 }
 .six {
-  animation-delay: 0.5s;
+  animation-delay: 0.4s;
 }
 .five {
   animation-delay: 0.4s;

@@ -15,14 +15,15 @@
 from argilla import (
     Argilla,
     Dataset,
+    ChatField,
     Settings,
+    TermsMetadataProperty,
     TextField,
     ImageField,
     RatingQuestion,
     LabelQuestion,
-    Workspace,
     VectorField,
-    TermsMetadataProperty,
+    Workspace,
 )
 from argilla.settings._task_distribution import TaskDistribution
 
@@ -32,7 +33,11 @@ class TestCreateDatasets:
         dataset = Dataset(
             name=dataset_name,
             settings=Settings(
-                fields=[TextField(name="test_field"), ImageField(name="image")],
+                fields=[
+                    TextField(name="test_field"),
+                    ImageField(name="image"),
+                    ChatField(name="chat", use_markdown=False),
+                ],
                 questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
             ),
         )
@@ -44,6 +49,23 @@ class TestCreateDatasets:
         created_dataset = client.datasets(name=dataset_name)
         assert created_dataset.settings == dataset.settings
         assert created_dataset.settings.distribution == TaskDistribution(min_submitted=1)
+
+    def test_create_dataset_with_optional_fields(self, client: Argilla, dataset_name: str):
+        dataset = Dataset(
+            name=dataset_name,
+            settings=Settings(
+                fields=[TextField(name="test_field"), TextField(name="optional", required=False)],
+                questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
+            ),
+        )
+        client.datasets.add(dataset)
+
+        assert dataset in client.datasets
+        assert dataset in client.datasets
+        assert dataset is not None
+
+        created_dataset = client.datasets(name=dataset_name)
+        assert created_dataset.settings.fields["optional"].required is False
 
     def test_create_multiple_dataset_with_same_settings(self, client: Argilla, dataset_name: str):
         settings = Settings(

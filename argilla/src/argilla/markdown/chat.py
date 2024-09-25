@@ -62,11 +62,13 @@ def chat_to_html(messages: List[Dict[str, str]]) -> str:
         ValueError: If the an invalid role is passed.
 
     Examples:
-        >>> from argilla.markdown import chat_to_html
-        >>> html = chat_to_html([
-        >>>    {"role": "user", "content": "hello"},
-        >>>    {"role": "assistant", "content": "goodbye"}
-        >>> ])
+        ```python
+        from argilla.markdown import chat_to_html
+        html = chat_to_html([
+            {"role": "user", "content": "hello"},
+            {"role": "assistant", "content": "goodbye"}
+        ])
+        ```
     """
     chat_html = ""
     for message in messages:

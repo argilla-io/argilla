@@ -66,6 +66,7 @@ from tests.factories import (
     VectorFactory,
     VectorSettingsFactory,
     ImageFieldFactory,
+    ChatFieldFactory,
 )
 
 
@@ -557,6 +558,9 @@ class TestBaseElasticAndOpenSearchEngine:
             ("00000", 1),
             ("card payment", 5),
             ("nothing", 0),
+            ("cash | negative", 6),  # OR
+            ("cash + negative", 1),  # AN
+            ("-(cash | negative)", 3),  # NOT
             (TextQuery(q="card"), 5),
             (TextQuery(q="account"), 1),
             (TextQuery(q="payment"), 6),
@@ -567,6 +571,9 @@ class TestBaseElasticAndOpenSearchEngine:
             (TextQuery(q="negative", field="label"), 4),
             (TextQuery(q="00000", field="textId"), 1),
             (TextQuery(q="card payment", field="text"), 5),
+            (TextQuery(q="cash | negative", field="text"), 3),
+            (TextQuery(q="cash + negative", field="text"), 0),
+            (TextQuery(q="-(cash | negative)", field="text"), 6),
         ],
     )
     async def test_search_with_query_string(
@@ -589,6 +596,28 @@ class TestBaseElasticAndOpenSearchEngine:
         sorted_scores.sort(reverse=True)
 
         assert scores == sorted_scores
+
+    async def test_search_for_chat_field(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
+        chat_field = await ChatFieldFactory.create(name="field")
+
+        dataset = await DatasetFactory.create(fields=[chat_field])
+
+        records = await RecordFactory.create_batch(
+            size=2,
+            dataset=dataset,
+            fields={chat_field.name: [{"role": "user", "content": "Hello world"}, {"role": "bot", "content": "Hi"}]},
+        )
+
+        await refresh_dataset(dataset)
+        await refresh_records(records)
+
+        await search_engine.create_index(dataset)
+        await search_engine.index_records(dataset, records)
+
+        result = await search_engine.search(dataset, query=TextQuery(q="world", field=chat_field.name))
+
+        assert len(result.items) == 2
+        assert result.total == 2
 
     @pytest.mark.parametrize(
         "statuses, expected_items",

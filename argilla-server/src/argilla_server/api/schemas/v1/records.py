@@ -13,7 +13,6 @@
 #  limitations under the License.
 
 from datetime import datetime
-from re import S
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
@@ -21,6 +20,7 @@ from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
+from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
@@ -40,6 +40,8 @@ TERMS_FILTER_VALUES_MAX_ITEMS = 250
 
 SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
 SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
+
+CHAT_FIELDS_MAX_MESSAGES = 500
 
 
 class RecordGetterDict(GetterDict):
@@ -82,13 +84,28 @@ class Record(BaseModel):
         getter_dict = RecordGetterDict
 
 
+FieldValueCreate = Union[List[ChatFieldValue], Dict[StrictStr, Any], StrictStr, None]
+
+
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[StrictStr, None, List[Dict[StrictStr, StrictStr]], Dict[StrictStr, Any]]]
+    fields: Dict[str, FieldValueCreate]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
     suggestions: Optional[List[SuggestionCreate]]
     vectors: Optional[Dict[str, List[float]]]
+
+    @validator("fields")
+    @classmethod
+    def validate_chat_fields(cls, fields):
+        for key, value in fields.items():
+            if isinstance(value, list) and all(isinstance(item, ChatFieldValue) for item in value):
+                if len(value) > CHAT_FIELDS_MAX_MESSAGES:
+                    raise ValueError(
+                        f"Number of chat messages in field '{key}' exceeds the maximum allowed value of {CHAT_FIELDS_MAX_MESSAGES}"
+                    )
+
+        return fields
 
     @validator("responses")
     @classmethod
@@ -149,7 +166,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[StrictStr, None, List[Dict[StrictStr, StrictStr]], Dict[StrictStr, Any]]]]
+    fields: Optional[Dict[str, FieldValueCreate]] = None
 
 
 class RecordIncludeParam(BaseModel):

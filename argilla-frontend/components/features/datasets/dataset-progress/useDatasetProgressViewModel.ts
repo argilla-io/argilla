@@ -9,7 +9,7 @@ export const useDatasetProgressViewModel = ({
 }: {
   datasetId: string;
 }) => {
-  const t = useTranslate();
+  const { t } = useTranslate();
   const isLoaded = ref(false);
   const progress = ref<Progress | null>(null);
   const progressRanges = ref([]);
@@ -23,14 +23,15 @@ export const useDatasetProgressViewModel = ({
       {
         id: "completed",
         name: t("datasets.completed"),
-        color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
+        color:
+          "linear-gradient(90deg, var(--fg-tertiary) 0%, var(--fg-primary) 100%)",
         value: progress.value.completed,
         tooltip: `${progress.value.completed}/${progress.value.total}`,
       },
       {
         id: "pending",
         name: t("datasets.left"),
-        color: "#e6e6e6",
+        color: "var(--bg-solid-grey-3)",
         value: progress.value.pending,
         tooltip: `${progress.value.pending}/${progress.value.total}`,
       },

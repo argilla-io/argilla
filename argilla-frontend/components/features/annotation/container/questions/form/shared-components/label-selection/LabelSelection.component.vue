@@ -351,8 +351,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$label-color: palette(grey, 700);
-$label-dark-color: palette(purple, 200);
 .container {
   display: flex;
   flex-direction: column;
@@ -372,7 +370,7 @@ $label-dark-color: palette(purple, 200);
     border-radius: 5em;
     background: transparent;
     &:hover {
-      border-color: darken($label-color, 12%);
+      border-color: hsl(from var(--bg-label) h s l / 80%);
     }
   }
 
@@ -387,21 +385,21 @@ $label-dark-color: palette(purple, 200);
   gap: $base-space;
   background: none;
   border: none;
-  color: $black-37;
+  color: var(--fg-tertiary);
   font-weight: 500;
   text-decoration: none;
   .--more {
     border-radius: 20px;
-    border: 1px solid $black-10;
+    border: 1px solid var(--bg-opacity-10);
     padding: 2px 4px;
-    color: $black-54;
+    color: var(--fg-secondary);
     @include font-size(12px);
   }
   .--less {
     @include font-size(14px);
   }
   .svg-icon {
-    color: $black-37;
+    color: var(--fg-tertiary);
     border-radius: $border-radius;
   }
 }
@@ -416,8 +414,8 @@ $label-dark-color: palette(purple, 200);
   min-width: 50px;
   text-align: center;
   padding-inline: $base-space;
-  background: $label-color;
-  color: $label-dark-color;
+  background: var(--bg-label-unselected);
+  color: var(--fg-label);
   font-weight: 500;
   outline: none;
   border: 2px solid transparent;
@@ -447,17 +445,17 @@ $label-dark-color: palette(purple, 200);
   }
 
   &:not(.label-active):hover {
-    background: darken($label-color, 2%);
+    background: var(--bg-label-unselected-hover);
     transition: all 0.2s ease-in-out;
   }
 
   &.label-active {
     color: white;
-    background: $label-dark-color;
+    background: var(--bg-label);
     box-shadow: none;
     &:hover {
-      box-shadow: inset 0 -2px 6px 0 darken(palette(purple, 200), 8%);
-      background: darken(palette(purple, 200), 4%);
+      box-shadow: inset 0 -2px 6px 0 hsl(from var(--bg-label) h s l / 80%);
+      background: hsl(from var(--bg-label) h s l / 80%);
     }
   }
 }
@@ -473,7 +471,7 @@ input[type="checkbox"] {
   @extend %visuallyhidden;
   &:focus {
     & + div .label-text {
-      outline: 2px solid $primary-color;
+      outline: 2px solid var(--fg-cuaternary);
     }
   }
 }
@@ -499,11 +497,11 @@ input[type="checkbox"] {
   line-height: 1;
   border-radius: $border-radius;
   border-width: 1px 1px 3px 1px;
-  border-color: $black-20;
+  border-color: var(--fg-shortcut-key);
   border-style: solid;
   box-sizing: content-box;
-  color: $black-87;
-  background: palette(grey, 700);
+  color: var(--fg-primary);
+  background: var(--bg-solid-grey-2);
   @include font-size(11px);
   font-family: monospace, monospace;
 }

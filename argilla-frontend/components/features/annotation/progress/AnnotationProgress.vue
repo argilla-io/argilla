@@ -18,17 +18,17 @@
 <template>
   <div class="my-progress__container">
     <TeamProgress :datasetId="datasetId" />
-
-    <li class="my-progress__item">
-      <span>
-        <span
-          class="color-bullet"
-          :style="{ backgroundColor: RecordStatus.submitted.color }"
-        ></span>
-        <label class="my-progress__name" v-text="RecordStatus.submitted.name" />
-      </span>
-      <span class="my-progress__counter" v-text="metrics.submitted" />
-    </li>
+    <StatusCounterSkeleton
+      v-if="!metrics.hasMetrics"
+      class="my-progress__status--skeleton"
+    />
+    <StatusCounter
+      v-else
+      class="my-progress__status"
+      :color="RecordStatus.submitted.color"
+      :name="RecordStatus.submitted.name"
+      :value="metrics.submitted"
+    />
   </div>
 </template>
 
@@ -55,15 +55,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$bullet-size: 8px;
-.color-bullet {
-  display: inline-flex;
-  height: $bullet-size;
-  width: $bullet-size;
-  margin-right: 4px;
-  border-radius: $border-radius-rounded;
-}
-
+$statusCounterMinWidth: 110px;
+$statusCounterMinHeight: 30px;
 .my-progress {
   &__container {
     width: 100%;
@@ -72,24 +65,11 @@ $bullet-size: 8px;
     justify-content: space-between;
     margin-right: $base-space * 2;
   }
-  &__item {
-    display: flex;
-    flex-direction: row;
-    gap: $base-space;
-    padding: $base-space;
-    width: auto;
-    background: $black-3;
-    border-radius: $border-radius;
-  }
-  &__name {
-    text-transform: capitalize;
-    color: $black-54;
-    @include font-size(12px);
-  }
-  &__counter {
-    font-weight: 600;
-    color: $black-87;
-    @include font-size(14px);
+  &__status {
+    &--skeleton {
+      min-width: $statusCounterMinWidth;
+      min-height: $statusCounterMinHeight;
+    }
   }
 }
 </style>

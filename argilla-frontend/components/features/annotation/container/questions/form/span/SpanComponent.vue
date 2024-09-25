@@ -73,7 +73,7 @@ export default {
     display: flex;
     align-items: center;
     gap: $base-space;
-    color: $black-54;
+    color: var(--fg-secondary);
     @include font-size(13px);
   }
 }

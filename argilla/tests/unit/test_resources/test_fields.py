@@ -19,8 +19,9 @@ import httpx
 from pytest_httpx import HTTPXMock
 
 import argilla as rg
-from argilla._models import FieldModel, ImageFieldSettings, ChatFieldSettings
-from argilla.settings._field import ImageField, ChatField
+from argilla._models import FieldModel
+from argilla._models._settings._fields import ImageFieldSettings, ChatFieldSettings
+from argilla.settings._field import ImageField, ChatField, CustomField
 
 
 class TestImageField:
@@ -75,6 +76,16 @@ class TestChatField:
         assert field.description == "Chat description"
         assert field.required is False
         assert isinstance(field._model.settings, ChatFieldSettings)
+
+    def test_create_custom_field(self):
+        field = CustomField(name="custom", template="template")
+
+        assert field.name == "custom"
+        assert field.title == "custom"
+        assert field.required is True
+        assert field.description is None
+        assert field.template == "template"
+        assert field.advanced_mode is False
 
 
 class TestFieldsAPI:

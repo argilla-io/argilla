@@ -18,7 +18,7 @@ export default {
 
 <style lang="scss" scoped>
 .internal-page {
-  background: palette(white);
+  background: var(--bg-accent-grey-1);
   &__container {
     display: flex;
     flex-direction: column;

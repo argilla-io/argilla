@@ -39,7 +39,7 @@ except ImportError:
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-__all__ = ["Field", "TextField", "ImageField", "ChatField", "CustomField"]
+__all__ = ["Field", "AbstractField", "TextField", "ImageField", "ChatField", "CustomField"]
 
 
 class AbstractField(ABC, SettingsPropertyBase):
@@ -103,7 +103,7 @@ class TextField(AbstractField):
         name: str,
         title: Optional[str] = None,
         use_markdown: Optional[bool] = False,
-        required: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         client: Optional[Argilla] = None,
     ) -> None:
@@ -112,7 +112,7 @@ class TextField(AbstractField):
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
             use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to False.
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
 
         """
@@ -120,7 +120,7 @@ class TextField(AbstractField):
         super().__init__(
             name=name,
             title=title,
-            required=required or True,
+            required=required,
             description=description,
             settings=TextFieldSettings(use_markdown=use_markdown),
             _client=client,
@@ -173,7 +173,8 @@ class ChatField(AbstractField):
         self,
         name: str,
         title: Optional[str] = None,
-        required: Optional[bool] = True,
+        use_markdown: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         _client: Optional[Argilla] = None,
     ) -> None:
@@ -183,7 +184,8 @@ class ChatField(AbstractField):
         Parameters:
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
-            required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            use_markdown (Optional[bool], optional): Whether to use markdown. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
 
@@ -192,9 +194,17 @@ class ChatField(AbstractField):
             title=title,
             required=required,
             description=description,
-            settings=ChatFieldSettings(),
+            settings=ChatFieldSettings(use_markdown=use_markdown),
             _client=_client,
         )
+
+    @property
+    def use_markdown(self) -> Optional[bool]:
+        return self._model.settings.use_markdown
+
+    @use_markdown.setter
+    def use_markdown(self, value: bool) -> None:
+        self._model.settings.use_markdown = value
 
 
 class CustomField(AbstractField):
@@ -204,19 +214,25 @@ class CustomField(AbstractField):
         self,
         name: str,
         template: Optional[str] = "",
+        advanced_mode: Optional[bool] = False,
         title: Optional[str] = None,
-        required: Optional[bool] = True,
+        required: bool = True,
         description: Optional[str] = None,
         _client: Optional[Argilla] = None,
     ) -> None:
         """
-        Custom field for use in Argilla `Dataset` `Settings` for working with custom HTML and CSS templates
+        Custom field for use in Argilla `Dataset` `Settings` for working with custom HTML and CSS templates.
+        By default argilla will use a brackets syntax engine for the templates, which converts
+        `{{ field.key }}` to the values of record's field's object.
 
         Parameters:
             name (str): The name of the field
             title (Optional[str], optional): The title of the field. Defaults to None.
             template (str): The template of the field (HTML and CSS)
+            advanced_mode (Optional[bool], optional): Whether to use advanced mode. Defaults to False.
+                Deactivate the brackets syntax engine and use custom javascript to render the field.
             required (Optional[bool], optional): Whether the field is required. Defaults to True.
+            required (bool): Whether the field is required. Defaults to True.
             description (Optional[str], optional): The description of the field. Defaults to None.
         """
         template = self._load_template(template)
@@ -225,7 +241,7 @@ class CustomField(AbstractField):
             title=title,
             required=required,
             description=description,
-            settings=CustomFieldSettings(template=template),
+            settings=CustomFieldSettings(template=template, advanced_mode=advanced_mode),
             _client=_client,
         )
 
@@ -236,6 +252,14 @@ class CustomField(AbstractField):
     @template.setter
     def template(self, value: str) -> None:
         self._model.settings.template = self._load_template(value)
+
+    @property
+    def advanced_mode(self) -> Optional[bool]:
+        return self._model.settings.advanced_mode
+
+    @advanced_mode.setter
+    def advanced_mode(self, value: bool) -> None:
+        self._model.settings.advanced_mode = value
 
     def _load_template(self, template: str) -> str:
         if template.endswith(".html") and os.path.exists(template):

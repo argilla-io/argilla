@@ -80,7 +80,7 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     You can add the data directly as a dictionary like structure, where the keys correspond to the names of fields, questions, metadata or vectors in the dataset and the values are the data to be added.
 
-    If your data structure does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which keys in the source data correspond to the dataset fields.
+    If your data structure does not correspond to your Argilla dataset names, you can use a `mapping` to indicate which keys in the source data correspond to the dataset fields, metadata, vectors, suggestions, or responses. If you need to add the same data to multiple attributes, you can also use a list with the name of the attributes.
 
     We illustrate this python dictionaries that represent your data, but we would not advise you to define dictionaries. Instead, use the `Record` object to instantiate records.
 
@@ -121,7 +121,6 @@ You can add records to a dataset in two different ways: either by using a dictio
     1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
     2. The data structure has keys `query` and `response`, and the Argilla dataset has fields `question` and `answer`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the Argilla dataset.
 
-
 === "From a Hugging Face dataset"
 
     You can also add records to a dataset using a Hugging Face dataset. This is useful when you want to use a dataset from the Hugging Face Hub and add it to your Argilla dataset.
@@ -154,6 +153,51 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     3. In this case, the `text` key in the Hugging Face dataset would correspond to the `review` field in the Argilla dataset, and the `label` key in the Hugging Face dataset would correspond to the `sentiment` field in the Argilla dataset.
 
+### Fields
+
+Fields are the main pieces of information of the record. These are shown at first sight in the UI together with the questions form. You may only include fields that you have previously configured in the [dataset settings](../how_to_guides/dataset.md#fields). Depending on the type of fields included in the dataset, the data format may be slightly different:
+
+=== "Text"
+    Text fields expect input in the form of a `string`.
+
+    ```python
+    record = rg.Record(
+        fields={"text": "Hello World, how are you?"}
+    )
+    ```
+
+=== "Image"
+    Image fields expect a remote URL or local path to an image file in the form of a `string`, or a PIL object.
+
+    > Check the [Dataset.records - Python Reference](../reference/argilla/datasets/dataset_records.md) to see how to add records with with images in detail.
+
+    ```python
+    records = [
+        rg.Record(
+            fields={"image": "https://example.com/image.jpg"}
+        ),
+        rg.Record(
+            fields={"image": "path/to/image.jpg"}
+        ),
+        rg.Record(
+            fields={"image": Image.open("path/to/image.jpg")}
+        ),
+    ]
+    ```
+
+=== "Chat"
+    Chat fields expect a list of dictionaries with the keys `role` and `content`, where the `role` identifies the interlocutor type (e.g., user, assistant, model, etc.), whereas the `content` contains the text of the message.
+
+    ```python
+    record = rg.Record(
+        fields={
+            "chat": [
+                {"role": "user", "content": "What is Argilla?"},
+                {"role": "assistant", "content": "Argilla is a collaboration tool for AI engineers and domain experts to build high-quality datasets"},
+            ]
+        }
+    )
+    ```
 
 ### Metadata
 

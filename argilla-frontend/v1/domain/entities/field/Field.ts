@@ -11,29 +11,29 @@ export class Field {
     public title: string,
     public readonly content: string,
     public readonly datasetId: string,
-    public readonly required: boolean,
+    public readonly isRequired: boolean,
     public settings: any
   ) {
     this.initializeOriginal();
   }
 
   get isTextType() {
-    return this.fieldType === "text";
+    return this.type === "text";
   }
 
   get isImageType() {
-    return this.fieldType === "image";
+    return this.type === "image";
   }
 
   get isChatType() {
-    return this.fieldType === "chat";
+    return this.type === "chat";
   }
 
   get isCustomType() {
-    return this.fieldType === "custom";
+    return this.type === "custom";
   }
 
-  private get fieldType() {
+  private get type() {
     return this.settings?.type?.toLowerCase() ?? null;
   }
 
