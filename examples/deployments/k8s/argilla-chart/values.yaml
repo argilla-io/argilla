@@ -22,8 +22,12 @@ argilla:
     enabled: true
     className: "nginx"
     host: "argilla.local"
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/use-regex: "true"
   configmap:
-    minikubeIP: "192.168.64.2"
+    minikubeIP: "192.168.49.2"
   hpa:
     enabled: true
     minReplicas: 1

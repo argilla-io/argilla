@@ -58,7 +58,7 @@ tests:
           path: spec.template.spec.containers[0].env
           content:
             name: PASSWORD
-            value: 12345678
+            value: "12345678"
 
   - it: should render elasticsearch operator resources when enabled
     set:

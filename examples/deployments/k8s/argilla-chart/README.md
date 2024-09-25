@@ -46,6 +46,11 @@ minikube config set memory 3g
 minikube config set cpus 2
 minikube start
 ```
+## Enable Minikube Addons
+```bash
+minikube addons enable ingress
+
+```
 ## Installing ECK
 As we want to use the operator to manage our Elasticsearch cluster, we need to install the ECK operator.
 ```bash

@@ -37,12 +37,12 @@ spec:
             - name: ARGILLA_REDIS_URL
               value: redis://{{ .Release.Name }}-redis-master:6379/0
             - name: USERNAME
-              value: {{ .Values.argilla.auth.username }}
+              value: {{ .Values.argilla.auth.username | quote }}
             - name: PASSWORD
-              value: {{ .Values.argilla.auth.password }}
+              value: {{ .Values.argilla.auth.password  | quote }}
             {{- if .Values.argilla.persistence.enabled }}
             - name: ARGILLA_HOME_PATH
-              value: {{ .Values.argilla.persistence.mountPath}}
+              value: {{ .Values.argilla.persistence.mountPath | quote }}
             {{- end }}
           ports:
             - containerPort: 6900
