@@ -86,8 +86,6 @@ dataset.records.log(
 
 ### Example Gallery
 
-Instead of explaining the syntax, let's just show you an example.
-
 === "Show texts in two columns"
 
     ```python
