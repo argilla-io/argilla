@@ -16,7 +16,7 @@ import os
 import warnings
 from threading import Lock
 from typing import Optional
-from huggingface_hub.utils._runtime import is_google_colab, is_colab_enterprise
+from huggingface_hub.utils._runtime import is_google_colab
 from argilla._constants import _DEFAULT_API_URL
 
 
@@ -47,8 +47,8 @@ def _get_token_from_google_colab() -> Optional[str]:
     Token is read from the vault only once per session and then stored in a global variable to avoid re-requesting
     access to the vault.
     """
-    # If it's not a Google Colab or it's Colab Enterprise, fallback to environment variable or token file authentication
-    if not is_google_colab() or is_colab_enterprise():
+    # If it's not a Google Colab, fallback to environment variable
+    if not is_google_colab():
         return None
 
     # `google.colab.userdata` is not thread-safe
