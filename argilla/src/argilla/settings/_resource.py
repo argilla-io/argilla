@@ -264,6 +264,7 @@ class Settings(DefaultSettingsMixin, Resource):
     def from_hub(
         cls,
         repo_id: str,
+        subset: Optional[str] = None,
         feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]] = None,
         **kwargs,
     ) -> "Settings":
