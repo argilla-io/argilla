@@ -166,7 +166,7 @@ def _render_code_snippet(repo_id: str):
     settings = rg.Settings.from_hub(repo_id="{repo_id}")
     settings.questions.add(rg.TextQuestion(name="new_question", required=True))
     dataset = rg.Dataset.from_hub(repo_id="{repo_id}", settings=settings)
-    
+
     # 2. Map the dataset's columns to question, field, or metadata
     settings = rg.Settings.from_hub(
         repo_id="{repo_id}",
