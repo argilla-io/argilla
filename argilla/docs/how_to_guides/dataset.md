@@ -191,7 +191,9 @@ The fields in a dataset consist of one or more data items requiring annotation. 
     ![ChatField](../assets/images/how_to_guides/dataset/chat_field.png)
 
 === "Custom"
-    A `CustomField` allows you to use a custom template for the field. This is useful if you want to use a custom UI for the field. You can use the `template` argument to pass a string that will be rendered as the field's UI. By default argilla will use a brackets syntax engine for the templates, which converts `{{ record.fields.field.key }}` to the values of record's field's object. You can also use `advanced_mode`, which deactivates the above brackets syntax engine and allows you to use custom javascript to render the field.
+    A `CustomField` allows you to use a custom template for the field. This is useful if you want to use a custom UI for the field. You can use the `template` argument to pass a string that will be rendered as the field's UI.
+
+    By default, `advanced_mode=False`, which will use a brackets syntax engine for the templates. This engine converts `{{record.fields.field.key}}` to the values of record's field's object. You can also use `advanced_mode=True`, which deactivates the above brackets syntax engine and allows you to add custom javascript to your template to render the field.
 
     ```python
     rg.CustomField(
@@ -203,6 +205,9 @@ The fields in a dataset consist of one or more data items requiring annotation. 
         description="Field description",
     )
     ```
+
+    !!! tip
+        To learn more about how to create custom fields with HTML and CSS templates, check this [how-to guide](custom_fields.md).
 
 ### Questions
 
