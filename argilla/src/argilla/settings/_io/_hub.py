@@ -268,7 +268,6 @@ def _define_settings_from_features(
 def build_settings_from_repo_id(
     repo_id: str,
     feature_mapping: Optional[Dict[str, str]] = None,
-    config: Optional[str] = None,
     subset: Optional[str] = None,
 ) -> "Settings":
     """Build the argilla settings from the features of a dataset.
