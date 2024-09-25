@@ -24,8 +24,8 @@ To manually create a new webhook, instantiate the `Webhook` object with the clie
 
 ```python
 webhook = rg.Webhook(
-    url="https://somehost.com/webhook", 
-    events=["dataset.created"], 
+    url="https://somehost.com/webhook",
+    events=["dataset.created"],
     description="My webhook"
 )
 webhook.create()
