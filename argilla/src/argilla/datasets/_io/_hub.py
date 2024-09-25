@@ -118,6 +118,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         with_records: bool = True,
         settings: Optional["Settings"] = None,
         split: Optional[str] = None,
+        subset: Optional[str] = None,
         **kwargs: Any,
     ):
         """Loads a `Dataset` from the Hugging Face Hub.
@@ -169,6 +170,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                     with_records=with_records,
                     settings=settings,
                     split=split,
+                    subset=subset,
                     **kwargs,
                 )
                 return dataset
@@ -178,6 +180,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                 hf_dataset = load_dataset(
                     path=repo_id,
                     split=split,
+                    name=subset,
                     **kwargs,
                 )  # type: ignore
                 hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, split=split, **kwargs)
