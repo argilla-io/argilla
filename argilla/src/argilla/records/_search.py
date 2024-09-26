@@ -11,8 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from datetime import datetime
 from typing import Optional, List, Any, Union, Tuple
+from uuid import UUID
 
 from argilla._models import SearchQueryModel
 from argilla._models._search import (
@@ -39,6 +40,12 @@ class Condition(Tuple[str, str, Any]):
         field = field.strip()
         scope = self._extract_filter_scope(field)
 
+        if isinstance(value, UUID):
+            value = str(value)
+
+        elif isinstance(value, datetime):
+            value = value.isoformat()
+
         operator = operator.strip()
         if operator == "==":
             return TermsFilterModel(values=[value], scope=scope)
@@ -56,6 +63,10 @@ class Condition(Tuple[str, str, Any]):
         field = field.strip()
         if field == "status":
             return RecordFilterScopeModel(property="status")
+        elif field == "id":
+            return RecordFilterScopeModel(property="external_id")
+        elif field == "_server_id":
+            return RecordFilterScopeModel(property="id")
         elif field == "inserted_at":
             return RecordFilterScopeModel(property="inserted_at")
         elif field == "updated_at":
@@ -81,10 +92,13 @@ class Condition(Tuple[str, str, Any]):
             return SuggestionFilterScopeModel(question=field)
 
 
+Conditions = Union[List[Tuple[str, str, Any]], Tuple[str, str, Any]]
+
+
 class Filter:
     """This class is used to map user filters to the internal filter models"""
 
-    def __init__(self, conditions: Union[List[Tuple[str, str, Any]], Tuple[str, str, Any], None] = None):
+    def __init__(self, conditions: Union[Conditions, None] = None):
         """ Create a filter object for use in Argilla search requests.
 
         Parameters:
@@ -108,13 +122,19 @@ class Query:
 
     query: Optional[str] = None
 
-    def __init__(self, *, query: Union[str, None] = None, filter: Union[Filter, None] = None):
+    def __init__(self, *, query: Union[str, None] = None, filter: Union[Filter, Conditions, None] = None):
         """Create a query object for use in Argilla search requests.add()
 
         Parameters:
             query (Union[str, None], optional): The query string that will be used to search.
             filter (Union[Filter, None], optional): The filter object that will be used to filter the search results.
         """
+
+        if isinstance(filter, tuple):
+            filter = [filter]
+
+        if isinstance(filter, list):
+            filter = Filter(conditions=filter)
 
         self.query = query
         self.filter = filter

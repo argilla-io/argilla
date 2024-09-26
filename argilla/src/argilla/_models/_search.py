@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 
 class RecordFilterScopeModel(BaseModel):
     entity: Literal["record"] = "record"
-    property: Literal["status", "inserted_at", "updated_at"] = "status"
+    property: Literal["id", "external_id", "inserted_at", "updated_at", "status"] = "status"
 
 
 class ResponseFilterScopeModel(BaseModel):
@@ -60,7 +60,7 @@ class TermsFilterModel(BaseModel):
     """Filter model for terms filter."""
 
     type: Literal["terms"] = "terms"
-    values: List[str]
+    values: List[Any]
     scope: ScopeModel
 
 
