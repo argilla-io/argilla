@@ -83,3 +83,19 @@ class TestChatField:
         field.use_markdown = False
 
         assert field.use_markdown is False
+
+
+class TestCustomField:
+    def test_create_custom_field(self):
+        field = rg.CustomField(name="custom", template="<p>{{ custom }}</p>")
+
+        assert field.name == "custom"
+        assert field.template == "<p>{{ custom }}</p>"
+        assert field.advanced_mode is False
+
+    def test_create_custom_field_with_advanced_mode(self):
+        field = rg.CustomField(name="custom", template="<p></p>", advanced_mode=True)
+
+        assert field.name == "custom"
+        assert field.template == "<p></p>"
+        assert field.advanced_mode is True
