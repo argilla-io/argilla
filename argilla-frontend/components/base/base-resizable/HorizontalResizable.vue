@@ -7,8 +7,11 @@
     <div class="resizable__bar" ref="resizableBar">
       <div class="resizable__bar__inner" />
     </div>
-
+    <div class="resizable__down" v-if="!collapsable">
+      <slot name="down" />
+    </div>
     <BaseCollapsablePanel
+      v-else
       class="resizable__down"
       :class="isExpanded ? '--expanded' : null"
       :is-expanded="isExpanded"
@@ -37,6 +40,10 @@ export default {
     id: {
       type: String,
       default: "h-rz",
+    },
+    collapsable: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -80,12 +87,16 @@ export default {
       });
     },
   },
+
   mounted() {
     this.resizer = this.$refs.resizableBar;
     this.upSide = this.resizer.previousElementSibling;
     this.downSide = this.resizer.nextElementSibling;
 
     this.limitElementHeight(this.upSide);
+    if (!this.collapsable) {
+      this.limitElementHeight(this.downSide);
+    }
 
     this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
 
@@ -101,8 +112,8 @@ export default {
   methods: {
     savePosition() {},
     limitElementHeight(element) {
-      element.style["max-height"] = "100%";
-      element.style["min-height"] = "50%";
+      element.style["max-height"] = this.collapsable ? "100%" : "80%";
+      element.style["min-height"] = this.collapsable ? "50%" : "20%";
     },
     savePositionOnStartResizing(e) {
       this.upSidePrevPosition = {
@@ -172,6 +183,7 @@ $resizable-bar-width: $base-space;
 .resizable {
   $this: &;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   flex-direction: column;
   height: 100%;

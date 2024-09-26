@@ -110,6 +110,7 @@ $resizable-bar-width: $base-space;
 .resizable {
   $this: &;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   height: 100%;
   min-height: 0;

@@ -61,8 +61,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.card {
+<style lang="scss" scoped
   display: flex;
   align-items: flex-end;
   padding: $base-space * 2;
