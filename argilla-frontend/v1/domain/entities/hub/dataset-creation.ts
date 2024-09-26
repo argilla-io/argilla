@@ -44,22 +44,11 @@ class QuestionCreation {
   }
 }
 
-class DatasetCreation {
-  constructor(
-    public readonly fields: FieldCreation[],
-    public readonly questions: QuestionCreation[]
-  ) {}
-}
+class Subset {
+  public readonly name: string;
 
-interface Feature {
-  dtype: "string" | "int32" | "int64";
-  _type: "Value" | "Image" | "ClassLabel";
-  names?: string[];
-}
-
-export class DatasetCreationBuilder {
-  private readonly fields: FieldCreation[] = [];
-  private readonly questions: QuestionCreation[] = [];
+  public readonly fields: FieldCreation[] = [];
+  public readonly questions: QuestionCreation[] = [];
 
   private readonly features: {
     name: string;
@@ -68,7 +57,7 @@ export class DatasetCreationBuilder {
     type: "string" | "int32" | "int64";
   }[] = [];
 
-  constructor(datasetInfo: any) {
+  constructor(name: string, datasetInfo: any) {
     for (const [name, value] of Object.entries<Feature>(datasetInfo.features)) {
       this.features.push({
         name,
@@ -77,16 +66,12 @@ export class DatasetCreationBuilder {
         type: value.dtype,
       });
     }
-  }
 
-  build(): DatasetCreation {
     this.createFields();
     this.createQuestions();
-
-    return new DatasetCreation(this.fields, this.questions);
   }
 
-  createQuestions() {
+  private createQuestions() {
     for (const feat of this.features) {
       if (feat.kindObject === "ClassLabel") {
         this.questions.push(
@@ -115,5 +100,56 @@ export class DatasetCreationBuilder {
         this.fields.push(new FieldCreation(feat.name, "image"));
       }
     }
+  }
+}
+
+class DatasetCreation {
+  private selectedSubset: Subset;
+
+  constructor(private readonly subset: Subset[]) {
+    this.selectedSubset = subset[0];
+  }
+
+  changeSubset(name: string) {
+    this.selectedSubset = this.subset.find((s) => s.name === name);
+  }
+
+  get hasMoreThanOneSubset() {
+    return this.subset.length > 1;
+  }
+
+  get subsets() {
+    return this.subset.map((s) => s.name);
+  }
+
+  get fields() {
+    return this.selectedSubset.fields;
+  }
+
+  get questions() {
+    return this.selectedSubset.questions;
+  }
+}
+
+interface Feature {
+  dtype: "string" | "int32" | "int64";
+  _type: "Value" | "Image" | "ClassLabel";
+  names?: string[];
+}
+
+export class DatasetCreationBuilder {
+  private readonly subsets: Subset[] = [];
+  constructor(datasetInfo: any) {
+    if (datasetInfo.default) {
+      for (const [name, value] of Object.entries<Feature>(datasetInfo)) {
+        this.subsets.push(new Subset(name, value));
+      }
+    } else {
+      this.subsets.push(new Subset("default", datasetInfo));
+    }
+  }
+
+  build(): DatasetCreation {
+    return new DatasetCreation(this.subsets);
   }
 }
