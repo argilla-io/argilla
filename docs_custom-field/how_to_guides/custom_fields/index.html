@@ -166,7 +166,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#custom-fields-with-javascript-html-and-css-templates" class="md-skip">
+        <a href="#custom-fields-with-layout-templates" class="md-skip">
           Skip to content
         </a>
       
@@ -1029,19 +1029,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-mode-advanced_modefalse" class="md-nav__link">
+  <a href="#using-handlebars-in-your-template" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic Mode (advanced_mode=False)
+      Using Handlebars in your template
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Basic Mode (advanced_mode=False)">
+    <nav class="md-nav" aria-label="Using Handlebars in your template">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#minimal-example" class="md-nav__link">
+  <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
-      Minimal example
+      Usage example
     </span>
   </a>
   
@@ -1062,19 +1062,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#advanced-mode-advanced_modetrue" class="md-nav__link">
+  <a href="#advanced-mode" class="md-nav__link">
     <span class="md-ellipsis">
-      Advanced Mode (advanced_mode=True)
+      Advanced Mode
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Advanced Mode (advanced_mode=True)">
+    <nav class="md-nav" aria-label="Advanced Mode">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#minimal-example_1" class="md-nav__link">
+  <a href="#usage-example_1" class="md-nav__link">
     <span class="md-ellipsis">
-      Minimal example
+      Usage example
     </span>
   </a>
   
@@ -2327,19 +2327,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#basic-mode-advanced_modefalse" class="md-nav__link">
+  <a href="#using-handlebars-in-your-template" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic Mode (advanced_mode=False)
+      Using Handlebars in your template
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Basic Mode (advanced_mode=False)">
+    <nav class="md-nav" aria-label="Using Handlebars in your template">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#minimal-example" class="md-nav__link">
+  <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
-      Minimal example
+      Usage example
     </span>
   </a>
   
@@ -2360,19 +2360,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#advanced-mode-advanced_modetrue" class="md-nav__link">
+  <a href="#advanced-mode" class="md-nav__link">
     <span class="md-ellipsis">
-      Advanced Mode (advanced_mode=True)
+      Advanced Mode
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Advanced Mode (advanced_mode=True)">
+    <nav class="md-nav" aria-label="Advanced Mode">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#minimal-example_1" class="md-nav__link">
+  <a href="#usage-example_1" class="md-nav__link">
     <span class="md-ellipsis">
-      Minimal example
+      Usage example
     </span>
   </a>
   
@@ -2415,7 +2415,7 @@
   
 
 
-<h1 id="custom-fields-with-javascript-html-and-css-templates">Custom fields with JavaScript, HTML and CSS templates<a class="headerlink" href="#custom-fields-with-javascript-html-and-css-templates" title="Permanent link">&para;</a></h1>
+<h1 id="custom-fields-with-layout-templates">Custom fields with layout templates<a class="headerlink" href="#custom-fields-with-layout-templates" title="Permanent link">&para;</a></h1>
 <p>This guide demonstrates how to create custom fields in Argilla using HTML, CSS, and JavaScript templates.</p>
 <div class="admonition info">
 <p class="admonition-title">Main Class</p>
@@ -2433,10 +2433,10 @@
 </blockquote>
 </div>
 <h2 id="understanding-the-record-object">Understanding the Record Object<a class="headerlink" href="#understanding-the-record-object" title="Permanent link">&para;</a></h2>
-<p>If you are somewhat familiar with web development and thestructure of resources in Argilla, you might will easiliy be able to grasp the <code>record</code> object structure you can access within your custom fields definition.The <code>record</code> object is the main object that contains all the information about the resource, like <code>fields</code>, <code>metadata</code>, etc.</p>
-<h2 id="basic-mode-advanced_modefalse">Basic Mode (advanced_mode=False)<a class="headerlink" href="#basic-mode-advanced_modefalse" title="Permanent link">&para;</a></h2>
-<p>When <code>advanced_mode=False</code>, you can use the <code>template</code> argument to only pass basic HTML and CSS templates. To render information, we rely on the <a href="https://handlebarsjs.com/">handlebars syntax engine</a>. This engine will convert the content inside the brackets <code>{{}}</code> to the values of record's field's object within your template. As described in the <a href="#accessing-record-information">Accessing record information</a> section, you can access the fields of the record by navigating to <code>{{record.fields.&lt;field_name&gt;}}</code>. For more complex use cases, handlebars has various <a href="https://handlebarsjs.com/guide/">expressions, partials, and helpers</a> that you can use to render your data.</p>
-<h3 id="minimal-example">Minimal example<a class="headerlink" href="#minimal-example" title="Permanent link">&para;</a></h3>
+<p>The <code>record</code> object is the main object that contains all the information about the Argilla <code>record</code> object in the UI, like <code>fields</code>, <code>metadata</code>, etc. Your template can use this object to display record information within the custom field.</p>
+<h2 id="using-handlebars-in-your-template">Using Handlebars in your template<a class="headerlink" href="#using-handlebars-in-your-template" title="Permanent link">&para;</a></h2>
+<p>By default, custom fields will use the <a href="https://handlebarsjs.com/">handlebars syntax engine</a> to render templates with <code>record</code> information. This engine will convert the content inside the brackets <code>{{}}</code> to the values of record's field's object that you reference within your template. As described in the <a href="#accessing-record-information">Accessing record information</a> section, you can access the fields of the record by navigating to <code>{{record.fields.&lt;field_name&gt;}}</code>. For more complex use cases, handlebars has various <a href="https://handlebarsjs.com/guide/">expressions, partials, and helpers</a> that you can use to render your data. You can deactivate the <code>handlebars</code> engine with the <code>advanced_mode=False</code> parameter in <code>CustomField</code>, then you will need to define custom javascript to access the record attributes.</p>
+<h3 id="usage-example">Usage example<a class="headerlink" href="#usage-example" title="Permanent link">&para;</a></h3>
 <p>Because of the handlebars syntax engine, we only need to pass the HTML between <code>&lt;script&gt;</code> tags and potentially some CSS in
 between the <code>&lt;style&gt;</code> tags.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">css_template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -2486,7 +2486,6 @@ between the <code>&lt;style&gt;</code> tags.</p>
 </span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="example-gallery">Example Gallery<a class="headerlink" href="#example-gallery" title="Permanent link">&para;</a></h3>
-<p>Instead of explaining the syntax, let's just show you an example.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Show texts in two columns</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2523,9 +2522,9 @@ between the <code>&lt;style&gt;</code> tags.</p>
 </div>
 </div>
 </div>
-<h2 id="advanced-mode-advanced_modetrue">Advanced Mode (advanced_mode=True)<a class="headerlink" href="#advanced-mode-advanced_modetrue" title="Permanent link">&para;</a></h2>
+<h2 id="advanced-mode">Advanced Mode<a class="headerlink" href="#advanced-mode" title="Permanent link">&para;</a></h2>
 <p>When <code>advanced_mode=True</code>, you can use the <code>template</code> argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript.</p>
-<h3 id="minimal-example_1">Minimal example<a class="headerlink" href="#minimal-example_1" title="Permanent link">&para;</a></h3>
+<h3 id="usage-example_1">Usage example<a class="headerlink" href="#usage-example_1" title="Permanent link">&para;</a></h3>
 <p>Let's reproduce example from the <a href="#without-advanced-mode">Without advanced mode</a> section but this time we will insert the <a href="https://handlebarsjs.com/">handlebars syntax engine</a> ourselves.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">render_template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="s2">&lt;script id=&quot;template&quot; type=&quot;text/x-handlebars-template&quot;&gt;</span>
