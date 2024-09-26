@@ -526,6 +526,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def _map_record_to_es_document(self, record: Record) -> Dict[str, Any]:
         document = {
             "id": str(record.id),
+            "external_id": record.external_id,
             "fields": record.fields,
             "status": record.status,
             "inserted_at": record.inserted_at,
@@ -616,6 +617,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 RecordSortField.inserted_at.value: {"type": "date_nanos"},
                 RecordSortField.updated_at.value: {"type": "date_nanos"},

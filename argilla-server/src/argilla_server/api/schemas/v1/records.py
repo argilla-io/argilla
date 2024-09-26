@@ -16,11 +16,11 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
+from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
-from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
@@ -209,7 +209,13 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal["status"]]
+    property: Literal[
+        RecordSortField.id,
+        RecordSortField.external_id,
+        RecordSortField.inserted_at,
+        RecordSortField.updated_at,
+        RecordSortField.status,
+    ]
 
 
 class Records(BaseModel):
