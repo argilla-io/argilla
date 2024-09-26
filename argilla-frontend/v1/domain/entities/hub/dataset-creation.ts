@@ -3,6 +3,12 @@ import {
   QuestionPrototype,
 } from "../question/QuestionSetting";
 
+interface Feature {
+  dtype: "string" | "int32" | "int64";
+  _type: "Value" | "Image" | "ClassLabel";
+  names?: string[];
+}
+
 class FieldCreation {
   public readonly required: false;
 
@@ -45,8 +51,6 @@ class QuestionCreation {
 }
 
 class Subset {
-  public readonly name: string;
-
   public readonly fields: FieldCreation[] = [];
   public readonly questions: QuestionCreation[] = [];
 
@@ -57,7 +61,7 @@ class Subset {
     type: "string" | "int32" | "int64";
   }[] = [];
 
-  constructor(name: string, datasetInfo: any) {
+  constructor(public readonly name: string, datasetInfo: any) {
     for (const [name, value] of Object.entries<Feature>(datasetInfo.features)) {
       this.features.push({
         name,
@@ -129,12 +133,6 @@ class DatasetCreation {
   get questions() {
     return this.selectedSubset.questions;
   }
-}
-
-interface Feature {
-  dtype: "string" | "int32" | "int64";
-  _type: "Value" | "Image" | "ClassLabel";
-  names?: string[];
 }
 
 export class DatasetCreationBuilder {
