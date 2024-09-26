@@ -15,12 +15,24 @@ These are the section headers that we use:
 -->
 
 ## [Unreleased]()
+
 ### Changed
 
 - Changed the __repr__ method for `SettingsProperties` to display the details of all the properties in `Setting` object. ([#5380](https://github.com/argilla-io/argilla/issues/5380))
 ### Fixed
 
 - Fixed the deployment yaml used to create a new Argilla server in K8s. Added `USERNAME` and `PASSWORD` to the environment variables of pod template. ([#5434](https://github.com/argilla-io/argilla/issues/5434))
+
+## [2.2.2](https://github.com/argilla-io/argilla/compare/v2.2.1...v2.2.2)
+
+### Fixed
+
+- Fixed `from_hub` with unsupported column names. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+- Fixed `from_hub` with missing dataset `subset` configuration value. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+
+### Changed
+
+- Changed `from_hub` to only generate fields not questions for strings in dataset. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
 
 ## [2.2.1](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.2.1)
 
