@@ -36,6 +36,7 @@ def get_token() -> Optional[dict]:
 
 
 def _get_token_from_environment() -> Optional[str]:
+    """ Get the argilla credentials from the environment """
     ARGILLA_API_URL = _clean_token(os.getenv(key="ARGILLA_API_URL", default=_DEFAULT_API_URL))
     ARGILLA_API_KEY = _clean_token(os.getenv(key="ARGILLA_API_KEY"))
     return {"ARGILLA_API_URL": ARGILLA_API_URL, "ARGILLA_API_KEY": ARGILLA_API_KEY}
