@@ -18,12 +18,15 @@ class FieldCreation {
   get isTextType() {
     return this.type.isTextType;
   }
+
   get isImageType() {
     return this.type.isImageType;
   }
+
   get isChatType() {
     return this.type.isChatType;
   }
+
   get isCustomType() {
     return this.type.isCustomType;
   }
