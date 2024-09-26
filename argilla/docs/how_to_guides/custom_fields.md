@@ -2,7 +2,7 @@
 description: Learn how to create custom fields using HTML, CSS, and JavaScript templates in Argilla.
 ---
 
-# Custom fields with JavaScript, HTML and CSS templates
+# Custom fields with layout templates
 
 This guide demonstrates how to create custom fields in Argilla using HTML, CSS, and JavaScript templates.
 
@@ -23,13 +23,13 @@ This guide demonstrates how to create custom fields in Argilla using HTML, CSS, 
 
 ## Understanding the Record Object
 
-If you are somewhat familiar with web development and thestructure of resources in Argilla, you might will easiliy be able to grasp the `record` object structure you can access within your custom fields definition.The `record` object is the main object that contains all the information about the resource, like `fields`, `metadata`, etc.
+The `record` object is the main object that contains all the information about the Argilla `record` object in the UI, like `fields`, `metadata`, etc. Your template can use this object to display record information within the custom field.
 
-## Basic Mode
+## Using Handlebars in your template
 
-When `advanced_mode=False`, you can use the `template` argument to only pass basic HTML and CSS templates. To render information, we rely on the [handlebars syntax engine](https://handlebarsjs.com/). This engine will convert the content inside the brackets `{{}}` to the values of record's field's object within your template. As described in the [Accessing record information](#accessing-record-information) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data.
+By default, custom fields will use the [handlebars syntax engine](https://handlebarsjs.com/) to render templates with `record` information. This engine will convert the content inside the brackets `{{}}` to the values of record's field's object that you reference within your template. As described in the [Accessing record information](#accessing-record-information) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data. You can deactivate the `handlebars` engine with the `advanced_mode=False` parameter in `CustomField`, then you will need to define custom javascript to access the record attributes.
 
-### Minimal example
+### Usage example
 
 Because of the handlebars syntax engine, we only need to pass the HTML between `<script>` tags and potentially some CSS in
 between the `<style>` tags.
@@ -124,7 +124,7 @@ dataset.records.log(
 
 When `advanced_mode=True`, you can use the `template` argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript.
 
-### Minimal example
+### Usage example
 
 Let's reproduce example from the [Without advanced mode](#without-advanced-mode) section but this time we will insert the [handlebars syntax engine](https://handlebarsjs.com/) ourselves.
 
