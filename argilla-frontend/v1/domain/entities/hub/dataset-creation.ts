@@ -1,3 +1,4 @@
+import { FieldType } from "../field/FieldType";
 import {
   QuestionSetting,
   QuestionPrototype,
@@ -12,21 +13,19 @@ interface Feature {
 class FieldCreation {
   public readonly required: false;
 
-  constructor(
-    public readonly name: string,
-    private readonly type: "text" | "image" | "chat"
-  ) {}
+  constructor(public readonly name: string, private readonly type: FieldType) {}
 
   get isTextType() {
-    return this.type === "text";
+    return this.type.isTextType;
   }
-
   get isImageType() {
-    return this.type === "image";
+    return this.type.isImageType;
   }
-
   get isChatType() {
-    return this.type === "chat";
+    return this.type.isChatType;
+  }
+  get isCustomType() {
+    return this.type.isCustomType;
   }
 }
 

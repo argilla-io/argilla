@@ -1,0 +1,21 @@
+import { useResolve } from "ts-injecty";
+import { ref } from "@nuxtjs/composition-api";
+import { GetDatasetCreationUseCase } from "~/v1/domain/usecases/get-dataset-creation-use-case";
+import DatasetCreationVue from "~/components/features/dataset-creation/DatasetCreation.vue";
+
+export const useNewDatasetViewModel = () => {
+  const datasetId = ref();
+  const datasetConfig = ref();
+  const getDatasetCreationUseCase = useResolve(GetDatasetCreationUseCase);
+
+  const getNewDatasetByRepoId = async (repositoryId: string) => {
+    datasetId.value = repositoryId;
+    datasetConfig.value = await getDatasetCreationUseCase.execute(repositoryId);
+  };
+
+  const selectSubset = (name: string) => {
+    datasetConfig.value.changeSubset(name);
+  };
+
+  return { getNewDatasetByRepoId, datasetConfig, datasetId, selectSubset };
+};
