@@ -39,7 +39,6 @@ class TestCreateDatasets:
                     ImageField(name="image"),
                     ChatField(name="chat", use_markdown=False),
                     CustomField(name="custom", template="<div>{{field}}</div>"),
-                    
                 ],
                 questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
             ),
@@ -52,7 +51,6 @@ class TestCreateDatasets:
         created_dataset = client.datasets(name=dataset_name)
         assert created_dataset.settings == dataset.settings
         assert created_dataset.settings.distribution == TaskDistribution(min_submitted=1)
-        
 
     def test_create_dataset_with_optional_fields(self, client: Argilla, dataset_name: str):
         dataset = Dataset(
@@ -229,4 +227,3 @@ class TestCreateDatasets:
         assert created_dataset.settings == dataset.settings
         assert created_dataset.settings.fields["custom"].template == "<div>{{field}}</div>"
         assert created_dataset.settings.fields["custom2"].advanced_mode is True
-        
