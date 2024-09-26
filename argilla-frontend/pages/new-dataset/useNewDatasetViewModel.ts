@@ -1,7 +1,6 @@
 import { useResolve } from "ts-injecty";
 import { ref } from "@nuxtjs/composition-api";
 import { GetDatasetCreationUseCase } from "~/v1/domain/usecases/get-dataset-creation-use-case";
-import DatasetCreationVue from "~/components/features/dataset-creation/DatasetCreation.vue";
 
 export const useNewDatasetViewModel = () => {
   const datasetId = ref();
