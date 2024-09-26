@@ -35,7 +35,7 @@ def get_token() -> Optional[dict]:
     return _get_token_from_google_colab() or _get_token_from_environment()
 
 
-def _get_token_from_environment() -> Optional[str]:
+def _get_token_from_environment() -> Dict[str,str]:
     """ Get the argilla credentials from the environment """
     ARGILLA_API_URL = _clean_token(os.getenv(key="ARGILLA_API_URL", default=_DEFAULT_API_URL))
     ARGILLA_API_KEY = _clean_token(os.getenv(key="ARGILLA_API_KEY"))
