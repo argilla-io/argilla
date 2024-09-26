@@ -9,7 +9,7 @@ export class Field {
     public readonly id: string,
     public readonly name: string,
     public title: string,
-    private readonly record: any,
+    public readonly content: string,
     public readonly datasetId: string,
     public readonly isRequired: boolean,
     public settings: any
@@ -25,23 +25,12 @@ export class Field {
     return this.type === "image";
   }
 
-  public get isChatType() {
+  get isChatType() {
     return this.type === "chat";
   }
 
   get isCustomType() {
     return this.type === "custom";
-  }
-
-  get content() {
-    if (this.isCustomType) {
-      return `<script>const record_object = ${JSON.stringify(
-        this.record
-      )};</script>
-      ${this.settings.template}`;
-    }
-
-    return this.record.fields[this.name];
   }
 
   private get type() {
