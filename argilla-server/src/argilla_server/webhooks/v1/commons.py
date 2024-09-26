@@ -25,7 +25,7 @@ from argilla_server.models import Webhook as WebhookModel
 
 MSG_ID_BYTES_LENGTH = 16
 
-NOTIFY_EVENT_DEFAULT_TIMEOUT = httpx.Timeout(timeout=5.0)
+NOTIFY_EVENT_DEFAULT_TIMEOUT = httpx.Timeout(timeout=20.0)
 
 
 # NOTE: We are using standard webhooks implementation.
