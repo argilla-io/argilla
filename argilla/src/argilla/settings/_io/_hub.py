@@ -14,12 +14,26 @@
 
 import httpx
 import warnings
-from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, TYPE_CHECKING, Union, List, Optional
 
 from argilla._exceptions._hub import DatasetsServerException
 from argilla._exceptions._settings import SettingsError
+from argilla.settings._field import (
+    ImageField,
+    TextField,
+    ChatField,
+)
+from argilla.settings._question import (
+    LabelQuestion,
+    TextQuestion,
+    RatingQuestion,
+)
+from argilla.settings._metadata import (
+    TermsMetadataProperty,
+    IntegerMetadataProperty,
+    FloatMetadataProperty,
+)
 
 if TYPE_CHECKING:
     from argilla import Settings
@@ -44,7 +58,10 @@ class AttributeType(Enum):
     METADATA = "metadata"
 
 
-def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
+def _get_dataset_features(
+    repo_id: str,
+    config: Optional[str] = None,
+) -> Dict[str, Dict[str, Any]]:
     """Get the features of a dataset from the datasets server using the repo_id and config.
     Extract the features from the response and return them as a dictionary.
 
@@ -68,9 +85,10 @@ def _get_dataset_features(repo_id: str) -> Dict[str, Dict[str, Any]]:
             dataset_info = response_json["dataset_info"]
             available_configs = list(dataset_info.keys())
 
-            if len(available_configs) > 1:
-                warnings.warn("Multiple configurations found. Using the first one.")
-            config = available_configs[0]
+            if config is not None and config not in available_configs:
+                raise DatasetsServerException(f"Configuration '{config}' not found in the dataset.")
+            else:
+                config = config or available_configs[0]
             features = dataset_info[config]["features"]
             return features
 
@@ -115,8 +133,11 @@ def _map_attribute_type(attribute_type):
         return AttributeType.FIELD
     elif attribute_type == "metadata":
         return AttributeType.METADATA
+    elif attribute_type is None:
+        return None
     else:
         warnings.warn(f"Unsupported attribute type: {attribute_type}")
+        return None
 
 
 def _is_chat_feature(sub_features):
@@ -128,6 +149,51 @@ def _is_chat_feature(sub_features):
         and sub_features["role"]["_type"] == "Value"
         and sub_features["content"].get("dtype") == "string"
         and sub_features["role"].get("dtype") == "string"
+    )
+
+
+def _render_code_snippet(repo_id: str, subset: Optional[str] = None):
+    """Render the code snippet to use feature_mapping to load a dataset and log its records."""
+
+    from rich.console import Console, Group
+    from rich.syntax import Syntax
+    from rich.panel import Panel
+    from rich import box
+
+    from_hub_args = [f'repo_id="{repo_id}"']
+    if subset:
+        from_hub_args.append(f'subset="{subset}"')
+
+    from_hub_args = ", ".join(from_hub_args)
+
+    title = "Customize the dataset settings"
+    message = """
+    No questions were found in the dataset's features. A default question for 'quality' has been added.
+    If you want to customize the dataset differently, you can do the following:
+    """
+    code_block = f"""
+    # 1. Create new questions, fields, vectors, or metadata properties in the settings
+    settings = rg.Settings.from_hub({from_hub_args})
+    settings.questions.add(rg.TextQuestion(name="new_question", required=True))
+    dataset = rg.Dataset.from_hub({from_hub_args}, settings=settings)
+
+    # 2. Map the dataset's columns to question, field, or metadata
+    settings = rg.Settings.from_hub(
+        {from_hub_args},
+        feature_mapping={{"<column_name>": "question"}},
+    )
+    dataset = rg.Dataset.from_hub({from_hub_args}, settings=settings)
+    """
+
+    console = Console()
+    console.print(
+        Panel(
+            Group(Syntax(message, "markdown"), Syntax(code_block, "python", theme="github-dark", line_numbers=False)),
+            title=title,
+            box=box.SQUARE,
+            width=100,
+            expand=False,
+        )
     )
 
 
@@ -143,43 +209,32 @@ def _define_settings_from_features(
         rg.Settings: The settings defined from the features.
     """
 
-    from argilla import (
-        ImageField,
-        LabelQuestion,
-        TextQuestion,
-        Settings,
-        TextField,
-        ChatField,
-        TermsMetadataProperty,
-        IntegerMetadataProperty,
-        FloatMetadataProperty,
-    )
+    from argilla import Settings
 
     fields = []
     questions = []
     metadata = []
-    mapping = defaultdict(list)
     feature_mapping = feature_mapping or {}
 
     for name, feature in features.items():
         feature_type = _map_feature_type(feature)
         attribute_definition = _map_attribute_type(feature_mapping.get(name))
 
-        # Lowercase the name to avoid case sensitivity issues when mapping the features to the settings.
-        name = name.lower()
+        name = Settings._sanitize_settings_name(name)
+
+        if not Settings._is_valid_name(name):
+            warnings.warn(f"Feature '{name}' has an invalid name. Skipping.")
+            continue
 
         if feature_type == FeatureType.CHAT:
             fields.append(ChatField(name=name, required=False))
         elif feature_type == FeatureType.TEXT:
             if attribute_definition == AttributeType.QUESTION:
-                questions.append(TextQuestion(name=name))
+                questions.append(TextQuestion(name=name, required=False))
             elif attribute_definition == AttributeType.FIELD:
                 fields.append(TextField(name=name, required=False))
             elif attribute_definition is None:
-                questions.append(TextQuestion(name=f"{name}_question"))
                 fields.append(TextField(name=name, required=False))
-                mapping[name].append(name)
-                mapping[name].append(f"{name}_question")
             else:
                 raise SettingsError(
                     f"Attribute definition '{attribute_definition}' is not supported for feature '{name}'."
@@ -193,25 +248,10 @@ def _define_settings_from_features(
             if names is None:
                 warnings.warn(f"Feature '{name}' has no labels. Skipping.")
                 continue
-            if attribute_definition == AttributeType.QUESTION:
-                questions.append(
-                    LabelQuestion(
-                        name=name,
-                        labels=names,
-                    )
-                )
+            if attribute_definition == AttributeType.QUESTION or attribute_definition is None:
+                questions.append(LabelQuestion(name=name, labels=names, required=False))
             elif attribute_definition == AttributeType.FIELD:
                 metadata.append(TermsMetadataProperty(name=name))
-            elif attribute_definition is None:
-                questions.append(
-                    LabelQuestion(
-                        name=name,
-                        labels=names,
-                    )
-                )
-                metadata.append(TermsMetadataProperty(name=f"{name}_metadata"))
-                mapping[name].append(name)
-                mapping[name].append(f"{name}_metadata")
             else:
                 raise SettingsError(
                     f"Attribute definition '{attribute_definition}' is not supported for feature '{name}'."
@@ -223,24 +263,43 @@ def _define_settings_from_features(
         else:
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
-    mapping = {
-        key: value[0] if isinstance(value, list) and len(value) == 1 else tuple(value) for key, value in mapping.items()
-    }
+    settings = Settings(fields=fields, questions=questions, metadata=metadata)
 
-    if not questions:
-        questions.append(TextQuestion(name="comment", required=True))
-
-    if not fields:
+    if not settings.fields:
         raise SettingsError("No fields found in the dataset features. Argilla datasets require at least one field.")
-
-    questions[0].required = True
-    fields[0].required = True
-
-    settings = Settings(fields=fields, questions=questions, metadata=metadata, mapping=mapping)
 
     return settings
 
 
-def build_settings_from_repo_id(repo_id: str, feature_mapping: Optional[Dict[str, str]] = None) -> "Settings":
-    dataset_features = _get_dataset_features(repo_id)
-    return _define_settings_from_features(dataset_features, feature_mapping)
+def build_settings_from_repo_id(
+    repo_id: str,
+    feature_mapping: Optional[Dict[str, str]] = None,
+    subset: Optional[str] = None,
+) -> "Settings":
+    """Build the argilla settings from the features of a dataset.
+
+    Parameters:
+        repo_id (str): The repository ID of the dataset on the hub.
+        feature_mapping (Dict[str, str]): A mapping of dataset features to questions, fields, or metadata properties.
+        subset (str): The subset of the dataset to use. If provided, 'config' should not be provided.
+
+    """
+    dataset_features = _get_dataset_features(repo_id=repo_id, config=subset)
+    settings = _define_settings_from_features(dataset_features, feature_mapping)
+
+    if not settings.questions:
+        settings.questions.add(
+            RatingQuestion(
+                name="quality",
+                title="Quality",
+                description="How would you rate the quality of the record?",
+                required=True,
+                values=[0, 1, 2, 3, 4, 5],
+            )
+        )
+        _render_code_snippet(repo_id=repo_id, subset=subset)
+
+    settings.questions[0].required = True
+    settings.fields[0].required = True
+
+    return settings
