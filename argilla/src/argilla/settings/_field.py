@@ -213,9 +213,9 @@ class CustomField(AbstractField):
     def __init__(
         self,
         name: str,
+        title: Optional[str] = None,
         template: Optional[str] = "",
         advanced_mode: Optional[bool] = False,
-        title: Optional[str] = None,
         required: bool = True,
         description: Optional[str] = None,
         _client: Optional[Argilla] = None,
