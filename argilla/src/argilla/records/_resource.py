@@ -273,8 +273,7 @@ class Record(Resource):
 
         # set private attributes
         instance._dataset = dataset
-        instance._model.id = model.id
-        instance._model.status = model.status
+        instance._model = model
 
         return instance
 

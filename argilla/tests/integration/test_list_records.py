@@ -106,3 +106,21 @@ def test_list_records_with_responses(client: Argilla, dataset: Dataset):
 
     assert records[1].responses["comment"][0].value == "The comment"
     assert records[1].responses["sentiment"][0].value == "negative"
+
+
+def test_list_records_with_updated_at_and_inserted_at(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+        ]
+    )
+
+    records = list(dataset.records(with_responses=True))
+    assert len(records) == 2
+
+    assert records[0].inserted_at
+    assert records[0].updated_at
+
+    assert records[1].inserted_at
+    assert records[1].updated_at
