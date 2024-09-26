@@ -79,13 +79,13 @@ export default {
     },
   },
   computed: {
-    isBasic() {
-      return true;
+    isAdvanced() {
+      this.settings.advanced_mode;
     },
     template() {
       const recordObject = JSON.stringify(this.record);
 
-      const templateToUse = this.isBasic ? BASIC_TEMPLATE : ADVANCE_TEMPLATE;
+      const templateToUse = this.isAdvanced ? ADVANCE_TEMPLATE : BASIC_TEMPLATE;
 
       return templateToUse
         .replace("#RECORD_OBJECT#", recordObject)
