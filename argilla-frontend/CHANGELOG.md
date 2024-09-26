@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added new field `CustomField` [#5462](https://github.com/argilla-io/argilla/pull/5462)
+
 ### Fixed
 
 - Fix autofill form on sign-in page [#5522](https://github.com/argilla-io/argilla/pull/5522)

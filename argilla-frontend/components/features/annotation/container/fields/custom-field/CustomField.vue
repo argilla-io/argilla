@@ -17,12 +17,44 @@
       </BaseActionTooltip>
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
-      <Sandbox :content="content" />
+      <Sandbox :content="template" />
     </div>
   </div>
 </template>
-
 <script>
+/* eslint-disable */
+const STYLES = `
+<script>
+if (parent) {
+  const currentHead = document.getElementsByTagName("head")[0];
+  const styles = parent.document.getElementsByTagName("style");
+  for (const style of styles) {
+    currentHead.appendChild(style.cloneNode(true));
+  }
+}
+<\/script>`;
+
+const BASIC_TEMPLATE = `
+${STYLES}
+<script>const record_object = #RECORD_OBJECT#;<\/script>
+<script src="./js/handlebars.min.js"><\/script>
+<div id="template" class="text-center">
+  #TEMPLATE#
+</div>
+<script>
+  const template = document.getElementById("template").innerHTML;
+  const compiledTemplate = Handlebars.compile(template);
+  const html = compiledTemplate({ record_object });
+  document.body.innerHTML = html;
+<\/script>
+`;
+const ADVANCE_TEMPLATE = ` ${STYLES}
+<script>
+  const record_object = #RECORD_OBJECT#;
+<\/script>
+#TEMPLATE#
+`;
+
 export default {
   props: {
     name: {
@@ -33,14 +65,31 @@ export default {
       type: String,
       required: true,
     },
+    settings: {
+      type: Object,
+      required: true,
+    },
     content: {
       type: String,
       required: true,
     },
+    record: {
+      type: Object,
+      required: true,
+    },
   },
   computed: {
-    classes() {
-      return this.$language.isRTL(this.content) ? "--rtl" : "--ltr";
+    isAdvanced() {
+      this.settings.advanced_mode;
+    },
+    template() {
+      const recordObject = JSON.stringify(this.record);
+
+      const templateToUse = this.isAdvanced ? ADVANCE_TEMPLATE : BASIC_TEMPLATE;
+
+      return templateToUse
+        .replace("#RECORD_OBJECT#", recordObject)
+        .replace("#TEMPLATE#", this.content);
     },
   },
 };
