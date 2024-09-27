@@ -49,13 +49,23 @@ minikube start
 ## Enable Minikube Addons
 ```bash
 minikube addons enable ingress
-
 ```
+
+The ingress controller pod should be in the `Running` state.
+```bash
+kubectl get pods -n ingress-nginx
+```
+
 ## Installing ECK
 As we want to use the operator to manage our Elasticsearch cluster, we need to install the ECK operator.
 ```bash
 helm install elastic-operator elastic/eck-operator -n elastic-system --create-namespace
 ```
+The elastic-operator pod should be in the `Running` state.
+```bash
+kubectl get pods -n elastic-system
+```
+
 ## Installing the Chart
 
 After adding the repository, you can install the chart with the release name `my-argilla-server`:

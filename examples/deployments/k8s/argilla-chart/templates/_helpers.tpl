@@ -5,6 +5,11 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "argilla.worker.name" -}}
+{{- printf "%s-%s" .Release.Name "worker" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
@@ -51,17 +56,22 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Worker labels
+Argilla Worker labels
 */}}
 {{- define "worker.labels" -}}
-{{ include "argilla.labels" . }}
+helm.sh/chart: {{ include "argilla.chart" . }}
 app.kubernetes.io/component: worker
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Worker Selector labels
+Argilla Worker Selector labels
 */}}
 {{- define "worker.selectorLabels" -}}
-{{ include "argilla.selectorLabels" . }}
 app.kubernetes.io/component: worker
+app.kubernetes.io/name: {{ include "argilla.worker.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}-worker
 {{- end }}
