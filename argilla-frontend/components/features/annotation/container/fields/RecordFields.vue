@@ -7,6 +7,7 @@
         title,
         content,
         settings,
+        sdkRecord,
         isTextType,
         isImageType,
         isChatType,
