@@ -20,10 +20,11 @@ export class Field {
   ) {
     this.initializeOriginal();
 
-    this.content = record?.fields[name] ?? "";
-
     if (this.isCustomType) {
       this.sdkRecord = record;
+      this.content = settings.template;
+    } else {
+      this.content = record?.fields[name] ?? "";
     }
   }
 
