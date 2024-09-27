@@ -279,20 +279,18 @@ class Record(Resource):
             fields=model.fields,
             metadata={meta.name: meta.value for meta in model.metadata},
             vectors={vector.name: vector.vector_values for vector in model.vectors},
-            # Responses and their models are not aligned 1-1.
-            responses=[
-                response
-                for response_model in model.responses
-                for response in UserResponse.from_model(response_model, dataset=dataset)
-            ],
-            suggestions=[Suggestion.from_model(model=suggestion, dataset=dataset) for suggestion in model.suggestions],
-            inserted_at=model.inserted_at,
-            updated_at=model.updated_at,
+            _dataset=dataset,
+            responses=[],
+            suggestions=[],
         )
 
         # set private attributes
         instance._dataset = dataset
         instance._model = model
+
+        # Responses and suggestions are computed separately based on the record model
+        instance.responses.from_models(model.responses)
+        instance.suggestions.from_models(model.suggestions)
 
         return instance
 
@@ -367,11 +365,10 @@ class RecordResponses(Iterable[Response]):
     def __init__(self, responses: List[Response], record: Record) -> None:
         self.record = record
         self.__responses_by_question_name = defaultdict(list)
+        self.__responses = []
 
-        self.__responses = responses or []
-        for response in self.__responses:
-            response.record = self.record
-            self.__responses_by_question_name[response.question_name].append(response)
+        for response in responses or []:
+            self.add(response)
 
     def __iter__(self):
         return iter(self.__responses)
@@ -427,6 +424,11 @@ class RecordResponses(Iterable[Response]):
                     f"already found. The responses for the same question name do not support more than one user"
                 )
 
+    def from_models(self, responses: List[UserResponseModel]) -> None:
+        for response_model in responses:
+            for response in UserResponse.from_model(response_model, record=self.record):
+                self.add(response)
+
 
 class RecordSuggestions(Iterable[Suggestion]):
     """This is a container class for the suggestions of a Record.
@@ -479,3 +481,7 @@ class RecordSuggestions(Iterable[Suggestion]):
         """
         suggestion.record = self.record
         self._suggestion_by_question_name[suggestion.question_name] = suggestion
+
+    def from_models(self, suggestions: List[SuggestionModel]) -> None:
+        for suggestion_model in suggestions:
+            self.add(Suggestion.from_model(suggestion_model, record=self.record))
