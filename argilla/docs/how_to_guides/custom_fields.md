@@ -87,6 +87,7 @@ dataset.records.log(
 === "Show images in two columns"
 
     ```python
+
     template = """
     <style>
     #container {
@@ -155,6 +156,13 @@ dataset.records.log(
         {{/each}}
     </div>
     """
+    record_object = rg.Record(
+        metadata={
+            "key": "value",
+            "key2": "value2",
+        }
+    )
+    ```
 
 ## Advanced Mode
 
