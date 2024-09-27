@@ -24,6 +24,7 @@ from argilla._api._base import ResourceAPI
 from argilla._api._client import DEFAULT_HTTP_CONFIG
 from argilla._exceptions import ArgillaError, NotFoundError
 from argilla._helpers import GenericIterator
+from argilla._helpers._deploy import SpacesDeploymentMixin
 from argilla._helpers._resource_repr import ResourceHTMLReprMixin
 from argilla._models import DatasetModel, ResourceModel, UserModel, WorkspaceModel
 
@@ -33,7 +34,7 @@ if TYPE_CHECKING:
 __all__ = ["Argilla"]
 
 
-class Argilla(_api.APIClient):
+class Argilla(_api.APIClient, SpacesDeploymentMixin):
     """Argilla API client. This is the main entry point to interact with the API.
 
     Attributes:
