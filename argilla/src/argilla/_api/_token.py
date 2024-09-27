@@ -15,7 +15,7 @@
 import os
 import warnings
 from threading import Lock
-from typing import Optional
+from typing import Optional, Dict
 from huggingface_hub.utils._runtime import is_google_colab
 from argilla._constants import _DEFAULT_API_URL
 
