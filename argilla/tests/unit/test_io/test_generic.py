@@ -43,6 +43,8 @@ class TestGenericIO:
             {
                 "id": str(record.id),
                 "status": "pending",
+                "inserted_at": record.inserted_at,
+                "updated_at": record.updated_at,
                 "_server_id": None,
                 "field": "The field",
                 "key": "value",
