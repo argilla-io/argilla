@@ -41,6 +41,8 @@ TERMS_FILTER_VALUES_MAX_ITEMS = 250
 SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
 SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
 
+SEARCH_MAX_SIMILARITY_SEARCH_RESULT = 1000
+
 CHAT_FIELDS_MAX_MESSAGES = 500
 
 
@@ -261,7 +263,12 @@ class VectorQuery(BaseModel):
 
 class Query(BaseModel):
     text: Optional[TextQuery] = None
-    vector: Optional[VectorQuery] = None
+    vector: Optional[VectorQuery] = Field(
+        None,
+        description="Query by vector similarity."
+        " Either 'record_id' or 'value' must be provided. "
+        f"Max number of records to return is limited to {SEARCH_MAX_SIMILARITY_SEARCH_RESULT}.",
+    )
 
 
 class MetadataFilterScope(BaseModel):
