@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from datetime import datetime
 from typing import List, Any, Union, Literal, Annotated, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 
 class RecordFilterScopeModel(BaseModel):
@@ -64,6 +64,18 @@ class TermsFilterModel(BaseModel):
     values: List[Any]
     scope: ScopeModel
 
+    @field_serializer("values", when_used="unless-none")
+    def serialize_values(self, values):
+        sanitized_values = []
+        for value in values:
+            if isinstance(value, UUID):
+                value = str(value)
+            elif isinstance(value, datetime):
+                value = value.isoformat()
+            sanitized_values.append(value)
+
+        return sanitized_values
+
 
 class RangeFilterModel(BaseModel):
     """Filter model for range filter."""
@@ -72,6 +84,12 @@ class RangeFilterModel(BaseModel):
     ge: Union[Any, None] = None
     le: Union[Any, None] = None
     scope: ScopeModel
+
+    @field_serializer("ge", "le", when_used="unless-none")
+    def serialize_values(self, value):
+        if isinstance(value, datetime):
+            return value.isoformat()
+        return value
 
 
 FilterModel = Annotated[
@@ -103,6 +121,10 @@ class VectorQueryModel(BaseModel):
     record_id: Optional[UUID] = None
     value: Optional[List[float]] = None
     order: Literal["most_similar", "least_similar"] = "most_similar"
+
+    @field_serializer("record_id", when_used="unless-none", return_type=str)
+    def serialize_record_id(self, value):
+        return str(value)
 
 
 class QueryModel(BaseModel):
