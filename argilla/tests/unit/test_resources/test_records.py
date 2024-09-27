@@ -49,7 +49,9 @@ class TestRecords:
             "fields={'name': 'John', 'age': '30'},"
             "metadata={'key': 'value'},"
             "suggestions={'question': {'value': 'answer', 'score': None, 'agent': None}},"
-            f"responses={{'question': [{{'value': 'answer'}}]}})"
+            f"responses={{'question': [{{'value': 'answer'}}]}},"
+            "inserted_at=None,"
+            "updated_at=None)"
         )
 
     def test_record_external_id(self):
