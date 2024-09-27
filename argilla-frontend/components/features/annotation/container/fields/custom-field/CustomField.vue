@@ -73,17 +73,17 @@ export default {
       type: String,
       required: true,
     },
-    record: {
+    sdkRecord: {
       type: Object,
       required: true,
     },
   },
   computed: {
     isAdvanced() {
-      this.settings.advanced_mode;
+      return this.settings.advanced_mode;
     },
     template() {
-      const recordObject = JSON.stringify(this.record);
+      const recordObject = JSON.stringify(this.sdkRecord);
 
       const templateToUse = this.isAdvanced ? ADVANCE_TEMPLATE : BASIC_TEMPLATE;
 

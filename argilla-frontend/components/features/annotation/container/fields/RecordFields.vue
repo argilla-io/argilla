@@ -51,7 +51,7 @@
         :name="name"
         :title="title"
         :content="content"
-        :record="record"
+        :sdkRecord="sdkRecord"
         :settings="settings"
       />
     </div>
