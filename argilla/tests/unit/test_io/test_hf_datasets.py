@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
 from uuid import uuid4
 
-from datasets import Sequence, Value
+from datasets import Value, Sequence
 
 import argilla as rg
 from argilla.records._io import HFDatasetsIO
@@ -35,7 +34,7 @@ class TestHFDatasetsIO:
             ),
         )
         records = [
-            rg.Record(fields={"field": "The field"}, metadata={"a": "a"}, inserted_at=datetime.datetime.now()),
+            rg.Record(fields={"field": "The field"}, metadata={"a": "a"}),
             rg.Record(fields={"field": "Other field", "other": "Field"}, metadata={"b": "b"}),
             rg.Record(fields={"field": "Again"}, suggestions=[rg.Suggestion("question", value="value")]),
             rg.Record(
@@ -64,8 +63,6 @@ class TestHFDatasetsIO:
             "b": Value(dtype="string", id=None),
             "field": Value(dtype="string", id=None),
             "id": Value(dtype="string", id=None),
-            "inserted_at": Value(dtype="timestamp[ns, tz=UTC]", id=None),
-            "updated_at": Value(dtype="timestamp[ns, tz=UTC]", id=None),
             "other": Value(dtype="string", id=None),
             "other_question.responses": Sequence(feature=Value(dtype="string", id=None), length=-1, id=None),
             "other_question.responses.status": Sequence(feature=Value(dtype="null", id=None), length=-1, id=None),
