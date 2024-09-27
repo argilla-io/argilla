@@ -178,7 +178,7 @@ export default {
   }
   &__left {
     @include media("<desktop") {
-      :deep(.resizable__down) {
+      :deep(.resizable-h__down) {
         display: none;
       }
     }

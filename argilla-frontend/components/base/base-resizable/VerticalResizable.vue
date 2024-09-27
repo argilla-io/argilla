@@ -1,12 +1,12 @@
 <template>
-  <div class="resizable" :class="resizing ? '--v-resizing' : ''">
-    <div class="resizable__left"><slot name="left" /></div>
+  <div class="resizable-v" :class="resizing ? '--v-resizing' : ''">
+    <div class="resizable-v__left"><slot name="left" /></div>
 
-    <div class="resizable__bar" ref="resizableBar">
-      <div class="resizable__bar__inner" />
+    <div class="resizable-v__bar" ref="resizableBar">
+      <div class="resizable-v__bar__inner" />
     </div>
 
-    <div class="resizable__right"><slot name="right" /></div>
+    <div class="resizable-v__right"><slot name="right" /></div>
     <slot></slot>
   </div>
 </template>
@@ -107,7 +107,7 @@ export default {
 $resizabla-bar-color: #6794fe;
 $resizable-bar-width: $base-space;
 
-.resizable {
+.resizable-v {
   $this: &;
   display: flex;
   flex-direction: row;

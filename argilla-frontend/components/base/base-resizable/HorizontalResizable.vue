@@ -1,18 +1,18 @@
 <template>
-  <div class="resizable" :class="resizing ? '--h-resizing' : null">
-    <div class="resizable__up">
+  <div class="resizable-h" :class="resizing ? '--h-resizing' : null">
+    <div class="resizable-h__up">
       <slot name="up" />
     </div>
 
-    <div class="resizable__bar" ref="resizableBar">
-      <div class="resizable__bar__inner" />
+    <div class="resizable-h__bar" ref="resizableBar">
+      <div class="resizable-h__bar__inner" />
     </div>
-    <div class="resizable__down" v-if="!collapsable">
+    <div class="resizable-h__down" v-if="!collapsable">
       <slot name="down" />
     </div>
     <BaseCollapsablePanel
       v-else
-      class="resizable__down"
+      class="resizable-h__down"
       :class="isExpanded ? '--expanded' : null"
       :is-expanded="isExpanded"
       @toggle-expand="toggleExpand"
@@ -180,12 +180,11 @@ export default {
 $resizabla-bar-color: #6794fe;
 $collapsed-panel-height: 50px;
 $resizable-bar-width: $base-space;
-.resizable {
+.resizable-h {
   $this: &;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  flex-direction: column;
   height: 100%;
   min-height: 0;
   width: 100%;
