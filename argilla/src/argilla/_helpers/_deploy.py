@@ -182,6 +182,7 @@ class SpacesDeploymentMixin(LoggingMixin):
             from IPython.display import IFrame, display
 
             display(IFrame(src=self.api_url, frameborder=0, width=850, height=600))
+            return f"Argilla is being deployed at: {self.api_url}"
         else:
             return f"Argilla is being deployed at: {self.api_url}"
 
