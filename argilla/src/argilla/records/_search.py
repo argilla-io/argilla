@@ -11,9 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from datetime import datetime
-from typing import List, Any, Union, Tuple, Iterable
-from uuid import UUID
+from typing import List, Any, Union, Tuple, Iterable, TYPE_CHECKING
 
 from argilla._models import SearchQueryModel
 from argilla._models._search import (
@@ -31,6 +29,9 @@ from argilla._models._search import (
     VectorQueryModel,
 )
 
+if TYPE_CHECKING:
+    from argilla.records import Record
+
 __all__ = ["Query", "Filter", "Condition", "Similar", "Conditions"]
 
 
@@ -42,13 +43,6 @@ class Condition(Tuple[str, str, Any]):
 
         field = field.strip()
         scope = self._extract_filter_scope(field)
-
-        # TODO: Remove this and move the serialization logic to the API classes
-        if isinstance(value, UUID):
-            value = str(value)
-        # TODO: Remove this and move the serialization logic to the API classes
-        elif isinstance(value, datetime):
-            value = value.isoformat()
 
         operator = operator.strip()
         if operator == "==":
@@ -107,20 +101,24 @@ Conditions = Union[List[Tuple[str, str, Any]], Tuple[str, str, Any]]
 class Similar:
     """This class is used to map user similar queries to the internal query models"""
 
-    def __init__(self, name: str, value: Iterable[float]):
+    def __init__(self, name: str, value: Union[Iterable[float], "Record"]):
         """
         Create a similar object for use in Argilla search requests.
 
         Parameters:
             name: The name of the vector field
-            value: The vector value
+            value: The vector value or the record to search for similar records
         """
 
         self.name = name
         self.value = value
 
     def api_model(self) -> VectorQueryModel:
-        # TODO: Add support for record id
+        from argilla.records import Record
+
+        if isinstance(self.value, Record):
+            return VectorQueryModel(name=self.name, record_id=self.value._server_id, order="most_similar")
+
         return VectorQueryModel(name=self.name, value=self.value, order="most_similar")
 
 
