@@ -12,6 +12,7 @@ argilla:
   auth:
     username: "argilla"
     password: "12345678"
+    apiKey: "argilla.apikey"
   persistence:
     enabled: true
     accessMode: ReadWriteOnce

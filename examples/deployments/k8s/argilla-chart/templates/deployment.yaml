@@ -40,6 +40,8 @@ spec:
               value: {{ .Values.argilla.auth.username | quote }}
             - name: PASSWORD
               value: {{ .Values.argilla.auth.password  | quote }}
+            - name: API_KEY
+              value: {{ .Values.argilla.auth.apiKey  | quote }}
             {{- if .Values.argilla.persistence.enabled }}
             - name: ARGILLA_HOME_PATH
               value: {{ .Values.argilla.persistence.mountPath | quote }}

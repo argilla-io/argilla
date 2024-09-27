@@ -3,18 +3,18 @@ kind: Deployment
 metadata:
   name: {{ include "argilla.fullname" . }}-worker
   labels:
-    {{- include "argilla.labels" . | nindent 4 }}
+    {{- include "worker.labels" . | nindent 4 }}
     app.kubernetes.io/component: worker
 spec:
   replicas: {{ .Values.worker.replicaCount | default 1 }}
   selector:
     matchLabels:
-      {{- include "argilla.selectorLabels" . | nindent 6 }}
+      {{- include "worker.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: worker
   template:
     metadata:
       labels:
-        {{- include "argilla.selectorLabels" . | nindent 8 }}
+        {{- include "worker.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: worker
     spec:
       containers:

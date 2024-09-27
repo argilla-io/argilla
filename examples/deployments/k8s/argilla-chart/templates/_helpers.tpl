@@ -49,3 +49,19 @@ Create chart name and version as used by the chart label.
 {{- define "argilla.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{/*
+Worker labels
+*/}}
+{{- define "worker.labels" -}}
+{{ include "argilla.labels" . }}
+app.kubernetes.io/component: worker
+{{- end }}
+
+{{/*
+Worker Selector labels
+*/}}
+{{- define "worker.selectorLabels" -}}
+{{ include "argilla.selectorLabels" . }}
+app.kubernetes.io/component: worker
+{{- end }}
