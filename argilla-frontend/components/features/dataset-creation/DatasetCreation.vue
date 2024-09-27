@@ -18,11 +18,7 @@
         </p>
         <div class="dataset-creation__paste">
           <BaseInputContainer class="dataset-creation__input">
-            <BaseInput
-              class="search-area__input"
-              v-model="repositoryId"
-              placeholder="Repository ID"
-            />
+            <BaseInput v-model="repositoryId" placeholder="Repository ID" />
           </BaseInputContainer>
           <BaseButton class="primary" @click="loadDatasetFromHF"
             >Import Dataset</BaseButton
