@@ -65,6 +65,93 @@ def test_list_records_with_start_offset(client: Argilla, dataset: Dataset):
     ]
 
 
+def test_list_records_with_limit(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+
+    records = list(dataset.records(limit=2))
+    assert len(records) == 2
+
+    assert [record.to_dict() for record in records] == [
+        {
+            "_server_id": str(records[0]._server_id),
+            "fields": {"text": "The record text field"},
+            "id": "1",
+            "status": "pending",
+            "metadata": {},
+            "responses": {},
+            "suggestions": {},
+            "vectors": {},
+        },
+        {
+            "_server_id": str(records[1]._server_id),
+            "fields": {"text": "The record text field"},
+            "id": "2",
+            "status": "pending",
+            "metadata": {},
+            "responses": {},
+            "suggestions": {},
+            "vectors": {},
+        },
+    ]
+
+
+def test_list_records_with_limit_greater_than_batch_size(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+
+    records = list(dataset.records(limit=2, batch_size=1))
+
+    assert len(records) == 2
+    assert records[0].id == "1"
+    assert records[1].id == "2"
+
+
+@pytest.mark.parametrize("limit", [0, -1, -10])
+def test_list_records_with_invalid_limit(client: Argilla, dataset: Dataset, limit: int):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+    with pytest.warns(UserWarning, match=f"Limit {limit} is invalid: must be greater than 0. Setting limit to 1."):
+        records = list(dataset.records(limit=limit))
+        assert len(records) == 1
+
+
+def test_list_records_with_limit_greater_than_total(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+
+    records = list(dataset.records(limit=10))
+    assert len(records) == 5
+
+
 def test_get_record_by_id(client: Argilla, dataset: Dataset):
     dataset.records.log(
         [
