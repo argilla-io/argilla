@@ -40,9 +40,10 @@ class Condition(Tuple[str, str, Any]):
         field = field.strip()
         scope = self._extract_filter_scope(field)
 
+        # TODO: Remove this and move the serialization logic to the API classes
         if isinstance(value, UUID):
             value = str(value)
-
+        # TODO: Remove this and move the serialization logic to the API classes
         elif isinstance(value, datetime):
             value = value.isoformat()
 
@@ -73,22 +74,27 @@ class Condition(Tuple[str, str, Any]):
             return RecordFilterScopeModel(property="updated_at")
         elif field == "response.status":
             return ResponseFilterScopeModel(property="status")
-        elif "metadata" in field:
+        elif field.startswith("metadata"):
             _, md_property = field.split(".")
             return MetadataFilterScopeModel(metadata_property=md_property)
-        elif "suggestion" in field:
+        elif field.endswith("suggestion"):
             question, _ = field.split(".")
             return SuggestionFilterScopeModel(question=question)
-        elif "score" in field:
+        elif field.endswith("score"):
             question, _ = field.split(".")
             return SuggestionFilterScopeModel(question=question, property="score")
-        elif "response" in field:
+        elif field.endswith("agent"):
+            question, _ = field.split(".")
+            return SuggestionFilterScopeModel(question=question, property="agent")
+        elif field.endswith("type"):
+            question, _ = field.split(".")
+            return SuggestionFilterScopeModel(question=question, property="type")
+        elif field.endswith("response"):
             question, _ = field.split(".")
             return ResponseFilterScopeModel(question=question)
 
         else:  # Question field -> Suggestion
-            # TODO: The default path would be raise an error instead of consider suggestions by default
-            #  (can be confusing)
+            # TODO: Return None and skip this filter
             return SuggestionFilterScopeModel(question=field)
 
 
