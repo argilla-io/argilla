@@ -160,10 +160,13 @@ class SpacesDeploymentMixin(LoggingMixin):
                 secrets=secrets,
             )
 
+        repo_url: RepoUrl = api.create_repo(
+            repo_id=repo_id, repo_type="space", token=token, exist_ok=True, space_sdk="docker"
+        )
         api_url: str = (
             f"https://{cls._sanitize_url_component(org_name)}-{cls._sanitize_url_component(repo_name)}.hf.space/"
         )
-        cls._log_message(cls, message=f"Argilla is being deployed at: {api_url}")
+        cls._log_message(cls, message=f"Argilla is being deployed at: {repo_url}")
         while cls._check_if_running(api.get_space_runtime(repo_id=repo_id, token=token)):
             time.sleep(_SLEEP_TIME)
             cls._log_message(cls, message=f"Deploying. Waiting {_SLEEP_TIME} seconds.")
