@@ -419,7 +419,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         es_sort = self.build_elasticsearch_sort(sort) if sort else None
         response = await self._index_search_request(index, query=es_query, size=limit, from_=offset, sort=es_sort)
 
-        return await self._process_search_response(response)
+        return self._process_search_response(response)
 
     async def similarity_search(
         self,
@@ -466,7 +466,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             query_filters=query_filters,
         )
 
-        return await self._process_search_response(response, threshold)
+        return self._process_search_response(response, threshold)
 
     async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
         index_name = es_index_name_for_dataset(metadata_property.dataset)
@@ -630,7 +630,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         }
 
     @staticmethod
-    async def _process_search_response(response: dict, score_threshold: Optional[float] = None) -> SearchResponses:
+    def _process_search_response(response: dict, score_threshold: Optional[float] = None) -> SearchResponses:
         hits = response["hits"]["hits"]
 
         if score_threshold is not None:
