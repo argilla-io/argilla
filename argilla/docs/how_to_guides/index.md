@@ -82,11 +82,11 @@ These guides provide step-by-step instructions for common scenarios, including d
 
 <div class="grid cards" markdown>
 
--   __Custom fields with HTML and CSS templates__
+-   __Custom fields with layout templates__
 
     ---
 
-    Learn how to create `CustomFields` with HTML and CSS templates.
+    Learn how to create `CustomFields` with HTML, CSS and JavaScript templates.
 
     [:octicons-arrow-right-24: How-to guide](custom_fields.md)
 

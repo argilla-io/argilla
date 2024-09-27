@@ -44,9 +44,7 @@ css_template = """
 """ # (1)
 
 html_template = """
-<script>
-    <div id="div">{{record.fields.custom.key}}</div>
-</script>
+<div>{{record.fields.custom.key}}</div>
 """ # (2)
 ```
 
@@ -86,29 +84,29 @@ dataset.records.log(
 
 ### Example Gallery
 
-=== "Show texts in two columns"
+=== "Show images in two columns"
 
     ```python
     template = """
-	  <style>
-	    #container {
-	      display: flex;
-	      gap: 10px;
-	    }
-	    .column {
-	      flex: 1;
-	    }
-	  </style>
-	  <div id="container">
-	    <div class="column">
-	      <h3>Original text</h3>
-	      <div>{{record.fields.text.original}}</div>
-	    </div>
-	    <div class="column">
-	      <h3>Revision</h3>
-	      <div>{{record.fields.text.revision}}</div>
-	    </div>
-	  </div>
+    <style>
+    #container {
+        display: flex;
+        gap: 10px;
+    }
+    .column {
+        flex: 1;
+    }
+    </style>
+    <div id="container">
+        <div class="column">
+            <h3>Original text</h3>
+            <div>{{record.fields.text.original}}</div>
+        </div>
+        <div class="column">
+            <h3>Revision</h3>
+            <div>{{record.fields.text.revision}}</div>
+        </div>
+    </div>
     """
     record_object = rg.Record(
         fields={
@@ -119,6 +117,56 @@ dataset.records.log(
         }
     )
     ```
+
+=== "Show metadata in a table"
+
+    ```python
+    template = """
+    <style>
+    .container {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+        width: 100%;
+        max-width: 400px;
+    }
+    .header {
+        display: flex;
+        background-color: #f2f2f2;
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+    }
+    .row {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+    }
+    .row:last-child {
+        border-bottom: none;
+    }
+    .column {
+        flex: 1;
+        padding: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .column:first-child {
+        border-right: 1px solid #ddd;
+    }
+    </style>
+    <div class="container">
+        <div class="header">
+            <div class="column">Metadata</div>
+            <div class="column">Value</div>
+        </div>
+        {{#each record_object.metadata}}
+        <div class="row">
+            <div class="column">{{@key}}</div>
+            <div class="column">{{this}}</div>
+        </div>
+        {{/each}}
+    </div>
+    """
 
 ## Advanced Mode
 
