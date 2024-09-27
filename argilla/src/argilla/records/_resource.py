@@ -34,9 +34,11 @@ from argilla.suggestions import Suggestion
 from argilla.vectors import Vector
 
 if TYPE_CHECKING:
-    from argilla.datasets import Dataset
+    from datetime import datetime
+
     from argilla import Argilla
     from argilla._api import RecordsAPI
+    from argilla.datasets import Dataset
 
 
 class Record(Resource):
@@ -65,6 +67,8 @@ class Record(Resource):
         vectors: Optional[Dict[str, VectorValue]] = None,
         responses: Optional[List[Response]] = None,
         suggestions: Optional[List[Suggestion]] = None,
+        inserted_at: Optional[Union["datetime", str]] = None,
+        updated_at: Optional[Union["datetime", str]] = None,
         _server_id: Optional[UUID] = None,
         _dataset: Optional["Dataset"] = None,
     ):
@@ -79,6 +83,8 @@ class Record(Resource):
             vectors: A dictionary of vectors for the record.
             responses: A list of Response objects for the record.
             suggestions: A list of Suggestion objects for the record.
+            inserted_at: The datetime when the record was inserted.
+            updated_at: The datetime when the record was updated.
             _server_id: An id for the record. (Read-only and set by the server)
             _dataset: The dataset object to which the record belongs.
         """
@@ -91,7 +97,7 @@ class Record(Resource):
             raise ValueError("If fields are an empty dictionary, an id must be provided.")
 
         self._dataset = _dataset
-        self._model = RecordModel(external_id=id, id=_server_id)
+        self._model = RecordModel(external_id=id, id=_server_id, inserted_at=inserted_at, updated_at=updated_at)
         self.__fields = RecordFields(fields=fields, record=self)
         self.__vectors = RecordVectors(vectors=vectors)
         self.__metadata = RecordMetadata(metadata=metadata)
@@ -101,7 +107,8 @@ class Record(Resource):
     def __repr__(self) -> str:
         return (
             f"Record(id={self.id},status={self.status},fields={self.fields},metadata={self.metadata},"
-            f"suggestions={self.suggestions},responses={self.responses})"
+            f"suggestions={self.suggestions},responses={self.responses},inserted_at={self.inserted_at},"
+            f"updated_at={self.updated_at})"
         )
 
     ############################
@@ -173,6 +180,8 @@ class Record(Resource):
             vectors=self.vectors.api_models(),
             responses=self.responses.api_models(),
             suggestions=self.suggestions.api_models(),
+            inserted_at=self.inserted_at,
+            updated_at=self.updated_at,
             status=self.status,
         )
 
@@ -201,6 +210,8 @@ class Record(Resource):
         suggestions = self.suggestions.to_dict()
         responses = self.responses.to_dict()
         vectors = self.vectors.to_dict()
+        inserted_at = self.inserted_at
+        updated_at = self.updated_at
 
         return {
             "id": id,
@@ -210,6 +221,8 @@ class Record(Resource):
             "responses": responses,
             "vectors": vectors,
             "status": status,
+            "inserted_at": inserted_at,
+            "updated_at": updated_at,
             "_server_id": server_id,
         }
 
@@ -227,6 +240,8 @@ class Record(Resource):
         suggestions = data.get("suggestions", {})
         responses = data.get("responses", {})
         vectors = data.get("vectors", {})
+        inserted_at = data.get("inserted_at", None)
+        updated_at = data.get("updated_at", None)
         record_id = data.get("id", None)
         _server_id = data.get("_server_id", None)
 
@@ -244,6 +259,8 @@ class Record(Resource):
             responses=responses,
             vectors=vectors,
             metadata=metadata,
+            inserted_at=inserted_at,
+            updated_at=updated_at,
             _dataset=dataset,
             _server_id=_server_id,
         )
@@ -262,18 +279,18 @@ class Record(Resource):
             fields=model.fields,
             metadata={meta.name: meta.value for meta in model.metadata},
             vectors={vector.name: vector.vector_values for vector in model.vectors},
-            # Responses and their models are not aligned 1-1.
-            responses=[
-                response
-                for response_model in model.responses
-                for response in UserResponse.from_model(response_model, dataset=dataset)
-            ],
-            suggestions=[Suggestion.from_model(model=suggestion, dataset=dataset) for suggestion in model.suggestions],
+            _dataset=dataset,
+            responses=[],
+            suggestions=[],
         )
 
         # set private attributes
         instance._dataset = dataset
         instance._model = model
+
+        # Responses and suggestions are computed separately based on the record model
+        instance.responses.from_models(model.responses)
+        instance.suggestions.from_models(model.suggestions)
 
         return instance
 
@@ -348,11 +365,10 @@ class RecordResponses(Iterable[Response]):
     def __init__(self, responses: List[Response], record: Record) -> None:
         self.record = record
         self.__responses_by_question_name = defaultdict(list)
+        self.__responses = []
 
-        self.__responses = responses or []
-        for response in self.__responses:
-            response.record = self.record
-            self.__responses_by_question_name[response.question_name].append(response)
+        for response in responses or []:
+            self.add(response)
 
     def __iter__(self):
         return iter(self.__responses)
@@ -408,6 +424,11 @@ class RecordResponses(Iterable[Response]):
                     f"already found. The responses for the same question name do not support more than one user"
                 )
 
+    def from_models(self, responses: List[UserResponseModel]) -> None:
+        for response_model in responses:
+            for response in UserResponse.from_model(response_model, record=self.record):
+                self.add(response)
+
 
 class RecordSuggestions(Iterable[Suggestion]):
     """This is a container class for the suggestions of a Record.
@@ -460,3 +481,7 @@ class RecordSuggestions(Iterable[Suggestion]):
         """
         suggestion.record = self.record
         self._suggestion_by_question_name[suggestion.question_name] = suggestion
+
+    def from_models(self, suggestions: List[SuggestionModel]) -> None:
+        for suggestion_model in suggestions:
+            self.add(Suggestion.from_model(suggestion_model, record=self.record))
