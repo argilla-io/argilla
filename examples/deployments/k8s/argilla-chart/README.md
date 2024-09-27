@@ -75,7 +75,7 @@ All the pods should be in the `Running` state.
 
 In a different terminal window, run the following command to access Argilla:
 ```bash
-kubectl port-forward svc/my-argilla-server-argilla 6900
+kubectl port-forward svc/my-argilla-server 6900
 ```
 Argilla will be accessible at http://localhost:6900.
 
