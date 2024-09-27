@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Any, Union, Literal, Annotated
+from typing import List, Any, Union, Literal, Annotated, Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -97,10 +98,18 @@ class TextQueryModel(BaseModel):
     field: Union[str, None] = None
 
 
+class VectorQueryModel(BaseModel):
+    name: str
+    record_id: Optional[UUID] = None
+    value: Optional[List[float]] = None
+    order: Literal["most_similar", "least_similar"] = "most_similar"
+
+
 class QueryModel(BaseModel):
     """Query part of the search query model"""
 
-    text: TextQueryModel
+    text: Union[TextQueryModel, None] = None
+    vector: Union[VectorQueryModel, None] = None
 
 
 class SearchQueryModel(BaseModel):
