@@ -79,7 +79,7 @@ def _get_token_from_google_colab() -> Optional[str]:
             }
 
         except userdata.NotebookAccessError:
-            # Means the user has a secret call `HF_TOKEN` and got a popup "please grand access to HF_TOKEN" and refused it
+            # Means the user has a secret call `ARGILLA_API_URL` and `ARGILLA_API_URL` and got a popup "please grand access to ARGILLA_API_URL" and refused it
             # => warn user but ignore error => do not re-request access to user
             warnings.warn(
                 "\nAccess to the secret `ARGILLA_API_URL` and `ARGILLA_API_KEY` has not been granted on this notebook."
