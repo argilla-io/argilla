@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import fields
 from datetime import datetime
+from random import random
 
 import pytest
 
@@ -28,6 +28,8 @@ from argilla import (
     Query,
     Record,
     Suggestion,
+    VectorField,
+    Similar,
 )
 
 
@@ -35,17 +37,20 @@ from argilla import (
 def dataset(client: Argilla, workspace: Workspace, dataset_name: str) -> Dataset:
     settings = Settings(
         fields=[TextField(name="text")],
+        vectors=[VectorField(name="vector", dimensions=10)],
         questions=[
             TextQuestion(name="comment", use_markdown=False),
             LabelQuestion(name="sentiment", labels=["positive", "negative"], required=False),
         ],
     )
+
     dataset = Dataset(
         name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
     )
+
     dataset.create()
     yield dataset
     dataset.delete()
@@ -147,3 +152,25 @@ class TestSearchRecords:
         records = list(dataset.records(query=Query(filter=("sentiment.type", "==", "human"))))
         assert len(records) == 1
         assert records[0].id == "1"
+
+    def test_search_records_by_similar_value(self, client: Argilla, dataset: Dataset):
+        data = [
+            {
+                "id": i,
+                "text": "The record text field",
+                "vector": [random() for _ in range(10)],
+            }
+            for i in range(1500)
+        ]
+
+        dataset.records.log(data)
+
+        records = list(
+            dataset.records(
+                query=Query(
+                    similar=Similar(name="vector", value=data[3]["vector"]),
+                )
+            )
+        )
+        assert len(records) == 1000
+        assert records[0].id == str(data[3]["id"])
