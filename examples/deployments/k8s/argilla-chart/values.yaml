@@ -83,3 +83,14 @@ redis:
           memory: 2Gi
 serviceAccount:
   create: false
+
+worker:
+  replicaCount: 1
+  numWorkers: 2
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi

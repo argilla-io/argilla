@@ -11,6 +11,11 @@ spec:
     count: {{ .Values.elasticsearch.nodeCount }}
     config:
       node.store.allow_mmap: false
+      {{- if .Values.elasticsearch.disableAuthentication }}
+      xpack.security.enabled: false
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+      {{- end }}
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data

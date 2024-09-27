@@ -1,60 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "argilla.fullname" . }}
+  name: {{ include "argilla.fullname" . }}-worker
   labels:
     {{- include "argilla.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
 spec:
-  replicas: {{ .Values.argilla.replicaCount }}
+  replicas: {{ .Values.worker.replicaCount | default 1 }}
   selector:
     matchLabels:
       {{- include "argilla.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
   template:
     metadata:
       labels:
         {{- include "argilla.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
     spec:
-      volumes:
-      {{- if not .Values.elasticsearch.useOperator }}
-        - name: hosts-file
-          configMap:
-            name: custom-hosts
-      {{- end }}
-      {{- if .Values.argilla.persistence.enabled }}
-        - name: argilla-data
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
-      {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Chart.Name }}-worker
           image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
           env:
             - name: ARGILLA_ELASTICSEARCH
-              # TODO: modify this to use externalElasticsearch.host if elasticsearch.useOperator is false
               value: {{if .Values.elasticsearch.useOperator}}"http://{{ include "argilla.fullname" . }}-es-http:9200"{{else}}"{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}"{{end}}
-            - name: ARGILLA_AUTH_SECRET_KEY
-              value: {{ .Values.argilla.authSecretKey | quote }}
             - name: ARGILLA_REDIS_URL
               value: redis://{{ .Release.Name }}-redis-master:6379/0
-            - name: USERNAME
-              value: {{ .Values.argilla.auth.username | quote }}
-            - name: PASSWORD
-              value: {{ .Values.argilla.auth.password  | quote }}
+            - name: BACKGROUND_NUM_WORKERS
+              value: "{{ .Values.worker.numWorkers | default 2 }}"
             {{- if .Values.argilla.persistence.enabled }}
             - name: ARGILLA_HOME_PATH
               value: {{ .Values.argilla.persistence.mountPath | quote }}
             {{- end }}
-          ports:
-            - containerPort: 6900
-          volumeMounts:
-          {{- if not .Values.elasticsearch.useOperator }}
-            - name: hosts-file
-              mountPath: /etc/hosts
-              subPath: hosts
-          {{- end }}
+          command: ["sh", "-c", "python -m argilla_server worker --num-workers ${BACKGROUND_NUM_WORKERS}"]
           {{- if .Values.argilla.persistence.enabled }}
+          volumeMounts:
             - name: argilla-data
               mountPath: {{ .Values.argilla.persistence.mountPath}}
           {{- end }}
           resources:
-            {{- toYaml .Values.argilla.resources | nindent 12 }}
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+      {{- if .Values.argilla.persistence.enabled }}
+      volumes:
+        - name: argilla-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+      {{- end }}

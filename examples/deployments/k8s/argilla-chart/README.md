@@ -54,7 +54,7 @@ minikube addons enable ingress
 ## Installing ECK
 As we want to use the operator to manage our Elasticsearch cluster, we need to install the ECK operator.
 ```bash
-helm install elasticsearch-operator elastic/eck --namespace elastic-system --create-namespace
+helm install elastic-operator elastic/eck-operator -n elastic-system --create-namespace
 ```
 ## Installing the Chart
 
