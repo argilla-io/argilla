@@ -123,36 +123,24 @@ dataset.records.log(
     ```python
     template = """
     <style>
-    .container {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        overflow: hidden;
-        width: 100%;
-        max-width: 400px;
-    }
-    .header {
-        display: flex;
-        background-color: #f2f2f2;
-        font-weight: bold;
-        border-bottom: 1px solid #ddd;
-    }
-    .row {
-        display: flex;
-        border-bottom: 1px solid #ddd;
-    }
-    .row:last-child {
-        border-bottom: none;
-    }
-    .column {
-        flex: 1;
-        padding: 8px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    .column:first-child {
-        border-right: 1px solid #ddd;
-    }
+        .container {
+            border: 1px solid #ddd;
+            font-family: sans-serif;
+        }
+        .row {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .row:last-child {
+            border-bottom: none;
+        }
+        .column {
+            flex: 1;
+            padding: 8px;
+        }
+        .column:first-child {
+            border-right: 1px solid #ddd;
+        }
     </style>
     <div class="container">
         <div class="header">
