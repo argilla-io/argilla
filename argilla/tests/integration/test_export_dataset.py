@@ -18,11 +18,13 @@ import random
 import uuid
 from string import ascii_lowercase
 from tempfile import TemporaryDirectory
+from time import sleep
 from typing import Any, List
 
 import argilla as rg
 import pytest
-from argilla._exceptions import SettingsError
+from argilla._exceptions import ConflictError, SettingsError
+from datasets import Dataset as HFDataset, Value, Features, ClassLabel, load_dataset
 from huggingface_hub.utils._errors import BadRequestError, FileMetadataError, HfHubHTTPError
 
 _RETRIES = 5
@@ -149,7 +151,7 @@ class TestDiskImportExportMixin:
 
 
 @pytest.mark.flaky(
-    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError, OSError]
+    retries=_RETRIES, only_on=[BadRequestError, FileMetadataError, HfHubHTTPError, OSError, FileNotFoundError]
 )  # Hub consistency CICD pipline
 @pytest.mark.skipif(
     not os.getenv("HF_TOKEN_ARGILLA_INTERNAL_TESTING"),
@@ -363,3 +365,24 @@ class TestHubImportExportMixin:
                 )
         else:
             rg.Dataset.from_hub(repo_id=repo_id, client=client, token=token, settings=settings, name=mock_dataset_name)
+
+    def test_import_dataset_from_hub_with_automatic_settings(
+        self, token: str, dataset: rg.Dataset, client, mock_data: List[dict[str, Any]], with_records_export: bool
+    ):
+        repo_id = f"argilla-internal-testing/test_import_dataset_from_hub_with_automatic_settings_{with_records_export}"
+        mock_dataset_name = f"test_import_dataset_from_hub_with_automatic_settings_{uuid.uuid4()}"
+        mocked_external_dataset = load_dataset(path=repo_id, split="train")
+
+        rg_dataset = rg.Dataset.from_hub(
+            repo_id=repo_id,
+            client=client,
+            token=token,
+            name=mock_dataset_name,
+            with_records=with_records_export,
+        )
+
+        if with_records_export:
+            int2str = mocked_external_dataset.features["label"].int2str
+            for i, record in enumerate(rg_dataset.records(with_suggestions=True)):
+                assert record.fields["text"] == mocked_external_dataset[i]["text"]
+                assert record.suggestions["label"].value == int2str(mocked_external_dataset[i]["label"])

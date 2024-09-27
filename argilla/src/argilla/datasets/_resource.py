@@ -20,7 +20,7 @@ from argilla._exceptions import NotFoundError, SettingsError
 from argilla._models import DatasetModel
 from argilla._resource import Resource
 from argilla.client import Argilla
-from argilla.datasets._export import DiskImportExportMixin, HubImportExportMixin
+from argilla.datasets._io import DiskImportExportMixin, HubImportExportMixin
 from argilla.records import DatasetRecords
 from argilla.settings import Settings
 from argilla.settings._task_distribution import TaskDistribution
@@ -269,3 +269,11 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
     def _is_published(self) -> bool:
         return self._model.status == "ready"
+
+    @classmethod
+    def _sanitize_name(cls, name: str):
+        name = name.replace(" ", "_")
+
+        for character in ["/", "\\", ".", ",", ";", ":", "-", "+", "="]:
+            name = name.replace(character, "-")
+        return name
