@@ -62,8 +62,35 @@ After adding the repository, you can install the chart with the release name `my
 
 ```bash
 helm install my-argilla-server examples/deployments/k8s/argilla-chart
+```
 
-TODO: Add information about any backwards incompatible changes and how to handle them.
+Check the status of the pods:
+
+```bash
+kubectl get pods -w
+```
+All the pods should be in the `Running` state.
+
+## Accessing Argilla
+
+In a different terminal window, run the following command to access Argilla:
+```bash
+kubectl port-forward svc/my-argilla-server-argilla 6900
+```
+Argilla will be accessible at http://localhost:6900.
+
+## Execute integration tests
+
+Set the following environment variables:
+```bash
+export ARGILLA_HOST=http://localhost:6900
+export ARGILLA_API_KEY=argilla.apikey
+```
+
+Run the following command to execute the integration tests:
+```bash
+pytest tests/integration
+```
 
 ## Uninstalling the Chart
 
