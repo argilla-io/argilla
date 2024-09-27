@@ -37,19 +37,32 @@ between the `<style>` tags.
 ```python
 css_template = """
 <style>
-.div {
-    font-weight: bold;
+#container {
+    display: flex;
+    gap: 10px;
+}
+.column {
+    flex: 1;
 }
 </style>
 """ # (1)
 
 html_template = """
-<div>{{record.fields.custom.key}}</div>
+<div id="container">
+    <div class="column">
+        <h3>Original</h3>
+        <img src="{{record.fields.custom.original}}" />
+    </div>
+    <div class="column">
+        <h3>Revision</h3>
+        <img src="{{record.fields.custom.revision}}" />
+    </div>
+</div>
 """ # (2)
 ```
 
-1. This is a CSS template, which ensures that the text inside the `div` is bold.
-2. This is an HTML template, which creates a `div` and injects the value corresponding to the `key` of the `custom` field into it.
+1. This is a CSS template, which ensures that the container and columns are styled.
+2. This is an HTML template, which creates a `container` with two columns and injects the value corresponding to the `key` of the `image` field into it.
 
 We can now pass these templates to the `CustomField` class.
 
@@ -72,54 +85,25 @@ dataset = rg.Dataset(
     settings=settings,
 )
 
-
 dataset.records.log(
-    rg.Record(
+    record = rg.Record(
         fields={
-            "custom": {"key": "value"},
+            "image": {
+                "original": "https://argilla.io/brand-assets/argilla/argilla-logo-color-black.png",
+                "revision": "https://argilla.io/brand-assets/argilla/argilla-logo-black.png",
+            }
         }
     )
 )
 ```
 
+The result will be the following:
+
+![example-gallery-end](/assets/images/how_to_guides/custom_field/images_in_two_columns.png)
+
 ### Example Gallery
 
-=== "Show images in two columns"
-
-    ```python
-
-    template = """
-    <style>
-    #container {
-        display: flex;
-        gap: 10px;
-    }
-    .column {
-        flex: 1;
-    }
-    </style>
-    <div id="container">
-        <div class="column">
-            <h3>Original text</h3>
-            <div>{{record.fields.text.original}}</div>
-        </div>
-        <div class="column">
-            <h3>Revision</h3>
-            <div>{{record.fields.text.revision}}</div>
-        </div>
-    </div>
-    """
-    record_object = rg.Record(
-        fields={
-            "text": {
-                "original": "Hello, world!",
-                "revision": "Hello, Argilla!",
-            }
-        }
-    )
-    ```
-
-=== "Show metadata in a table"
+??? "Metadata in a table"
 
     ```python
     template = """
@@ -148,7 +132,7 @@ dataset.records.log(
             <div class="column">Metadata</div>
             <div class="column">Value</div>
         </div>
-        {{#each record_object.metadata}}
+        {{#each record.metadata}}
         <div class="row">
             <div class="column">{{@key}}</div>
             <div class="column">{{this}}</div>
@@ -156,12 +140,20 @@ dataset.records.log(
         {{/each}}
     </div>
     """
-    record_object = rg.Record(
+    record = rg.Record(
+        fields={"text": "hello"},
         metadata={
-            "key": "value",
-            "key2": "value2",
+            "name": "John Doe",
+            "age": 25,
         }
     )
+    ```
+    ![example-gallery-end](/assets/images/how_to_guides/custom_field/metadata_table.png)
+
+??? "JSON/Code viewer"
+
+    ```python
+    import argilla as rg
     ```
 
 ## Advanced Mode
@@ -215,14 +207,9 @@ custom_field = rg.CustomField(
 
 ### Example Gallery
 
-=== "Show text difference"
+??? "3D object viewer"
 
     ```python
     import argilla as rg
     ```
 
-=== "JSON viewer"
-
-    ```python
-    import argilla as rg
-    ```
