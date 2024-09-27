@@ -12,9 +12,14 @@ export const useNewDatasetViewModel = () => {
     datasetConfig.value = await getDatasetCreationUseCase.execute(repositoryId);
   };
 
-  const selectSubset = (name: string) => {
+  const changeSubset = (name: string) => {
     datasetConfig.value.changeSubset(name);
   };
 
-  return { getNewDatasetByRepoId, datasetConfig, datasetId, selectSubset };
+  return {
+    getNewDatasetByRepoId,
+    datasetConfig,
+    datasetId,
+    changeSubset,
+  };
 };

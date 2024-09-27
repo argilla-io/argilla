@@ -9,7 +9,7 @@
       v-else
       :dataset-config="datasetConfig"
       :dataset-id="datasetId"
-      @change-subset="selectSubset($event)"
+      @change-subset="changeSubset($event)"
     />
   </div>
 </template>

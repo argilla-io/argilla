@@ -13,6 +13,12 @@
                 }"
               />
             </div> -->
+            <DatasetConfigurationSelector
+              :options="datasetConfig.subsets"
+              :value="datasetConfig.selectedSubset.name"
+              @onValueChange="$emit('change-subset', $event)"
+            />
+            {{ datasetConfig.selectedSubset }}
           </template>
           <template #right>
             <!-- <QuestionsComponent
@@ -34,12 +40,10 @@
             ></iframe>
           </div>
           <div class="dataset-config__configuration">
-            <SubsetSelector
-              :options="datasetConfig.subsets"
-              :value="datasetConfig.selectedSubset.name"
-              @onValueChange="$emit('change-subset', $event)"
+            <DatasetConfigurationForm
+              :fields="datasetConfig.fields"
+              :questions="datasetConfig.questions"
             />
-            {{ datasetConfig.selectedSubset }}
           </div>
         </div>
       </template>

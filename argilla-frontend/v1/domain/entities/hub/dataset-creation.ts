@@ -13,7 +13,11 @@ interface Feature {
 class FieldCreation {
   public readonly required: false;
 
-  constructor(public readonly name: string, private readonly type: FieldType) {}
+  constructor(
+    public readonly name: string,
+    public title: string,
+    private readonly type: FieldType
+  ) {}
 
   get isTextType() {
     return this.type.isTextType;
@@ -99,11 +103,11 @@ class Subset {
   private createFields() {
     for (const feat of this.features) {
       if (feat.kindObject === "Value") {
-        this.fields.push(new FieldCreation(feat.name, "text"));
+        this.fields.push(new FieldCreation(feat.name, feat.name, "text"));
       }
 
       if (feat.kindObject === "Image") {
-        this.fields.push(new FieldCreation(feat.name, "image"));
+        this.fields.push(new FieldCreation(feat.name, feat.name, "image"));
       }
     }
   }

@@ -17,7 +17,7 @@
               ? 'selector__option--selected'
               : 'selector__option'
           "
-          v-for="option in options"
+          v-for="option in filteredOptions"
           :key="option"
           @click="selectOption(option)"
         >
@@ -50,6 +50,9 @@ export default {
     };
   },
   computed: {
+    filteredOptions() {
+      return this.options.filter((option) => option !== this.value);
+    },
     selectedValue() {
       const selectedOption = this.options.find(
         (option) => this.value === option
@@ -75,8 +78,20 @@ export default {
   user-select: none;
   font-weight: 500;
 
+  :deep(.dropdown__header) {
+    background: var(--bg-accent-grey-1);
+    justify-content: space-between;
+    height: $base-space * 4;
+    padding: 0 $base-space;
+    border: 1px solid var(--bg-opacity-10);
+  }
+
+  :deep(.dropdown__content) {
+    width: 100%;
+  }
+
   &__options {
-    min-width: 100px;
+    min-width: 100%;
     list-style: none;
     padding: calc($base-space / 2);
     margin: 0;
@@ -94,6 +109,7 @@ export default {
     }
     &--selected {
       background: var(--bg-opacity-4);
+      @extend .selector__option;
     }
   }
   .svg-icon {
