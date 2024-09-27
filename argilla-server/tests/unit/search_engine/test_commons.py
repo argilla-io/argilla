@@ -519,6 +519,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
