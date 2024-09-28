@@ -73,7 +73,7 @@ class SpacesDeploymentMixin(LoggingMixin):
     @classmethod
     def deploy_on_spaces(
         cls,
-        repo_name: str,
+        repo_name: Optional[str] = "argilla",
         org_name: Optional[str] = None,
         token: Optional[str] = None,
         space_storage: Optional[Union[str, "SpaceStorage", None]] = None,
@@ -89,7 +89,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         For a full guide check our docs.
 
         Args:
-            repo_name (str): The ID of the repository where Argilla will be deployed.
+            repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
             org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
             token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
             space_storage (Optional[Union[str, SpaceStorage, None]]): The persistant storage size for the space. Defaults to None without persistant storage.
@@ -108,14 +108,15 @@ class SpacesDeploymentMixin(LoggingMixin):
             import argilla as rg
 
             client = rg.Argilla.deploy_on_spaces(
-                repo_id="my-org/my-space",
+                repo_name="my-space",
+                org_name="my-org",
                 token="hf_ABC123",
                 space_storage="10GB",
                 space_hardware="cpu-basic",
                 private=True,
                 username="admin",
                 password="12345678",
-                overwrite=True,
+                overwrite=False,
             )
         """
         token = cls._acquire_hf_token(cls, token=token)
