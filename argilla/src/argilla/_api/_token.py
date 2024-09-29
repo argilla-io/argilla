@@ -70,12 +70,13 @@ def _get_secret_from_google_colab(name: str) -> Optional[str]:
         except userdata.NotebookAccessError:
             # Means the user has a secret call `ARGILLA_API_URL` and `ARGILLA_API_URL` and got a popup "please grand access to ARGILLA_API_URL" and refused it
             # => warn user but ignore error => do not re-request access to user
-            warnings.warn(
-                "\nAccess to the secret `ARGILLA_API_URL` and `ARGILLA_API_KEY` has not been granted on this notebook."
-                "\nYou will not be requested again."
-                "\nPlease restart the session if you want to be prompted again."
-            )
-            _GOOGLE_COLAB_SECRET = None
+            if not _IS_GOOGLE_COLAB_CHECKED:
+               warnings.warn(
+                   f"\nAccess to the secret {name} has not been granted on this 
+notebook."
+                   "\nYou will not be requested again."
+                   "\nPlease restart the session if you want to be prompted again."
+               )
         except userdata.SecretNotFoundError:
             # Means the user did not define a `ARGILLA_API_URL` and `ARGILLA_API_KEY` secret => warn
             warnings.warn("\nThe secrets `ARGILLA_API_URL` and `ARGILLA_API_KEY` do not exist in your Colab secrets.")
