@@ -78,21 +78,20 @@ notebook."
                    "\nPlease restart the session if you want to be prompted again."
                )
         except userdata.SecretNotFoundError:
-            # Means the user did not define a `ARGILLA_API_URL` and `ARGILLA_API_KEY` secret => warn
-            warnings.warn("\nThe secrets `ARGILLA_API_URL` and `ARGILLA_API_KEY` do not exist in your Colab secrets.")
-            _GOOGLE_COLAB_SECRET = None
+            # Means the user did not define a name  secret => warn
+            warnings.warn(f"\nThe secrets {name} and does not exist in your Colab secrets.")
         except ColabError as e:
             # Something happen but we don't know what => recommend to open a GitHub issue
             warnings.warn(
-                f"\nError while fetching `ARGILLA_API_URL` and `ARGILLA_API_KEY` secret value from your vault: '{str(e)}'."
+                f"\nError while fetching {name} secret value from your vault: '{str(e)}'."
                 "\nYou are not authenticated with the Argilla in this notebook."
                 "\nIf the error persists, please let us know by opening an issue on GitHub "
                 "(https://github.com/argilla-io/argilla//issues/new)."
             )
-            _GOOGLE_COLAB_SECRET = None
 
         _IS_GOOGLE_COLAB_CHECKED = True
-        return _GOOGLE_COLAB_SECRET
+
+        return secret_value
 
 
 def _clean_secret_value(value: Optional[str]) -> Optional[str]:
