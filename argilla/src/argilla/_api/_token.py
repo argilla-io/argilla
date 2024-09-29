@@ -35,11 +35,10 @@ def get_secret(name: str) -> Optional[str]:
     return _get_secret_from_google_colab(name) or _get_secret_from_environment(name)
 
 
-def _get_token_from_environment() -> Dict[str, str]:
-    """Get the argilla credentials from the environment"""
-    ARGILLA_API_URL = _clean_token(os.getenv(key="ARGILLA_API_URL", default=_DEFAULT_API_URL))
-    ARGILLA_API_KEY = _clean_token(os.getenv(key="ARGILLA_API_KEY"))
-    return {"ARGILLA_API_URL": ARGILLA_API_URL, "ARGILLA_API_KEY": ARGILLA_API_KEY}
+def _get_secret_from_environment(name: str) -> Optional[str]:
+    """Get the secret  from the environment"""
+    return _clean_token(os.getenv(key=name))
+
 
 
 def _get_token_from_google_colab() -> Optional[str]:
