@@ -41,7 +41,7 @@ def _get_secret_from_environment(name: str) -> Optional[str]:
 
 
 
-def _get_token_from_google_colab() -> Optional[str]:
+def _get_secret_from_google_colab(name:str) -> Optional[str]:
     """Get token from Google Colab secrets vault using `google.colab.userdata.get(...)`.
 
     Token is read from the vault only once per session and then stored in a global variable to avoid re-requesting
