@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
+
 ### Changed
 
 - Changed the __repr__ method for `SettingsProperties` to display the details of all the properties in `Setting` object. ([#5380](https://github.com/argilla-io/argilla/issues/5380))

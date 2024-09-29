@@ -23,7 +23,7 @@ from argilla._resource import Resource
 from argilla.settings import RankingQuestion
 
 if TYPE_CHECKING:
-    from argilla import Argilla, Dataset, Record
+    from argilla import Argilla, Record
 
 __all__ = ["Response", "UserResponse", "ResponseStatus"]
 
@@ -71,11 +71,21 @@ class Response:
         if isinstance(status, str):
             status = ResponseStatus(status)
 
-        self.record = _record
+        self._record = _record
         self.question_name = question_name
         self.value = value
         self.user_id = user_id
         self.status = status
+
+    @property
+    def record(self) -> "Record":
+        """Returns the record associated with the response"""
+        return self._record
+
+    @record.setter
+    def record(self, record: "Record") -> None:
+        """Sets the record associated with the response"""
+        self._record = record
 
     def serialize(self) -> dict[str, Any]:
         """Serializes the Response to a dictionary. This is principally used for sending the response to the API, \
@@ -138,6 +148,9 @@ class UserResponse(Resource):
             user_id=self._compute_user_id_from_responses(responses),
         )
 
+        for response in responses:
+            response.record = _record
+
     def __iter__(self) -> Iterable[Response]:
         return iter(self.responses)
 
@@ -164,19 +177,29 @@ class UserResponse(Resource):
     @property
     def responses(self) -> List[Response]:
         """Returns the list of responses"""
-        return self.__model_as_responses_list(self._model)
+        return self.__model_as_responses_list(self._model, record=self._record)
+
+    @property
+    def record(self) -> "Record":
+        """Returns the record associated with the response"""
+        return self._record
+
+    @record.setter
+    def record(self, record: "Record") -> None:
+        """Sets the record associated with the response"""
+        self._record = record
 
     @classmethod
-    def from_model(cls, model: UserResponseModel, dataset: "Dataset") -> "UserResponse":
+    def from_model(cls, model: UserResponseModel, record: "Record") -> "UserResponse":
         """Creates a UserResponse from a ResponseModel"""
-        responses = cls.__model_as_responses_list(model)
+        responses = cls.__model_as_responses_list(model, record=record)
         for response in responses:
-            question = dataset.settings.questions[response.question_name]
+            question = record.dataset.settings.questions[response.question_name]
             # We need to adapt the ranking question value to the expected format
             if isinstance(question, RankingQuestion):
                 response.value = cls.__ranking_from_model_value(response.value)  # type: ignore
 
-        return cls(responses=responses)
+        return cls(responses=responses, _record=record)
 
     def api_model(self):
         """Returns the model that is used to interact with the API"""
@@ -223,7 +246,7 @@ class UserResponse(Resource):
         return {answer.question_name: {"value": answer.value} for answer in responses}
 
     @classmethod
-    def __model_as_responses_list(cls, model: UserResponseModel) -> List[Response]:
+    def __model_as_responses_list(cls, model: UserResponseModel, record: "Record") -> List[Response]:
         """Creates a list of Responses from a UserResponseModel without changing the format of the values"""
 
         return [
@@ -232,6 +255,7 @@ class UserResponse(Resource):
                 value=value["value"],
                 user_id=model.user_id,
                 status=model.status,
+                _record=record,
             )
             for question_name, value in model.values.items()
         ]
