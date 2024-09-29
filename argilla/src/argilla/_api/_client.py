@@ -29,7 +29,6 @@ from argilla._api._users import UsersAPI
 from argilla._api._vectors import VectorsAPI
 from argilla._api._workspaces import WorkspacesAPI
 from argilla._exceptions import ArgillaError
-from argilla._api._token import get_token
 
 __all__ = ["APIClient"]
 

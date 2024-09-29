@@ -15,9 +15,8 @@
 import os
 import warnings
 from threading import Lock
-from typing import Optional, Dict
+from typing import Optional
 from huggingface_hub.utils._runtime import is_google_colab
-from argilla._constants import _DEFAULT_API_URL
 
 
 _IS_GOOGLE_COLAB_CHECKED = False
@@ -40,8 +39,7 @@ def _get_secret_from_environment(name: str) -> Optional[str]:
     return _clean_token(os.getenv(key=name))
 
 
-
-def _get_secret_from_google_colab(name:str) -> Optional[str]:
+def _get_secret_from_google_colab(name: str) -> Optional[str]:
     """Get token from Google Colab secrets vault using `google.colab.userdata.get(...)`.
 
     Token is read from the vault only once per session and then stored in a global variable to avoid re-requesting
