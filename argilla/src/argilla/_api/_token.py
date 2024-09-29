@@ -56,11 +56,9 @@ def _get_secret_from_google_colab(name:str) -> Optional[str]:
     # => use a lock
     # See https://github.com/huggingface/huggingface_hub/issues/1952 for more details.
     with _GOOGLE_COLAB_SECRET_LOCK:
-        global _GOOGLE_COLAB_SECRET
         global _IS_GOOGLE_COLAB_CHECKED
 
-        if _IS_GOOGLE_COLAB_CHECKED:  # request access only once
-            return _GOOGLE_COLAB_SECRET
+        # we can add here some cache mechanism
 
         try:
             from google.colab import userdata
@@ -69,13 +67,7 @@ def _get_secret_from_google_colab(name:str) -> Optional[str]:
             return None
 
         try:
-            ARGILLA_API_URL = userdata.get("ARGILLA_API_URL")
-            ARGILLA_API_KEY = userdata.get("ARGILLA_API_KEY")
-
-            _GOOGLE_COLAB_SECRET = {
-                "ARGILLA_API_URL": _clean_token(ARGILLA_API_URL),
-                "ARGILLA_API_KEY": _clean_token(ARGILLA_API_KEY),
-            }
+            secret_value = userdata.get(name)
 
         except userdata.NotebookAccessError:
             # Means the user has a secret call `ARGILLA_API_URL` and `ARGILLA_API_URL` and got a popup "please grand access to ARGILLA_API_URL" and refused it
