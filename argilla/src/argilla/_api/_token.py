@@ -72,7 +72,7 @@ def _get_secret_from_google_colab(name: str) -> Optional[str]:
             # => warn user but ignore error => do not re-request access to user
             if not _IS_GOOGLE_COLAB_CHECKED:
                warnings.warn(
-                   f"\nAccess to the secret {name} has not been granted on this 
+                   f"\nAccess to the secret {name} has not been granted on this
 notebook."
                    "\nYou will not be requested again."
                    "\nPlease restart the session if you want to be prompted again."
