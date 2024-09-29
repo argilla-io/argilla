@@ -25,14 +25,14 @@ _GOOGLE_COLAB_SECRET_LOCK = Lock()
 _GOOGLE_COLAB_SECRET: Optional[dict] = None
 
 
-def get_token() -> Optional[dict]:
+def get_secret(name: str) -> Optional[str]:
     """
-    Get token if present
+    Get secret if present
 
     Returns:
-        `dict` or `None`: The token, `None` if it doesn't exist.
+        `str` or `None`: The secret value, `None` if it doesn't exist.
     """
-    return _get_token_from_google_colab() or _get_token_from_environment()
+    return _get_secret_from_google_colab(name) or _get_secret_from_environment(name)
 
 
 def _get_token_from_environment() -> Dict[str, str]:
