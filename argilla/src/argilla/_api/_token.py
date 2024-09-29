@@ -95,7 +95,7 @@ notebook."
         return _GOOGLE_COLAB_SECRET
 
 
-def _clean_token(token: Optional[str]) -> Optional[str]:
+def _clean_secret_value(value: Optional[str]) -> Optional[str]:
     """Clean token by removing trailing and leading spaces and newlines.
 
     If token is an empty string, return None.
