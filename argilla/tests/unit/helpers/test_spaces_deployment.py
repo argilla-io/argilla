@@ -29,11 +29,11 @@ class TestSpacesDeploymentMixin:
     @patch("argilla.client.Argilla.__init__", return_value=None)
     def test_deploy_on_spaces(self, mock_argilla_init, mock_get_token, mock_hf_api, argilla_client_class):
         mock_get_token.return_value = "fake_token"
-        mock_api = Mock()
+        mock_api = Mock(api_key="12345678")
         mock_hf_api.return_value = mock_api
         mock_api.whoami.return_value = {"name": "test_user"}
         mock_api.repo_exists.return_value = False
-        mock_api.get_space_runtime.return_value = Mock(stage="RUNNING")
+        mock_api.get_space_runtime.return_value = Mock(api_key="12345678", stage="RUNNING")
 
         result = argilla_client_class.deploy_on_spaces(
             username="test_user",
@@ -49,6 +49,7 @@ class TestSpacesDeploymentMixin:
 
         # Check the arguments passed to Argilla.__init__
         args, kwargs = mock_argilla_init.call_args
+        assert kwargs["api_key"] == "12345678"
         assert kwargs["api_url"].startswith("https://")
         assert kwargs["api_url"].endswith(".hf.space/")
         assert "api_key" in kwargs
