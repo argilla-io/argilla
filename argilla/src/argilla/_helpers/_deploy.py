@@ -58,11 +58,12 @@ class SpacesDeploymentMixin(LoggingMixin):
             overwrite (Optional[Union[bool, None]]): Whether to overwrite the existing space. Defaults to False.
 
         Returns:
-            RepoUrl: The URL of the created space.
+            Argilla: The Argilla client.
 
         Example:
             ```Python
             import argilla as rg
+
             client = rg.Argilla.deploy_on_spaces(api_key="12345678")
             ```
         """
