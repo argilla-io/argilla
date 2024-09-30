@@ -43,10 +43,11 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         client = rg.Argilla.deploy_on_spaces(api_key="<api_key>")
         ```
 
-        Continue with the [Create your first dataset section](#create-your-first-dataset).
+        Learn how to [sign in to the UI](#sign-in-into-the-argilla-ui) and retrieve your API key or continue with the [Create your first dataset section](#create-your-first-dataset).
 
     !!! warning "Persistent storage `SMALL`"
         Not setting persistent storage to `SMALL` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. If you want to **use the Space just for testing** you can use `FREE` temporarily.
+
     If you want to deploy Argilla within a Hugging Face organization, setup a more stable Space, or understand the settings, [check out the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
 
 !!! docker "Deploy with Docker"
