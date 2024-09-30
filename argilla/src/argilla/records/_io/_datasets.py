@@ -16,15 +16,15 @@ import warnings
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Union
 
-from datasets import ClassLabel, Image, Value
 from datasets import Dataset as HFDataset
+from datasets import Image, ClassLabel, Value
 
-from argilla._helpers._media import pil_to_data_uri, uncast_image
 from argilla.records._io._generic import GenericIO
+from argilla._helpers._media import pil_to_data_uri, uncast_image
 
 if TYPE_CHECKING:
-    from argilla.datasets import Dataset
     from argilla.records import Record
+    from argilla.datasets import Dataset
 
 
 def _cast_images_as_urls(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
@@ -89,31 +89,6 @@ FEATURE_CASTERS = {
     Image: _cast_images_as_urls,
     ClassLabel: _cast_classlabels_as_strings,
 }
-
-
-def _uncast_datetime_to_pyarrow_datetime(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
-    """Cast the datetime features in the Hugging Face dataset as pyarrow datetime.
-
-    Parameters:
-        hf_dataset (HFDataset): The Hugging Face dataset to cast.
-        columns (List[str]): The names of the columns containing the datetime features.
-
-    Returns:
-        HFDataset: The Hugging Face dataset with datetime features cast as pyarrow datetime.
-    """
-    for column in columns:
-        if column in hf_dataset.column_names:
-            features = hf_dataset.features.copy()
-            features[column] = Value("timestamp[ns, tz=UTC]")
-            hf_dataset = hf_dataset.map(
-                function=lambda batch: {column: batch},
-                with_indices=False,
-                batched=True,
-                input_columns=[column],
-                remove_columns=[column],
-                features=features,
-            )
-    return hf_dataset
 
 
 def _uncast_uris_as_images(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
@@ -209,7 +184,6 @@ class HFDatasetsIO:
         record_dicts = GenericIO.to_dict(records, flatten=True)
         hf_dataset = HFDataset.from_dict(record_dicts)
         hf_dataset = HFDatasetsIO._uncast_argilla_attributes_to_datasets(hf_dataset, dataset.schema)
-        hf_dataset = HFDatasetsIO._uncast_datetime_to_pyarrow_datetime(hf_dataset)
         return hf_dataset
 
     @staticmethod
@@ -251,18 +225,6 @@ class HFDatasetsIO:
             if attributes:
                 hf_dataset = uncaster(hf_dataset, attributes)
         return hf_dataset
-
-    @staticmethod
-    def _uncast_datetime_to_pyarrow_datetime(hf_dataset: "HFDataset") -> "HFDataset":
-        """Get the names of the Argilla fields that contain image data.
-
-        Parameters:
-            hf_dataset (Dataset): The dataset to check.
-
-        Returns:
-            HFDataset: The dataset with argilla attributes uncasted.
-        """
-        return _uncast_datetime_to_pyarrow_datetime(hf_dataset, ["inserted_at", "updated_at"])
 
     @staticmethod
     def to_argilla(hf_dataset: "HFDataset") -> "HFDataset":
