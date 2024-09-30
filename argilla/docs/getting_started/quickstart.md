@@ -51,7 +51,8 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
     If you want to deploy Argilla within a Hugging Face organization, setup a more stable Space, or understand the settings, [check out the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
 
 !!! docker "Deploy with Docker"
-     If you want to **run Argilla locally on your machine or a server**, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
+
+    If you want to **run Argilla locally on your machine or a server**, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
 
 ## Sign in into the Argilla UI
 If everything went well, you should see the Argilla sign in page that looks like this:
