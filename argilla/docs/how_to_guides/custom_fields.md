@@ -97,7 +97,7 @@ dataset.records.log([
 
 The result will be the following:
 
-![example-gallery-end](/assets/images/how_to_guides/custom_field/images_in_two_columns.png)
+![example-gallery-end](../assets/images/how_to_guides/custom_field/images_in_two_columns.png)
 
 ### Example Gallery
 
@@ -146,7 +146,7 @@ The result will be the following:
         }
     )
     ```
-    ![example-gallery-end](/assets/images/how_to_guides/custom_field/metadata_table.png)
+    ![example-gallery-end](../assets/images/how_to_guides/custom_field/metadata_table.png)
 
 ??? "JSON/Code viewer"
 
