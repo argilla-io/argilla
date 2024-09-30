@@ -37,12 +37,12 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         pip install argilla
         ```
 
-        Next, `Argilla.deploy_on_spaces`, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will do the following:
+        Next, we can use the `Argilla.deploy_on_spaces` method, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will do the following:
 
         - Deploy an Argilla Space on the Hugging Face Hub, which takes around 2-3 minutes.
         - Set the `API_KEY` secret based on the `api_key` you provide. This key will be used to authenticate your requests to the Argilla API.
-        - Set the `USERNAME` and `PASSWORD` secrets based on the username of the Hugging Face token you provide and the `api_key` you provide, respectively.
-        - Automatically return an authenticated Argilla client, which you can directly use to interact with your Argilla server.
+        - Set the `USERNAME` and `PASSWORD` secrets based on the username of the Hugging Face token and the `api_key` you provide, respectively.
+        - Automatically return an authenticated Argilla client, which can directly be used to interact with your Argilla server.
 
         ```python
         import argilla as rg
@@ -50,7 +50,11 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         authenticated_client = rg.Argilla.deploy_on_spaces(api_key="<api_key>")
         ```
 
-        Learn how to [sign in to the UI](#sign-in-into-the-argilla-ui) and retrieve your API key or continue with the [Create your first dataset section](#create-your-first-dataset).
+        Learn how to [create your first dataset](create-your-first-dataset.md).
+
+
+    !!! tip "Argilla API Key"
+        Your Argilla API key can be found in the `My Settings` page of your Argilla Space. Take a look at the [sign in to the UI section](#sign-in-into-the-argilla-ui) to learn how to retrieve it.
 
     !!! warning "Persistent storage `SMALL`"
         Not setting persistent storage to `SMALL` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. If you want to **use the Space just for testing** you can use `FREE` temporarily.
@@ -72,11 +76,12 @@ If everything went well, you should see the Argilla sign in page that looks like
 
 In the sign in page:
 
-1. Click on **Sign in with Hugging Face**
+1. Click on **Sign in with Hugging Face**.
+
 2. **Authorize the application** and you will be logged in into Argilla as an `owner`.
 
 !!! info "Unauthorized error"
-    Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button solves the issue.
+    Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button again will solve this issue.
 
 Congrats! Your Argilla server is ready to start your first project using the Python SDK. You now have full rights to create datasets. Follow the instructions in the home page, or keep reading this guide if you want a more detailed explanation.
 
