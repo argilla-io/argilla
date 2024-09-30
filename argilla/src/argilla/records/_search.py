@@ -92,7 +92,6 @@ class Condition(Tuple[str, str, Any]):
         elif field.endswith("response"):
             question, _ = field.split(".")
             return ResponseFilterScopeModel(question=question)
-
         else:  # Question field -> Suggestion
             # TODO: Return None and skip this filter
             return SuggestionFilterScopeModel(question=field)
