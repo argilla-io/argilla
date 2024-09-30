@@ -36,7 +36,7 @@ if (parent) {
 
 const BASIC_TEMPLATE = `
 ${STYLES}
-<script>const record_object = #RECORD_OBJECT#;<\/script>
+<script>const record = #RECORD_OBJECT#;<\/script>
 <script src="./js/handlebars.min.js"><\/script>
 <div id="template" class="text-center">
   #TEMPLATE#
@@ -44,13 +44,13 @@ ${STYLES}
 <script>
   const template = document.getElementById("template").innerHTML;
   const compiledTemplate = Handlebars.compile(template);
-  const html = compiledTemplate({ record_object });
+  const html = compiledTemplate({ record });
   document.body.innerHTML = html;
 <\/script>
 `;
 const ADVANCE_TEMPLATE = ` ${STYLES}
 <script>
-  const record_object = #RECORD_OBJECT#;
+  const record = #RECORD_OBJECT#;
 <\/script>
 #TEMPLATE#
 `;
