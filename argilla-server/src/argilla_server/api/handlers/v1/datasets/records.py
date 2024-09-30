@@ -34,6 +34,7 @@ from argilla_server.api.schemas.v1.records import (
     SearchRecordsQuery,
     SearchRecordsResult,
     TermsFilter,
+    SEARCH_MAX_SIMILARITY_SEARCH_RESULT,
 )
 from argilla_server.api.schemas.v1.records import Record as RecordSchema
 from argilla_server.api.schemas.v1.responses import ResponseFilterScope
@@ -167,13 +168,20 @@ async def _get_search_responses(
             "record": record,
             "query": text_query,
             "order": vector_query.order,
-            "max_results": limit,
+            "max_results": min(limit + offset, SEARCH_MAX_SIMILARITY_SEARCH_RESULT),
         }
 
         if filters:
             similarity_search_params["filter"] = _to_search_engine_filter(filters, user=user)
 
-        return await search_engine.similarity_search(**similarity_search_params)
+        if offset >= similarity_search_params["max_results"]:
+            return SearchResponses(items=[], total=0)
+
+        responses = await search_engine.similarity_search(**similarity_search_params)
+        responses.items = responses.items[offset:]
+
+        return responses
+
     else:
         search_params = {
             "dataset": dataset,

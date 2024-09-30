@@ -11,9 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from datetime import datetime
-from typing import Optional, List, Any, Union, Tuple
-from uuid import UUID
+from typing import List, Any, Union, Tuple, Iterable, TYPE_CHECKING
 
 from argilla._models import SearchQueryModel
 from argilla._models._search import (
@@ -28,7 +26,13 @@ from argilla._models._search import (
     AndFilterModel,
     QueryModel,
     RecordFilterScopeModel,
+    VectorQueryModel,
 )
+
+if TYPE_CHECKING:
+    from argilla.records import Record
+
+__all__ = ["Query", "Filter", "Condition", "Similar", "Conditions"]
 
 
 class Condition(Tuple[str, str, Any]):
@@ -39,13 +43,6 @@ class Condition(Tuple[str, str, Any]):
 
         field = field.strip()
         scope = self._extract_filter_scope(field)
-
-        # TODO: Remove this and move the serialization logic to the API classes
-        if isinstance(value, UUID):
-            value = str(value)
-        # TODO: Remove this and move the serialization logic to the API classes
-        elif isinstance(value, datetime):
-            value = value.isoformat()
 
         operator = operator.strip()
         if operator == "==":
@@ -100,6 +97,34 @@ class Condition(Tuple[str, str, Any]):
 Conditions = Union[List[Tuple[str, str, Any]], Tuple[str, str, Any]]
 
 
+class Similar:
+    """This class is used to map user similar queries to the internal query models"""
+
+    def __init__(self, name: str, value: Union[Iterable[float], "Record"], most_similar: bool = True):
+        """
+        Create a similar object for use in Argilla search requests.
+
+        Parameters:
+            name: The name of the vector field
+            value: The vector value or the record to search for similar records
+            most_similar: Whether to search for the most similar records or the least similar records
+        """
+
+        self.name = name
+        self.value = value
+        self.most_similar = most_similar if most_similar is not None else True
+
+    def api_model(self) -> VectorQueryModel:
+        from argilla.records import Record
+
+        order = "most_similar" if self.most_similar else "least_similar"
+
+        if isinstance(self.value, Record):
+            return VectorQueryModel(name=self.name, record_id=self.value._server_id, order=order)
+
+        return VectorQueryModel(name=self.name, value=self.value, order=order)
+
+
 class Filter:
     """This class is used to map user filters to the internal filter models"""
 
@@ -111,7 +136,6 @@ class Filter:
                 The conditions that will be used to filter the search results. \
                 The conditions should be a list of tuples where each tuple contains \
                 the field, operator, and value. For example `("label", "in", ["positive","happy"])`.\
-
         """
 
         if isinstance(conditions, tuple):
@@ -125,13 +149,18 @@ class Filter:
 class Query:
     """This class is used to map user queries to the internal query models"""
 
-    query: Optional[str] = None
-
-    def __init__(self, *, query: Union[str, None] = None, filter: Union[Filter, Conditions, None] = None):
+    def __init__(
+        self,
+        *,
+        query: Union[str, None] = None,
+        similar: Union[Similar, None] = None,
+        filter: Union[Filter, Conditions, None] = None,
+    ):
         """Create a query object for use in Argilla search requests.add()
 
         Parameters:
             query (Union[str, None], optional): The query string that will be used to search.
+            similar (Union[Similar, None], optional): The similar object that will be used to search for similar records
             filter (Union[Filter, None], optional): The filter object that will be used to filter the search results.
         """
 
@@ -143,18 +172,26 @@ class Query:
 
         self.query = query
         self.filter = filter
+        self.similar = similar
+
+    def has_search(self) -> bool:
+        return bool(self.query or self.similar or self.filter)
 
     def api_model(self) -> SearchQueryModel:
         model = SearchQueryModel()
 
-        if self.query is not None:
-            text_query = TextQueryModel(q=self.query)
-            model.query = QueryModel(text=text_query)
+        if self.query or self.similar:
+            query = QueryModel()
+
+            if self.query is not None:
+                query.text = TextQueryModel(q=self.query)
+
+            if self.similar is not None:
+                query.vector = self.similar.api_model()
+
+            model.query = query
 
         if self.filter is not None:
             model.filters = self.filter.api_model()
 
         return model
-
-
-__all__ = ["Query", "Filter", "Condition"]
