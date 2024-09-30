@@ -39,10 +39,10 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
         Next, `Argilla.deploy_on_spaces`, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will do the following:
 
+        - Deploy an Argilla Space on the Hugging Face Hub, which takes around 2-3 minutes.
         - Set the `API_KEY` secret based on the `api_key` you provide. This key will be used to authenticate your requests to the Argilla API.
-        - Set the `USERNAME` and `PASSWORD` secrets based on the username of the Hugging Face token you provide and the `api_key` you provide.
-        - Automatically return an authenticated Argilla client, which you can use to interact with your Argilla server.
-        - This will take around 2-3 minutes to complete.
+        - Set the `USERNAME` and `PASSWORD` secrets based on the username of the Hugging Face token you provide and the `api_key` you provide, respectively.
+        - Automatically return an authenticated Argilla client, which you can directly use to interact with your Argilla server.
 
         ```python
         import argilla as rg
