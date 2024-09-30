@@ -10,7 +10,7 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
     The **recommended choice to get started**. You can get up and running in under 5 minutes and don't need to maintain a server or run any commands.
 
-    === "Hugging Face Hub"
+    === "Hugging Face website"
 
         If you're just getting started with Argilla, click the deploy button below:
 
