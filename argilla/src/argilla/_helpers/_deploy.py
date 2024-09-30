@@ -36,8 +36,6 @@ class SpacesDeploymentMixin(LoggingMixin):
     def deploy_on_spaces(
         cls,
         api_key: str,
-        username: Optional[Union[str, None]] = None,
-        password: Optional[Union[str, None]] = None,
         repo_name: Optional[str] = "argilla",
         org_name: Optional[str] = None,
         hf_token: Optional[str] = None,
@@ -50,11 +48,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         Deploys Argilla on Hugging Face Spaces.
 
         Args:
-            api_key (str): The API key of the owner user.
-            username (Optional[Union[str, None]]): The username of the owner user.
-                Defaults to None and is set to the current user of the Hugging Face Hub token.
-            password (Optional[Union[str, None]]): The password of the owner user. Defaults to None.
-                When None, the username user can use Hugging Face login to authenticate as owner.
+            api_key (str): The API key of the owner user, which will be used as the password for the space.
             repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
             org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
             hf_token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
@@ -77,17 +71,15 @@ class SpacesDeploymentMixin(LoggingMixin):
 
         # Get the org name from the repo name or default to the current user
         token_username = api.whoami(token=hf_token)["name"]
-        username = username or token_username
         org_name = org_name or token_username
         repo_id = f"{org_name}/{repo_name}"
 
         # Define the api_key for the space
         secrets = [
-            {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user"},
-            {"key": "USERNAME", "value": username, "description": "The username of the owner user"},
+            {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user."},
+            {"key": "USERNAME", "value": token_username, "description": "The username of the owner user."},
+            {"key": "PASSWORD", "value": api_key, "description": "The password of the owner user."},
         ]
-        if password is not None:
-            secrets.append({"key": "PASSWORD", "value": password, "description": "The password of the owner user"})
 
         # Check if the space already exists
         if api.repo_exists(repo_id=repo_id, repo_type="space", token=hf_token):
