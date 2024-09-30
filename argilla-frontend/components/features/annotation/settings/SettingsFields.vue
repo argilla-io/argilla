@@ -24,8 +24,14 @@
             <input type="text" id="field.id" v-model="field.title" />
           </Validation>
 
-          <div class="settings__custom-field-preview" v-if="field.isCustomType">
-            <pre>{{ field.settings.template }}</pre>
+          <div class="settings__edition-form__group">
+            <label>Code highlighting</label>
+            <div
+              class="settings__custom-field-preview"
+              v-if="field.isCustomType"
+            >
+              <pre><code v-highlight>{{ field.settings.template }}</code></pre>
+            </div>
           </div>
 
           <BaseSwitch
