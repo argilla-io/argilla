@@ -42,6 +42,10 @@ ${STYLES}
   #TEMPLATE#
 </div>
 <script>
+  Handlebars.registerHelper("json", (context) => {
+    return JSON.stringify(context);
+  });
+
   const template = document.getElementById("template").innerHTML;
   const compiledTemplate = Handlebars.compile(template);
   const html = compiledTemplate({ record });
