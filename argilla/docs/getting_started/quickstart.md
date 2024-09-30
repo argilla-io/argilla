@@ -156,6 +156,7 @@ dataset.records.log(records=data, mapping={"text": "review"})
 🎉 You have successfully created your first dataset with Argilla. You can now access it in the Argilla UI and start annotating the records.
 
 ## Next steps
+
 - To learn how to create your datasets, workspace, and manage users, check the [how-to guides](../how_to_guides/index.md).
 
 - To learn Argilla with hands-on examples, check the [Tutorials section](../tutorials/index.md).
