@@ -16,7 +16,7 @@ import uuid
 
 import pytest
 
-from argilla import Record, Response, Suggestion, Dataset, Settings, TextQuestion, TextField
+from argilla import Dataset, Record, Response, Settings, Suggestion, TextField, TextQuestion
 from argilla._exceptions import ArgillaError
 from argilla._models import MetadataModel, RecordModel
 
@@ -60,6 +60,14 @@ class TestRecords:
         assert record.id
         record = Record(fields={"name": "John", "age": "30"})
         assert record.id
+
+    def test_record_inserted_at(self):
+        record = Record(fields={"name": "John", "age": "30"})
+        assert hasattr(record, "inserted_at")
+
+    def test_record_updated_at(self):
+        record = Record(fields={"name": "John", "age": "30"})
+        assert hasattr(record, "updated_at")
 
     def test_update_record_metadata_by_key(self):
         record = Record(fields={"name": "John", "age": "30"}, metadata={"key": "value"})
