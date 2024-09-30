@@ -156,7 +156,7 @@ The result will be the following:
 
 ## Advanced Mode
 
-When `advanced_mode=True`, you can use the `template` argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript.
+When `advanced_mode=True`, you can use the `template` argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript. The record object will be available in the global scope, so you can access it in your JavaScript code as described in the [Record Object](#record-object) section.
 
 ### Usage example
 
