@@ -83,6 +83,8 @@ class TestWorkspaces:
                 created_workspace = ws.create()
                 assert created_workspace.name == mock_name
                 assert created_workspace.id == uuid.UUID(mock_return_value["id"])
+                assert created_workspace.inserted_at == datetime.fromisoformat(mock_return_value["inserted_at"])
+                assert created_workspace.updated_at == datetime.fromisoformat(mock_return_value["updated_at"])
 
     @pytest.mark.parametrize(
         "status_code, expected_exception, expected_message",
@@ -147,6 +149,8 @@ class TestWorkspaces:
         for i in range(len(workspaces)):
             assert workspaces[i].name == mock_return_value["items"][i]["name"]
             assert workspaces[i].id == uuid.UUID(mock_return_value["items"][i]["id"])
+            assert workspaces[i].inserted_at == datetime.fromisoformat(mock_return_value["items"][i]["inserted_at"])
+            assert workspaces[i].updated_at == datetime.fromisoformat(mock_return_value["items"][i]["updated_at"])
 
 
 class TestWorkspacesAPI:
@@ -175,6 +179,8 @@ class TestWorkspacesAPI:
             assert ws is not None
             assert ws.name == "test-workspace"
             assert ws.id == uuid.UUID(mock_return_value["items"][0]["id"])
+            assert ws.inserted_at == datetime.fromisoformat(mock_return_value["items"][0]["inserted_at"])
+            assert ws.updated_at == datetime.fromisoformat(mock_return_value["items"][0]["updated_at"])
 
     def test_multiple_clients_create_workspace(self, httpx_mock: HTTPXMock):
         mock_uuid = str(uuid.uuid4())
@@ -246,3 +252,8 @@ class TestWorkspacesAPI:
             for i in range(len(datasets)):
                 assert datasets[i].name == mock_return_value["items"][i]["name"]
                 assert datasets[i].id == uuid.UUID(mock_return_value["items"][i]["id"])
+                assert datasets[i].guidelines == mock_return_value["items"][i]["guidelines"]
+                assert datasets[i].allow_extra_metadata == mock_return_value["items"][i]["allow_extra_metadata"]
+                assert datasets[i].workspace_id == uuid.UUID(mock_return_value["items"][i]["workspace_id"])
+                assert datasets[i].inserted_at == datetime.fromisoformat(mock_return_value["items"][i]["inserted_at"])
+                assert datasets[i].updated_at == datetime.fromisoformat(mock_return_value["items"][i]["updated_at"])

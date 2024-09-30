@@ -12,7 +12,6 @@ export class GetFieldsUseCase {
         field.id,
         field.name,
         field.title,
-        "",
         datasetId,
         field.required,
         field.settings

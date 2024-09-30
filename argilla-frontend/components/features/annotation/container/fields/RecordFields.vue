@@ -7,6 +7,7 @@
         title,
         content,
         settings,
+        sdkRecord,
         isTextType,
         isImageType,
         isChatType,
@@ -51,7 +52,7 @@
         :name="name"
         :title="title"
         :content="content"
-        :record="record"
+        :sdkRecord="sdkRecord"
         :settings="settings"
       />
     </div>
