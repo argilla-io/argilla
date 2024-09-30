@@ -83,10 +83,11 @@ class SpacesDeploymentMixin(LoggingMixin):
 
         # Define the api_key for the space
         secrets = [
-            {"key": "USERNAME", "value": username, "description": "The username of the owner user"},
-            {"key": "PASSWORD", "value": password, "description": "The password of the owner user"},
             {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user"},
+            {"key": "USERNAME", "value": username, "description": "The username of the owner user"},
         ]
+        if password is not None:
+            secrets.append({"key": "PASSWORD", "value": password, "description": "The password of the owner user"})
 
         # Check if the space already exists
         if api.repo_exists(repo_id=repo_id, repo_type="space", token=hf_token):
