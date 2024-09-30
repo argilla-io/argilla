@@ -2335,20 +2335,24 @@
 <p>First, install Argilla:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">pip install argilla</span>
 </span></code></pre></div>
-<p>Next, <code>Argilla.deploy_on_spaces</code>, which will create a Space in <a href="https://huggingface.co/">the Hugging Face Hub</a>. This method will do the following:</p>
+<p>Next, we can use the <code>Argilla.deploy_on_spaces</code> method, which will create a Space in <a href="https://huggingface.co/">the Hugging Face Hub</a>. This method will do the following:</p>
 <ul>
 <li>Deploy an Argilla Space on the Hugging Face Hub, which takes around 2-3 minutes.</li>
 <li>Set the <code>API_KEY</code> secret based on the <code>api_key</code> you provide. This key will be used to authenticate your requests to the Argilla API.</li>
-<li>Set the <code>USERNAME</code> and <code>PASSWORD</code> secrets based on the username of the Hugging Face token you provide and the <code>api_key</code> you provide, respectively.</li>
-<li>Automatically return an authenticated Argilla client, which you can directly use to interact with your Argilla server.</li>
+<li>Set the <code>USERNAME</code> and <code>PASSWORD</code> secrets based on the username of the Hugging Face token and the <code>api_key</code> you provide, respectively.</li>
+<li>Automatically return an authenticated Argilla client, which can directly be used to interact with your Argilla server.</li>
 </ul>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">authenticated_client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="o">.</span><span class="n">deploy_on_spaces</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Learn how to <a href="#sign-in-into-the-argilla-ui">sign in to the UI</a> and retrieve your API key or continue with the <a href="#create-your-first-dataset">Create your first dataset section</a>.</p>
+<p>Learn how to <a href="create-your-first-dataset.md">create your first dataset</a>.</p>
 </div>
 </div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Argilla API Key</p>
+<p>Your Argilla API key can be found in the <code>My Settings</code> page of your Argilla Space. Take a look at the <a href="#sign-in-into-the-argilla-ui">sign in to the UI section</a> to learn how to retrieve it.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Persistent storage <code>SMALL</code></p>
@@ -2369,12 +2373,16 @@
 </div>
 <p>In the sign in page:</p>
 <ol>
-<li>Click on <strong>Sign in with Hugging Face</strong></li>
-<li><strong>Authorize the application</strong> and you will be logged in into Argilla as an <code>owner</code>.</li>
+<li>
+<p>Click on <strong>Sign in with Hugging Face</strong>.</p>
+</li>
+<li>
+<p><strong>Authorize the application</strong> and you will be logged in into Argilla as an <code>owner</code>.</p>
+</li>
 </ol>
 <div class="admonition info">
 <p class="admonition-title">Unauthorized error</p>
-<p>Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button solves the issue.</p>
+<p>Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button again will solve this issue.</p>
 </div>
 <p>Congrats! Your Argilla server is ready to start your first project using the Python SDK. You now have full rights to create datasets. Follow the instructions in the home page, or keep reading this guide if you want a more detailed explanation.</p>
 <h2 id="install-the-python-sdk">Install the Python SDK<a class="headerlink" href="#install-the-python-sdk" title="Permanent link">&para;</a></h2>
