@@ -10,19 +10,40 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
     The **recommended choice to get started**. You can get up and running in under 5 minutes and don't need to maintain a server or run any commands.
 
-    If you're just getting started with Argilla, click the deploy button below:
+    === "Hugging Face Hub"
 
-    <div style="margin: 5px">
-            <a href="http://huggingface.co/new-space?template=argilla/argilla-template-space&name=my-argilla" target="_blank">
-                <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
-            </a>
-    </div>
-    You can use the default values following these steps:
+        If you're just getting started with Argilla, click the deploy button below:
 
-    - Leave the default Space owner (your personal account)
-    - Leave `USERNAME` and `PASSWORD` secrets empty since you'll sign in with your HF user as the Argilla Space `owner`.
-    - Click create Space to launch Argilla 🚀.
-    - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
+        <div style="margin: 5px">
+                <a href="http://huggingface.co/new-space?template=argilla/argilla-template-space&name=my-argilla" target="_blank">
+                    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
+                </a>
+        </div>
+
+        You can use the default values following these steps:
+
+        - Leave the default Space owner (your personal account)
+        - Leave `USERNAME` and `PASSWORD` secrets empty since you'll sign in with your HF user as the Argilla Space `owner`.
+        - Click create Space to launch Argilla 🚀.
+        - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
+
+    === "SDK"
+
+        First, install Argilla:
+
+        ```bash
+        pip install argilla
+        ```
+
+        Next, `Argilla.deploy_on_spaces`, which will create a Space in [the Hugging Face Hub](https://huggingface.co/).
+
+        ```python
+        import argilla as rg
+
+        client = rg.Argilla.deploy_on_spaces(api_key="<api_key>")
+        ```
+
+        Continue with the [Create your first dataset section](#create-your-first-dataset).
 
     !!! warning "Persistent storage `SMALL`"
         Not setting persistent storage to `SMALL` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. If you want to **use the Space just for testing** you can use `FREE` temporarily.
@@ -38,7 +59,6 @@ If everything went well, you should see the Argilla sign in page that looks like
 
 !!! info "Building errors"
     If you get a build error, sometimes restarting the Space from the Settings page works, otherwise [check the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
-
 
 In the sign in page:
 
@@ -59,11 +79,12 @@ pip install argilla
 ```
 
 ## Create your first dataset
+
 For getting started with Argilla and its SDK, we recommend to use Jupyter Notebook or Google Colab.
 
 To start interacting with your Argilla server, you need to create a instantiate a client with an API key and API URL:
 
-- The `<api_key>` is in the `My Settings` page of your Argilla Space.
+- The `<api_key>` is in the `My Settings` page of your Argilla Space but make sure you are logged in with the `owner` account you used to create the Space.
 
 - The `<api_url>` is the URL shown in your browser if it ends with `*.hf.space`.
 
