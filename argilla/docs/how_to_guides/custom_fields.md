@@ -50,11 +50,11 @@ html_template = """
 <div id="container">
     <div class="column">
         <h3>Original</h3>
-        <img src="{{record.fields.custom.original}}" />
+        <img src="{{record.fields.image.original}}" />
     </div>
     <div class="column">
         <h3>Revision</h3>
-        <img src="{{record.fields.custom.revision}}" />
+        <img src="{{record.fields.image.revision}}" />
     </div>
 </div>
 """ # (2)
@@ -69,7 +69,7 @@ We can now pass these templates to the `CustomField` class.
 import argilla as rg
 
 custom_field = rg.CustomField(
-    name="custom",
+    name="image",
     template=css_template + html_template,
 )
 
@@ -83,15 +83,15 @@ dataset = rg.Dataset(
     settings=settings,
 ).create()
 
-dataset.records.log(
-    record = rg.Record(
+dataset.records.log([
+    rg.Record(
         fields={
             "image": {
                 "original": "https://argilla.io/brand-assets/argilla/argilla-logo-color-black.png",
                 "revision": "https://argilla.io/brand-assets/argilla/argilla-logo-black.png",
             }
         }
-    )
+    )]
 )
 ```
 
