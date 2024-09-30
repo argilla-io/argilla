@@ -183,6 +183,7 @@ class Record(Resource):
         serialized_responses = [response.serialize() for response in self.__responses]
         serialized_model["responses"] = serialized_responses
         serialized_model["suggestions"] = serialized_suggestions
+
         return serialized_model
 
     def to_dict(self) -> Dict[str, Dict]:
@@ -202,6 +203,7 @@ class Record(Resource):
         responses = self.responses.to_dict()
         vectors = self.vectors.to_dict()
 
+        # TODO: Review model attributes when to_dict and serialize methods are unified
         return {
             "id": id,
             "fields": fields,
