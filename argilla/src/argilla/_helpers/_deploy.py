@@ -81,7 +81,7 @@ class SpacesDeploymentMixin(LoggingMixin):
                 overwrite=False,
             )
         """
-        token = cls._acquire_hf_token(cls, token=token)
+        token = cls._acquire_hf_token(token=token)
         api = HfApi(token=token)
 
         # Get the org name from the repo name or default to the current user
@@ -112,9 +112,9 @@ class SpacesDeploymentMixin(LoggingMixin):
                         token=token,
                     )
                 if space_hardware:
-                    api.request_space_hardware(hardware=space_hardware, token=token)
+                    api.request_space_hardware(repo_id=repo_id, hardware=space_hardware, token=token)
                 if space_storage:
-                    api.request_space_storage(storage=space_storage, token=token)
+                    api.request_space_storage(repo_id=repo_id, storage=space_storage, token=token)
                 else:
                     cls._space_storage_warning()
         else:
@@ -140,7 +140,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         cls._log_message(cls, message=f"Argilla is being deployed at: {repo_url}")
         while cls._check_if_running(api.get_space_runtime(repo_id=repo_id, token=token)):
             time.sleep(_SLEEP_TIME)
-            cls._log_message(cls, message=f"Deploying. Waiting {_SLEEP_TIME} seconds.")
+            cls._log_message(cls, message=f"Deployment in progress. Waiting {_SLEEP_TIME} seconds.")
 
         headers = {}
         if private:
@@ -154,20 +154,22 @@ class SpacesDeploymentMixin(LoggingMixin):
             "No storage provided. The space will not have persistant storage so every 48 hours your data will be reset."
         )
 
-    def _acquire_hf_token(self, token: Union[str, None]) -> str:
+    @classmethod
+    def _acquire_hf_token(cls, token: Union[str, None]) -> str:
         """Obtain the Hugging Face authentication token to deploy a space and authenticate."""
         if token is None:
             token = get_token()
         if token is None:
-            if self._is_interactive():
+            if cls._is_interactive():
                 notebook_login()
             else:
                 login()
             token = get_token()
         return token
 
-    def _check_if_running(runtime: SpaceRuntime) -> bool:
-        """Check the current stage of the space runtime. Simplified to return True when being build."""
+    @classmethod
+    def _check_if_running(cls, runtime: SpaceRuntime) -> bool:
+        """Check the current stage of the space runtime. Simplified to return True when being built."""
         if runtime.stage in ["RUNNING"]:
             return False
         elif runtime.stage in [
@@ -182,8 +184,9 @@ class SpacesDeploymentMixin(LoggingMixin):
         else:
             raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
 
-    def _check_if_runtime_can_be_build(runtime: SpaceRuntime) -> bool:
-        """Check the current stage of the space runtime. Simplified to return True when being build."""
+    @classmethod
+    def _check_if_runtime_can_be_build(cls, runtime: SpaceRuntime) -> bool:
+        """Check the current stage of the space runtime. Simplified to return True when it can be built."""
         if runtime.stage in ["RUNNING", "RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return False
         elif runtime.stage in ["PAUSED", "STOPPED"]:
@@ -198,7 +201,7 @@ class SpacesDeploymentMixin(LoggingMixin):
             display(IFrame(src=self.api_url, frameborder=0, width=850, height=600))
             return f"Argilla has been deployed at: {self.api_url}"
         else:
-            return f"Argilla has been deployed at: {self.api_url}"
+            return super().__repr__()
 
     @staticmethod
     def _sanitize_url_component(component: str) -> str:
