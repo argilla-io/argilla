@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import time
-import uuid
 import warnings
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -36,12 +35,10 @@ class SpacesDeploymentMixin(LoggingMixin):
     @classmethod
     def deploy_on_spaces(
         cls,
-        username: Optional[Union[str, None]] = None,
-        password: Optional[Union[str, None]] = None,
-        api_key: Optional[Union[str, None]] = None,
+        api_key: str,
         repo_name: Optional[str] = "argilla",
         org_name: Optional[str] = None,
-        token: Optional[str] = None,
+        hf_token: Optional[str] = None,
         space_storage: Optional[Union[str, "SpaceStorage", None]] = None,
         space_hardware: Optional[Union[str, "SpaceHardware"]] = "cpu-basic",
         private: Optional[Union[bool, None]] = False,
@@ -49,59 +46,45 @@ class SpacesDeploymentMixin(LoggingMixin):
     ) -> "Argilla":
         """
         Deploys Argilla on Hugging Face Spaces.
-        For a full guide check our docs.
+
         Args:
-            username (Optional[Union[str, None]]): The username of the admin user.
-                Defaults to None and is set to the current user of the Hugging Face Hub token.
-            password (Optional[Union[str, None]]): The password of the admin user. Defaults to None.
-                When None, the username user can use Hugging Face login to authenticate as owner.
-            api_key (Optional[Union[str, None]]): The API key of the admin user. Defaults to None.
-                When None, a random API key will be generated using a `uuid.uuid4().hex`.
+            api_key (str): The API key of the owner user, which will be used as the password for the space.
             repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
             org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
-            token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
+            hf_token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
             space_storage (Optional[Union[str, SpaceStorage, None]]): The persistant storage size for the space. Defaults to None without persistant storage.
             space_hardware (Optional[Union[str, SpaceStorage, None]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
             private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
             overwrite (Optional[Union[bool, None]]): Whether to overwrite the existing space. Defaults to False.
+
         Returns:
             RepoUrl: The URL of the created space.
+
         Example:
+            ```Python
             import argilla as rg
-            client = rg.Argilla.deploy_on_spaces(
-                username="admin",
-                password="12345678",
-                api_key=None,
-                repo_name="my-space",
-                org_name="my-org",
-                token="hf_ABC123",
-                space_storage="10GB",
-                space_hardware="cpu-basic",
-                private=True,
-                overwrite=False,
-            )
+            client = rg.Argilla.deploy_on_spaces(api_key="12345678")
+            ```
         """
-        token = cls._acquire_hf_token(token=token)
-        api = HfApi(token=token)
+        hf_token = cls._acquire_hf_token(ht_token=hf_token)
+        api = HfApi(token=hf_token)
 
         # Get the org name from the repo name or default to the current user
-        token_username = api.whoami(token=token)["name"]
-        username = username or token_username
+        token_username = api.whoami(token=hf_token)["name"]
         org_name = org_name or token_username
         repo_id = f"{org_name}/{repo_name}"
 
         # Define the api_key for the space
-        api_key = token or uuid.uuid4().hex
         secrets = [
-            {"key": "USERNAME", "value": username, "description": "The username of the admin user"},
-            {"key": "PASSWORD", "value": password, "description": "The password of the admin user"},
-            {"key": "API_KEY", "value": api_key, "description": "The API key of the admin user"},
+            {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user."},
+            {"key": "USERNAME", "value": token_username, "description": "The username of the owner user."},
+            {"key": "PASSWORD", "value": api_key, "description": "The password of the owner user."},
         ]
 
         # Check if the space already exists
-        if api.repo_exists(repo_id=repo_id, repo_type="space", token=token):
-            if cls._check_if_runtime_can_be_build(api.get_space_runtime(repo_id=repo_id, token=token)):
-                api.restart_space(repo_id=repo_id, token=token)
+        if api.repo_exists(repo_id=repo_id, repo_type="space", token=hf_token):
+            if cls._check_if_runtime_can_be_build(api.get_space_runtime(repo_id=repo_id, token=hf_token)):
+                api.restart_space(repo_id=repo_id, token=hf_token)
             if overwrite:
                 for secret in secrets:
                     api.add_space_secret(
@@ -109,12 +92,12 @@ class SpacesDeploymentMixin(LoggingMixin):
                         key=secret["key"],
                         value=secret["value"],
                         description=secret["description"],
-                        token=token,
+                        token=hf_token,
                     )
                 if space_hardware:
-                    api.request_space_hardware(repo_id=repo_id, hardware=space_hardware, token=token)
+                    api.request_space_hardware(repo_id=repo_id, hardware=space_hardware, token=hf_token)
                 if space_storage:
-                    api.request_space_storage(repo_id=repo_id, storage=space_storage, token=token)
+                    api.request_space_storage(repo_id=repo_id, storage=space_storage, token=hf_token)
                 else:
                     cls._space_storage_warning()
         else:
@@ -124,7 +107,7 @@ class SpacesDeploymentMixin(LoggingMixin):
                 from_id=_FROM_REPO_ID,
                 to_id=repo_id,
                 private=private,
-                token=token,
+                token=hf_token,
                 exist_ok=True,
                 hardware=space_hardware,
                 storage=space_storage,
@@ -132,19 +115,19 @@ class SpacesDeploymentMixin(LoggingMixin):
             )
 
         repo_url: RepoUrl = api.create_repo(
-            repo_id=repo_id, repo_type="space", token=token, exist_ok=True, space_sdk="docker"
+            repo_id=repo_id, repo_type="space", token=hf_token, exist_ok=True, space_sdk="docker"
         )
         api_url: str = (
             f"https://{cls._sanitize_url_component(org_name)}-{cls._sanitize_url_component(repo_name)}.hf.space/"
         )
         cls._log_message(cls, message=f"Argilla is being deployed at: {repo_url}")
-        while cls._check_if_running(api.get_space_runtime(repo_id=repo_id, token=token)):
+        while cls._check_if_running(api.get_space_runtime(repo_id=repo_id, token=hf_token)):
             time.sleep(_SLEEP_TIME)
             cls._log_message(cls, message=f"Deployment in progress. Waiting {_SLEEP_TIME} seconds.")
 
         headers = {}
         if private:
-            headers["Authorization"] = f"Bearer {token}"
+            headers["Authorization"] = f"Bearer {hf_token}"
 
         return cls(api_url=api_url, api_key=api_key, headers=headers)
 
@@ -155,17 +138,17 @@ class SpacesDeploymentMixin(LoggingMixin):
         )
 
     @classmethod
-    def _acquire_hf_token(cls, token: Union[str, None]) -> str:
+    def _acquire_hf_token(cls, ht_token: Union[str, None]) -> str:
         """Obtain the Hugging Face authentication token to deploy a space and authenticate."""
-        if token is None:
-            token = get_token()
-        if token is None:
+        if ht_token is None:
+            ht_token = get_token()
+        if ht_token is None:
             if cls._is_interactive():
                 notebook_login()
             else:
                 login()
-            token = get_token()
-        return token
+            ht_token = get_token()
+        return ht_token
 
     @classmethod
     def _check_if_running(cls, runtime: SpaceRuntime) -> bool:

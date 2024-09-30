@@ -35,12 +35,7 @@ class TestSpacesDeploymentMixin:
         mock_api.repo_exists.return_value = False
         mock_api.get_space_runtime.return_value = Mock(stage="RUNNING")
 
-        result = argilla_client_class.deploy_on_spaces(
-            username="test_user",
-            password="test_pass",
-            repo_name="test_repo",
-            token="fake_token",
-        )
+        result = argilla_client_class.deploy_on_spaces(api_key="12345678")
 
         assert isinstance(result, Argilla)
         mock_api.duplicate_space.assert_called_once()
@@ -49,6 +44,7 @@ class TestSpacesDeploymentMixin:
 
         # Check the arguments passed to Argilla.__init__
         args, kwargs = mock_argilla_init.call_args
+        assert kwargs["api_key"] == "12345678"
         assert kwargs["api_url"].startswith("https://")
         assert kwargs["api_url"].endswith(".hf.space/")
         assert "api_key" in kwargs
