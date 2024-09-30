@@ -25,7 +25,7 @@
           </Validation>
 
           <div class="settings__custom-field-preview" v-if="field.isCustomType">
-            <pre>{{ field }}</pre>
+            <pre>{{ field.settings.template }}</pre>
           </div>
 
           <BaseSwitch
