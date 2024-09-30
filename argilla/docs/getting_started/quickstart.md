@@ -31,7 +31,7 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
         First, install Argilla:
 
-        ```bash
+        ```console
         pip install argilla
         ```
 
