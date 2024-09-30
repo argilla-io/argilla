@@ -198,7 +198,7 @@ dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
 similar_filter = rg.Query(
     similar=rg.Similar(
-        name="vector", value=(0.1, 0.2, 0.3),
+        name="vector", value=[0.1, 0.2, 0.3],
     )
 )
 
