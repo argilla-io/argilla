@@ -10,7 +10,7 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
     The **recommended choice to get started**. You can get up and running in under 5 minutes and don't need to maintain a server or run any commands.
 
-    === "UI"
+    === "No-code"
 
         If you're just getting started with Argilla, click the deploy button below:
 
@@ -27,7 +27,9 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         - Click create Space to launch Argilla 🚀.
         - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
 
-    === "SDK"
+    === "Python SDK"
+
+        If you want to deploy Argilla using the Python SDK, follow these steps:
 
         First, install Argilla:
 
@@ -35,12 +37,17 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         pip install argilla
         ```
 
-        Next, `Argilla.deploy_on_spaces`, which will create a Space in [the Hugging Face Hub](https://huggingface.co/).
+        Next, `Argilla.deploy_on_spaces`, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will do the following:
+
+        - Set the `API_KEY` secret based on the `api_key` you provide. This key will be used to authenticate your requests to the Argilla API.
+        - Set the `USERNAME` and `PASSWORD` secrets based on the username of the Hugging Face token you provide and the `api_key` you provide.
+        - Automatically return an authenticated Argilla client, which you can use to interact with your Argilla server.
+        - This will take around 2-3 minutes to complete.
 
         ```python
         import argilla as rg
 
-        client = rg.Argilla.deploy_on_spaces(api_key="<api_key>")
+        authenticated_client = rg.Argilla.deploy_on_spaces(api_key="<api_key>")
         ```
 
         Learn how to [sign in to the UI](#sign-in-into-the-argilla-ui) and retrieve your API key or continue with the [Create your first dataset section](#create-your-first-dataset).
@@ -55,6 +62,7 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
     If you want to **run Argilla locally on your machine or a server**, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
 
 ## Sign in into the Argilla UI
+
 If everything went well, you should see the Argilla sign in page that looks like this:
 
 ![Focus view](../assets/images/getting_started/signin-hf-page.png){ width=100% height=100% }

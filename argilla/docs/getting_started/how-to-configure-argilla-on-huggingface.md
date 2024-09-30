@@ -10,7 +10,7 @@ This section details how to configure and deploy Argilla on Hugging Face Spaces.
 - How to configure and disable HF OAuth access
 - How to use Private Spaces
 
-!!! tip "Looking to get started easily?"
+!!! tip "Looking to get started easily or deploy Argilla with the Python SDK?"
     If you just discovered Argilla and want to get started quickly, go to the [Quickstart guide](quickstart.md).
 
 ## Persistent storage
@@ -114,7 +114,6 @@ client = rg.Argilla(
     headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
-
 
 ## Space Secrets overview
 
