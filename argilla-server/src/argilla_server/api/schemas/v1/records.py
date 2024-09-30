@@ -283,8 +283,8 @@ class TermsFilter(BaseModel):
 class RangeFilter(BaseModel):
     type: Literal["range"]
     scope: FilterScope
-    ge: Optional[float]
-    le: Optional[float]
+    ge: Optional[Union[float, str]]
+    le: Optional[Union[float, str]]
 
     @root_validator(skip_on_failure=True)
     def check_ge_and_le(cls, values: dict) -> dict:

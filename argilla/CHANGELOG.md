@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added `inserted_at` and `updated_at` to `Resource` model as properties. ([#5540](https://github.com/argilla-io/argilla/pull/5540))
 - Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
 
 ### Changed
