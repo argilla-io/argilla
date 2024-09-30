@@ -16,7 +16,6 @@ from datetime import datetime
 from random import random
 
 import pytest
-from mpmath import limit
 
 from argilla import (
     Argilla,
