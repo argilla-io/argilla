@@ -23,16 +23,15 @@ This guide demonstrates how to create custom fields in Argilla using HTML, CSS, 
 
 ## Understanding the Record Object
 
-The `record` object is the main object that contains all the information about the Argilla `record` object in the UI, like `fields`, `metadata`, etc. Your template can use this object to display record information within the custom field.
+The `record` object is the main object that contains all the information about the Argilla `record` object in the UI, like `fields`, `metadata`, etc. Your template can use this object to display record information within the custom field. You can for example access the fields of the record by navigating to `{{record.fields.<field_name>}}` and this generally works the same for `metadata`, `responses`, etc.
 
 ## Using Handlebars in your template
 
-By default, custom fields will use the [handlebars syntax engine](https://handlebarsjs.com/) to render templates with `record` information. This engine will convert the content inside the brackets `{{}}` to the values of record's field's object that you reference within your template. As described in the [Accessing record information](#accessing-record-information) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data. You can deactivate the `handlebars` engine with the `advanced_mode=False` parameter in `CustomField`, then you will need to define custom javascript to access the record attributes.
+By default, custom fields will use the [handlebars syntax engine](https://handlebarsjs.com/) to render templates with `record` information. This engine will convert the content inside the brackets `{{}}` to the values of record's field's object that you reference within your template. As described in the [Accessing record information](#accessing-record-information) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data. You can deactivate the `handlebars` engine with the `advanced_mode=False` parameter in `CustomField`, then you will need to define custom javascript to access the record attributes, like described in the [Advanced Mode](#advanced-mode) section.
 
 ### Usage example
 
-Because of the handlebars syntax engine, we only need to pass the HTML between `<script>` tags and potentially some CSS in
-between the `<style>` tags.
+Because of the handlebars syntax engine, we only need to pass the HTML and potentially some CSS in between the `<style>` tags.
 
 ```python
 css_template = """
@@ -83,7 +82,7 @@ settings = rg.Settings(
 dataset = rg.Dataset(
     name="custom_field_dataset",
     settings=settings,
-)
+).create()
 
 dataset.records.log(
     record = rg.Record(
@@ -180,12 +179,9 @@ script = """
 <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
 <script>
     const template = document.getElementById('template').innerHTML;
-    const rendered = Handlebars.compile(template);
-    document.body.innerHTML = rendered({{"key": "value"}});
-    // Compile the Handlebars template
-    const template = Handlebars.compile(document.getElementById('template').innerHTML);
-    const rendered = template({ record: record_object });
-    document.getElementById('container').innerHTML = rendered;
+    const compiled_template = Handlebars.compile(template);
+    const rendered = compiled_template({ record: record_object });
+    document.body.innerHTML = html;
 </script>
 """ # (2)
 ```
