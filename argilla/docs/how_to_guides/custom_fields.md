@@ -71,7 +71,6 @@ import argilla as rg
 custom_field = rg.CustomField(
     name="custom",
     template=css_template + html_template,
-    advanced_mode=False
 )
 
 settings = rg.Settings(
