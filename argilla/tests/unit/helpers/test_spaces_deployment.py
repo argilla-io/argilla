@@ -29,18 +29,13 @@ class TestSpacesDeploymentMixin:
     @patch("argilla.client.Argilla.__init__", return_value=None)
     def test_deploy_on_spaces(self, mock_argilla_init, mock_get_token, mock_hf_api, argilla_client_class):
         mock_get_token.return_value = "fake_token"
-        mock_api = Mock(api_key="12345678")
+        mock_api = Mock()
         mock_hf_api.return_value = mock_api
         mock_api.whoami.return_value = {"name": "test_user"}
         mock_api.repo_exists.return_value = False
-        mock_api.get_space_runtime.return_value = Mock(api_key="12345678", stage="RUNNING")
+        mock_api.get_space_runtime.return_value = Mock(stage="RUNNING")
 
-        result = argilla_client_class.deploy_on_spaces(
-            username="test_user",
-            password="test_pass",
-            repo_name="test_repo",
-            token="fake_token",
-        )
+        result = argilla_client_class.deploy_on_spaces(api_key="12345678")
 
         assert isinstance(result, Argilla)
         mock_api.duplicate_space.assert_called_once()
