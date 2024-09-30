@@ -178,8 +178,13 @@ export default {
   &__custom-field-preview {
     overflow: auto;
     max-height: 30vh;
+    padding: $base-space * 2;
     border: 1px solid var(--bg-opacity-10);
     border-radius: $border-radius;
+    background: var(--bg-opacity-4);
+    pre {
+      margin: 0;
+    }
   }
 }
 </style>
