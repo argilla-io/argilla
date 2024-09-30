@@ -25,7 +25,7 @@
           </Validation>
 
           <div class="settings__edition-form__group">
-            <label>Code highlighting</label>
+            <label>{{ $t("template") }}</label>
             <div
               class="settings__custom-field-preview"
               v-if="field.isCustomType"
