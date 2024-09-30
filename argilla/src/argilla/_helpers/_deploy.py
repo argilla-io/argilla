@@ -14,6 +14,7 @@
 
 import time
 import uuid
+import warnings
 from typing import TYPE_CHECKING, Optional, Union
 
 from huggingface_hub import HfApi, SpaceRuntime, get_token, login, notebook_login
@@ -36,7 +37,7 @@ class SpacesDeploymentMixin(LoggingMixin):
     def deploy_on_spaces(
         cls,
         username: Optional[Union[str, None]] = None,
-        password: Optional[Union[str, None]] = "12345678",
+        password: Optional[Union[str, None]] = None,
         api_key: Optional[Union[str, None]] = None,
         repo_name: Optional[str] = "argilla",
         org_name: Optional[str] = None,
@@ -49,11 +50,11 @@ class SpacesDeploymentMixin(LoggingMixin):
         """
         Deploys Argilla on Hugging Face Spaces.
         For a full guide check our docs.
-
         Args:
             username (Optional[Union[str, None]]): The username of the admin user.
                 Defaults to None and is set to the current user of the Hugging Face Hub token.
-            password (Optional[Union[str, None]]): The password of the admin user. Defaults to "12345678".
+            password (Optional[Union[str, None]]): The password of the admin user. Defaults to None.
+                When None, the username user can use Hugging Face login to authenticate as owner.
             api_key (Optional[Union[str, None]]): The API key of the admin user. Defaults to None.
                 When None, a random API key will be generated using a `uuid.uuid4().hex`.
             repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
@@ -63,13 +64,10 @@ class SpacesDeploymentMixin(LoggingMixin):
             space_hardware (Optional[Union[str, SpaceStorage, None]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
             private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
             overwrite (Optional[Union[bool, None]]): Whether to overwrite the existing space. Defaults to False.
-
         Returns:
             RepoUrl: The URL of the created space.
-
         Example:
             import argilla as rg
-
             client = rg.Argilla.deploy_on_spaces(
                 username="admin",
                 password="12345678",
@@ -92,8 +90,8 @@ class SpacesDeploymentMixin(LoggingMixin):
         org_name = org_name or token_username
         repo_id = f"{org_name}/{repo_name}"
 
-        # Define the secrets for the space
-        api_key = api_key or uuid.uuid4().hex
+        # Define the api_key for the space
+        api_key = token or uuid.uuid4().hex
         secrets = [
             {"key": "USERNAME", "value": username, "description": "The username of the admin user"},
             {"key": "PASSWORD", "value": password, "description": "The password of the admin user"},
@@ -117,7 +115,11 @@ class SpacesDeploymentMixin(LoggingMixin):
                     api.request_space_hardware(hardware=space_hardware, token=token)
                 if space_storage:
                     api.request_space_storage(storage=space_storage, token=token)
+                else:
+                    cls._space_storage_warning()
         else:
+            if space_storage is None:
+                cls._space_storage_warning()
             api.duplicate_space(
                 from_id=_FROM_REPO_ID,
                 to_id=repo_id,
@@ -146,6 +148,12 @@ class SpacesDeploymentMixin(LoggingMixin):
 
         return cls(api_url=api_url, api_key=api_key, headers=headers)
 
+    @staticmethod
+    def _space_storage_warning() -> None:
+        warnings.warn(
+            "No storage provided. The space will not have persistant storage so every 48 hours your data will be reset."
+        )
+
     def _acquire_hf_token(self, token: Union[str, None]) -> str:
         """Obtain the Hugging Face authentication token to deploy a space and authenticate."""
         if token is None:
@@ -158,7 +166,7 @@ class SpacesDeploymentMixin(LoggingMixin):
             token = get_token()
         return token
 
-    def _check_if_running(runtime: SpaceRuntime):
+    def _check_if_running(runtime: SpaceRuntime) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when being build."""
         if runtime.stage in ["RUNNING"]:
             return False
@@ -174,7 +182,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         else:
             raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
 
-    def _check_if_runtime_can_be_build(runtime: SpaceRuntime):
+    def _check_if_runtime_can_be_build(runtime: SpaceRuntime) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when being build."""
         if runtime.stage in ["RUNNING", "RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return False
@@ -188,9 +196,9 @@ class SpacesDeploymentMixin(LoggingMixin):
             from IPython.display import IFrame, display
 
             display(IFrame(src=self.api_url, frameborder=0, width=850, height=600))
-            return f"Argilla is being deployed at: {self.api_url}"
+            return f"Argilla has been deployed at: {self.api_url}"
         else:
-            return f"Argilla is being deployed at: {self.api_url}"
+            return f"Argilla has been deployed at: {self.api_url}"
 
     @staticmethod
     def _sanitize_url_component(component: str) -> str:
