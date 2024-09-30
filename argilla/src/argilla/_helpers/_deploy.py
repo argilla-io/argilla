@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import time
+import uuid
 import warnings
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -56,7 +57,7 @@ class SpacesDeploymentMixin(LoggingMixin):
             password (Optional[Union[str, None]]): The password of the admin user. Defaults to None.
                 When None, the username user can use Hugging Face login to authenticate as owner.
             api_key (Optional[Union[str, None]]): The API key of the admin user. Defaults to None.
-                When None, the Hugging Face token will be used as the API key.
+                When None, a random API key will be generated using a `uuid.uuid4().hex`.
             repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
             org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
             token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
@@ -94,9 +95,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         repo_id = f"{org_name}/{repo_name}"
 
         # Define the api_key for the space
-        if api_key is None:
-            warnings.warn("No API key provided. Using the your Hugging Face token as the API key. ")
-        api_key = token
+        api_key = token or uuid.uuid4().hex
         secrets = [
             {"key": "USERNAME", "value": username, "description": "The username of the admin user"},
             {"key": "PASSWORD", "value": password, "description": "The password of the admin user"},
