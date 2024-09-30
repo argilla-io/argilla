@@ -145,8 +145,8 @@ async def create_dataset(db: AsyncSession, dataset_attrs: dict):
     return await dataset.save(db)
 
 
-async def _count_required_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
-    return (await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id, required=True))).scalar_one()
+async def _count_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
+    return (await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))).scalar_one()
 
 
 async def _count_required_questions_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
@@ -166,8 +166,8 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
     if dataset.is_ready:
         raise UnprocessableEntityError("Dataset is already published")
 
-    if await _count_required_fields_by_dataset_id(db, dataset.id) == 0:
-        raise UnprocessableEntityError("Dataset cannot be published without required fields")
+    if await _count_fields_by_dataset_id(db, dataset.id) == 0:
+        raise UnprocessableEntityError("Dataset cannot be published without fields")
 
     if await _count_required_questions_by_dataset_id(db, dataset.id) == 0:
         raise UnprocessableEntityError("Dataset cannot be published without required questions")

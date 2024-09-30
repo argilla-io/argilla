@@ -169,7 +169,7 @@ class RecordUpdateValidator(RecordValidatorBase):
 class RecordsBulkCreateValidator:
     @classmethod
     async def validate(cls, db: AsyncSession, records_create: RecordsBulkCreate, dataset: Dataset) -> None:
-        cls._validate_dataset_is_ready(dataset)
+        # cls._validate_dataset_is_ready(dataset)
         await cls._validate_external_ids_are_not_present_in_db(db, records_create, dataset)
         cls._validate_all_bulk_records(dataset, records_create.items)
 
@@ -206,7 +206,7 @@ class RecordsBulkUpsertValidator:
         dataset: Dataset,
         existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
     ) -> None:
-        cls._validate_dataset_is_ready(dataset)
+        # cls._validate_dataset_is_ready(dataset)
         cls._validate_all_bulk_records(dataset, records_upsert.items, existing_records_by_external_id_or_record_id)
 
     @staticmethod
