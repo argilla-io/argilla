@@ -2,19 +2,6 @@
   <div class="custom_field_component" :key="content">
     <div class="title-area --body2">
       <span class="custom_field_component__title-content" v-text="title" />
-      <BaseActionTooltip
-        class="custom_field_component__tooltip"
-        tooltip="Copied"
-        tooltip-position="left"
-      >
-        <BaseButton
-          title="Copy to clipboard"
-          class="custom_field_component__copy-button"
-          @click.prevent="$copyToClipboard(content)"
-        >
-          <svgicon color="#acacac" name="copy" width="18" height="18" />
-        </BaseButton>
-      </BaseActionTooltip>
     </div>
     <div :id="`fields-content-${name}`" class="content-area --body1">
       <Sandbox :content="template" />
