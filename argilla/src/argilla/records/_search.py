@@ -100,25 +100,29 @@ Conditions = Union[List[Tuple[str, str, Any]], Tuple[str, str, Any]]
 class Similar:
     """This class is used to map user similar queries to the internal query models"""
 
-    def __init__(self, name: str, value: Union[Iterable[float], "Record"]):
+    def __init__(self, name: str, value: Union[Iterable[float], "Record"], most_similar: bool = True):
         """
         Create a similar object for use in Argilla search requests.
 
         Parameters:
             name: The name of the vector field
             value: The vector value or the record to search for similar records
+            most_similar: Whether to search for the most similar records or the least similar records
         """
 
         self.name = name
         self.value = value
+        self.most_similar = most_similar if most_similar is not None else True
 
     def api_model(self) -> VectorQueryModel:
         from argilla.records import Record
 
-        if isinstance(self.value, Record):
-            return VectorQueryModel(name=self.name, record_id=self.value._server_id, order="most_similar")
+        order = "most_similar" if self.most_similar else "least_similar"
 
-        return VectorQueryModel(name=self.name, value=self.value, order="most_similar")
+        if isinstance(self.value, Record):
+            return VectorQueryModel(name=self.name, record_id=self.value._server_id, order=order)
+
+        return VectorQueryModel(name=self.name, value=self.value, order=order)
 
 
 class Filter:

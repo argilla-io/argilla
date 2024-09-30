@@ -16,6 +16,7 @@ from datetime import datetime
 from random import random
 
 import pytest
+from mpmath import limit
 
 from argilla import (
     Argilla,
@@ -175,6 +176,27 @@ class TestSearchRecords:
         assert len(records) == 1000
         assert records[0].id == str(data[3]["id"])
 
+    def test_search_records_by_least_similar_value(self, client: Argilla, dataset: Dataset):
+        data = [
+            {
+                "id": i,
+                "text": "The record text field",
+                "vector": [random() for _ in range(10)],
+            }
+            for i in range(100)
+        ]
+
+        dataset.records.log(data)
+
+        records = list(
+            dataset.records(
+                query=Query(
+                    similar=Similar(name="vector", value=data[3]["vector"], most_similar=False),
+                )
+            )
+        )
+        assert records[-1].id == str(data[3]["id"])
+
     def test_search_records_by_similar_record(self, client: Argilla, dataset: Dataset):
         data = [
             {
@@ -198,3 +220,26 @@ class TestSearchRecords:
         )
         assert len(records) == 1000
         assert records[0].id != str(record.id)
+
+    def test_search_records_by_least_similar_record(self, client: Argilla, dataset: Dataset):
+        data = [
+            {
+                "id": i,
+                "text": "The record text field",
+                "vector": [random() for _ in range(10)],
+            }
+            for i in range(100)
+        ]
+
+        dataset.records.log(data)
+
+        record = list(dataset.records(limit=1, with_vectors=False))[0]
+
+        records = list(
+            dataset.records(
+                query=Query(
+                    similar=Similar(name="vector", value=record, most_similar=False),
+                )
+            )
+        )
+        assert all(r.id != str(record.id) for r in records)
