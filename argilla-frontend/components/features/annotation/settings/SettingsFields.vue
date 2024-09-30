@@ -24,6 +24,10 @@
             <input type="text" id="field.id" v-model="field.title" />
           </Validation>
 
+          <div class="settings__custom-field-preview" v-if="field.isCustomType">
+            <pre>{{ field }}</pre>
+          </div>
+
           <BaseSwitch
             v-if="field.isTextType || field.isChatType"
             class="settings__edition-form__switch"
@@ -170,6 +174,12 @@ export default {
       display: inline-flex;
       gap: $base-space;
     }
+  }
+  &__custom-field-preview {
+    overflow: auto;
+    max-height: 30vh;
+    border: 1px solid var(--bg-opacity-10);
+    border-radius: $border-radius;
   }
 }
 </style>
