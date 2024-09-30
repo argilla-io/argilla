@@ -56,10 +56,6 @@ class Condition(Tuple[str, str, Any]):
         field = field.strip()
         if field == "status":
             return RecordFilterScopeModel(property="status")
-        elif field == "inserted_at":
-            return RecordFilterScopeModel(property="inserted_at")
-        elif field == "updated_at":
-            return RecordFilterScopeModel(property="updated_at")
         elif field == "response.status":
             return ResponseFilterScopeModel(property="status")
         elif "metadata" in field:
@@ -74,7 +70,6 @@ class Condition(Tuple[str, str, Any]):
         elif "response" in field:
             question, _ = field.split(".")
             return ResponseFilterScopeModel(question=question)
-
         else:  # Question field -> Suggestion
             # TODO: The default path would be raise an error instead of consider suggestions by default
             #  (can be confusing)
