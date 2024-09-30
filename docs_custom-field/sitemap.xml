@@ -2,247 +2,247 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/community/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/community/changelog/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/community/contributor/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/community/developer/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/community/popular_issues/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/community/integrations/llamaindex_rag_github/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/getting_started/faq/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/getting_started/how-to-configure-argilla-on-huggingface/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/getting_started/how-to-deploy-argilla-with-docker/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/getting_started/quickstart/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/annotate/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/custom_fields/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/dataset/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/distribution/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/import_export/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/migrate_from_legacy_datasets/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/query/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/record/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/use_markdown_to_format_rich_content/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/user/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/how_to_guides/workspace/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/SUMMARY/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/client/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/markdown/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/search/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/users/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/workspaces/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/datasets/dataset_records/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/datasets/datasets/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/records/metadata/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/records/records/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/records/responses/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/records/suggestions/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/records/vectors/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/settings/fields/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/settings/metadata_property/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/settings/questions/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/settings/settings/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/settings/task_distribution/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla/settings/vectors/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla-server/configuration/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/reference/argilla-server/telemetry/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/tutorials/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/tutorials/image_classification/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/tutorials/image_preference/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/tutorials/text_classification/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://docs.argilla.io/docs_custom-field/tutorials/token_classification/</loc>
-         <lastmod>2024-09-27</lastmod>
+         <lastmod>2024-09-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
