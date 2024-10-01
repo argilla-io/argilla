@@ -14,6 +14,6 @@
 
 from argilla.records._dataset_records import DatasetRecords
 from argilla.records._resource import Record
-from argilla.records._search import Query, Filter, Condition
+from argilla.records._search import Query, Filter, Condition, Similar
 
-__all__ = ["Record", "DatasetRecords", "Query", "Filter", "Condition"]
+__all__ = ["Record", "DatasetRecords", "Query", "Filter", "Condition", "Similar"]

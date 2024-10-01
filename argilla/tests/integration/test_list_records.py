@@ -21,8 +21,7 @@ from argilla import Argilla, Dataset, Settings, TextField, TextQuestion, Workspa
 
 
 @pytest.fixture
-def dataset(client: Argilla, workspace: Workspace) -> Dataset:
-    name = "".join(random.choices(ascii_lowercase, k=16))
+def dataset(client: Argilla, workspace: Workspace, dataset_name: str) -> Dataset:
     settings = Settings(
         fields=[TextField(name="text")],
         questions=[
@@ -31,7 +30,7 @@ def dataset(client: Argilla, workspace: Workspace) -> Dataset:
         ],
     )
     dataset = Dataset(
-        name=name,
+        name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
