@@ -87,7 +87,7 @@ export default {
   }
 
   :deep(.dropdown__content) {
-    width: 100%;
+    min-width: 100%;
   }
 
   &__options {

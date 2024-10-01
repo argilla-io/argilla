@@ -13,12 +13,9 @@
                 }"
               />
             </div> -->
-            <DatasetConfigurationSelector
-              :options="datasetConfig.subsets"
-              :value="datasetConfig.selectedSubset.name"
-              @onValueChange="$emit('change-subset', $event)"
-            />
-            {{ datasetConfig.selectedSubset }}
+            <div :style="{ overflow: 'auto', height: '100%' }">
+              <pre>{{ datasetConfig }}</pre>
+            </div>
           </template>
           <template #right>
             <!-- <QuestionsComponent
@@ -43,6 +40,12 @@
             <DatasetConfigurationForm
               :fields="datasetConfig.fields"
               :questions="datasetConfig.questions"
+              :subsets="datasetConfig.subsets"
+              :selected-subset="datasetConfig.selectedSubset"
+              :splits="datasetConfig.splits"
+              :selected-split="datasetConfig.selectedSplit"
+              @change-subset="$emit('change-subset', $event)"
+              @change-split="$emit('change-split', $event)"
             />
           </div>
         </div>
@@ -79,11 +82,6 @@ export default {
     display: flex;
     height: 100%;
     width: 100%;
-  }
-  &__configuration {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
   }
   &__preview {
     align-items: flex-start;
