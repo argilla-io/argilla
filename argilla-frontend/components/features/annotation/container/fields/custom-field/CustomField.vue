@@ -16,41 +16,31 @@
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div :id="`fields-content-${name}`" class="content-area --body1">
-      <Sandbox :content="template" />
-    </div>
+    <Sandbox :content="template" />
   </div>
 </template>
 <script>
 /* eslint-disable */
-const STYLES = `
-<script>
-if (parent) {
-  const currentHead = document.getElementsByTagName("head")[0];
-  const styles = parent.document.getElementsByTagName("style");
-  for (const style of styles) {
-    currentHead.appendChild(style.cloneNode(true));
-  }
-}
-<\/script>`;
-
 const BASIC_TEMPLATE = `
-${STYLES}
-<script>const record_object = #RECORD_OBJECT#;<\/script>
+<script>const record = #RECORD_OBJECT#;<\/script>
 <script src="./js/handlebars.min.js"><\/script>
-<div id="template" class="text-center">
-  #TEMPLATE#
+<div id="template">
+#TEMPLATE#
 </div>
 <script>
+  Handlebars.registerHelper("json", (context) => {
+    return JSON.stringify(context);
+  });
+
   const template = document.getElementById("template").innerHTML;
   const compiledTemplate = Handlebars.compile(template);
-  const html = compiledTemplate({ record_object });
+  const html = compiledTemplate({ record });
   document.body.innerHTML = html;
 <\/script>
 `;
-const ADVANCE_TEMPLATE = ` ${STYLES}
+const ADVANCE_TEMPLATE = `
 <script>
-  const record_object = #RECORD_OBJECT#;
+  const record = #RECORD_OBJECT#;
 <\/script>
 #TEMPLATE#
 `;
@@ -102,8 +92,9 @@ export default {
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
-  background: palette(grey, 800);
+  background: var(--bg-field);
   border-radius: $border-radius-m;
+  border: 1px solid var(--border-field);
   &:hover {
     #{$this}__copy-button {
       opacity: 1;
@@ -115,10 +106,6 @@ export default {
     justify-content: space-between;
     gap: $base-space;
     color: var(--fg-secondary);
-  }
-  .content-area {
-    white-space: pre-wrap;
-    word-break: break-word;
   }
   &__title-content {
     word-break: break-word;
