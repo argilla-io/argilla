@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added helm chart for argilla. ([#5512](https://github.com/argilla-io/argilla/pull/5512))
+
 ## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 
 ### Added
