@@ -219,28 +219,79 @@ custom_field = rg.CustomField(
 
 ??? "3D object viewer"
 
-    We will now add another layer on top of the handlebars template by using a custom JavaScript library to visualize 3D objects. These 3D objects will be passed as a URL to the record's field, will then be inserted into the handlebars template and finally rendered in the browser.
+    We will now use native javascript and [three.js](https://threejs.org/) to create a 3D object viewer. We will then use the `record` object directly to insert URLs from the record's fields.
 
     ```python
     template = """
-    <div id="template" type="text/x-handlebars-template">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+
+    <div style="display: flex;">
         <div>
             <h3>Option A</h3>
-            {{record.fields.url.option_a}}
+            <canvas id="canvas1" width="400" height="400"></canvas>
         </div>
         <div>
             <h3>Option B</h3>
-            {{record.fields.url.option_b}}
+            <canvas id="canvas2" width="400" height="400"></canvas>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     <script>
-        const template = document.getElementById("template").innerHTML;
-        const compiledTemplate = Handlebars.compile(template);
-        const html = compiledTemplate({ record });
-        document.body.innerHTML = html;
+        function init(canvasId, modelUrl) {
+        let scene, camera, renderer, controls;
+
+        const canvas = document.getElementById(canvasId);
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(2, 2, 5);
+        scene.add(directionalLight);
+
+        const ambientLight = new THREE.AmbientLight(0x404040, 7);
+        scene.add(ambientLight);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.maxPolarAngle = Math.PI / 2;
+
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+            modelUrl,
+            function (gltf) {
+            const model = gltf.scene;
+            scene.add(model);
+            model.position.set(0, 0, 0);
+
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            model.position.sub(center);
+            camera.position.set(center.x, center.y, center.z + 1.2);
+
+            animate();
+            },
+            undefined,
+            function (error) {
+            console.error(error);
+            }
+        );
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        }
+
+        init("canvas1", record.fields.object.option_a);
+        init("canvas2", record.fields.object.option_b);
     </script>
+
     """
     ```
 
@@ -249,9 +300,9 @@ custom_field = rg.CustomField(
     ```python
     record = rg.Record(
         fields={
-            "url": {
-                "option_a": "https://huggingface.co/datasets/dylanebert/3d-arena/resolve/main/outputs/Strawb3rry/A_cartoon_house_with_red_roof.glb",
-                "option_b": "https://huggingface.co/datasets/dylanebert/3d-arena/resolve/main/outputs/MeshFormer/a_capybara_made_of_voxels_sitting_in_a_field.glb",
+            "object": {
+                "option_a": "https://huggingface.co/datasets/dylanebert/3d-arena/resolve/main/outputs/Strawb3rry/a_bookshelf_with_ten_books_stacked_vertically.glb",
+                "option_b": "https://huggingface.co/datasets/dylanebert/3d-arena/resolve/main/outputs/MeshFormer/a_bookshelf_with_ten_books_stacked_vertically.glb",
             }
         }
     )
