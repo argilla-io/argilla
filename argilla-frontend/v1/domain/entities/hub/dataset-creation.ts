@@ -16,23 +16,23 @@ class FieldCreation {
   constructor(
     public readonly name: string,
     public title: string,
-    private readonly type: FieldType
+    private readonly type: string
   ) {}
 
   get isTextType() {
-    return this.type.isTextType;
+    return FieldType.from(this.type).isTextType;
   }
 
   get isImageType() {
-    return this.type.isImageType;
+    return FieldType.from(this.type).isImageType;
   }
 
   get isChatType() {
-    return this.type.isChatType;
+    return FieldType.from(this.type).isChatType;
   }
 
   get isCustomType() {
-    return this.type.isCustomType;
+    return FieldType.from(this.type).isCustomType;
   }
 }
 

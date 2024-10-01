@@ -7,6 +7,10 @@ export class FieldType extends String {
     return this.toLowerCase();
   }
 
+  public static from(value: string): FieldType {
+    return new FieldType(value);
+  }
+
   public get isTextType(): boolean {
     return this.value === "text";
   }
