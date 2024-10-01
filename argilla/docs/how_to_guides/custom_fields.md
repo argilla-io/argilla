@@ -175,7 +175,7 @@ When `advanced_mode=True`, you can use the `template` argument to pass a full HT
 
 ### Usage example
 
-Let's reproduce example from the [Without advanced mode](#without-advanced-mode) section but this time we will insert the [handlebars syntax engine](https://handlebarsjs.com/) ourselves.
+Let's reproduce example from the [Without advanced mode](#without-advanced-mode) section but this time we will insert the [handlebars syntax engine](https://handlebarsjs.com/) into the template ourselves.
 
 ```python
 render_template = """
@@ -190,12 +190,12 @@ render_template = """
 """ # (1)
 
 script = """
-<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 <script>
-    const template = document.getElementById('template').innerHTML;
-    const compiled_template = Handlebars.compile(template);
-    const rendered = compiled_template({ record });
-    document.body.innerHTML = rendered;
+    const template = document.getElementById("template").innerHTML;
+    const compiledTemplate = Handlebars.compile(template);
+    const html = compiledTemplate({ record });
+    document.body.innerHTML = html;
 </script>
 """ # (2)
 ```
@@ -219,7 +219,43 @@ custom_field = rg.CustomField(
 
 ??? "3D object viewer"
 
+    We will now add another layer on top of the handlebars template by using a custom javascript library to visualize 3D objects. These 3D objects will be passed as a URL to the record's field, will then be inserted into the handlebars template and finally rendered in the browser.
+
     ```python
-    import argilla as rg
+    template = """
+    <div id="template" type="text/x-handlebars-template">
+        <div>
+            <h3>Option A</h3>
+            {{record.fields.url.option_a}}
+        </div>
+        <div>
+            <h3>Option B</h3>
+            {{record.fields.url.option_b}}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script>
+        const template = document.getElementById("template").innerHTML;
+        const compiledTemplate = Handlebars.compile(template);
+        const html = compiledTemplate({ record });
+        document.body.innerHTML = html;
+    </script>
+    """
     ```
+
+    Next, we will create a record with two URLs to 3D objects from [the 3d-arena dataset](https://huggingface.co/datasets/dylanebert/3d-arena).
+
+    ```python
+    record = rg.Record(
+        fields={
+            "url": {
+                "option_a": "https://huggingface.co/datasets/dylanebert/3d-arena/resolve/main/outputs/Strawb3rry/A_cartoon_house_with_red_roof.glb",
+                "option_b": "https://huggingface.co/datasets/dylanebert/3d-arena/resolve/main/outputs/MeshFormer/a_capybara_made_of_voxels_sitting_in_a_field.glb",
+            }
+        }
+    )
+    ```
+
+    ![example-gallery-end](../assets/images/how_to_guides/custom_field/3d_object_viewer.png)
 
