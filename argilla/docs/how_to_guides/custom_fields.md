@@ -152,7 +152,7 @@ The result will be the following:
 
 ??? "JSON viewer"
 
-    If you want to display a JSON object, you can use the `json` helper to convert the object to a string.
+    The value of a custom field is a dictionary in python and a javascript object in the browser. You can render this object as a JSON string using the `json` helper. This is implemented in Argilla's frontend for convenience. If you want to learn more about handlebars helpers, you can check the [handlebars documentation](https://handlebarsjs.com/guide/builtin-helpers.html).
 
     ```python
     template = "{{ json record.fields.user_profile }}"
