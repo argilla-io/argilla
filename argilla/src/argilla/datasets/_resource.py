@@ -15,6 +15,11 @@ import warnings
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
+
 from argilla._api import DatasetsAPI
 from argilla._exceptions import NotFoundError, SettingsError, ForbiddenError
 from argilla._models import DatasetModel
@@ -283,5 +288,5 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             name = name.replace(character, "-")
         return name
 
-    def _with_client(self, client: Argilla):
-        return super()._with_client(client)
+    def _with_client(self, client: Argilla) -> "Self":
+        return super()._with_client(client=client)
