@@ -125,7 +125,7 @@ export default {
     flex-direction: column;
     height: 100%;
     background: var(--bg-accent-grey-1);
-    border: 1px solid var(--bg-opacity-10);
+    border: 1px solid var(--bg-opacity-6);
     border-radius: $border-radius-m;
     &__header {
       padding: $base-space * 2;

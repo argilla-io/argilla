@@ -103,7 +103,7 @@ export default {
     padding: $base-space * 4;
     color: var(--fg-secondary);
     background-color: var(--bg-accent-grey-1);
-    border: 1px dashed var(--bg-opacity-20);
+    border: 1px dashed var(--bg-opacity-10);
     border-radius: $border-radius-m;
     margin: 0;
     @include font-size(16px);
