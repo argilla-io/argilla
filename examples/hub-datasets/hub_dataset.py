@@ -62,12 +62,6 @@ class HubDataset:
         return self.__params["dataset"]
 
     @property
-    def features(self) -> List[dict]:
-        """The features of the dataset"""
-        info = self.info()
-        return info.get("features")
-
-    @property
     def config(self):
         """The config of the dataset to use"""
 
@@ -86,6 +80,11 @@ class HubDataset:
             split = self._resolve_split()
             self.__params["split"] = split
         return split
+
+    def features(self) -> List[dict]:
+        """The features of the dataset"""
+        info = self.info()
+        return info.get("features")
 
     def get(self, row_idx: int) -> dict:
         """Get a single row by its index"""
