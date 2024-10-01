@@ -10,7 +10,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
 
 !!! info "Main Classes"
 
-    === "`rg.query`"
+    === "`rg.Query`"
 
         ```python
         rg.Query(
@@ -30,6 +30,16 @@ You can search for records in your dataset by **querying** or **filtering**. The
         )
         ```
         > Check the [Filter - Python Reference](../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Filter` class in detail.
+
+    === "`rg.Similar`"
+
+        ```python
+        rg.Similar(
+            name="vector",
+            value=[0.1, 0.2, 0.3],
+        )
+        ```
+        > Check the [Similar - Python Reference](../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Similar` class in detail.
 
 ## Query with search terms
 
@@ -130,9 +140,29 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
     ).to_list(flatten=True)
     ```
 
+### Available fields
+
+You can filter records based on the following fields:
+
+
+| field                   | description                                                                    | example                                                        |
+|-------------------------|--------------------------------------------------------------------------------|----------------------------------------------------------------|
+| `id`                    | The record id                                                                  | `("id", "in", ["1","2","3"])`                                  |
+| `_server_id`            | The internal record id. This value must be a valida UUID                       | `("_server_id", "==", "ba69a996-85c2-4af0-a473-23138929641b")` |
+| `inserted_at`           | The date and time the record was inserted. You can pass a datetime or a string | `("inserted_at" ">=", "2024-10-10")`                           |
+| `updated_at`            | The date and time the record was updated.                                      | `("updated_at" ">=", "2024-10-10")`                            |
+| `status`                | The record status, which can be `pending` or `completed`.                      | `("status", "==", "completed")`                                |
+| `response.status`       | The response status, which can be `draft`, `submitted`, or `discarded`.        | `("response.status", "==", "submitted")`                       |
+| `metadata.<name>`       | Filter by a metadata property                                                  | `("metadata.split", "==", "train")`                            |
+| `<question>.suggestion` | Filter by a question suggestion value                                          | `("label.sugggestion", "==", "positive")`                      |
+| `<question>.score`      | Filter by a suggestion score                                                   | `("label.score", "<=", "0.9")`                                 |
+| `<question>.agent`      | Filter by a suggestion agent                                                   | `("label.agent", "<=", "ChatGPT4.0")`                          |
+| `<question>.response`   | Filter by a question response                                                  | `("label.response", "==", "negative")`                         |
+
+
 ## Filter by status
 
-You can filter records based on record or response status. Record status can be `pending` or `completed`, and response status can be `pending`, `draft`, `submitted`, or `discarded`.
+You can filter records based on record or response status. Record status can be `pending` or `completed`, and response status can be `draft`, `submitted`, or `discarded`.
 
 ```python
 import argilla as rg
@@ -152,6 +182,32 @@ status_filter = rg.Query(
 
 filtered_records = dataset.records(status_filter).to_list(flatten=True)
 ```
+
+## Similarity search
+
+You can search for records that are similar to a given vector. You can use the `Similar` class to define the vector and pass it as part of the query argument to the `Dataset.records`.
+
+```python
+
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = client.datasets(name="my_dataset", workspace="my_workspace")
+
+
+similar_filter = rg.Query(
+    similar=rg.Similar(
+        name="vector", value=[0.1, 0.2, 0.3],
+    )
+)
+
+filtered_records = dataset.records(similar_filter).to_list(flatten=True)
+```
+
+!!! Note
+    The `Similar` search expects a vector field definition as part of the dataset settings. If the dataset does not have a vector field, the search will return an error.
+    Vist the [Vectors](./dataset.md#vectors) section for more details on how to define a vector field.
 
 ## Query and filter a dataset
 

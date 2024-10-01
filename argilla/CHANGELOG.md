@@ -20,6 +20,8 @@ These are the section headers that we use:
 
 - Added `inserted_at` and `updated_at` to `Resource` model as properties. ([#5540](https://github.com/argilla-io/argilla/pull/5540))
 - Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
+- Added similarity search support. ((#5546)[https://github.com/argilla-io/argilla/pull/5546])
+- Added filter support for `id`, `_server_id`, `inserted_at` and `updated_at` record attributes. ([#5545](https://github.com/argilla-io/argilla/pull/5545))
 
 ### Changed
 
