@@ -8,7 +8,7 @@ export OAUTH2_HUGGINGFACE_CLIENT_ID=$OAUTH_CLIENT_ID
 export OAUTH2_HUGGINGFACE_CLIENT_SECRET=$OAUTH_CLIENT_SECRET
 export OAUTH2_HUGGINGFACE_SCOPE=$OAUTH_SCOPES
 
-# Set the space author name as username if no provided.
+# Set the space creator name as username if no provided.
 # See https://huggingface.co/docs/hub/en/spaces-overview#helper-environment-variables for more details
 export USERNAME="${USERNAME:-$CREATOR_USER_ID}"
 
