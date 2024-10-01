@@ -1,4 +1,4 @@
-from huggingface_hub import dataset_infofrom tests.integration.conftest import client---
+---
 description: In this section, we will provide a step-by-step guide to show how to filter and query a dataset.
 ---
 
