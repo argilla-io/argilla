@@ -26,14 +26,19 @@
       <div class="config-form__col-wrapper">
         <div class="config-form__col">
           <div class="config-form__col__header">Fields</div>
-          <div class="config-form__col__content">
+
+          <draggable
+            class="config-form__col__content"
+            :list="fields"
+            :group="{ name: 'fields' }"
+          >
             <DatasetConfigurationField
               v-for="field in fields"
               :key="field.name"
               :field="field"
               :typeOptions="['text', 'image', 'chat', 'custom', 'no mapping']"
             />
-          </div>
+          </draggable>
         </div>
       </div>
       <div class="config-form__col-wrapper">
@@ -128,7 +133,7 @@ export default {
     &__content {
       display: flex;
       flex-direction: column;
-      padding: 0 $base-space * 2 $base-space * 2;
+      padding: calc($base-space / 2) $base-space * 2 $base-space * 2;
       gap: $base-space;
       overflow: auto;
       height: 100%;

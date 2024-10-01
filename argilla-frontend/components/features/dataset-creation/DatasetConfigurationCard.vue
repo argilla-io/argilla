@@ -1,28 +1,30 @@
 <template>
-  <div class="config-card">
-    <div class="config-card__header">
-      <h3 class="config-card__title" v-text="item.name" />
-      <slot name="header" />
-    </div>
-    <div class="config-card__content" :class="item.type.replace(/ /g, '')">
-      <div class="config-card__row">
-        <DatasetConfigurationSelector
-          class="config-card__type"
-          :options="typeOptions"
-          v-model="item.type"
-        />
-        <BaseCheckbox
-          v-if="!hasNoMapping"
-          v-model="item.required"
-          class="config-card__required"
-        />
+  <div class="config-card__wrapper">
+    <div class="config-card">
+      <div class="config-card__header">
+        <h3 class="config-card__title" v-text="item.name" />
+        <slot name="header" />
       </div>
-      <DatasetConfigurationInput
-        v-if="!hasNoMapping"
-        v-model="item.title"
-        placeholder="Title"
-      />
-      <slot></slot>
+      <div class="config-card__content" :class="item.type.replace(/ /g, '')">
+        <div class="config-card__row">
+          <DatasetConfigurationSelector
+            class="config-card__type"
+            :options="typeOptions"
+            v-model="item.type"
+          />
+          <BaseCheckbox
+            v-if="!hasNoMapping"
+            v-model="item.required"
+            class="config-card__required"
+          />
+        </div>
+        <DatasetConfigurationInput
+          v-if="!hasNoMapping"
+          v-model="item.title"
+          placeholder="Title"
+        />
+        <slot></slot>
+      </div>
     </div>
   </div>
 </template>
@@ -62,13 +64,23 @@ $no-mapping-color: hsl(0, 0%, 50%);
 .config-card {
   $this: &;
   border-radius: $base-space;
-  border: 1px solid hsla(from $validate-color h s l / 0.16);
   background: linear-gradient(
     180deg,
     hsla(from $validate-color h s l / 0.16) 0%,
     hsla(from $validate-color h s l / 0.1) 100%
   );
+  overflow: hidden;
   transition: all 0.3s ease-in;
+  &__wrapper {
+    border-radius: $base-space;
+    border: 1px solid hsla(from $validate-color h s l / 0.16);
+    background: var(--bg-accent-grey-1);
+    transition: all 0.3s ease-in;
+    &:hover {
+      transition: all 0.2s ease-in;
+      box-shadow: 0 0 3px 1px var(--bg-opacity-10);
+    }
+  }
   &__header {
     display: flex;
     justify-content: space-between;
@@ -102,10 +114,6 @@ $no-mapping-color: hsl(0, 0%, 50%);
     :deep(.checkbox__container) {
       border-color: var(--bg-opacity-20);
     }
-  }
-  &:hover {
-    transition: all 0.2s ease-in;
-    box-shadow: 0 0 3px 1px var(--bg-opacity-10);
   }
   &:focus-within,
   &:focus {
