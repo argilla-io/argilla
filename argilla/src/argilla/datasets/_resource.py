@@ -16,7 +16,7 @@ from typing import Optional, Union
 from uuid import UUID, uuid4
 
 from argilla._api import DatasetsAPI
-from argilla._exceptions import NotFoundError, SettingsError
+from argilla._exceptions import NotFoundError, SettingsError, ForbiddenError
 from argilla._models import DatasetModel
 from argilla._resource import Resource
 from argilla.client import Argilla
@@ -157,7 +157,12 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         Returns:
             Dataset: The created dataset object.
         """
-        super().create()
+        try:
+            super().create()
+        except ForbiddenError as e:
+            settings_url = f"{self._client.api_url}/user-settings"
+            message = f"User is not authorized to create a dataset in workspace {self.workspace.name}. Go to {settings_url} to view your role."
+            raise ForbiddenError(message) from e
         try:
             return self._publish()
         except Exception as e:
@@ -277,3 +282,6 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         for character in ["/", "\\", ".", ",", ";", ":", "-", "+", "="]:
             name = name.replace(character, "-")
         return name
+
+    def _with_client(self, client: Argilla):
+        return super()._with_client(client)
