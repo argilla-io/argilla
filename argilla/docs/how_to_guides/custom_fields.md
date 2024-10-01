@@ -103,6 +103,8 @@ The result will be the following:
 
 ??? "Metadata in a table"
 
+    You can make it easier to read metadata by displaying it in a table. This uses handlebars to iterate over the metadata object and display each key-value pair in a row.
+
     ```python
     template = """
     <style>
@@ -148,10 +150,23 @@ The result will be the following:
     ```
     ![example-gallery-end](../assets/images/how_to_guides/custom_field/metadata_table.png)
 
-??? "JSON/Code viewer"
+??? "JSON viewer"
+
+    If you want to display a JSON object, you can use the `json` helper to convert the object to a string.
 
     ```python
-    import argilla as rg
+    template = "{{ json record.fields.user_profile }}"
+
+    record = rg.Record(
+        fields={
+            "user_profile": {
+                "name": "John Doe",
+                "age": 30,
+                "address": "123 Main St",
+                "email": "john.doe@hooli.com",
+            }
+        },
+    )
     ```
 
 ## Advanced Mode
