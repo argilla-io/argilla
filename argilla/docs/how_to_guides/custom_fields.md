@@ -152,7 +152,7 @@ The result will be the following:
 
 ??? "JSON viewer"
 
-    The value of a custom field is a dictionary in python and a javascript object in the browser. You can render this object as a JSON string using the `json` helper. This is implemented in Argilla's frontend for convenience. If you want to learn more about handlebars helpers, you can check the [handlebars documentation](https://handlebarsjs.com/guide/builtin-helpers.html).
+    The value of a custom field is a dictionary in Python and a JavaScript object in the browser. You can render this object as a JSON string using the `json` helper. This is implemented in Argilla's frontend for convenience. If you want to learn more about handlebars helpers, you can check the [handlebars documentation](https://handlebarsjs.com/guide/builtin-helpers.html).
 
     ```python
     template = "{{ json record.fields.user_profile }}"
@@ -219,7 +219,7 @@ custom_field = rg.CustomField(
 
 ??? "3D object viewer"
 
-    We will now add another layer on top of the handlebars template by using a custom javascript library to visualize 3D objects. These 3D objects will be passed as a URL to the record's field, will then be inserted into the handlebars template and finally rendered in the browser.
+    We will now add another layer on top of the handlebars template by using a custom JavaScript library to visualize 3D objects. These 3D objects will be passed as a URL to the record's field, will then be inserted into the handlebars template and finally rendered in the browser.
 
     ```python
     template = """
