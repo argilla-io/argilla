@@ -27,10 +27,10 @@
         <div class="config-form__col">
           <div class="config-form__col__header">Fields</div>
           <div class="config-form__col__content">
-            <DatasetConfigurationCard
+            <DatasetConfigurationField
               v-for="field in fields"
               :key="field.name"
-              :item="field"
+              :field="field"
               :typeOptions="['text', 'image', 'chat', 'custom', 'no mapping']"
             />
           </div>

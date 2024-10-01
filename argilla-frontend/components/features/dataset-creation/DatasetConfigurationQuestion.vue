@@ -1,8 +1,10 @@
 <template>
-  <div class="config-card">
+  <div class="config-card" :class="cardClass">
     <div class="config-card__header">
-      <h3 class="config-card__title" v-text="item.name" />
-      <slot name="header" />
+      <h3 class="config-card__title">{{ item.name }}</h3>
+      <BaseButton v-if="removeIsAllowed" @click="remove"
+        ><svgicon name="close" height="16" width="16"
+      /></BaseButton>
     </div>
     <div class="config-card__content" :class="item.type.replace(/ /g, '')">
       <div class="config-card__row">
@@ -11,17 +13,9 @@
           :options="typeOptions"
           v-model="item.type"
         />
-        <BaseCheckbox
-          v-if="!hasNoMapping"
-          v-model="item.required"
-          class="config-card__required"
-        />
+        <BaseCheckbox v-model="item.required" class="config-card__required" />
       </div>
-      <DatasetConfigurationInput
-        v-if="!hasNoMapping"
-        v-model="item.title"
-        placeholder="Title"
-      />
+      <DatasetConfigurationInput v-model="item.title" placeholder="Title" />
       <slot></slot>
     </div>
   </div>
@@ -43,14 +37,30 @@ export default {
       default: false,
     },
   },
-  computed: {
-    hasNoMapping() {
-      return this.item.type === "no mapping";
-    },
-  },
   model: {
     prop: "type",
     event: "change",
+  },
+  data() {
+    return {
+      error: false,
+    };
+  },
+  computed: {
+    cardClass() {
+      return {
+        "--no-mapping": this.isNoMapping,
+        "--error": this.error,
+      };
+    },
+    noMapping() {
+      return this.type === "no mapping";
+    },
+  },
+  methods: {
+    remove() {
+      this.$emit("remove");
+    },
   },
 };
 </script>
@@ -145,9 +155,6 @@ $no-mapping-color: hsl(0, 0%, 50%);
       background: hsla(from $error-color h s l / 0.04);
       border-bottom: 1px solid hsla(from $error-color h s l / 0.06);
     }
-  }
-  &:deep(.re-switch-label) {
-    @include font-size(13px);
   }
 }
 </style>
