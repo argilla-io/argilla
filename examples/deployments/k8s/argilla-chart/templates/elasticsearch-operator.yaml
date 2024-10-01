@@ -1,0 +1,55 @@
+{{- if and .Values.elasticsearch.useOperator }}
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: {{ include "argilla.fullname" . }}
+spec:
+
+  version: {{ .Values.elasticsearch.version }}
+  nodeSets:
+  - name: default
+    count: {{ .Values.elasticsearch.nodeCount }}
+    config:
+      node.store.allow_mmap: false
+      {{- if .Values.elasticsearch.disableAuthentication }}
+      xpack.security.enabled: false
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+      {{- end }}
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.elasticsearch.persistence.storage.size }}
+        {{- if .Values.elasticsearch.persistence.storage.storageClass }}
+        storageClassName: {{ .Values.elasticsearch.persistence.storage.storageClass }}
+        {{- end }}
+    podTemplate:
+      spec:
+        containers:
+        - name: elasticsearch
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health
+              port: 9200
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /_cluster/health
+            port: 9200
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          {{- with .Values.elasticsearch.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+    {{- if .Values.elasticsearch.disableAuthentication }}
+      secureSettings:
+      - secretName: {{ include "argilla.fullname" . }}-es-http-certs-internal
+    {{- end }}
+{{- end }}

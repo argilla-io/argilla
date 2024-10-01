@@ -1,0 +1,17 @@
+{{- if .Values.argilla.persistence.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "argilla.fullname" . }}-pvc
+  labels:
+    {{- include "argilla.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.argilla.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.argilla.persistence.size | quote }}
+  {{- if .Values.argilla.persistence.storageClass }}
+  storageClassName: {{ .Values.argilla.persistence.storageClass | quote }}
+  {{- end }}
+{{- end }}
