@@ -2501,6 +2501,7 @@
 <h3 id="example-gallery">Example Gallery<a class="headerlink" href="#example-gallery" title="Permanent link">&para;</a></h3>
 <details>
 <summary>Metadata in a table</summary>
+<p>You can make it easier to read metadata by displaying it in a table. This uses handlebars to iterate over the metadata object and display each key-value pair in a row.</p>
 <p><div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="s2">&lt;style&gt;</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="s2">    .container {</span>
@@ -2546,8 +2547,20 @@
 <img alt="example-gallery-end" src="../../assets/images/how_to_guides/custom_field/metadata_table.png" /></p>
 </details>
 <details>
-<summary>JSON/Code viewer</summary>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+<summary>JSON viewer</summary>
+<p>If you want to display a JSON object, you can use the <code>json</code> helper to convert the object to a string.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;{{ json record.fields.user_profile }}&quot;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">record</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Record</span><span class="p">(</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">{</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="s2">&quot;user_profile&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>            <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>            <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;123 Main St&quot;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;john.doe@hooli.com&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="p">}</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="p">},</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="p">)</span>
 </span></code></pre></div>
 </details>
 <h2 id="advanced-mode">Advanced Mode<a class="headerlink" href="#advanced-mode" title="Permanent link">&para;</a></h2>
