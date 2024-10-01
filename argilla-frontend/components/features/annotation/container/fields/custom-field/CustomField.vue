@@ -16,7 +16,7 @@ const BASIC_TEMPLATE = `
 </div>
 <script>
   Handlebars.registerHelper("json", (context) => {
-    return JSON.stringify(context);
+    return JSON.stringify(context, null, 4);
   });
 
   const template = document.getElementById("template").innerHTML;
