@@ -195,11 +195,11 @@ def test_export_records_to_hf_datasets(dataset: rg.Dataset, mock_data):
     assert "label.suggestion" in hf_dataset.column_names
     assert hf_dataset["text"][0] == "Hello World, how are you?"
     assert hf_dataset["id"][0] == str(mock_data[0]["id"])
-    
+
     assert "image" in hf_dataset.column_names
     for i, image in enumerate(hf_dataset["image"]):
         assert isinstance(image, Image.Image)
-    
+
     assert "chat" in hf_dataset.column_names
     for i, chat in enumerate(hf_dataset["chat"]):
         assert isinstance(chat, list)
@@ -220,6 +220,3 @@ def test_import_records_from_hf_dataset(dataset: rg.Dataset, mock_data) -> None:
         assert record.fields["chat"][0].content == "Hello World, how are you?"
         assert record.suggestions["label"].value == mock_data[i]["label"]
         assert record.id == str(mock_data[i]["id"])
-        
-        
-
