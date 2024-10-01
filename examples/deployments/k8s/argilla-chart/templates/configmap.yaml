@@ -1,0 +1,12 @@
+{{- if not .Values.elasticsearch.useOperator }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-hosts
+data:
+
+  hosts: |
+    127.0.0.1 localhost
+    ::1 localhost
+    {{ .Values.argilla.configmap.minikubeIP }} {{ .Values.argilla.ingress.host }}
+{{- end }}
