@@ -36,7 +36,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
         ```python
         rg.Similar(
             name="vector",
-            value=(0.1, 0.2, 0.3),
+            value=[0.1, 0.2, 0.3],
         )
         ```
         > Check the [Similar - Python Reference](../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Similar` class in detail.
