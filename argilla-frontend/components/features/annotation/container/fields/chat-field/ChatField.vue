@@ -2,7 +2,6 @@
   <div class="chat" :key="title">
     <span class="chat__title" v-text="title" />
     <div
-      :id="`fields-content-${name}`"
       class="chat__wrapper"
       :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
     >
