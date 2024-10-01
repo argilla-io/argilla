@@ -194,8 +194,8 @@ script = """
 <script>
     const template = document.getElementById('template').innerHTML;
     const compiled_template = Handlebars.compile(template);
-    const rendered = compiled_template({ record: record_object });
-    document.body.innerHTML = html;
+    const rendered = compiled_template({ record });
+    document.body.innerHTML = rendered;
 </script>
 """ # (2)
 ```
