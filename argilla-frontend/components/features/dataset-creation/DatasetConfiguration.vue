@@ -18,6 +18,12 @@
             </div>
           </template>
           <template #right>
+            <div class="dataset-config__questions-wrapper">
+              <p
+                class="dataset-config__empty-questions"
+                v-text="'Your question will be here'"
+              />
+            </div>
             <!-- <QuestionsComponent
               v-if="!!questions"
               :questions="questions"
@@ -89,6 +95,23 @@ export default {
     padding: $base-space * 2;
     min-width: 40vw;
     height: 100%;
+    overflow: auto;
+  }
+  &__empty-questions {
+    width: 100%;
+    text-align: center;
+    padding: $base-space * 4;
+    color: var(--fg-secondary);
+    background-color: var(--bg-accent-grey-1);
+    border: 1px dashed var(--bg-opacity-20);
+    border-radius: $border-radius-m;
+    margin: 0;
+    @include font-size(16px);
+  }
+  &__questions-wrapper {
+    width: 100%;
+    height: 100%;
+    padding: $base-space * 2;
     overflow: auto;
   }
 }

@@ -64,16 +64,15 @@ $no-mapping-color: hsl(0, 0%, 50%);
 .config-card {
   $this: &;
   border-radius: $base-space;
+  border: 1px solid hsla(from $validate-color h s l / 0.16);
   background: linear-gradient(
     180deg,
     hsla(from $validate-color h s l / 0.16) 0%,
     hsla(from $validate-color h s l / 0.1) 100%
   );
-  overflow: hidden;
   transition: all 0.3s ease-in;
   &__wrapper {
     border-radius: $base-space;
-    border: 1px solid hsla(from $validate-color h s l / 0.16);
     background: var(--bg-accent-grey-1);
     transition: all 0.3s ease-in;
     &:hover {

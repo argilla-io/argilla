@@ -129,6 +129,7 @@ export default {
     border-radius: $border-radius-m;
     &__header {
       padding: $base-space * 2;
+      font-weight: 500;
     }
     &__content {
       display: flex;
