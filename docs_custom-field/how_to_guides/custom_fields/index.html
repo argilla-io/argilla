@@ -2548,7 +2548,7 @@
 </details>
 <details>
 <summary>JSON viewer</summary>
-<p>If you want to display a JSON object, you can use the <code>json</code> helper to convert the object to a string.</p>
+<p>The value of a custom field is a dictionary in python and a javascript object in the browser. You can render this object as a JSON string using the <code>json</code> helper. This is implemented in Argilla's frontend for convenience. If you want to learn more about handlebars helpers, you can check the <a href="https://handlebarsjs.com/guide/builtin-helpers.html">handlebars documentation</a>.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;{{ json record.fields.user_profile }}&quot;</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">record</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Record</span><span class="p">(</span>
