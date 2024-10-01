@@ -180,12 +180,16 @@ Let's reproduce example from the [Without advanced mode](#without-advanced-mode)
 ```python
 render_template = """
 <script id="template" type="text/x-handlebars-template">
-    <style>
-        .div {{
-            font-weight: bold;
-        }}
-    </style>
-    <div class="div">{{record.fields.custom.key}}</div>
+    <div id="container">
+        <div class="column">
+            <h3>Original</h3>
+            <img src="{{record.fields.image.original}}" />
+        </div>
+        <div class="column">
+            <h3>Revision</h3>
+            <img src="{{record.fields.image.revision}}" />
+        </div>
+    </div>
 </script>
 """ # (1)
 
@@ -209,11 +213,15 @@ We can now pass these templates to the `CustomField` class, ensuring that the `a
 import argilla as rg
 
 custom_field = rg.CustomField(
-    name="custom",
+    name="image",
     template=render_template + script,
     advanced_mode=True
 )
 ```
+
+Besides the new `CustomField` code above, reusing the same steps as in the [Without advanced mode](#without-advanced-mode) section, will create a dataset and log a record to it, yielding the same result.
+
+![example-gallery-end](../assets/images/how_to_guides/custom_field/images_in_two_columns.png)
 
 ### Example Gallery
 
