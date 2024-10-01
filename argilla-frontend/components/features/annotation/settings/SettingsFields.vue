@@ -24,12 +24,9 @@
             <input type="text" id="field.id" v-model="field.title" />
           </Validation>
 
-          <div class="settings__edition-form__group">
+          <div class="settings__edition-form__group" v-if="field.isCustomType">
             <label>{{ $t("template") }}</label>
-            <div
-              class="settings__custom-field-preview"
-              v-if="field.isCustomType"
-            >
+            <div class="settings__custom-field-preview">
               <pre><code v-highlight>{{ field.settings.template }}</code></pre>
             </div>
           </div>
