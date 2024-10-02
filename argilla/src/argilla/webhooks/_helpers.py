@@ -11,9 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
+import time
 import warnings
+from threading import Thread
 from typing import TYPE_CHECKING, Optional, Callable, Union, List
 
 import argilla as rg
@@ -24,7 +25,7 @@ from argilla.webhooks._resource import Webhook
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-__all__ = ["webhook_listener", "get_webhook_server", "set_webhook_server"]
+__all__ = ["webhook_listener", "get_webhook_server", "set_webhook_server", "start_webhook_server"]
 
 
 def _compute_default_webhook_server_url() -> str:
@@ -146,4 +147,56 @@ def set_webhook_server(app: "FastAPI"):
     _server = app
 
 
+class _WebhookServerRunner:
+    """
+    Class to run the webhook server in a separate thread.
+    """
+
+    def __init__(self, server: "FastAPI"):
+        import uvicorn
+
+        self._server = uvicorn.Server(uvicorn.Config(app=server))
+        self._thread = Thread(target=self._server.run, daemon=True)
+
+    def start(self):
+        """Start the webhook server"""
+        self._thread.start()
+        while not self._server.started and self._thread.is_alive():
+            time.sleep(1e-3)
+
+    def stop(self):
+        """Stop the webhook server"""
+        self._server.should_exit = True
+        self._thread.join()
+
+
+def start_webhook_server():
+    """Start the webhook runner."""
+
+    global _server_runner
+
+    if _server_runner:
+        warnings.warn("Server already started")
+    else:
+        server = get_webhook_server()
+
+        _server_runner = _WebhookServerRunner(server)
+        _server_runner.start()
+
+
+def stop_webhook_server():
+    """Stop the webhook runner."""
+
+    global _server_runner
+
+    if not _server_runner:
+        warnings.warn("Server not started")
+    else:
+        try:
+            _server_runner.stop()
+        finally:
+            _server_runner = None
+
+
 _server: Optional["FastAPI"] = None
+_server_runner: Optional[_WebhookServerRunner] = None
