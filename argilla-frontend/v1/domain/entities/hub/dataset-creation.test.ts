@@ -91,6 +91,47 @@ describe("DatasetCreation", () => {
       expect(labelQuestion.options).toEqual(["positive", "negative"]);
     });
 
+    it("create a text field if the dataset no has fields", () => {
+      const datasetInfoWithoutFields = {
+        ...datasetInfo,
+        features: {},
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithoutFields);
+
+      const datasetCreation = builder.build();
+
+      const field = datasetCreation.fields[0];
+
+      expect(field.name).toBe("prompt");
+      expect(field.isTextType).toBeTruthy();
+      expect(field.required).toBeTruthy();
+      expect(datasetCreation.fields.length).toBe(1);
+    });
+
+    it("create a required field if the dataset has just one field", () => {
+      const datasetInfoWithOneField = {
+        ...datasetInfo,
+        features: {
+          text_field: {
+            dtype: "string",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithOneField);
+
+      const datasetCreation = builder.build();
+
+      const field = datasetCreation.fields[0];
+
+      expect(field.name).toBe("text_field");
+      expect(field.isTextType).toBeTruthy();
+      expect(field.required).toBeTruthy();
+      expect(datasetCreation.fields.length).toBe(1);
+    });
+
     it("create comment as a default question when the dataset does not have questions", () => {
       const datasetInfoWithoutQuestions = {
         ...datasetInfo,

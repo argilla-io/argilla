@@ -10,8 +10,7 @@ interface Feature {
 }
 
 class FieldCreation {
-  public readonly required: false;
-
+  public required = false;
   constructor(
     public readonly name: string,
     private readonly type: "text" | "image" | "chat"
@@ -27,6 +26,10 @@ class FieldCreation {
 
   get isChatType() {
     return this.type === "chat";
+  }
+
+  markAsRequired() {
+    this.required = true;
   }
 }
 
@@ -49,15 +52,14 @@ class QuestionCreation {
     return this.settings.options;
   }
 }
+type MetadataTypes = "int32" | "int64" | "float32" | "float64";
 
 class MetadataCreation {
   public constructor(
     public readonly name: string,
-    type: "int32" | "int64" | "float32" | "float64"
+    public readonly type: MetadataTypes
   ) {}
 }
-
-type MetadataTypes = "int32" | "int64" | "float32" | "float64";
 
 type Structure = {
   name: string;
@@ -110,25 +112,41 @@ class Subset {
 
   private createFields() {
     for (const structure of this.structures) {
-      if (structure.kindObject === "Value") {
-        if (structure.type === "string") {
-          this.fields.push(new FieldCreation(structure.name, "text"));
-        }
-      }
-
-      if (structure.kindObject === "Image") {
+      if (this.isTextField(structure)) {
+        this.fields.push(new FieldCreation(structure.name, "text"));
+      } else if (this.isImageField(structure)) {
         this.fields.push(new FieldCreation(structure.name, "image"));
-      }
-
-      if (this.isChatField(structure)) {
+      } else if (this.isChatField(structure)) {
         this.fields.push(new FieldCreation(structure.name, "chat"));
       }
     }
+
+    if (this.fields.length === 0) {
+      this.fields.push(new FieldCreation("prompt", "text"));
+    }
+
+    if (this.fields.length === 1) {
+      this.fields[0].markAsRequired();
+    }
   }
 
-  private isChatField(_: Structure) {
-    /// TODO: Implement this method
-    return false;
+  private isTextField(structure: Structure) {
+    return structure.kindObject === "Value" && structure.type === "string";
+  }
+
+  private isImageField(structure: Structure) {
+    return structure.kindObject === "Image";
+  }
+
+  private isChatField(info: any) {
+    return (
+      "content" in info &&
+      "role" in info &&
+      info.role.kindObject === "Value" &&
+      info.role.type === "string" &&
+      info.content.kindObject === "Value" &&
+      info.content.type === "string"
+    );
   }
 
   private createMetadata() {
