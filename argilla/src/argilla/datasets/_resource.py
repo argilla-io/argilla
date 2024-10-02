@@ -169,7 +169,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             user_role = self._client.me.role.value
             user_name = self._client.me.username
             workspace_name = self.workspace.name
-            message = f"""User '{user_name}' is not authorized to create a dataset in workspace '{workspace_name}' 
+            message = f"""User '{user_name}' is not authorized to create a dataset in workspace '{workspace_name}'
             with role '{user_role}'. Go to {settings_url} to view your role."""
             raise ForbiddenError(message) from e
         try:
