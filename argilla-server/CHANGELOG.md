@@ -20,6 +20,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added support for `CustomField`. ([#5422](https://github.com/argilla-io/argilla/pull/5422))
 - Added helm chart for argilla. ([#5512](https://github.com/argilla-io/argilla/pull/5512))
 
 ### Fixed
