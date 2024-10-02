@@ -72,7 +72,6 @@ class DatasetRecordsIterator:
         if self.__limit is not None and self.__limit < self.__batch_size:
             self.__batch_size = self.__limit
 
-
     def __iter__(self):
         return self
 
