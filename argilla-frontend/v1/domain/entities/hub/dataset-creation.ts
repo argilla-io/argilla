@@ -1,3 +1,5 @@
+import { FieldType } from "../field/FieldType";
+import { QuestionType } from "../question/QuestionType";
 import {
   QuestionSetting,
   QuestionPrototype,
@@ -11,21 +13,13 @@ interface Feature {
 
 class FieldCreation {
   public required = false;
-  constructor(
-    public readonly name: string,
-    private readonly type: "text" | "image" | "chat"
-  ) {}
-
-  get isTextType() {
-    return this.type === "text";
+  public readonly type: FieldType;
+  constructor(public readonly name: string, type: string) {
+    this.type = FieldType.from(type);
   }
 
-  get isImageType() {
-    return this.type === "image";
-  }
-
-  get isChatType() {
-    return this.type === "chat";
+  get title() {
+    return this.name;
   }
 
   markAsRequired() {
@@ -44,8 +38,16 @@ class QuestionCreation {
     this.settings = new QuestionSetting(settings);
   }
 
+  get title() {
+    return this.name;
+  }
+
   get type() {
     return this.settings.type;
+  }
+
+  set type(value: QuestionType) {
+    this.settings.type = value;
   }
 
   get options() {

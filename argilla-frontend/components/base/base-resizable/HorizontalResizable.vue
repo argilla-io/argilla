@@ -1,15 +1,18 @@
 <template>
-  <div class="resizable" :class="resizing ? '--h-resizing' : null">
-    <div class="resizable__up">
+  <div class="resizable-h" :class="resizing ? '--h-resizing' : null">
+    <div class="resizable-h__up">
       <slot name="up" />
     </div>
 
-    <div class="resizable__bar" ref="resizableBar">
-      <div class="resizable__bar__inner" />
+    <div class="resizable-h__bar" ref="resizableBar">
+      <div class="resizable-h__bar__inner" />
     </div>
-
+    <div class="resizable-h__down" v-if="!collapsable">
+      <slot name="down" />
+    </div>
     <BaseCollapsablePanel
-      class="resizable__down"
+      v-else
+      class="resizable-h__down"
       :class="isExpanded ? '--expanded' : null"
       :is-expanded="isExpanded"
       @toggle-expand="toggleExpand"
@@ -37,6 +40,10 @@ export default {
     id: {
       type: String,
       default: "h-rz",
+    },
+    collapsable: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -80,12 +87,16 @@ export default {
       });
     },
   },
+
   mounted() {
     this.resizer = this.$refs.resizableBar;
     this.upSide = this.resizer.previousElementSibling;
     this.downSide = this.resizer.nextElementSibling;
 
     this.limitElementHeight(this.upSide);
+    if (!this.collapsable) {
+      this.limitElementHeight(this.downSide);
+    }
 
     this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
 
@@ -101,8 +112,8 @@ export default {
   methods: {
     savePosition() {},
     limitElementHeight(element) {
-      element.style["max-height"] = "100%";
-      element.style["min-height"] = "50%";
+      element.style["max-height"] = this.collapsable ? "100%" : "80%";
+      element.style["min-height"] = this.collapsable ? "50%" : "20%";
     },
     savePositionOnStartResizing(e) {
       this.upSidePrevPosition = {
@@ -169,11 +180,11 @@ export default {
 $resizabla-bar-color: #6794fe;
 $collapsed-panel-height: 50px;
 $resizable-bar-width: $base-space;
-.resizable {
+.resizable-h {
   $this: &;
   display: flex;
-  justify-content: space-between;
   flex-direction: column;
+  justify-content: space-between;
   height: 100%;
   min-height: 0;
   width: 100%;

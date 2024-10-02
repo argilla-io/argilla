@@ -62,7 +62,7 @@ describe("DatasetCreation", () => {
       const firstField = datasetCreation.fields[0];
 
       expect(firstField.name).toBe("text_field");
-      expect(firstField.isTextType).toBeTruthy();
+      expect(firstField.type.isTextType).toBeTruthy();
       expect(firstField.required).toBeFalsy();
     });
 
@@ -74,7 +74,7 @@ describe("DatasetCreation", () => {
       const secondField = datasetCreation.fields[1];
 
       expect(secondField.name).toBe("image_field");
-      expect(secondField.isImageType).toBeTruthy();
+      expect(secondField.type.isImageType).toBeTruthy();
       expect(secondField.required).toBeFalsy();
     });
 
@@ -104,7 +104,7 @@ describe("DatasetCreation", () => {
       const field = datasetCreation.fields[0];
 
       expect(field.name).toBe("prompt");
-      expect(field.isTextType).toBeTruthy();
+      expect(field.type.isTextType).toBeTruthy();
       expect(field.required).toBeTruthy();
       expect(datasetCreation.fields.length).toBe(1);
     });
@@ -127,7 +127,7 @@ describe("DatasetCreation", () => {
       const field = datasetCreation.fields[0];
 
       expect(field.name).toBe("text_field");
-      expect(field.isTextType).toBeTruthy();
+      expect(field.type.isTextType).toBeTruthy();
       expect(field.required).toBeTruthy();
       expect(datasetCreation.fields.length).toBe(1);
     });
