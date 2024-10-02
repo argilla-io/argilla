@@ -614,13 +614,11 @@ class TestCreateDatasetRecordsBulk:
                 "items": [
                     {
                         "fields": {
-                            "prompt": "Does exercise help reduce stress?",
                             "custom": {"a": 1, "b": 2},
                         },
                     },
                     {
                         "fields": {
-                            "prompt": "What is the best way to reduce stress?",
                             "custom": {"c": 1, "b": 2},
                         },
                     },
