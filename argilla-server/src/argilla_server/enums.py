@@ -19,6 +19,7 @@ class FieldType(str, Enum):
     text = "text"
     image = "image"
     chat = "chat"
+    custom = "custom"
 
 
 class ResponseStatus(str, Enum):

@@ -1,0 +1,163 @@
+<html>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.0.0/marked.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
+
+<style>
+  #user {
+    background-color: lightgreen;
+    right: 0;
+    margin-left: auto;
+  }
+  #app {
+    height: 300px !important;
+  }
+  .chat-message {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #d1e7dd;
+    width: 30%;
+    border-radius: 10px;
+    .message-content {
+      color: #333;
+      padding: 10px;
+      border-radius: 10px;
+      margin-left: 10px;
+      max-width: 80%;
+      position: relative;
+    }
+    .message-role-title {
+      display: flex;
+      align-items: center;
+      span {
+        font-weight: bold;
+      }
+    }
+    .message-actions {
+      display: flex;
+      gap: 5px;
+      margin-left: auto;
+      button {
+        background-color: darkgray;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        &:hover {
+          background-color: #0056b3;
+        }
+      }
+    }
+  }
+  </style>
+
+<div id="app">
+          <div
+            class="chat-message"
+            :id="message.role"
+            v-for="(message, index) in chatMessages"
+            :key="message"
+          >
+            <div class="flex items-end">
+              <div class="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+                <div class="message-role-title">
+                  <span v-if="!message.editing" class="px-4 py-2 rounded-lg inline-block rounded-tl-none bg-gray-300 text-gray-600">{{ message.role }}</span>
+                  <input
+                    v-else
+                    type="text"
+                    v-model="message.role"
+                    class="px-4 py-2 rounded-lg inline-block rounded-tl-none bg-gray-300 text-gray-600"
+                    @blur="finishEditing(index)"
+                    @keyup.enter="finishEditing(index)"
+                  />
+                </div>
+                <div>
+                    <span
+                      class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600"
+                      v-if="!message.editing"
+                      @dblclick="editMessage(index)"
+                      v-html="parseMarkdown(message.content)"
+                    ></span>
+                  <input
+                    v-else
+                    type="text"
+                    v-model="message.content"
+                    @blur="finishEditing(index)"
+                    @keyup.enter="finishEditing(index)"
+                    class="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600"
+                  />
+                </div>
+              </div>
+              <div class="message-actions">
+                <button @click="editMessage(index)">✏️</button>
+                <button @click="deleteMessage(index)">🗑️</button>
+                <button @click="addMessage">➕</button>
+                <!-- <button @click="regenerateMessage(index)">↪️</button> -->
+              </div>
+          </div>
+        </div>
+        <div class="copy-conversation">
+          <button @click="copyConversation">📋</button>
+        </div>
+
+
+<script>
+
+  const { createApp, ref } = Vue
+
+  createApp({
+    setup() {
+    const chatMessages = ref(record_object.fields.chosen)
+
+    const parseMarkdown = (content) => {
+      return marked.parse(content);
+    }
+
+    const deleteMessage = (index) =>  {
+      chatMessages.value.splice(index, 1);
+    }
+
+    const editMessage = (index) => {
+      chatMessages.value[index].editing = true;
+    }
+
+    const addMessage = () => {
+      chatMessages.value.push({
+        content: "",
+        role: "user",
+      });
+    }
+
+    const finishEditing = (index) =>  {
+      chatMessages.value[index].editing = false;
+    }
+
+    const copyConversation = ()  => {
+      const conversation = chatMessages.value.map(message => ({
+        content: message.content,
+        role: message.role,
+      }));
+
+      const conversationStr = JSON.stringify(conversation, null, 2);
+      navigator.clipboard.writeText(conversationStr).then(() => {
+        alert("Conversation copied to clipboard!");
+      });
+    };
+
+      return {
+        parseMarkdown,
+        chatMessages,
+        addMessage,
+        deleteMessage,
+        editMessage,
+        finishEditing,
+        copyConversation,
+      }
+    }
+  }).mount('#app')
+</script>
+</html>
