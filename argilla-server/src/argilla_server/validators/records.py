@@ -16,12 +16,13 @@ import copy
 import mimetypes
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any
 from uuid import UUID
 from urllib.parse import urlparse, ParseResult, ParseResultBytes
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
 from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.contexts import records
@@ -56,6 +57,8 @@ class RecordValidatorBase(ABC):
         cls._validate_required_fields(dataset=dataset, fields=fields)
         cls._validate_extra_fields(dataset=dataset, fields=fields)
         cls._validate_image_fields(dataset=dataset, fields=fields)
+        cls._validate_chat_fields(dataset=dataset, fields=fields)
+        cls._validate_custom_fields(dataset=dataset, fields=fields)
 
     @staticmethod
     def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
@@ -97,6 +100,11 @@ class RecordValidatorBase(ABC):
             cls._validate_image_field(field.name, fields.get(field.name))
 
     @classmethod
+    def _validate_chat_fields(cls, dataset: Dataset, fields: Dict[str, Any]) -> None:
+        for field in filter(lambda field: field.is_chat, dataset.fields):
+            cls._validate_chat_field(field.name, fields.get(field.name))
+
+    @classmethod
     def _validate_image_field(cls, field_name: str, field_value: Union[str, None]) -> None:
         if field_value is None:
             return
@@ -112,6 +120,15 @@ class RecordValidatorBase(ABC):
             return cls._validate_data_url(field_name, field_value, parse_result)
         else:
             raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+    @classmethod
+    def _validate_chat_field(cls, field_name: str, field_value: Any) -> None:
+        # This validator is needed because pydantic can resolve values as Dicts since we have a new custom  field
+        if field_value is None:
+            return
+
+        if not isinstance(field_value, list) or any(not isinstance(message, ChatFieldValue) for message in field_value):
+            raise UnprocessableEntityError(f"chat field {field_name!r} value must be a list of messages")
 
     @staticmethod
     def _validate_web_url(
@@ -142,6 +159,19 @@ class RecordValidatorBase(ABC):
             raise UnprocessableEntityError(
                 f"image field {field_name!r} value is using an unsupported MIME type, supported MIME types are: {IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES!r}"
             )
+
+    @classmethod
+    def _validate_custom_fields(cls, dataset: Dataset, fields: Dict[str, Any]) -> None:
+        for field in filter(lambda field: field.is_custom, dataset.fields):
+            cls._validate_custom_field(field.name, fields.get(field.name))
+
+    @classmethod
+    def _validate_custom_field(cls, name: str, value: Any) -> None:
+        if value is None:
+            return
+
+        if not isinstance(value, dict):
+            raise UnprocessableEntityError(f"custom field {name!r} value must be a dictionary")
 
 
 class RecordCreateValidator(RecordValidatorBase):

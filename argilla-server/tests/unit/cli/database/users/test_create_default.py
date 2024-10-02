@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING
 
 from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla_server.contexts import accounts
-from argilla_server.models import User, UserRole
+from argilla_server.models import User, UserRole, Workspace
+from tests.factories import WorkspaceSyncFactory
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -86,4 +87,14 @@ def test_create_default_with_existent_default_user_and_quiet(sync_db: "Session",
 
     assert result.exit_code == 0
     assert result.output == ""
+    assert sync_db.query(User).count() == 1
+
+
+def test_create_default_with_existent_default_workspace(sync_db: "Session", cli_runner: "CliRunner", cli: "Typer"):
+    WorkspaceSyncFactory.create(name=DEFAULT_USERNAME)
+
+    result = cli_runner.invoke(cli, "database users create_default")
+
+    assert result.exit_code == 0
+    assert result.output != ""
     assert sync_db.query(User).count() == 1

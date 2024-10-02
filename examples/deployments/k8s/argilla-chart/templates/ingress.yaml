@@ -1,0 +1,25 @@
+{{- if .Values.argilla.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "argilla.fullname" . }}
+  labels:
+    {{- include "argilla.labels" . | nindent 4 }}
+  {{- with .Values.argilla.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.argilla.ingress.className }}
+  rules:
+    - host: {{ .Values.argilla.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "argilla.fullname" . }}
+                port:
+                  number: 6900
+{{- end }}

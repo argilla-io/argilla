@@ -199,6 +199,7 @@ class UserResponse(Resource):
         """Sets the record associated with the UserResponse"""
         self._record = record
 
+        
     @classmethod
     def from_model(cls, model: UserResponseModel, record: "Record") -> "UserResponse":
         """Creates a UserResponse from a ResponseModel"""

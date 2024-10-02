@@ -26,10 +26,7 @@ def test_define_settings_from_features_text():
     assert len(settings.fields) == 1
     assert isinstance(settings.fields[0], rg.TextField)
     assert settings.fields[0].name == "text_column"
-    assert len(settings.questions) == 1
-    assert isinstance(settings.questions[0], rg.TextQuestion)
-    assert settings.questions[0].name == "comment"
-    assert settings.mapping == {}
+    assert len(settings.questions) == 0
 
 
 def test_define_settings_from_features_image():
@@ -39,9 +36,32 @@ def test_define_settings_from_features_image():
     assert len(settings.fields) == 1
     assert isinstance(settings.fields[0], rg.ImageField)
     assert settings.fields[0].name == "image_column"
-    assert len(settings.questions) == 1
-    assert settings.questions[0].name == "comment"
-    assert settings.mapping == {}
+
+
+@pytest.mark.parametrize(
+    "column,name",
+    [
+        ("Text column", "text_column"),
+        ("text column", "text_column"),
+        ("text:column", "text_column"),
+        ("text.column", "text_column"),
+    ],
+)
+def test_define_settings_from_features_with_non_curated_column_name(column: str, name: str):
+    features = {column: {"_type": "Value", "dtype": "string"}}
+
+    settings = _define_settings_from_features(features, feature_mapping={})
+
+    assert len(settings.fields) == 1
+    assert settings.fields[0].name == name
+
+
+@pytest.mark.parametrize("column", ["text<column", "text>column", "text|column", "text]column", "text/column"])
+def test_define_settings_from_features_with_unsupported_column_name(column: str):
+    features = {column: {"_type": "Value", "dtype": "string"}}
+
+    with pytest.raises(SettingsError):
+        _define_settings_from_features(features, feature_mapping={})
 
 
 def test_define_settings_from_features_multiple():
@@ -60,7 +80,6 @@ def test_define_settings_from_features_multiple():
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "label_column"
-    assert settings.mapping == {}
 
 
 def test_mapped_question():
@@ -79,7 +98,6 @@ def test_mapped_question():
     assert settings.questions[0].name == "text_column"
     assert isinstance(settings.questions[1], rg.LabelQuestion)
     assert settings.questions[1].name == "label_column"
-    assert settings.mapping == {}
 
 
 def test_mapped_fields():
@@ -98,7 +116,6 @@ def test_mapped_fields():
     assert len(settings.questions) == 1
     assert isinstance(settings.questions[0], rg.LabelQuestion)
     assert settings.questions[0].name == "label_column"
-    assert settings.mapping == {}
 
 
 def test_define_settings_from_features_unsupported():

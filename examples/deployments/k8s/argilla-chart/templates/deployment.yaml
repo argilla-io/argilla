@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "argilla.fullname" . }}
+  labels:
+    {{- include "argilla.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.argilla.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "argilla.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "argilla.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+      {{- if not .Values.elasticsearch.useOperator }}
+        - name: hosts-file
+          configMap:
+            name: custom-hosts
+      {{- end }}
+      {{- if .Values.argilla.persistence.enabled }}
+        - name: argilla-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
+          env:
+            - name: ARGILLA_ELASTICSEARCH
+              # TODO: modify this to use externalElasticsearch.host if elasticsearch.useOperator is false
+              value: {{if .Values.elasticsearch.useOperator}}"http://{{ include "argilla.fullname" . }}-es-http:9200"{{else}}"{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}"{{end}}
+            - name: ARGILLA_AUTH_SECRET_KEY
+              value: {{ .Values.argilla.authSecretKey | quote }}
+            - name: ARGILLA_REDIS_URL
+              value: redis://{{ .Release.Name }}-redis-master:6379/0
+            - name: USERNAME
+              value: {{ .Values.argilla.auth.username | quote }}
+            - name: PASSWORD
+              value: {{ .Values.argilla.auth.password  | quote }}
+            - name: API_KEY
+              value: {{ .Values.argilla.auth.apiKey  | quote }}
+            {{- if .Values.argilla.persistence.enabled }}
+            - name: ARGILLA_HOME_PATH
+              value: {{ .Values.argilla.persistence.mountPath | quote }}
+            {{- end }}
+          ports:
+            - containerPort: 6900
+          volumeMounts:
+          {{- if not .Values.elasticsearch.useOperator }}
+            - name: hosts-file
+              mountPath: /etc/hosts
+              subPath: hosts
+          {{- end }}
+          {{- if .Values.argilla.persistence.enabled }}
+            - name: argilla-data
+              mountPath: {{ .Values.argilla.persistence.mountPath}}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.argilla.resources | nindent 12 }}

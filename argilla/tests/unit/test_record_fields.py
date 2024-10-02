@@ -18,7 +18,7 @@ from tempfile import NamedTemporaryFile
 
 from PIL import Image
 
-from argilla import Record, Settings, ImageField, Dataset
+from argilla import Record, Settings, ImageField, Dataset, ChatField, TextField
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def dataset():
     dataset = Dataset(
         name=f"test_dataset_{random.randint(1, 1000)}",
         settings=Settings(
-            fields=[ImageField(name="image")],
+            fields=[ImageField(name="image"), ChatField(name="chat"), TextField(name="text")],
         ),
     )
     return dataset
@@ -80,3 +80,15 @@ class TestRecordFields:
             record.fields.to_dict()
         with pytest.raises(ValueError):
             record.fields["image"]
+
+    def test_serialize_record_fields(self, pil_image, dataset):
+        record = Record(
+            fields={"image": pil_image, "chat": [{"role": "bot", "content": "leave me now"}], "text": "why pat?"},
+            _dataset=dataset,
+        )
+
+        fields = record.fields.to_dict()
+        assert isinstance(fields["image"], str)
+        assert isinstance(fields["chat"], list)
+        assert all(isinstance(chat, dict) for chat in fields["chat"])
+        assert isinstance(fields["text"], str)

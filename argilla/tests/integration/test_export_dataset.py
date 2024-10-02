@@ -37,6 +37,7 @@ def dataset(client) -> rg.Dataset:
         fields=[
             rg.TextField(name="text"),
             rg.ImageField(name="image"),
+            rg.ChatField(name="chat"),
         ],
         questions=[
             rg.LabelQuestion(name="label", labels=["positive", "negative"]),
@@ -58,18 +59,36 @@ def mock_data() -> List[dict[str, Any]]:
         {
             "text": "Hello World, how are you?",
             "image": "http://mock.url/image",
+            "chat": [
+                {
+                    "role": "user",
+                    "content": "Hello World, how are you?",
+                }
+            ],
             "label": "positive",
             "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
             "image": "http://mock.url/image",
+            "chat": [
+                {
+                    "role": "user",
+                    "content": "Hello World, how are you?",
+                }
+            ],
             "label": "negative",
             "id": uuid.uuid4(),
         },
         {
             "text": "Hello World, how are you?",
             "image": "http://mock.url/image",
+            "chat": [
+                {
+                    "role": "user",
+                    "content": "Hello World, how are you?",
+                }
+            ],
             "label": "positive",
             "id": uuid.uuid4(),
         },

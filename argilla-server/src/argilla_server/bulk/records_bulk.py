@@ -220,7 +220,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
 
         await self._db.commit()
 
-        await self._notify_record_events(records)
+        await self._notify_upsert_record_events(records)
 
         return RecordsBulkWithUpdateInfo(
             items=records,
@@ -241,7 +241,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
 
         return {**records_by_external_id, **records_by_id}
 
-    async def _notify_record_events(self, records: List[Record]) -> None:
+    async def _notify_upsert_record_events(self, records: List[Record]) -> None:
         for record in records:
             if record.inserted_at == record.updated_at:
                 await notify_record_event_v1(self._db, RecordEvent.created, record)
