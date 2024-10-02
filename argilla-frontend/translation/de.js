@@ -33,6 +33,7 @@ export default {
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
   required: "Erforderlich",
   optional: "Optional",
+  template: "Template",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "Der Datensatz ist leer. Bitten fragen Sie einen Admin, Einträge Hinzufügen und kommst du bald wieder.",

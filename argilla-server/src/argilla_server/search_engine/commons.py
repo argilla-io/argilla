@@ -20,7 +20,7 @@ from uuid import UUID
 from elasticsearch8 import AsyncElasticsearch
 from opensearchpy import AsyncOpenSearch
 
-from argilla_server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla_server.models import (
     Dataset,
     Field,
@@ -165,7 +165,7 @@ def es_mapping_for_field(field: Field) -> dict:
 
     if field.is_text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
-    if field.is_chat:
+    elif field.is_chat:
         es_field = {
             "type": "object",
             "properties": {
@@ -174,6 +174,14 @@ def es_mapping_for_field(field: Field) -> dict:
             },
         }
         return {es_field_for_record_field(field.name): es_field}
+    elif field.is_custom:
+        return {
+            es_field_for_record_field(field.name): {
+                "type": "object",
+                "dynamic": True,
+                "properties": {},
+            }
+        }
     elif field.is_image:
         return {
             es_field_for_record_field(field.name): {
@@ -419,7 +427,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         es_sort = self.build_elasticsearch_sort(sort) if sort else None
         response = await self._index_search_request(index, query=es_query, size=limit, from_=offset, sort=es_sort)
 
-        return await self._process_search_response(response)
+        return self._process_search_response(response)
 
     async def similarity_search(
         self,
@@ -466,7 +474,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             query_filters=query_filters,
         )
 
-        return await self._process_search_response(response, threshold)
+        return self._process_search_response(response, threshold)
 
     async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
         index_name = es_index_name_for_dataset(metadata_property.dataset)
@@ -526,6 +534,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def _map_record_to_es_document(self, record: Record) -> Dict[str, Any]:
         document = {
             "id": str(record.id),
+            "external_id": record.external_id,
             "fields": record.fields,
             "status": record.status,
             "inserted_at": record.inserted_at,
@@ -616,6 +625,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 RecordSortField.inserted_at.value: {"type": "date_nanos"},
                 RecordSortField.updated_at.value: {"type": "date_nanos"},
@@ -628,7 +638,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         }
 
     @staticmethod
-    async def _process_search_response(response: dict, score_threshold: Optional[float] = None) -> SearchResponses:
+    def _process_search_response(response: dict, score_threshold: Optional[float] = None) -> SearchResponses:
         hits = response["hits"]["hits"]
 
         if score_threshold is not None:
@@ -652,7 +662,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             if field is None:
                 raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
 
-            if field.is_chat:
+            if field.is_chat or field.is_custom:
                 field_name = f"{text.field}.*"
             else:
                 field_name = text.field

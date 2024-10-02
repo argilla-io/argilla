@@ -277,6 +277,14 @@ class ChatFieldFactory(FieldFactory):
     }
 
 
+class CustomFieldFactory(FieldFactory):
+    settings = {
+        "type": FieldType.custom,
+        "template": "<div>{{ value }}</div>",
+        "advanced_mode": False,
+    }
+
+
 class MetadataPropertyFactory(BaseFactory):
     class Meta:
         model = MetadataProperty

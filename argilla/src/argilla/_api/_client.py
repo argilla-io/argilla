@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-import os
 from typing import Optional
 
 import httpx
@@ -31,13 +30,15 @@ from argilla._api._records import RecordsAPI
 from argilla._api._users import UsersAPI
 from argilla._api._vectors import VectorsAPI
 from argilla._api._workspaces import WorkspacesAPI
-from argilla._constants import _DEFAULT_API_URL
 from argilla._exceptions import ArgillaError
+from argilla._constants import _DEFAULT_API_URL
+from argilla._api._token import get_secret
 
 __all__ = ["APIClient"]
 
-ARGILLA_API_URL = os.getenv(key="ARGILLA_API_URL", default=_DEFAULT_API_URL)
-ARGILLA_API_KEY = os.getenv(key="ARGILLA_API_KEY")
+
+ARGILLA_API_URL = get_secret("ARGILLA_API_URL") or _DEFAULT_API_URL
+ARGILLA_API_KEY = get_secret("ARGILLA_API_KEY")
 
 DEFAULT_HTTP_CONFIG = HTTPClientConfig(api_url=ARGILLA_API_URL, api_key=ARGILLA_API_KEY)
 

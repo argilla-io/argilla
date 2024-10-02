@@ -16,9 +16,11 @@ import json
 import uuid
 from datetime import datetime
 
-import argilla as rg
 import httpx
 import pytest
+from pytest_httpx import HTTPXMock
+
+import argilla as rg
 from argilla._exceptions import (
     BadRequestError,
     ConflictError,
@@ -28,7 +30,6 @@ from argilla._exceptions import (
     UnprocessableEntityError,
 )
 from argilla._models import UserModel
-from pytest_httpx import HTTPXMock
 
 
 class TestUserSerialization:
@@ -113,6 +114,11 @@ class TestUsers:
                 created_user = user.create()
                 assert user.username == created_user.username
                 assert user.id == created_user.id
+                assert user.first_name == created_user.first_name
+                assert user.last_name == created_user.last_name
+                assert user.role == created_user.role
+                assert user.inserted_at == created_user.inserted_at
+                assert user.updated_at == created_user.updated_at
 
     @pytest.mark.parametrize(
         "status_code, expected_exception, expected_message",
@@ -156,6 +162,11 @@ class TestUsers:
                 gotten_user = user.create()
                 assert user.username == gotten_user.username
                 assert user.id == gotten_user.id
+                assert user.first_name == gotten_user.first_name
+                assert user.last_name == gotten_user.last_name
+                assert user.role == gotten_user.role
+                assert user.inserted_at == gotten_user.inserted_at
+                assert user.updated_at == gotten_user.updated_at
 
     def test_list_users(self, httpx_mock: HTTPXMock):
         mock_return_value = {
@@ -190,6 +201,10 @@ class TestUsers:
                 assert users[i].username == mock_return_value["items"][i]["username"]
                 assert users[i].role == mock_return_value["items"][i]["role"]
                 assert users[i].id == uuid.UUID(mock_return_value["items"][i]["id"])
+                assert users[i].first_name == mock_return_value["items"][i]["first_name"]
+                assert users[i].last_name == mock_return_value["items"][i]["last_name"]
+                assert users[i].inserted_at == datetime.fromisoformat(mock_return_value["items"][i]["inserted_at"])
+                assert users[i].updated_at == datetime.fromisoformat(mock_return_value["items"][i]["updated_at"])
 
 
 class TestUsersAPI:
@@ -212,6 +227,10 @@ class TestUsersAPI:
             assert user.username == mock_return_value["username"]
             assert user.id == uuid.UUID(mock_return_value["id"])
             assert user.role == mock_return_value["role"]
+            assert user.first_name == mock_return_value["first_name"]
+            assert user.last_name == mock_return_value["last_name"]
+            assert user.inserted_at == datetime.fromisoformat(mock_return_value["inserted_at"])
+            assert user.updated_at == datetime.fromisoformat(mock_return_value["updated_at"])
 
     def test_remove_user_from_workspace(self, httpx_mock: HTTPXMock):
         user_id = uuid.uuid4()
@@ -275,6 +294,11 @@ class TestUsersAPI:
             for i in range(len(users)):
                 assert users[i].username == mock_return_value["items"][i]["username"]
                 assert users[i].id == uuid.UUID(mock_return_value["items"][i]["id"])
+                assert users[i].first_name == mock_return_value["items"][i]["first_name"]
+                assert users[i].last_name == mock_return_value["items"][i]["last_name"]
+                assert users[i].role == mock_return_value["items"][i]["role"]
+                assert users[i].inserted_at == datetime.fromisoformat(mock_return_value["items"][i]["inserted_at"])
+                assert users[i].updated_at == datetime.fromisoformat(mock_return_value["items"][i]["updated_at"])
 
     def test_create_user(self, httpx_mock: HTTPXMock):
         user_id = uuid.uuid4()
