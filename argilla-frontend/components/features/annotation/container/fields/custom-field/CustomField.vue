@@ -16,7 +16,7 @@ const BASIC_TEMPLATE = `
 </div>
 <script>
   Handlebars.registerHelper("json", (context) => {
-    return new Handlebars.SafeString('<pre>' + JSON.stringify(context, null, 4) + '</pre>');
+    return new Handlebars.SafeString('<pre style="overflow: auto">' + JSON.stringify(context, null, 4) + '</pre>');
   });
 
   const template = document.getElementById("template").innerHTML;
@@ -82,11 +82,6 @@ export default {
   background: var(--bg-field);
   border-radius: $border-radius-m;
   border: 1px solid var(--border-field);
-  &:hover {
-    #{$this}__copy-button {
-      opacity: 1;
-    }
-  }
   .title-area {
     display: flex;
     align-items: center;
@@ -98,22 +93,5 @@ export default {
     word-break: break-word;
     width: calc(100% - 30px);
   }
-  &__tooltip {
-    display: flex;
-    align-self: flex-start;
-  }
-  &__copy-button {
-    flex-shrink: 0;
-    padding: 0;
-    opacity: 0;
-  }
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.25s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
