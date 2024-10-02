@@ -36,7 +36,7 @@ class BadRequestError(ArgillaAPIError):
 
 
 class ForbiddenError(ArgillaAPIError):
-    message = "User role is forbidden from performing this this action by server"
+    message = "User role is forbidden from performing this action by server"
 
 
 class NotFoundError(ArgillaAPIError):
