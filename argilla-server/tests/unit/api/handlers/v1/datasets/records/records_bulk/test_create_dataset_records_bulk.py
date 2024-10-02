@@ -599,7 +599,6 @@ class TestCreateDatasetRecordsBulk:
 
         webhook = await WebhookFactory.create(events=[RecordEvent.created])
 
-        
     async def test_create_dataset_records_bulk_with_custom_field_values(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):
@@ -617,7 +616,6 @@ class TestCreateDatasetRecordsBulk:
                         "fields": {
                             "prompt": "Does exercise help reduce stress?",
                             "custom": {"a": 1, "b": 2},
-
                         },
                     },
                     {
@@ -683,4 +681,3 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
-
