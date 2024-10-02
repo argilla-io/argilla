@@ -2,19 +2,6 @@
   <div class="custom_field_component" :key="content">
     <div class="title-area --body2">
       <span class="custom_field_component__title-content" v-text="title" />
-      <BaseActionTooltip
-        class="custom_field_component__tooltip"
-        tooltip="Copied"
-        tooltip-position="left"
-      >
-        <BaseButton
-          title="Copy to clipboard"
-          class="custom_field_component__copy-button"
-          @click.prevent="$copyToClipboard(content)"
-        >
-          <svgicon color="#acacac" name="copy" width="18" height="18" />
-        </BaseButton>
-      </BaseActionTooltip>
     </div>
     <Sandbox :content="template" />
   </div>
@@ -29,7 +16,7 @@ const BASIC_TEMPLATE = `
 </div>
 <script>
   Handlebars.registerHelper("json", (context) => {
-    return JSON.stringify(context);
+    return new Handlebars.SafeString('<pre style="overflow: auto">' + JSON.stringify(context, null, 4) + '</pre>');
   });
 
   const template = document.getElementById("template").innerHTML;
@@ -95,11 +82,6 @@ export default {
   background: var(--bg-field);
   border-radius: $border-radius-m;
   border: 1px solid var(--border-field);
-  &:hover {
-    #{$this}__copy-button {
-      opacity: 1;
-    }
-  }
   .title-area {
     display: flex;
     align-items: center;
@@ -111,22 +93,5 @@ export default {
     word-break: break-word;
     width: calc(100% - 30px);
   }
-  &__tooltip {
-    display: flex;
-    align-self: flex-start;
-  }
-  &__copy-button {
-    flex-shrink: 0;
-    padding: 0;
-    opacity: 0;
-  }
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.25s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

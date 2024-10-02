@@ -76,13 +76,8 @@ class DatasetRecordsIterator:
         return self
 
     def __next__(self) -> Record:
-        if self._limit_reached():
-            raise StopIteration()
-
-        if not self._has_local_records():
+        if self._no_records():
             self._fetch_next_batch()
-            if not self._has_local_records():
-                raise StopIteration()
 
         return self._next_record()
 
@@ -92,6 +87,9 @@ class DatasetRecordsIterator:
         return self.__limit <= 0
 
     def _next_record(self) -> Record:
+        if self._limit_reached() or self._no_records():
+            raise StopIteration()
+
         record = self.__records_batch.pop(0)
 
         if self.__limit is not None:
@@ -99,8 +97,8 @@ class DatasetRecordsIterator:
 
         return record
 
-    def _has_local_records(self) -> bool:
-        return len(self.__records_batch) > 0
+    def _no_records(self) -> bool:
+        return len(self.__records_batch) <= 0
 
     def _fetch_next_batch(self) -> None:
         self.__records_batch = list(self._list())
@@ -138,7 +136,7 @@ class DatasetRecordsIterator:
         return [record_model for record_model, _ in search_items]
 
     def _is_search_query(self) -> bool:
-        return bool(self.__query and (self.__query.query or self.__query.filter))
+        return self.__query.has_search()
 
     def to_list(self, flatten: bool) -> List[Dict[str, Any]]:
         return GenericIO.to_list(records=list(self), flatten=flatten)

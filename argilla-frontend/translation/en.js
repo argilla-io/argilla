@@ -41,6 +41,7 @@ export default {
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
   required: "Required",
   optional: "Optional",
+  template: "Template",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",

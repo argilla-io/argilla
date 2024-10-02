@@ -22,22 +22,15 @@ import argilla as rg
 
 
 @pytest.fixture
-def dataset(client: rg.Argilla) -> rg.Dataset:
+def dataset(client: rg.Argilla, dataset_name: str) -> rg.Dataset:
     workspace = client.workspaces[0]
-    mock_dataset_name = f"test_add_records{datetime.now().strftime('%Y%m%d%H%M%S')}"
     settings = rg.Settings(
-        fields=[
-            rg.TextField(name="text"),
-        ],
-        questions=[
-            rg.LabelQuestion(name="label", labels=["positive", "negative"]),
-        ],
-        vectors=[
-            rg.VectorField(name="vector", dimensions=10),
-        ],
+        fields=[rg.TextField(name="text")],
+        questions=[rg.LabelQuestion(name="label", labels=["positive", "negative"])],
+        vectors=[rg.VectorField(name="vector", dimensions=10)],
     )
     dataset = rg.Dataset(
-        name=mock_dataset_name,
+        name=dataset_name,
         workspace=workspace,
         settings=settings,
         client=client,

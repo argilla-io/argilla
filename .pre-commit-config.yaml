@@ -3,7 +3,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-yaml
-        exclude: argilla/mkdocs.yml
+        exclude: argilla/mkdocs.yml|examples/deployments/k8s
       - id: end-of-file-fixer
         exclude_types: [text, jupyter]
       - id: trailing-whitespace
@@ -70,6 +70,17 @@ repos:
           - --license-filepath
           - argilla-server/LICENSE_HEADER
           - --fuzzy-match-generates-todo
+
+  ##############################################################################
+  # Helm lint hook
+  ##############################################################################
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.23
+    hooks:
+      - id: helmlint
+        name: Helm lint
+        files: '^examples/deployments/k8s/.*\.yaml$'
+        args: ['helm', 'lint','examples/deployments/k8s/']
 
 ci:
   autofix_commit_msg: |
