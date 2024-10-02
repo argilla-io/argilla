@@ -1,4 +1,5 @@
 import { FieldType } from "../field/FieldType";
+import { QuestionType } from "../question/QuestionType";
 import {
   QuestionSetting,
   QuestionPrototype,
@@ -41,6 +42,7 @@ class QuestionCreation {
 
   constructor(
     public readonly name: string,
+    public title: string,
     public readonly required: boolean,
     settings: QuestionPrototype
   ) {
@@ -49,6 +51,10 @@ class QuestionCreation {
 
   get type() {
     return this.settings.type;
+  }
+
+  set type(value: QuestionType) {
+    this.settings.type = value;
   }
 
   get options() {
@@ -85,7 +91,7 @@ class Subset {
     for (const feat of this.features) {
       if (feat.kindObject === "ClassLabel") {
         this.questions.push(
-          new QuestionCreation(feat.name, false, {
+          new QuestionCreation(feat.name, feat.name, false, {
             type: "label_selection",
             options: feat.options,
           })
@@ -95,7 +101,7 @@ class Subset {
 
     if (this.questions.length === 0) {
       this.questions.push(
-        new QuestionCreation("comment", true, { type: "text" })
+        new QuestionCreation("comment", "comment", true, { type: "text" })
       );
     }
   }

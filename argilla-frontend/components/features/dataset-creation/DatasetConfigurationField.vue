@@ -1,13 +1,5 @@
 <template>
   <DatasetConfigurationCard :item="field" :type-options="typeOptions">
-    <template slot="header">
-      <BaseButton
-        class="config-card__remove"
-        @click="remove"
-        v-if="removeIsAllowed"
-        >Remove</BaseButton
-      >
-    </template>
     <BaseSwitch
       v-if="field.isTextType || field.isChatType"
       class="config-card__remove__switch"
@@ -28,19 +20,10 @@ export default {
       type: Array,
       required: true,
     },
-    removeIsAllowed: {
-      type: Boolean,
-      default: false,
-    },
   },
   model: {
     prop: "type",
     event: "change",
-  },
-  methods: {
-    remove() {
-      this.$emit("remove");
-    },
   },
 };
 </script>

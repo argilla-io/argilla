@@ -24,7 +24,7 @@
     </div>
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
-        <div class="config-form__col">
+        <div class="config-form__col" v-if="fields.length">
           <div class="config-form__col__header">Fields</div>
 
           <draggable
@@ -36,21 +36,44 @@
               v-for="field in fields"
               :key="field.name"
               :field="field"
-              :typeOptions="['text', 'image', 'chat', 'custom', 'no mapping']"
+              :typeOptions="[
+                'no mapping',
+                'text',
+                'image',
+                'chat',
+                'custom',
+                'metadata term',
+                'metadata integer',
+                'metadata float',
+              ]"
             />
           </draggable>
         </div>
       </div>
       <div class="config-form__col-wrapper">
-        <div class="config-form__col">
+        <div class="config-form__col" v-if="questions.length">
           <div class="config-form__col__header">Questions</div>
-          <div class="config-form__col__content">
-            <template v-if="questions.length">
-              <div v-for="question in questions" :key="question.name">
-                {{ question }}
-              </div>
-            </template>
-          </div>
+
+          <draggable
+            class="config-form__col__content"
+            :list="fields"
+            :group="{ name: 'questions' }"
+          >
+            <DatasetConfigurationQuestion
+              v-for="question in questions"
+              :key="question.name"
+              :question="question"
+              :typeOptions="[
+                'no mapping',
+                'text',
+                'label_selection',
+                'multi_label_selection',
+                'ratting',
+                'ranking',
+                'span',
+              ]"
+            />
+          </draggable>
         </div>
       </div>
     </div>

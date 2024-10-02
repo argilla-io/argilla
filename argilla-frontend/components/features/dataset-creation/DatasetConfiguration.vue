@@ -114,5 +114,8 @@ export default {
     padding: $base-space * 2;
     overflow: auto;
   }
+  &__configuration {
+    width: 100%;
+  }
 }
 </style>
