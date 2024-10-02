@@ -662,7 +662,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             if field is None:
                 raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
 
-            if field.is_chat:
+            if field.is_chat or field.is_custom:
                 field_name = f"{text.field}.*"
             else:
                 field_name = text.field
