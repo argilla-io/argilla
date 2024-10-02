@@ -50,20 +50,33 @@ class QuestionCreation {
   }
 }
 
+class MetadataCreation {
+  public constructor(
+    public readonly name: string,
+    type: "int32" | "int64" | "float32" | "float64"
+  ) {}
+}
+
+type MetadataTypes = "int32" | "int64" | "float32" | "float64";
+
+type Structure = {
+  name: string;
+  options?: string[];
+  kindObject: "Value" | "Image" | "ClassLabel";
+  type: "string" | MetadataTypes;
+};
+
 class Subset {
   public readonly fields: FieldCreation[] = [];
   public readonly questions: QuestionCreation[] = [];
 
-  private readonly features: {
-    name: string;
-    options?: string[];
-    kindObject: "Value" | "Image" | "ClassLabel";
-    type: "string" | "int32" | "int64";
-  }[] = [];
+  public readonly metadata: any[] = [];
+
+  private readonly structures: Structure[] = [];
 
   constructor(public readonly name: string, datasetInfo: any) {
     for (const [name, value] of Object.entries<Feature>(datasetInfo.features)) {
-      this.features.push({
+      this.structures.push({
         name,
         options: value.names,
         kindObject: value._type,
@@ -73,15 +86,16 @@ class Subset {
 
     this.createFields();
     this.createQuestions();
+    this.createMetadata();
   }
 
   private createQuestions() {
-    for (const feat of this.features) {
-      if (feat.kindObject === "ClassLabel") {
+    for (const structure of this.structures) {
+      if (structure.kindObject === "ClassLabel") {
         this.questions.push(
-          new QuestionCreation(feat.name, false, {
+          new QuestionCreation(structure.name, false, {
             type: "label_selection",
-            options: feat.options,
+            options: structure.options,
           })
         );
       }
@@ -95,13 +109,35 @@ class Subset {
   }
 
   private createFields() {
-    for (const feat of this.features) {
-      if (feat.kindObject === "Value") {
-        this.fields.push(new FieldCreation(feat.name, "text"));
+    for (const structure of this.structures) {
+      if (structure.kindObject === "Value") {
+        if (structure.type === "string") {
+          this.fields.push(new FieldCreation(structure.name, "text"));
+        }
       }
 
-      if (feat.kindObject === "Image") {
-        this.fields.push(new FieldCreation(feat.name, "image"));
+      if (structure.kindObject === "Image") {
+        this.fields.push(new FieldCreation(structure.name, "image"));
+      }
+
+      if (this.isChatField(structure)) {
+        this.fields.push(new FieldCreation(structure.name, "chat"));
+      }
+    }
+  }
+
+  private isChatField(_: Structure) {
+    /// TODO: Implement this method
+    return false;
+  }
+
+  private createMetadata() {
+    const metadataTypes = ["int32", "int64", "float32", "float64"];
+    for (const structure of this.structures) {
+      if (metadataTypes.includes(structure.type)) {
+        this.metadata.push(
+          new MetadataCreation(structure.name, structure.type as MetadataTypes)
+        );
       }
     }
   }
