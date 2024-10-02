@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 - Added helm chart for argilla. ([#5512](https://github.com/argilla-io/argilla/pull/5512))
 
+### Fixed
+
+- Fixed error when creating default user with existing default workspace. ([#5558](https://github.com/argilla-io/argilla/pull/5558))
+
 ## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 
 ### Added
