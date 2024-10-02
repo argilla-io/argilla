@@ -91,6 +91,10 @@ class DatasetRecordsIterator:
             raise StopIteration()
 
         record = self.__records_batch.pop(0)
+
+        if self.__limit is not None:
+            self.__limit -= 1
+
         return record
 
     def _no_records(self) -> bool:
