@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0)
+
 ### Added
 
 - Added `inserted_at` and `updated_at` to `Resource` model as properties. ([#5540](https://github.com/argilla-io/argilla/pull/5540))
