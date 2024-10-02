@@ -10,6 +10,7 @@ export OAUTH2_HUGGINGFACE_SCOPE=$OAUTH_SCOPES
 
 # Set the space creator name as username if no provided.
 # See https://huggingface.co/docs/hub/en/spaces-overview#helper-environment-variables for more details
-export USERNAME="${USERNAME:-$CREATOR_USER_ID}"
+USERNAME=$(curl -s https://huggingface.co/api/users/${SPACES_CREATOR_USER_ID}/overview | jq -r '.user' || echo "$SPACE_AUTHOR_NAME")
+export USERNAME
 
 honcho start
