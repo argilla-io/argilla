@@ -24,6 +24,7 @@ from argilla import (
     LabelQuestion,
     VectorField,
     Workspace,
+    CustomField,
 )
 from argilla.settings._task_distribution import TaskDistribution
 
@@ -37,6 +38,7 @@ class TestCreateDatasets:
                     TextField(name="test_field"),
                     ImageField(name="image"),
                     ChatField(name="chat", use_markdown=False),
+                    CustomField(name="custom", template="<div>{{field}}</div>"),
                 ],
                 questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
             ),
@@ -203,3 +205,25 @@ class TestCreateDatasets:
 
         assert client.api.datasets.exists(dataset.id)
         assert dataset.settings.distribution == task_distribution
+
+    def test_create_dataset_with_custom_field(self, client: Argilla, dataset_name: str):
+        dataset = Dataset(
+            name=dataset_name,
+            settings=Settings(
+                fields=[
+                    TextField(name="test_field"),
+                    CustomField(name="custom", template="<div>{{field}}</div>"),
+                    CustomField(name="custom2", template="<div></div>", advanced_mode=True),
+                ],
+                questions=[RatingQuestion(name="test_question", values=[1, 2, 3, 4, 5])],
+            ),
+        )
+        client.datasets.add(dataset)
+
+        assert dataset in client.datasets
+        assert dataset is not None
+
+        created_dataset = client.datasets(name=dataset_name)
+        assert created_dataset.settings == dataset.settings
+        assert created_dataset.settings.fields["custom"].template == "<div>{{field}}</div>"
+        assert created_dataset.settings.fields["custom2"].advanced_mode is True

@@ -20,16 +20,13 @@ These are the section headers that we use:
 
 - Added helm chart for argilla. ([#5512](https://github.com/argilla-io/argilla/pull/5512))
 
+### Fixed
+
+- Fixed error when creating default user with existing default workspace. ([#5558](https://github.com/argilla-io/argilla/pull/5558))
+
 ## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 
-### Added
-
 - Added filtering by `name`, and `status` support to endpoint `GET /api/v1/me/datasets`. ([#5374](https://github.com/argilla-io/argilla/pull/5374))
-
-## [2.2.0]()
-
-### Added
-
 - Added [`rq`](https://python-rq.org) library to process background jobs using [Redis](https://redis.io) as a dependency. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
 - Added a new background job to update records status when a dataset distribution strategy is updated. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
 - Added new `chat` type dataset field supporting chat-like conversations. ([#5376](https://github.com/argilla-io/argilla/pull/5376))

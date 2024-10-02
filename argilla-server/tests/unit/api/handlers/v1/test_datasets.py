@@ -2072,6 +2072,11 @@ class TestSuiteDatasets:
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
                         },
@@ -2174,6 +2179,11 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "value is not a valid list",
                             "type": "type_error.list",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
