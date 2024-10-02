@@ -102,7 +102,12 @@ const config: NuxtConfig = {
     "@nuxtjs/style-resources",
     "@nuxtjs/axios",
     "@nuxtjs/auth-next",
-    "nuxt-highlightjs",
+    [
+      "nuxt-highlightjs",
+      {
+        style: "obsidian",
+      },
+    ],
     "@nuxtjs/i18n",
   ],
 

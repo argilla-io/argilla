@@ -12,13 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from uuid import UUID
-
 import pytest
-from httpx import AsyncClient
 
+from uuid import UUID
+from httpx import AsyncClient
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from argilla_server.jobs.queues import HIGH_QUEUE
 from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory
+from argilla_server.webhooks.v1.datasets import build_dataset_event
+from argilla_server.webhooks.v1.enums import DatasetEvent
+
+from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, WebhookFactory
 
 
 @pytest.mark.asyncio
@@ -152,3 +158,24 @@ class TestUpdateDataset:
             "strategy": DatasetDistributionStrategy.overlap,
             "min_submitted": 1,
         }
+
+    async def test_update_dataset_enqueue_webhook_dataset_updated_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        webhook = await WebhookFactory.create(events=[DatasetEvent.updated])
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"name": "Updated dataset"},
+        )
+
+        assert response.status_code == 200
+
+        event = await build_dataset_event(db, DatasetEvent.updated, dataset)
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == DatasetEvent.updated
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)

@@ -1,0 +1,10 @@
+suite: test simple
+templates:
+  - hpa.yaml
+tests:
+  - it: should render HPA
+    set:
+      argilla.hpa.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1

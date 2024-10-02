@@ -13,13 +13,19 @@
 #  limitations under the License.
 
 import pytest
-from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
-from argilla_server.models import Dataset
+
 from httpx import AsyncClient
 from sqlalchemy import func, select
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import WorkspaceFactory
+from argilla_server.models import Dataset
+from argilla_server.jobs.queues import HIGH_QUEUE
+from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
+from argilla_server.webhooks.v1.enums import DatasetEvent
+from argilla_server.webhooks.v1.datasets import build_dataset_event
+
+from tests.factories import WebhookFactory, WorkspaceFactory
 
 
 @pytest.mark.asyncio
@@ -137,3 +143,28 @@ class TestCreateDataset:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar_one() == 0
+
+    async def test_create_dataset_enqueue_webhook_dataset_created_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        webhook = await WebhookFactory.create(events=[DatasetEvent.created])
+
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "name": "Dataset Name",
+                "workspace_id": str(workspace.id),
+            },
+        )
+
+        assert response.status_code == 201
+
+        dataset = (await db.execute(select(Dataset))).scalar_one()
+        event = await build_dataset_event(db, DatasetEvent.created, dataset)
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == DatasetEvent.created
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)

@@ -827,7 +827,7 @@ async def delete_records(
 ) -> None:
     params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
 
-    records = (await db.execute(select(Record).filter(*params))).scalars().all()
+    records = (await db.execute(select(Record).filter(*params).order_by(Record.inserted_at.asc()))).scalars().all()
 
     deleted_record_events_v1 = []
     for record in records:

@@ -40,6 +40,7 @@ export default {
   noAnnotationGuidelines: "Este dataset no tiene guía de anotación",
   required: "Requerido",
   optional: "Opcional",
+  template: "Plantilla",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",

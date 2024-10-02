@@ -336,6 +336,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
@@ -382,6 +383,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "_source": {"excludes": [f"fields.{field.name}" for field in image_fields]},
             "properties": {
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
@@ -460,6 +462,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
@@ -516,6 +519,7 @@ class TestBaseElasticAndOpenSearchEngine:
             "dynamic": "strict",
             "properties": {
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 "inserted_at": {"type": "date_nanos"},
                 "updated_at": {"type": "date_nanos"},
@@ -939,6 +943,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "external_id": record.external_id,
                 "status": RecordStatus.pending,
                 "fields": record_text_fields,
                 "inserted_at": record.inserted_at.isoformat(),
@@ -998,6 +1003,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(records[0].id),
+                "external_id": records[0].external_id,
                 "status": RecordStatus.pending,
                 "fields": records[0].fields,
                 "inserted_at": records[0].inserted_at.isoformat(),
@@ -1006,6 +1012,7 @@ class TestBaseElasticAndOpenSearchEngine:
             },
             {
                 "id": str(records[1].id),
+                "external_id": records[1].external_id,
                 "status": RecordStatus.pending,
                 "fields": records[1].fields,
                 "inserted_at": records[1].inserted_at.isoformat(),
@@ -1041,6 +1048,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "external_id": record.external_id,
                 "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),
@@ -1081,6 +1089,7 @@ class TestBaseElasticAndOpenSearchEngine:
         assert es_docs == [
             {
                 "id": str(record.id),
+                "external_id": record.external_id,
                 "status": RecordStatus.pending,
                 "fields": record.fields,
                 "inserted_at": record.inserted_at.isoformat(),

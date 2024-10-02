@@ -16,11 +16,11 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
+from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
-from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
 from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
 from argilla_server.pydantic_v1.utils import GetterDict
@@ -40,6 +40,8 @@ TERMS_FILTER_VALUES_MAX_ITEMS = 250
 
 SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
 SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
+
+SEARCH_MAX_SIMILARITY_SEARCH_RESULT = 1000
 
 CHAT_FIELDS_MAX_MESSAGES = 500
 
@@ -84,8 +86,11 @@ class Record(BaseModel):
         getter_dict = RecordGetterDict
 
 
+FieldValueCreate = Union[List[ChatFieldValue], Dict[StrictStr, Any], StrictStr, None]
+
+
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[List[ChatFieldValue], StrictStr, None]]
+    fields: Dict[str, FieldValueCreate]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
@@ -163,7 +168,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[List[ChatFieldValue], StrictStr, None]]]
+    fields: Optional[Dict[str, FieldValueCreate]] = None
 
 
 class RecordIncludeParam(BaseModel):
@@ -209,7 +214,13 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal["status"]]
+    property: Literal[
+        RecordSortField.id,
+        RecordSortField.external_id,
+        RecordSortField.inserted_at,
+        RecordSortField.updated_at,
+        RecordSortField.status,
+    ]
 
 
 class Records(BaseModel):
@@ -255,7 +266,12 @@ class VectorQuery(BaseModel):
 
 class Query(BaseModel):
     text: Optional[TextQuery] = None
-    vector: Optional[VectorQuery] = None
+    vector: Optional[VectorQuery] = Field(
+        None,
+        description="Query by vector similarity."
+        " Either 'record_id' or 'value' must be provided. "
+        f"Max number of records to return is limited to {SEARCH_MAX_SIMILARITY_SEARCH_RESULT}.",
+    )
 
 
 class MetadataFilterScope(BaseModel):
@@ -283,8 +299,8 @@ class TermsFilter(BaseModel):
 class RangeFilter(BaseModel):
     type: Literal["range"]
     scope: FilterScope
-    ge: Optional[float]
-    le: Optional[float]
+    ge: Optional[Union[float, str]]
+    le: Optional[Union[float, str]]
 
     @root_validator(skip_on_failure=True)
     def check_ge_and_le(cls, values: dict) -> dict:

@@ -15,8 +15,13 @@ import warnings
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
+
 from argilla._api import DatasetsAPI
-from argilla._exceptions import NotFoundError, SettingsError
+from argilla._exceptions import NotFoundError, SettingsError, ForbiddenError
 from argilla._models import DatasetModel
 from argilla._resource import Resource
 from argilla.client import Argilla
@@ -157,7 +162,16 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         Returns:
             Dataset: The created dataset object.
         """
-        super().create()
+        try:
+            super().create()
+        except ForbiddenError as e:
+            settings_url = f"{self._client.api_url}/user-settings"
+            user_role = self._client.me.role.value
+            user_name = self._client.me.username
+            workspace_name = self.workspace.name
+            message = f"""User '{user_name}' is not authorized to create a dataset in workspace '{workspace_name}'
+            with role '{user_role}'. Go to {settings_url} to view your role."""
+            raise ForbiddenError(message) from e
         try:
             return self._publish()
         except Exception as e:
@@ -269,3 +283,14 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
     def _is_published(self) -> bool:
         return self._model.status == "ready"
+
+    @classmethod
+    def _sanitize_name(cls, name: str):
+        name = name.replace(" ", "_")
+
+        for character in ["/", "\\", ".", ",", ";", ":", "-", "+", "="]:
+            name = name.replace(character, "-")
+        return name
+
+    def _with_client(self, client: Argilla) -> "Self":
+        return super()._with_client(client=client)

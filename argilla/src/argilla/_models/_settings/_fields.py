@@ -36,12 +36,14 @@ class ChatFieldSettings(BaseModel):
     use_markdown: Optional[bool] = True
 
 
+class CustomFieldSettings(BaseModel):
+    type: Literal["custom"] = "custom"
+    template: str
+    advanced_mode: Optional[bool] = False
+
+
 FieldSettings = Annotated[
-    Union[
-        TextFieldSettings,
-        ImageFieldSettings,
-        ChatFieldSettings,
-    ],
+    Union[TextFieldSettings, ImageFieldSettings, ChatFieldSettings, CustomFieldSettings],
     Field(..., discriminator="type"),
 ]
 
