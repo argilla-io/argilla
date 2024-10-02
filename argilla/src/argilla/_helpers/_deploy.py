@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import time
+import uuid
 import warnings
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -79,7 +80,8 @@ class SpacesDeploymentMixin(LoggingMixin):
         secrets = [
             {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user."},
             {"key": "USERNAME", "value": token_username, "description": "The username of the owner user."},
-            {"key": "PASSWORD", "value": api_key, "description": "The password of the owner user."},
+            {"key": "PASSWORD", "value": str(uuid.uuid4()), "description": "The password of the owner user."},
+            {"key": "WORKSPACE", "value": "argilla", "description": "The workspace of the space."},
         ]
 
         # Check if the space already exists
