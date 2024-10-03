@@ -77,7 +77,18 @@
                 ]"
               />
             </draggable>
-            <BaseButton>Add question</BaseButton>
+            <DatasetConfigurationAddQuestion
+              :options="[
+                'no mapping',
+                'text',
+                'label_selection',
+                'multi_label_selection',
+                'rating',
+                'ranking',
+                'span',
+              ]"
+              @add-question="addQuestion($event)"
+            />
           </div>
         </div>
       </div>
@@ -112,6 +123,13 @@ export default {
     createDataset() {
       console.log("Open dataset creation modal");
     },
+    addQuestion(type) {
+      const questionName = `${type}_${this.selectedSubset.questions.length}`;
+      this.selectedSubset.addQuestion(questionName, type);
+    },
+  },
+  mounted() {
+    console.log(this.selectedSubset);
   },
 };
 </script>

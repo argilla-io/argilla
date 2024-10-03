@@ -18,7 +18,10 @@
             </div>
           </template>
           <template #right>
-            <div class="dataset-config__questions-wrapper">
+            <div
+              class="dataset-config__questions-wrapper"
+              v-if="!datasetConfig.questions.length"
+            >
               <p
                 class="dataset-config__empty-questions"
                 v-text="'Your question will be here'"
