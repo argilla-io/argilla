@@ -151,15 +151,24 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         self.settings.get()
         return self
 
-    def create(self) -> "Dataset":
+    def create(self, publish: bool = True) -> "Dataset":
         """Creates the dataset on the server with the `Settings` configuration.
+
+        Parameters:
+            publish (bool): If True, the dataset is published after creation. Default is True.
 
         Returns:
             Dataset: The created dataset object.
+
         """
-        super().create()
         try:
-            return self._publish()
+            super().create()
+            self._settings.create()
+
+            if publish:
+                return self.publish()
+
+            return self.get()
         except Exception as e:
             self._log_message(message=f"Error creating dataset: {e}", level="error")
             self._rollback_dataset_creation()
@@ -173,6 +182,17 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         """
         self.settings.update()
         return self
+
+    def publish(self) -> "Dataset":
+        """
+        Publishes the dataset on the server.
+
+        Returns:
+            The published dataset object.
+
+        """
+        self._api.publish(dataset_id=self._model.id)
+        return self.get()
 
     def progress(self, with_users_distribution: bool = False) -> dict:
         """Returns the team's progress on the dataset.
@@ -235,12 +255,6 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
     def api_model(self) -> DatasetModel:
         self._model.workspace_id = self.workspace.id
         return self._model
-
-    def _publish(self) -> "Dataset":
-        self._settings.create()
-        # self._api.publish(dataset_id=self._model.id)
-
-        return self.get()
 
     def _resolve_workspace(self) -> Workspace:
         workspace = self._workspace
