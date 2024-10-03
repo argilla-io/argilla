@@ -17,7 +17,7 @@ import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Optional, Type, Union, Dict
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 from uuid import UUID
 
 from datasets import DatasetDict
@@ -30,14 +30,14 @@ from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
 from argilla._helpers._media import pil_to_data_uri
 from argilla.datasets._io._disk import DiskImportExportMixin
-from argilla.records._mapping import IngestedRecordMapper
 from argilla.records._io._datasets import HFDatasetsIO
+from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
 
 if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
 
-    from argilla import Argilla, Dataset, Workspace, Settings
+    from argilla import Argilla, Dataset, Settings, Workspace
 
 
 class HubImportExportMixin(DiskImportExportMixin):
@@ -47,7 +47,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         *,
         with_records: bool = True,
         generate_card: Optional[bool] = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Pushes the `Dataset` to the Hugging Face Hub. If the dataset has been previously pushed to the
         Hugging Face Hub, it will be updated instead of creating a new dataset repo.
@@ -58,6 +58,9 @@ class HubImportExportMixin(DiskImportExportMixin):
             generate_card: whether to generate a dataset card for the `Dataset` in the Hugging Face Hub. Defaults
                 to `True`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
+
+        Returns:
+            None
         """
 
         from huggingface_hub import DatasetCardData, HfApi
@@ -120,7 +123,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         split: Optional[str] = None,
         subset: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> "Dataset":
         """Loads a `Dataset` from the Hugging Face Hub.
 
         Parameters:

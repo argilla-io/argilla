@@ -67,6 +67,7 @@ from tests.factories import (
     VectorSettingsFactory,
     ImageFieldFactory,
     ChatFieldFactory,
+    CustomFieldFactory,
 )
 
 
@@ -623,6 +624,34 @@ class TestBaseElasticAndOpenSearchEngine:
         assert len(result.items) == 2
         assert result.total == 2
 
+    async def test_search_for_custom_field(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
+        custom_field = await CustomFieldFactory.create(name="field")
+
+        dataset = await DatasetFactory.create(fields=[custom_field])
+
+        records = await RecordFactory.create_batch(
+            size=2,
+            dataset=dataset,
+            fields={
+                custom_field.name: {
+                    "a": "This is a value",
+                    "b": 100,
+                }
+            },
+        )
+
+        await refresh_dataset(dataset)
+        await refresh_records(records)
+
+        await search_engine.create_index(dataset)
+        await search_engine.index_records(dataset, records)
+
+        for query in ["value", 100]:
+            result = await search_engine.search(dataset, query=TextQuery(q=query, field=custom_field.name))
+
+            assert len(result.items) == 2
+            assert result.total == 2
+
     @pytest.mark.parametrize(
         "statuses, expected_items",
         [
@@ -1064,11 +1093,16 @@ class TestBaseElasticAndOpenSearchEngine:
     async def test_index_records_with_vectors(
         self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
     ):
-        dataset = await DatasetFactory.create()
-        text_fields = await TextFieldFactory.create_batch(size=5, dataset=dataset)
-        vectors_settings = await VectorSettingsFactory.create_batch(size=5, dataset=dataset, dimensions=5)
+        text_fields = await TextFieldFactory.create_batch(size=5)
+        vectors_settings = await VectorSettingsFactory.create_batch(size=5, dimensions=5)
+
+        dataset = await DatasetFactory.create(fields=text_fields, vectors_settings=vectors_settings, questions=[])
+
         records = await RecordFactory.create_batch(
-            size=5, fields={field.name: f"This is the value for {field.name}" for field in text_fields}, responses=[]
+            size=5,
+            fields={field.name: f"This is the value for {field.name}" for field in text_fields},
+            dataset=dataset,
+            responses=[],
         )
 
         for record in records:
