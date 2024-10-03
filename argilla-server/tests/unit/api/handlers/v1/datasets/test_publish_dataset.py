@@ -30,7 +30,7 @@ class TestPublishDataset:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/publish"
 
-    async def test_publish_draft_dataset_with_records(
+    async def test_publish_draft_dataset_with_records_delete_all_records_before_publishing(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.draft)

@@ -169,14 +169,8 @@ class RecordUpdateValidator(RecordValidatorBase):
 class RecordsBulkCreateValidator:
     @classmethod
     async def validate(cls, db: AsyncSession, records_create: RecordsBulkCreate, dataset: Dataset) -> None:
-        # cls._validate_dataset_is_ready(dataset)
         await cls._validate_external_ids_are_not_present_in_db(db, records_create, dataset)
         cls._validate_all_bulk_records(dataset, records_create.items)
-
-    @staticmethod
-    def _validate_dataset_is_ready(dataset: Dataset) -> None:
-        if not dataset.is_ready:
-            raise UnprocessableEntityError("records cannot be created for a non published dataset")
 
     @staticmethod
     async def _validate_external_ids_are_not_present_in_db(
@@ -206,13 +200,7 @@ class RecordsBulkUpsertValidator:
         dataset: Dataset,
         existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
     ) -> None:
-        # cls._validate_dataset_is_ready(dataset)
         cls._validate_all_bulk_records(dataset, records_upsert.items, existing_records_by_external_id_or_record_id)
-
-    @staticmethod
-    def _validate_dataset_is_ready(dataset: Dataset) -> None:
-        if not dataset.is_ready:
-            raise UnprocessableEntityError("records cannot be created or updated for a non published dataset")
 
     @staticmethod
     def _validate_all_bulk_records(
