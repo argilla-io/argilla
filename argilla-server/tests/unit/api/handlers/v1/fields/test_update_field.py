@@ -45,11 +45,13 @@ class TestUpdateField:
         assert response.status_code == 200
         assert response.json()["name"] == "updated-name"
 
+        assert text_field.name == "updated-name"
+
     async def test_update_field_name_attribute_with_published_dataset(
         self, async_client: AsyncClient, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        text_field = await TextFieldFactory.create(dataset=dataset)
+        text_field = await TextFieldFactory.create(name="text-field", dataset=dataset)
 
         response = await async_client.patch(
             self.url(text_field.id),
@@ -59,6 +61,8 @@ class TestUpdateField:
 
         assert response.status_code == 422
         assert response.json() == {"detail": "Field name cannot be changed for fields belonging to a published dataset"}
+
+        assert text_field.name == "text-field"
 
     async def test_update_field_required_attribute_with_draft_dataset(
         self, async_client: AsyncClient, owner_auth_header: dict
@@ -75,11 +79,13 @@ class TestUpdateField:
         assert response.status_code == 200
         assert response.json()["required"] is True
 
+        assert text_field.required is True
+
     async def test_update_field_required_attribute_with_published_dataset(
         self, async_client: AsyncClient, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        text_field = await TextFieldFactory.create(dataset=dataset)
+        text_field = await TextFieldFactory.create(required=True, dataset=dataset)
 
         response = await async_client.patch(
             self.url(text_field.id),
@@ -91,6 +97,8 @@ class TestUpdateField:
         assert response.json() == {
             "detail": "Field required flag cannot be changed for fields belonging to a published dataset"
         }
+
+        assert text_field.required is True
 
     async def test_update_image_field(self, async_client: AsyncClient, owner_auth_header: dict):
         image_field = await ImageFieldFactory.create()

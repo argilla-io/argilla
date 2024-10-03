@@ -367,8 +367,10 @@ class QuestionCreate(BaseModel):
 
 
 class QuestionUpdate(UpdateSchema):
+    name: Optional[QuestionName]
     title: Optional[QuestionTitle]
     description: Optional[QuestionDescription]
+    required: Optional[bool]
     settings: Optional[QuestionSettingsUpdate]
 
-    __non_nullable_fields__ = {"title", "settings"}
+    __non_nullable_fields__ = {"name", "title", "required", "settings"}
