@@ -1,3 +1,5 @@
+import { any } from "@codescouts/test/jest";
+import { info } from "sass";
 import { FieldType } from "../field/FieldType";
 import { QuestionType } from "../question/QuestionType";
 import {
@@ -70,8 +72,9 @@ class MetadataCreation {
 type Structure = {
   name: string;
   options?: string[];
-  kindObject: "Value" | "Image" | "ClassLabel";
-  type: "string" | MetadataTypes;
+  structure?: Structure[];
+  kindObject?: "Value" | "Image" | "ClassLabel";
+  type?: "string" | MetadataTypes;
 };
 
 class Subset {
@@ -84,12 +87,27 @@ class Subset {
 
   constructor(public readonly name: string, datasetInfo: any) {
     for (const [name, value] of Object.entries<Feature>(datasetInfo.features)) {
-      this.structures.push({
-        name,
-        options: value.names,
-        kindObject: value._type,
-        type: value.dtype,
-      });
+      if (Array.isArray(value)) {
+        this.structures.push({
+          name,
+          structure: value.map((v) => {
+            const [key, value] = Object.entries<any>(v)[0];
+
+            return {
+              name: key,
+              kindObject: value._type,
+              type: value.dtype,
+            };
+          }),
+        });
+      } else {
+        this.structures.push({
+          name,
+          options: value.names,
+          kindObject: value._type,
+          type: value.dtype,
+        });
+      }
     }
 
     this.createFields();
@@ -128,7 +146,7 @@ class Subset {
   }
 
   public addQuestion(name: string, type: string) {
-    this.questions.push(new QuestionCreation(name, true, { type: type }));
+    this.questions.push(new QuestionCreation(name, true, { type }));
   }
 
   private createFields() {
@@ -159,15 +177,8 @@ class Subset {
     return structure.kindObject === "Image";
   }
 
-  private isChatField(info: any) {
-    return (
-      "content" in info &&
-      "role" in info &&
-      info.role.kindObject === "Value" &&
-      info.role.type === "string" &&
-      info.content.kindObject === "Value" &&
-      info.content.type === "string"
-    );
+  private isChatField(structure: Structure) {
+    return structure.structure?.length > 0;
   }
 
   private createMetadata() {
