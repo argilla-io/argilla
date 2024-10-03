@@ -300,7 +300,18 @@ class RecordFields(dict):
         self.record = record
 
     def to_dict(self) -> dict:
-        return {key: cast_image(value) if self._is_image(key) else value for key, value in self.items()}
+        fields = {}
+
+        for key, value in self.items():
+            if value is None:
+                continue
+            elif self._is_image(key):
+                fields[key] = cast_image(value)
+            elif self._is_chat(key):
+                fields[key] = [message.model_dump() if not isinstance(message, dict) else message for message in value]
+            else:
+                fields[key] = value
+        return fields
 
     def __getitem__(self, key: str) -> FieldValue:
         value = super().__getitem__(key)
@@ -310,6 +321,11 @@ class RecordFields(dict):
         if not self.record.dataset:
             return False
         return self.record.dataset.settings.schema[key].type == "image"
+
+    def _is_chat(self, key: str) -> bool:
+        if not self.record.dataset:
+            return False
+        return self.record.dataset.settings.schema[key].type == "chat"
 
 
 class RecordMetadata(dict):

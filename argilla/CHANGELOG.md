@@ -16,8 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0)
+
 ### Added
 
+- Added support for `CustomField`. ([#5422](https://github.com/argilla-io/argilla/pull/5422))
 - Added `inserted_at` and `updated_at` to `Resource` model as properties. ([#5540](https://github.com/argilla-io/argilla/pull/5540))
 - Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
 - Added similarity search support. ((#5546)[https://github.com/argilla-io/argilla/pull/5546])
@@ -26,9 +29,12 @@ These are the section headers that we use:
 ### Changed
 
 - Changed the __repr__ method for `SettingsProperties` to display the details of all the properties in `Setting` object. ([#5380](https://github.com/argilla-io/argilla/issues/5380))
+- Changed error messages when creating datasets with insufficient permissions. ([#5540](https://github.com/argilla-io/argilla/pull/5554))
+-
 ### Fixed
 
 - Fixed the deployment yaml used to create a new Argilla server in K8s. Added `USERNAME` and `PASSWORD` to the environment variables of pod template. ([#5434](https://github.com/argilla-io/argilla/issues/5434))
+- Fixed serialization of `ChatField` when collecting records from the hub and exporting to `datasets`. ([#5554](https://github.com/argilla-io/argilla/pull/5553))
 
 ## [2.2.2](https://github.com/argilla-io/argilla/compare/v2.2.1...v2.2.2)
 

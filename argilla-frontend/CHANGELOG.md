@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.3.0)
+
 ### Added
 
 - Added new field `CustomField` [#5462](https://github.com/argilla-io/argilla/pull/5462)
