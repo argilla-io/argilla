@@ -70,12 +70,12 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
         question: QuestionModel,
     ) -> QuestionModel:
         # TODO: Implement update method for fields with server side ID
-        raise NotImplementedError
+        return question
 
     @api_error_handler
     def delete(self, question_id: UUID) -> None:
         # TODO: Implement delete method for fields with server side ID
-        raise NotImplementedError
+        pass
 
     ####################
     # Utility methods #
