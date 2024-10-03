@@ -63,6 +63,9 @@ class SettingsPropertyBase(Resource):
     def type(self) -> str:
         return self._model.settings.type
 
+    def validate(self):
+        pass
+
     def serialize(self) -> dict[str, Any]:
         serialized_model = super().serialize()
         serialized_model["type"] = self.type
