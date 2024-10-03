@@ -511,6 +511,7 @@ Once a dataset is published, there are limited things you can update. Here is a 
     |Title       |✅        |✅        |
     |Required    |❌        |❌        |
     |Use markdown|✅        |✅        |
+    |Template    |✅        |❌        |
 
 === "Questions"
     | Attributes      | From SDK | From UI |
