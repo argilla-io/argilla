@@ -186,6 +186,9 @@ class Settings(DefaultSettingsMixin, Resource):
         self._validate_empty_settings()
         self._validate_duplicate_names()
 
+        for field in self.fields:
+            field.validate()
+
     #####################
     #  Public methods   #
     #####################
@@ -385,8 +388,8 @@ class Settings(DefaultSettingsMixin, Resource):
         self._client.api.datasets.update(dataset_model)
 
     def _validate_empty_settings(self):
-        if not all([self.fields, self.questions]):
-            message = "Fields and questions are required"
+        if not all(self.fields):
+            message = "At least one field must be defined in the settings"
             raise SettingsError(message=message)
 
     def _validate_duplicate_names(self) -> None:
