@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_deploy_on_spaces",
-    "title": "docs_deploy_on_spaces",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_custom-field",
     "title": "docs_custom-field",
     "aliases": [],
