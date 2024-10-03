@@ -1,5 +1,8 @@
 <template>
-  <DatasetConfigurationCard :item="question" :type-options="typeOptions">
+  <DatasetConfigurationCard
+    :item="question"
+    :type-options="question.availableTypes"
+  >
     <template slot="header">
       <BaseButton
         class="config-card__remove"
@@ -22,10 +25,6 @@ export default {
   props: {
     question: {
       type: Object,
-      required: true,
-    },
-    typeOptions: {
-      type: Array,
       required: true,
     },
     removeIsAllowed: {

@@ -14,8 +14,13 @@ interface Feature {
 class FieldCreation {
   public required = false;
   public readonly type: FieldType;
-  constructor(public readonly name: string, type: string) {
-    this.type = FieldType.from(type);
+  public readonly availableTypes = [
+    FieldType.from("text"),
+    FieldType.from("image"),
+    FieldType.from("chat"),
+  ];
+  constructor(public readonly name: string, type: FieldType) {
+    this.type = type;
   }
 
   get title() {
@@ -29,6 +34,14 @@ class FieldCreation {
 
 class QuestionCreation {
   public readonly settings: QuestionSetting;
+  public readonly availableTypes = [
+    QuestionType.from("label_selection"),
+    QuestionType.from("multi_label_selection"),
+    QuestionType.from("ranking"),
+    QuestionType.from("text"),
+    QuestionType.from("span"),
+    QuestionType.from("rating"),
+  ];
 
   constructor(
     public readonly name: string,
@@ -134,16 +147,22 @@ class Subset {
   private createFields() {
     for (const structure of this.structures) {
       if (this.isTextField(structure)) {
-        this.fields.push(new FieldCreation(structure.name, "text"));
+        this.fields.push(
+          new FieldCreation(structure.name, FieldType.from("text"))
+        );
       } else if (this.isImageField(structure)) {
-        this.fields.push(new FieldCreation(structure.name, "image"));
+        this.fields.push(
+          new FieldCreation(structure.name, FieldType.from("image"))
+        );
       } else if (this.isChatField(structure)) {
-        this.fields.push(new FieldCreation(structure.name, "chat"));
+        this.fields.push(
+          new FieldCreation(structure.name, FieldType.from("chat"))
+        );
       }
     }
 
     if (this.fields.length === 0) {
-      this.fields.push(new FieldCreation("prompt", "text"));
+      this.fields.push(new FieldCreation("prompt", FieldType.from("text")));
     }
 
     if (this.fields.length === 1) {

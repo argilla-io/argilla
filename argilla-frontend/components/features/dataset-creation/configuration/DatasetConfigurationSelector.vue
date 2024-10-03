@@ -18,7 +18,7 @@
               : 'selector__option'
           "
           v-for="option in filteredOptions"
-          :key="option"
+          :key="option.value"
           @click="selectOption(option)"
         >
           {{ option }}
@@ -51,10 +51,10 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.options.filter((option) => option !== this.value);
+      return this.options.filter((option) => option.value !== this.value.value);
     },
     selectedValue() {
-      return this.options.find((option) => this.value === option);
+      return this.options.find((option) => this.value.value === option.value);
     },
   },
   methods: {
