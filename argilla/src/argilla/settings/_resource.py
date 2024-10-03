@@ -186,6 +186,9 @@ class Settings(DefaultSettingsMixin, Resource):
         self._validate_empty_settings()
         self._validate_duplicate_names()
 
+        for field in self.fields:
+            field.validate()
+
     #####################
     #  Public methods   #
     #####################
