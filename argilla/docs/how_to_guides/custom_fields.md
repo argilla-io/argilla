@@ -23,11 +23,11 @@ This guide demonstrates how to create custom fields in Argilla using HTML, CSS, 
 
 ## Understanding the Record Object
 
-The `record` object is the main object that contains all the information about the Argilla `record` object in the UI, like `fields`, `metadata`, etc. Your template can use this object to display record information within the custom field. You can for example access the fields of the record by navigating to `{{record.fields.<field_name>}}` and this generally works the same for `metadata`, `responses`, etc.
+The `record` object is the main JavaScript object that contains all the information about the Argilla `record` object in the UI, like `fields`, `metadata`, etc. Your template can use this object to display record information within the custom field. You can for example access the fields of the record by navigating to `record.fields.<field_name>` and this generally works the same for `metadata`, `responses`, etc.
 
 ## Using Handlebars in your template
 
-By default, custom fields will use the [handlebars syntax engine](https://handlebarsjs.com/) to render templates with `record` information. This engine will convert the content inside the brackets `{{}}` to the values of record's field's object that you reference within your template. As described in the [Accessing record information](#accessing-record-information) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data. You can deactivate the `handlebars` engine with the `advanced_mode=False` parameter in `CustomField`, then you will need to define custom javascript to access the record attributes, like described in the [Advanced Mode](#advanced-mode) section.
+By default, custom fields will use the [handlebars syntax engine](https://handlebarsjs.com/) to render templates with `record` information. This engine will convert the content inside the brackets `{{}}` to the values of record's field's object that you reference within your template. As described in the [Understanding the Record Object](#understanding-the-record-object) section, you can access the fields of the record by navigating to `{{record.fields.<field_name>}}`. For more complex use cases, handlebars has various [expressions, partials, and helpers](https://handlebarsjs.com/guide/) that you can use to render your data. You can deactivate the `handlebars` engine with the `advanced_mode=True` parameter in `CustomField`, then you will need to define custom javascript to access the record attributes, like described in the [Advanced Mode](#advanced-mode) section.
 
 ### Usage example
 
@@ -171,7 +171,7 @@ The result will be the following:
 
 ## Advanced Mode
 
-When `advanced_mode=True`, you can use the `template` argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript. The record object will be available in the global scope, so you can access it in your JavaScript code as described in the [Record Object](#understanding-the-record-object) section.
+When `advanced_mode=True`, you can use the `template` argument to pass a full HTML page. This allows for more complex customizations, including the use of JavaScript. The record object will be available in the global scope, so you can access it in your JavaScript code as described in the [Understanding the Record Object](#understanding-the-record-object) section.
 
 ### Usage example
 
@@ -219,7 +219,7 @@ custom_field = rg.CustomField(
 )
 ```
 
-Besides the new `CustomField` code above, reusing the same steps as in the [Without advanced mode](#without-advanced-mode) section, will create a dataset and log a record to it, yielding the same result.
+Besides the new `CustomField` code above, reusing the same approach as in the [Using handlebars in your template](#using-handlebars-in-your-template) section, will create a dataset and log a record to it, yielding the same result.
 
 ![example-gallery-end](../assets/images/how_to_guides/custom_field/images_in_two_columns.png)
 
