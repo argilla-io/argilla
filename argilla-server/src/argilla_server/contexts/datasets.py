@@ -145,8 +145,8 @@ async def create_dataset(db: AsyncSession, dataset_attrs: dict):
     return await dataset.save(db)
 
 
-async def _count_required_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
-    return (await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id, required=True))).scalar_one()
+async def _count_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
+    return (await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id))).scalar_one()
 
 
 async def _count_required_questions_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
@@ -166,14 +166,18 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
     if dataset.is_ready:
         raise UnprocessableEntityError("Dataset is already published")
 
-    if await _count_required_fields_by_dataset_id(db, dataset.id) == 0:
-        raise UnprocessableEntityError("Dataset cannot be published without required fields")
+    if await _count_fields_by_dataset_id(db, dataset.id) == 0:
+        raise UnprocessableEntityError("Dataset cannot be published without fields")
 
     if await _count_required_questions_by_dataset_id(db, dataset.id) == 0:
         raise UnprocessableEntityError("Dataset cannot be published without required questions")
 
     async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
+
+        # NOTE: Deleting records that could be in the draft dataset before publishing
+        await Record.delete_many(db, params=[Record.dataset_id == dataset.id], autocommit=False)
+
         await search_engine.create_index(dataset)
 
     await db.commit()
@@ -222,6 +226,14 @@ async def update_field(db: AsyncSession, field: Field, field_update: "FieldUpdat
     if field_update.settings and field_update.settings.type != field.settings["type"]:
         raise UnprocessableEntityError(
             f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'"
+        )
+
+    if field_update.name is not None and field.dataset.is_ready:
+        raise UnprocessableEntityError("Field name cannot be changed for fields belonging to a published dataset")
+
+    if field_update.required is not None and field.dataset.is_ready:
+        raise UnprocessableEntityError(
+            "Field required flag cannot be changed for fields belonging to a published dataset"
         )
 
     params = field_update.dict(exclude_unset=True)

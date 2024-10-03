@@ -63,12 +63,12 @@ if TYPE_CHECKING:
         ),
         (
             TextQuestionFactory,
-            {"name": "New Name", "required": True, "dataset_id": str(uuid4()), "settings": {"type": "text"}},
+            {"name": "new-name", "required": True, "dataset_id": str(uuid4()), "settings": {"type": "text"}},
             {"type": "text", "use_markdown": False},
         ),
         (
             RatingQuestionFactory,
-            {"name": "New Name", "description": "New Description", "settings": {"type": "rating"}},
+            {"name": "new-name", "description": "New Description", "settings": {"type": "rating"}},
             {
                 "type": "rating",
                 "options": [
@@ -180,7 +180,7 @@ if TYPE_CHECKING:
         ),
         (
             RankingQuestionFactory,
-            {"name": "New Name", "description": "New Description", "settings": {"type": "ranking"}},
+            {"name": "new-name", "description": "New Description", "settings": {"type": "ranking"}},
             {
                 "type": "ranking",
                 "options": [
@@ -265,7 +265,7 @@ async def test_update_question(
         "name": question.name,
         "title": title,
         "description": description,
-        "required": False,
+        "required": question.required,
         "settings": expected_settings,
         "dataset_id": str(question.dataset_id),
         "inserted_at": question.inserted_at.isoformat(),

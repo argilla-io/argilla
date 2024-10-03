@@ -15,17 +15,95 @@ from datetime import datetime
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import OptionsOrder, QuestionType
+from argilla_server.enums import DatasetStatus, OptionsOrder, QuestionType
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import LabelSelectionQuestionFactory, QuestionFactory, SpanQuestionFactory, TextQuestionFactory
+from tests.factories import (
+    DatasetFactory,
+    LabelSelectionQuestionFactory,
+    QuestionFactory,
+    SpanQuestionFactory,
+    TextQuestionFactory,
+)
 
 
 @pytest.mark.asyncio
 class TestUpdateQuestion:
     def url(self, question_id: UUID) -> str:
         return f"/api/v1/questions/{question_id}"
+
+    async def test_update_question_name_attribute_with_draft_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        text_question = await TextQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_question.id),
+            headers=owner_auth_header,
+            json={"name": "updated-name"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["name"] == "updated-name"
+
+        assert text_question.name == "updated-name"
+
+    async def test_update_question_name_attribute_with_published_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        text_question = await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_question.id),
+            headers=owner_auth_header,
+            json={"name": "updated-name"},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Question name cannot be changed for questions belonging to a published dataset"
+        }
+
+        assert text_question.name == "text-question"
+
+    async def test_update_question_required_attribute_with_draft_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        text_question = await TextQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_question.id),
+            headers=owner_auth_header,
+            json={"required": True},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["required"] is True
+
+        assert text_question.required is True
+
+    async def test_update_question_required_attribute_with_published_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        text_question = await TextQuestionFactory.create(required=True, dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_question.id),
+            headers=owner_auth_header,
+            json={"required": False},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Question required flag cannot be changed for questions belonging to a published dataset"
+        }
+
+        assert text_question.required is True
 
     async def test_update_question_with_different_type(self, async_client: AsyncClient, owner_auth_header: dict):
         question = await TextQuestionFactory.create()

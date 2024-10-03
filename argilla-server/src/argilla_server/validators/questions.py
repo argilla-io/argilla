@@ -70,7 +70,23 @@ class QuestionUpdateValidator:
 
     @classmethod
     def validate(cls, question_update: QuestionUpdate, question: Question):
+        cls._validate_question_name(question_update, question)
+        cls._validate_question_required(question_update, question)
         cls._validate_question_settings(question_update, question.parsed_settings)
+
+    @classmethod
+    def _validate_question_name(cls, question_update: QuestionUpdate, question: Question) -> None:
+        if question_update.name is not None and question.dataset.is_ready:
+            raise UnprocessableEntityError(
+                "Question name cannot be changed for questions belonging to a published dataset"
+            )
+
+    @classmethod
+    def _validate_question_required(cls, question_update: QuestionUpdate, question: Question) -> None:
+        if question_update.required is not None and question.dataset.is_ready:
+            raise UnprocessableEntityError(
+                "Question required flag cannot be changed for questions belonging to a published dataset"
+            )
 
     @classmethod
     def _validate_question_settings(cls, question_update: QuestionUpdate, question_settings: QuestionSettings):
