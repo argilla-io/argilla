@@ -585,5 +585,4 @@ class QuestionsProperties(SettingsProperties[QuestionType]):
 
     # TODO: Align to the Resource model
     def _delete_question(self, question: QuestionType) -> None:
-        question_model = self._settings._client.api.questions.delete(question.id)
-        question._model = question_model
+        self._settings._client.api.questions.delete(question.id)
