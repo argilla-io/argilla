@@ -1,3 +1,4 @@
+import { FieldType } from "../field/FieldType";
 import { QuestionPrototype } from "../question/QuestionSetting";
 import { Feature } from "./DatasetCreationBuilder";
 import { FieldCreation } from "./FieldCreation";
@@ -105,16 +106,22 @@ export class Subset {
   private createFields() {
     for (const structure of this.structures) {
       if (this.isTextField(structure)) {
-        this.fields.push(new FieldCreation(structure.name, "text"));
+        this.fields.push(
+          new FieldCreation(structure.name, FieldType.from("text"))
+        );
       } else if (this.isImageField(structure)) {
-        this.fields.push(new FieldCreation(structure.name, "image"));
+        this.fields.push(
+          new FieldCreation(structure.name, FieldType.from("image"))
+        );
       } else if (this.isChatField(structure)) {
-        this.fields.push(new FieldCreation(structure.name, "chat"));
+        this.fields.push(
+          new FieldCreation(structure.name, FieldType.from("chat"))
+        );
       }
     }
 
     if (this.fields.length === 0) {
-      this.fields.push(new FieldCreation("prompt", "text"));
+      this.fields.push(new FieldCreation("prompt", FieldType.from("text")));
     }
 
     if (this.fields.length === 1) {

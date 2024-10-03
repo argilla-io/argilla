@@ -1,4 +1,23 @@
+import { FieldType } from "../field/FieldType";
+import { QuestionType } from "../question/QuestionType";
 import { Subset } from "./Subset";
+
+export const availableMetadataType = ["terms", "int", "float"];
+
+export const availableFieldTypes = [
+  FieldType.from("text"),
+  FieldType.from("image"),
+  FieldType.from("chat"),
+];
+
+export const availableQuestionsTypes = [
+  QuestionType.from("label_selection"),
+  QuestionType.from("multi_label_selection"),
+  QuestionType.from("ranking"),
+  QuestionType.from("text"),
+  QuestionType.from("span"),
+  QuestionType.from("rating"),
+];
 
 export class DatasetCreation {
   public selectedSubset: Subset;

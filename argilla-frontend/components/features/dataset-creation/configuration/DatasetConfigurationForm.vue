@@ -36,16 +36,6 @@
                 v-for="field in fields"
                 :key="field.name"
                 :field="field"
-                :typeOptions="[
-                  'no mapping',
-                  'text',
-                  'image',
-                  'chat',
-                  'custom',
-                  'metadata term',
-                  'metadata integer',
-                  'metadata float',
-                ]"
               />
             </draggable>
           </div>
@@ -66,15 +56,6 @@
                 :question="question"
                 :remove-is-allowed="true"
                 @remove="selectedSubset.removeQuestion(question.name)"
-                :typeOptions="[
-                  'no mapping',
-                  'text',
-                  'label_selection',
-                  'multi_label_selection',
-                  'rating',
-                  'ranking',
-                  'span',
-                ]"
               />
             </draggable>
             <DatasetConfigurationAddQuestion
