@@ -102,6 +102,7 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(GetRecordsByCriteriaUseCase)
       .withDependencies(
+        DatasetRepository,
         RecordRepository,
         QuestionRepository,
         FieldRepository,
