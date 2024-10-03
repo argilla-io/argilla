@@ -12,28 +12,18 @@ interface Feature {
 }
 
 class FieldCreation {
-  public readonly required: false;
-
-  constructor(
-    public readonly name: string,
-    public title: string,
-    private readonly type: string
-  ) {}
-
-  get isTextType() {
-    return FieldType.from(this.type).isTextType;
+  public required = false;
+  public readonly type: FieldType;
+  constructor(public readonly name: string, type: string) {
+    this.type = FieldType.from(type);
   }
 
-  get isImageType() {
-    return FieldType.from(this.type).isImageType;
+  get title() {
+    return this.name;
   }
 
-  get isChatType() {
-    return FieldType.from(this.type).isChatType;
-  }
-
-  get isCustomType() {
-    return FieldType.from(this.type).isCustomType;
+  markAsRequired() {
+    this.required = true;
   }
 }
 
@@ -42,11 +32,14 @@ class QuestionCreation {
 
   constructor(
     public readonly name: string,
-    public title: string,
     public readonly required: boolean,
     settings: QuestionPrototype
   ) {
     this.settings = new QuestionSetting(settings);
+  }
+
+  get title() {
+    return this.name;
   }
 
   get type() {
@@ -61,21 +54,33 @@ class QuestionCreation {
     return this.settings.options;
   }
 }
+type MetadataTypes = "int32" | "int64" | "float32" | "float64";
+
+class MetadataCreation {
+  public constructor(
+    public readonly name: string,
+    public readonly type: MetadataTypes
+  ) {}
+}
+
+type Structure = {
+  name: string;
+  options?: string[];
+  kindObject: "Value" | "Image" | "ClassLabel";
+  type: "string" | MetadataTypes;
+};
 
 class Subset {
   public readonly fields: FieldCreation[] = [];
   public readonly questions: QuestionCreation[] = [];
 
-  private readonly features: {
-    name: string;
-    options?: string[];
-    kindObject: "Value" | "Image" | "ClassLabel";
-    type: "string" | "int32" | "int64";
-  }[] = [];
+  public readonly metadata: any[] = [];
+
+  private readonly structures: Structure[] = [];
 
   constructor(public readonly name: string, datasetInfo: any) {
     for (const [name, value] of Object.entries<Feature>(datasetInfo.features)) {
-      this.features.push({
+      this.structures.push({
         name,
         options: value.names,
         kindObject: value._type,
@@ -85,15 +90,16 @@ class Subset {
 
     this.createFields();
     this.createQuestions();
+    this.createMetadata();
   }
 
   private createQuestions() {
-    for (const feat of this.features) {
-      if (feat.kindObject === "ClassLabel") {
+    for (const structure of this.structures) {
+      if (structure.kindObject === "ClassLabel") {
         this.questions.push(
-          new QuestionCreation(feat.name, feat.name, false, {
+          new QuestionCreation(structure.name, false, {
             type: "label_selection",
-            options: feat.options,
+            options: structure.options,
           })
         );
       }
@@ -101,7 +107,7 @@ class Subset {
 
     if (this.questions.length === 0) {
       this.questions.push(
-        new QuestionCreation("comment", "comment", true, { type: "text" })
+        new QuestionCreation("comment", true, { type: "text" })
       );
     }
   }
@@ -114,13 +120,51 @@ class Subset {
   }
 
   private createFields() {
-    for (const feat of this.features) {
-      if (feat.kindObject === "Value") {
-        this.fields.push(new FieldCreation(feat.name, feat.name, "text"));
+    for (const structure of this.structures) {
+      if (this.isTextField(structure)) {
+        this.fields.push(new FieldCreation(structure.name, "text"));
+      } else if (this.isImageField(structure)) {
+        this.fields.push(new FieldCreation(structure.name, "image"));
+      } else if (this.isChatField(structure)) {
+        this.fields.push(new FieldCreation(structure.name, "chat"));
       }
+    }
 
-      if (feat.kindObject === "Image") {
-        this.fields.push(new FieldCreation(feat.name, feat.name, "image"));
+    if (this.fields.length === 0) {
+      this.fields.push(new FieldCreation("prompt", "text"));
+    }
+
+    if (this.fields.length === 1) {
+      this.fields[0].markAsRequired();
+    }
+  }
+
+  private isTextField(structure: Structure) {
+    return structure.kindObject === "Value" && structure.type === "string";
+  }
+
+  private isImageField(structure: Structure) {
+    return structure.kindObject === "Image";
+  }
+
+  private isChatField(info: any) {
+    return (
+      "content" in info &&
+      "role" in info &&
+      info.role.kindObject === "Value" &&
+      info.role.type === "string" &&
+      info.content.kindObject === "Value" &&
+      info.content.type === "string"
+    );
+  }
+
+  private createMetadata() {
+    const metadataTypes = ["int32", "int64", "float32", "float64"];
+    for (const structure of this.structures) {
+      if (metadataTypes.includes(structure.type)) {
+        this.metadata.push(
+          new MetadataCreation(structure.name, structure.type as MetadataTypes)
+        );
       }
     }
   }

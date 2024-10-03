@@ -62,7 +62,7 @@ describe("DatasetCreation", () => {
       const firstField = datasetCreation.fields[0];
 
       expect(firstField.name).toBe("text_field");
-      expect(firstField.isTextType).toBeTruthy();
+      expect(firstField.type.isTextType).toBeTruthy();
       expect(firstField.required).toBeFalsy();
     });
 
@@ -74,7 +74,7 @@ describe("DatasetCreation", () => {
       const secondField = datasetCreation.fields[1];
 
       expect(secondField.name).toBe("image_field");
-      expect(secondField.isImageType).toBeTruthy();
+      expect(secondField.type.isImageType).toBeTruthy();
       expect(secondField.required).toBeFalsy();
     });
 
@@ -89,6 +89,47 @@ describe("DatasetCreation", () => {
       expect(labelQuestion.type.isSingleLabelType).toBeTruthy();
       expect(labelQuestion.required).toBeFalsy();
       expect(labelQuestion.options).toEqual(["positive", "negative"]);
+    });
+
+    it("create a text field if the dataset no has fields", () => {
+      const datasetInfoWithoutFields = {
+        ...datasetInfo,
+        features: {},
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithoutFields);
+
+      const datasetCreation = builder.build();
+
+      const field = datasetCreation.fields[0];
+
+      expect(field.name).toBe("prompt");
+      expect(field.type.isTextType).toBeTruthy();
+      expect(field.required).toBeTruthy();
+      expect(datasetCreation.fields.length).toBe(1);
+    });
+
+    it("create a required field if the dataset has just one field", () => {
+      const datasetInfoWithOneField = {
+        ...datasetInfo,
+        features: {
+          text_field: {
+            dtype: "string",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithOneField);
+
+      const datasetCreation = builder.build();
+
+      const field = datasetCreation.fields[0];
+
+      expect(field.name).toBe("text_field");
+      expect(field.type.isTextType).toBeTruthy();
+      expect(field.required).toBeTruthy();
+      expect(datasetCreation.fields.length).toBe(1);
     });
 
     it("create comment as a default question when the dataset does not have questions", () => {
