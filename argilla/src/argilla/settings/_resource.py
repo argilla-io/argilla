@@ -388,8 +388,8 @@ class Settings(DefaultSettingsMixin, Resource):
         self._client.api.datasets.update(dataset_model)
 
     def _validate_empty_settings(self):
-        if not all(self.fields):
-            message = "At least one field must be defined in the settings"
+        if not all([self.fields, self.questions]):
+            message = "Fields and questions are required"
             raise SettingsError(message=message)
 
     def _validate_duplicate_names(self) -> None:
