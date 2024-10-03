@@ -112,11 +112,15 @@ class Subset {
     }
   }
 
-  private removeQuestion(name: string) {
+  public removeQuestion(name: string) {
     const index = this.questions.findIndex((q) => q.name === name);
     if (index !== -1) {
       this.questions.splice(index, 1);
     }
+  }
+
+  public addQuestion(name: string, type: string) {
+    this.questions.push(new QuestionCreation(name, true, { type: type }));
   }
 
   private createFields() {
