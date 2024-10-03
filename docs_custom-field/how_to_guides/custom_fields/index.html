@@ -1094,6 +1094,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#updating-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating templates
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2392,6 +2401,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#updating-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating templates
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2695,6 +2713,11 @@
 </span></code></pre></div>
 <p><img alt="example-gallery-end" src="../../assets/images/how_to_guides/custom_field/3d_object_viewer.png" /></p>
 </details>
+<h2 id="updating-templates">Updating templates<a class="headerlink" href="#updating-templates" title="Permanent link">&para;</a></h2>
+<p>As described in the <a href="../dataset/">dataset guide</a>, you can update certain setting attributes for a published dataset. This includes the custom fields templates, which is a usefule feature when you want to iterate on the template of a custom field without the need to create a new dataset. The following example shows how to update the template of a custom field.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">dataset</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s2">&quot;custom&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&lt;new-template&gt;&quot;</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">dataset</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</span></code></pre></div>
 
 
 
