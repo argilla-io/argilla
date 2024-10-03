@@ -158,5 +158,28 @@ describe("DatasetCreation", () => {
       expect(commentQuestion.required).toBeTruthy();
       expect(datasetCreation.questions.length).toBe(1);
     });
+
+    it("create a required question if the dataset has just one field", () => {
+      const datasetInfoWithOneQuestion = {
+        ...datasetInfo,
+        features: {
+          label_question: {
+            names: ["positive", "negative"],
+            _type: "ClassLabel",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithOneQuestion);
+
+      const datasetCreation = builder.build();
+
+      const question = datasetCreation.questions[0];
+
+      expect(question.name).toBe("label_question");
+      expect(question.type.isSingleLabelType).toBeTruthy();
+      expect(question.required).toBeTruthy();
+      expect(datasetCreation.questions.length).toBe(1);
+    });
   });
 });
