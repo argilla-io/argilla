@@ -228,6 +228,14 @@ async def update_field(db: AsyncSession, field: Field, field_update: "FieldUpdat
             f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'"
         )
 
+    if field_update.name is not None and field.dataset.is_ready:
+        raise UnprocessableEntityError("Field name cannot be changed for fields belonging to a published dataset")
+
+    if field_update.required is not None and field.dataset.is_ready:
+        raise UnprocessableEntityError(
+            "Field required flag cannot be changed for fields belonging to a published dataset"
+        )
+
     params = field_update.dict(exclude_unset=True)
     return await field.update(db, **params)
 

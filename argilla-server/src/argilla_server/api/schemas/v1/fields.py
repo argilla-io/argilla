@@ -142,7 +142,9 @@ class FieldCreate(BaseModel):
 
 
 class FieldUpdate(UpdateSchema):
+    name: Optional[FieldName]
     title: Optional[FieldTitle]
+    required: Optional[bool]
     settings: Optional[FieldSettingsUpdate]
 
-    __non_nullable_fields__ = {"title", "settings"}
+    __non_nullable_fields__ = {"name", "title", "required", "settings"}

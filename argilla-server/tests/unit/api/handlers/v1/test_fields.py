@@ -43,7 +43,7 @@ if TYPE_CHECKING:
         ),
         ({"title": "New Title"}, {"type": "text", "use_markdown": False}),
         (
-            {"name": "New Name", "required": True, "dataset_id": str(uuid4())},
+            {"name": "new-name", "required": True, "dataset_id": str(uuid4())},
             {"type": "text", "use_markdown": False},
         ),
     ],
@@ -57,7 +57,9 @@ async def test_update_field(
     user = await UserFactory.create(role=role, workspaces=[field.dataset.workspace])
 
     response = await async_client.patch(
-        f"/api/v1/fields/{field.id}", headers={API_KEY_HEADER_NAME: user.api_key}, json=payload
+        f"/api/v1/fields/{field.id}",
+        headers={API_KEY_HEADER_NAME: user.api_key},
+        json=payload,
     )
 
     title = payload.get("title") or field.title

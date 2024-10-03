@@ -14,21 +14,83 @@
 
 import pytest
 
+from uuid import UUID
 from httpx import AsyncClient
+from typing_extensions import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing_extensions import Any
-from uuid import UUID
 
-from argilla_server.enums import FieldType
+from argilla_server.enums import FieldType, DatasetStatus
 
-from tests.factories import ImageFieldFactory, ChatFieldFactory
+from tests.factories import ImageFieldFactory, ChatFieldFactory, TextFieldFactory, DatasetFactory
 
 
 @pytest.mark.asyncio
 class TestUpdateField:
     def url(self, field_id: UUID) -> str:
         return f"/api/v1/fields/{field_id}"
+
+    async def test_update_field_name_attribute_with_draft_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        text_field = await TextFieldFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_field.id),
+            headers=owner_auth_header,
+            json={"name": "updated-name"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["name"] == "updated-name"
+
+    async def test_update_field_name_attribute_with_published_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        text_field = await TextFieldFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_field.id),
+            headers=owner_auth_header,
+            json={"name": "updated-name"},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Field name cannot be changed for fields belonging to a published dataset"}
+
+    async def test_update_field_required_attribute_with_draft_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        text_field = await TextFieldFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_field.id),
+            headers=owner_auth_header,
+            json={"required": True},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["required"] is True
+
+    async def test_update_field_required_attribute_with_published_dataset(
+        self, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        text_field = await TextFieldFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            self.url(text_field.id),
+            headers=owner_auth_header,
+            json={"required": False},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Field required flag cannot be changed for fields belonging to a published dataset"
+        }
 
     async def test_update_image_field(self, async_client: AsyncClient, owner_auth_header: dict):
         image_field = await ImageFieldFactory.create()
