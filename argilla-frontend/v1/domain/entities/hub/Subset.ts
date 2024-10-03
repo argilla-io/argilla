@@ -1,4 +1,3 @@
-import { FieldType } from "../field/FieldType";
 import { QuestionPrototype } from "../question/QuestionSetting";
 import { Feature } from "./DatasetCreationBuilder";
 import { FieldCreation } from "./FieldCreation";
@@ -17,6 +16,7 @@ export class Subset {
   public readonly fields: FieldCreation[] = [];
   public readonly questions: QuestionCreation[] = [];
   public readonly metadata: any[] = [];
+  public readonly noMapped: Structure[] = [];
   private readonly structures: Structure[] = [];
 
   constructor(public readonly name: string, datasetInfo: any) {
@@ -44,26 +44,23 @@ export class Subset {
       }
     }
 
-    this.createFields();
-    this.createQuestions();
-    this.createMetadata();
-  }
-
-  private createQuestions() {
     for (const structure of this.structures) {
-      if (structure.kindObject === "ClassLabel") {
-        this.questions.push(
-          new QuestionCreation(structure.name, false, {
-            type: "label_selection",
-            options: structure.options,
-          })
-        );
-      }
+      if (this.tryToCreateFields(structure)) continue;
+
+      if (this.tryToCreateQuestion(structure)) continue;
+
+      if (this.tryToCreateMetadata(structure)) continue;
+
+      this.noMapped.push(structure);
     }
 
+    this.setDefaultValues();
+  }
+
+  private setDefaultValues() {
     if (this.questions.length === 0) {
       this.questions.push(
-        new QuestionCreation("comment", false, {
+        new QuestionCreation("comment", true, {
           type: "text",
         })
       );
@@ -72,6 +69,61 @@ export class Subset {
     if (this.questions.length === 1) {
       this.questions[0].markAsRequired();
     }
+
+    if (this.fields.length === 0) {
+      this.fields.push(new FieldCreation("prompt", "text"));
+    }
+
+    if (this.fields.length === 1) {
+      this.fields[0].markAsRequired();
+    }
+  }
+
+  private tryToCreateQuestion(structure: Structure) {
+    if (this.isASingleLabel(structure)) {
+      this.questions.push(
+        new QuestionCreation(structure.name, false, {
+          type: "label_selection",
+          options: structure.options,
+        })
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
+  private tryToCreateFields(structure: Structure) {
+    if (this.isTextField(structure)) {
+      this.fields.push(new FieldCreation(structure.name, "text"));
+    } else if (this.isImageField(structure)) {
+      this.fields.push(new FieldCreation(structure.name, "image"));
+    } else if (this.isChatField(structure)) {
+      this.fields.push(new FieldCreation(structure.name, "chat"));
+    } else {
+      return false;
+    }
+
+    return true;
+  }
+
+  private tryToCreateMetadata(structure: Structure) {
+    const metadataTypes = ["int32", "int64", "float32", "float64"];
+
+    if (metadataTypes.includes(structure.type)) {
+      this.metadata.push(
+        new MetadataCreation(structure.name, structure.type as MetadataTypes)
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
+  private isASingleLabel(structure: Structure) {
+    return structure.kindObject === "ClassLabel";
   }
 
   public removeQuestion(name: string) {
@@ -103,32 +155,6 @@ export class Subset {
     this.questions.push(new QuestionCreation(name, false, settings));
   }
 
-  private createFields() {
-    for (const structure of this.structures) {
-      if (this.isTextField(structure)) {
-        this.fields.push(
-          new FieldCreation(structure.name, FieldType.from("text"))
-        );
-      } else if (this.isImageField(structure)) {
-        this.fields.push(
-          new FieldCreation(structure.name, FieldType.from("image"))
-        );
-      } else if (this.isChatField(structure)) {
-        this.fields.push(
-          new FieldCreation(structure.name, FieldType.from("chat"))
-        );
-      }
-    }
-
-    if (this.fields.length === 0) {
-      this.fields.push(new FieldCreation("prompt", FieldType.from("text")));
-    }
-
-    if (this.fields.length === 1) {
-      this.fields[0].markAsRequired();
-    }
-  }
-
   private isTextField(structure: Structure) {
     return structure.kindObject === "Value" && structure.type === "string";
   }
@@ -139,16 +165,5 @@ export class Subset {
 
   private isChatField(structure: Structure) {
     return structure.structure?.length > 0;
-  }
-
-  private createMetadata() {
-    const metadataTypes = ["int32", "int64", "float32", "float64"];
-    for (const structure of this.structures) {
-      if (metadataTypes.includes(structure.type)) {
-        this.metadata.push(
-          new MetadataCreation(structure.name, structure.type as MetadataTypes)
-        );
-      }
-    }
   }
 }

@@ -49,4 +49,8 @@ export class DatasetCreation {
   get metadata() {
     return this.selectedSubset.metadata;
   }
+
+  get noMapped() {
+    return this.selectedSubset.noMapped;
+  }
 }

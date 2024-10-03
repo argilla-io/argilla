@@ -205,6 +205,22 @@ describe("DatasetCreation", () => {
       expect(chatField.type.isChatType).toBeTruthy();
       expect(chatField.required).toBeFalsy();
     });
+
+    it("get no mapped feature", () => {
+      const builder = new DatasetCreationBuilder({
+        ...datasetInfo,
+        features: {
+          no_mapped: {
+            dtype: "NO",
+            _type: "NO",
+          },
+        },
+      });
+
+      const datasetCreation = builder.build();
+
+      expect(datasetCreation.noMapped.length).toBe(1);
+    });
   });
 
   describe("addQuestions should", () => {
