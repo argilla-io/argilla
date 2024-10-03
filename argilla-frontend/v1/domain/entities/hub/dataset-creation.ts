@@ -120,6 +120,13 @@ class Subset {
     }
   }
 
+  private removeQuestion(name: string) {
+    const index = this.questions.findIndex((q) => q.name === name);
+    if (index !== -1) {
+      this.questions.splice(index, 1);
+    }
+  }
+
   private createFields() {
     for (const structure of this.structures) {
       if (this.isTextField(structure)) {

@@ -26,54 +26,59 @@
       <div class="config-form__col-wrapper">
         <div class="config-form__col" v-if="fields.length">
           <div class="config-form__col__header">Fields</div>
-
-          <draggable
-            class="config-form__col__content"
-            :list="fields"
-            :group="{ name: 'fields' }"
-          >
-            <DatasetConfigurationField
-              v-for="field in fields"
-              :key="field.name"
-              :field="field"
-              :typeOptions="[
-                'no mapping',
-                'text',
-                'image',
-                'chat',
-                'custom',
-                'metadata term',
-                'metadata integer',
-                'metadata float',
-              ]"
-            />
-          </draggable>
+          <div class="config-form__col__content">
+            <draggable
+              class="config-form__draggable-area"
+              :list="fields"
+              :group="{ name: 'fields' }"
+            >
+              <DatasetConfigurationField
+                v-for="field in fields"
+                :key="field.name"
+                :field="field"
+                :typeOptions="[
+                  'no mapping',
+                  'text',
+                  'image',
+                  'chat',
+                  'custom',
+                  'metadata term',
+                  'metadata integer',
+                  'metadata float',
+                ]"
+              />
+            </draggable>
+          </div>
         </div>
       </div>
       <div class="config-form__col-wrapper">
         <div class="config-form__col" v-if="questions.length">
           <div class="config-form__col__header">Questions</div>
-
-          <draggable
-            class="config-form__col__content"
-            :list="fields"
-            :group="{ name: 'questions' }"
-          >
-            <DatasetConfigurationQuestion
-              v-for="question in questions"
-              :key="question.name"
-              :question="question"
-              :typeOptions="[
-                'no mapping',
-                'text',
-                'label_selection',
-                'multi_label_selection',
-                'ratting',
-                'ranking',
-                'span',
-              ]"
-            />
-          </draggable>
+          <div class="config-form__col__content">
+            <draggable
+              class="config-form__draggable-area"
+              :list="fields"
+              :group="{ name: 'questions' }"
+            >
+              <DatasetConfigurationQuestion
+                v-for="question in questions"
+                :key="question.name"
+                :question="question"
+                :remove-is-allowed="true"
+                @remove="selectedSubset.removeQuestion(question.name)"
+                :typeOptions="[
+                  'no mapping',
+                  'text',
+                  'label_selection',
+                  'multi_label_selection',
+                  'rating',
+                  'ranking',
+                  'span',
+                ]"
+              />
+            </draggable>
+            <BaseButton>Add question</BaseButton>
+          </div>
         </div>
       </div>
     </div>
@@ -105,7 +110,7 @@ export default {
   },
   methods: {
     createDataset() {
-      console.log("Creating dataset");
+      console.log("Open dataset creation modal");
     },
   },
 };
@@ -162,6 +167,11 @@ export default {
       overflow: auto;
       height: 100%;
     }
+  }
+  &__draggable-area {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
   }
 }
 </style>

@@ -2,7 +2,11 @@
   <div class="config-card__wrapper">
     <div class="config-card">
       <div class="config-card__header">
-        <h3 class="config-card__title" v-text="item.name" />
+        <h3 class="config-card__title">
+          <svgicon width="6" name="draggable" color="var(--bg-opacity-20)" />{{
+            item.name
+          }}
+        </h3>
         <slot name="header" />
       </div>
       <div class="config-card__content" :class="item.type.replace(/ /g, '')">
@@ -14,7 +18,8 @@
           />
           <BaseCheckbox
             v-if="!hasNoMapping"
-            v-model="item.required"
+            :value="item.required"
+            @input="item.required = !item.required"
             class="config-card__required"
           />
         </div>
@@ -75,6 +80,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
     border-radius: $base-space;
     background: var(--bg-accent-grey-1);
     transition: all 0.3s ease-in;
+    cursor: pointer;
     &:hover {
       transition: all 0.2s ease-in;
       box-shadow: 0 0 3px 1px var(--bg-opacity-10);
@@ -95,6 +101,9 @@ $no-mapping-color: hsl(0, 0%, 50%);
     gap: $base-space;
   }
   &__title {
+    display: flex;
+    gap: $base-space;
+    align-items: center;
     margin: 0;
     font-weight: 500;
     @include font-size(14px);

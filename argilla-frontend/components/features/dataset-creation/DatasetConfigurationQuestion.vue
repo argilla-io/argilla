@@ -5,9 +5,15 @@
         class="config-card__remove"
         @click="remove"
         v-if="removeIsAllowed"
-        >Remove</BaseButton
-      >
+        ><svgicon name="close"
+      /></BaseButton>
     </template>
+    <BaseSwitch
+      v-if="question.settings.type.isTextType"
+      class="config-card__remove__switch"
+      v-model="question.use_markdown"
+      >{{ $t("useMarkdown") }}</BaseSwitch
+    >
   </DatasetConfigurationCard>
 </template>
 
@@ -38,3 +44,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.config-card {
+  &__remove.button {
+    padding: 0;
+  }
+}
+</style>
