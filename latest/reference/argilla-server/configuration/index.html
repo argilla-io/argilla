@@ -963,6 +963,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../how_to_guides/custom_fields/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Custom fields with layout templates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
@@ -2615,7 +2636,10 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <h4 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>ARGILLA_AUTH_SECRET_KEY</code>: The secret key used to sign the API token data. You can use <code>openssl rand -hex 32</code> to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.</li>
+<li><code>USERNAME</code>: If provided, the owner username (Default: <code>None</code>).</li>
+<li><code>PASSWORD</code>: If provided, the owner password (Default: <code>None</code>).</li>
 </ul>
+<p>If <code>USERNAME</code> and <code>PASSWORD</code> are provided, the owner user will be created with these credentials on the server startup.</p>
 <h4 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h4>
 <ul>
 <li><code>ARGILLA_DATABASE_URL</code>: A URL string that contains the necessary information to connect to a database. Argilla uses SQLite by default, PostgreSQL is also officially supported (Default: <code>sqlite:///$ARGILLA_HOME_PATH/argilla.db?check_same_thread=False</code>).</li>
@@ -2678,6 +2702,9 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 </li>
 <li>
 <p><code>PASSWORD</code>: If provided, the owner password. If <code>USERNAME</code> and <code>PASSWORD</code> are provided, the owner user will be created with these credentials on the server startup (Default: <code>""</code>).</p>
+</li>
+<li>
+<p><code>WORKSPACE</code>: If provided, the workspace name. If <code>USERNAME</code>, <code>PASSWORD</code> and <code>WORSPACE</code> are provided, a default workspace will be created with this name (Default: <code>""</code>).</p>
 </li>
 <li>
 <p><code>API_KEY</code>: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: <code>""</code>).</p>
