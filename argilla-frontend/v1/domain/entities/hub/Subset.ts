@@ -1,73 +1,8 @@
-import { any } from "@codescouts/test/jest";
-import { info } from "sass";
-import { FieldType } from "../field/FieldType";
-import { QuestionType } from "../question/QuestionType";
-import {
-  QuestionSetting,
-  QuestionPrototype,
-} from "../question/QuestionSetting";
-
-interface Feature {
-  dtype: "string" | "int32" | "int64";
-  _type: "Value" | "Image" | "ClassLabel";
-  names?: string[];
-}
-
-class FieldCreation {
-  public required = false;
-  public readonly type: FieldType;
-  constructor(public readonly name: string, type: string) {
-    this.type = FieldType.from(type);
-  }
-
-  get title() {
-    return this.name;
-  }
-
-  markAsRequired() {
-    this.required = true;
-  }
-}
-
-class QuestionCreation {
-  public readonly settings: QuestionSetting;
-
-  constructor(
-    public readonly name: string,
-    public required: boolean,
-    settings: QuestionPrototype
-  ) {
-    this.settings = new QuestionSetting(settings);
-  }
-
-  get title() {
-    return this.name;
-  }
-
-  get type() {
-    return this.settings.type;
-  }
-
-  set type(value: QuestionType) {
-    this.settings.type = value;
-  }
-
-  get options() {
-    return this.settings.options;
-  }
-
-  markAsRequired() {
-    this.required = true;
-  }
-}
-type MetadataTypes = "int32" | "int64" | "float32" | "float64";
-
-class MetadataCreation {
-  public constructor(
-    public readonly name: string,
-    public readonly type: MetadataTypes
-  ) {}
-}
+import { QuestionPrototype } from "../question/QuestionSetting";
+import { Feature } from "./DatasetCreationBuilder";
+import { FieldCreation } from "./FieldCreation";
+import { MetadataTypes, MetadataCreation } from "./MetadataCreation";
+import { QuestionCreation } from "./QuestionCreation";
 
 type Structure = {
   name: string;
@@ -77,12 +12,10 @@ type Structure = {
   type?: "string" | MetadataTypes;
 };
 
-class Subset {
+export class Subset {
   public readonly fields: FieldCreation[] = [];
   public readonly questions: QuestionCreation[] = [];
-
   public readonly metadata: any[] = [];
-
   private readonly structures: Structure[] = [];
 
   constructor(public readonly name: string, datasetInfo: any) {
@@ -129,7 +62,9 @@ class Subset {
 
     if (this.questions.length === 0) {
       this.questions.push(
-        new QuestionCreation("comment", true, { type: "text" })
+        new QuestionCreation("comment", false, {
+          type: "text",
+        })
       );
     }
 
@@ -145,8 +80,26 @@ class Subset {
     }
   }
 
-  public addQuestion(name: string, type: string) {
-    this.questions.push(new QuestionCreation(name, true, { type }));
+  public addQuestion(name: string, settings: QuestionPrototype) {
+    const { type } = settings;
+
+    if (type === "label_selection") {
+      settings.options = [
+        { name: "positive" },
+        { name: "negative" },
+        { name: "neutral" },
+      ];
+    }
+
+    if (type === "ranking") {
+      settings.options = [
+        { text: "Option 1", value: "option1" },
+        { text: "Option 2", value: "option2" },
+        { text: "Option 3", value: "option3" },
+      ];
+    }
+
+    this.questions.push(new QuestionCreation(name, false, settings));
   }
 
   private createFields() {
@@ -190,50 +143,5 @@ class Subset {
         );
       }
     }
-  }
-}
-
-class DatasetCreation {
-  private selectedSubset: Subset;
-
-  constructor(private readonly subset: Subset[]) {
-    this.selectedSubset = subset[0];
-  }
-
-  changeSubset(name: string) {
-    this.selectedSubset = this.subset.find((s) => s.name === name);
-  }
-
-  get hasMoreThanOneSubset() {
-    return this.subset.length > 1;
-  }
-
-  get subsets() {
-    return this.subset.map((s) => s.name);
-  }
-
-  get fields() {
-    return this.selectedSubset.fields;
-  }
-
-  get questions() {
-    return this.selectedSubset.questions;
-  }
-}
-
-export class DatasetCreationBuilder {
-  private readonly subsets: Subset[] = [];
-  constructor(datasetInfo: any) {
-    if (datasetInfo.default) {
-      for (const [name, value] of Object.entries<Feature>(datasetInfo)) {
-        this.subsets.push(new Subset(name, value));
-      }
-    } else {
-      this.subsets.push(new Subset("default", datasetInfo));
-    }
-  }
-
-  build(): DatasetCreation {
-    return new DatasetCreation(this.subsets);
   }
 }

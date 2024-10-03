@@ -1,4 +1,4 @@
-import { DatasetCreationBuilder } from "./dataset-creation";
+import { DatasetCreationBuilder } from "./DatasetCreationBuilder";
 
 const datasetInfo = {
   description: "",
@@ -204,6 +204,69 @@ describe("DatasetCreation", () => {
       expect(chatField.name).toBe("chat_field");
       expect(chatField.type.isChatType).toBeTruthy();
       expect(chatField.required).toBeFalsy();
+    });
+  });
+
+  describe("addQuestions should", () => {
+    it("add single label", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {},
+      };
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.addQuestion("Second", {
+        type: "label_selection",
+      });
+
+      const secondQuestion = datasetCreation.questions[1];
+      expect(secondQuestion.name).toBe("Second");
+      expect(secondQuestion.type.isSingleLabelType).toBeTruthy();
+      expect(secondQuestion.options).toEqual([
+        {
+          name: "positive",
+        },
+        {
+          name: "negative",
+        },
+        {
+          name: "neutral",
+        },
+      ]);
+    });
+
+    it("add ranking question", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {},
+      };
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.addQuestion("Second", {
+        type: "ranking",
+      });
+
+      const secondQuestion = datasetCreation.questions[1];
+      expect(secondQuestion.name).toBe("Second");
+      expect(secondQuestion.type.isRankingType).toBeTruthy();
+      expect(secondQuestion.options).toEqual([
+        {
+          value: "option1",
+          text: "Option 1",
+        },
+        {
+          value: "option2",
+          text: "Option 2",
+        },
+        {
+          value: "option3",
+          text: "Option 3",
+        },
+      ]);
     });
   });
 });
