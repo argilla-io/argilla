@@ -36,7 +36,7 @@ export class GetRecordsByCriteriaUseCase {
     let getRecords;
     if (dataset.isDraft) {
       getRecords = this.recordRepository.listRecords(criteria);
-    } else{
+    } else {
       getRecords = this.recordRepository.getRecords(criteria);
     }
 
