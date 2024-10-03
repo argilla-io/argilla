@@ -288,14 +288,15 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self.put_index_mapping_request(index, mappings)
 
     async def index_records(self, dataset: Dataset, records: Iterable[Record]):
-        index_name = es_index_name_for_dataset(dataset)
+        if not dataset.is_indexed:
+            return
 
         bulk_actions = [
             {
                 # If document exist, we update source with latest version
                 "_op_type": "index",  # TODO: Review and maybe change to partial update
                 "_id": record.id,
-                "_index": index_name,
+                "_index": es_index_name_for_dataset(dataset),
                 **self._map_record_to_es_document(record),
             }
             for record in records
@@ -304,22 +305,30 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         await self._bulk_op_request(bulk_actions)
 
     async def partial_record_update(self, record: Record, **update):
-        index_name = es_index_name_for_dataset(record.dataset)
-        await self._update_document_request(index_name=index_name, id=str(record.id), body={"doc": update})
+        if not record.dataset.is_indexed:
+            return
+
+        await self._update_document_request(
+            index_name=es_index_name_for_dataset(record.dataset),
+            id=str(record.id),
+            body={"doc": update},
+        )
 
     async def delete_records(self, dataset: Dataset, records: Iterable[Record]):
-        index_name = es_index_name_for_dataset(dataset)
-
-        bulk_actions = [{"_op_type": "delete", "_id": record.id, "_index": index_name} for record in records]
+        bulk_actions = [
+            {"_op_type": "delete", "_id": record.id, "_index": es_index_name_for_dataset(dataset)} for record in records
+        ]
 
         await self._bulk_op_request(bulk_actions)
 
     async def update_record_response(self, response: Response) -> None:
         record = response.record
-        index_name = es_index_name_for_dataset(record.dataset)
+
+        if not record.dataset.is_indexed:
+            return
 
         await self._update_document_request(
-            index_name,
+            es_index_name_for_dataset(record.dataset),
             id=str(record.id),
             body={
                 "script": {
@@ -343,10 +352,12 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
     async def delete_record_response(self, response: Response) -> None:
         record = response.record
-        index_name = es_index_name_for_dataset(record.dataset)
+
+        if not record.dataset.is_indexed:
+            return
 
         await self._update_document_request(
-            index_name,
+            es_index_name_for_dataset(record.dataset),
             id=str(record.id),
             body={
                 "script": {
@@ -365,21 +376,23 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         )
 
     async def update_record_suggestion(self, suggestion: Suggestion):
-        index_name = es_index_name_for_dataset(suggestion.record.dataset)
-
-        es_suggestions = self._map_record_suggestions_to_es([suggestion])
+        if not suggestion.record.dataset.is_indexed:
+            return
 
         await self._update_document_request(
-            index_name,
+            es_index_name_for_dataset(suggestion.record.dataset),
             id=str(suggestion.record_id),
-            body={"doc": {"suggestions": es_suggestions}},
+            body={
+                "doc": {"suggestions": self._map_record_suggestions_to_es([suggestion])},
+            },
         )
 
     async def delete_record_suggestion(self, suggestion: Suggestion):
-        index_name = es_index_name_for_dataset(suggestion.record.dataset)
+        if not suggestion.record.dataset.is_indexed:
+            return
 
         await self._update_document_request(
-            index_name,
+            es_index_name_for_dataset(suggestion.record.dataset),
             id=str(suggestion.record_id),
             body={"script": f'ctx._source["suggestions"].remove("{suggestion.question.name}")'},
         )

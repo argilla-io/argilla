@@ -390,6 +390,10 @@ class Dataset(DatabaseModel):
         return self.status == DatasetStatus.ready
 
     @property
+    def is_indexed(self):
+        return self.is_ready
+
+    @property
     def distribution_strategy(self) -> DatasetDistributionStrategy:
         return DatasetDistributionStrategy(self.distribution["strategy"])
 
