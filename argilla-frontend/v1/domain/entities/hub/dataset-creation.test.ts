@@ -18,6 +18,18 @@ const datasetInfo = {
       names: ["positive", "negative"],
       _type: "ClassLabel",
     },
+    chat_field: [
+      {
+        content: {
+          dtype: "string",
+          _type: "Value",
+        },
+        role: {
+          dtype: "string",
+          _type: "Value",
+        },
+      },
+    ],
   },
   builder_name: "parquet",
   dataset_name: "duorc",
@@ -87,7 +99,7 @@ describe("DatasetCreation", () => {
 
       expect(labelQuestion.name).toBe("label_question");
       expect(labelQuestion.type.isSingleLabelType).toBeTruthy();
-      expect(labelQuestion.required).toBeFalsy();
+      expect(labelQuestion.required).toBeTruthy();
       expect(labelQuestion.options).toEqual(["positive", "negative"]);
     });
 
@@ -180,6 +192,18 @@ describe("DatasetCreation", () => {
       expect(question.type.isSingleLabelType).toBeTruthy();
       expect(question.required).toBeTruthy();
       expect(datasetCreation.questions.length).toBe(1);
+    });
+
+    it("create a chat field", () => {
+      const builder = new DatasetCreationBuilder(datasetInfo);
+
+      const datasetCreation = builder.build();
+
+      const chatField = datasetCreation.fields[2];
+
+      expect(chatField.name).toBe("chat_field");
+      expect(chatField.type.isChatType).toBeTruthy();
+      expect(chatField.required).toBeFalsy();
     });
   });
 });
