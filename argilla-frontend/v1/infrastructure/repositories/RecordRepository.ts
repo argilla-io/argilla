@@ -41,6 +41,25 @@ const BACKEND_ORDER: {
 export class RecordRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
+  async listRecords(criteria: RecordCriteria): Promise<BackendRecords> {
+    const { datasetId, page } = criteria;
+    const { from, many } = page.server;
+
+    const url = `/v1/datasets/${datasetId}/records`;
+    const params = this.createParams(from, many);
+
+    const { data } = await this.axios.get<ResponseWithTotal<BackendRecord[]>>(
+      url,
+      { params }
+    );
+    const { items, total } = data;
+
+    return {
+      records: items,
+      total,
+    };
+  }
+
   getRecords(criteria: RecordCriteria): Promise<BackendRecords> {
     return this.getRecordsByAdvanceSearch(criteria);
   }
