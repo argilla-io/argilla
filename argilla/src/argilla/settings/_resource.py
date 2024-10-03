@@ -15,7 +15,6 @@
 import json
 import os
 import re
-from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
 from uuid import UUID
@@ -160,7 +159,8 @@ class Settings(DefaultSettingsMixin, Resource):
         self._dataset = dataset
         self._client = dataset._client
 
-    @cached_property
+    # TODO: The schema should be refreshed after a change on the settings names
+    @property
     def schema(self) -> dict:
         schema_dict = {}
 
@@ -178,7 +178,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
         return schema_dict
 
-    @cached_property
+    @property
     def schema_by_id(self) -> Dict[UUID, Union[Field, QuestionType, MetadataType, VectorField]]:
         return {v.id: v for v in self.schema.values()}
 
@@ -219,7 +219,7 @@ class Settings(DefaultSettingsMixin, Resource):
         self.__fields.update()
         self.__vectors.update()
         self.__metadata.update()
-        # self.questions.update()
+        self.questions.update()
 
         self._update_last_api_call()
         return self
@@ -385,9 +385,8 @@ class Settings(DefaultSettingsMixin, Resource):
         self._client.api.datasets.update(dataset_model)
 
     def _validate_empty_settings(self):
-        if not all([self.fields, self.questions]):
-            message = "Fields and questions are required"
-            raise SettingsError(message=message)
+        if not all(self.fields):
+            raise SettingsError(message="At least one field must be defined in the settings")
 
     def _validate_duplicate_names(self) -> None:
         dataset_properties_by_name = {}
@@ -488,6 +487,16 @@ class SettingsProperties(Sequence[Property]):
         setattr(self, property.name, property)
         return property
 
+    def remove(self, property: Union[str, Property]) -> None:
+        if isinstance(property, str):
+            property = self._properties_by_name.get(property)
+
+        if property is None:
+            return
+
+        property = self._properties_by_name.pop(property.name)
+        property.delete()
+
     def create(self):
         for property in self:
             try:
@@ -530,6 +539,17 @@ class QuestionsProperties(SettingsProperties[QuestionType]):
     Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
     """
 
+    def remove(self, property: Union[str, Property]) -> None:
+        if isinstance(property, str):
+            property = self._properties_by_name.get(property)
+
+        if property is None:
+            return
+
+        property = self._properties_by_name.pop(property.name)
+        self._delete_question(property)
+
+    # TODO: Align to the Resource model
     def create(self):
         for question in self:
             try:
@@ -537,9 +557,33 @@ class QuestionsProperties(SettingsProperties[QuestionType]):
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to create question {question.name}") from e
 
-    def _create_question(self, question: QuestionType) -> None:
+    # TODO: Align to the Resource model
+    def update(self):
+        for item in self:
+            try:
+                item.dataset = self._settings.dataset
+                self._update_question(item) if item.id else self._create_question(item)
+            except ArgillaAPIError as e:
+                raise SettingsError(f"Failed to update {item.name!r}: {e.message}") from e
+
+    # TODO: Align to the Resource model
+    def _create_question(self, question: QuestionType) -> QuestionType:
         question_model = self._settings._client.api.questions.create(
             dataset_id=self._settings.dataset.id,
             question=question.api_model(),
         )
+        question._model = question_model
+
+        return question
+
+    # TODO: Align to the Resource model
+    def _update_question(self, question: QuestionType) -> QuestionType:
+        question_model = self._settings._client.api.questions.update(question.api_model())
+        question._model = question_model
+
+        return question
+
+    # TODO: Align to the Resource model
+    def _delete_question(self, question: QuestionType) -> None:
+        question_model = self._settings._client.api.questions.delete(question.id)
         question._model = question_model
