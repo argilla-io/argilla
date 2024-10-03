@@ -174,6 +174,10 @@ async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset
 
     async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
+
+        # NOTE: Deleting records that could be in the draft dataset before publishing
+        await Record.delete_many(db, params=[Record.dataset_id == dataset.id], autocommit=False)
+
         await search_engine.create_index(dataset)
 
     await db.commit()

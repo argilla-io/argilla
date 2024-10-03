@@ -28,6 +28,7 @@ from argilla_server.enums import (
     SimilarityOrder,
     RecordStatus,
     SortOrder,
+    DatasetStatus,
 )
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings, Vector
 from argilla_server.search_engine import (
@@ -119,6 +120,7 @@ async def test_banking_sentiment_dataset_non_indexed():
             await FloatMetadataPropertyFactory.create(name="seq_float"),
         ],
         questions=[text_question, rating_question],
+        status=DatasetStatus.ready,
     )
 
     records = [
@@ -600,7 +602,7 @@ class TestBaseElasticAndOpenSearchEngine:
     async def test_search_for_chat_field(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
         chat_field = await ChatFieldFactory.create(name="field")
 
-        dataset = await DatasetFactory.create(fields=[chat_field])
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready, fields=[chat_field])
 
         records = await RecordFactory.create_batch(
             size=2,
@@ -823,7 +825,9 @@ class TestBaseElasticAndOpenSearchEngine:
                 "options": [{"value": "A"}, {"value": "B"}],
             }
         )
-        dataset = await DatasetFactory.create(fields=[text_field], questions=[label_question])
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready, fields=[text_field], questions=[label_question]
+        )
         records = await RecordFactory.create_batch(
             size=2,
             dataset=dataset,
@@ -912,7 +916,9 @@ class TestBaseElasticAndOpenSearchEngine:
         text_fields = await TextFieldFactory.create_batch(5)
         image_fields = await ImageFieldFactory.create_batch(5)
 
-        dataset = await DatasetFactory.create(fields=text_fields + image_fields, questions=[])
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready, fields=text_fields + image_fields, questions=[]
+        )
 
         record_text_fields = {field.name: f"This is the value for {field.name}" for field in text_fields}
         record_image_fields = {field.name: f"https://random.url/{field.name}" for field in image_fields}
@@ -975,7 +981,9 @@ class TestBaseElasticAndOpenSearchEngine:
                 "options": [{"value": "A"}, {"value": "B"}],
             }
         )
-        dataset = await DatasetFactory.create(fields=[text_field], questions=[label_question])
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready, fields=[text_field], questions=[label_question]
+        )
         records = await RecordFactory.create_batch(
             size=2,
             dataset=dataset,
@@ -1020,7 +1028,12 @@ class TestBaseElasticAndOpenSearchEngine:
         text_fields = await TextFieldFactory.create_batch(5)
         metadata_properties = await TermsMetadataPropertyFactory.create_batch(3)
 
-        dataset = await DatasetFactory.create(fields=text_fields, metadata_properties=metadata_properties, questions=[])
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready,
+            fields=text_fields,
+            metadata_properties=metadata_properties,
+            questions=[],
+        )
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
@@ -1056,7 +1069,7 @@ class TestBaseElasticAndOpenSearchEngine:
     async def test_index_records_with_vectors(
         self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
     ):
-        dataset = await DatasetFactory.create()
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
         text_fields = await TextFieldFactory.create_batch(size=5, dataset=dataset)
         vectors_settings = await VectorSettingsFactory.create_batch(size=5, dataset=dataset, dimensions=5)
         records = await RecordFactory.create_batch(
@@ -1092,7 +1105,7 @@ class TestBaseElasticAndOpenSearchEngine:
 
     async def test_delete_records(self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch):
         text_fields = await TextFieldFactory.create_batch(5)
-        dataset = await DatasetFactory.create(fields=text_fields, questions=[])
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready, fields=text_fields, questions=[])
         records = await RecordFactory.create_batch(
             size=10,
             dataset=dataset,
