@@ -42,20 +42,22 @@ export class RecordRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
   async listRecords(criteria: RecordCriteria): Promise<BackendRecords> {
-      const { datasetId, page } = criteria;
-      const { from, many } = page.server;
+    const { datasetId, page } = criteria;
+    const { from, many } = page.server;
 
-      const url = `/v1/datasets/${datasetId}/records`;
-      const params = this.createParams(from, many);
+    const url = `/v1/datasets/${datasetId}/records`;
+    const params = this.createParams(from, many);
 
-      const { data } = await this.axios.get
-        <ResponseWithTotal<BackendRecord[]>>(url, { params });
-      const { items, total } = data;
+    const { data } = await this.axios.get<ResponseWithTotal<BackendRecord[]>>(
+      url,
+      { params }
+    );
+    const { items, total } = data;
 
-      return {
-        records: items,
-        total,
-      };
+    return {
+      records: items,
+      total,
+    };
   }
 
   getRecords(criteria: RecordCriteria): Promise<BackendRecords> {
