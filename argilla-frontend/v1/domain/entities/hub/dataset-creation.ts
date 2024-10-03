@@ -32,7 +32,7 @@ class QuestionCreation {
 
   constructor(
     public readonly name: string,
-    public readonly required: boolean,
+    public required: boolean,
     settings: QuestionPrototype
   ) {
     this.settings = new QuestionSetting(settings);
@@ -52,6 +52,10 @@ class QuestionCreation {
 
   get options() {
     return this.settings.options;
+  }
+
+  markAsRequired() {
+    this.required = true;
   }
 }
 type MetadataTypes = "int32" | "int64" | "float32" | "float64";
@@ -109,6 +113,10 @@ class Subset {
       this.questions.push(
         new QuestionCreation("comment", true, { type: "text" })
       );
+    }
+
+    if (this.questions.length === 1) {
+      this.questions[0].markAsRequired();
     }
   }
 
