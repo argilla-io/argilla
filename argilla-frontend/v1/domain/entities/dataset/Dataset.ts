@@ -58,6 +58,10 @@ export class Dataset {
     );
   }
 
+  get isDraft(): boolean {
+    return this.status === "draft";
+  }
+
   restore(part: "guidelines" | "metadata" | "distribution") {
     if (part === "guidelines") return this.restoreGuidelines();
 

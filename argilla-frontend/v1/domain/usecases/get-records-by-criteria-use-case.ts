@@ -10,6 +10,7 @@ import {
   RecordsWithReference,
 } from "../entities/record/Records";
 import { Record } from "../entities/record/Record";
+import { IDatasetRepository } from "../services/IDatasetRepository";
 import { IQuestionRepository } from "../services/IQuestionRepository";
 import {
   FieldRepository,
@@ -18,6 +19,7 @@ import {
 
 export class GetRecordsByCriteriaUseCase {
   constructor(
+    private readonly datasetRepository: IDatasetRepository,
     private readonly recordRepository: RecordRepository,
     private readonly questionRepository: IQuestionRepository,
     private readonly fieldRepository: FieldRepository,
@@ -29,7 +31,15 @@ export class GetRecordsByCriteriaUseCase {
     const savedRecords = this.recordsStorage.get();
     savedRecords.synchronizeQueuePagination(criteria);
 
-    const getRecords = this.recordRepository.getRecords(criteria);
+    const dataset = await this.datasetRepository.getById(datasetId);
+
+    let getRecords;
+    if (dataset.isDraft) {
+      getRecords = this.recordRepository.listRecords(criteria);
+    } else{
+      getRecords = this.recordRepository.getRecords(criteria);
+    }
+
     const getQuestions = this.questionRepository.getQuestions(datasetId);
     const getFields = this.fieldRepository.getFields(datasetId);
 
