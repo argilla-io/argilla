@@ -82,10 +82,7 @@ Creating an Argilla Space within an organization is useful for several scenarios
 - **You want manage the Space together with other users** (e.g., Space settings, etc.). Note that if you just want to manage your Argilla datasets, workspaces, you can achieve this by adding other Argilla `owner` roles to your Argilla Server.
 - **More generally, you want to make available your space under an organization/community umbrella**.
 
-The steps are very similar the [Quickstart guide](quickstart.md) with two important differences:
-
-!!! tip "Setup USERNAME"
-    You need to **set up the `USERNAME` Space Secret with your Hugging Face username**. This way, the first time you enter with the `Hugging Face Sign in` button, you'll be granted the `owner` role.
+The steps are very similar the [Quickstart guide](quickstart.md) with one important difference:
 
 !!! tip "Enable Persistent Storage `SMALL`"
     Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
@@ -120,14 +117,4 @@ client = rg.Argilla(
 
 There's two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of the Argilla Space. Remember that, by default Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space for personal spaces.
 
-The `USERNAME` and `PASSWORD` are only useful in a couple of scenarios:
-
-- You have [disabled Hugging Face OAuth](#how-to-configure-and-disable-oauth-access).
-- You want to [set up Argilla under an organization](#how-to-deploy-argilla-under-a-hugging-face-organization) and want your Hugging Face username to be granted the `owner` role.
-
-In summary, when setting up a Space:
-!!! info "Creating a Space under your personal account"
-    If you are creating the Space under your personal account, **don't insert any value for `USERNAME` and `PASSWORD`**. Once you launch the Space you will be able to Sign in with your Hugging Face username and the `owner` role.
-
-!!! info "Creating a Space under an organization"
-    If you are creating the Space under an organization **make sure to insert your Hugging Face username in the secret `USERNAME`**. In this way, you'll be able to Sign in with your Hugging Face user.
+The `USERNAME` and `PASSWORD` are only useful when you want to create a specific user to login into Argilla, if not your user account will we granted the `owner` role after the login with OAuth.
