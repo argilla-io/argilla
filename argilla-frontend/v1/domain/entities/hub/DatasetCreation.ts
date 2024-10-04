@@ -5,12 +5,13 @@ import { Subset } from "./Subset";
 export const availableMetadataType = ["terms", "int", "float"];
 
 export const availableFieldTypes = [
+  "no mapping",
   FieldType.from("text"),
   FieldType.from("image"),
   FieldType.from("chat"),
 ];
 
-export const availableQuestionsTypes = [
+export const availableQuestionTypes = [
   QuestionType.from("label_selection"),
   QuestionType.from("multi_label_selection"),
   QuestionType.from("ranking"),
