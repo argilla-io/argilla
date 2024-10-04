@@ -1,8 +1,5 @@
 <template>
-  <DatasetConfigurationCard
-    :item="question"
-    :type-options="question.availableTypes"
-  >
+  <DatasetConfigurationCard :item="question" :available-types="availableTypes">
     <template slot="header">
       <BaseButton
         class="config-card__remove"
@@ -17,8 +14,7 @@
       v-model="question.use_markdown"
       >{{ $t("useMarkdown") }}</BaseSwitch
     >
-    <input
-      type="text"
+    <DatasetConfigurationInputLabels
       v-if="question.settings.type.isSingleLabelType"
       v-model="question.settings.options"
     />
@@ -35,6 +31,10 @@ export default {
     removeIsAllowed: {
       type: Boolean,
       default: false,
+    },
+    availableTypes: {
+      type: Array,
+      required: true,
     },
   },
   model: {

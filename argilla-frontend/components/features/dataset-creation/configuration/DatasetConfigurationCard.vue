@@ -13,7 +13,7 @@
         <div class="config-card__row">
           <DatasetConfigurationSelector
             class="config-card__type"
-            :options="typeOptions"
+            :options="availableTypes"
             v-model="item.type"
           />
           <BaseCheckbox
@@ -41,7 +41,7 @@ export default {
       type: Object,
       required: true,
     },
-    typeOptions: {
+    availableTypes: {
       type: Array,
       required: true,
     },

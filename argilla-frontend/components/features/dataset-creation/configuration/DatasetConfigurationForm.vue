@@ -36,6 +36,7 @@
                 v-for="field in fields"
                 :key="field.name"
                 :field="field"
+                :available-types="availableFieldTypes"
               />
             </draggable>
           </div>
@@ -55,6 +56,7 @@
                 :key="question.name"
                 :question="question"
                 :remove-is-allowed="true"
+                :available-types="availableQuestionTypes"
                 @remove="selectedSubset.removeQuestion(question.name)"
               />
             </draggable>
@@ -77,6 +79,7 @@
 </template>
 
 <script>
+import { useDatasetConfigurationForm } from "./useDatasetConfigurationForm";
 export default {
   props: {
     fields: {
@@ -105,11 +108,11 @@ export default {
     },
     addQuestion(type) {
       const questionName = `${type}_${this.selectedSubset.questions.length}`;
-      this.selectedSubset.addQuestion(questionName, type);
+      this.selectedSubset.addQuestion(questionName, { type });
     },
   },
-  mounted() {
-    console.log(this.selectedSubset);
+  setup() {
+    return useDatasetConfigurationForm();
   },
 };
 </script>

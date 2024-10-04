@@ -1,5 +1,5 @@
 <template>
-  <DatasetConfigurationCard :item="field" :type-options="field.availableTypes">
+  <DatasetConfigurationCard :item="field" :available-types="availableTypes">
     <BaseSwitch
       v-if="field.type.isTextType || field.type.isChatType"
       class="config-card__remove__switch"
@@ -14,6 +14,10 @@ export default {
   props: {
     field: {
       type: Object,
+      required: true,
+    },
+    availableTypes: {
+      type: Array,
       required: true,
     },
   },
