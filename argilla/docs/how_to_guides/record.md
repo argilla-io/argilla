@@ -199,6 +199,15 @@ Fields are the main pieces of information of the record. These are shown at firs
     )
     ```
 
+=== "Custom"
+    Custom fields expect a dictionary with the keys and values you define in the dataset settings. You need to ensure these are aligned with `CustomField.template` in order for them to be rendered in the UI.
+
+    ```python
+    record = rg.Record(
+        fields={"custom": {"key": "value"}}
+    )
+    ```
+
 ### Metadata
 
 Record metadata can include any information about the record that is not part of the fields in the form of a dictionary. To use metadata for filtering and sorting records, make sure that the key of the dictionary corresponds with the metadata property `name`. When the key doesn't correspond, this will be considered extra metadata that will get stored with the record (as long as `allow_extra_metadata` is set to `True` for the dataset), but will not be usable for filtering and sorting.

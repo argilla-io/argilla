@@ -11,14 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC
 import os
-import requests
+from abc import ABC
 from typing import Optional, Union, TYPE_CHECKING
+
+import requests
 
 from argilla import Argilla
 from argilla._api import FieldsAPI
-from argilla._exceptions import ArgillaError
+from argilla._exceptions import ArgillaError, SettingsError
 from argilla._models import (
     FieldModel,
     TextFieldSettings,
@@ -261,7 +262,12 @@ class CustomField(AbstractField):
     def advanced_mode(self, value: bool) -> None:
         self._model.settings.advanced_mode = value
 
-    def _load_template(self, template: str) -> str:
+    def validate(self):
+        if self.template is None or self.template.strip() == "":
+            raise SettingsError("A valid template is required for CustomField")
+
+    @classmethod
+    def _load_template(cls, template: str) -> str:
         if template.endswith(".html") and os.path.exists(template):
             with open(template, "r") as f:
                 return f.read()
