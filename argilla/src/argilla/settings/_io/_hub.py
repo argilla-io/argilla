@@ -27,7 +27,6 @@ from argilla.settings._field import (
 from argilla.settings._question import (
     LabelQuestion,
     TextQuestion,
-    RatingQuestion,
 )
 from argilla.settings._metadata import (
     TermsMetadataProperty,
@@ -287,19 +286,16 @@ def build_settings_from_repo_id(
     dataset_features = _get_dataset_features(repo_id=repo_id, config=subset)
     settings = _define_settings_from_features(dataset_features, feature_mapping)
 
-    if not settings.questions:
-        settings.questions.add(
-            RatingQuestion(
-                name="quality",
-                title="Quality",
-                description="How would you rate the quality of the record?",
-                required=True,
-                values=[0, 1, 2, 3, 4, 5],
-            )
-        )
-        _render_code_snippet(repo_id=repo_id, subset=subset)
-
-    settings.questions[0].required = True
-    settings.fields[0].required = True
+    # if not settings.questions:
+    #     settings.questions.add(
+    #         RatingQuestion(
+    #             name="quality",
+    #             title="Quality",
+    #             description="How would you rate the quality of the record?",
+    #             required=True,
+    #             values=[0, 1, 2, 3, 4, 5],
+    #         )
+    #     )
+    #     _render_code_snippet(repo_id=repo_id, subset=subset)
 
     return settings

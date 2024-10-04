@@ -165,6 +165,9 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             super().create()
             self._settings.create()
 
+            if len(self._settings.questions) == 0:
+                publish = False
+
             if publish:
                 return self.publish()
 

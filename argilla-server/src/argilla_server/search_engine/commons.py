@@ -591,20 +591,26 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     async def _metrics_for_numeric_property(
         self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
     ) -> Union[IntegerMetadataMetrics, FloatMetadataMetrics]:
+        metrics_class = (
+            IntegerMetadataMetrics if metadata_property.type == MetadataPropertyType.integer else FloatMetadataMetrics
+        )
+
+        if metadata_property.dataset.is_draft:
+            return metrics_class(min=0, max=0)
+
         field_name = es_field_for_metadata_property(metadata_property)
         query = query or {"match_all": {}}
 
         stats = await self.__stats_aggregation(index_name, field_name, query)
-
-        metrics_class = (
-            IntegerMetadataMetrics if metadata_property.type == MetadataPropertyType.integer else FloatMetadataMetrics
-        )
 
         return metrics_class(min=stats["min"], max=stats["max"])
 
     async def _metrics_for_terms_property(
         self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
     ) -> TermsMetadataMetrics:
+        if metadata_property.dataset.is_draft:
+            return TermsMetadataMetrics(total=0)
+
         field_name = es_field_for_metadata_property(metadata_property)
         query = query or {"match_all": {}}
 
