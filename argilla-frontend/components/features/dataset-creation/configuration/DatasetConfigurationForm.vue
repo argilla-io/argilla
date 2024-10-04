@@ -60,7 +60,6 @@
             </draggable>
             <DatasetConfigurationAddQuestion
               :options="[
-                'no mapping',
                 'text',
                 'label_selection',
                 'multi_label_selection',

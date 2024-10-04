@@ -17,6 +17,11 @@
       v-model="question.use_markdown"
       >{{ $t("useMarkdown") }}</BaseSwitch
     >
+    <input
+      type="text"
+      v-if="question.settings.type.isSingleLabelType"
+      v-model="question.settings.options"
+    />
   </DatasetConfigurationCard>
 </template>
 
