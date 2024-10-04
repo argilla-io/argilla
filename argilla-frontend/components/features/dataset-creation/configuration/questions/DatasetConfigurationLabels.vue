@@ -12,8 +12,16 @@
         class="dataset-config-label__input"
       />
     </div>
-    <label class="dataset-config-label__label --error" v-if="error" v-text="error" />
-    <label v-else class="dataset-config-label__label" v-text="`Use coma to separate labels`"/>
+    <label
+      class="dataset-config-label__label --error"
+      v-if="error"
+      v-text="error"
+    />
+    <label
+      v-else
+      class="dataset-config-label__label"
+      v-text="`Use coma to separate labels`"
+    />
   </div>
 </template>
 
@@ -41,7 +49,7 @@ export default {
   },
   computed: {
     namesJoinedByCommas() {
-      return this.value.map((item) => item.name).join(",");
+      return this.value.map((item) => item.name).join(", ");
     },
   },
   watch: {
@@ -71,7 +79,7 @@ export default {
       this.$emit("is-focused", false);
     },
     onInput(inputValue) {
-      const namesArray = inputValue.split(",");
+      const namesArray = inputValue.split(", ");
       const trimmedNamesArray = namesArray.map((name) => ({
         name: name.trim(),
       }));
