@@ -6,6 +6,7 @@ import { QuestionType } from "../question/QuestionType";
 
 export class QuestionCreation {
   public readonly settings: QuestionSetting;
+  public title: string;
 
   constructor(
     public readonly name: string,
@@ -13,10 +14,7 @@ export class QuestionCreation {
     settings: QuestionPrototype
   ) {
     this.settings = new QuestionSetting(settings);
-  }
-
-  get title() {
-    return this.name;
+    this.title = this.name;
   }
 
   get type() {
