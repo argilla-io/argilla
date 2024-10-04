@@ -2,7 +2,7 @@ import { FieldType } from "../field/FieldType";
 import { QuestionType } from "../question/QuestionType";
 import { Subset } from "./Subset";
 
-export const availableMetadataType = ["terms", "int", "float"];
+export const availableMetadataTypes = ["terms", "int", "float"];
 
 export const availableFieldTypes = [
   "no mapping",

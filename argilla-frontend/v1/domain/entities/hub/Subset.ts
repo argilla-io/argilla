@@ -126,6 +126,14 @@ export class Subset {
     return structure.kindObject === "ClassLabel";
   }
 
+  public changeToMetadata(name: string, type: MetadataTypes) {
+    const index = this.fields.findIndex((f) => f.name === name);
+    if (index !== -1) {
+      const field = this.fields.splice(index, 1)[0];
+      this.metadata.push(new MetadataCreation(field.name, type));
+    }
+  }
+
   public removeQuestion(name: string) {
     const index = this.questions.findIndex((q) => q.name === name);
     if (index !== -1) {
@@ -159,6 +167,16 @@ export class Subset {
         { text: "Option 1", value: "option1" },
         { text: "Option 2", value: "option2" },
       ];
+    }
+
+    if (type === "span") {
+      settings.options = [
+        { name: "positive" },
+        { name: "negative" },
+        { name: "neutral" },
+      ];
+      settings.allow_overlapping = true;
+      settings.field = "text";
     }
 
     this.questions.push(new QuestionCreation(name, false, settings));

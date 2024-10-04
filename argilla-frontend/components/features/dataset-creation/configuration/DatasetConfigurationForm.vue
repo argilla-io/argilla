@@ -38,8 +38,10 @@
                   v-for="field in fields"
                   :key="field.name"
                   :field="field"
-                  :available-types="availableFieldTypes"
+                  :available-field-types="availableFieldTypes"
+                  :available-metadata-types="availableMetadataTypes"
                   @is-focused="isFocused = $event"
+                  @metadata-type-selected="onMetadataTypeSelected"
                 />
               </template>
             </draggable>
@@ -124,6 +126,9 @@ export default {
     addQuestion(type) {
       const questionName = `${type}_${this.selectedSubset.questions.length}`;
       this.selectedSubset.addQuestion(questionName, { type });
+    },
+    onMetadataTypeSelected(field) {
+      this.selectedSubset.changeToMetadata(field.name, field.metadataType);
     },
   },
   setup() {

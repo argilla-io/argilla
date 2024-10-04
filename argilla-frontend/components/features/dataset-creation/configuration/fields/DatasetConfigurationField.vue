@@ -1,7 +1,7 @@
 <template>
   <DatasetConfigurationCard
     :item="field"
-    :available-types="availableTypes"
+    :available-types="[...availableFieldTypes, ...availableMetadataTypes]"
     @is-focused="$emit('is-focused', $event)"
   >
     <BaseSwitch
@@ -20,9 +20,23 @@ export default {
       type: Object,
       required: true,
     },
-    availableTypes: {
+    availableFieldTypes: {
       type: Array,
       required: true,
+    },
+    availableMetadataTypes: {
+      type: Array,
+      required: true,
+    },
+  },
+  watch: {
+    field: {
+      handler() {
+        if (this.availableMetadataTypes.includes(this.field.type)) {
+          this.$emit("metadata-type-selected", this.field);
+        }
+      },
+      deep: true,
     },
   },
   model: {
