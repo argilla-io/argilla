@@ -238,7 +238,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
     def _publish(self) -> "Dataset":
         self._settings.create()
-        self._api.publish(dataset_id=self._model.id)
+        # self._api.publish(dataset_id=self._model.id)
 
         return self.get()
 
