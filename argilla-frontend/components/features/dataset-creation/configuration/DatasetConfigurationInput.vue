@@ -4,6 +4,8 @@
       type="text"
       :value="value"
       @input="onInput($event.target.value)"
+      @focus="$emit('is-focused', true)"
+      @blur="$emit('is-focused', false)"
       :placeholder="placeholder"
       class="dataset-config__input"
     />

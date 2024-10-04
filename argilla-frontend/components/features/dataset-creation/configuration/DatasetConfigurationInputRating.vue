@@ -1,8 +1,9 @@
 <template>
   <div class="dataset-config__input-container">
     <input
-      type="text"
-      :value="namesJoinedByCommas"
+      type="number"
+      min="2"
+      :value="value.length"
       @input="onInput($event.target.value)"
       @focus="$emit('is-focused', true)"
       @blur="$emit('is-focused', false)"
@@ -29,17 +30,16 @@ export default {
     event: "on-value-change",
   },
   computed: {
-    // Usa una propiedad computada para unir los nombres por comas
     namesJoinedByCommas() {
       return this.value.map((item) => item.name).join(", ");
     },
   },
   methods: {
     onInput(inputValue) {
-      const namesArray = inputValue
-        .split(",")
-        .map((name) => ({ name: name.trim() }));
-      this.$emit("on-value-change", namesArray);
+      const valuesArray = Array.from({ length: inputValue }, (_, i) => ({
+        value: i + 1,
+      }));
+      this.$emit("on-value-change", valuesArray);
     },
   },
 };
@@ -47,7 +47,7 @@ export default {
 
 <style lang="scss" scoped>
 .dataset-config__input-container {
-  width: 100%;
+  width: 100px;
   padding: 0 $base-space;
   border-radius: $border-radius;
   border: 1px solid var(--bg-opacity-10);

@@ -1,5 +1,9 @@
 <template>
-  <DatasetConfigurationCard :item="field" :available-types="availableTypes">
+  <DatasetConfigurationCard
+    :item="field"
+    :available-types="availableTypes"
+    @is-focused="$emit('is-focused', $event)"
+  >
     <BaseSwitch
       v-if="field.type.isTextType || field.type.isChatType"
       class="config-card__remove__switch"

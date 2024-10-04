@@ -31,12 +31,14 @@
               class="config-form__draggable-area"
               :list="fields"
               :group="{ name: 'fields' }"
+              :disabled="isFocused"
             >
               <DatasetConfigurationField
                 v-for="field in fields"
                 :key="field.name"
                 :field="field"
                 :available-types="availableFieldTypes"
+                @is-focused="isFocused = $event"
               />
             </draggable>
           </div>
@@ -50,6 +52,7 @@
               class="config-form__draggable-area"
               :list="fields"
               :group="{ name: 'questions' }"
+              :disabled="isFocused"
             >
               <DatasetConfigurationQuestion
                 v-for="question in questions"
@@ -58,6 +61,7 @@
                 :remove-is-allowed="true"
                 :available-types="availableQuestionTypes"
                 @remove="selectedSubset.removeQuestion(question.name)"
+                @is-focused="isFocused = $event"
               />
             </draggable>
             <DatasetConfigurationAddQuestion
@@ -101,6 +105,11 @@ export default {
     selectedSplit: {
       type: Object,
     },
+  },
+  data() {
+    return {
+      isFocused: false,
+    };
   },
   methods: {
     createDataset() {

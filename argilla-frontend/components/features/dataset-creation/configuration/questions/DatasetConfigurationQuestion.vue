@@ -1,5 +1,9 @@
 <template>
-  <DatasetConfigurationCard :item="question" :available-types="availableTypes">
+  <DatasetConfigurationCard
+    :item="question"
+    :available-types="availableTypes"
+    @is-focused="$emit('is-focused', $event)"
+  >
     <template slot="header">
       <BaseButton
         class="config-card__remove"
@@ -15,8 +19,17 @@
       >{{ $t("useMarkdown") }}</BaseSwitch
     >
     <DatasetConfigurationInputLabels
-      v-if="question.settings.type.isSingleLabelType"
+      v-if="
+        question.settings.type.isSingleLabelType ||
+        question.settings.type.isMultiLabelType
+      "
       v-model="question.settings.options"
+      @is-focused="$emit('is-focused', $event)"
+    />
+    <DatasetConfigurationInputRating
+      v-else-if="question.settings.type.isRatingType"
+      v-model="question.settings.options"
+      @is-focused="$emit('is-focused', $event)"
     />
   </DatasetConfigurationCard>
 </template>

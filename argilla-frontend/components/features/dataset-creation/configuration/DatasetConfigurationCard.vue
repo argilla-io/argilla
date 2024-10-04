@@ -26,6 +26,7 @@
         <DatasetConfigurationInput
           v-if="!hasNoMapping"
           v-model="item.title"
+          @is-focused="$emit('is-focused', $event)"
           placeholder="Title"
         />
         <slot></slot>
