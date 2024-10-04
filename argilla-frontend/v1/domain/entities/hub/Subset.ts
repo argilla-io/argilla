@@ -136,7 +136,7 @@ export class Subset {
   public addQuestion(name: string, settings: QuestionPrototype) {
     const { type } = settings;
 
-    if (type === "label_selection") {
+    if (type === "label_selection" || type === "multi_label_selection") {
       settings.options = [
         { name: "positive" },
         { name: "negative" },
@@ -144,11 +144,20 @@ export class Subset {
       ];
     }
 
+    if (type === "rating") {
+      settings.options = [
+        { value: 1 },
+        { value: 2 },
+        { value: 3 },
+        { value: 4 },
+        { value: 5 },
+      ];
+    }
+
     if (type === "ranking") {
       settings.options = [
         { text: "Option 1", value: "option1" },
         { text: "Option 2", value: "option2" },
-        { text: "Option 3", value: "option3" },
       ];
     }
 

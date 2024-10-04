@@ -24,7 +24,7 @@
     </div>
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
-        <div class="config-form__col" v-if="fields.length">
+        <div class="config-form__col" v-if="fields.length || noMapped.length">
           <div class="config-form__col__header">Fields</div>
           <div class="config-form__col__content">
             <draggable
@@ -33,13 +33,15 @@
               :group="{ name: 'fields' }"
               :disabled="isFocused"
             >
-              <DatasetConfigurationField
-                v-for="field in fields"
-                :key="field.name"
-                :field="field"
-                :available-types="availableFieldTypes"
-                @is-focused="isFocused = $event"
-              />
+              <template v-if="fields.length">
+                <DatasetConfigurationField
+                  v-for="field in fields"
+                  :key="field.name"
+                  :field="field"
+                  :available-types="availableFieldTypes"
+                  @is-focused="isFocused = $event"
+                />
+              </template>
             </draggable>
           </div>
         </div>
@@ -89,6 +91,10 @@ export default {
     fields: {
       type: Array,
       required: true,
+    },
+    noMapped: {
+      type: Array,
+      required: false,
     },
     questions: {
       type: Array,

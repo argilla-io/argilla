@@ -1,5 +1,5 @@
 <template>
-  <div class="dataset-config__input-container">
+  <div class="dataset-config-rating__input-container">
     <input
       type="number"
       min="2"
@@ -8,7 +8,7 @@
       @focus="$emit('is-focused', true)"
       @blur="$emit('is-focused', false)"
       :placeholder="placeholder"
-      class="dataset-config__input"
+      class="dataset-config-rating__input"
     />
   </div>
 </template>
@@ -46,7 +46,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dataset-config__input-container {
+.dataset-config-rating__input-container {
   width: 100px;
   padding: 0 $base-space;
   border-radius: $border-radius;
@@ -56,7 +56,7 @@ export default {
     border-color: var(--fg-cuaternary);
   }
 }
-.dataset-config__input {
+.dataset-config-rating__input {
   height: calc($base-space * 4 - 2px);
   padding: 0;
   border: none;
