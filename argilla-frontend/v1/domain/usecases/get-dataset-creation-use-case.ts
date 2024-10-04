@@ -1,4 +1,4 @@
-import { DatasetCreationBuilder } from "../entities/hub/dataset-creation";
+import { DatasetCreationBuilder } from "../entities/hub/DatasetCreationBuilder";
 import { HubRepository } from "~/v1/infrastructure/repositories/HubRepository";
 
 export class GetDatasetCreationUseCase {
