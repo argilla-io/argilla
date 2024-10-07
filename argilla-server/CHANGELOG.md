@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Changed
+
+- Now it is possible to publish a dataset without required fields. Allowing being published with at least one field (required or not). ([#5569](https://github.com/argilla-io/argilla/pull/5569))
+
 ## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.3.0)
 
 ### Added
