@@ -912,6 +912,28 @@ class TestSuiteDatasets:
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
+
+    @pytest.mark.parametrize(
+        "dataset_json",
+        [
+            {"name": ""},
+            {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
+            {"name": "test-dataset", "guidelines": ""},
+            {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+        ],
+    )
+    async def test_create_dataset_with_invalid_settings(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset_json.update({"workspace_id": str(workspace.id)})
+
+        response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
+
+
     async def test_create_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
         dataset_json = {"name": "name", "workspace_id": str(workspace.id)}
@@ -4486,6 +4508,33 @@ class TestSuiteDatasets:
         assert dataset.guidelines == guidelines
         assert dataset.allow_extra_metadata is allow_extra_metadata
 
+
+    @pytest.mark.parametrize(
+        "dataset_json",
+        [
+            {"name": None},
+            {"name": ""},
+            {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
+            {"name": "test-dataset", "guidelines": ""},
+            {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
+            {"allow_extra_metadata": None},
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_update_dataset_with_invalid_settings(
+        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
+    ):
+        dataset = await DatasetFactory.create(
+            name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
+        )
+
+        response = await async_client.patch(
+            f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header, json=dataset_json
+        )
+
+        assert response.status_code == 422
+
+        
     @pytest.mark.asyncio
     async def test_update_dataset_with_invalid_payload(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()

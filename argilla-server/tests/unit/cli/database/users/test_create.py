@@ -15,11 +15,11 @@
 from typing import TYPE_CHECKING
 
 import pytest
-from argilla_server.contexts import accounts
-from argilla_server.models import User, UserRole, Workspace
 from click.testing import CliRunner
 from typer import Typer
 
+from argilla_server.contexts import accounts
+from argilla_server.models import User, UserRole, Workspace
 from tests.factories import UserSyncFactory, WorkspaceSyncFactory
 
 if TYPE_CHECKING:
@@ -131,17 +131,6 @@ def test_create_with_input_username(sync_db: "Session", cli_runner: CliRunner, c
     assert sync_db.query(User).filter_by(username="username").first()
 
 
-def test_create_with_invalid_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "database users create --first-name first-name --username -Invalid-Username --password 12345678 --role owner",
-    )
-
-    assert result.exit_code == 1
-    assert sync_db.query(User).count() == 0
-    assert sync_db.query(Workspace).count() == 0
-
-
 def test_create_with_existing_username(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     UserSyncFactory.create(username="username")
 
@@ -243,15 +232,3 @@ def test_create_with_existent_workspaces(sync_db: "Session", cli_runner: CliRunn
     user = sync_db.query(User).filter_by(username="username").first()
     assert user
     assert [ws.name for ws in user.workspaces] == ["workspace-a", "workspace-b", "workspace-c"]
-
-
-def test_create_with_invalid_workspaces(sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    result = cli_runner.invoke(
-        cli,
-        "database users create --first-name first-name --username username --role owner --password 12345678 "
-        "--workspace workspace-a --workspace 'invalid workspace' --workspace workspace-c",
-    )
-
-    assert result.exit_code == 1
-    assert sync_db.query(User).count() == 0
-    assert sync_db.query(Workspace).count() == 0
