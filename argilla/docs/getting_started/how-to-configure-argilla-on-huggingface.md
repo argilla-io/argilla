@@ -117,4 +117,3 @@ client = rg.Argilla(
 
 There's two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of the Argilla Space. Remember that, by default Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space for personal spaces.
 
-The `USERNAME` and `PASSWORD` are only useful when you want to create a specific user to login into Argilla, if not your user account will we granted the `owner` role after the login with OAuth.
