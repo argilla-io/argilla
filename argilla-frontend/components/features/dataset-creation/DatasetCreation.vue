@@ -44,7 +44,7 @@
 <script>
 export default {
   data: () => ({
-    repositoryId: "openai/MMMLU",
+    repositoryId: "argilla/FinePersonas-v0.1",
   }),
   methods: {
     loadDatasetFromHF() {
