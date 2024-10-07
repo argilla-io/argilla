@@ -912,7 +912,6 @@ class TestSuiteDatasets:
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
-
     @pytest.mark.parametrize(
         "dataset_json",
         [
@@ -932,7 +931,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
-
 
     async def test_create_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
@@ -4508,7 +4506,6 @@ class TestSuiteDatasets:
         assert dataset.guidelines == guidelines
         assert dataset.allow_extra_metadata is allow_extra_metadata
 
-
     @pytest.mark.parametrize(
         "dataset_json",
         [
@@ -4534,7 +4531,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 422
 
-        
     @pytest.mark.asyncio
     async def test_update_dataset_with_invalid_payload(self, async_client: "AsyncClient", owner_auth_header: dict):
         dataset = await DatasetFactory.create()
