@@ -20,14 +20,13 @@ from argilla._exceptions import ArgillaError
 from argilla._helpers._media import cast_image, uncast_image
 from argilla._models import (
     FieldValue,
-    MetadataModel,
-    MetadataValue,
     RecordModel,
     SuggestionModel,
     UserResponseModel,
     VectorModel,
     VectorValue,
 )
+from argilla._models._record._metadata import MetadataModel
 from argilla._resource import Resource
 from argilla.responses import Response, UserResponse
 from argilla.suggestions import Suggestion
@@ -61,7 +60,7 @@ class Record(Resource):
         self,
         id: Optional[Union[UUID, str]] = None,
         fields: Optional[Dict[str, FieldValue]] = None,
-        metadata: Optional[Dict[str, MetadataValue]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
         vectors: Optional[Dict[str, VectorValue]] = None,
         responses: Optional[List[Response]] = None,
         suggestions: Optional[List[Suggestion]] = None,
@@ -331,7 +330,7 @@ class RecordFields(dict):
 class RecordMetadata(dict):
     """This is a container class for the metadata of a Record."""
 
-    def __init__(self, metadata: Optional[Dict[str, MetadataValue]] = None) -> None:
+    def __init__(self, metadata: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(metadata or {})
 
     def to_dict(self) -> dict:
