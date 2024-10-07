@@ -178,7 +178,7 @@ When `advanced_mode=True`, you can use the `template` argument to pass a full HT
 Let's reproduce example from the [Without advanced mode](#without-advanced-mode) section but this time we will insert the [handlebars syntax engine](https://handlebarsjs.com/) into the template ourselves.
 
 ```python
-render_template = """
+template = """
 <div id="custom-field-container"></div>
 <script id="template" type="text/x-handlebars-template">
     <div id="container">
@@ -215,7 +215,7 @@ import argilla as rg
 
 custom_field = rg.CustomField(
     name="image",
-    template=render_template + script,
+    template=template + script,
     advanced_mode=True
 )
 ```
