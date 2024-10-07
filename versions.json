@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_update-llamaindex-tutorial",
+    "title": "docs_update-llamaindex-tutorial",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_update-advanced-custom-field-example",
     "title": "docs_update-advanced-custom-field-example",
     "aliases": [],
