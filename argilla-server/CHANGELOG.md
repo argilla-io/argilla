@@ -16,6 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Removed
+
+- Removed name pattern restrictions for Fields. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+- Removed name pattern restrictions for Questions. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+
 ## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.3.0)
 
 ### Added
