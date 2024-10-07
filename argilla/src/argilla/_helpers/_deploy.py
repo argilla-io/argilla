@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from huggingface_hub import HfApi, SpaceRuntime, get_token, login, notebook_login
 from huggingface_hub.hf_api import RepoUrl
-from huggingface_hub.utils import is_google_colab, is_notebook
 
 from argilla._helpers._log import LoggingMixin
 
@@ -181,16 +180,6 @@ class SpacesDeploymentMixin(LoggingMixin):
             return True
         else:
             raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
-
-    def __repr__(self) -> str:
-        """Display the Argilla space in a notebook or Google Colab."""
-        if is_notebook() or is_google_colab():
-            from IPython.display import IFrame, display
-
-            display(IFrame(src=self.api_url, frameborder=0, width=850, height=600))
-            return f"Argilla has been deployed at: {self.api_url}"
-        else:
-            return super().__repr__()
 
     @staticmethod
     def _sanitize_url_component(component: str) -> str:
