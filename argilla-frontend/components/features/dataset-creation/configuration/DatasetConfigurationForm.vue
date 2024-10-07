@@ -24,7 +24,7 @@
     </div>
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
-        <div class="config-form__col" v-if="fields.length || noMapped.length">
+        <div class="config-form__col" v-if="fields.length">
           <div class="config-form__col__header">Fields</div>
           <div class="config-form__col__content">
             <draggable
@@ -33,17 +33,32 @@
               :group="{ name: 'fields' }"
               :disabled="isFocused"
             >
-              <template v-if="fields.length">
-                <DatasetConfigurationField
-                  v-for="field in fields"
-                  :key="field.name"
-                  :field="field"
-                  :available-field-types="availableFieldTypes"
-                  :available-metadata-types="availableMetadataTypes"
-                  @is-focused="isFocused = $event"
-                  @metadata-type-selected="onMetadataTypeSelected"
-                />
-              </template>
+              <DatasetConfigurationField
+                v-for="field in fields"
+                :key="field.name"
+                :field="field"
+                :available-field-types="availableFieldTypes"
+                :available-metadata-types="availableMetadataTypes"
+                @is-focused="isFocused = $event"
+                @metadata-type-selected="onMetadataTypeSelected"
+              />
+            </draggable>
+            <span class="config-form__separator" v-if="metadata.length" />
+            <draggable
+              class="config-form__draggable-area"
+              :list="fields"
+              :group="{ name: 'metadata' }"
+              :disabled="isFocused"
+            >
+              <DatasetConfigurationFieldMetadata
+                v-for="metdataItem in metadata"
+                :key="metdataItem.name"
+                :metadata="metdataItem"
+                :available-field-types="availableFieldTypes"
+                :available-metadata-types="availableMetadataTypes"
+                @is-focused="isFocused = $event"
+                @field-type-selected="onFieldTypeSelected"
+              />
             </draggable>
           </div>
         </div>
@@ -94,9 +109,8 @@ export default {
       type: Array,
       required: true,
     },
-    noMapped: {
+    metadata: {
       type: Array,
-      required: false,
     },
     questions: {
       type: Array,
@@ -128,7 +142,10 @@ export default {
       this.selectedSubset.addQuestion(questionName, { type });
     },
     onMetadataTypeSelected(field) {
-      this.selectedSubset.changeToMetadata(field.name, field.metadataType);
+      this.selectedSubset.changeToMetadata(field.name, field.type);
+    },
+    onFieldTypeSelected(metadata) {
+      this.selectedSubset.changeToField(metadata.name, metadata.type);
     },
   },
   setup() {
@@ -188,6 +205,10 @@ export default {
       overflow: auto;
       height: 100%;
     }
+  }
+  &__separator {
+    border-bottom: 1px solid var(--bg-opacity-10);
+    margin: $base-space 0;
   }
   &__draggable-area {
     display: flex;

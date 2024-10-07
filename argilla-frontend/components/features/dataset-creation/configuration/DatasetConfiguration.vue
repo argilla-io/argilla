@@ -48,7 +48,7 @@
           <div class="dataset-config__configuration">
             <DatasetConfigurationForm
               :fields="datasetConfig.fields"
-              :no-mapped="datasetConfig.noMapped"
+              :metadata="datasetConfig.metadata"
               :questions="datasetConfig.questions"
               :subsets="datasetConfig.subsets"
               :selected-subset="datasetConfig.selectedSubset"

@@ -12,6 +12,14 @@
         ><svgicon name="close"
       /></BaseButton>
     </template>
+    <template slot="required">
+      <BaseCheckbox
+        v-if="!hasNoMapping"
+        :value="question.required"
+        @input="question.required = !question.required"
+        class="config-card__required"
+      />
+    </template>
     <BaseSwitch
       v-if="question.settings.type.isTextType"
       class="config-card__remove__switch"
@@ -59,6 +67,11 @@ export default {
   model: {
     prop: "type",
     event: "change",
+  },
+  computed: {
+    hasNoMapping() {
+      return this.question.settings.type.value === "no mapping";
+    },
   },
   methods: {
     remove() {

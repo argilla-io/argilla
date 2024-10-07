@@ -16,7 +16,6 @@ export class Subset {
   public readonly fields: FieldCreation[] = [];
   public readonly questions: QuestionCreation[] = [];
   public readonly metadata: any[] = [];
-  public readonly noMapped: Structure[] = [];
   private readonly structures: Structure[] = [];
 
   constructor(public readonly name: string, datasetInfo: any) {
@@ -51,7 +50,7 @@ export class Subset {
 
       if (this.tryToCreateMetadata(structure)) continue;
 
-      this.noMapped.push(structure);
+      this.createNoMappedFields(structure);
     }
 
     this.setDefaultValues();
@@ -122,15 +121,27 @@ export class Subset {
     return false;
   }
 
+  private createNoMappedFields(structure: Structure) {
+    this.fields.push(new FieldCreation(structure.name, "no mapping"));
+  }
+
   private isASingleLabel(structure: Structure) {
     return structure.kindObject === "ClassLabel";
   }
 
-  public changeToMetadata(name: string, type: MetadataTypes) {
+  public changeToMetadata(name: string, type: any) {
     const index = this.fields.findIndex((f) => f.name === name);
     if (index !== -1) {
       const field = this.fields.splice(index, 1)[0];
       this.metadata.push(new MetadataCreation(field.name, type));
+    }
+  }
+
+  public changeToField(name: string, type: "text" | "image" | "chat") {
+    const index = this.metadata.findIndex((m) => m.name === name);
+    if (index !== -1) {
+      const metadata = this.metadata.splice(index, 1)[0];
+      this.fields.push(new FieldCreation(metadata.name, type));
     }
   }
 

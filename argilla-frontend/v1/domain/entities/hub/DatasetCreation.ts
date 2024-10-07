@@ -1,11 +1,18 @@
 import { FieldType } from "../field/FieldType";
+import { MetadataType } from "../metadata/MetadataType";
 import { QuestionType } from "../question/QuestionType";
 import { Subset } from "./Subset";
 
-export const availableMetadataTypes = ["terms", "int", "float"];
+export const availableMetadataTypes = [
+  MetadataType.from("int32"),
+  MetadataType.from("int64"),
+  MetadataType.from("float32"),
+  MetadataType.from("float64"),
+  MetadataType.from("terms"),
+];
 
 export const availableFieldTypes = [
-  "no mapping",
+  FieldType.from("no mapping"),
   FieldType.from("text"),
   FieldType.from("image"),
   FieldType.from("chat"),
@@ -49,9 +56,5 @@ export class DatasetCreation {
 
   get metadata() {
     return this.selectedSubset.metadata;
-  }
-
-  get noMapped() {
-    return this.selectedSubset.noMapped;
   }
 }

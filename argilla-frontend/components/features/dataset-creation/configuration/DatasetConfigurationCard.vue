@@ -16,12 +16,7 @@
             :options="availableTypes"
             v-model="item.type"
           />
-          <BaseCheckbox
-            v-if="!hasNoMapping"
-            :value="item.required"
-            @input="item.required = !item.required"
-            class="config-card__required"
-          />
+          <slot name="required" />
         </div>
         <DatasetConfigurationInput
           v-if="!hasNoMapping"
@@ -53,7 +48,7 @@ export default {
   },
   computed: {
     hasNoMapping() {
-      return this.item.type === "no mapping";
+      return this.item.type.value === "no mapping";
     },
   },
   model: {
