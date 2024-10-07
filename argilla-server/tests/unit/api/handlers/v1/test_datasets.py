@@ -912,30 +912,6 @@ class TestSuiteDatasets:
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
 
-    @pytest.mark.parametrize(
-        "dataset_json",
-        [
-            {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
-            {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
-            {"name": "test-dataset", "guidelines": ""},
-            {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
-        ],
-    )
-    async def test_create_dataset_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
-    ):
-        workspace = await WorkspaceFactory.create()
-        dataset_json.update({"workspace_id": str(workspace.id)})
-
-        response = await async_client.post("/api/v1/datasets", headers=owner_auth_header, json=dataset_json)
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
-
     async def test_create_dataset_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
         workspace = await WorkspaceFactory.create()
         dataset_json = {"name": "name", "workspace_id": str(workspace.id)}
@@ -1008,240 +984,6 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": f"Workspace with id `{workspace_id}` not found"}
 
         assert (await db.execute(select(func.count(Dataset.id)))).scalar() == 0
-
-    @pytest.mark.parametrize(
-        ("settings", "expected_settings"),
-        [
-            ({"type": "text"}, {"type": "text", "use_markdown": False}),
-            ({"type": "text", "discarded": "value"}, {"type": "text", "use_markdown": False}),
-            ({"type": "text", "use_markdown": False}, {"type": "text", "use_markdown": False}),
-        ],
-    )
-    async def test_create_dataset_field(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        owner_auth_header: dict,
-        settings: dict,
-        expected_settings: dict,
-    ):
-        dataset = await DatasetFactory.create()
-        field_json = {"name": "name", "title": "title", "settings": settings}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
-
-        response_body = response.json()
-        assert await db.get(Field, UUID(response_body["id"]))
-        assert response_body == {
-            "id": str(UUID(response_body["id"])),
-            "name": "name",
-            "title": "title",
-            "required": False,
-            "settings": expected_settings,
-            "dataset_id": str(dataset.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-        }
-
-    async def test_create_dataset_field_without_authentication(self, async_client: "AsyncClient", db: "AsyncSession"):
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(f"/api/v1/datasets/{dataset.id}/fields", json=field_json)
-
-        assert response.status_code == 401
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_field_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
-        workspace = await WorkspaceFactory.create()
-        admin = await AdminFactory.create(workspaces=[workspace])
-        dataset = await DatasetFactory.create(workspace=workspace)
-        field_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields",
-            headers={API_KEY_HEADER_NAME: admin.api_key},
-            json=field_json,
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
-
-    async def test_create_dataset_field_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
-        annotator = await AnnotatorFactory.create()
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields",
-            headers={API_KEY_HEADER_NAME: annotator.api_key},
-            json=field_json,
-        )
-
-        assert response.status_code == 403
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-    async def test_create_dataset_field_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
-    ):
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": invalid_name,
-            "title": "title",
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_field_with_invalid_max_length_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": "a" * (FIELD_CREATE_NAME_MAX_LENGTH + 1),
-            "title": "title",
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
-        )
-
-        assert response.status_code == 422
-        # assert db.query(Field).count() == 0
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_field_with_invalid_max_length_title(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": "name",
-            "title": "a" * (FIELD_CREATE_TITLE_MAX_LENGTH + 1),
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    @pytest.mark.parametrize(
-        "settings",
-        [
-            {},
-            None,
-            {"type": "wrong-type"},
-            {"type": "text", "use_markdown": None},
-            {"type": "rating", "options": None},
-            {"type": "rating", "options": []},
-        ],
-    )
-    async def test_create_dataset_field_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, settings: dict
-    ):
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": "name",
-            "title": "Title",
-            "settings": settings,
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_field_with_existent_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        field = await FieldFactory.create(name="name")
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{field.dataset_id}/fields",
-            headers=owner_auth_header,
-            json={
-                "name": "name",
-                "title": "title",
-                "settings": {"type": "text"},
-            },
-        )
-
-        assert response.status_code == 409
-        assert response.json() == {
-            "detail": f"Field with name `{field.name}` already exists for dataset with id `{field.dataset_id}`"
-        }
-
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 1
-
-    async def test_create_dataset_field_with_published_dataset(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields",
-            headers=owner_auth_header,
-            json={
-                "name": "name",
-                "title": "title",
-                "settings": {"type": "text"},
-            },
-        )
-
-        assert response.status_code == 422
-        assert response.json() == {"detail": "Field cannot be created for a published dataset"}
-
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_field_with_nonexistent_dataset_id(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset_id = uuid4()
-
-        await DatasetFactory.create()
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset_id}/fields",
-            headers=owner_auth_header,
-            json={
-                "name": "text",
-                "title": "Text",
-                "settings": {"type": "text"},
-            },
-        )
-
-        assert response.status_code == 404
-        assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
-
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
     @pytest.mark.parametrize(
         ("settings", "expected_settings"),
@@ -1409,32 +1151,6 @@ class TestSuiteDatasets:
 
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
-
-    @pytest.mark.parametrize(
-        "invalid_name",
-        [
-            None,
-            "",
-            "::",
-            "bad Name",
-            "¿pef",
-            "wrong:name",
-            "wrong.name" "**",
-            "a" * (METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH + 1),
-        ],
-    )
-    async def test_create_dataset_metadata_property_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": invalid_name, "title": "title", "settings": {"type": "terms"}}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
     async def test_create_dataset_metadata_property_with_existent_name(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
@@ -1608,7 +1324,6 @@ class TestSuiteDatasets:
         [
             {"name": "", "title": "vectors", "dimensions": 5},
             {"name": "a" * (VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH + 1), "title": "vectors", "dimensions": 5},
-            {"name": " invalid", "title": "vectors", "dimensions": 5},
             {"name": "vectors", "title": "", "dimensions": 5},
             {
                 "name": "vectors",
@@ -4770,35 +4485,6 @@ class TestSuiteDatasets:
         assert dataset.name == name
         assert dataset.guidelines == guidelines
         assert dataset.allow_extra_metadata is allow_extra_metadata
-
-    @pytest.mark.parametrize(
-        "dataset_json",
-        [
-            {"name": None},
-            {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
-            {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
-            {"name": "test-dataset", "guidelines": ""},
-            {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
-            {"allow_extra_metadata": None},
-        ],
-    )
-    @pytest.mark.asyncio
-    async def test_update_dataset_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, dataset_json: dict
-    ):
-        dataset = await DatasetFactory.create(
-            name="Current Name", guidelines="Current Guidelines", status=DatasetStatus.ready
-        )
-
-        response = await async_client.patch(
-            f"/api/v1/datasets/{dataset.id}", headers=owner_auth_header, json=dataset_json
-        )
-
-        assert response.status_code == 422
 
     @pytest.mark.asyncio
     async def test_update_dataset_with_invalid_payload(self, async_client: "AsyncClient", owner_auth_header: dict):

@@ -32,12 +32,6 @@ class VectorFieldModel(ResourceModel):
     def serialize_id(self, value: UUID) -> str:
         return str(value)
 
-    @field_validator("name")
-    @classmethod
-    def _name_lower(cls, name):
-        formatted_name = name.lower().replace(" ", "_")
-        return formatted_name
-
     @field_validator("title")
     @classmethod
     def _title_default(cls, title: str, info: ValidationInfo) -> str:
