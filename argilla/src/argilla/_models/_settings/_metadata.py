@@ -105,12 +105,6 @@ class MetadataFieldModel(ResourceModel):
 
     dataset_id: Optional[UUID] = None
 
-    @field_validator("name")
-    @classmethod
-    def __name_lower(cls, name):
-        formatted_name = name.lower().replace(" ", "_")
-        return formatted_name
-
     @field_validator("title")
     @classmethod
     def __title_default(cls, title, values):
