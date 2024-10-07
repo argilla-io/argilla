@@ -18,8 +18,6 @@ from typing import TYPE_CHECKING, List, Optional
 import typer
 import yaml
 
-from argilla_server.api.schemas.v1.users import USER_USERNAME_REGEX
-from argilla_server.api.schemas.v1.workspaces import WORKSPACE_NAME_REGEX
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
 from argilla_server.pydantic_v1 import BaseModel, Field, constr
@@ -31,12 +29,12 @@ if TYPE_CHECKING:
 
 
 class WorkspaceCreate(BaseModel):
-    name: str = Field(..., regex=WORKSPACE_NAME_REGEX, min_length=1)
+    name: str = Field(..., min_length=1)
 
 
 class UserCreate(BaseModel):
     first_name: constr(strip_whitespace=True)
-    username: str = Field(..., regex=USER_USERNAME_REGEX, min_length=1)
+    username: str = Field(..., min_length=1)
     role: UserRole
     api_key: constr(min_length=1)
     password_hash: constr(min_length=1)

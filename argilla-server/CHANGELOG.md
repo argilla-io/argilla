@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Removed
+
+- Removed name pattern validation for Workspaces, Datasets, and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
+
 ## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.3.0)
 
 ### Added

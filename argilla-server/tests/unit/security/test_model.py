@@ -14,17 +14,11 @@
 
 
 import pytest
+
 from argilla_server.api.schemas.v1.users import User, UserCreate
 from argilla_server.api.schemas.v1.workspaces import WorkspaceCreate
-
 from tests.factories import UserFactory
 from tests.pydantic_v1 import ValidationError
-
-
-@pytest.mark.parametrize("invalid_name", ["work space", "work/space", "work.space", "_", "-"])
-def test_workspace_create_invalid_name(invalid_name: str):
-    with pytest.raises(ValidationError):
-        WorkspaceCreate(name=invalid_name)
 
 
 @pytest.mark.parametrize(
@@ -47,25 +41,6 @@ def test_workspace_create_invalid_name(invalid_name: str):
 )
 def test_user_create(username: str):
     assert UserCreate(first_name="first-name", username=username, password="12345678")
-
-
-@pytest.mark.parametrize(
-    "invalid_username",
-    [
-        "user name",
-        "user/name",
-        "user.name",
-        "_",
-        "-",
-        "-1234",
-        "_1234",
-        "_mark",
-        "-mark",
-    ],
-)
-def test_user_create_invalid_username(invalid_username: str):
-    with pytest.raises(ValidationError):
-        UserCreate(first_name="first-name", username=invalid_username, password="12345678")
 
 
 @pytest.mark.asyncio

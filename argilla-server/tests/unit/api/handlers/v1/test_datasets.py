@@ -916,10 +916,6 @@ class TestSuiteDatasets:
         "dataset_json",
         [
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
@@ -4777,10 +4773,6 @@ class TestSuiteDatasets:
         [
             {"name": None},
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
