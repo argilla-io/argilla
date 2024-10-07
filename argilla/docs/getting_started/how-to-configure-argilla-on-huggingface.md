@@ -115,5 +115,6 @@ client = rg.Argilla(
 
 ## Space Secrets overview
 
-There's two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of the Argilla Space. Remember that, by default Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space for personal spaces.
+Remember that, by default, Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space. There are two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of Argilla Space. Those are useful when you want to create a different owner user to login into Argilla.
+
 
