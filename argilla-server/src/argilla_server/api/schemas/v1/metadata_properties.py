@@ -23,7 +23,6 @@ from argilla_server.pydantic_v1.generics import GenericModel
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
-METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
 
@@ -103,7 +102,6 @@ MetadataPropertyName = Annotated[
     str,
     Field(
         ...,
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     ),
