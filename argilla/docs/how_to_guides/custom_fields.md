@@ -179,8 +179,17 @@ Let's reproduce example from the [Without advanced mode](#without-advanced-mode)
 
 ```python
 template = """
-<div id="custom-field-container"></div>
+<div id="content"></div>
 <script id="template" type="text/x-handlebars-template">
+    <style>
+    #container {
+        display: flex;
+        gap: 10px;
+    }
+    .column {
+        flex: 1;
+    }
+    </style>
     <div id="container">
         <div class="column">
             <h3>Original</h3>
@@ -200,13 +209,13 @@ script = """
     const template = document.getElementById("template").innerHTML;
     const compiledTemplate = Handlebars.compile(template);
     const html = compiledTemplate({ record });
-    document.getElementById("custom-field-container").innerHTML = html;
+    document.getElementById("content").innerHTML = html;
 </script>
 """ # (2)
 ```
 
-1. This is a JavaScript template script. We set `id` to `template` to use it later in our JavaScript code and `type` to `text/x-handlebars-template` to indicate that this is a Handlebars template. Note that we also added a `div` with `id` to `custom-field-container` to render the template into.
-2. This is a JavaScript template script. We load the Handlebars library and then use it to compile the template and render the record. Eventually, we render the result into the `div` with `id` to `custom-field-container`.
+1. This is a JavaScript template script. We set `id` to `template` to use it later in our JavaScript code and `type` to `text/x-handlebars-template` to indicate that this is a Handlebars template. Note that we also added a `div` with `id` to `content` to render the template into.
+2. This is a JavaScript template script. We load the Handlebars library and then use it to compile the template and render the record. Eventually, we render the result into the `div` with `id` to `content`.
 
 We can now pass these templates to the `CustomField` class, ensuring that the `advanced_mode` is set to `True`.
 
