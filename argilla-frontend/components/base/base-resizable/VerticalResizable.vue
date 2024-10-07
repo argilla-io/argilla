@@ -115,6 +115,9 @@ $resizable-bar-width: $base-space;
   height: 100%;
   min-height: 0;
   width: 100%;
+  @include media("<desktop") {
+    flex-direction: column;
+  }
   &.--v-resizing {
     user-select: none;
   }

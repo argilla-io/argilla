@@ -1,6 +1,6 @@
 <template>
   <div class="dataset-config">
-    <HorizontalResizable :id="`dataset-config-r-h-rz`">
+    <HorizontalResizable :id="`dataset-config-r-h-rz`" class="wrapper">
       <template #up>
         <VerticalResizable :id="`dataset-config-left-t-v-rz`">
           <template #left>
@@ -80,6 +80,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.wrapper {
+  @include media("<desktop") {
+    overflow: auto;
+  }
+}
 .dataset-config {
   height: 100%;
   min-height: 0;

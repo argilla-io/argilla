@@ -201,6 +201,8 @@ $resizable-bar-width: $base-space;
     margin-bottom: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       height: auto !important;
+      max-height: none !important;
+      min-height: auto !important;
     }
     .--h-resizing & {
       transition: none;
@@ -218,6 +220,11 @@ $resizable-bar-width: $base-space;
       @include media(">=desktop") {
         border: none;
       }
+    }
+    @include media("<desktop") {
+      height: auto !important;
+      max-height: none !important;
+      min-height: auto !important;
     }
   }
 

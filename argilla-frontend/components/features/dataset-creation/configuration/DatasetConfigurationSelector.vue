@@ -72,7 +72,7 @@ export default {
 <style lang="scss" scoped>
 .selector {
   user-select: none;
-  font-weight: 500;
+  font-weight: 400;
 
   :deep(.dropdown__header) {
     background: var(--bg-accent-grey-1);
