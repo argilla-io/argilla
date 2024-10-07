@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import time
-import uuid
 import warnings
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -49,7 +48,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         Deploys Argilla on Hugging Face Spaces.
 
         Args:
-            api_key (str): The API key of the owner user, which will be used as the password for the space.
+            api_key (str): The Argilla API key to be defined for the owner user and creator of the Space.
             repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
             org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
             hf_token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
@@ -80,7 +79,6 @@ class SpacesDeploymentMixin(LoggingMixin):
         secrets = [
             {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user."},
             {"key": "USERNAME", "value": token_username, "description": "The username of the owner user."},
-            {"key": "PASSWORD", "value": str(uuid.uuid4()), "description": "The password of the owner user."},
             {"key": "WORKSPACE", "value": "argilla", "description": "The workspace of the space."},
         ]
 
@@ -88,6 +86,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         if api.repo_exists(repo_id=repo_id, repo_type="space", token=hf_token):
             if cls._check_if_runtime_can_be_build(api.get_space_runtime(repo_id=repo_id, token=hf_token)):
                 api.restart_space(repo_id=repo_id, token=hf_token)
+
             if overwrite:
                 for secret in secrets:
                     api.add_space_secret(
@@ -97,8 +96,10 @@ class SpacesDeploymentMixin(LoggingMixin):
                         description=secret["description"],
                         token=hf_token,
                     )
+
                 if space_hardware:
                     api.request_space_hardware(repo_id=repo_id, hardware=space_hardware, token=hf_token)
+
                 if space_storage:
                     api.request_space_storage(repo_id=repo_id, storage=space_storage, token=hf_token)
                 else:
@@ -106,6 +107,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         else:
             if space_storage is None:
                 cls._space_storage_warning()
+
             api.duplicate_space(
                 from_id=_FROM_REPO_ID,
                 to_id=repo_id,
@@ -181,6 +183,7 @@ class SpacesDeploymentMixin(LoggingMixin):
             raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
 
     def __repr__(self) -> str:
+        """Display the Argilla space in a notebook or Google Colab."""
         if is_notebook() or is_google_colab():
             from IPython.display import IFrame, display
 
