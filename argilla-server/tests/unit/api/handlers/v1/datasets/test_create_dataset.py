@@ -13,11 +13,14 @@
 #  limitations under the License.
 
 import pytest
-from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
-from argilla_server.models import Dataset
+
+from typing import Any
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
+from argilla_server.models import Dataset
 
 from tests.factories import WorkspaceFactory
 
@@ -54,6 +57,7 @@ class TestCreateDataset:
                 "strategy": DatasetDistributionStrategy.overlap,
                 "min_submitted": 1,
             },
+            "metadata": {},
             "workspace_id": str(workspace.id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -74,6 +78,7 @@ class TestCreateDataset:
                     "strategy": DatasetDistributionStrategy.overlap,
                     "min_submitted": 4,
                 },
+                "metadata": {},
                 "workspace_id": str(workspace.id),
             },
         )
@@ -91,6 +96,7 @@ class TestCreateDataset:
                 "strategy": DatasetDistributionStrategy.overlap,
                 "min_submitted": 4,
             },
+            "metadata": {},
             "workspace_id": str(workspace.id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -131,6 +137,66 @@ class TestCreateDataset:
                 "distribution": {
                     "strategy": "invalid_strategy",
                 },
+                "workspace_id": str(workspace.id),
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Dataset.id)))).scalar_one() == 0
+
+    async def test_create_dataset_with_default_metadata(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "name": "Dataset Name",
+                "workspace_id": str(workspace.id),
+            },
+        )
+
+        assert response.status_code == 201
+        assert response.json()["metadata"] == {}
+
+        dataset = (await db.execute(select(Dataset))).scalar_one()
+        assert dataset.metadata_ == {}
+
+    async def test_create_dataset_with_custom_metadata(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "name": "Dataset Name",
+                "metadata": {"key": "value"},
+                "workspace_id": str(workspace.id),
+            },
+        )
+
+        assert response.status_code == 201
+        assert response.json()["metadata"] == {"key": "value"}
+
+        dataset = (await db.execute(select(Dataset))).scalar_one()
+        assert dataset.metadata_ == {"key": "value"}
+
+    @pytest.mark.parametrize("invalid_metadata", ["invalid_metadata", None, 123])
+    async def test_create_dataset_with_invalid_metadata(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, invalid_metadata: Any
+    ):
+        workspace = await WorkspaceFactory.create()
+
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "name": "Dataset Name",
+                "metadata": invalid_metadata,
                 "workspace_id": str(workspace.id),
             },
         )
