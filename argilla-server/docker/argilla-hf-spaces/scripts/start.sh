@@ -12,21 +12,20 @@ export OAUTH2_HUGGINGFACE_SCOPE=$OAUTH_SCOPES
 # See https://huggingface.co/docs/hub/en/spaces-overview#helper-environment-variables for more details
 DEFAULT_USERNAME=$(curl -L -s https://huggingface.co/api/users/${SPACES_CREATOR_USER_ID}/overview | jq -r '.user' || echo "${SPACE_AUTHOR_NAME}")
 export USERNAME="${USERNAME:-$DEFAULT_USERNAME}"
+
 DEFAULT_PASSWORD=$(pwgen -s 16 1)
 export PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
 
-# These lines only make sense if the container is running in a Hugging Face Spaces environment with persistent storage
-
-# 1. Create a backup of the existing persistent storage files once. If something goes wrong, we can restore the files
-# from the zero-backup directory
-if [ ! -d /data/backups/argilla ]; then
-  mkdir -p /data/backups/argilla
-  cp -r /data/argilla/* /data/backups/argilla
+if [ ! -d /data/argilla/backup ]; then
+  mkdir -p /data/argilla/backup
 fi
 
-# 2. Copy the backup file to the correct location
-cp -r /data/argilla/backup/* /data/* || true
-# 3. Copy all the persistent storage files to the correct location
-cp -r /data/argilla/* $ARGILLA_HOME_PATH
+if [ -d /data/argilla ]; then
+  # Initialize the backup folder with the existing argilla files
+  cp -r /data/argilla/* /data/argilla/backup || true
+fi
+
+# Copy the backup files to the argilla folder
+cp -r /data/argilla/backup/* $ARGILLA_HOME_PATH || true
 
 honcho start
