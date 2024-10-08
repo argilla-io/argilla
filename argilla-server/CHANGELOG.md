@@ -82,10 +82,6 @@ These are the section headers that we use:
 - Added `REINDEX_DATASETS` environment variable to Argilla server Docker image. ([#5268](https://github.com/argilla-io/argilla/pull/5268))
 - Added `argilla-hf-spaces` docker image for running Argilla server in HF spaces. ([#5307](https://github.com/argilla-io/argilla/pull/5307))
 
-### Added
-
-- Added some new performance tuning settings for SQLite database. ([#5150](https://github.com/argilla-io/argilla/pull/5150))
-
 ### Changed
 
 - Change `responses` table to delete rows on cascade when a user is deleted. ([#5126](https://github.com/argilla-io/argilla/pull/5126))
