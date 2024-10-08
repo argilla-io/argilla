@@ -19,9 +19,9 @@ export PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
 
 # 1. Create a backup of the existing persistent storage files once. If something goes wrong, we can restore the files
 # from the zero-backup directory
-if [ ! -d /data/argilla/backup.0 ]; then
-  mkdir -p /data/argilla/backup.0
-  cp -r /data/argilla/* /data/argilla/backup.0
+if [ ! -d /data/backups/argilla ]; then
+  mkdir -p /data/backups/argilla
+  cp -r /data/argilla/* /data/backups/argilla
 fi
 
 # 2. Copy the backup file to the correct location
