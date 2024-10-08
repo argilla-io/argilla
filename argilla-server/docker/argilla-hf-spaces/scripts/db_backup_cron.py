@@ -23,7 +23,7 @@ from argilla_server.database import database_url_sync
 url_db = database_url_sync()
 db_path = Path(urlparse(url_db).path)
 
-backup_path = Path(db_path.parent / "backup")
+backup_path = Path("/data/argilla/backup")
 
 if not backup_path.exists():
     backup_path.mkdir()
