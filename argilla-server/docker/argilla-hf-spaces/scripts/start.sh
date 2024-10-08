@@ -17,15 +17,26 @@ DEFAULT_PASSWORD=$(pwgen -s 16 1)
 export PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
 
 if [ ! -d /data/argilla/backup ]; then
+  echo "Creating backup folder..."
   mkdir -p /data/argilla/backup
 fi
 
-if [ -d /data/argilla ]; then
-  # Initialize the backup folder with the existing argilla files
-  cp -r /data/argilla/* /data/argilla/backup || true
+# if exists the db file, copy it to the backup folder and rename it
+if [ -f /data/argilla/argilla.db ]; then
+  echo "Found argilla.db file, moving it to the backup folder..."
+  cp /data/argilla/argilla.db /data/argilla/backup || true
+  mv /data/argilla/argilla.db /data/argilla/argilla.db.bak || true
+fi
+
+# if exists the server id file, copy it to the argilla folder
+if [ -f /data/argilla/server_id.dat ]; then
+  echo "Found server_id.dat file, moving it to the backup folder..."
+  cp /data/argilla/server_id.dat /data/argilla/backup || true
 fi
 
 # Copy the backup files to the argilla folder
+echo "Restoring files from backup folder..."
 cp -r /data/argilla/backup/* $ARGILLA_HOME_PATH || true
 
+echo "Starting processes..."
 honcho start
