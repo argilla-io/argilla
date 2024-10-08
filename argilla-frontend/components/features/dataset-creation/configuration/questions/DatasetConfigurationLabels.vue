@@ -62,6 +62,7 @@ export default {
   methods: {
     validateNames() {
       const options = this.value.map((item) => item.name);
+      console.log(options);
       if (!options.length) {
         this.error = "At least two labels are required";
       } else if (options.some((option) => !option)) {
@@ -79,7 +80,7 @@ export default {
       this.$emit("is-focused", false);
     },
     onInput(inputValue) {
-      const namesArray = inputValue.split(", ");
+      const namesArray = inputValue.split(",");
       const trimmedNamesArray = namesArray.map((name) => ({
         name: name.trim(),
       }));
