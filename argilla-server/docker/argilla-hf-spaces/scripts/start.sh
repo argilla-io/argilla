@@ -15,10 +15,18 @@ export USERNAME="${USERNAME:-$DEFAULT_USERNAME}"
 DEFAULT_PASSWORD=$(pwgen -s 16 1)
 export PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
 
-# Copy the backup file to the correct location
-cp -r /data/argilla/backup/* /data/* || true
+# These lines only make sense if the container is running in a Hugging Face Spaces environment with persistent storage
 
-# Copy all the persistent storage files to the correct location
+# 1. Create a backup of the existing persistent storage files once. If something goes wrong, we can restore the files
+# from the zero-backup directory
+if [ ! -d /data/argilla/backup.0 ]; then
+  mkdir -p /data/argilla/backup.0
+  cp -r /data/argilla/* /data/argilla/backup.0
+fi
+
+# 2. Copy the backup file to the correct location
+cp -r /data/argilla/backup/* /data/* || true
+# 3. Copy all the persistent storage files to the correct location
 cp -r /data/argilla/* $ARGILLA_HOME_PATH
 
 honcho start
