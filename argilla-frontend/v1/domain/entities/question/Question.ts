@@ -273,6 +273,7 @@ export class Question {
       description: this.description,
       settings: new QuestionSetting({
         ...rest,
+        type: this.settings.type.value,
         options: options?.map((option: string) => option),
       }),
       answer: originalAnswer,
@@ -284,6 +285,7 @@ export class Question {
 
     this.settings = new QuestionSetting({
       ...rest,
+      type: this.original.settings.type.value,
       options: options?.map((option: string) => option),
     });
 
