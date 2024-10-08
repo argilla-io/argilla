@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added new `metadata` attribute for endpoints creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
+- Added new `metadata` attribute for endpoints getting, creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
 
 ### Changed
 
