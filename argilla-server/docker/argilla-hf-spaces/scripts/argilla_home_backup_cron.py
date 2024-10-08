@@ -32,7 +32,7 @@ logging.basicConfig(
 _LOGGER = logging.getLogger("argilla.backup")
 
 
-def backup(src, dst):
+def _run_backup(src, dst):
     src_conn = sqlite3.connect(src, isolation_level="DEFERRED")
     dst_conn = sqlite3.connect(dst, isolation_level="DEFERRED")
 
@@ -59,7 +59,7 @@ def db_backup(backup_folder: str, interval: int = 15):
 
     while True:
         try:
-            backup(src=db_path, dst=backup_file)
+            _run_backup(src=db_path, dst=backup_file)
         except Exception as e:
             _LOGGER.exception(f"Error creating backup: {e}")
 
@@ -83,5 +83,8 @@ def server_id_backup(backup_folder: str):
 
 if __name__ == "__main__":
     backup_folder: str = "/data/argilla/backup"
+
+    backup_interval = int(os.getenv("ARGILLA_BACKUP_INTERVAL") or "15")
+
     server_id_backup(backup_folder)
-    db_backup(backup_folder)
+    db_backup(backup_folder, interval=backup_interval)
