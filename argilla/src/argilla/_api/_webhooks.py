@@ -14,28 +14,13 @@
 
 __all__ = ["WebhooksAPI"]
 
-from typing import List, Optional
+from typing import List
 
 import httpx
-from pydantic import ConfigDict, Field
 
 from argilla._api._base import ResourceAPI
 from argilla._exceptions import api_error_handler
-from argilla._models import ResourceModel
-
-
-class WebhookModel(ResourceModel):
-    url: str
-    events: List[str]
-    enabled: bool = True
-    description: Optional[str] = None
-
-    secret: Optional[str] = Field(None, description="Webhook secret. Read-only.")
-
-    model_config = ConfigDict(
-        validate_assignment=True,
-        str_strip_whitespace=True,
-    )
+from argilla._models._webhook import WebhookModel
 
 
 class WebhooksAPI(ResourceAPI[WebhookModel]):

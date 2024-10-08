@@ -82,6 +82,22 @@ These guides provide step-by-step instructions for common scenarios, including d
 
 <div class="grid cards" markdown>
 
+-   __Use webhooks to respond to server events__
+
+    ---
+
+    Learn how to use Argilla webhooks to receive notifications about events in your Argilla Server.
+
+    [:octicons-arrow-right-24: How-to guide](webhooks.md)
+
+-   __Webhooks internals__
+
+    ---
+
+    Learn how Argilla webhooks are implented under the hood and the structure of the different events.
+
+    [:octicons-arrow-right-24: How-to guide](webhooks_internals.md)
+
 -   __Use Markdown to format rich content__
 
     ---
