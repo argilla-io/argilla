@@ -16,7 +16,6 @@ import uuid
 
 import pytest
 from pytest_mock import MockerFixture
-from tensorboard.compat.tensorflow_stub.tensor_shape import vector
 
 import argilla as rg
 from argilla import Dataset
