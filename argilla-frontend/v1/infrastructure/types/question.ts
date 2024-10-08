@@ -52,5 +52,11 @@ export interface BackendQuestion {
   name: string;
   title: string;
   required: boolean;
-  settings: unknown;
+  settings:
+    | TextSetting
+    | MultiSelectionSetting
+    | SingleSelectionSetting
+    | RatingSetting
+    | RankingSetting
+    | SpanSetting;
 }

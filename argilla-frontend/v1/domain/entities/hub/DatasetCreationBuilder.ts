@@ -10,7 +10,6 @@ export interface Feature {
 export class DatasetCreationBuilder {
   private readonly subsets: Subset[] = [];
   constructor(datasetInfo: any) {
-    debugger;
     if (datasetInfo.default) {
       for (const [name, value] of Object.entries<Feature>(datasetInfo)) {
         this.subsets.push(new Subset(name, value));
