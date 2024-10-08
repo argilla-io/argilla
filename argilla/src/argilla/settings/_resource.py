@@ -285,6 +285,27 @@ class Settings(DefaultSettingsMixin, Resource):
     def __eq__(self, other: "Settings") -> bool:
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
 
+    def add(
+        self, property: Union[Field, VectorField, MetadataType, QuestionType]
+    ) -> Union[Field, VectorField, MetadataType, QuestionType]:
+        # review all settings properties and remove any existing property with the same name
+        for attributes in [self.fields, self.questions, self.vectors, self.metadata]:
+            for prop in attributes:
+                if prop.name == property.name:
+                    attributes.remove(prop)
+
+        if isinstance(property, Field):
+            self.fields.add(property)
+        elif isinstance(property, QuestionType):
+            self.questions.add(property)
+        elif isinstance(property, VectorField):
+            self.vectors.add(property)
+        elif isinstance(property, MetadataType):
+            self.metadata.add(property)
+        else:
+            raise ValueError(f"Unsupported property type: {type(property).__name__}")
+        return property
+
     #####################
     #  Repr Methods     #
     #####################
