@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import logging
 import os
 import sqlite3
 import time
@@ -22,6 +22,15 @@ from argilla_server.database import database_url_sync
 from argilla_server.settings import settings
 from argilla_server.telemetry import get_server_id, SERVER_ID_DAT_FILE
 
+logging.basicConfig(
+    handlers=[logging.StreamHandler()],
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    force=True,
+)
+
+_LOGGER = logging.getLogger("argilla.backup")
+
 
 def backup(src, dst):
     src_conn = sqlite3.connect(src, isolation_level="DEFERRED")
@@ -29,9 +38,9 @@ def backup(src, dst):
 
     try:
         with src_conn, dst_conn:
-            print("Creating a db backup")
+            _LOGGER.info("Creating a db backup...")
             src_conn.backup(dst_conn)
-            print("Backup created")
+            _LOGGER.info("DB backup created!")
     finally:
         src_conn.close()
         dst_conn.close()
@@ -52,7 +61,7 @@ def db_backup(backup_folder: str, interval: int = 15):
         try:
             backup(src=db_path, dst=backup_file)
         except Exception as e:
-            print(f"Error backing", e)
+            _LOGGER.exception(f"Error creating backup: {e}")
 
         time.sleep(interval)
 
@@ -67,11 +76,12 @@ def server_id_backup(backup_folder: str):
 
     server_id_file = os.path.join(settings.home_path, SERVER_ID_DAT_FILE)
 
+    _LOGGER.info(f"Copying server id file to {backup_folder}")
     os.system(f"cp {server_id_file} {backup_folder}")
+    _LOGGER.info("Server id file copied!")
 
 
 if __name__ == "__main__":
     backup_folder: str = "/data/argilla/backup"
-
     server_id_backup(backup_folder)
     db_backup(backup_folder)
