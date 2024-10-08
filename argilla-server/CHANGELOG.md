@@ -19,7 +19,7 @@ These are the section headers that we use:
 ### Changed
 
 - Now it is possible to publish a dataset without required fields. Allowing being published with at least one field (required or not). ([#5569](https://github.com/argilla-io/argilla/pull/5569))
-- Now it is possible to publish a dataset without required questions. Allowing being published with at least one question (required or not). ([]())
+- Now it is possible to publish a dataset without required questions. Allowing being published with at least one question (required or not). ([#5588](https://github.com/argilla-io/argilla/pull/5588))
 
 ### Removed
 
