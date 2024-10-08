@@ -6,7 +6,7 @@ FROM ${ARGILLA_SERVER_IMAGE}:${ARGILLA_VERSION}
 USER root
 
 # Copy Argilla distribution files
-COPY scripts/start.sh /home/argilla
+COPY scripts/* /home/argilla
 COPY Procfile /home/argilla
 COPY requirements.txt /packages/requirements.txt
 
@@ -59,7 +59,6 @@ USER argilla
 ENV ELASTIC_CONTAINER=true
 ENV ES_JAVA_OPTS="-Xms1g -Xmx1g"
 
-ENV ARGILLA_HOME_PATH=/data/argilla
 ENV BACKGROUND_NUM_WORKERS=2
 ENV REINDEX_DATASETS=1
 

@@ -15,4 +15,10 @@ export USERNAME="${USERNAME:-$DEFAULT_USERNAME}"
 DEFAULT_PASSWORD=$(pwgen -s 16 1)
 export PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
 
+# Copy the backup file to the correct location
+cp -r /data/argilla/backup/* /data/* || true
+
+# Copy all the persistent storage files to the correct location
+cp -r /data/argilla/* /home/argilla/
+
 honcho start
