@@ -26,3 +26,8 @@ class TestDatabase:
             return
 
         assert (await db.execute(text("PRAGMA foreign_keys"))).scalar() == 1
+        assert (await db.execute(text("PRAGMA journal_mode"))).scalar() == "wal"
+        assert (await db.execute(text("PRAGMA synchronous"))).scalar() == 1
+        assert (await db.execute(text("PRAGMA journal_size_limit"))).scalar() == 67108864
+        assert (await db.execute(text("PRAGMA mmap_size"))).scalar() == 134217728
+        assert (await db.execute(text("PRAGMA cache_size"))).scalar() == 2000
