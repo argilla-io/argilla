@@ -23,7 +23,11 @@ async def my_webhook_listener(dataset):
 To manually create a new webhook, instantiate the `Webhook` object with the client and the name:
 
 ```python
-webhook = rg.Webhook(url="https://somehost.com/webhook", events=["dataset.created"], description="My webhook")
+webhook = rg.Webhook(
+    url="https://somehost.com/webhook",
+    events=["dataset.created"],
+    description="My webhook"
+)
 webhook.create()
 ```
 
@@ -37,49 +41,21 @@ for webhook in client.webhooks():
 ---
 
 ::: src.argilla.webhooks._resource.Webhook
-    options:
-        heading_level: 4
-
 
 ::: src.argilla.webhooks._helpers.webhook_listener
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._helpers.get_webhook_server
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._helpers.set_webhook_server
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._handler.WebhookHandler
-    options:
-        heading_level: 4
-        hide: footer
-
 
 ::: src.argilla.webhooks._event.WebhookEvent
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._event.DatasetEvent
-    options:
-        heading_level: 4
-        hide: footer
-
 
 ::: src.argilla.webhooks._event.RecordEvent
-    options:
-        heading_level: 4
-        hide: footer
 
 ::: src.argilla.webhooks._event.UserResponseEvent
-    options:
-        heading_level: 4
-        hide: footer
+
 
