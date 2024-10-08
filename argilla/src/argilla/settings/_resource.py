@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from email import message
 import json
 import os
 import re
@@ -19,6 +20,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
 from uuid import UUID
+import warnings
 
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
@@ -286,13 +288,18 @@ class Settings(DefaultSettingsMixin, Resource):
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
 
     def add(
-        self, property: Union[Field, VectorField, MetadataType, QuestionType]
+        self, property: Union[Field, VectorField, MetadataType, QuestionType], override: bool = True
     ) -> Union[Field, VectorField, MetadataType, QuestionType]:
         # review all settings properties and remove any existing property with the same name
         for attributes in [self.fields, self.questions, self.vectors, self.metadata]:
             for prop in attributes:
                 if prop.name == property.name:
-                    attributes.remove(prop)
+                    message = f"Property with name {property.name!r} already exists in settings as {prop.__class__.__name__!r}"
+                    if override:
+                        warnings.warn(message + ". Overriding the existing property.")
+                        attributes.remove(prop)
+                    else:
+                        raise ValueError(message)
 
         if isinstance(property, Field):
             self.fields.add(property)
