@@ -207,10 +207,10 @@ class Settings(DefaultSettingsMixin, Resource):
         self.validate()
 
         self._update_dataset_related_attributes()
-        self.__fields.create()
-        self.__questions.create()
-        self.__vectors.create()
-        self.__metadata.create()
+        self.__fields._create()
+        self.__questions._create()
+        self.__vectors._create()
+        self.__metadata._create()
 
         self._update_last_api_call()
         return self
@@ -219,10 +219,10 @@ class Settings(DefaultSettingsMixin, Resource):
         self.validate()
 
         self._update_dataset_related_attributes()
-        self.__fields.update()
-        self.__vectors.update()
-        self.__metadata.update()
-        # self.questions.update()
+        self.__fields._update()
+        self.__vectors._update()
+        self.__metadata._update()
+        self.questions._update()
 
         self._update_last_api_call()
         return self
@@ -457,6 +457,7 @@ class SettingsProperties(Sequence[Property]):
     def __init__(self, settings: "Settings", properties: List[Property]):
         self._properties_by_name = {}
         self._settings = settings
+        self._removed_properties = []
 
         for property in properties or []:
             if self._settings.dataset and hasattr(property, "dataset"):
@@ -474,7 +475,7 @@ class SettingsProperties(Sequence[Property]):
             return self._properties_by_name.get(key)
 
     def __iter__(self) -> Iterator[Property]:
-        return iter(self._properties_by_name.values())
+        return iter([v for v in self._properties_by_name.values()])
 
     def __len__(self):
         return len(self._properties_by_name)
@@ -491,7 +492,17 @@ class SettingsProperties(Sequence[Property]):
         setattr(self, property.name, property)
         return property
 
-    def create(self):
+    def remove(self, property: Union[str, Property]) -> None:
+        if isinstance(property, str):
+            property = self._properties_by_name.pop(property)
+        else:
+            property = self._properties_by_name.pop(property.name)
+
+        if property:
+            delattr(self, property.name)
+            self._removed_properties.append(property)
+
+    def _create(self):
         for property in self:
             try:
                 property.dataset = self._settings.dataset
@@ -499,13 +510,22 @@ class SettingsProperties(Sequence[Property]):
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to create property {property.name!r}: {e.message}") from e
 
-    def update(self):
+    def _update(self):
         for item in self:
             try:
                 item.dataset = self._settings.dataset
                 item.update() if item.id else item.create()
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to update {item.name!r}: {e.message}") from e
+
+        self._delete()
+
+    def _delete(self):
+        for item in self._removed_properties:
+            try:
+                item.delete()
+            except ArgillaAPIError as e:
+                raise SettingsError(f"Failed to delete {item.name!r}: {e.message}") from e
 
     def serialize(self) -> List[dict]:
         return [property.serialize() for property in self]
@@ -533,12 +553,18 @@ class QuestionsProperties(SettingsProperties[QuestionType]):
     Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
     """
 
-    def create(self):
+    def _create(self):
         for question in self:
             try:
                 self._create_question(question)
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to create question {question.name}") from e
+
+    def _update(self):
+        pass
+
+    def _delete(self):
+        pass
 
     def _create_question(self, question: QuestionType) -> None:
         question_model = self._settings._client.api.questions.create(
