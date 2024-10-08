@@ -116,11 +116,16 @@ async def list_datasets(db: AsyncSession, user: Optional[User] = None, **filters
     query = select(Dataset).filter_by(**filters).order_by(Dataset.inserted_at.asc())
 
     if user and not user.is_owner:
-        query = query.join(WorkspaceUser, Dataset.workspace_id == WorkspaceUser.workspace_id).join(
-            User, User.id == WorkspaceUser.user_id
+        query = query.join(
+            WorkspaceUser,
+            and_(
+                WorkspaceUser.workspace_id == Dataset.workspace_id,
+                WorkspaceUser.user_id == user.id,
+            ),
         )
 
     result = await db.scalars(query)
+
     return result.all()
 
 
