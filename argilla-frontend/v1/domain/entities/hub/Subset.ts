@@ -1,6 +1,6 @@
 import { QuestionPrototype } from "../question/QuestionSetting";
 import { Feature } from "./DatasetCreationBuilder";
-import { FieldCreation } from "./FieldCreation";
+import { FieldCreation, FieldCreationTypes } from "./FieldCreation";
 import { MetadataTypes, MetadataCreation } from "./MetadataCreation";
 import { QuestionCreation } from "./QuestionCreation";
 
@@ -15,7 +15,7 @@ type Structure = {
 export class Subset {
   public readonly fields: FieldCreation[] = [];
   public readonly questions: QuestionCreation[] = [];
-  public readonly metadata: any[] = [];
+  public readonly metadata: MetadataCreation[] = [];
   private readonly structures: Structure[] = [];
 
   constructor(public readonly name: string, datasetInfo: any) {
@@ -70,7 +70,7 @@ export class Subset {
     }
 
     if (this.fields.length === 0) {
-      this.fields.push(new FieldCreation("prompt", "text"));
+      this.fields.push(FieldCreation.from("prompt", "text"));
     }
 
     if (this.fields.length === 1) {
@@ -94,26 +94,31 @@ export class Subset {
   }
 
   private tryToCreateFields(structure: Structure) {
-    if (this.isTextField(structure)) {
-      this.fields.push(new FieldCreation(structure.name, "text"));
-    } else if (this.isImageField(structure)) {
-      this.fields.push(new FieldCreation(structure.name, "image"));
-    } else if (this.isChatField(structure)) {
-      this.fields.push(new FieldCreation(structure.name, "chat"));
-    } else {
-      return false;
+    const getFieldType = (structure: Structure) => {
+      if (structure.kindObject === "Value" && structure.type === "string")
+        return "text";
+
+      if (structure.kindObject === "Image") return "image";
+
+      if (structure.structure?.length > 0) return "chat";
+    };
+
+    const field = FieldCreation.from(structure.name, getFieldType(structure));
+
+    if (field) {
+      this.fields.push(field);
+
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   private tryToCreateMetadata(structure: Structure) {
-    const metadataTypes = ["int32", "int64", "float32", "float64"];
+    const metadata = MetadataCreation.from(structure.name, structure.type);
 
-    if (metadataTypes.includes(structure.type)) {
-      this.metadata.push(
-        new MetadataCreation(structure.name, structure.type as MetadataTypes)
-      );
+    if (metadata) {
+      this.metadata.push(metadata);
 
       return true;
     }
@@ -122,26 +127,36 @@ export class Subset {
   }
 
   private createNoMappedFields(structure: Structure) {
-    this.fields.push(new FieldCreation(structure.name, "no mapping"));
+    this.fields.push(FieldCreation.from(structure.name, "no mapping"));
   }
 
   private isASingleLabel(structure: Structure) {
     return structure.kindObject === "ClassLabel";
   }
 
-  public changeToMetadata(name: string, type: any) {
+  public changeToMetadata(name: string, type: MetadataTypes) {
     const index = this.fields.findIndex((f) => f.name === name);
     if (index !== -1) {
-      const field = this.fields.splice(index, 1)[0];
-      this.metadata.push(new MetadataCreation(field.name, type));
+      const field = this.fields[index];
+      const newMetadata = MetadataCreation.from(field.name, type);
+
+      if (newMetadata) {
+        this.fields.splice(index, 1);
+        this.metadata.push(newMetadata);
+      }
     }
   }
 
-  public changeToField(name: string, type: "text" | "image" | "chat") {
+  public changeToField(name: string, type: FieldCreationTypes) {
     const index = this.metadata.findIndex((m) => m.name === name);
     if (index !== -1) {
-      const metadata = this.metadata.splice(index, 1)[0];
-      this.fields.push(new FieldCreation(metadata.name, type));
+      const metadata = this.metadata[index];
+      const newField = FieldCreation.from(metadata.name, type);
+
+      if (newField) {
+        this.metadata.splice(index, 1);
+        this.fields.push(newField);
+      }
     }
   }
 
@@ -191,17 +206,5 @@ export class Subset {
     }
 
     this.questions.push(new QuestionCreation(name, false, settings));
-  }
-
-  private isTextField(structure: Structure) {
-    return structure.kindObject === "Value" && structure.type === "string";
-  }
-
-  private isImageField(structure: Structure) {
-    return structure.kindObject === "Image";
-  }
-
-  private isChatField(structure: Structure) {
-    return structure.structure?.length > 0;
   }
 }

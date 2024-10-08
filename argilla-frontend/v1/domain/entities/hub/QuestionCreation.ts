@@ -4,6 +4,15 @@ import {
 } from "../question/QuestionSetting";
 import { QuestionType } from "../question/QuestionType";
 
+export const availableQuestionTypes = [
+  QuestionType.from("label_selection"),
+  QuestionType.from("multi_label_selection"),
+  QuestionType.from("ranking"),
+  QuestionType.from("text"),
+  QuestionType.from("span"),
+  QuestionType.from("rating"),
+];
+
 export class QuestionCreation {
   public readonly settings: QuestionSetting;
   public title: string;

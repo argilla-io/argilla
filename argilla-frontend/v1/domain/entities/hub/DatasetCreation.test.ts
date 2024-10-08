@@ -30,6 +30,10 @@ const datasetInfo = {
         },
       },
     ],
+    metadata: {
+      dtype: "int32",
+      _type: "Value",
+    },
   },
   builder_name: "parquet",
   dataset_name: "duorc",
@@ -219,7 +223,21 @@ describe("DatasetCreation", () => {
 
       const datasetCreation = builder.build();
 
-      expect(datasetCreation.noMapped.length).toBe(1);
+      expect(
+        datasetCreation.fields.filter((f) => f.type.value === "no mapping")
+          .length
+      ).toBe(1);
+    });
+
+    it("create metadata", () => {
+      const builder = new DatasetCreationBuilder(datasetInfo);
+
+      const datasetCreation = builder.build();
+
+      const metadata = datasetCreation.metadata[0];
+
+      expect(metadata.name).toBe("metadata");
+      expect(metadata.title).toBe("metadata");
     });
   });
 
@@ -278,11 +296,153 @@ describe("DatasetCreation", () => {
           value: "option2",
           text: "Option 2",
         },
-        {
-          value: "option3",
-          text: "Option 3",
-        },
       ]);
+    });
+  });
+
+  describe("changeToMetadata should", () => {
+    it("change field to metadata", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {
+          text_field: {
+            dtype: "string",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.changeToMetadata("text_field", "int32");
+
+      const metadata = datasetCreation.metadata[0];
+
+      expect(datasetCreation.metadata.length).toBe(1);
+      expect(datasetCreation.fields.length).toBe(0);
+
+      expect(metadata.name).toBe("text_field");
+      expect(metadata.title).toBe("text_field");
+    });
+
+    it("not change field to metadata if the field does not exist", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {
+          text_field: {
+            dtype: "string",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.changeToMetadata("image_field", "int32");
+
+      expect(datasetCreation.metadata.length).toBe(0);
+      expect(datasetCreation.fields.length).toBe(1);
+    });
+
+    it("prevent to change to metadat if the type is not available", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {
+          text_field: {
+            dtype: "string",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.changeToMetadata(
+        "text_field",
+        "image" as any
+      );
+
+      expect(datasetCreation.metadata.length).toBe(0);
+      expect(datasetCreation.fields.length).toBe(1);
+    });
+  });
+
+  describe("changeToField should", () => {
+    it("change metadata to field", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {
+          metadata: {
+            dtype: "int32",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.changeToField("metadata", "text");
+
+      const field = datasetCreation.fields.find((f) => f.name === "metadata");
+
+      expect(datasetCreation.metadata.length).toBe(0);
+
+      expect(field.name).toBe("metadata");
+      expect(field.type.isTextType).toBeTruthy();
+    });
+
+    it("not change metadata to field if the metadata does not exist", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {
+          metadata: {
+            dtype: "int32",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.changeToField("text_field", "text");
+
+      expect(datasetCreation.metadata.length).toBe(1);
+      expect(
+        datasetCreation.fields.filter((f) => f.name === "text_field").length
+      ).toBe(0);
+    });
+
+    it("prevent to change to field if the type is not available", () => {
+      const datasetInfoWithNoQuestions = {
+        ...datasetInfo,
+        features: {
+          metadata: {
+            dtype: "int32",
+            _type: "Value",
+          },
+        },
+      };
+
+      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+
+      const datasetCreation = builder.build();
+
+      datasetCreation.selectedSubset.changeToField("metadata", "int16" as any);
+
+      expect(datasetCreation.metadata.length).toBe(1);
+      expect(
+        datasetCreation.fields.filter((f) => f.name === "metadata").length
+      ).toBe(0);
     });
   });
 });

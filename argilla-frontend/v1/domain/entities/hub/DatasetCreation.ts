@@ -1,31 +1,4 @@
-import { FieldType } from "../field/FieldType";
-import { MetadataType } from "../metadata/MetadataType";
-import { QuestionType } from "../question/QuestionType";
 import { Subset } from "./Subset";
-
-export const availableMetadataTypes = [
-  MetadataType.from("int32"),
-  MetadataType.from("int64"),
-  MetadataType.from("float32"),
-  MetadataType.from("float64"),
-  MetadataType.from("terms"),
-];
-
-export const availableFieldTypes = [
-  FieldType.from("no mapping"),
-  FieldType.from("text"),
-  FieldType.from("image"),
-  FieldType.from("chat"),
-];
-
-export const availableQuestionTypes = [
-  QuestionType.from("label_selection"),
-  QuestionType.from("multi_label_selection"),
-  QuestionType.from("ranking"),
-  QuestionType.from("text"),
-  QuestionType.from("span"),
-  QuestionType.from("rating"),
-];
 
 export class DatasetCreation {
   public selectedSubset: Subset;
