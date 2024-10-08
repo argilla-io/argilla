@@ -62,7 +62,6 @@ export default {
   methods: {
     validateNames() {
       const options = this.value.map((item) => item.name);
-      console.log(options);
       if (!options.length) {
         this.error = "At least two labels are required";
       } else if (options.some((option) => !option)) {
