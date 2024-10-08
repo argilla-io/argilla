@@ -19,6 +19,6 @@ export PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
 cp -r /data/argilla/backup/* /data/* || true
 
 # Copy all the persistent storage files to the correct location
-cp -r /data/argilla/* /home/argilla/
+cp -r /data/argilla/* $ARGILLA_HOME_PATH
 
 honcho start
