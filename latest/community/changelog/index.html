@@ -2062,7 +2062,16 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Unreleased">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#230" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.0">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3933,7 +3942,16 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Unreleased">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#230" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.0">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5644,20 +5662,24 @@ These are the section headers that we use:
 -->
 
 <h2 id="unreleased"><a href="">Unreleased</a><a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h2 id="230"><a href="https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0">2.3.0</a><a class="headerlink" href="#230" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
+<li>Added support for <code>CustomField</code>. (<a href="https://github.com/argilla-io/argilla/pull/5422">#5422</a>)</li>
 <li>Added <code>inserted_at</code> and <code>updated_at</code> to <code>Resource</code> model as properties. (<a href="https://github.com/argilla-io/argilla/pull/5540">#5540</a>)</li>
 <li>Added <code>limit</code> argument when fetching records. (<a href="https://github.com/argilla-io/argilla/pull/5525">#5525</a></li>
-<li>Added similarity search support. ((#5546)[https://github.com/argilla-io/argilla/pull/5546])</li>
+<li>Added similarity search support. (<a href="https://github.com/argilla-io/argilla/pull/5546">#5546</a>)</li>
 <li>Added filter support for <code>id</code>, <code>_server_id</code>, <code>inserted_at</code> and <code>updated_at</code> record attributes. (<a href="https://github.com/argilla-io/argilla/pull/5545">#5545</a>)</li>
+<li>Added support to read argilla credentials from colab secrets. (<a href="https://github.com/argilla-io/argilla/pull/5541">#5541</a>))</li>
 </ul>
 <h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Changed the <strong>repr</strong> method for <code>SettingsProperties</code> to display the details of all the properties in <code>Setting</code> object. (<a href="https://github.com/argilla-io/argilla/issues/5380">#5380</a>)</li>
+<li>Changed error messages when creating datasets with insufficient permissions. (<a href="https://github.com/argilla-io/argilla/pull/5554">#5540</a>)</li>
 </ul>
 <h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Fixed the deployment yaml used to create a new Argilla server in K8s. Added <code>USERNAME</code> and <code>PASSWORD</code> to the environment variables of pod template. (<a href="https://github.com/argilla-io/argilla/issues/5434">#5434</a>)</li>
+<li>Fixed serialization of <code>ChatField</code> when collecting records from the hub and exporting to <code>datasets</code>. (<a href="https://github.com/argilla-io/argilla/pull/5553">#5554</a>)</li>
 </ul>
 <h2 id="222"><a href="https://github.com/argilla-io/argilla/compare/v2.2.1...v2.2.2">2.2.2</a><a class="headerlink" href="#222" title="Permanent link">&para;</a></h2>
 <h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
