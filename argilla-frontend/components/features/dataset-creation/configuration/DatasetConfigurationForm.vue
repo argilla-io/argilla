@@ -142,10 +142,10 @@ export default {
       this.selectedSubset.addQuestion(questionName, { type });
     },
     onMetadataTypeSelected(field) {
-      this.selectedSubset.changeToMetadata(field.name, field.type);
+      this.selectedSubset.changeToMetadata(field.name, field.type.value);
     },
     onFieldTypeSelected(metadata) {
-      this.selectedSubset.changeToField(metadata.name, metadata.type);
+      this.selectedSubset.changeToField(metadata.name, metadata.type.value);
     },
   },
   setup() {
