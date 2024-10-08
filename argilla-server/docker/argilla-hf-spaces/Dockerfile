@@ -44,7 +44,9 @@ RUN \
     apt-get remove -y wget gnupg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    rm -rf /packages
+    rm -rf /packages && \
+    # Install pwgen curl and jq
+    apt-get update && apt-get install -y curl jq pwgen
 
 COPY config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 

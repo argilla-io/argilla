@@ -94,7 +94,7 @@ from argilla_server.models import (
 )
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
-from argilla_server.validators.datasets import DatasetCreateValidator, DatasetUpdateValidator
+from argilla_server.validators.datasets import DatasetCreateValidator, DatasetPublishValidator, DatasetUpdateValidator
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
     ResponseUpdateValidator,
@@ -129,11 +129,16 @@ async def list_datasets(db: AsyncSession, user: Optional[User] = None, **filters
     query = select(Dataset).filter_by(**filters).order_by(Dataset.inserted_at.asc())
 
     if user and not user.is_owner:
-        query = query.join(WorkspaceUser, Dataset.workspace_id == WorkspaceUser.workspace_id).join(
-            User, User.id == WorkspaceUser.user_id
+        query = query.join(
+            WorkspaceUser,
+            and_(
+                WorkspaceUser.workspace_id == Dataset.workspace_id,
+                WorkspaceUser.user_id == user.id,
+            ),
         )
 
     result = await db.scalars(query)
+
     return result.all()
 
 
@@ -162,16 +167,6 @@ async def create_dataset(db: AsyncSession, dataset_attrs: dict) -> Dataset:
     return dataset
 
 
-async def _count_required_fields_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
-    return (await db.execute(select(func.count(Field.id)).filter_by(dataset_id=dataset_id, required=True))).scalar_one()
-
-
-async def _count_required_questions_by_dataset_id(db: AsyncSession, dataset_id: UUID) -> int:
-    return (
-        await db.execute(select(func.count(Question.id)).filter_by(dataset_id=dataset_id, required=True))
-    ).scalar_one()
-
-
 def _allowed_roles_for_metadata_property_create(metadata_property_create: MetadataPropertyCreate) -> List[UserRole]:
     if metadata_property_create.visible_for_annotators:
         return VISIBLE_FOR_ANNOTATORS_ALLOWED_ROLES
@@ -180,14 +175,7 @@ def _allowed_roles_for_metadata_property_create(metadata_property_create: Metada
 
 
 async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
-    if dataset.is_ready:
-        raise UnprocessableEntityError("Dataset is already published")
-
-    if await _count_required_fields_by_dataset_id(db, dataset.id) == 0:
-        raise UnprocessableEntityError("Dataset cannot be published without required fields")
-
-    if await _count_required_questions_by_dataset_id(db, dataset.id) == 0:
-        raise UnprocessableEntityError("Dataset cannot be published without required questions")
+    await DatasetPublishValidator.validate(db, dataset)
 
     async with db.begin_nested():
         dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)

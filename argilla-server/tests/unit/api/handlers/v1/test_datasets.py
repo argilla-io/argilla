@@ -916,10 +916,6 @@ class TestSuiteDatasets:
         "dataset_json",
         [
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
@@ -4673,10 +4669,10 @@ class TestSuiteDatasets:
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset is already published"}
+        assert response.json() == {"detail": "Dataset has already been published"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_without_fields(
+    async def test_publish_dataset_without_required_fields(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4689,7 +4685,7 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": "Dataset cannot be published without required fields"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_without_questions(
+    async def test_publish_dataset_without_required_questions(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4778,10 +4774,6 @@ class TestSuiteDatasets:
         [
             {"name": None},
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},

@@ -22,11 +22,28 @@ These are the section headers that we use:
 - Added new webhook events when responses are created, updated, deleted. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 - Added new webhook events when datasets are created, updated, deleted or published. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 - Added new webhook events when records are created, updated, deleted or completed. ([#5489](https://github.com/argilla-io/argilla/pull/5489))
+
+### Removed
+
+- Removed name pattern validation for Workspaces, Datasets, and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
+
+## [2.3.1](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.3.1)
+
+### Fixed
+
+- Fixed error listing current user datasets and not filtering by current user id. ([#5583](https://github.com/argilla-io/argilla/pull/5583))
+
+## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.3.0)
+
+### Added
+
+- Added support for `CustomField`. ([#5422](https://github.com/argilla-io/argilla/pull/5422))
 - Added helm chart for argilla. ([#5512](https://github.com/argilla-io/argilla/pull/5512))
 
 ### Fixed
 
 - Fixed error when creating default user with existing default workspace. ([#5558](https://github.com/argilla-io/argilla/pull/5558))
+- Fixed the deployment yaml used to create a new Argilla server in K8s. Added `USERNAME` and `PASSWORD` to the environment variables of pod template. ([#5434](https://github.com/argilla-io/argilla/issues/5434))
 
 ## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 
