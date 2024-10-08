@@ -338,7 +338,7 @@ Metadata properties allow you to configure the use of metadata information for t
     ```python
     rg.TermsMetadataProperty(
         name="terms",
-        options=["group-a", "group-b", "group-c"]
+        options=["group-a", "group-b", "group-c"],
         title="Annotation groups",
         visible_for_annotators=True,
     )
