@@ -222,7 +222,7 @@ class Settings(DefaultSettingsMixin, Resource):
         self.__fields._update()
         self.__vectors._update()
         self.__metadata._update()
-        self.questions._update()
+        self.__questions._update()
 
         self._update_last_api_call()
         return self
