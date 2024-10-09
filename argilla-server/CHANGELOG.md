@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Changed
+
+- Changed supported values for terms metadata options to accept other than strings values. ([#5589](https://github.com/argilla-io/argilla/pull/5589))
+
 ### Removed
 
 - Removed name pattern validation for Workspaces, Datasets, and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
