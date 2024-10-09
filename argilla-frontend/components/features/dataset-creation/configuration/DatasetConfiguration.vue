@@ -18,19 +18,19 @@
             </div>
           </template>
           <template #right>
-            <div
-              class="dataset-config__questions-wrapper"
-              v-if="!datasetConfig.questions.length"
-            >
+            <div class="dataset-config__questions-wrapper">
               <p
+                v-if="!datasetConfig.questions.length"
                 class="dataset-config__empty-questions"
                 v-text="'Your question will be here'"
               />
+
+              <QuestionsComponent
+                class="dataset-config__questions"
+                v-else
+                :questions="datasetConfig.questions"
+              />
             </div>
-            <!-- <QuestionsComponent
-              v-if="!!questions"
-              :questions="questions"
-            /> -->
           </template>
         </VerticalResizable>
       </template>
@@ -122,6 +122,18 @@ export default {
     height: 100%;
     padding: $base-space * 2;
     overflow: auto;
+  }
+  &__questions {
+    background: var(--bg-form);
+    border: 1px solid var(--bg-opacity-6);
+    border-radius: $border-radius-m;
+    display: flex;
+    flex-direction: column;
+    gap: $base-space * 2;
+    overflow: auto;
+    padding: $base-space * 2;
+    position: relative;
+    scroll-behavior: smooth;
   }
   &__configuration {
     width: 100%;

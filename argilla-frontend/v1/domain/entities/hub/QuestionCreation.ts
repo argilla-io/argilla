@@ -1,3 +1,14 @@
+import { Color } from "../color/Color";
+import { Guard } from "../error";
+import {
+  MultiLabelQuestionAnswer,
+  QuestionAnswer,
+  RankingQuestionAnswer,
+  RatingLabelQuestionAnswer,
+  SingleLabelQuestionAnswer,
+  SpanQuestionAnswer,
+  TextQuestionAnswer,
+} from "../question/QuestionAnswer";
 import {
   QuestionSetting,
   QuestionPrototype,
@@ -16,6 +27,7 @@ export const availableQuestionTypes = [
 export class QuestionCreation {
   public readonly settings: QuestionSetting;
   public title: string;
+  public readonly id: string;
 
   constructor(
     public readonly name: string,
@@ -24,6 +36,8 @@ export class QuestionCreation {
   ) {
     this.settings = new QuestionSetting(settings);
     this.title = this.name;
+    this.id = this.name;
+    this.initialize();
   }
 
   get type() {
@@ -40,5 +54,99 @@ export class QuestionCreation {
 
   markAsRequired() {
     this.required = true;
+  }
+
+  get isTextType(): boolean {
+    return this.type.isTextType;
+  }
+
+  get isSpanType(): boolean {
+    return this.type.isSpanType;
+  }
+
+  get isRatingType(): boolean {
+    return this.type.isRatingType;
+  }
+
+  get isMultiLabelType(): boolean {
+    return this.type.isMultiLabelType;
+  }
+
+  get isSingleLabelType(): boolean {
+    return this.type.isSingleLabelType;
+  }
+
+  get isRankingType(): boolean {
+    return this.type.isRankingType;
+  }
+
+  get answer(): QuestionAnswer {
+    return this.createInitialAnswers();
+  }
+  private initialize() {
+    if (this.settings.options && !this.settings.visible_options) {
+      this.settings.visible_options = this.settings.options.length;
+    }
+
+    if (this.isSpanType) {
+      this.settings.options = this.settings.options.map((option) => {
+        return {
+          ...option,
+          color: option.color
+            ? Color.from(option.color)
+            : Color.generate(option.value),
+        };
+      });
+    }
+  }
+
+  private createInitialAnswers(): QuestionAnswer {
+    if (this.isTextType) {
+      return new TextQuestionAnswer(this.type, "");
+    }
+
+    if (this.isSpanType) {
+      return new SpanQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
+    if (this.isRatingType) {
+      return new RatingLabelQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
+    if (this.isMultiLabelType) {
+      return new MultiLabelQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
+    if (this.isSingleLabelType) {
+      return new SingleLabelQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
+    if (this.isRankingType) {
+      return new RankingQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
+    Guard.throw(
+      `Question answer for type ${this.type} is not implemented yet.`
+    );
   }
 }
