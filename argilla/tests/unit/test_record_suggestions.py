@@ -23,12 +23,18 @@ def record():
     return Record(fields={"name": "John Doe"}, metadata={"age": 30})
 
 
+@pytest.mark.parametrize("as_dict", [True, False])
 class TestRecordSuggestions:
-    def test_create_record_suggestions(self, record: Record):
+    def test_create_record_suggestions(self, record: Record, as_dict: bool):
         suggestions = RecordSuggestions(
             suggestions=[
                 Suggestion("name", "John Doe", score=0.9),
                 Suggestion("label", ["A", "B"], score=[0.8, 0.9]),
+            ]
+            if not as_dict
+            else [
+                {"question_name": "name", "value": "John Doe", "score": 0.9},
+                {"question_name": "label", "value": ["A", "B"], "score": [0.8, 0.9]},
             ],
             record=record,
         )

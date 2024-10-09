@@ -14,10 +14,14 @@
 
 import warnings
 from enum import Enum
-from typing import Dict, Optional, Union, Any
+from typing import Any, Dict, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, field_serializer, field_validator, Field
+from pydantic import BaseModel, Field, field_serializer, field_validator
+
+from argilla.responses import Response
+
+ResponseValue = Union[Dict[str, Any], Response]
 
 
 class ResponseStatus(str, Enum):

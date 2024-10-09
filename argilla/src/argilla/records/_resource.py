@@ -23,7 +23,9 @@ from argilla._models import (
     MetadataModel,
     MetadataValue,
     RecordModel,
+    ResponseValue,
     SuggestionModel,
+    SuggestionValue,
     UserResponseModel,
     VectorModel,
     VectorValue,
@@ -34,9 +36,9 @@ from argilla.suggestions import Suggestion
 from argilla.vectors import Vector
 
 if TYPE_CHECKING:
-    from argilla.datasets import Dataset
     from argilla import Argilla
     from argilla._api import RecordsAPI
+    from argilla.datasets import Dataset
 
 
 class Record(Resource):
@@ -63,8 +65,8 @@ class Record(Resource):
         fields: Optional[Dict[str, FieldValue]] = None,
         metadata: Optional[Dict[str, MetadataValue]] = None,
         vectors: Optional[Dict[str, VectorValue]] = None,
-        responses: Optional[List[Response]] = None,
-        suggestions: Optional[List[Suggestion]] = None,
+        responses: Optional[List[ResponseValue]] = None,
+        suggestions: Optional[List[SuggestionValue]] = None,
         _server_id: Optional[UUID] = None,
         _dataset: Optional["Dataset"] = None,
     ):
@@ -356,14 +358,14 @@ class RecordVectors(dict):
         return [Vector(name=name, values=value).api_model() for name, value in self.items()]
 
 
-class RecordResponses(Iterable[Response]):
+class RecordResponses(Iterable[ResponseValue]):
     """This is a container class for the responses of a Record.
     It allows for accessing responses by attribute and iterating over them.
     A record can have multiple responses per question so we set the response
     in a list default dictionary with the question name as the key.
     """
 
-    def __init__(self, responses: List[Response], record: Record) -> None:
+    def __init__(self, responses: List[ResponseValue], record: Record) -> None:
         self.record = record
         self.__responses_by_question_name = defaultdict(list)
         self.__responses = []
@@ -405,11 +407,39 @@ class RecordResponses(Iterable[Response]):
             for responses in responses_by_user_id.values()
         ]
 
-    def add(self, response: Response) -> None:
+    def add(self, response: ResponseValue) -> None:
         """Adds a response to the record and updates the record. Records can have multiple responses per question.
         Args:
             response: The response to add.
+
+        Examples:
+            Adding a response with a `Response` object:
+            ```python
+            import argilla as rg
+            response = rg.Response(
+                question_name="question_name",
+                value="value",
+                user_id=user.id,
+                status="submitted"
+            )
+            record.responses.add(response)
+            ```
+
+            Adding a response as a dictionary:
+            ```python
+            record.responses.add(
+                {
+                    "question_name": "question_name",
+                    "value": "value",
+                    "user_id": user.id,
+                    "status": "submitted"
+                }
+            )
+            ```
         """
+        if isinstance(response, dict):
+            response = Response(**response)
+
         self._check_response_already_exists(response)
 
         response.record = self.record
@@ -431,14 +461,14 @@ class RecordResponses(Iterable[Response]):
                 self.add(response)
 
 
-class RecordSuggestions(Iterable[Suggestion]):
+class RecordSuggestions(Iterable[SuggestionValue]):
     """This is a container class for the suggestions of a Record.
     It allows for accessing suggestions by attribute and iterating over them.
     """
 
-    def __init__(self, suggestions: List[Suggestion], record: Record) -> None:
+    def __init__(self, suggestions: List[SuggestionValue], record: Record) -> None:
         self.record = record
-        self._suggestion_by_question_name: Dict[str, Suggestion] = {}
+        self._suggestion_by_question_name: Dict[str, SuggestionValue] = {}
         suggestions = suggestions or []
         for suggestion in suggestions:
             suggestion.record = self.record
@@ -474,12 +504,41 @@ class RecordSuggestions(Iterable[Suggestion]):
         suggestions = self._suggestion_by_question_name.values()
         return [suggestion.api_model() for suggestion in suggestions]
 
-    def add(self, suggestion: Suggestion) -> None:
+    def add(self, suggestion: SuggestionValue) -> None:
         """Adds a suggestion to the record and updates the record. Records can have only one suggestion per question, so
         adding a new suggestion will overwrite the previous suggestion.
+
         Args:
             suggestion: The suggestion to add.
+
+        Examples:
+            Adding a suggestion with a `Suggestion` object:
+            ```python
+            import argilla as rg
+            suggestion = Suggestion(
+                question_name="question_name",
+                value="value",
+                score=0.5,
+                agent="agent_name"
+            )
+            record.suggestions.add(suggestion)
+            ```
+
+            Adding a suggestion as a dictionary:
+            ```python
+            record.suggestions.add(
+                {
+                    "question_name": "question_name",
+                    "value": "value",
+                    "score": 0.5,
+                    "agent": "agent_name"
+                }
+            )
+            ```
         """
+        if isinstance(suggestion, dict):
+            suggestion = Suggestion(**suggestion)
+
         suggestion.record = self.record
         self._suggestion_by_question_name[suggestion.question_name] = suggestion
 

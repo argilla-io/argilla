@@ -19,8 +19,6 @@ from string import ascii_lowercase
 import pytest
 
 import argilla as rg
-from argilla import Record
-from argilla._models import RecordModel
 
 
 @pytest.fixture
@@ -114,7 +112,8 @@ class TestUpdateSuggestions:
         for i, record in enumerate(dataset.records(with_suggestions=True)):
             assert record.suggestions["label"].value == updated_mock_data[i]["label"]
 
-    def test_update_records_add_suggestions(self, client: rg.Argilla, dataset: rg.Dataset):
+    @pytest.mark.parametrize("as_dict", [True, False])
+    def test_update_records_add_suggestions(self, client: rg.Argilla, dataset: rg.Dataset, as_dict: bool):
         mock_data = [
             {
                 "text": "Hello World, how are you?",
@@ -142,6 +141,8 @@ class TestUpdateSuggestions:
                     question_name="label",
                     value="positive",
                 )
+                if not as_dict
+                else {"question_name": "label", "value": "positive"}
             )
             updated_records.append(record)
 
@@ -152,7 +153,8 @@ class TestUpdateSuggestions:
 
 
 class TestUpdateResponses:
-    def test_update_records_add_responses(self, client: rg.Argilla, dataset: rg.Dataset):
+    @pytest.mark.parametrize("as_dict", [True, False])
+    def test_update_records_add_responses(self, client: rg.Argilla, dataset: rg.Dataset, as_dict: bool):
         mock_data = [
             {
                 "text": "Hello World, how are you?",
@@ -181,6 +183,8 @@ class TestUpdateResponses:
                     value="positive",
                     user_id=client.users[0].id,
                 )
+                if not as_dict
+                else {"question_name": "label", "value": "positive", "user_id": client.users[0].id}
             )
             updated_records.append(record)
 

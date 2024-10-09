@@ -15,8 +15,8 @@ import uuid
 
 import pytest
 
-from argilla import Response, User, Dataset, Settings, TextQuestion, TextField, Workspace
-from argilla.records._resource import RecordResponses, Record
+from argilla import Dataset, Response, Settings, TextField, TextQuestion, User, Workspace
+from argilla.records._resource import Record, RecordResponses
 
 
 @pytest.fixture
@@ -37,15 +37,24 @@ def record():
     return Record(fields={"name": "John Doe"}, metadata={"age": 30}, _dataset=dataset)
 
 
+@pytest.mark.parametrize("as_dict", [True, False])
 class TestRecordResponses:
-    def test_create_record_responses_for_single_user(self, record: Record):
+    def test_create_record_responses_for_single_user(self, record: Record, as_dict: bool):
         user = User(username="johndoe", id=uuid.uuid4())
 
-        responses = [
-            Response(question_name="question_a", value="answer_a", user_id=user.id),
-            Response(question_name="question_b", value="answer_b", user_id=user.id),
-            Response(question_name="question_c", value="answer_c", user_id=user.id),
-        ]
+        responses = (
+            [
+                Response(question_name="question_a", value="answer_a", user_id=user.id),
+                Response(question_name="question_b", value="answer_b", user_id=user.id),
+                Response(question_name="question_c", value="answer_c", user_id=user.id),
+            ]
+            if not as_dict
+            else [
+                {"question_name": "question_a", "value": "answer_a", "user_id": user.id},
+                {"question_name": "question_b", "value": "answer_b", "user_id": user.id},
+                {"question_name": "question_c", "value": "answer_c", "user_id": user.id},
+            ]
+        )
 
         record_responses = RecordResponses(responses, record)
 
@@ -56,16 +65,25 @@ class TestRecordResponses:
         assert record_responses["question_c"][0].value == "answer_c"
         assert record_responses["question_c"][0].user_id == user.id
 
-    def test_create_record_responses_for_multiple_users(self, record: Record):
+    def test_create_record_responses_for_multiple_users(self, record: Record, as_dict: bool):
         user_a = User(username="johndoe", id=uuid.uuid4())
         user_b = User(username="janedoe", id=uuid.uuid4())
 
-        responses = [
-            Response(question_name="question_a", value="answer_a", user_id=user_a.id),
-            Response(question_name="question_a", value="answer_a", user_id=user_b.id),
-            Response(question_name="question_b", value="answer_b", user_id=user_a.id),
-            Response(question_name="question_b", value="answer_b", user_id=user_b.id),
-        ]
+        responses = (
+            [
+                Response(question_name="question_a", value="answer_a", user_id=user_a.id),
+                Response(question_name="question_a", value="answer_a", user_id=user_b.id),
+                Response(question_name="question_b", value="answer_b", user_id=user_a.id),
+                Response(question_name="question_b", value="answer_b", user_id=user_b.id),
+            ]
+            if not as_dict
+            else [
+                {"question_name": "question_a", "value": "answer_a", "user_id": user_a.id},
+                {"question_name": "question_a", "value": "answer_a", "user_id": user_b.id},
+                {"question_name": "question_b", "value": "answer_b", "user_id": user_a.id},
+                {"question_name": "question_b", "value": "answer_b", "user_id": user_b.id},
+            ]
+        )
 
         record_responses = RecordResponses(responses, record)
 
@@ -76,13 +94,18 @@ class TestRecordResponses:
         assert record_responses["question_b"][0].value == "answer_b"
         assert record_responses["question_b"][0].user_id == user_a.id
 
-    def test_generate_responses_models_for_record_responses(self, record: Record):
+    def test_generate_responses_models_for_record_responses(self, record: Record, as_dict: bool):
         user = User(username="johndoe", id=uuid.uuid4())
 
         record_responses = RecordResponses(
             responses=[
                 Response(question_name="question_a", value="answer_a", user_id=user.id),
                 Response(question_name="question_b", value="answer_b", user_id=user.id),
+            ]
+            if not as_dict
+            else [
+                {"question_name": "question_a", "value": "answer_a", "user_id": user.id},
+                {"question_name": "question_b", "value": "answer_b", "user_id": user.id},
             ],
             record=record,
         )
@@ -98,7 +121,7 @@ class TestRecordResponses:
             "status": "draft",
         }
 
-    def test_generate_response_models_for_record_responses_with_multiple_users(self, record: Record):
+    def test_generate_response_models_for_record_responses_with_multiple_users(self, record: Record, as_dict: bool):
         user_a = User(username="johndoe", id=uuid.uuid4())
         user_b = User(username="janedoe", id=uuid.uuid4())
 
@@ -108,6 +131,13 @@ class TestRecordResponses:
                 Response(question_name="question_a", value="answer_a", user_id=user_b.id),
                 Response(question_name="question_b", value="answer_b", user_id=user_a.id),
                 Response(question_name="question_b", value="answer_b", user_id=user_b.id),
+            ]
+            if not as_dict
+            else [
+                {"question_name": "question_a", "value": "answer_a", "user_id": user_a.id},
+                {"question_name": "question_a", "value": "answer_a", "user_id": user_b.id},
+                {"question_name": "question_b", "value": "answer_b", "user_id": user_a.id},
+                {"question_name": "question_b", "value": "answer_b", "user_id": user_b.id},
             ],
             record=record,
         )
