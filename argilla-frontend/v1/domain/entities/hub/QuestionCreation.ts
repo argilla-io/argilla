@@ -28,6 +28,7 @@ export class QuestionCreation {
   public readonly settings: QuestionSetting;
   public title: string;
   public readonly id: string;
+  public datasetColumn: string;
 
   constructor(
     public readonly name: string,
@@ -37,6 +38,7 @@ export class QuestionCreation {
     this.settings = new QuestionSetting(settings);
     this.title = this.name;
     this.id = this.name;
+    this.datasetColumn = "no mapping";
     this.initialize();
   }
 

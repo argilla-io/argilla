@@ -80,6 +80,7 @@
                 v-for="question in selectedSubset.questions"
                 :key="question.name"
                 :question="question"
+                :columns="selectedSubset.columns"
                 :remove-is-allowed="true"
                 :available-types="availableQuestionTypes"
                 @remove="selectedSubset.removeQuestion(question.name)"

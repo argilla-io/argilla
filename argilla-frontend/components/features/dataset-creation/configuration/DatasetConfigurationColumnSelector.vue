@@ -6,7 +6,7 @@
     v-if="options.length"
   >
     <template slot="dropdown-header">
-      {{ selectedValue.value }}
+      {{ selectedValue }}
       <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
@@ -18,10 +18,10 @@
               : 'selector__option'
           "
           v-for="option in filteredOptions"
-          :key="option.value"
+          :key="option"
           @click="selectOption(option)"
         >
-          {{ option.value }}
+          {{ option }}
         </li>
       </ul>
     </template>
@@ -51,10 +51,10 @@ export default {
   },
   computed: {
     filteredOptions() {
-      return this.options.filter((option) => option.value !== this.value.value);
+      return this.options.filter((option) => option !== this.value);
     },
     selectedValue() {
-      return this.options.find((option) => this.value.value === option.value);
+      return this.options.find((option) => this.value === option);
     },
   },
   methods: {

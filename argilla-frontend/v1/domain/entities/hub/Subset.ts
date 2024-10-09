@@ -56,11 +56,17 @@ export class Subset {
     this.setDefaultValues();
   }
 
+  public get columns() {
+    const columnNames = this.structures.map((f) => f.name);
+    return ["no mapping", ...columnNames];
+  }
+
   private setDefaultValues() {
     if (this.questions.length === 0) {
       this.questions.push(
         new QuestionCreation("comment", true, {
           type: "text",
+          options: [],
         })
       );
     }
@@ -203,6 +209,10 @@ export class Subset {
       ];
       settings.allow_overlapping = true;
       settings.field = "text";
+    }
+
+    if (type === "text") {
+      settings.options = [];
     }
 
     this.questions.push(new QuestionCreation(name, false, settings));

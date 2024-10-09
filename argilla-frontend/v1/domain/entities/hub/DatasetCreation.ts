@@ -30,4 +30,8 @@ export class DatasetCreation {
   get metadata() {
     return this.selectedSubset.metadata;
   }
+
+  get columns() {
+    return this.selectedSubset.columns;
+  }
 }

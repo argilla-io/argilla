@@ -20,6 +20,11 @@
         class="config-card__required"
       />
     </template>
+    <DatasetConfigurationColumnSelector
+      class="config-card__type"
+      :options="columns"
+      v-model="question.datasetColumn"
+    />
     <BaseSwitch
       v-if="question.settings.type.isTextType"
       class="config-card__remove__switch"
@@ -57,6 +62,10 @@ export default {
   props: {
     question: {
       type: Object,
+      required: true,
+    },
+    columns: {
+      type: Array,
       required: true,
     },
     removeIsAllowed: {
