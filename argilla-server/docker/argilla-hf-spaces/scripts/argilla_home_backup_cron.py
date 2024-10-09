@@ -89,7 +89,7 @@ def server_id_backup(backup_folder: str):
 
 
 if __name__ == "__main__":
-    backup_folder: str = "./data/argilla/backup"
+    backup_folder: str = "/data/argilla/backup"
 
     backup_interval = int(os.getenv("ARGILLA_BACKUP_INTERVAL") or "15")
 
