@@ -51,6 +51,7 @@
               :selected-subset="datasetConfig.selectedSubset"
               :splits="datasetConfig.splits"
               :selected-split="datasetConfig.selectedSplit"
+              :dataset-id="datasetId"
               @change-subset="$emit('change-subset', $event)"
               @change-split="$emit('change-split', $event)"
             />

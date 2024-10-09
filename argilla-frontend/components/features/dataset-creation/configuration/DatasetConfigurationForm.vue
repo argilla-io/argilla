@@ -17,10 +17,21 @@
           @onValueChange="$emit('change-split', $event)"
         />
       </div>
-
-      <BaseButton class="config-form__button primary" @click="createDataset"
-        >Create Dataset</BaseButton
-      >
+      <div class="config-form__button-area">
+        <BaseButton
+          class="primary"
+          @click.prevent="
+            visibledatasetCreationDialog = !visibledatasetCreationDialog
+          "
+          >Create Dataset</BaseButton
+        >
+        <DatasetConfigurationDialog
+          v-if="visibledatasetCreationDialog"
+          :dataset-id="datasetId"
+          @close-dialog="visibledatasetCreationDialog = false"
+          @create-dataset="createDataset"
+        />
+      </div>
     </div>
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
@@ -117,6 +128,7 @@ export default {
     },
     selectedSubset: {
       type: Object,
+      required: true,
     },
     splits: {
       type: Array,
@@ -124,15 +136,20 @@ export default {
     selectedSplit: {
       type: Object,
     },
+    datasetId: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
       isFocused: false,
+      visibledatasetCreationDialog: false,
     };
   },
   methods: {
-    createDataset() {
-      console.log("Open dataset creation modal");
+    createDataset(name, workspace) {
+      console.log("Create dataset", name, workspace);
     },
     addQuestion(type) {
       const questionName = `question_${this.selectedSubset.questions.length}`;
@@ -216,6 +233,9 @@ export default {
     display: flex;
     flex-direction: column;
     gap: $base-space;
+  }
+  &__button-area {
+    position: relative;
   }
 }
 </style>
