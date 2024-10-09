@@ -46,7 +46,7 @@
             <span class="config-form__separator" v-if="metadata.length" />
             <draggable
               class="config-form__draggable-area"
-              :list="fields"
+              :list="metadata"
               :group="{ name: 'metadata' }"
               :disabled="isFocused"
             >
@@ -69,7 +69,7 @@
           <div class="config-form__col__content">
             <draggable
               class="config-form__draggable-area"
-              :list="fields"
+              :list="questions"
               :group="{ name: 'questions' }"
               :disabled="isFocused"
             >
