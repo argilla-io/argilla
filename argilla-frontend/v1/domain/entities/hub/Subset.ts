@@ -212,11 +212,10 @@ export class Subset {
     if (type === "text") {
       settings.options = [];
     }
-
-    if (this.questions.find((q) => q.name !== name)) {
-      this.questions.push(new QuestionCreation(name, false, settings));
-    } else {
+    if (!!this.questions.find((q) => q.name === name)) {
       this.questions.find((q) => q.name === name)?.setSettings(settings);
+    } else {
+      this.questions.push(new QuestionCreation(name, false, settings));
     }
   }
 }
