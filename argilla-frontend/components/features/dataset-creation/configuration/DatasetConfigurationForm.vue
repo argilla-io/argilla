@@ -3,7 +3,7 @@
     <div class="config-form__header">
       <div class="config-form__selectors">
         <DatasetConfigurationSelector
-          v-if="subsets"
+          v-if="subsets.length > 1"
           class="config-form__selector"
           :options="subsets"
           :value="selectedSubset.name"
@@ -139,7 +139,7 @@ export default {
       console.log("Open dataset creation modal");
     },
     addQuestion(type) {
-      const questionName = `${type}_${this.selectedSubset.questions.length}`;
+      const questionName = `question_${this.selectedSubset.questions.length}`;
       this.selectedSubset.addQuestion(questionName, { type });
     },
     onMetadataTypeSelected(field) {
