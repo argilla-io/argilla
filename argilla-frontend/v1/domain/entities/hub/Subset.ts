@@ -172,9 +172,9 @@ export class Subset {
 
     if (type === "label_selection" || type === "multi_label_selection") {
       settings.options = [
-        { name: "positive" },
-        { name: "negative" },
-        { name: "neutral" },
+        { text: "positive", id: "1", value: "positive" },
+        { text: "negative", id: "2", value: "negative" },
+        { text: "neutral", id: "3", value: "neutral" },
       ];
     }
 
@@ -197,9 +197,9 @@ export class Subset {
 
     if (type === "span") {
       settings.options = [
-        { name: "positive" },
-        { name: "negative" },
-        { name: "neutral" },
+        { text: "positive", id: "1", value: "positive" },
+        { text: "negative", id: "2", value: "negative" },
+        { text: "neutral", id: "3", value: "neutral" },
       ];
       settings.allow_overlapping = true;
       settings.field = "text";

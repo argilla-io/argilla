@@ -6,7 +6,7 @@
         type="text"
         :value="optionsJoinedByCommas"
         @input="onInput($event.target.value)"
-        @focus.stop="onFocus"
+        @focus="onFocus"
         @blur="onBlur"
         :placeholder="placeholder"
         class="dataset-config-label__input"
@@ -84,6 +84,7 @@ export default {
         value: text.trim(),
         id: text.trim(),
         text: text.trim(),
+        color: this.$color.generate(text),
       }));
       this.$emit("on-value-change", trimmedOptionsArray);
       if (this.isDirty) {

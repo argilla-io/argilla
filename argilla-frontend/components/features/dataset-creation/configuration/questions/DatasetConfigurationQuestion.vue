@@ -29,9 +29,13 @@
     <DatasetConfigurationLabels
       v-if="
         question.settings.type.isSingleLabelType ||
-        question.settings.type.isMultiLabelType ||
-        question.settings.type.isSpanType
+        question.settings.type.isMultiLabelType
       "
+      v-model="question.settings.options"
+      @is-focused="$emit('is-focused', $event)"
+    />
+    <DatasetConfigurationSpan
+      v-else-if="question.settings.type.isSpanType"
       v-model="question.settings.options"
       @is-focused="$emit('is-focused', $event)"
     />
