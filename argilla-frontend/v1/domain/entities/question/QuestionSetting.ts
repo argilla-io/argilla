@@ -1,13 +1,7 @@
-import { QuestionType } from "./QuestionType";
+import { QuestionType, QuestionTypes } from "./QuestionType";
 
 export interface QuestionPrototype {
-  type:
-    | "label_selection"
-    | "multi_label_selection"
-    | "ranking"
-    | "text"
-    | "span"
-    | "rating";
+  type: QuestionTypes;
   use_markdown?: boolean;
   visible_options?: number;
   options?: any[];
