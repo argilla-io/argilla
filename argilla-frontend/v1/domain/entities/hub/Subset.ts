@@ -66,7 +66,6 @@ export class Subset {
       this.questions.push(
         new QuestionCreation("comment", true, {
           type: "text",
-          options: [],
         })
       );
     }
@@ -173,9 +172,8 @@ export class Subset {
     }
   }
 
-  public addQuestion(name: string, settings: QuestionPrototype) {
+  public setQuestionSettingByType(name: string, settings: QuestionPrototype) {
     const { type } = settings;
-
     if (type === "label_selection" || type === "multi_label_selection") {
       settings.options = [
         { text: "positive", id: "1", value: "positive" },
@@ -215,6 +213,10 @@ export class Subset {
       settings.options = [];
     }
 
-    this.questions.push(new QuestionCreation(name, false, settings));
+    if (this.questions.find((q) => q.name !== name)) {
+      this.questions.push(new QuestionCreation(name, false, settings));
+    } else {
+      this.questions.find((q) => q.name === name)?.setSettings(settings);
+    }
   }
 }

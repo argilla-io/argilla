@@ -3,6 +3,7 @@
     :item="question"
     :available-types="availableTypes"
     @is-focused="$emit('is-focused', $event)"
+    @change-type="$emit('change-type', $event)"
   >
     <template slot="header">
       <BaseButton

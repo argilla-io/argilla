@@ -14,6 +14,7 @@
           <DatasetConfigurationSelector
             class="config-card__type"
             :options="availableTypes"
+            @onValueChange="$emit('change-type', $event)"
             v-model="item.type"
           />
           <slot name="required" />

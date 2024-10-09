@@ -25,7 +25,7 @@ export const availableQuestionTypes = [
 ];
 
 export class QuestionCreation {
-  public readonly settings: QuestionSetting;
+  public settings: QuestionSetting;
   public title: string;
   public readonly id: string;
   public datasetColumn: string;
@@ -85,6 +85,12 @@ export class QuestionCreation {
   get answer(): QuestionAnswer {
     return this.createInitialAnswers();
   }
+
+  public setSettings(settings: QuestionPrototype) {
+    this.settings = new QuestionSetting(settings);
+    this.initialize();
+  }
+
   private initialize() {
     if (this.settings.options && !this.settings.visible_options) {
       this.settings.visible_options = this.settings.options.length;

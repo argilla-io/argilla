@@ -67,10 +67,11 @@
         </div>
       </div>
       <div class="config-form__col-wrapper">
-        <div class="config-form__col" v-if="selectedSubset.questions.length">
+        <div class="config-form__col">
           <div class="config-form__col__header">Questions</div>
           <div class="config-form__col__content">
             <draggable
+              v-if="selectedSubset.questions.length"
               class="config-form__draggable-area"
               :list="selectedSubset.questions"
               :group="{ name: 'questions' }"
@@ -84,6 +85,7 @@
                 :remove-is-allowed="true"
                 :available-types="availableQuestionTypes"
                 @remove="selectedSubset.removeQuestion(question.name)"
+                @change-type="onTypeIsChanged(question.name, $event)"
                 @is-focused="isFocused = $event"
               />
             </draggable>
@@ -134,13 +136,18 @@ export default {
     },
     addQuestion(type) {
       const questionName = `question_${this.selectedSubset.questions.length}`;
-      this.selectedSubset.addQuestion(questionName, { type });
+      this.selectedSubset.setQuestionSettingByType(questionName, { type });
     },
     onMetadataTypeSelected(field) {
       this.selectedSubset.changeToMetadata(field.name, field.type.value);
     },
     onFieldTypeSelected(metadata) {
       this.selectedSubset.changeToField(metadata.name, metadata.type.value);
+    },
+    onTypeIsChanged(name, type) {
+      this.selectedSubset.setQuestionSettingByType(name, {
+        type: type.value,
+      });
     },
   },
   setup() {
