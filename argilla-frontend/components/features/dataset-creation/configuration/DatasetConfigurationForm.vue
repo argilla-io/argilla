@@ -25,7 +25,7 @@
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
         <div class="config-form__col" v-if="fields.length">
-          <div class="config-form__col__header">Fields</div>
+          <div class="config-form__col__header">Fields and metadata</div>
           <div class="config-form__col__content">
             <draggable
               class="config-form__draggable-area"
