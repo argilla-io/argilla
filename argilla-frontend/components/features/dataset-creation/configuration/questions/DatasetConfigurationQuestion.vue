@@ -15,7 +15,6 @@
     </template>
     <template slot="required">
       <BaseCheckbox
-        v-if="!hasNoMapping"
         :value="question.required"
         @input="question.required = !question.required"
         class="config-card__required"
@@ -32,29 +31,31 @@
       v-model="question.use_markdown"
       >{{ $t("useMarkdown") }}</BaseSwitch
     >
-    <DatasetConfigurationLabels
-      v-if="
-        question.settings.type.isSingleLabelType ||
-        question.settings.type.isMultiLabelType
-      "
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
-    <DatasetConfigurationSpan
-      v-else-if="question.settings.type.isSpanType"
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
-    <DatasetConfigurationRating
-      v-else-if="question.settings.type.isRatingType"
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
-    <DatasetConfigurationRanking
-      v-else-if="question.settings.type.isRankingType"
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
+    <template v-if="hasNoMapping">
+      <DatasetConfigurationLabels
+        v-if="
+          question.settings.type.isSingleLabelType ||
+          question.settings.type.isMultiLabelType
+        "
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+      <DatasetConfigurationSpan
+        v-else-if="question.settings.type.isSpanType"
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+      <DatasetConfigurationRating
+        v-else-if="question.settings.type.isRatingType"
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+      <DatasetConfigurationRanking
+        v-else-if="question.settings.type.isRankingType"
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+    </template>
   </DatasetConfigurationCard>
 </template>
 
@@ -84,7 +85,7 @@ export default {
   },
   computed: {
     hasNoMapping() {
-      return this.question.settings.type.value === "no mapping";
+      return this.question.datasetColumn === "no mapping";
     },
   },
   methods: {
