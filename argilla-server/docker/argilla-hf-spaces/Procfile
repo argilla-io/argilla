@@ -2,4 +2,4 @@ elastic: /usr/share/elasticsearch/bin/elasticsearch
 redis: /usr/bin/redis-server
 worker: sleep 30; rq worker-pool --num-workers ${BACKGROUND_NUM_WORKERS}
 argilla: sleep 30; /bin/bash start_argilla_server.sh
-home-backup: sleep 15; python argilla_home_backup_cron.py
+argilla-backup: sleep 15; python argilla_home_backup_cron.py
