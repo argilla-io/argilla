@@ -24,17 +24,17 @@
     </div>
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
-        <div class="config-form__col" v-if="fields.length">
+        <div class="config-form__col" v-if="selectedSubset.fields.length">
           <div class="config-form__col__header">Fields and metadata</div>
           <div class="config-form__col__content">
             <draggable
               class="config-form__draggable-area"
-              :list="fields"
+              :list="selectedSubset.fields"
               :group="{ name: 'fields' }"
               :disabled="isFocused"
             >
               <DatasetConfigurationField
-                v-for="field in fields"
+                v-for="field in selectedSubset.fields"
                 :key="field.name"
                 :field="field"
                 :available-field-types="availableFieldTypes"
@@ -43,15 +43,18 @@
                 @metadata-type-selected="onMetadataTypeSelected"
               />
             </draggable>
-            <span class="config-form__separator" v-if="metadata.length" />
+            <span
+              class="config-form__separator"
+              v-if="selectedSubset.metadata.length"
+            />
             <draggable
               class="config-form__draggable-area"
-              :list="metadata"
+              :list="selectedSubset.metadata"
               :group="{ name: 'metadata' }"
               :disabled="isFocused"
             >
               <DatasetConfigurationFieldMetadata
-                v-for="metdataItem in metadata"
+                v-for="metdataItem in selectedSubset.metadata"
                 :key="metdataItem.name"
                 :metadata="metdataItem"
                 :available-field-types="availableFieldTypes"
@@ -64,17 +67,17 @@
         </div>
       </div>
       <div class="config-form__col-wrapper">
-        <div class="config-form__col" v-if="questions.length">
+        <div class="config-form__col" v-if="selectedSubset.questions.length">
           <div class="config-form__col__header">Questions</div>
           <div class="config-form__col__content">
             <draggable
               class="config-form__draggable-area"
-              :list="questions"
+              :list="selectedSubset.questions"
               :group="{ name: 'questions' }"
               :disabled="isFocused"
             >
               <DatasetConfigurationQuestion
-                v-for="question in questions"
+                v-for="question in selectedSubset.questions"
                 :key="question.name"
                 :question="question"
                 :remove-is-allowed="true"
@@ -106,16 +109,6 @@ import { useDatasetConfigurationForm } from "./UseDatasetConfigurationForm";
 
 export default {
   props: {
-    fields: {
-      type: Array,
-      required: true,
-    },
-    metadata: {
-      type: Array,
-    },
-    questions: {
-      type: Array,
-    },
     subsets: {
       type: Array,
     },

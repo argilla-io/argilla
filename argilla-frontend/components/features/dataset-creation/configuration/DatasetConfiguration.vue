@@ -47,9 +47,6 @@
           </div>
           <div class="dataset-config__configuration">
             <DatasetConfigurationForm
-              :fields="datasetConfig.fields"
-              :metadata="datasetConfig.metadata"
-              :questions="datasetConfig.questions"
               :subsets="datasetConfig.subsets"
               :selected-subset="datasetConfig.selectedSubset"
               :splits="datasetConfig.splits"
