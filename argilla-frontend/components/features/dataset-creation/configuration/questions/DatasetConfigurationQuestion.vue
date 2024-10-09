@@ -21,7 +21,7 @@
         class="config-card__required"
       />
     </template>
-    <DatasetConfigurationColumnSelector
+    <DatasetConfigurationSelector
       class="config-card__type"
       :options="columns"
       v-model="question.datasetColumn"
