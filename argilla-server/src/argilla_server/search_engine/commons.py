@@ -20,7 +20,7 @@ from uuid import UUID
 from elasticsearch8 import AsyncElasticsearch
 from opensearchpy import AsyncOpenSearch
 
-from argilla_server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla_server.models import (
     Dataset,
     Field,
@@ -165,7 +165,7 @@ def es_mapping_for_field(field: Field) -> dict:
 
     if field.is_text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
-    if field.is_chat:
+    elif field.is_chat:
         es_field = {
             "type": "object",
             "properties": {
@@ -174,6 +174,12 @@ def es_mapping_for_field(field: Field) -> dict:
             },
         }
         return {es_field_for_record_field(field.name): es_field}
+    elif field.is_custom:
+        return {
+            es_field_for_record_field(field.name): {
+                "type": "text",
+            }
+        }
     elif field.is_image:
         return {
             es_field_for_record_field(field.name): {
@@ -524,17 +530,19 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return [vector_value[i] * -1 for i in range(0, len(vector_value))]
 
     def _map_record_to_es_document(self, record: Record) -> Dict[str, Any]:
+        dataset = record.dataset
+
         document = {
             "id": str(record.id),
             "external_id": record.external_id,
-            "fields": record.fields,
+            "fields": self._map_record_fields_to_es(record.fields, dataset.fields),
             "status": record.status,
             "inserted_at": record.inserted_at,
             "updated_at": record.updated_at,
         }
 
         if record.metadata_:
-            document["metadata"] = self._map_record_metadata_to_es(record.metadata_, record.dataset.metadata_properties)
+            document["metadata"] = self._map_record_metadata_to_es(record.metadata_, dataset.metadata_properties)
         if record.responses:
             document["responses"] = self._map_record_responses_to_es(record.responses)
         if record.suggestions:
@@ -824,6 +832,18 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
                 for question, value in response.values.items()
             },
         }
+
+    @classmethod
+    def _map_record_fields_to_es(cls, fields: dict, dataset_fields: List[Field]) -> dict:
+        for field in dataset_fields:
+            if field.is_image:
+                fields[field.name] = None
+            elif field.is_custom:
+                fields[field.name] = str(fields.get(field.name, ""))
+            else:
+                fields[field.name] = fields.get(field.name, "")
+
+        return fields
 
     async def __terms_aggregation(self, index_name: str, field_name: str, query: dict, size: int) -> List[dict]:
         aggregation_name = "terms_agg"

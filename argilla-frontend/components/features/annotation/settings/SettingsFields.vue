@@ -24,6 +24,13 @@
             <input type="text" id="field.id" v-model="field.title" />
           </Validation>
 
+          <div class="settings__edition-form__group" v-if="field.isCustomType">
+            <label>{{ $t("template") }}</label>
+            <div class="settings__custom-field-preview">
+              <pre><code v-highlight>{{ field.settings.template }}</code></pre>
+            </div>
+          </div>
+
           <BaseSwitch
             v-if="field.isTextType || field.isChatType"
             class="settings__edition-form__switch"
@@ -169,6 +176,17 @@ export default {
       border-bottom: 1px solid var(--bg-opacity-10);
       display: inline-flex;
       gap: $base-space;
+    }
+  }
+  &__custom-field-preview {
+    overflow: auto;
+    max-height: 30vh;
+    padding: $base-space * 2;
+    border: 1px solid var(--bg-opacity-10);
+    border-radius: $border-radius;
+    background: var(--bg-opacity-4);
+    pre {
+      margin: 0;
     }
   }
 }

@@ -20,6 +20,8 @@ from argilla_server.contexts import accounts
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole, Workspace
 
+from .utils import get_or_new_workspace
+
 
 async def _create_default(api_key: str, password: str, quiet: bool):
     """Creates a user with default credentials on database suitable to start experimenting with argilla."""
@@ -37,7 +39,7 @@ async def _create_default(api_key: str, password: str, quiet: bool):
             role=UserRole.owner,
             api_key=api_key,
             password_hash=accounts.hash_password(password),
-            workspaces=[Workspace(name=DEFAULT_USERNAME)],
+            workspaces=[await get_or_new_workspace(session, DEFAULT_USERNAME)],
         )
 
         if not quiet:

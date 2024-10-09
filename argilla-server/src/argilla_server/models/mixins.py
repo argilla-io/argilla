@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Set, TypeVar, Union
 from uuid import UUID
 
-from sqlalchemy import select, sql
+from sqlalchemy import select, func, sql
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
@@ -99,6 +99,10 @@ class CRUDMixin:
         conditions_str = ", ".join([f"{key}={value}" for key, value in conditions.items()])
 
         raise NotFoundError(f"{cls.__name__} not found filtering by {conditions_str}")
+
+    @classmethod
+    async def count_by(cls, db: AsyncSession, **conditions) -> int:
+        return (await db.execute(select(func.count(cls.id)).filter_by(**conditions))).scalar_one()
 
     async def update(
         self,

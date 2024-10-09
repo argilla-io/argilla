@@ -93,6 +93,10 @@ class Field(DatabaseModel):
     def is_chat(self):
         return self.settings.get("type") == FieldType.chat
 
+    @property
+    def is_custom(self):
+        return self.settings.get("type") == FieldType.custom
+
     def __repr__(self):
         return (
             f"Field(id={str(self.id)!r}, name={self.name!r}, required={self.required!r}, "
