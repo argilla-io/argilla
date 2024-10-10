@@ -55,7 +55,7 @@ export class QuestionRepository implements IQuestionRepository {
     return {
       title,
       description: newDescription,
-      settings,
+      settings: settings as any,
     };
   }
 }

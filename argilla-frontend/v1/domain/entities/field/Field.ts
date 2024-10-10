@@ -1,3 +1,5 @@
+import { FieldType } from "./FieldType";
+
 interface OriginalField {
   title: string;
   settings: any;
@@ -29,23 +31,23 @@ export class Field {
   }
 
   get isTextType() {
-    return this.type === "text";
+    return this.type.isTextType;
   }
 
   get isImageType() {
-    return this.type === "image";
+    return this.type.isImageType;
   }
 
   get isChatType() {
-    return this.type === "chat";
+    return this.type.isChatType;
   }
 
   get isCustomType() {
-    return this.type === "custom";
+    return this.type.isCustomType;
   }
 
   private get type() {
-    return this.settings?.type?.toLowerCase() ?? null;
+    return FieldType.from(this.settings?.type);
   }
 
   get isModified(): boolean {
