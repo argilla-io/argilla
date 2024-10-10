@@ -59,8 +59,10 @@ dependencies = [
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
     "packaging>=23.2",
     "psycopg2-binary>=2.9.9",
+    "datasets>=3.0.1",
     # For Telemetry
     "huggingface_hub>=0.13,<1",
+
 ]
 
 [project.optional-dependencies]
@@ -100,7 +102,6 @@ test = [
     "factory-boy~=3.2.1",
     "httpx>=0.26.0",
     # Required by tests/unit/utils/test_dependency.py but we should take a look a probably removed them
-    "datasets > 1.17.0,!= 2.3.2",
     "spacy>=3.5.0,<3.7.0",
     "pytest-randomly>=3.15.0",
 ]
