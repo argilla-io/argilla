@@ -39,11 +39,11 @@ export class Field {
   }
 
   get isChatType() {
-    return this.type === "chat";
+    return this.type.isChatType;
   }
 
   get isCustomType() {
-    return this.type === "custom";
+    return this.type.isCustomType;
   }
 
   private get type() {
