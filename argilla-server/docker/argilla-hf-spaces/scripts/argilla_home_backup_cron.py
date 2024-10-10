@@ -103,7 +103,7 @@ def is_argilla_alive():
 
 if __name__ == "__main__":
     argilla_data: str = "/data/argilla"
-    backup_path = os.environ["ARGILLA_BACKUP_PATH"]
+    backup_path = os.environ["ARGILLA_BACKUPS_PATH"]
     backup_interval = int(os.getenv("ARGILLA_BACKUP_INTERVAL") or "15")
     num_of_backups = int(os.getenv("ARGILLA_NUM_OF_BACKUPS") or "20")
 
