@@ -142,3 +142,9 @@ class DatasetUpdate(UpdateSchema):
     distribution: Optional[DatasetDistributionUpdate]
 
     __non_nullable_fields__ = {"name", "allow_extra_metadata", "distribution"}
+
+
+class HubDataset(BaseModel):
+    name: str
+    subset: str
+    split: str
