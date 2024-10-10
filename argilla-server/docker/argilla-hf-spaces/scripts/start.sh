@@ -16,20 +16,22 @@ export USERNAME="${USERNAME:-$DEFAULT_USERNAME}"
 DEFAULT_PASSWORD=$(pwgen -s 16 1)
 export PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
 
-if [ ! -d /data/argilla/backup ]; then
-  echo "Initializing backup folder..."
-  mkdir -p /data/argilla/backup
+export ARGILLA_BACKUPS_PATH=/data/argilla/backups
+
+if [ ! -d ARGILLA_BACKUPS_PATH ]; then
+  echo "Initializing backups folder..."
+  mkdir -p ARGILLA_BACKUPS_PATH
 
   # if exists the db file, copy it to the backup folder and rename it
   if [ -f /data/argilla/argilla.db ]; then
-    echo "Found argilla.db file, moving it to the backup folder..."
-    cp /data/argilla/argilla.db /data/argilla/backup || true
+    echo "Found argilla.db file, moving it to the argilla home path..."
+    cp /data/argilla/argilla.db $ARGILLA_HOME_PATH || true
   fi
 
   # if exists the server id file, copy it to the argilla folder
   if [ -f /data/argilla/server_id.dat ]; then
-    echo "Found server_id.dat file, moving it to the backup folder..."
-    cp /data/argilla/server_id.dat /data/argilla/backup || true
+    echo "Found server_id.dat file, moving it to argilla home path..."
+    cp /data/argilla/server_id.dat $ARGILLA_HOME_PATH || true
   fi
 
 else
@@ -38,7 +40,7 @@ fi
 
 # Copy the backup files to the argilla folder
 echo "Restoring files from backup folder..."
-cp -r /data/argilla/backup/* $ARGILLA_HOME_PATH || true
+python restore_argilla_backup.py
 
 echo "Starting processes..."
 honcho start

@@ -18,6 +18,8 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse
 
+import httpx
+
 from argilla_server.database import database_url_sync
 from argilla_server.settings import settings
 from argilla_server.telemetry import get_server_id, SERVER_ID_DAT_FILE
@@ -32,30 +34,28 @@ logging.basicConfig(
 _LOGGER = logging.getLogger("argilla.backup")
 
 
-def _run_backup(src: Path, dst_folder: str):
-    bak_folder = Path(dst_folder) / "bak"
+def _run_backup(src: Path, dst_folder: Path, backup_id: int):
+    backup_folder = Path(dst_folder) / str(backup_id)
 
     # Creating a copy of existing backup
-    os.system(f"rm -rf {bak_folder}/")
-    bak_folder.mkdir(exist_ok=True)
-    os.system(f"mv {os.path.join(dst_folder, src.name)}* {bak_folder}/")
+    backup_folder.mkdir(exist_ok=True)
 
-    backup_file = os.path.join(dst_folder, src.name)
+    backup_file = os.path.join(backup_folder, src.name)
 
     src_conn = sqlite3.connect(src, isolation_level="DEFERRED")
     dst_conn = sqlite3.connect(backup_file, isolation_level="DEFERRED")
 
     try:
-        _LOGGER.info("Creating a db backup...")
+        _LOGGER.info("Creating a db backup in %s", backup_file)
         with src_conn, dst_conn:
             src_conn.backup(dst_conn)
-        _LOGGER.info("DB backup created!")
+        _LOGGER.info("DB backup created at %s", backup_file)
     finally:
         src_conn.close()
         dst_conn.close()
 
 
-def db_backup(backup_folder: str, interval: int = 15):
+def db_backup(backup_folder: str, interval: int = 15, num_of_backups: int = 20):
     url_db = database_url_sync()
     db_path = Path(urlparse(url_db).path)
 
@@ -64,9 +64,11 @@ def db_backup(backup_folder: str, interval: int = 15):
     if not backup_path.exists():
         backup_path.mkdir()
 
+    backup_id = 0
     while True:
         try:
-            _run_backup(src=db_path, dst_folder=backup_path)
+            _run_backup(src=db_path, dst_folder=backup_path, backup_id=backup_id)
+            backup_id = (backup_id + 1) % num_of_backups
         except Exception as e:
             _LOGGER.exception(f"Error creating backup: {e}")
 
@@ -88,10 +90,26 @@ def server_id_backup(backup_folder: str):
     _LOGGER.info("Server id file copied!")
 
 
+def is_argilla_alive():
+    try:
+        with httpx.Client() as client:
+            response = client.get("http://localhost:6900/api/v1/status")
+            response.raise_for_status()
+        return True
+    except Exception as e:
+        _LOGGER.exception(f"Error checking if argilla is alive: {e}")
+        return False
+
+
 if __name__ == "__main__":
-    backup_folder: str = "/data/argilla/backup"
-
+    argilla_data: str = "/data/argilla"
+    backup_path = os.environ["ARGILLA_BACKUP_PATH"]
     backup_interval = int(os.getenv("ARGILLA_BACKUP_INTERVAL") or "15")
+    num_of_backups = int(os.getenv("ARGILLA_NUM_OF_BACKUPS") or "20")
 
-    server_id_backup(backup_folder)
-    db_backup(backup_folder, interval=backup_interval)
+    while not is_argilla_alive():
+        _LOGGER.info("Waiting for the server to be ready...")
+        time.sleep(5)
+
+    server_id_backup(argilla_data)
+    db_backup(backup_path, interval=backup_interval, num_of_backups=num_of_backups)
