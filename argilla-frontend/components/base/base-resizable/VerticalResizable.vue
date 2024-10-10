@@ -26,6 +26,10 @@ export default {
       type: String,
       default: "v-rz",
     },
+    minWidthPercent: {
+      type: Number,
+      default: 38,
+    },
   },
   data() {
     return {
@@ -59,8 +63,8 @@ export default {
   },
   methods: {
     limitElementWidth(element) {
-      element.style["max-width"] = "62%";
-      element.style["min-width"] = "38%";
+      element.style["max-width"] = `${100 - this.minWidthPercent}%`;
+      element.style["min-width"] = `${this.minWidthPercent}%`;
     },
     savePositionOnStartResizing(e) {
       this.leftSidePrevPosition = {

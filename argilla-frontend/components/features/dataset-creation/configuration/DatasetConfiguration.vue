@@ -1,6 +1,10 @@
 <template>
   <div class="dataset-config">
-    <HorizontalResizable :id="`dataset-config-r-h-rz`" class="wrapper">
+    <HorizontalResizable
+      :min-height-percent="30"
+      :id="`dataset-config-r-h-rz`"
+      class="wrapper"
+    >
       <template #up>
         <VerticalResizable :id="`dataset-config-left-t-v-rz`">
           <template #left>

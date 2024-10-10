@@ -45,6 +45,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    minHeightPercent: {
+      type: Number,
+      default: 50,
+    },
   },
   data() {
     return {
@@ -112,8 +116,8 @@ export default {
   methods: {
     savePosition() {},
     limitElementHeight(element) {
-      element.style["max-height"] = this.collapsable ? "100%" : "80%";
-      element.style["min-height"] = this.collapsable ? "50%" : "20%";
+      element.style["max-height"] = "100%";
+      element.style["min-height"] = `${this.minHeightPercent}%`;
     },
     savePositionOnStartResizing(e) {
       this.upSidePrevPosition = {
