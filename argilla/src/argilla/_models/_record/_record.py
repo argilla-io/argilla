@@ -18,7 +18,7 @@ import uuid
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 
-from argilla._models._record._metadata import MetadataModel, MetadataValue
+from argilla._models._record._metadata import MetadataModel
 from argilla._models._record._response import UserResponseModel
 from argilla._models._record._suggestion import SuggestionModel
 from argilla._models._record._vector import VectorModel
@@ -44,7 +44,7 @@ class RecordModel(ResourceModel):
 
     status: Literal["pending", "completed"] = "pending"
     fields: Optional[Dict[str, FieldValue]] = None
-    metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
+    metadata: Optional[Union[List[MetadataModel], Dict[str, Any]]] = Field(default_factory=dict)
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
     suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(default_factory=tuple)

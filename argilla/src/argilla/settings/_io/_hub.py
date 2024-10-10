@@ -50,6 +50,7 @@ class FeatureType(Enum):
     LABEL = "label"
     INT = "int"
     FLOAT = "float"
+    BOOL = "bool"
 
 
 class AttributeType(Enum):
@@ -117,6 +118,8 @@ def _map_feature_type(feature):
             return FeatureType.INT
         elif dtype in ["float32", "float64"]:
             return FeatureType.FLOAT
+        elif dtype == "bool":
+            return FeatureType.BOOL
     elif hf_type == "Image":
         return FeatureType.IMAGE
     elif hf_type == "ClassLabel":
@@ -260,6 +263,8 @@ def _define_settings_from_features(
             metadata.append(IntegerMetadataProperty(name=name))
         elif feature_type == FeatureType.FLOAT:
             metadata.append(FloatMetadataProperty(name=name))
+        elif feature_type == FeatureType.BOOL:
+            metadata.append(TermsMetadataProperty(name=name))
         else:
             warnings.warn(f"Feature '{name}' has an unsupported type. Skipping. Feature type: {feature_type}")
 
