@@ -92,7 +92,7 @@ jobs:
           path: argilla-server/docker/server/dist
 
       - name: Build and push `argilla-server` image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: argilla-server/docker/server
           platforms: ${{ env.PLATFORMS }}
@@ -102,7 +102,7 @@ jobs:
 
       - name: Push latest `argilla-server` image
         if: ${{ env.PUBLISH_LATEST == 'true' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: argilla-server/docker/server
           platforms: ${{ env.PLATFORMS }}
@@ -111,7 +111,7 @@ jobs:
           push: true
 
       - name: Build and push `argilla-hf-spaces` image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: argilla-server/docker/argilla-hf-spaces
           platforms: ${{ env.PLATFORMS }}
@@ -124,7 +124,7 @@ jobs:
 
       - name: Push latest `argilla-hf-spaces` image
         if: ${{ env.PUBLISH_LATEST == 'true' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: argilla-server/docker/argilla-hf-spaces
           platforms: ${{ env.PLATFORMS }}
