@@ -16,12 +16,12 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.models import Dataset, Field, Question, Workspace
 from argilla_server.errors.future import (
     NotUniqueError,
     UnprocessableEntityError,
     UpdateDistributionWithExistingResponsesError,
 )
-from argilla_server.models import Dataset, Workspace
 
 
 class DatasetCreateValidator:
@@ -39,6 +39,29 @@ class DatasetCreateValidator:
     async def _validate_name_is_not_duplicated(cls, db: AsyncSession, name: str, workspace_id: UUID) -> None:
         if await Dataset.get_by(db, name=name, workspace_id=workspace_id):
             raise NotUniqueError(f"Dataset with name `{name}` already exists for workspace with id `{workspace_id}`")
+
+
+class DatasetPublishValidator:
+    @classmethod
+    async def validate(cls, db: AsyncSession, dataset: Dataset) -> None:
+        await cls._validate_has_not_been_published_yet(db, dataset)
+        await cls._validate_has_at_least_one_required_field(db, dataset)
+        await cls._validate_has_at_least_one_required_question(db, dataset)
+
+    @classmethod
+    async def _validate_has_not_been_published_yet(cls, db: AsyncSession, dataset: Dataset) -> None:
+        if dataset.is_ready:
+            raise UnprocessableEntityError("Dataset has already been published")
+
+    @classmethod
+    async def _validate_has_at_least_one_required_field(cls, db: AsyncSession, dataset: Dataset) -> None:
+        if await Field.count_by(db, dataset_id=dataset.id, required=True) == 0:
+            raise UnprocessableEntityError("Dataset cannot be published without required fields")
+
+    @classmethod
+    async def _validate_has_at_least_one_required_question(cls, db: AsyncSession, dataset: Dataset) -> None:
+        if await Question.count_by(db, dataset_id=dataset.id, required=True) == 0:
+            raise UnprocessableEntityError("Dataset cannot be published without required questions")
 
 
 class DatasetUpdateValidator:

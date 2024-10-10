@@ -7,6 +7,7 @@
         title,
         content,
         settings,
+        sdkRecord,
         isTextType,
         isImageType,
         isChatType,
@@ -30,6 +31,7 @@
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
         :searchText="recordCriteria.committed.searchText.value.text"
+        :record="record"
       />
       <ChatField
         v-else-if="isChatType"
@@ -39,7 +41,20 @@
         :content="content"
         :searchText="recordCriteria.committed.searchText.value.text"
       />
-      <ImageField v-else :name="name" :title="title" :content="content" />
+      <ImageField
+        v-else-if="isImageType"
+        :name="name"
+        :title="title"
+        :content="content"
+      />
+      <CustomField
+        v-else
+        :name="name"
+        :title="title"
+        :content="content"
+        :sdkRecord="sdkRecord"
+        :settings="settings"
+      />
     </div>
   </div>
 </template>

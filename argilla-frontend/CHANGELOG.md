@@ -16,6 +16,17 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.3.0)
+
+### Added
+
+- Added new field `CustomField` [#5462](https://github.com/argilla-io/argilla/pull/5462)
+
+### Fixed
+
+- Fix autofill form on sign-in page [#5522](https://github.com/argilla-io/argilla/pull/5522)
+- Support copy on clipboard for no secure context [#5535](https://github.com/argilla-io/argilla/pull/5535)
+
 ## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
 
 ### Added

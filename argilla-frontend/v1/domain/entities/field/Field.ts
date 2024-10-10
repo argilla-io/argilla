@@ -4,18 +4,30 @@ interface OriginalField {
   title: string;
   settings: any;
 }
+
 export class Field {
   private original: OriginalField;
+  public readonly content: string;
+
+  public readonly sdkRecord?: unknown;
+
   constructor(
     public readonly id: string,
     public readonly name: string,
     public title: string,
-    public readonly content: string,
     public readonly datasetId: string,
     public readonly isRequired: boolean,
-    public settings: any
+    public settings: any,
+    record?: any
   ) {
     this.initializeOriginal();
+
+    if (this.isCustomType) {
+      this.sdkRecord = record;
+      this.content = settings.template;
+    } else {
+      this.content = record?.fields[name] ?? "";
+    }
   }
 
   get isTextType() {
@@ -26,8 +38,12 @@ export class Field {
     return this.type.isImageType;
   }
 
-  public get isChatType() {
-    return this.type.isChatType;
+  get isChatType() {
+    return this.type === "chat";
+  }
+
+  get isCustomType() {
+    return this.type === "custom";
   }
 
   private get type() {

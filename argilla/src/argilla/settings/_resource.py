@@ -14,6 +14,7 @@
 
 import json
 import os
+import re
 from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
@@ -22,8 +23,8 @@ from uuid import UUID
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
-from argilla.settings._io import build_settings_from_repo_id
 from argilla.settings._field import Field, _field_from_dict, _field_from_model
+from argilla.settings._io import build_settings_from_repo_id
 from argilla.settings._metadata import MetadataType, MetadataField
 from argilla.settings._question import QuestionType, question_from_model, question_from_dict
 from argilla.settings._task_distribution import TaskDistribution
@@ -185,6 +186,9 @@ class Settings(DefaultSettingsMixin, Resource):
         self._validate_empty_settings()
         self._validate_duplicate_names()
 
+        for field in self.fields:
+            field.validate()
+
     #####################
     #  Public methods   #
     #####################
@@ -261,11 +265,21 @@ class Settings(DefaultSettingsMixin, Resource):
 
     @classmethod
     def from_hub(
-        cls, repo_id: str, feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]] = None
+        cls,
+        repo_id: str,
+        subset: Optional[str] = None,
+        feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]] = None,
+        **kwargs,
     ) -> "Settings":
-        """Load the settings from the Hub"""
+        """Load the settings from the Hub
 
-        settings = build_settings_from_repo_id(repo_id=repo_id, feature_mapping=feature_mapping)
+        Parameters:
+            repo_id (str): The ID of the repository to load the settings from on the Hub.
+            subset (Optional[str]): The subset of the repository to load the settings from.
+            feature_mapping (Dict[str, Literal["question", "field", "metadata"]]): A dictionary that maps incoming column names to Argilla attributes.
+        """
+
+        settings = build_settings_from_repo_id(repo_id=repo_id, feature_mapping=feature_mapping, subset=subset)
         return settings
 
     def __eq__(self, other: "Settings") -> bool:
@@ -391,7 +405,7 @@ class Settings(DefaultSettingsMixin, Resource):
                 dataset_properties_by_name[property.name] = property
 
     @classmethod
-    def _validate_mapping(cls, mapping: Dict[str, Union[str, Sequence[str]]]) -> None:
+    def _validate_mapping(cls, mapping: Dict[str, Union[str, Sequence[str]]]) -> dict:
         validate_mapping = {}
         for key, value in mapping.items():
             if isinstance(value, str):
@@ -400,7 +414,17 @@ class Settings(DefaultSettingsMixin, Resource):
                 validate_mapping[key] = tuple(value)
             else:
                 raise SettingsError(f"Invalid mapping value for key {key!r}: {value}")
+
         return validate_mapping
+
+    @classmethod
+    def _sanitize_settings_name(cls, name: str) -> str:
+        """Sanitize the name for the settings"""
+
+        for char in [" ", ":", ".", "&", "?", "!"]:
+            name = name.replace(char, "_")
+
+        return name.lower()
 
     def __process_guidelines(self, guidelines):
         if guidelines is None:
@@ -414,6 +438,11 @@ class Settings(DefaultSettingsMixin, Resource):
                 return file.read()
 
         return guidelines
+
+    @classmethod
+    def _is_valid_name(cls, name: str) -> bool:
+        """Check if the name is valid"""
+        return bool(re.match(r"^(?=.*[a-z0-9])[a-z0-9_-]+$", name))
 
 
 Property = Union[Field, VectorField, MetadataType, QuestionType]
@@ -487,6 +516,11 @@ class SettingsProperties(Sequence[Property]):
 
         if property.name in dir(self):
             raise ValueError(f"Property with name {property.name!r} conflicts with an existing attribute")
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+
+        return f"{repr([prop for prop in self])}"
 
 
 class QuestionsProperties(SettingsProperties[QuestionType]):

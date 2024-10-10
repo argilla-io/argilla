@@ -17,7 +17,7 @@ import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Optional, Type, Union, Dict
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 from uuid import UUID
 
 from datasets import DatasetDict
@@ -30,14 +30,14 @@ from argilla._exceptions._records import RecordsIngestionError
 from argilla._exceptions._settings import SettingsError
 from argilla._helpers._media import pil_to_data_uri
 from argilla.datasets._io._disk import DiskImportExportMixin
-from argilla.records._mapping import IngestedRecordMapper
 from argilla.records._io._datasets import HFDatasetsIO
+from argilla.records._mapping import IngestedRecordMapper
 from argilla.responses import Response
 
 if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
 
-    from argilla import Argilla, Dataset, Workspace, Settings
+    from argilla import Argilla, Dataset, Settings, Workspace
 
 
 class HubImportExportMixin(DiskImportExportMixin):
@@ -47,7 +47,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         *,
         with_records: bool = True,
         generate_card: Optional[bool] = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Pushes the `Dataset` to the Hugging Face Hub. If the dataset has been previously pushed to the
         Hugging Face Hub, it will be updated instead of creating a new dataset repo.
@@ -58,6 +58,9 @@ class HubImportExportMixin(DiskImportExportMixin):
             generate_card: whether to generate a dataset card for the `Dataset` in the Hugging Face Hub. Defaults
                 to `True`.
             **kwargs: the kwargs to pass to `datasets.Dataset.push_to_hub`.
+
+        Returns:
+            None
         """
 
         from huggingface_hub import DatasetCardData, HfApi
@@ -118,8 +121,9 @@ class HubImportExportMixin(DiskImportExportMixin):
         with_records: bool = True,
         settings: Optional["Settings"] = None,
         split: Optional[str] = None,
+        subset: Optional[str] = None,
         **kwargs: Any,
-    ):
+    ) -> "Dataset":
         """Loads a `Dataset` from the Hugging Face Hub.
 
         Parameters:
@@ -137,9 +141,10 @@ class HubImportExportMixin(DiskImportExportMixin):
         """
         from datasets import load_dataset
         from huggingface_hub import snapshot_download
+        from argilla import Dataset
 
         if name is None:
-            name = repo_id.replace("/", "_")
+            name = Dataset._sanitize_name(repo_id)
 
         if settings is not None:
             dataset = cls(name=name, settings=settings)
@@ -160,7 +165,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             except ImportDatasetError:
                 from argilla import Settings
 
-                settings = Settings.from_hub(repo_id=repo_id)
+                settings = Settings.from_hub(repo_id=repo_id, subset=subset)
                 dataset = cls.from_hub(
                     repo_id=repo_id,
                     name=name,
@@ -169,6 +174,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                     with_records=with_records,
                     settings=settings,
                     split=split,
+                    subset=subset,
                     **kwargs,
                 )
                 return dataset
@@ -178,6 +184,7 @@ class HubImportExportMixin(DiskImportExportMixin):
                 hf_dataset = load_dataset(
                     path=repo_id,
                     split=split,
+                    name=subset,
                     **kwargs,
                 )  # type: ignore
                 hf_dataset = cls._get_dataset_split(hf_dataset=hf_dataset, split=split, **kwargs)
@@ -193,9 +200,16 @@ class HubImportExportMixin(DiskImportExportMixin):
     @staticmethod
     def _log_dataset_records(hf_dataset: "HFDataset", dataset: "Dataset"):
         """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
-        # THIS IS REQUIRED SINCE NAME IN ARGILLA ARE LOWERCASE. The Settings BaseModel models apply this logic
-        # Ideally, the restrictions in Argilla should be removed and the names should be case-insensitive
-        hf_dataset = hf_dataset.rename_columns({col: col.lower() for col in hf_dataset.column_names})
+        # THIS IS REQUIRED SINCE THE NAME RESTRICTION IN ARGILLA. HUGGING FACE DATASET COLUMNS ARE CASE SENSITIVE
+        # Also, there is a logic with column names including ".responses" and ".suggestion" in the name.
+        columns_map = {}
+        for column in hf_dataset.column_names:
+            if ".responses" in column or ".suggestion" in column:
+                columns_map[column] = column.lower()
+            else:
+                columns_map[column] = dataset.settings._sanitize_settings_name(column)
+
+        hf_dataset = hf_dataset.rename_columns(columns_map)
 
         # Identify columns that columns that contain responses
         responses_columns = [col for col in hf_dataset.column_names if ".responses" in col]

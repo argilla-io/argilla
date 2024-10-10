@@ -16,7 +16,7 @@ import uuid
 
 import pytest
 
-from argilla import UserResponse, Response, Dataset, Workspace
+from argilla import UserResponse, Response, Dataset, Workspace, Record
 from argilla._models import UserResponseModel, ResponseStatus
 
 
@@ -89,9 +89,14 @@ class TestResponses:
 
     def test_create_user_response_from_draft_response_model_without_values(self):
         model = UserResponseModel(values={}, status=ResponseStatus.draft, user=uuid.uuid4())
-        response = UserResponse.from_model(
-            model=model, dataset=Dataset(name="burr", workspace=Workspace(name="test", id=uuid.uuid4()))
+
+        record = Record(
+            fields={"question": "answer"},
+            _dataset=Dataset(name="burr", workspace=Workspace(name="test", id=uuid.uuid4())),
         )
+
+        response = UserResponse.from_model(model=model, record=record)
+
         assert len(response.responses) == 0
         assert response.user_id is None
         assert response.status == ResponseStatus.draft

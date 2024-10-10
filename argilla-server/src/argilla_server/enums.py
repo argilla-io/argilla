@@ -19,6 +19,7 @@ class FieldType(str, Enum):
     text = "text"
     image = "image"
     chat = "chat"
+    custom = "custom"
 
 
 class ResponseStatus(str, Enum):
@@ -81,8 +82,11 @@ class MetadataPropertyType(str, Enum):
 
 
 class RecordSortField(str, Enum):
+    id = "id"
+    external_id = "external_id"
     inserted_at = "inserted_at"
     updated_at = "updated_at"
+    status = "status"
 
 
 class SortOrder(str, Enum):

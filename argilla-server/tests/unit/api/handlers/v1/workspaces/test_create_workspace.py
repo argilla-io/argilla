@@ -87,18 +87,6 @@ class TestCreateWorkspace:
 
         assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 1
 
-    async def test_create_workspace_with_invalid_name(
-        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        response = await async_client.post(
-            self.url(),
-            headers=owner_auth_header,
-            json={"name": "invalid name"},
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 0
-
     async def test_create_workspace_with_invalid_min_length_name(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):

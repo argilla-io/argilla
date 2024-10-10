@@ -916,10 +916,6 @@ class TestSuiteDatasets:
         "dataset_json",
         [
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
@@ -2072,6 +2068,11 @@ class TestSuiteDatasets:
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
                         },
@@ -2174,6 +2175,11 @@ class TestSuiteDatasets:
                             "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "value is not a valid list",
                             "type": "type_error.list",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
@@ -4350,8 +4356,9 @@ class TestSuiteDatasets:
             items=[
                 SearchResponseItem(record_id=records[0].id, score=14.2),
                 SearchResponseItem(record_id=records[1].id, score=12.2),
+                SearchResponseItem(record_id=records[2].id, score=11.1),
             ],
-            total=2,
+            total=3,
         )
 
         query_json = {"query": {"vector": {"name": vector_settings.name, "value": selected_vector.value}}}
@@ -4359,13 +4366,13 @@ class TestSuiteDatasets:
             f"/api/v1/me/datasets/{dataset.id}/records/search",
             headers=owner_auth_header,
             json=query_json,
-            params={"offset": 0, "limit": 10},
+            params={"offset": 1, "limit": 3},
         )
 
         assert response.status_code == 200
         response_json = response.json()
         assert len(response_json["items"]) == 2
-        assert response_json["total"] == 2
+        assert response_json["total"] == 3
 
         mock_search_engine.search.assert_not_called()
         mock_search_engine.similarity_search.assert_called_once_with(
@@ -4375,8 +4382,34 @@ class TestSuiteDatasets:
             value=selected_vector.value,
             query=None,
             order=SimilarityOrder.most_similar,
-            max_results=10,
+            max_results=4,
         )
+
+    async def test_search_current_user_dataset_records_with_vector_value_and_max_results_offset(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        selected_vector = await VectorFactory.create(
+            vector_settings=vector_settings, record=records[0], value=[1, 2, 3]
+        )
+
+        query_json = {"query": {"vector": {"name": vector_settings.name, "value": selected_vector.value}}}
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 1000},
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json["items"]) == 0
+        assert response_json["total"] == 0
+
+        mock_search_engine.search.assert_not_called()
+        mock_search_engine.similarity_search.assert_not_called()
 
     async def test_search_current_user_dataset_records_with_vector_value_and_query(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
@@ -4635,10 +4668,10 @@ class TestSuiteDatasets:
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset is already published"}
+        assert response.json() == {"detail": "Dataset has already been published"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_without_fields(
+    async def test_publish_dataset_without_required_fields(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4651,7 +4684,7 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": "Dataset cannot be published without required fields"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_without_questions(
+    async def test_publish_dataset_without_required_questions(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4740,10 +4773,6 @@ class TestSuiteDatasets:
         [
             {"name": None},
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},

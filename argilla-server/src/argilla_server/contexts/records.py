@@ -97,14 +97,14 @@ def _record_by_dataset_id_query(
         query = query.options(selectinload(Record.suggestions))
 
     if with_vectors is True:
-        query = query.options(selectinload(Record.vectors))
+        query = query.options(selectinload(Record.vectors).selectinload(Vector.vector_settings))
     elif isinstance(with_vectors, list):
         subquery = select(VectorSettings.id).filter(
             and_(VectorSettings.dataset_id == dataset_id, VectorSettings.name.in_(with_vectors))
         )
         query = query.outerjoin(
             Vector, and_(Vector.record_id == Record.id, Vector.vector_settings_id.in_(subquery))
-        ).options(contains_eager(Record.vectors))
+        ).options(contains_eager(Record.vectors).selectinload(Vector.vector_settings))
 
     if offset is not None:
         query = query.offset(offset)
