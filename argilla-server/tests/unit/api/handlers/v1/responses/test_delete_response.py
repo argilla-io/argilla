@@ -12,16 +12,21 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from uuid import UUID
-
 import pytest
 
+from uuid import UUID
 from httpx import AsyncClient
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import User
+from argilla_server.jobs.queues import HIGH_QUEUE
+from argilla_server.webhooks.v1.enums import RecordEvent, ResponseEvent
+from argilla_server.webhooks.v1.responses import build_response_event
+from argilla_server.webhooks.v1.records import build_record_event
 from argilla_server.enums import DatasetDistributionStrategy, RecordStatus, ResponseStatus
 
-from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, TextQuestionFactory
+from tests.factories import DatasetFactory, RecordFactory, ResponseFactory, TextQuestionFactory, WebhookFactory
 
 
 @pytest.mark.asyncio
@@ -64,3 +69,56 @@ class TestDeleteResponse:
 
         assert resp.status_code == 200
         assert record.status == RecordStatus.completed
+
+    async def test_delete_response_enqueue_webhook_response_deleted_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await ResponseFactory.create()
+        webhook = await WebhookFactory.create(events=[ResponseEvent.deleted])
+
+        event = await build_response_event(db, ResponseEvent.deleted, response)
+
+        resp = await async_client.delete(self.url(response.id), headers=owner_auth_header)
+
+        assert resp.status_code == 200
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == ResponseEvent.deleted
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)
+
+    async def test_delete_response_enqueue_webhook_record_updated_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        record = await RecordFactory.create()
+        responses = await ResponseFactory.create_batch(2, record=record)
+        webhook = await WebhookFactory.create(events=[RecordEvent.updated])
+
+        response = await async_client.delete(self.url(responses[0].id), headers=owner_auth_header)
+
+        assert response.status_code == 200
+
+        event = await build_record_event(db, RecordEvent.updated, record)
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.updated
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)
+
+    async def test_delete_response_enqueue_webhook_record_completed_event(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        record = await RecordFactory.create()
+        responses = await ResponseFactory.create_batch(2, record=record)
+        webhook = await WebhookFactory.create(events=[RecordEvent.completed])
+
+        response = await async_client.delete(self.url(responses[0].id), headers=owner_auth_header)
+
+        assert response.status_code == 200
+
+        event = await build_record_event(db, RecordEvent.completed, record)
+
+        assert HIGH_QUEUE.count == 1
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.completed
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event.data)

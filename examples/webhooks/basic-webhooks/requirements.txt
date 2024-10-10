@@ -1,0 +1,3 @@
+argilla @ git+https://github.com/argilla-io/argilla.git@feat/argilla/working-with-webhooks#subdirectory=argilla
+fastapi
+uvicorn[standard]
