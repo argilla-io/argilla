@@ -260,13 +260,19 @@ describe("DatasetCreation", () => {
       expect(secondQuestion.type.isSingleLabelType).toBeTruthy();
       expect(secondQuestion.options).toEqual([
         {
-          name: "positive",
+          id: "1",
+          text: "positive",
+          value: "positive",
         },
         {
-          name: "negative",
+          id: "2",
+          text: "negative",
+          value: "negative",
         },
         {
-          name: "neutral",
+          id: "3",
+          text: "neutral",
+          value: "neutral",
         },
       ]);
     });

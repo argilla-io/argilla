@@ -153,7 +153,7 @@ export default {
     },
     addQuestion(type) {
       const questionName = `question_${this.selectedSubset.questions.length}`;
-      this.selectedSubset.setQuestionSettingByType(questionName, { type });
+      this.selectedSubset.addQuestion(questionName, { type });
     },
     onMetadataTypeSelected(field) {
       this.selectedSubset.changeToMetadata(field.name, field.type.value);
@@ -162,7 +162,7 @@ export default {
       this.selectedSubset.changeToField(metadata.name, metadata.type.value);
     },
     onTypeIsChanged(name, type) {
-      this.selectedSubset.setQuestionSettingByType(name, {
+      this.selectedSubset.addQuestion(name, {
         type: type.value,
       });
     },

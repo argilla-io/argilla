@@ -172,7 +172,7 @@ export class Subset {
     }
   }
 
-  public setQuestionSettingByType(name: string, settings: QuestionPrototype) {
+  public addQuestion(name: string, settings: QuestionPrototype) {
     const { type } = settings;
     if (type === "label_selection" || type === "multi_label_selection") {
       settings.options = [
@@ -212,10 +212,15 @@ export class Subset {
     if (type === "text") {
       settings.options = [];
     }
-    if (!!this.questions.find((q) => q.name === name)) {
-      this.questions.find((q) => q.name === name)?.setSettings(settings);
-    } else {
-      this.questions.push(new QuestionCreation(name, false, settings));
+
+    const currentQuestion = this.questions.find((q) => q.name === name);
+
+    if (currentQuestion) {
+      currentQuestion?.setSettings(settings);
+
+      return;
     }
+
+    this.questions.push(new QuestionCreation(name, false, settings));
   }
 }
