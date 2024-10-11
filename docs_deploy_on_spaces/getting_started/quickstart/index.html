@@ -2335,11 +2335,12 @@
 <p>First, install Argilla:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">pip install argilla</span>
 </span></code></pre></div>
-<p>Next, we can use the <code>Argilla.deploy_on_spaces</code> method, which will create a Space in <a href="https://huggingface.co/">the Hugging Face Hub</a>. This method will automatically do the following:</p>
+<p>Next, we can use the <code>Argilla.deploy_on_spaces</code> method, which will create a Space in <a href="https://huggingface.co/">the Hugging Face Hub</a>. This method will do the following:</p>
 <ul>
-<li>Deploy an Argilla Space on the Hugging Face Hub with <a href="#sign-in-into-the-argilla-ui">OAuth sign-in</a> and a URL like <code>https://&lt;your-username&gt;-argilla.hf.space</code>, which takes around 2-3 minutes.</li>
-<li>Create a default workspace called <code>argilla</code> with an owner called <code>&lt;your-username&gt;</code> and an Argilla token set to <code>api_key</code>.</li>
-<li>Automatically return the authenticated Argilla client, which can directly be used to interact with your Argilla server.</li>
+<li>Deploy an Argilla Space on the Hugging Face Hub, which takes around 2-3 minutes.</li>
+<li>Set the <code>API_KEY</code> secret based on the <code>api_key</code> you provide. This key will be used to authenticate your requests to the Argilla API.</li>
+<li>Set the <code>USERNAME</code> and <code>PASSWORD</code> secrets based on the username of the Hugging Face token and the <code>api_key</code> you provide, respectively.</li>
+<li>Automatically return an authenticated Argilla client, which can directly be used to interact with your Argilla server.</li>
 </ul>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
