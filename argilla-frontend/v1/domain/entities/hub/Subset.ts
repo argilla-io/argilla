@@ -133,32 +133,6 @@ export class Subset {
     return structure.kindObject === "ClassLabel";
   }
 
-  public changeToMetadata(name: string, type: MetadataTypes) {
-    const index = this.fields.findIndex((f) => f.name === name);
-    if (index !== -1) {
-      const field = this.fields[index];
-      const newMetadata = MetadataCreation.from(field.name, type);
-
-      if (newMetadata) {
-        this.fields.splice(index, 1);
-        this.metadata.push(newMetadata);
-      }
-    }
-  }
-
-  public changeToField(name: string, type: FieldCreationTypes) {
-    const index = this.metadata.findIndex((m) => m.name === name);
-    if (index !== -1) {
-      const metadata = this.metadata[index];
-      const newField = FieldCreation.from(metadata.name, type, type);
-
-      if (newField) {
-        this.metadata.splice(index, 1);
-        this.fields.push(newField);
-      }
-    }
-  }
-
   public removeQuestion(name: string) {
     const index = this.questions.findIndex((q) => q.name === name);
     if (index !== -1) {

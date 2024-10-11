@@ -1,7 +1,7 @@
 <template>
   <DatasetConfigurationCard
     :item="field"
-    :available-types="[...availableFieldTypes, ...availableMetadataTypes]"
+    :available-types="availableFieldTypes"
     @is-focused="$emit('is-focused', $event)"
   >
     <template slot="required">
@@ -32,24 +32,10 @@ export default {
       type: Array,
       required: true,
     },
-    availableMetadataTypes: {
-      type: Array,
-      required: true,
-    },
   },
   computed: {
     hasNoMapping() {
       return this.field.type.value === "no mapping";
-    },
-  },
-  watch: {
-    field: {
-      handler() {
-        if (this.availableMetadataTypes.includes(this.field.type)) {
-          this.$emit("metadata-type-selected", this.field);
-        }
-      },
-      deep: true,
     },
   },
   model: {
