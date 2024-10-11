@@ -96,7 +96,11 @@ export class Subset {
       if (structure.structure?.length > 0) return "chat";
     };
 
-    const field = FieldCreation.from(structure.name, getFieldType(structure));
+    const field = FieldCreation.from(
+      structure.name,
+      getFieldType(structure),
+      structure.type
+    );
 
     if (field) {
       this.fields.push(field);
@@ -120,7 +124,9 @@ export class Subset {
   }
 
   private createNoMappedFields(structure: Structure) {
-    this.fields.push(FieldCreation.from(structure.name, "no mapping"));
+    this.fields.push(
+      FieldCreation.from(structure.name, "no mapping", structure.type)
+    );
   }
 
   private isASingleLabel(structure: Structure) {
@@ -144,7 +150,7 @@ export class Subset {
     const index = this.metadata.findIndex((m) => m.name === name);
     if (index !== -1) {
       const metadata = this.metadata[index];
-      const newField = FieldCreation.from(metadata.name, type);
+      const newField = FieldCreation.from(metadata.name, type, type);
 
       if (newField) {
         this.metadata.splice(index, 1);
