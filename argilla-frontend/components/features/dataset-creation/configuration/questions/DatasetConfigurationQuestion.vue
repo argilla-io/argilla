@@ -13,24 +13,17 @@
         ><svgicon name="close"
       /></BaseButton>
     </template>
-    <template slot="required">
-      <BaseCheckbox
-        :value="question.required"
-        @input="question.required = !question.required"
-        class="config-card__required"
-      />
-    </template>
     <DatasetConfigurationSelector
       class="config-card__type"
       :options="columns"
       v-model="question.datasetColumn"
     />
-    <BaseSwitch
+    <!-- <BaseSwitch
       v-if="question.settings.type.isTextType"
       class="config-card__remove__switch"
       v-model="question.use_markdown"
       >{{ $t("useMarkdown") }}</BaseSwitch
-    >
+    > -->
     <template v-if="hasNoMapping">
       <DatasetConfigurationLabels
         v-if="

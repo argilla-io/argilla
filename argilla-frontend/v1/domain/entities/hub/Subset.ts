@@ -103,7 +103,11 @@ export class Subset {
       if (structure.structure?.length > 0) return "chat";
     };
 
-    const field = FieldCreation.from(structure.name, getFieldType(structure));
+    const field = FieldCreation.from(
+      structure.name,
+      getFieldType(structure),
+      structure.type
+    );
 
     if (field) {
       this.fields.push(field);
@@ -127,37 +131,13 @@ export class Subset {
   }
 
   private createNoMappedFields(structure: Structure) {
-    this.fields.push(FieldCreation.from(structure.name, "no mapping"));
+    this.fields.push(
+      FieldCreation.from(structure.name, "no mapping", structure.type)
+    );
   }
 
   private isASingleLabel(structure: Structure) {
     return structure.kindObject === "ClassLabel";
-  }
-
-  public changeToMetadata(name: string, type: MetadataTypes) {
-    const index = this.fields.findIndex((f) => f.name === name);
-    if (index !== -1) {
-      const field = this.fields[index];
-      const newMetadata = MetadataCreation.from(field.name, type);
-
-      if (newMetadata) {
-        this.fields.splice(index, 1);
-        this.metadata.push(newMetadata);
-      }
-    }
-  }
-
-  public changeToField(name: string, type: FieldCreationTypes) {
-    const index = this.metadata.findIndex((m) => m.name === name);
-    if (index !== -1) {
-      const metadata = this.metadata[index];
-      const newField = FieldCreation.from(metadata.name, type);
-
-      if (newField) {
-        this.metadata.splice(index, 1);
-        this.fields.push(newField);
-      }
-    }
   }
 
   public removeQuestion(name: string) {

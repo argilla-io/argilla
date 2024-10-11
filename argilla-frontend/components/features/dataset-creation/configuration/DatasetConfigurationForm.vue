@@ -39,7 +39,7 @@
           class="config-form__col"
           v-if="dataset.selectedSubset.fields.length"
         >
-          <div class="config-form__col__header">Fields and metadata</div>
+          <div class="config-form__col__header">Fields</div>
           <div class="config-form__col__content">
             <draggable
               class="config-form__draggable-area"
@@ -52,29 +52,7 @@
                 :key="field.name"
                 :field="field"
                 :available-field-types="availableFieldTypes"
-                :available-metadata-types="availableMetadataTypes"
                 @is-focused="isFocused = $event"
-                @metadata-type-selected="onMetadataTypeSelected"
-              />
-            </draggable>
-            <span
-              class="config-form__separator"
-              v-if="dataset.selectedSubset.metadata.length"
-            />
-            <draggable
-              class="config-form__draggable-area"
-              :list="dataset.selectedSubset.metadata"
-              :group="{ name: 'metadata' }"
-              :disabled="isFocused"
-            >
-              <DatasetConfigurationFieldMetadata
-                v-for="metdataItem in dataset.selectedSubset.metadata"
-                :key="metdataItem.name"
-                :metadata="metdataItem"
-                :available-field-types="availableFieldTypes"
-                :available-metadata-types="availableMetadataTypes"
-                @is-focused="isFocused = $event"
-                @field-type-selected="onFieldTypeSelected"
               />
             </draggable>
           </div>
@@ -145,18 +123,6 @@ export default {
       const questionName = `question_${this.dataset.selectedSubset.questions.length}`;
       this.dataset.selectedSubset.addQuestion(questionName, { type });
     },
-    onMetadataTypeSelected(field) {
-      this.dataset.selectedSubset.changeToMetadata(
-        field.name,
-        field.type.value
-      );
-    },
-    onFieldTypeSelected(metadata) {
-      this.dataset.selectedSubset.changeToField(
-        metadata.name,
-        metadata.type.value
-      );
-    },
     onTypeIsChanged(name, type) {
       this.dataset.selectedSubset.addQuestion(name, {
         type: type.value,
@@ -222,10 +188,6 @@ export default {
       overflow: auto;
       height: 100%;
     }
-  }
-  &__separator {
-    border-bottom: 1px solid var(--bg-opacity-10);
-    margin: $base-space 0;
   }
   &__draggable-area {
     display: flex;
