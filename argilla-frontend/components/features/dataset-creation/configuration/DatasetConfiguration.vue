@@ -60,7 +60,7 @@
       <template #down>
         <VerticalResizable
           class="dataset-config__down"
-          :id="`dataset-config-left-t-v-rz`"
+          :id="`dataset-preview-t-v-rz`"
         >
           <template #left>
             <div class="dataset-config__preview">
