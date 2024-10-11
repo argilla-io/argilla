@@ -32,17 +32,15 @@ JOB_TIMEOUT_DISABLED = -1
 # TODO: Once we merge webhooks we should change the queue to use a different one (default queue is deleted there)
 @job(DEFAULT_QUEUE, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
 async def import_dataset_from_hub_job(name: str, subset: str, split: str, dataset_id: UUID) -> None:
-    hub_dataset = HubDataset(name, subset, split)
-
     async with AsyncSessionLocal() as db:
-        async with SearchEngine.get_by_name(settings.search_engine) as search_engine:
-            dataset = await Dataset.get_or_raise(
-                db,
-                dataset_id,
-                options=[
-                    selectinload(Dataset.fields),
-                    selectinload(Dataset.metadata_properties),
-                ],
-            )
+        dataset = await Dataset.get_or_raise(
+            db,
+            dataset_id,
+            options=[
+                selectinload(Dataset.fields),
+                selectinload(Dataset.metadata_properties),
+            ],
+        )
 
-            await hub_dataset.import_to(db, search_engine, dataset)
+        async with SearchEngine.get_by_name(settings.search_engine) as search_engine:
+            await HubDataset(name, subset, split).import_to(db, search_engine, dataset)
