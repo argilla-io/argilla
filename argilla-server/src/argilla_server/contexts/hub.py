@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Union
 from typing_extensions import Self
 
 from datasets import load_dataset
@@ -42,7 +43,6 @@ class HubDataset:
 
         return self
 
-    # TODO: We can change things so we get the database and search engine here instead of receiving them as parameters
     async def import_to(self, db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> None:
         if not dataset.is_ready:
             raise Exception("it's not possible to import records to a non published dataset")
@@ -58,33 +58,42 @@ class HubDataset:
 
         items = []
         for i in range(batch_size):
-            # NOTE: if there is a value with key "id" in the batch, we will use it as external_id
-            external_id = None
-            if "id" in batch:
-                external_id = batch["id"][i]
-
-            fields = {}
-            for field in dataset.fields:
-                # TODO: Should we cast to string or change the schema to use not strict string?
-                value = batch[field.name][i]
-                if field.is_text:
-                    value = str(value)
-
-                fields[field.name] = value
-
-            metadata = {}
-            for metadata_property in dataset.metadata_properties:
-                metadata[metadata_property.name] = batch[metadata_property.name][i]
-
-            items.append(
-                RecordCreateSchema(
-                    fields=fields,
-                    metadata=metadata,
-                    external_id=external_id,
-                    responses=None,
-                    suggestions=None,
-                    vectors=None,
-                ),
-            )
+            items.append(self._batch_row_to_record_schema(batch, i, dataset))
 
         await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, RecordsBulkCreateSchema(items=items))
+
+    def _batch_row_to_record_schema(self, batch: dict, index: int, dataset: Dataset) -> RecordCreateSchema:
+        return RecordCreateSchema(
+            fields=self._batch_row_fields(batch, index, dataset),
+            metadata=self._batch_row_metadata(batch, index, dataset),
+            external_id=self._batch_row_external_id(batch, index),
+            responses=None,
+            suggestions=None,
+            vectors=None,
+        )
+
+    # NOTE: if there is a value with key "id" in the batch, we will use it as external_id
+    def _batch_row_external_id(self, batch: dict, index: int) -> Union[str, None]:
+        if not "id" in batch:
+            return None
+
+        return batch["id"][index]
+
+    def _batch_row_fields(self, batch: dict, index: int, dataset: Dataset) -> dict:
+        fields = {}
+        for field in dataset.fields:
+            # TODO: Should we cast to string or change the schema to use not strict string?
+            value = batch[field.name][index]
+            if field.is_text:
+                value = str(value)
+
+            fields[field.name] = value
+
+        return fields
+
+    def _batch_row_metadata(self, batch: dict, index: int, dataset: Dataset) -> dict:
+        metadata = {}
+        for metadata_property in dataset.metadata_properties:
+            metadata[metadata_property.name] = batch[metadata_property.name][index]
+
+        return metadata

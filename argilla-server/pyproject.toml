@@ -62,7 +62,6 @@ dependencies = [
     "datasets>=3.0.1",
     # For Telemetry
     "huggingface_hub>=0.13,<1",
-
 ]
 
 [project.optional-dependencies]
