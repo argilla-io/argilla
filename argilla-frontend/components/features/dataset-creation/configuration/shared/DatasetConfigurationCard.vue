@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import "assets/icons/draggable";
 export default {
   props: {
     item: {
