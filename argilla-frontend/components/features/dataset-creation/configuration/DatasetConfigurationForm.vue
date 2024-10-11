@@ -179,13 +179,13 @@ export default {
     border: 1px solid var(--bg-opacity-6);
     border-radius: $border-radius-m;
     &__header {
-      padding: $base-space * 2;
+      padding: $base-space * 2 $base-space * 3;
       font-weight: 500;
     }
     &__content {
       display: flex;
       flex-direction: column;
-      padding: calc($base-space / 2) $base-space * 2 $base-space * 2;
+      padding: $base-space $base-space * 3 $base-space * 3;
       gap: $base-space;
       overflow: auto;
       height: 100%;
