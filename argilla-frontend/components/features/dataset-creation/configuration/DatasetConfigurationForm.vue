@@ -3,17 +3,17 @@
     <div class="config-form__header">
       <div class="config-form__selectors">
         <DatasetConfigurationSelector
-          v-if="subsets.length > 1"
+          v-if="dataset.subsets.length > 1"
           class="config-form__selector"
-          :options="subsets"
-          :value="selectedSubset.name"
+          :options="dataset.subsets"
+          :value="dataset.selectedSubset.name"
           @onValueChange="$emit('change-subset', $event)"
         />
         <DatasetConfigurationSelector
-          v-if="splits"
+          v-if="dataset.splits"
           class="config-form__selector"
-          :options="splits"
-          :value="selectedSplit.name"
+          :options="dataset.splits"
+          :value="dataset.selectedSplit.name"
           @onValueChange="$emit('change-split', $event)"
         />
       </div>
@@ -27,7 +27,7 @@
         >
         <DatasetConfigurationDialog
           v-if="visibledatasetCreationDialog"
-          :dataset-id="datasetId"
+          :dataset="dataset"
           @close-dialog="visibledatasetCreationDialog = false"
           @create-dataset="createDataset"
         />
@@ -35,17 +35,20 @@
     </div>
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
-        <div class="config-form__col" v-if="selectedSubset.fields.length">
+        <div
+          class="config-form__col"
+          v-if="dataset.selectedSubset.fields.length"
+        >
           <div class="config-form__col__header">Fields and metadata</div>
           <div class="config-form__col__content">
             <draggable
               class="config-form__draggable-area"
-              :list="selectedSubset.fields"
+              :list="dataset.selectedSubset.fields"
               :group="{ name: 'fields' }"
               :disabled="isFocused"
             >
               <DatasetConfigurationField
-                v-for="field in selectedSubset.fields"
+                v-for="field in dataset.selectedSubset.fields"
                 :key="field.name"
                 :field="field"
                 :available-field-types="availableFieldTypes"
@@ -56,16 +59,16 @@
             </draggable>
             <span
               class="config-form__separator"
-              v-if="selectedSubset.metadata.length"
+              v-if="dataset.selectedSubset.metadata.length"
             />
             <draggable
               class="config-form__draggable-area"
-              :list="selectedSubset.metadata"
+              :list="dataset.selectedSubset.metadata"
               :group="{ name: 'metadata' }"
               :disabled="isFocused"
             >
               <DatasetConfigurationFieldMetadata
-                v-for="metdataItem in selectedSubset.metadata"
+                v-for="metdataItem in dataset.selectedSubset.metadata"
                 :key="metdataItem.name"
                 :metadata="metdataItem"
                 :available-field-types="availableFieldTypes"
@@ -82,20 +85,20 @@
           <div class="config-form__col__header">Questions</div>
           <div class="config-form__col__content">
             <draggable
-              v-if="selectedSubset.questions.length"
+              v-if="dataset.selectedSubset.questions.length"
               class="config-form__draggable-area"
-              :list="selectedSubset.questions"
+              :list="dataset.selectedSubset.questions"
               :group="{ name: 'questions' }"
               :disabled="isFocused"
             >
               <DatasetConfigurationQuestion
-                v-for="question in selectedSubset.questions"
+                v-for="question in dataset.selectedSubset.questions"
                 :key="question.name"
                 :question="question"
-                :columns="selectedSubset.columns"
+                :columns="dataset.selectedSubset.columns"
                 :remove-is-allowed="true"
                 :available-types="availableQuestionTypes"
-                @remove="selectedSubset.removeQuestion(question.name)"
+                @remove="dataset.selectedSubset.removeQuestion(question.name)"
                 @change-type="onTypeIsChanged(question.name, $event)"
                 @is-focused="isFocused = $event"
               />
@@ -123,21 +126,8 @@ import { useDatasetConfigurationForm } from "./UseDatasetConfigurationForm";
 
 export default {
   props: {
-    subsets: {
-      type: Array,
-    },
-    selectedSubset: {
+    dataset: {
       type: Object,
-      required: true,
-    },
-    splits: {
-      type: Array,
-    },
-    selectedSplit: {
-      type: Object,
-    },
-    datasetId: {
-      type: String,
       required: true,
     },
   },
@@ -148,21 +138,27 @@ export default {
     };
   },
   methods: {
-    createDataset(name, workspace) {
-      console.log("Create dataset", name, workspace);
+    createDataset() {
+      this.create(this.dataset);
     },
     addQuestion(type) {
-      const questionName = `question_${this.selectedSubset.questions.length}`;
-      this.selectedSubset.addQuestion(questionName, { type });
+      const questionName = `question_${this.dataset.selectedSubset.questions.length}`;
+      this.dataset.selectedSubset.addQuestion(questionName, { type });
     },
     onMetadataTypeSelected(field) {
-      this.selectedSubset.changeToMetadata(field.name, field.type.value);
+      this.dataset.selectedSubset.changeToMetadata(
+        field.name,
+        field.type.value
+      );
     },
     onFieldTypeSelected(metadata) {
-      this.selectedSubset.changeToField(metadata.name, metadata.type.value);
+      this.dataset.selectedSubset.changeToField(
+        metadata.name,
+        metadata.type.value
+      );
     },
     onTypeIsChanged(name, type) {
-      this.selectedSubset.addQuestion(name, {
+      this.dataset.selectedSubset.addQuestion(name, {
         type: type.value,
       });
     },

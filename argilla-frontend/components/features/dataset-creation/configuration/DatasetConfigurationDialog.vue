@@ -16,22 +16,19 @@
           >
           <DatasetConfigurationInput
             id="datasetName"
-            v-model="datasetName"
+            v-model="dataset.name"
             placeholder="Name"
           />
         </div>
         <div class="dataset-config-dialog__row">
           <label class="dataset-config-dialog__label">Assign a workspace</label>
-          <DatasetConfigurationSelector
-            :options="workspaceOptions"
-            v-model="datasetWorkspace"
-          />
+          <DatasetConfigurationSelector :options="workspaceOptions" />
         </div>
         <p class="dataset-config-dialog__info">
           100 records will be added to the dataset.
         </p>
         <BaseButton
-          :disabled="!datasetName"
+          :disabled="!dataset.name"
           type="submit"
           class="dataset-config-dialog__button primary full"
           >Create</BaseButton
@@ -42,18 +39,13 @@
 </template>
 <script>
 import { useDatasetConfigurationNameAndWorkspace } from "./useDatasetConfigurationNameAndWorkspace";
+
 export default {
   props: {
-    datasetId: {
-      type: String,
+    dataset: {
+      type: Object,
       required: true,
     },
-  },
-  data() {
-    return {
-      datasetName: "",
-      datasetWorkspace: "argilla",
-    };
   },
   computed: {
     workspaceOptions() {
@@ -65,11 +57,8 @@ export default {
       this.$emit("close-dialog");
     },
     createDataset() {
-      this.$emit("create-dataset", this.datasetName, this.datasetWorkspace);
+      this.$emit("create-dataset");
     },
-  },
-  created() {
-    this.datasetName = this.datasetId;
   },
   setup() {
     return useDatasetConfigurationNameAndWorkspace();

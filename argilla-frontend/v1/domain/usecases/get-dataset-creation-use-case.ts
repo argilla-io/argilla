@@ -7,7 +7,7 @@ export class GetDatasetCreationUseCase {
   async execute(repoId: string) {
     const datasetInfo = await this.hubRepository.getDatasetCreation(repoId);
 
-    const datasetCreation = new DatasetCreationBuilder(datasetInfo);
+    const datasetCreation = new DatasetCreationBuilder(repoId, datasetInfo);
 
     return datasetCreation.build();
   }

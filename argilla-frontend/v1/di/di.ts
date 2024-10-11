@@ -9,6 +9,7 @@ import {
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
 import { LoadUserUseCase } from "../domain/usecases/load-user-use-case";
+import { CreateDatasetUseCase } from "../domain/usecases/create-dataset-use-case";
 import { useAxiosExtension } from "@/v1/infrastructure/services/useAxiosExtension";
 
 import {
@@ -208,6 +209,10 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(AuthLoginUseCase)
       .withDependencies(useAuth, AuthRepository, LoadUserUseCase)
+      .build(),
+
+    register(CreateDatasetUseCase)
+      .withDependencies(DatasetRepository, QuestionRepository, FieldRepository)
       .build(),
   ];
 

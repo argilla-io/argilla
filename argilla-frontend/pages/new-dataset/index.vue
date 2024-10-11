@@ -7,8 +7,7 @@
     />
     <DatasetConfiguration
       v-else
-      :dataset-config="datasetConfig"
-      :dataset-id="datasetId"
+      :dataset="datasetConfig"
       @change-subset="changeSubset($event)"
     />
   </div>
@@ -16,6 +15,7 @@
 
 <script>
 import { useNewDatasetViewModel } from "./useNewDatasetViewModel";
+
 export default {
   methods: {
     onLoadDatasetFromHF(repoId) {
