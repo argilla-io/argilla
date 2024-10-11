@@ -107,24 +107,6 @@ describe("DatasetCreation", () => {
       expect(labelQuestion.options).toEqual(["positive", "negative"]);
     });
 
-    it("create a text field if the dataset no has fields", () => {
-      const datasetInfoWithoutFields = {
-        ...datasetInfo,
-        features: {},
-      };
-
-      const builder = new DatasetCreationBuilder(datasetInfoWithoutFields);
-
-      const datasetCreation = builder.build();
-
-      const field = datasetCreation.fields[0];
-
-      expect(field.name).toBe("prompt");
-      expect(field.type.isTextType).toBeTruthy();
-      expect(field.required).toBeTruthy();
-      expect(datasetCreation.fields.length).toBe(1);
-    });
-
     it("create a required field if the dataset has just one field", () => {
       const datasetInfoWithOneField = {
         ...datasetInfo,
@@ -146,33 +128,6 @@ describe("DatasetCreation", () => {
       expect(field.type.isTextType).toBeTruthy();
       expect(field.required).toBeTruthy();
       expect(datasetCreation.fields.length).toBe(1);
-    });
-
-    it("create comment as a default question when the dataset does not have questions", () => {
-      const datasetInfoWithoutQuestions = {
-        ...datasetInfo,
-        features: {
-          text_field: {
-            dtype: "string",
-            _type: "Value",
-          },
-          image_field: {
-            dtype: "string",
-            _type: "Image",
-          },
-        },
-      };
-
-      const builder = new DatasetCreationBuilder(datasetInfoWithoutQuestions);
-
-      const datasetCreation = builder.build();
-
-      const commentQuestion = datasetCreation.questions[0];
-
-      expect(commentQuestion.name).toBe("comment");
-      expect(commentQuestion.type.isTextType).toBeTruthy();
-      expect(commentQuestion.required).toBeTruthy();
-      expect(datasetCreation.questions.length).toBe(1);
     });
 
     it("create a required question if the dataset has just one field", () => {
@@ -251,14 +206,14 @@ describe("DatasetCreation", () => {
 
       const datasetCreation = builder.build();
 
-      datasetCreation.selectedSubset.addQuestion("Second", {
+      datasetCreation.selectedSubset.addQuestion("First", {
         type: "label_selection",
       });
 
-      const secondQuestion = datasetCreation.questions[1];
-      expect(secondQuestion.name).toBe("Second");
-      expect(secondQuestion.type.isSingleLabelType).toBeTruthy();
-      expect(secondQuestion.options).toEqual([
+      const firtsQuestion = datasetCreation.questions[0];
+      expect(firtsQuestion.name).toBe("First");
+      expect(firtsQuestion.type.isSingleLabelType).toBeTruthy();
+      expect(firtsQuestion.options).toEqual([
         {
           id: "1",
           text: "positive",
@@ -286,14 +241,14 @@ describe("DatasetCreation", () => {
 
       const datasetCreation = builder.build();
 
-      datasetCreation.selectedSubset.addQuestion("Second", {
+      datasetCreation.selectedSubset.addQuestion("First", {
         type: "ranking",
       });
 
-      const secondQuestion = datasetCreation.questions[1];
-      expect(secondQuestion.name).toBe("Second");
-      expect(secondQuestion.type.isRankingType).toBeTruthy();
-      expect(secondQuestion.options).toEqual([
+      const firtsQuestion = datasetCreation.questions[0];
+      expect(firtsQuestion.name).toBe("First");
+      expect(firtsQuestion.type.isRankingType).toBeTruthy();
+      expect(firtsQuestion.options).toEqual([
         {
           value: "option1",
           text: "Option 1",

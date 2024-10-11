@@ -62,20 +62,8 @@ export class Subset {
   }
 
   private setDefaultValues() {
-    if (this.questions.length === 0) {
-      this.questions.push(
-        new QuestionCreation("comment", true, {
-          type: "text",
-        })
-      );
-    }
-
     if (this.questions.length === 1) {
       this.questions[0].markAsRequired();
-    }
-
-    if (this.fields.length === 0) {
-      this.fields.push(FieldCreation.from("prompt", "text"));
     }
 
     if (this.fields.length === 1) {
