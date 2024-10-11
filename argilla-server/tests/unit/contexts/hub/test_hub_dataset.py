@@ -23,7 +23,7 @@ from argilla_server.models import Record
 from argilla_server.contexts.hub import HubDataset
 from argilla_server.search_engine import SearchEngine
 
-from tests.factories import DatasetFactory, TextFieldFactory, IntegerMetadataPropertyFactory
+from tests.factories import DatasetFactory, ImageFieldFactory, TextFieldFactory, IntegerMetadataPropertyFactory
 
 
 @pytest.mark.asyncio
@@ -70,6 +70,25 @@ class TestHubDataset:
 
         await hub_dataset.import_to(db, mock_search_engine, dataset)
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
+
+    async def test_hub_dataset_import_image_fields(self, db: AsyncSession, mock_search_engine: SearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ImageFieldFactory.create(name="image", required=True, dataset=dataset)
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset = HubDataset(name="lmms-lab/llava-critic-113k", subset="pairwise", split="train")
+
+        await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
+
+        record = (await db.execute(select(Record))).scalar_one()
+        assert record.external_id == "vlfeedback_1"
+        assert (
+            record.fields["image"][:100]
+            == "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aH"
+        )
 
     async def test_hub_dataset_num_rows(self):
         hub_dataset = HubDataset(name="lhoestq/demo1", subset="default", split="train")

@@ -12,11 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import io
+import base64
+
 from typing import Union
 from typing_extensions import Self
 
 from datasets import load_dataset
 from sqlalchemy.ext.asyncio import AsyncSession
+from PIL import Image
 
 from argilla_server.models.database import Dataset
 from argilla_server.search_engine import SearchEngine
@@ -83,10 +87,13 @@ class HubDataset:
     def _batch_row_fields(self, batch: dict, index: int, dataset: Dataset) -> dict:
         fields = {}
         for field in dataset.fields:
-            # TODO: Should we cast to string or change the schema to use not strict string?
             value = batch[field.name][index]
+
             if field.is_text:
                 value = str(value)
+
+            if field.is_image and isinstance(value, Image.Image):
+                value = pil_image_to_data_url(value)
 
             fields[field.name] = value
 
@@ -98,3 +105,13 @@ class HubDataset:
             metadata[metadata_property.name] = batch[metadata_property.name][index]
 
         return metadata
+
+
+def pil_image_to_data_url(image: Image.Image):
+    buffer = io.BytesIO()
+
+    image.save(buffer, format=image.format)
+
+    base64_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+    return f"data:{image.get_format_mimetype()};base64,{base64_image}"
