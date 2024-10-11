@@ -17,12 +17,14 @@
             @onValueChange="$emit('change-type', $event)"
             v-model="item.type"
           />
-          <BaseCheckbox
-            v-if="!hasNoMapping"
-            :value="item.required"
-            @input="item.required = !item.required"
-            class="config-card__required"
-          />
+          <BaseTooltip text="Required">
+            <BaseCheckbox
+              v-if="!hasNoMapping"
+              :value="item.required"
+              @input="item.required = !item.required"
+              class="config-card__required"
+            />
+          </BaseTooltip>
         </div>
         <!-- <DatasetConfigurationInput
           v-if="!hasNoMapping"
