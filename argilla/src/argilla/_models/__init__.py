@@ -22,7 +22,6 @@ from argilla._models._record._record import RecordModel, FieldValue
 from argilla._models._record._suggestion import SuggestionModel
 from argilla._models._record._response import UserResponseModel, ResponseStatus
 from argilla._models._record._vector import VectorModel, VectorValue
-from argilla._models._record._metadata import MetadataModel, MetadataValue
 from argilla._models._search import (
     SearchQueryModel,
     AndFilterModel,
@@ -36,6 +35,7 @@ from argilla._models._settings._fields import (
     TextFieldSettings,
     ImageFieldSettings,
     ChatFieldSettings,
+    CustomFieldSettings,
     FieldSettings,
 )
 from argilla._models._settings._questions import (

@@ -12,23 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Literal, Optional, Union, Dict
+from typing import Dict, List, Literal, Optional, Union
 
 from argilla import Argilla
 from argilla._models._settings._questions import (
     LabelQuestionModel,
     LabelQuestionSettings,
     MultiLabelQuestionModel,
+    MultiLabelQuestionSettings,
+    QuestionModel,
     RankingQuestionModel,
+    RankingQuestionSettings,
+    RatingQuestionModel,
+    RatingQuestionSettings,
+    SpanQuestionModel,
+    SpanQuestionSettings,
     TextQuestionModel,
     TextQuestionSettings,
-    RatingQuestionModel,
-    QuestionModel,
-    SpanQuestionSettings,
-    SpanQuestionModel,
-    RatingQuestionSettings,
-    MultiLabelQuestionSettings,
-    RankingQuestionSettings,
 )
 from argilla.settings._common import SettingsPropertyBase
 
@@ -393,7 +393,7 @@ class SpanQuestion(QuestionPropertyBase):
                 field (str): The name of the text field where the span question will be applied.
                 labels (Union[List[str], Dict[str, str]]): The list of available labels for the question, or a \
                     dictionary of key-value pairs where the key is the label and the value is the label name displayed in the UI.
-                allow_overlapping (bool) This value specifies whether overlapped spans are allowed or not.
+                allow_overlapping (bool): This value specifies whether overlapped spans are allowed or not.
                 visible_labels (Optional[int]): The number of visible labels for the question to be shown in the UI. \
                     Setting it to None show all options.
                 title (Optional[str]:) The title of the question to be shown in the UI.

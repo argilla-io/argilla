@@ -11,15 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from datetime import datetime
+from typing import List, Any, Union, Literal, Annotated, Optional
+from uuid import UUID
 
-from typing import List, Any, Union, Literal, Annotated
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 
 class RecordFilterScopeModel(BaseModel):
     entity: Literal["record"] = "record"
-    property: Literal["status"] = "status"
+    property: Literal["id", "external_id", "inserted_at", "updated_at", "status"] = "status"
 
 
 class ResponseFilterScopeModel(BaseModel):
@@ -35,7 +36,7 @@ class SuggestionFilterScopeModel(BaseModel):
 
     entity: Literal["suggestion"] = "suggestion"
     question: str
-    property: Union[Literal["value"], Literal["agent"], Literal["score"], None] = "value"
+    property: Union[Literal["value", "agent", "score", "type"], None] = "value"
 
 
 class MetadataFilterScopeModel(BaseModel):
@@ -60,8 +61,20 @@ class TermsFilterModel(BaseModel):
     """Filter model for terms filter."""
 
     type: Literal["terms"] = "terms"
-    values: List[str]
+    values: List[Any]
     scope: ScopeModel
+
+    @field_serializer("values", when_used="unless-none")
+    def serialize_values(self, values):
+        sanitized_values = []
+        for value in values:
+            if isinstance(value, UUID):
+                value = str(value)
+            elif isinstance(value, datetime):
+                value = value.isoformat()
+            sanitized_values.append(value)
+
+        return sanitized_values
 
 
 class RangeFilterModel(BaseModel):
@@ -71,6 +84,12 @@ class RangeFilterModel(BaseModel):
     ge: Union[Any, None] = None
     le: Union[Any, None] = None
     scope: ScopeModel
+
+    @field_serializer("ge", "le", when_used="unless-none")
+    def serialize_values(self, value):
+        if isinstance(value, datetime):
+            return value.isoformat()
+        return value
 
 
 FilterModel = Annotated[
@@ -97,10 +116,22 @@ class TextQueryModel(BaseModel):
     field: Union[str, None] = None
 
 
+class VectorQueryModel(BaseModel):
+    name: str
+    record_id: Optional[UUID] = None
+    value: Optional[List[float]] = None
+    order: Literal["most_similar", "least_similar"] = "most_similar"
+
+    @field_serializer("record_id", when_used="unless-none", return_type=str)
+    def serialize_record_id(self, value):
+        return str(value)
+
+
 class QueryModel(BaseModel):
     """Query part of the search query model"""
 
-    text: TextQueryModel
+    text: Union[TextQueryModel, None] = None
+    vector: Union[VectorQueryModel, None] = None
 
 
 class SearchQueryModel(BaseModel):

@@ -20,14 +20,13 @@ from argilla._exceptions import ArgillaError
 from argilla._helpers._media import cast_image, uncast_image
 from argilla._models import (
     FieldValue,
-    MetadataModel,
-    MetadataValue,
     RecordModel,
     SuggestionModel,
     UserResponseModel,
     VectorModel,
     VectorValue,
 )
+from argilla._models._record._metadata import MetadataModel
 from argilla._resource import Resource
 from argilla.responses import Response, UserResponse
 from argilla.suggestions import Suggestion
@@ -61,7 +60,7 @@ class Record(Resource):
         self,
         id: Optional[Union[UUID, str]] = None,
         fields: Optional[Dict[str, FieldValue]] = None,
-        metadata: Optional[Dict[str, MetadataValue]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
         vectors: Optional[Dict[str, VectorValue]] = None,
         responses: Optional[List[Response]] = None,
         suggestions: Optional[List[Suggestion]] = None,
@@ -183,6 +182,7 @@ class Record(Resource):
         serialized_responses = [response.serialize() for response in self.__responses]
         serialized_model["responses"] = serialized_responses
         serialized_model["suggestions"] = serialized_suggestions
+
         return serialized_model
 
     def to_dict(self) -> Dict[str, Dict]:
@@ -202,6 +202,7 @@ class Record(Resource):
         responses = self.responses.to_dict()
         vectors = self.vectors.to_dict()
 
+        # TODO: Review model attributes when to_dict and serialize methods are unified
         return {
             "id": id,
             "fields": fields,
@@ -268,8 +269,9 @@ class Record(Resource):
         )
 
         # set private attributes
-        instance._model.id = model.id
-        instance._model.status = model.status
+        instance._dataset = dataset
+        instance._model = model
+
         # Responses and suggestions are computed separately based on the record model
         instance.responses.from_models(model.responses)
         instance.suggestions.from_models(model.suggestions)
@@ -297,7 +299,18 @@ class RecordFields(dict):
         self.record = record
 
     def to_dict(self) -> dict:
-        return {key: cast_image(value) if self._is_image(key) else value for key, value in self.items()}
+        fields = {}
+
+        for key, value in self.items():
+            if value is None:
+                continue
+            elif self._is_image(key):
+                fields[key] = cast_image(value)
+            elif self._is_chat(key):
+                fields[key] = [message.model_dump() if not isinstance(message, dict) else message for message in value]
+            else:
+                fields[key] = value
+        return fields
 
     def __getitem__(self, key: str) -> FieldValue:
         value = super().__getitem__(key)
@@ -308,11 +321,16 @@ class RecordFields(dict):
             return False
         return self.record.dataset.settings.schema[key].type == "image"
 
+    def _is_chat(self, key: str) -> bool:
+        if not self.record.dataset:
+            return False
+        return self.record.dataset.settings.schema[key].type == "chat"
+
 
 class RecordMetadata(dict):
     """This is a container class for the metadata of a Record."""
 
-    def __init__(self, metadata: Optional[Dict[str, MetadataValue]] = None) -> None:
+    def __init__(self, metadata: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(metadata or {})
 
     def to_dict(self) -> dict:

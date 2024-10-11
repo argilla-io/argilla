@@ -21,8 +21,7 @@ from argilla import Argilla, Dataset, Settings, TextField, TextQuestion, Workspa
 
 
 @pytest.fixture
-def dataset(client: Argilla, workspace: Workspace) -> Dataset:
-    name = "".join(random.choices(ascii_lowercase, k=16))
+def dataset(client: Argilla, workspace: Workspace, dataset_name: str) -> Dataset:
     settings = Settings(
         fields=[TextField(name="text")],
         questions=[
@@ -31,7 +30,7 @@ def dataset(client: Argilla, workspace: Workspace) -> Dataset:
         ],
     )
     dataset = Dataset(
-        name=name,
+        name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
@@ -193,3 +192,21 @@ def test_list_records_with_responses(client: Argilla, dataset: Dataset):
 
     assert records[1].responses["comment"][0].value == "The comment"
     assert records[1].responses["sentiment"][0].value == "negative"
+
+
+def test_list_records_with_updated_at_and_inserted_at(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+        ]
+    )
+
+    records = list(dataset.records(with_responses=True))
+    assert len(records) == 2
+
+    assert records[0].inserted_at
+    assert records[0].updated_at
+
+    assert records[1].inserted_at
+    assert records[1].updated_at
