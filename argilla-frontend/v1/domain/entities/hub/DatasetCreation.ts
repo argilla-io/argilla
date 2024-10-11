@@ -29,6 +29,10 @@ export class DatasetCreation {
     return this.selectedSubset.fields;
   }
 
+  get mappedFields() {
+    return this.fields.filter((f) => f.type.value !== "no mapping");
+  }
+
   get questions() {
     return this.selectedSubset.questions;
   }
