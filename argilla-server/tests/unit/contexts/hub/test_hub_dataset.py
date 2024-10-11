@@ -55,6 +55,22 @@ class TestHubDataset:
         assert record.fields["date"] == "October 12 2016"
         assert record.fields["star"] == "4"
 
+    async def test_hub_dataset_import_to_idempotency(self, db: AsyncSession, mock_search_engine: SearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="package_name", required=True, dataset=dataset)
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset = HubDataset(name="lhoestq/demo1", subset="default", split="train")
+
+        await hub_dataset.import_to(db, mock_search_engine, dataset)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
+
+        await hub_dataset.import_to(db, mock_search_engine, dataset)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
+
     async def test_hub_dataset_num_rows(self):
         hub_dataset = HubDataset(name="lhoestq/demo1", subset="default", split="train")
 

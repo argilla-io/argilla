@@ -20,9 +20,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models.database import Dataset
 from argilla_server.search_engine import SearchEngine
-from argilla_server.bulk.records_bulk import CreateRecordsBulk
-from argilla_server.api.schemas.v1.records import RecordCreate as RecordCreateSchema
-from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate as RecordsBulkCreateSchema
+from argilla_server.bulk.records_bulk import UpsertRecordsBulk
+from argilla_server.api.schemas.v1.records import RecordUpsert as RecordUpsertSchema
+from argilla_server.api.schemas.v1.records_bulk import RecordsBulkUpsert as RecordsBulkUpsertSchema
 
 BATCH_SIZE = 100
 
@@ -60,10 +60,11 @@ class HubDataset:
         for i in range(batch_size):
             items.append(self._batch_row_to_record_schema(batch, i, dataset))
 
-        await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, RecordsBulkCreateSchema(items=items))
+        await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, RecordsBulkUpsertSchema(items=items))
 
-    def _batch_row_to_record_schema(self, batch: dict, index: int, dataset: Dataset) -> RecordCreateSchema:
-        return RecordCreateSchema(
+    def _batch_row_to_record_schema(self, batch: dict, index: int, dataset: Dataset) -> RecordUpsertSchema:
+        return RecordUpsertSchema(
+            id=None,
             fields=self._batch_row_fields(batch, index, dataset),
             metadata=self._batch_row_metadata(batch, index, dataset),
             external_id=self._batch_row_external_id(batch, index),
