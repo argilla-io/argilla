@@ -39,7 +39,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         org_name: Optional[str] = None,
         hf_token: Optional[str] = None,
         space_storage: Optional[Union[str, "SpaceStorage", Literal["small", "medium", "large"]]] = None,
-        space_hardware: Optional[Union[str, "SpaceHardware"]] = "cpu-basic",
+        space_hardware: Optional[Union[str, "SpaceHardware", Literal["cpu-basic", "cpu-upgrade"]]] = "cpu-basic",
         private: Optional[Union[bool, None]] = False,
         overwrite: Optional[Union[bool, None]] = False,
     ) -> "Argilla":
