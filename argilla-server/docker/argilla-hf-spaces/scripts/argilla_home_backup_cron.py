@@ -38,6 +38,9 @@ def _run_backup(src: Path, dst_folder: Path, backup_id: int):
     backup_folder = Path(dst_folder) / str(backup_id)
 
     # Creating a copy of existing backup
+    if backup_folder.exists():
+        _LOGGER.info("Removing existing backup folder %s", backup_folder)
+        os.system(f"rm -rf {backup_folder}")
     backup_folder.mkdir(exist_ok=True)
 
     backup_file = os.path.join(backup_folder, src.name)
