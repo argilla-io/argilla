@@ -178,7 +178,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: $base-space;
-  padding: $base-space $base-space * 2 $base-space * 2 0;
+  padding: $base-space $base-space * 2 $base-space * 2 $base-space * 2;
   height: 100%;
   &__header {
     display: flex;
@@ -199,11 +199,13 @@ export default {
   }
   &__content {
     display: flex;
+    justify-content: space-evenly;
     gap: $base-space * 2;
     min-height: 0;
   }
   &__col-wrapper {
     width: 100%;
+    max-width: 440px;
   }
   &__col {
     display: flex;

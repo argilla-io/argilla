@@ -183,7 +183,6 @@ export default {
 <style lang="scss" scoped>
 $resizabla-bar-color: #6794fe;
 $collapsed-panel-height: 50px;
-$resizable-bar-width: $base-space;
 .resizable-h {
   $this: &;
   display: flex;
@@ -202,7 +201,6 @@ $resizable-bar-width: $base-space;
     justify-content: center;
     min-height: $collapsed-panel-height;
     transition: all 0.2s ease-in;
-    margin-bottom: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       height: auto !important;
       max-height: none !important;
@@ -233,7 +231,9 @@ $resizable-bar-width: $base-space;
   }
 
   &__bar {
-    height: $resizable-bar-width;
+    position: relative;
+    height: 1px;
+    background: var(--bg-opacity-10);
     width: 100%;
     display: flex;
     align-items: center;
@@ -244,8 +244,9 @@ $resizable-bar-width: $base-space;
     }
 
     &__inner {
+      position: absolute;
+      height: 4px;
       width: 100%;
-      border-bottom: 1px solid var(--bg-opacity-10);
       transition: all 0.1s ease-in;
     }
 
@@ -253,7 +254,7 @@ $resizable-bar-width: $base-space;
     .--h-resizing & {
       #{$this}__bar__inner {
         transition: all 0.1s ease-in;
-        border: 2px solid $resizabla-bar-color;
+        background: $resizabla-bar-color;
       }
     }
   }

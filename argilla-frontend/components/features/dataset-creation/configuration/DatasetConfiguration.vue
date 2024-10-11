@@ -39,28 +39,35 @@
         </VerticalResizable>
       </template>
       <template #down>
-        <div class="dataset-config__down">
-          <div class="dataset-config__preview">
-            <iframe
-              v-if="!!datasetId"
-              :src="`https://huggingface.co/datasets/${datasetId}/embed/viewer/ParaphraseRC/train`"
-              frameborder="0"
-              width="100%"
-              height="500px"
-            ></iframe>
-          </div>
-          <div class="dataset-config__configuration">
-            <DatasetConfigurationForm
-              :subsets="datasetConfig.subsets"
-              :selected-subset="datasetConfig.selectedSubset"
-              :splits="datasetConfig.splits"
-              :selected-split="datasetConfig.selectedSplit"
-              :dataset-id="datasetId"
-              @change-subset="$emit('change-subset', $event)"
-              @change-split="$emit('change-split', $event)"
-            />
-          </div>
-        </div>
+        <VerticalResizable
+          class="dataset-config__down"
+          :id="`dataset-config-left-t-v-rz`"
+        >
+          <template #left>
+            <div class="dataset-config__preview">
+              <iframe
+                v-if="!!datasetId"
+                :src="`https://huggingface.co/datasets/${datasetId}/embed/viewer/ParaphraseRC/train`"
+                frameborder="0"
+                width="100%"
+                height="500px"
+              ></iframe>
+            </div>
+          </template>
+          <template #right>
+            <div class="dataset-config__configuration">
+              <DatasetConfigurationForm
+                :subsets="datasetConfig.subsets"
+                :selected-subset="datasetConfig.selectedSubset"
+                :splits="datasetConfig.splits"
+                :selected-split="datasetConfig.selectedSplit"
+                :dataset-id="datasetId"
+                @change-subset="$emit('change-subset', $event)"
+                @change-split="$emit('change-split', $event)"
+              />
+            </div>
+          </template>
+        </VerticalResizable>
       </template>
     </HorizontalResizable>
   </div>
@@ -104,7 +111,7 @@ export default {
     align-items: flex-start;
     justify-items: center;
     padding: $base-space * 2;
-    min-width: 40vw;
+    width: 40vw;
     height: 100%;
     overflow: auto;
   }
@@ -139,6 +146,7 @@ export default {
   }
   &__configuration {
     width: 100%;
+    height: 100%;
   }
 }
 </style>
