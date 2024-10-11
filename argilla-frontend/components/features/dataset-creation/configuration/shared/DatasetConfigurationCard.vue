@@ -17,14 +17,19 @@
             @onValueChange="$emit('change-type', $event)"
             v-model="item.type"
           />
-          <slot name="required" />
+          <BaseCheckbox
+            v-if="!hasNoMapping"
+            :value="item.required"
+            @input="item.required = !item.required"
+            class="config-card__required"
+          />
         </div>
-        <DatasetConfigurationInput
+        <!-- <DatasetConfigurationInput
           v-if="!hasNoMapping"
           v-model="item.title"
           @is-focused="$emit('is-focused', $event)"
           placeholder="Title"
-        />
+        /> -->
         <slot></slot>
       </div>
     </div>
@@ -121,23 +126,24 @@ $no-mapping-color: hsl(0, 0%, 50%);
       border-color: var(--bg-opacity-20);
     }
   }
-  &:focus-within,
-  &:focus {
-    transition: all 0.3s ease-in;
-    background: linear-gradient(
-      180deg,
-      hsla(from $validate-color h s l / 0) 0%,
-      hsla(from $validate-color h s l / 0) 100%
-    );
-  }
-  &:has(.dropdown__content) {
-    transition: all 0.3s ease-in;
-    background: linear-gradient(
-      180deg,
-      hsla(from $validate-color h s l / 0) 0%,
-      hsla(from $validate-color h s l / 0) 100%
-    );
-  }
+  // TODO: validate this
+  // &:focus-within,
+  // &:focus {
+  //   transition: all 0.3s ease-in;
+  //   background: linear-gradient(
+  //     180deg,
+  //     hsla(from $validate-color h s l / 0) 0%,
+  //     hsla(from $validate-color h s l / 0) 100%
+  //   );
+  // }
+  // &:has(.dropdown__content) {
+  //   transition: all 0.3s ease-in;
+  //   background: linear-gradient(
+  //     180deg,
+  //     hsla(from $validate-color h s l / 0) 0%,
+  //     hsla(from $validate-color h s l / 0) 100%
+  //   );
+  // }
   &:has(.nomapping) {
     background: linear-gradient(
       180deg,
