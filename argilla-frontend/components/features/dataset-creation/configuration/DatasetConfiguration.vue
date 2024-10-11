@@ -8,18 +8,37 @@
       <template #up>
         <VerticalResizable :id="`dataset-config-left-t-v-rz`">
           <template #left>
-            <!-- <div class="dataset-config__fields">
+            <div class="dataset-config__fields">
               <Record
-                v-if="!!fields"
+                :recordCriteria="{
+                  committed: {
+                    searchText: {
+                      value: {
+                        text: {
+                          text: '',
+                        },
+                      },
+                    },
+                  },
+                }"
                 :record="{
-                  fields: fields,
-                  questions: questions,
+                  fields: [
+                    {
+                      title: 'Title',
+                      name: 'Name',
+                      content: 'lorem ipsum',
+                      settings: {
+                        use_markdown: false,
+                      },
+                    },
+                  ],
+                  questions: [],
                 }"
               />
-            </div> -->
-            <div :style="{ overflow: 'auto', height: '100%' }">
-              <pre>{{ dataset }}</pre>
             </div>
+            <!-- <div :style="{ overflow: 'auto', height: '100%' }">
+              <pre>{{ dataset }}</pre>
+            </div> -->
           </template>
           <template #right>
             <div class="dataset-config__questions-wrapper">
@@ -92,7 +111,7 @@ export default {
   &__fields {
     width: 100%;
     height: 100%;
-    padding: $base-space * 2 $base-space $base-space * 2 $base-space * 2;
+    padding: $base-space * 2;
   }
   &__down {
     display: flex;
