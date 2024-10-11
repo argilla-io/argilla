@@ -97,7 +97,7 @@ def is_argilla_alive():
             response.raise_for_status()
         return True
     except Exception as e:
-        _LOGGER.exception(f"Error checking if argilla is alive: {e}")
+        _LOGGER.warning(f"Argilla server is not running: {e}")
         return False
 
 
