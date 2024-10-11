@@ -32,6 +32,22 @@ export class FieldCreation {
     return this.settings.type;
   }
 
+  get isTextType() {
+    return this.type.isTextType;
+  }
+
+  get isImageType() {
+    return this.type.isImageType;
+  }
+
+  get isChatType() {
+    return this.type.isChatType;
+  }
+
+  get isCustomType() {
+    return this.type.isCustomType;
+  }
+
   markAsRequired() {
     this.required = true;
   }
