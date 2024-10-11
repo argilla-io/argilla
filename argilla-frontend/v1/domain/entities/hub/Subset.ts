@@ -17,10 +17,18 @@ export class Subset {
   public readonly questions: QuestionCreation[] = [];
   public readonly metadata: MetadataCreation[] = [];
   private readonly structures: Structure[] = [];
-  private readonly splits: any;
+  private readonly splits: any[];
+  public selectedSplit: any;
 
   constructor(public readonly name: string, datasetInfo: any) {
-    this.splits = datasetInfo.splits;
+    this.splits = Object.entries(datasetInfo.splits).map(([name, value]) => {
+      return {
+        name,
+        value,
+      };
+    });
+
+    this.selectedSplit = this.splits[0];
 
     for (const [name, value] of Object.entries<Feature>(datasetInfo.features)) {
       if (Array.isArray(value)) {
@@ -57,10 +65,6 @@ export class Subset {
     }
 
     this.setDefaultValues();
-  }
-
-  get firstSplit() {
-    return this.splits[0];
   }
 
   public get columns() {
