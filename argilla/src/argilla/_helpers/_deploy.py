@@ -14,9 +14,9 @@
 
 import time
 import warnings
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
-from huggingface_hub import HfApi, SpaceRuntime, get_token, login, notebook_login
+from huggingface_hub import HfApi, SpaceStage, get_token, login, notebook_login
 from huggingface_hub.hf_api import RepoUrl
 
 from argilla._helpers._log import LoggingMixin
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from argilla.client import Argilla
 
 _SLEEP_TIME = 10
-_FROM_REPO_ID = "argilla/argilla-template-space"
+_ARGILLA_SPACE_TEMPLATE_REPO = "argilla/argilla-template-space"
 
 
 class SpacesDeploymentMixin(LoggingMixin):
@@ -38,7 +38,7 @@ class SpacesDeploymentMixin(LoggingMixin):
         repo_name: Optional[str] = "argilla",
         org_name: Optional[str] = None,
         hf_token: Optional[str] = None,
-        space_storage: Optional[Union[str, "SpaceStorage", None]] = None,
+        space_storage: Optional[Union[str, "SpaceStorage", Literal["small", "medium", "large"]]] = None,
         space_hardware: Optional[Union[str, "SpaceHardware"]] = "cpu-basic",
         private: Optional[Union[bool, None]] = False,
         overwrite: Optional[Union[bool, None]] = False,
@@ -50,11 +50,11 @@ class SpacesDeploymentMixin(LoggingMixin):
             api_key (str): The Argilla API key to be defined for the owner user and creator of the Space.
             repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
             org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
-            hf_token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
-            space_storage (Optional[Union[str, SpaceStorage, None]]): The persistant storage size for the space. Defaults to None without persistant storage.
-            space_hardware (Optional[Union[str, SpaceStorage, None]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
+            hf_token (Optional[Union[str, None]]): The Hugging Face authentication token. Defaults to None.
+            space_storage (Optional[Union[str, SpaceStorage]]): The persistant storage size for the space. Defaults to None without persistant storage.
+            space_hardware (Optional[Union[str, SpaceHardware]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
             private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
-            overwrite (Optional[Union[bool, None]]): Whether to overwrite the existing space. Defaults to False.
+            overwrite (Optional[Union[bool, None]]): Whether to overwrite the config of an existing space. Defaults to False.
 
         Returns:
             Argilla: The Argilla client.
@@ -77,13 +77,12 @@ class SpacesDeploymentMixin(LoggingMixin):
         # Define the api_key for the space
         secrets = [
             {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user."},
-            {"key": "USERNAME", "value": token_username, "description": "The username of the owner user."},
             {"key": "WORKSPACE", "value": "argilla", "description": "The workspace of the space."},
         ]
 
         # Check if the space already exists
         if api.repo_exists(repo_id=repo_id, repo_type="space", token=hf_token):
-            if cls._check_if_runtime_can_be_build(api.get_space_runtime(repo_id=repo_id, token=hf_token)):
+            if cls._check_if_stage_can_be_build(api.get_space_runtime(repo_id=repo_id, token=hf_token).stage):
                 api.restart_space(repo_id=repo_id, token=hf_token)
 
             if overwrite:
@@ -108,7 +107,7 @@ class SpacesDeploymentMixin(LoggingMixin):
                 cls._space_storage_warning()
 
             api.duplicate_space(
-                from_id=_FROM_REPO_ID,
+                from_id=_ARGILLA_SPACE_TEMPLATE_REPO,
                 to_id=repo_id,
                 private=private,
                 token=hf_token,
@@ -125,7 +124,7 @@ class SpacesDeploymentMixin(LoggingMixin):
             f"https://{cls._sanitize_url_component(org_name)}-{cls._sanitize_url_component(repo_name)}.hf.space/"
         )
         cls._log_message(cls, message=f"Argilla is being deployed at: {repo_url}")
-        while cls._check_if_running(api.get_space_runtime(repo_id=repo_id, token=hf_token)):
+        while cls._check_if_running(api.get_space_runtime(repo_id=repo_id, token=hf_token).stage):
             time.sleep(_SLEEP_TIME)
             cls._log_message(cls, message=f"Deployment in progress. Waiting {_SLEEP_TIME} seconds.")
 
@@ -155,31 +154,26 @@ class SpacesDeploymentMixin(LoggingMixin):
         return ht_token
 
     @classmethod
-    def _check_if_running(cls, runtime: SpaceRuntime) -> bool:
+    def _check_if_running(cls, stage: SpaceStage) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when being built."""
-        if runtime.stage in ["RUNNING"]:
+        if stage in ["RUNNING"]:
             return False
-        elif runtime.stage in [
-            "RUNNING_APP_STARTING",
-            "RUNNING_BUILDING",
-            "BUILDING",
-            "PAUSED",
-            "STOPPED",
-            "APP_STARTING",
-        ]:
+        elif stage in ["RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return True
+        elif stage in ["PAUSED", "STOPPED"]:
+            return False
         else:
-            raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
+            raise ValueError(f"Space configuration is wrong and in stage: {stage}")
 
     @classmethod
-    def _check_if_runtime_can_be_build(cls, runtime: SpaceRuntime) -> bool:
+    def _check_if_stage_can_be_build(cls, stage: SpaceStage) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when it can be built."""
-        if runtime.stage in ["RUNNING", "RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
+        if stage in ["RUNNING", "RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return False
-        elif runtime.stage in ["PAUSED", "STOPPED"]:
+        elif stage in ["PAUSED", "STOPPED"]:
             return True
         else:
-            raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
+            raise ValueError(f"Space configuration is wrong and in stage: {stage}")
 
     @staticmethod
     def _sanitize_url_component(component: str) -> str:
