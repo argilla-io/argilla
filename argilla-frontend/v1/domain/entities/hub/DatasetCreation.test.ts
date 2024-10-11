@@ -71,7 +71,7 @@ const datasetInfo = {
 describe("DatasetCreation", () => {
   describe("build should", () => {
     it("create text field", () => {
-      const builder = new DatasetCreationBuilder(datasetInfo);
+      const builder = new DatasetCreationBuilder("FAKE", datasetInfo);
 
       const datasetCreation = builder.build();
 
@@ -83,7 +83,7 @@ describe("DatasetCreation", () => {
     });
 
     it("create image field", () => {
-      const builder = new DatasetCreationBuilder(datasetInfo);
+      const builder = new DatasetCreationBuilder("FAKE", datasetInfo);
 
       const datasetCreation = builder.build();
 
@@ -95,7 +95,7 @@ describe("DatasetCreation", () => {
     });
 
     it("create label question", () => {
-      const builder = new DatasetCreationBuilder(datasetInfo);
+      const builder = new DatasetCreationBuilder("FAKE", datasetInfo);
 
       const datasetCreation = builder.build();
 
@@ -118,7 +118,10 @@ describe("DatasetCreation", () => {
         },
       };
 
-      const builder = new DatasetCreationBuilder(datasetInfoWithOneField);
+      const builder = new DatasetCreationBuilder(
+        "FAKE",
+        datasetInfoWithOneField
+      );
 
       const datasetCreation = builder.build();
 
@@ -141,7 +144,10 @@ describe("DatasetCreation", () => {
         },
       };
 
-      const builder = new DatasetCreationBuilder(datasetInfoWithOneQuestion);
+      const builder = new DatasetCreationBuilder(
+        "FAKE",
+        datasetInfoWithOneQuestion
+      );
 
       const datasetCreation = builder.build();
 
@@ -154,7 +160,7 @@ describe("DatasetCreation", () => {
     });
 
     it("create a chat field", () => {
-      const builder = new DatasetCreationBuilder(datasetInfo);
+      const builder = new DatasetCreationBuilder("FAKE", datasetInfo);
 
       const datasetCreation = builder.build();
 
@@ -166,7 +172,7 @@ describe("DatasetCreation", () => {
     });
 
     it("get no mapped feature", () => {
-      const builder = new DatasetCreationBuilder({
+      const builder = new DatasetCreationBuilder("FAKE", {
         ...datasetInfo,
         features: {
           no_mapped: {
@@ -185,7 +191,7 @@ describe("DatasetCreation", () => {
     });
 
     it("create metadata", () => {
-      const builder = new DatasetCreationBuilder(datasetInfo);
+      const builder = new DatasetCreationBuilder("FAKE", datasetInfo);
 
       const datasetCreation = builder.build();
 
@@ -202,7 +208,10 @@ describe("DatasetCreation", () => {
         ...datasetInfo,
         features: {},
       };
-      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+      const builder = new DatasetCreationBuilder(
+        "FAKE",
+        datasetInfoWithNoQuestions
+      );
 
       const datasetCreation = builder.build();
 
@@ -237,7 +246,10 @@ describe("DatasetCreation", () => {
         ...datasetInfo,
         features: {},
       };
-      const builder = new DatasetCreationBuilder(datasetInfoWithNoQuestions);
+      const builder = new DatasetCreationBuilder(
+        "FAKE",
+        datasetInfoWithNoQuestions
+      );
 
       const datasetCreation = builder.build();
 

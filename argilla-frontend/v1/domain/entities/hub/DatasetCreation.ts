@@ -3,7 +3,13 @@ import { Subset } from "./Subset";
 export class DatasetCreation {
   public selectedSubset: Subset;
 
-  constructor(private readonly subset: Subset[]) {
+  public readonly firstRecord: {};
+
+  constructor(
+    public readonly repoId: string,
+    public name: string,
+    private readonly subset: Subset[]
+  ) {
     this.selectedSubset = subset[0];
   }
 

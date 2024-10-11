@@ -13,17 +13,23 @@ export type FieldCreationTypes = "no mapping" | "text" | "image" | "chat";
 
 export class FieldCreation {
   public required = false;
-  public type: FieldType;
-  public dtype: string;
   public title: string;
+  public readonly settings: { type: FieldType };
+
   private constructor(
     public readonly name: string,
     type: string,
-    dtype: string
+    public readonly dtype: string
   ) {
-    this.type = FieldType.from(type);
     this.title = this.name;
-    this.dtype = dtype;
+
+    this.settings = {
+      type: FieldType.from(type),
+    };
+  }
+
+  get type(): FieldType {
+    return this.settings.type;
   }
 
   markAsRequired() {

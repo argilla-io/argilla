@@ -18,13 +18,13 @@
               />
             </div> -->
             <div :style="{ overflow: 'auto', height: '100%' }">
-              <pre>{{ datasetConfig }}</pre>
+              <pre>{{ dataset }}</pre>
             </div>
           </template>
           <template #right>
             <div class="dataset-config__questions-wrapper">
               <p
-                v-if="!datasetConfig.questions.length"
+                v-if="!dataset.questions.length"
                 class="dataset-config__empty-questions"
                 v-text="'Your question will be here'"
               />
@@ -32,7 +32,7 @@
               <QuestionsComponent
                 class="dataset-config__questions"
                 v-else
-                :questions="datasetConfig.questions"
+                :questions="dataset.questions"
               />
             </div>
           </template>
@@ -46,8 +46,8 @@
           <template #left>
             <div class="dataset-config__preview">
               <iframe
-                v-if="!!datasetId"
-                :src="`https://huggingface.co/datasets/${datasetId}/embed/viewer/ParaphraseRC/train`"
+                v-if="!!dataset.repoId"
+                :src="`https://huggingface.co/datasets/${dataset.repoId}/embed/viewer/ParaphraseRC/train`"
                 frameborder="0"
                 width="100%"
                 height="500px"
@@ -57,11 +57,7 @@
           <template #right>
             <div class="dataset-config__configuration">
               <DatasetConfigurationForm
-                :subsets="datasetConfig.subsets"
-                :selected-subset="datasetConfig.selectedSubset"
-                :splits="datasetConfig.splits"
-                :selected-split="datasetConfig.selectedSplit"
-                :dataset-id="datasetId"
+                :dataset="dataset"
                 @change-subset="$emit('change-subset', $event)"
                 @change-split="$emit('change-split', $event)"
               />
@@ -76,12 +72,8 @@
 <script>
 export default {
   props: {
-    datasetConfig: {
+    dataset: {
       type: Object,
-      required: true,
-    },
-    datasetId: {
-      type: String,
       required: true,
     },
   },
