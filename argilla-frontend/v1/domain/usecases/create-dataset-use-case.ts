@@ -20,7 +20,7 @@ export class CreateDatasetUseCase {
       workspaceId: "108b045c-a82e-4c75-a61b-0cddfb22c4c8",
     });
 
-    for (const field of dataset.fields) {
+    for (const field of dataset.mappedFields) {
       await this.fieldRepository.create(datasetCreated, field);
     }
 
@@ -34,7 +34,7 @@ export class CreateDatasetUseCase {
       datasetId: datasetCreated,
       name: dataset.name,
       subset: dataset.selectedSubset.name,
-      split: dataset.selectedSubset.firstSplit.name,
+      split: dataset.selectedSubset.selectedSplit.name,
     });
 
     return datasetCreated;

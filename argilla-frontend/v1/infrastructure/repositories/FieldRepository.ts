@@ -20,7 +20,7 @@ export class FieldRepository {
           name: field.name,
           title: field.title,
           required: field.required,
-          settings: field.title,
+          settings: field.settings,
         }
       );
 
