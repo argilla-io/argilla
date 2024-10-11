@@ -71,10 +71,10 @@ def db_backup(backup_folder: str, interval: int = 15, num_of_backups: int = 20):
     while True:
         try:
             _run_backup(src=db_path, dst_folder=backup_path, backup_id=backup_id)
-            backup_id = (backup_id + 1) % num_of_backups
         except Exception as e:
             _LOGGER.exception(f"Error creating backup: {e}")
-
+        finally:
+            backup_id = (backup_id + 1) % num_of_backups
         time.sleep(interval)
 
 
