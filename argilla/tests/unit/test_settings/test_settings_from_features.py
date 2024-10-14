@@ -56,6 +56,15 @@ def test_define_settings_from_features_with_non_curated_column_name(column: str,
     assert settings.fields[0].name == name
 
 
+def test_define_settings_from_bool_features():
+    features = {"text": {"_type": "Value", "dtype": "string"}, "bool_column": {"_type": "Value", "dtype": "bool"}}
+    settings = _define_settings_from_features(features, feature_mapping={})
+
+    assert len(settings.metadata) == 1
+    assert isinstance(settings.metadata[0], rg.TermsMetadataProperty)
+    assert settings.metadata[0].name == "bool_column"
+
+
 @pytest.mark.parametrize("column", ["text<column", "text>column", "text|column", "text]column", "text/column"])
 def test_define_settings_from_features_with_unsupported_column_name(column: str):
     features = {column: {"_type": "Value", "dtype": "string"}}

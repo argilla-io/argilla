@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Changed
+
+- Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
+
 ## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0)
 
 ### Added
