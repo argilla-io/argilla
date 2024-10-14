@@ -18,8 +18,11 @@ export class DatasetCreationBuilder {
         this.subsets.push(new Subset(name, value));
       }
     } else {
-      this.datasetName = datasetInfo.name;
-      this.subsets.push(new Subset("default", datasetInfo));
+      const firstKey = Object.keys(datasetInfo)[0];
+      const dataset = datasetInfo[firstKey];
+
+      this.datasetName = dataset.dataset_name;
+      this.subsets.push(new Subset(firstKey, dataset));
     }
   }
 

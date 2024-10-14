@@ -5,14 +5,30 @@ export class HubRepository {
   constructor(private axios: NuxtAxiosInstance) {}
 
   async getDatasetCreation(repoId: string): Promise<any> {
-    const { data } = await this.axios.get(
-      `https://datasets-server.huggingface.co/info?dataset=${repoId}`
-    );
+    try {
+      const { data } = await this.axios.get(
+        `https://datasets-server.huggingface.co/info?dataset=${repoId}`
+      );
 
-    const { dataset_info } = data;
+      const { dataset_info } = data;
 
-    if ("datasets" in dataset_info) return dataset_info.datasets;
+      if ("datasets" in dataset_info) return dataset_info.datasets;
 
-    return dataset_info;
+      return dataset_info;
+    } catch {
+      return {};
+    }
+  }
+
+  async getFirstRecord(repoId: string, split: string): Promise<any> {
+    try {
+      const { data } = await this.axios.get(
+        `https://datasets-server.huggingface.co/first-row?dataset=${repoId}&split=${split}&config=default`
+      );
+
+      return data;
+    } catch {
+      return {};
+    }
   }
 }

@@ -37,7 +37,7 @@
               />
             </div>
             <!-- <div :style="{ overflow: 'auto', height: '100%' }">
-              <pre>{{ dataset }}</pre>
+              <pre>{{ firstRecord }}</pre>
             </div> -->
           </template>
           <template #right>
@@ -89,12 +89,20 @@
 </template>
 
 <script>
+import { useDatasetConfiguration } from "./useDatasetConfiguration";
+
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
     },
+  },
+  mounted() {
+    this.getFirstRecord(this.dataset);
+  },
+  setup() {
+    return useDatasetConfiguration();
   },
 };
 </script>
