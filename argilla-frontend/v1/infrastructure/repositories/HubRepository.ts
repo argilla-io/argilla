@@ -30,7 +30,7 @@ export class HubRepository {
         )}&split=${split}&config=default`
       );
 
-      return data;
+      return data.rows[0].row;
     } catch {
       return {};
     }

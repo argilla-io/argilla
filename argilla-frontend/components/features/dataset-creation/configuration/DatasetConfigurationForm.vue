@@ -21,14 +21,14 @@
         <BaseButton
           class="primary"
           @click.prevent="
-            visibledatasetCreationDialog = !visibledatasetCreationDialog
+            visibleDatasetCreationDialog = !visibleDatasetCreationDialog
           "
           >Create Dataset</BaseButton
         >
         <DatasetConfigurationDialog
-          v-if="visibledatasetCreationDialog"
+          v-if="visibleDatasetCreationDialog"
           :dataset="dataset"
-          @close-dialog="visibledatasetCreationDialog = false"
+          @close-dialog="visibleDatasetCreationDialog = false"
           @create-dataset="createDataset"
         />
       </div>
@@ -112,7 +112,7 @@ export default {
   data() {
     return {
       isFocused: false,
-      visibledatasetCreationDialog: false,
+      visibleDatasetCreationDialog: false,
     };
   },
   methods: {
