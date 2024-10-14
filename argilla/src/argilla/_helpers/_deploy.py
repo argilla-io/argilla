@@ -79,6 +79,12 @@ class SpacesDeploymentMixin(LoggingMixin):
             {"key": "WORKSPACE", "value": "argilla", "description": "The workspace of the space."},
         ]
 
+        # check API key length
+        if len(api_key) < 8:
+            raise ValueError(
+                "Provided API key has invalid length. Please provide an apikey with at least 8 characters."
+            )
+
         # Check if the space already exists
         if hf_api.repo_exists(repo_id=repo_id, repo_type="space"):
             if cls._is_space_stopped(hf_api.get_space_runtime(repo_id=repo_id).stage):
