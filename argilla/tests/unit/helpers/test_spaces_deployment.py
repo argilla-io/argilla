@@ -15,6 +15,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from huggingface_hub import SpaceStage
 
 from argilla.client import Argilla
 
@@ -33,7 +34,7 @@ class TestSpacesDeploymentMixin:
         mock_hf_api.return_value = mock_api
         mock_api.whoami.return_value = {"name": "test_user"}
         mock_api.repo_exists.return_value = False
-        mock_api.get_space_runtime.return_value = Mock(stage="RUNNING")
+        mock_api.get_space_runtime.return_value = Mock(stage=SpaceStage.RUNNING)
 
         result = argilla_client_class.deploy_on_spaces(api_key="12345678")
 
@@ -47,7 +48,6 @@ class TestSpacesDeploymentMixin:
         assert kwargs["api_key"] == "12345678"
         assert kwargs["api_url"].startswith("https://")
         assert kwargs["api_url"].endswith(".hf.space/")
-        assert "api_key" in kwargs
         assert "headers" in kwargs
 
     @patch("argilla._helpers._deploy.get_token")
@@ -61,35 +61,37 @@ class TestSpacesDeploymentMixin:
     @pytest.mark.parametrize(
         "stage,expected",
         [
-            ("RUNNING", False),
-            ("BUILDING", True),
-            ("PAUSED", True),
+            (SpaceStage.RUNNING, False),
+            (SpaceStage.BUILDING, False),
+            (SpaceStage.PAUSED, True),
+            (SpaceStage.STOPPED, True),
             ("INVALID", pytest.raises(ValueError)),
         ],
     )
-    def test_check_if_running(self, stage, expected, argilla_client_class):
-        runtime = Mock(stage=stage)
+    def test_is_space_stopped(self, stage, expected, argilla_client_class):
         if isinstance(expected, bool):
-            assert argilla_client_class._check_if_running(runtime) == expected
+            assert argilla_client_class._is_space_stopped(stage) == expected
         else:
             with expected:
-                argilla_client_class._check_if_running(runtime)
+                argilla_client_class._is_space_stopped(stage)
 
     @pytest.mark.parametrize(
         "stage,expected",
         [
-            ("RUNNING", False),
-            ("PAUSED", True),
+            (SpaceStage.RUNNING, False),
+            (SpaceStage.RUNNING_BUILDING, True),
+            (SpaceStage.BUILDING, True),
+            (SpaceStage.PAUSED, False),
+            (SpaceStage.STOPPED, False),
             ("INVALID", pytest.raises(ValueError)),
         ],
     )
-    def test_check_if_runtime_can_be_build(self, stage, expected, argilla_client_class):
-        runtime = Mock(stage=stage)
+    def test_is_building(self, stage, expected, argilla_client_class):
         if isinstance(expected, bool):
-            assert argilla_client_class._check_if_runtime_can_be_build(runtime) == expected
+            assert argilla_client_class._is_building(stage) == expected
         else:
             with expected:
-                argilla_client_class._check_if_runtime_can_be_build(runtime)
+                argilla_client_class._is_building(stage)
 
     @pytest.mark.parametrize(
         "component,expected",
