@@ -100,7 +100,7 @@
 </template>
 
 <script>
-import { useDatasetConfigurationForm } from "./useDatasetConfigurationFormss";
+import { useDatasetConfigurationForm } from "./useDatasetConfigurationForm";
 
 export default {
   props: {
