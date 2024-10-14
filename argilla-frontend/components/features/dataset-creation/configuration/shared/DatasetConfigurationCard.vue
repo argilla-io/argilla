@@ -1,15 +1,16 @@
 <template>
   <div class="config-card__wrapper">
     <div class="config-card">
-      <div class="config-card__header">
+      <div class="config-card__content" :class="item.type.replace(/ /g, '')">
         <h3 class="config-card__title">
           <svgicon width="6" name="draggable" color="var(--bg-opacity-20)" />{{
             item.name
           }}
+          <span v-if="item.dtype" class="config-card__dtype">{{
+            item.dtype
+          }}</span>
         </h3>
         <slot name="header" />
-      </div>
-      <div class="config-card__content" :class="item.type.replace(/ /g, '')">
         <div class="config-card__row">
           <DatasetConfigurationSelector
             class="config-card__type"
@@ -73,7 +74,8 @@ $error-color: hsl(3, 100%, 69%);
 $no-mapping-color: hsl(0, 0%, 50%);
 .config-card {
   $this: &;
-  border-radius: $base-space;
+  position: relative;
+  border-radius: $base-space * 2;
   border: 1px solid hsla(from $validate-color h s l / 0.16);
   background: linear-gradient(
     180deg,
@@ -82,7 +84,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
   );
   transition: all 0.3s ease-in;
   &__wrapper {
-    border-radius: $base-space;
+    border-radius: $base-space * 2;
     background: var(--bg-accent-grey-1);
     transition: all 0.3s ease-in;
     cursor: pointer;
@@ -91,16 +93,8 @@ $no-mapping-color: hsl(0, 0%, 50%);
       box-shadow: 0 0 3px 1px var(--bg-opacity-10);
     }
   }
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    padding: $base-space $base-space * 2;
-    align-items: center;
-    background: hsla(from $validate-color h s l / 0.04);
-    border-bottom: 1px solid hsla(from $validate-color h s l / 0.06);
-  }
   &__content {
-    padding: $base-space $base-space * 2 $base-space * 2;
+    padding: $base-space * 2;
     display: flex;
     flex-direction: column;
     gap: $base-space;
@@ -112,6 +106,13 @@ $no-mapping-color: hsl(0, 0%, 50%);
     margin: 0;
     font-weight: 500;
     @include font-size(14px);
+  }
+  &__dtype {
+    font-family: monospace, monospace;
+    color: var(--fg-secondary);
+    font-weight: 400;
+    @include font-size(12px);
+    margin-left: $base-space;
   }
   &__row {
     display: flex;
@@ -152,10 +153,6 @@ $no-mapping-color: hsl(0, 0%, 50%);
       hsla(from $no-mapping-color h s l / 0.16) 0%,
       hsla(from $no-mapping-color h s l / 0.1) 100%
     );
-    #{$this}__header {
-      background: hsla(from $no-mapping-color h s l / 0.04);
-      border-bottom: 1px solid hsla(from $no-mapping-color h s l / 0.06);
-    }
   }
   &:has(.error) {
     background: linear-gradient(
@@ -163,10 +160,6 @@ $no-mapping-color: hsl(0, 0%, 50%);
       hsla(from $error-color h s l / 0.16) 0%,
       hsla(from $error-color h s l / 0.1) 100%
     );
-    #{$this}__header {
-      background: hsla(from $error-color h s l / 0.04);
-      border-bottom: 1px solid hsla(from $error-color h s l / 0.06);
-    }
   }
   &:deep(.re-switch-label) {
     @include font-size(13px);

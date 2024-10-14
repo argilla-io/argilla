@@ -120,7 +120,7 @@ export default {
       this.create(this.dataset);
     },
     addQuestion(type) {
-      const questionName = `question_${this.dataset.selectedSubset.questions.length}`;
+      const questionName = `${type} ${this.dataset.selectedSubset.questions.length}`;
       this.dataset.selectedSubset.addQuestion(questionName, { type });
     },
     onTypeIsChanged(name, type) {
@@ -142,6 +142,8 @@ export default {
   gap: $base-space;
   padding: $base-space $base-space * 2 $base-space * 2 $base-space * 2;
   height: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
   &__header {
     display: flex;
     gap: $base-space;
@@ -161,7 +163,7 @@ export default {
   }
   &__content {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-between;
     gap: $base-space * 2;
     min-height: 0;
   }

@@ -5,14 +5,13 @@
     @is-focused="$emit('is-focused', $event)"
     @change-type="$emit('change-type', $event)"
   >
-    <template slot="header">
-      <BaseButton
-        class="config-card__remove"
-        @click="remove"
-        v-if="removeIsAllowed"
-        ><svgicon name="close"
-      /></BaseButton>
-    </template>
+    <BaseButton
+      class="config-card__remove"
+      @click="remove"
+      v-if="removeIsAllowed"
+      ><svgicon name="close"
+    /></BaseButton>
+
     <DatasetConfigurationSelector
       class="config-card__type"
       :options="columns"
@@ -93,6 +92,9 @@ export default {
 <style lang="scss" scoped>
 .config-card {
   &__remove.button {
+    position: absolute;
+    top: $base-space * 1.5;
+    right: $base-space * 1.5;
     padding: 0;
   }
 }
