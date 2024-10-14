@@ -37,12 +37,11 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         pip install argilla
         ```
 
-        Next, we can use the `Argilla.deploy_on_spaces` method, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will do the following:
+        Next, we can use the `Argilla.deploy_on_spaces` method, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will automatically do the following:
 
-        - Deploy an Argilla Space on the Hugging Face Hub, which takes around 2-3 minutes.
-        - Set the `API_KEY` secret based on the `api_key` you provide. This key will be used to authenticate your requests to the Argilla API.
-        - Set the `USERNAME` and `PASSWORD` secrets based on the username of the Hugging Face token and the `api_key` you provide, respectively.
-        - Automatically return an authenticated Argilla client, which can directly be used to interact with your Argilla server.
+        - Deploy an Argilla Space on the Hugging Face Hub with [OAuth sign-in](#sign-in-into-the-argilla-ui) and a URL like `https://<your-username>-argilla.hf.space`, which takes around 2-3 minutes.
+        - Create a default workspace called `argilla` with an owner called `<your-username>` and an Argilla token set to `api_key`.
+        - Automatically return the authenticated Argilla client, which can directly be used to interact with your Argilla server.
 
         ```python
         import argilla as rg

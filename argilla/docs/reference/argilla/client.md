@@ -17,7 +17,6 @@ import argilla as rg
 client = rg.Argilla.deploy_on_spaces(api_key="12345678")
 ```
 
-
 ### Connecting to an Argilla server
 
 To connect to an Argilla server, instantiate the `Argilla` class and pass the `api_url` of the server and the `api_key` to authenticate.
