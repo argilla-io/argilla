@@ -286,6 +286,18 @@ class Question(DatabaseModel):
         return parse_obj_as(QuestionSettings, self.settings)
 
     @property
+    def is_text(self) -> bool:
+        return self.settings.get("type") == QuestionType.text
+
+    @property
+    def is_label_selection(self) -> bool:
+        return self.settings.get("type") == QuestionType.label_selection
+
+    @property
+    def is_rating(self) -> bool:
+        return self.settings.get("type") == QuestionType.rating
+
+    @property
     def type(self) -> QuestionType:
         return QuestionType(self.settings["type"])
 

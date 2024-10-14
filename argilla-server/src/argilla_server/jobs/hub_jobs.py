@@ -38,6 +38,7 @@ async def import_dataset_from_hub_job(name: str, subset: str, split: str, datase
             dataset_id,
             options=[
                 selectinload(Dataset.fields),
+                selectinload(Dataset.questions),
                 selectinload(Dataset.metadata_properties),
             ],
         )
