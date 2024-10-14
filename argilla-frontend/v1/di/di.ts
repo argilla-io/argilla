@@ -212,7 +212,12 @@ export const loadDependencyContainer = (context: Context) => {
       .build(),
 
     register(CreateDatasetUseCase)
-      .withDependencies(DatasetRepository, QuestionRepository, FieldRepository)
+      .withDependencies(
+        DatasetRepository,
+        WorkspaceRepository,
+        QuestionRepository,
+        FieldRepository
+      )
       .build(),
   ];
 
