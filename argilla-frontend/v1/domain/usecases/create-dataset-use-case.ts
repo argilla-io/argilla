@@ -3,21 +3,29 @@ import { IDatasetRepository } from "../services/IDatasetRepository";
 import {
   FieldRepository,
   QuestionRepository,
+  WorkspaceRepository,
 } from "~/v1/infrastructure/repositories";
 
 export class CreateDatasetUseCase {
   constructor(
     private readonly datasetRepository: IDatasetRepository,
+    private readonly workspaceRepository: WorkspaceRepository,
     private readonly questionRepository: QuestionRepository,
     private readonly fieldRepository: FieldRepository
   ) {}
 
   async execute(dataset: DatasetCreation) {
-    // TODO: Crear workspace if not exists
+    if (!dataset.workspace.id) {
+      const workspace = await this.workspaceRepository.create(
+        dataset.workspace.name
+      );
+
+      dataset.workspace.id = workspace.id;
+    }
 
     const datasetCreated = await this.datasetRepository.create({
       name: dataset.name,
-      workspaceId: "108b045c-a82e-4c75-a61b-0cddfb22c4c8",
+      workspaceId: dataset.workspace.id,
     });
 
     for (const field of dataset.mappedFields) {
