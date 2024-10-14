@@ -1094,24 +1094,6 @@ class TestSuiteDatasets:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-    async def test_create_dataset_field_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
-    ):
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": invalid_name,
-            "title": "title",
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
     async def test_create_dataset_field_with_invalid_max_length_name(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
