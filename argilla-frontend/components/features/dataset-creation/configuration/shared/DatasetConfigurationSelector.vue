@@ -6,7 +6,7 @@
     v-if="options.length"
   >
     <template slot="dropdown-header">
-      {{ value }}
+      {{ value.name }}
       <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
@@ -19,7 +19,7 @@
           :key="index"
           @click="selectOption(option)"
         >
-          {{ option }}
+          {{ option.name }}
         </li>
       </ul>
     </template>
@@ -30,7 +30,7 @@
 export default {
   props: {
     value: {
-      type: [String, Number],
+      type: String,
       required: true,
     },
     options: {

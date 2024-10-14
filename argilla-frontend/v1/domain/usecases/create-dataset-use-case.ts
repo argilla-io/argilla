@@ -1,4 +1,5 @@
 import { DatasetCreation } from "../entities/hub/DatasetCreation";
+import { Workspace } from "../entities/workspace/Workspace";
 import { IDatasetRepository } from "../services/IDatasetRepository";
 import {
   FieldRepository,
@@ -15,12 +16,12 @@ export class CreateDatasetUseCase {
   ) {}
 
   async execute(dataset: DatasetCreation) {
-    if (!dataset.workspace.id) {
+    if (!dataset.workspace) {
       const workspace = await this.workspaceRepository.create(
         dataset.workspace.name
       );
 
-      dataset.workspace.id = workspace.id;
+      dataset.workspace = new Workspace(workspace.id, workspace.name);
     }
 
     const datasetCreated = await this.datasetRepository.create({

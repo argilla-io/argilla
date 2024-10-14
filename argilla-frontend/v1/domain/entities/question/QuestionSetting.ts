@@ -21,7 +21,7 @@ export class QuestionSetting {
   options: any;
   options_order: "natural" | "suggestion";
 
-  constructor(private readonly settings: QuestionPrototype) {
+  constructor(settings: QuestionPrototype) {
     this.type = QuestionType.from(settings.type);
 
     this.use_markdown = settings.use_markdown;

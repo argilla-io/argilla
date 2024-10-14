@@ -1,15 +1,11 @@
+import { Workspace } from "../workspace/Workspace";
 import { Subset } from "./Subset";
-
-type Workspace = {
-  id?: string;
-  name?: string;
-};
 
 export class DatasetCreation {
   public selectedSubset: Subset;
 
   public readonly firstRecord: {};
-  public readonly workspace: Workspace = {};
+  public workspace: Workspace;
 
   constructor(
     public readonly repoId: string,

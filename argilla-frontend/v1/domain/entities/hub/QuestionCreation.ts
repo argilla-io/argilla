@@ -13,7 +13,7 @@ import {
   QuestionSetting,
   QuestionPrototype,
 } from "../question/QuestionSetting";
-import { QuestionType } from "../question/QuestionType";
+import { QuestionType, QuestionType } from "../question/QuestionType";
 
 export const availableQuestionTypes = [
   QuestionType.from("label_selection"),
@@ -39,6 +39,7 @@ export class QuestionCreation {
     this.title = this.name;
     this.id = this.name;
     this.datasetColumn = "no mapping";
+
     this.initialize();
   }
 
