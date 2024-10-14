@@ -14,7 +14,6 @@
 
 import json
 import os
-import re
 from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
@@ -417,15 +416,6 @@ class Settings(DefaultSettingsMixin, Resource):
 
         return validate_mapping
 
-    @classmethod
-    def _sanitize_settings_name(cls, name: str) -> str:
-        """Sanitize the name for the settings"""
-
-        for char in [" ", ":", ".", "&", "?", "!"]:
-            name = name.replace(char, "_")
-
-        return name.lower()
-
     def __process_guidelines(self, guidelines):
         if guidelines is None:
             return guidelines
@@ -438,11 +428,6 @@ class Settings(DefaultSettingsMixin, Resource):
                 return file.read()
 
         return guidelines
-
-    @classmethod
-    def _is_valid_name(cls, name: str) -> bool:
-        """Check if the name is valid"""
-        return bool(re.match(r"^(?=.*[a-z0-9])[a-z0-9_-]+$", name))
 
 
 Property = Union[Field, VectorField, MetadataType, QuestionType]
