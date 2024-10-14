@@ -150,19 +150,17 @@ class SpacesDeploymentMixin(LoggingMixin):
         return ht_token
 
     @classmethod
-    def _check_if_running(cls, stage: SpaceStage) -> bool:
+    def _is_building(cls, stage: SpaceStage) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when being built."""
-        if stage in ["RUNNING"]:
-            return False
-        elif stage in ["RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
+        if stage in ["RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return True
-        elif stage in ["PAUSED", "STOPPED"]:
+        elif stage in ["RUNNING", "PAUSED", "STOPPED"]:
             return False
         else:
             raise ValueError(f"Space configuration is wrong and in stage: {stage}")
 
     @classmethod
-    def _check_if_stage_can_be_build(cls, stage: SpaceStage) -> bool:
+    def _is_space_stopped(cls, stage: SpaceStage) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when it can be built."""
         if stage in ["RUNNING", "RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return False
