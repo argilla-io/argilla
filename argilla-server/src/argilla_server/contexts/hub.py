@@ -32,6 +32,7 @@ from argilla_server.api.schemas.v1.records_bulk import RecordsBulkUpsert as Reco
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 
 BATCH_SIZE = 100
+RESET_ROW_IDX = -1
 
 
 class HubDataset:
@@ -39,6 +40,7 @@ class HubDataset:
         self.dataset = load_dataset(path=name, name=subset, split=split)
         self.mapping = mapping
         self.iterable_dataset = self.dataset.to_iterable_dataset()
+        self.row_idx = RESET_ROW_IDX
 
     @property
     def num_rows(self) -> int:
@@ -53,9 +55,19 @@ class HubDataset:
         if not dataset.is_ready:
             raise Exception("it's not possible to import records to a non published dataset")
 
+        self._reset_row_idx()
+
         batched_dataset = self.iterable_dataset.batch(batch_size=BATCH_SIZE)
         for batch in batched_dataset:
             await self._import_batch_to(db, search_engine, batch, dataset)
+
+    def _reset_row_idx(self) -> None:
+        self.row_idx = RESET_ROW_IDX
+
+    def _next_row_idx(self) -> int:
+        self.row_idx += 1
+
+        return self.row_idx
 
     async def _import_batch_to(
         self, db: AsyncSession, search_engine: SearchEngine, batch: dict, dataset: Dataset
@@ -79,9 +91,9 @@ class HubDataset:
             vectors=None,
         )
 
-    def _batch_row_external_id(self, batch: dict, index: int) -> Union[str, None]:
+    def _batch_row_external_id(self, batch: dict, index: int) -> str:
         if not self.mapping.external_id:
-            return None
+            return str(self._next_row_idx())
 
         return batch[self.mapping.external_id][index]
 
