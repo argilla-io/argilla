@@ -18,7 +18,8 @@ import pytest
 
 from argilla import Dataset, Record, Response, Settings, Suggestion, TextField, TextQuestion
 from argilla._exceptions import ArgillaError
-from argilla._models import MetadataModel, RecordModel
+from argilla._models import RecordModel
+from argilla._models._record._metadata import MetadataModel
 
 
 @pytest.fixture()
