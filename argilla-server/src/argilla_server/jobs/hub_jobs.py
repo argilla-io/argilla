@@ -23,6 +23,7 @@ from argilla_server.settings import settings
 from argilla_server.contexts.hub import HubDataset
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.search_engine.base import SearchEngine
+from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
 from argilla_server.jobs.queues import DEFAULT_QUEUE
 
 # TODO: Move this to be defined on jobs queues as a shared constant
@@ -31,7 +32,7 @@ JOB_TIMEOUT_DISABLED = -1
 
 # TODO: Once we merge webhooks we should change the queue to use a different one (default queue is deleted there)
 @job(DEFAULT_QUEUE, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
-async def import_dataset_from_hub_job(name: str, subset: str, split: str, dataset_id: UUID) -> None:
+async def import_dataset_from_hub_job(name: str, subset: str, split: str, dataset_id: UUID, mapping: dict) -> None:
     async with AsyncSessionLocal() as db:
         dataset = await Dataset.get_or_raise(
             db,
@@ -44,4 +45,6 @@ async def import_dataset_from_hub_job(name: str, subset: str, split: str, datase
         )
 
         async with SearchEngine.get_by_name(settings.search_engine) as search_engine:
-            await HubDataset(name, subset, split).import_to(db, search_engine, dataset)
+            parsed_mapping = HubDatasetMapping.parse_obj(mapping)
+
+            await HubDataset(name, subset, split, parsed_mapping).import_to(db, search_engine, dataset)

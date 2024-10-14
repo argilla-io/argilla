@@ -17,6 +17,7 @@ import pytest
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.api.schemas.v1.datasets import HubDatasetMapping, HubDatasetMappingItem
 from argilla_server.api.schemas.v1.metadata_properties import IntegerMetadataProperty
 from argilla_server.enums import DatasetStatus, QuestionType
 from argilla_server.models import Record
@@ -48,7 +49,24 @@ class TestHubDataset:
         await dataset.awaitable_attrs.questions
         await dataset.awaitable_attrs.metadata_properties
 
-        hub_dataset = HubDataset(name="lhoestq/demo1", subset="default", split="train")
+        hub_dataset = HubDataset(
+            name="lhoestq/demo1",
+            subset="default",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="package_name", target="package_name"),
+                    HubDatasetMappingItem(source="review", target="review"),
+                    HubDatasetMappingItem(source="date", target="date"),
+                    HubDatasetMappingItem(source="star", target="star"),
+                ],
+                metadata=[
+                    HubDatasetMappingItem(source="version_id", target="version_id"),
+                ],
+                suggestions=[],
+                external_id="id",
+            ),
+        )
 
         await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
 
@@ -61,6 +79,7 @@ class TestHubDataset:
         )
         assert record.fields["date"] == "October 12 2016"
         assert record.fields["star"] == "4"
+        assert record.metadata_ == {"version_id": 1487}
 
     async def test_hub_dataset_import_to_with_suggestions(self, db: AsyncSession, mock_search_engine: SearchEngine):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
@@ -88,7 +107,20 @@ class TestHubDataset:
         await dataset.awaitable_attrs.questions
         await dataset.awaitable_attrs.metadata_properties
 
-        hub_dataset = HubDataset(name="lhoestq/demo1", subset="default", split="train")
+        hub_dataset = HubDataset(
+            name="lhoestq/demo1",
+            subset="default",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="package_name", target="package_name"),
+                    HubDatasetMappingItem(source="review", target="review"),
+                ],
+                metadata=[],
+                suggestions=[HubDatasetMappingItem(source="star", target="star")],
+                external_id=None,
+            ),
+        )
 
         await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
 
@@ -99,20 +131,30 @@ class TestHubDataset:
     async def test_hub_dataset_import_to_with_image_fields(self, db: AsyncSession, mock_search_engine: SearchEngine):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
 
-        await ImageFieldFactory.create(name="image", required=True, dataset=dataset)
+        await ImageFieldFactory.create(name="image-to-review", required=True, dataset=dataset)
 
         await dataset.awaitable_attrs.fields
         await dataset.awaitable_attrs.questions
         await dataset.awaitable_attrs.metadata_properties
 
-        hub_dataset = HubDataset(name="lmms-lab/llava-critic-113k", subset="pairwise", split="train")
+        hub_dataset = HubDataset(
+            name="lmms-lab/llava-critic-113k",
+            subset="pairwise",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[HubDatasetMappingItem(source="image", target="image-to-review")],
+                metadata=[],
+                suggestions=[],
+                external_id="id",
+            ),
+        )
 
         await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
 
         record = (await db.execute(select(Record))).scalar_one()
         assert record.external_id == "vlfeedback_1"
         assert (
-            record.fields["image"][:100]
+            record.fields["image-to-review"][:100]
             == "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aH"
         )
 
@@ -125,7 +167,17 @@ class TestHubDataset:
         await dataset.awaitable_attrs.questions
         await dataset.awaitable_attrs.metadata_properties
 
-        hub_dataset = HubDataset(name="lhoestq/demo1", subset="default", split="train")
+        hub_dataset = HubDataset(
+            name="lhoestq/demo1",
+            subset="default",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[HubDatasetMappingItem(source="package_name", target="package_name")],
+                metadata=[],
+                suggestions=[],
+                external_id="id",
+            ),
+        )
 
         await hub_dataset.import_to(db, mock_search_engine, dataset)
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
@@ -134,6 +186,16 @@ class TestHubDataset:
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
 
     async def test_hub_dataset_num_rows(self):
-        hub_dataset = HubDataset(name="lhoestq/demo1", subset="default", split="train")
+        hub_dataset = HubDataset(
+            name="lhoestq/demo1",
+            subset="default",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[HubDatasetMappingItem(source="package_name", target="package_name")],
+                metadata=[],
+                suggestions=[],
+                external_id=None,
+            ),
+        )
 
         assert hub_dataset.num_rows == 5

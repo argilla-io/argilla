@@ -424,7 +424,7 @@ class Dataset(DatabaseModel):
             if question.id == question_id:
                 return question
 
-    def question_by_name(self, name: str) -> Union["Question", None]:
+    def question_by_name(self, name: str) -> Union[Question, None]:
         for question in self.questions:
             if question.name == name:
                 return question

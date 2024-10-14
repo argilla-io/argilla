@@ -324,6 +324,7 @@ async def import_dataset_from_hub(
         subset=hub_dataset.subset,
         split=hub_dataset.split,
         dataset_id=dataset.id,
+        mapping=hub_dataset.mapping.dict(),
     )
 
     return JobSchema(id=job.id, status=job.get_status())

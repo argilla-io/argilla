@@ -22,9 +22,11 @@ from PIL import Image
 from datasets import load_dataset
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 from argilla_server.models.database import Dataset
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
+from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
 from argilla_server.api.schemas.v1.records import RecordUpsert as RecordUpsertSchema
 from argilla_server.api.schemas.v1.records_bulk import RecordsBulkUpsert as RecordsBulkUpsertSchema
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
@@ -33,8 +35,9 @@ BATCH_SIZE = 100
 
 
 class HubDataset:
-    def __init__(self, name: str, subset: str, split: str):
+    def __init__(self, name: str, subset: str, split: str, mapping: HubDatasetMapping):
         self.dataset = load_dataset(path=name, name=subset, split=split)
+        self.mapping = mapping
         self.iterable_dataset = self.dataset.to_iterable_dataset()
 
     @property
@@ -76,17 +79,19 @@ class HubDataset:
             vectors=None,
         )
 
-    # NOTE: if there is a value with key "id" in the batch, we will use it as external_id
     def _batch_row_external_id(self, batch: dict, index: int) -> Union[str, None]:
-        if not "id" in batch:
+        if not self.mapping.external_id:
             return None
 
-        return batch["id"][index]
+        return batch[self.mapping.external_id][index]
 
     def _batch_row_fields(self, batch: dict, index: int, dataset: Dataset) -> dict:
         fields = {}
-        for field in dataset.fields:
-            value = batch[field.name][index]
+        for mapping_field in self.mapping.fields:
+            value = batch[mapping_field.source][index]
+            field = dataset.field_by_name(mapping_field.target)
+            if not field:
+                continue
 
             if field.is_text:
                 value = str(value)
@@ -100,18 +105,23 @@ class HubDataset:
 
     def _batch_row_metadata(self, batch: dict, index: int, dataset: Dataset) -> dict:
         metadata = {}
-        for metadata_property in dataset.metadata_properties:
-            metadata[metadata_property.name] = batch[metadata_property.name][index]
+        for mapping_metadata in self.mapping.metadata:
+            value = batch[mapping_metadata.source][index]
+            metadata_property = dataset.metadata_property_by_name(mapping_metadata.target)
+            if not metadata_property:
+                continue
+
+            metadata[metadata_property.name] = value
 
         return metadata
 
     def _batch_row_suggestions(self, batch: dict, index: int, dataset: Dataset) -> list:
         suggestions = []
-        for question in dataset.questions:
-            if not question.name in batch:
+        for mapping_suggestion in self.mapping.suggestions:
+            value = batch[mapping_suggestion.source][index]
+            question = dataset.question_by_name(mapping_suggestion.target)
+            if not question:
                 continue
-
-            value = batch[question.name][index]
 
             if question.is_text or question.is_label_selection:
                 value = str(value)

@@ -144,7 +144,20 @@ class DatasetUpdate(UpdateSchema):
     __non_nullable_fields__ = {"name", "allow_extra_metadata", "distribution"}
 
 
+class HubDatasetMappingItem(BaseModel):
+    source: str = Field(..., description="The name of the column in the Hub Dataset")
+    target: str = Field(..., description="The name of the target resource in the Argilla Dataset")
+
+
+class HubDatasetMapping(BaseModel):
+    fields: List[HubDatasetMappingItem] = Field(..., min_items=1)
+    metadata: List[HubDatasetMappingItem]
+    suggestions: List[HubDatasetMappingItem]
+    external_id: Optional[str]
+
+
 class HubDataset(BaseModel):
     name: str
     subset: str
     split: str
+    mapping: HubDatasetMapping
