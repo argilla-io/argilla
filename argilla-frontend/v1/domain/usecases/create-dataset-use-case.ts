@@ -39,12 +39,7 @@ export class CreateDatasetUseCase {
 
     await this.datasetRepository.publish(datasetCreated);
 
-    await this.datasetRepository.import({
-      datasetId: datasetCreated,
-      name: dataset.repoId,
-      subset: dataset.selectedSubset.name,
-      split: dataset.selectedSubset.selectedSplit.name,
-    });
+    await this.datasetRepository.import(datasetCreated, dataset);
 
     return datasetCreated;
   }

@@ -51,7 +51,7 @@
                 v-for="field in dataset.selectedSubset.fields"
                 :key="field.name"
                 :field="field"
-                :available-field-types="availableFieldTypes"
+                :available-types="availableFieldTypes"
                 @is-focused="isFocused = $event"
               />
             </draggable>

@@ -14,6 +14,7 @@ import {
 } from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
+import { DatasetCreation } from "~/v1/domain/entities/hub/DatasetCreation";
 
 export const DATASET_API_ERRORS = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
@@ -62,14 +63,28 @@ export class DatasetRepository implements IDatasetRepository {
     }
   }
 
-  async import({ name, datasetId, subset, split }): Promise<void> {
+  async import(datasetId: DatasetId, creation: DatasetCreation): Promise<void> {
     try {
       await this.axios.post<BackendDataset>(
         `/v1/datasets/${datasetId}/import`,
         {
-          name,
-          subset,
-          split,
+          name: creation.repoId,
+          subset: creation.selectedSubset.name,
+          split: creation.selectedSubset.selectedSplit.name,
+          mapping: {
+            fields: creation.mappedFields.map((field) => ({
+              source: field.name,
+              target: field.name,
+            })),
+            metadata: creation.metadata.map((metadata) => ({
+              source: metadata.name,
+              target: metadata.name,
+            })),
+            suggestions: creation.questions.map((question) => ({
+              source: question.column,
+              target: question.name,
+            })),
+          },
         }
       );
     } catch (err) {

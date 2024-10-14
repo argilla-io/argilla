@@ -15,7 +15,7 @@
     <DatasetConfigurationSelector
       class="config-card__type"
       :options="columns"
-      v-model="question.datasetColumn"
+      v-model="question.column"
     />
     <!-- <BaseSwitch
       v-if="question.settings.type.isTextType"
@@ -81,7 +81,6 @@ export default {
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .config-card {
   &__remove.button {

@@ -44,7 +44,7 @@ export class QuestionSetting {
   }
 
   get shouldShowVisibleOptions() {
-    return this.options?.length > 3 && "visible_options" in this.settings;
+    return this.options?.length > 3 && !!this.visible_options;
   }
 
   isEqual(setting: QuestionSetting) {

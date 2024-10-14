@@ -13,7 +13,7 @@ import {
   QuestionSetting,
   QuestionPrototype,
 } from "../question/QuestionSetting";
-import { QuestionType, QuestionType } from "../question/QuestionType";
+import { QuestionType } from "../question/QuestionType";
 
 export const availableQuestionTypes = [
   QuestionType.from("label_selection"),
@@ -28,8 +28,7 @@ export class QuestionCreation {
   public settings: QuestionSetting;
   public title: string;
   public readonly id: string;
-  public datasetColumn: string;
-
+  public column: string;
   constructor(
     public readonly name: string,
     public required: boolean,
@@ -38,7 +37,7 @@ export class QuestionCreation {
     this.settings = new QuestionSetting(settings);
     this.title = this.name;
     this.id = this.name;
-    this.datasetColumn = "no mapping";
+    this.column = "no mapping";
 
     this.initialize();
   }
