@@ -151,9 +151,9 @@ class HubDatasetMappingItem(BaseModel):
 
 class HubDatasetMapping(BaseModel):
     fields: List[HubDatasetMappingItem] = Field(..., min_items=1)
-    metadata: List[HubDatasetMappingItem]
-    suggestions: List[HubDatasetMappingItem]
-    external_id: Optional[str]
+    metadata: Optional[List[HubDatasetMappingItem]] = []
+    suggestions: Optional[List[HubDatasetMappingItem]] = []
+    external_id: Optional[str] = None
 
 
 class HubDataset(BaseModel):

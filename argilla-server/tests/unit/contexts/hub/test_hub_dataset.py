@@ -63,7 +63,6 @@ class TestHubDataset:
                 metadata=[
                     HubDatasetMappingItem(source="version_id", target="version_id"),
                 ],
-                suggestions=[],
                 external_id="id",
             ),
         )
@@ -116,9 +115,9 @@ class TestHubDataset:
                     HubDatasetMappingItem(source="package_name", target="package_name"),
                     HubDatasetMappingItem(source="review", target="review"),
                 ],
-                metadata=[],
-                suggestions=[HubDatasetMappingItem(source="star", target="star")],
-                external_id=None,
+                suggestions=[
+                    HubDatasetMappingItem(source="star", target="star"),
+                ],
             ),
         )
 
@@ -142,9 +141,9 @@ class TestHubDataset:
             subset="pairwise",
             split="train",
             mapping=HubDatasetMapping(
-                fields=[HubDatasetMappingItem(source="image", target="image-to-review")],
-                metadata=[],
-                suggestions=[],
+                fields=[
+                    HubDatasetMappingItem(source="image", target="image-to-review"),
+                ],
                 external_id="id",
             ),
         )
@@ -172,9 +171,9 @@ class TestHubDataset:
             subset="default",
             split="train",
             mapping=HubDatasetMapping(
-                fields=[HubDatasetMappingItem(source="package_name", target="package_name")],
-                metadata=[],
-                suggestions=[],
+                fields=[
+                    HubDatasetMappingItem(source="package_name", target="package_name"),
+                ],
                 external_id="id",
             ),
         )
@@ -191,7 +190,9 @@ class TestHubDataset:
             subset="default",
             split="train",
             mapping=HubDatasetMapping(
-                fields=[HubDatasetMappingItem(source="package_name", target="package_name")],
+                fields=[
+                    HubDatasetMappingItem(source="package_name", target="package_name"),
+                ],
                 metadata=[],
                 suggestions=[],
                 external_id=None,
