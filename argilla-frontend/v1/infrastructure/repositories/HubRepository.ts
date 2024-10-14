@@ -7,7 +7,9 @@ export class HubRepository {
   async getDatasetCreation(repoId: string): Promise<any> {
     try {
       const { data } = await this.axios.get(
-        `https://datasets-server.huggingface.co/info?dataset=${repoId}`
+        `https://datasets-server.huggingface.co/info?dataset=${encodeURIComponent(
+          repoId
+        )}`
       );
 
       const { dataset_info } = data;
@@ -23,7 +25,9 @@ export class HubRepository {
   async getFirstRecord(repoId: string, split: string): Promise<any> {
     try {
       const { data } = await this.axios.get(
-        `https://datasets-server.huggingface.co/first-row?dataset=${repoId}&split=${split}&config=default`
+        `https://datasets-server.huggingface.co/first-rows?dataset=${encodeURIComponent(
+          repoId
+        )}&split=${split}&config=default`
       );
 
       return data;
