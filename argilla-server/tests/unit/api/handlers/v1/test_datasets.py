@@ -1094,24 +1094,6 @@ class TestSuiteDatasets:
         assert response.status_code == 403
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
 
-    @pytest.mark.parametrize("invalid_name", ["", " ", "  ", "-", "--", "_", "__", "A", "AA", "invalid_nAmE"])
-    async def test_create_dataset_field_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
-    ):
-        dataset = await DatasetFactory.create()
-        field_json = {
-            "name": invalid_name,
-            "title": "title",
-            "settings": {"type": "text"},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/fields", headers=owner_auth_header, json=field_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
     async def test_create_dataset_field_with_invalid_max_length_name(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
@@ -1287,7 +1269,6 @@ class TestSuiteDatasets:
         [
             {"name": "", "title": "vectors", "dimensions": 5},
             {"name": "a" * (VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH + 1), "title": "vectors", "dimensions": 5},
-            {"name": " invalid", "title": "vectors", "dimensions": 5},
             {"name": "vectors", "title": "", "dimensions": 5},
             {
                 "name": "vectors",
@@ -4392,17 +4373,16 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": "Dataset has already been published"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_without_required_fields(
+    async def test_publish_dataset_without_fields(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
-        await TextFieldFactory.create(dataset=dataset, required=False)
         await TextQuestionFactory.create(dataset=dataset, required=True)
 
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset cannot be published without required fields"}
+        assert response.json() == {"detail": "Dataset cannot be published without fields"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
     async def test_publish_dataset_without_required_questions(

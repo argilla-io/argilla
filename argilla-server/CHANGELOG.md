@@ -18,10 +18,15 @@ These are the section headers that we use:
 
 ### Changed
 
+- Now it is possible to publish a dataset without required fields. Allowing being published with at least one field (required or not). ([#5569](https://github.com/argilla-io/argilla/pull/5569))
 - Changed supported values for terms metadata options to accept other than strings values. ([#5589](https://github.com/argilla-io/argilla/pull/5589))
 
 ### Removed
 
+- Removed name pattern restrictions for Fields. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+- Removed name pattern restrictions for Questions. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+- Removed name pattern restrictions for Metadata Properties. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+- Removed name pattern restrictions for Vector Settings. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
 - Removed name pattern validation for Workspaces, Datasets, and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
 
 ## [2.3.1](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.3.1)
