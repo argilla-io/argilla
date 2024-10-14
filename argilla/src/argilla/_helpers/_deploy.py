@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import time
 import warnings
 from typing import TYPE_CHECKING, Literal, Optional, Union
@@ -41,7 +42,6 @@ class SpacesDeploymentMixin(LoggingMixin):
         space_storage: Optional[Union[str, "SpaceStorage", Literal["small", "medium", "large"]]] = None,
         space_hardware: Optional[Union[str, "SpaceHardware", Literal["cpu-basic", "cpu-upgrade"]]] = "cpu-basic",
         private: Optional[Union[bool, None]] = False,
-        overwrite: Optional[Union[bool, None]] = False,
     ) -> "Argilla":
         """
                 Deploys Argilla on Hugging Face Spaces.
@@ -54,7 +54,6 @@ class SpacesDeploymentMixin(LoggingMixin):
                     space_storage (Optional[Union[str, SpaceStorage]]): The persistant storage size for the space. Defaults to None without persistant storage.
                     space_hardware (Optional[Union[str, SpaceHardware]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
                     private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
-                    overwrite (Optional[Union[bool, None]]): Whether to overwrite the config of an existing space. Defaults to False.
 
                 Returns:
                     Argilla: The Argilla client.
@@ -82,25 +81,12 @@ class SpacesDeploymentMixin(LoggingMixin):
 
         # Check if the space already exists
         if hf_api.repo_exists(repo_id=repo_id, repo_type="space"):
-            if cls._check_if_stage_can_be_build(hf_api.get_space_runtime(repo_id=repo_id).stage):
+            if cls._is_space_stopped(hf_api.get_space_runtime(repo_id=repo_id).stage):
                 hf_api.restart_space(repo_id=repo_id)
-
-            if overwrite:
-                for secret in secrets:
-                    hf_api.add_space_secret(
-                        repo_id=repo_id,
-                        key=secret["key"],
-                        value=secret["value"],
-                        description=secret["description"],
-                    )
-
-                if space_hardware:
-                    hf_api.request_space_hardware(repo_id=repo_id, hardware=space_hardware)
-
-                if space_storage:
-                    hf_api.request_space_storage(repo_id=repo_id, storage=space_storage)
-                else:
-                    cls._space_storage_warning()
+            warnings.warn(
+                f"Space {repo_id} already exists and is not paused. Go to https://huggingface.co/spaces/{repo_id} to login with OAuth and get the API key.",
+                stacklevel=2,
+            )
         else:
             if space_storage is None:
                 cls._space_storage_warning()
@@ -120,7 +106,7 @@ class SpacesDeploymentMixin(LoggingMixin):
             f"https://{cls._sanitize_url_component(org_name)}-{cls._sanitize_url_component(repo_name)}.hf.space/"
         )
         cls._log_message(cls, message=f"Argilla is being deployed at: {repo_url}")
-        while cls._check_if_running(hf_api.get_space_runtime(repo_id=repo_id).stage):
+        while cls._is_building(hf_api.get_space_runtime(repo_id=repo_id).stage):
             time.sleep(_SLEEP_TIME)
             cls._log_message(cls, message=f"Deployment in progress. Waiting {_SLEEP_TIME} seconds.")
 
@@ -172,7 +158,6 @@ class SpacesDeploymentMixin(LoggingMixin):
     @staticmethod
     def _sanitize_url_component(component: str) -> str:
         """Sanitize a component of a URL by replacing non-URL compatible characters."""
-        import re
 
         # Replace any character that's not alphanumeric or hyphen with a hyphen
         sanitized = re.sub(r"[^a-zA-Z0-9-]", "-", component)
