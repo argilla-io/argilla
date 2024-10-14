@@ -24,6 +24,8 @@ export const DATASET_API_ERRORS = {
   ERROR_PATCHING_DATASET_GUIDELINES: "ERROR_PATCHING_DATASET_GUIDELINES",
   ERROR_DELETING_DATASET: "ERROR_DELETING_DATASET",
   ERROR_FETCHING_DATASET_PROGRESS: "ERROR_FETCHING_DATASET_PROGRESS",
+  ERROR_PUBLISHING_DATASET: "ERROR_PUBLISHING_DATASET",
+  ERROR_IMPORTING_DATASET: "ERROR_IMPORTING_DATASET",
 };
 
 export class DatasetRepository implements IDatasetRepository {
@@ -55,7 +57,7 @@ export class DatasetRepository implements IDatasetRepository {
       return data.id === datasetId;
     } catch (err) {
       throw {
-        response: DATASET_API_ERRORS.ERROR_FETCHING_DATASET_INFO,
+        response: DATASET_API_ERRORS.ERROR_PUBLISHING_DATASET,
       };
     }
   }
@@ -72,7 +74,7 @@ export class DatasetRepository implements IDatasetRepository {
       );
     } catch (err) {
       throw {
-        response: DATASET_API_ERRORS.ERROR_FETCHING_DATASET_INFO,
+        response: DATASET_API_ERRORS.ERROR_IMPORTING_DATASET,
       };
     }
   }
