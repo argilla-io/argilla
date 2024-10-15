@@ -9,8 +9,8 @@ export const availableMetadataTypes = [
 ];
 
 const ADAPTED_TYPES = {
-  int32: "int",
-  int64: "int",
+  int32: "integer",
+  int64: "integer",
   float32: "float",
   float64: "float",
 };
