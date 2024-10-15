@@ -38,6 +38,15 @@ def test_define_settings_from_features_image():
     assert settings.fields[0].name == "image_column"
 
 
+def test_define_settings_from_bool_features():
+    features = {"text": {"_type": "Value", "dtype": "string"}, "bool_column": {"_type": "Value", "dtype": "bool"}}
+    settings = _define_settings_from_features(features, feature_mapping={})
+
+    assert len(settings.metadata) == 1
+    assert isinstance(settings.metadata[0], rg.TermsMetadataProperty)
+    assert settings.metadata[0].name == "bool_column"
+
+
 def test_define_settings_from_features_multiple():
     features = {
         "text_column": {"_type": "Value", "dtype": "string"},
