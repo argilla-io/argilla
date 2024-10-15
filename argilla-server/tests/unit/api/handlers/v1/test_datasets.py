@@ -123,6 +123,7 @@ class TestSuiteDatasets:
                         "strategy": DatasetDistributionStrategy.overlap,
                         "min_submitted": 1,
                     },
+                    "metadata": None,
                     "workspace_id": str(dataset_a.workspace_id),
                     "last_activity_at": dataset_a.last_activity_at.isoformat(),
                     "inserted_at": dataset_a.inserted_at.isoformat(),
@@ -138,6 +139,7 @@ class TestSuiteDatasets:
                         "strategy": DatasetDistributionStrategy.overlap,
                         "min_submitted": 1,
                     },
+                    "metadata": None,
                     "workspace_id": str(dataset_b.workspace_id),
                     "last_activity_at": dataset_b.last_activity_at.isoformat(),
                     "inserted_at": dataset_b.inserted_at.isoformat(),
@@ -153,6 +155,7 @@ class TestSuiteDatasets:
                         "strategy": DatasetDistributionStrategy.overlap,
                         "min_submitted": 1,
                     },
+                    "metadata": None,
                     "workspace_id": str(dataset_c.workspace_id),
                     "last_activity_at": dataset_c.last_activity_at.isoformat(),
                     "inserted_at": dataset_c.inserted_at.isoformat(),
@@ -684,6 +687,7 @@ class TestSuiteDatasets:
                 "strategy": DatasetDistributionStrategy.overlap,
                 "min_submitted": 1,
             },
+            "metadata": None,
             "workspace_id": str(dataset.workspace_id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -890,6 +894,7 @@ class TestSuiteDatasets:
                 "strategy": DatasetDistributionStrategy.overlap,
                 "min_submitted": 1,
             },
+            "metadata": None,
             "workspace_id": str(workspace.id),
             "last_activity_at": datetime.fromisoformat(response_body["last_activity_at"]).isoformat(),
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
@@ -4458,6 +4463,7 @@ class TestSuiteDatasets:
                 "strategy": DatasetDistributionStrategy.overlap,
                 "min_submitted": 1,
             },
+            "metadata": None,
             "workspace_id": str(dataset.workspace_id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -4540,7 +4546,10 @@ class TestSuiteDatasets:
         response = await async_client.patch(
             f"/api/v1/datasets/{dataset.id}",
             headers={API_KEY_HEADER_NAME: user.api_key},
-            json={"name": "New Name", "guidelines": "New Guidelines"},
+            json={
+                "name": "New Name",
+                "guidelines": "New Guidelines",
+            },
         )
 
         assert response.status_code == 403
