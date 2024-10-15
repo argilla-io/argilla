@@ -85,6 +85,7 @@ export class DatasetRepository implements IDatasetRepository {
               target: question.name,
             })),
           },
+          external_id: "id",
         }
       );
     } catch (err) {

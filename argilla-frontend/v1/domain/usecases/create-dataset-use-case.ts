@@ -3,6 +3,7 @@ import { Workspace } from "../entities/workspace/Workspace";
 import { IDatasetRepository } from "../services/IDatasetRepository";
 import {
   FieldRepository,
+  MetadataRepository,
   QuestionRepository,
   WorkspaceRepository,
 } from "~/v1/infrastructure/repositories";
@@ -12,7 +13,8 @@ export class CreateDatasetUseCase {
     private readonly datasetRepository: IDatasetRepository,
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly questionRepository: QuestionRepository,
-    private readonly fieldRepository: FieldRepository
+    private readonly fieldRepository: FieldRepository,
+    private readonly metadataRepository: MetadataRepository
   ) {}
 
   async execute(dataset: DatasetCreation) {
@@ -35,6 +37,10 @@ export class CreateDatasetUseCase {
 
     for (const question of dataset.questions) {
       await this.questionRepository.create(datasetCreated, question);
+    }
+
+    for (const metadata of dataset.metadata) {
+      await this.metadataRepository.create(datasetCreated, metadata);
     }
 
     await this.datasetRepository.publish(datasetCreated);
