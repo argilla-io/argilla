@@ -17,6 +17,8 @@ export class DatasetCreationBuilder {
       for (const [name, value] of Object.entries<Feature>(datasetInfo)) {
         this.subsets.push(new Subset(name, value));
       }
+    } else if (datasetInfo.dataset_name) {
+      this.subsets.push(new Subset("default", datasetInfo));
     } else {
       const firstKey = Object.keys(datasetInfo)[0];
       const dataset = datasetInfo[firstKey];
