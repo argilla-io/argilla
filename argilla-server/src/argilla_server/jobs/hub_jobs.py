@@ -29,6 +29,8 @@ from argilla_server.jobs.queues import DEFAULT_QUEUE
 # TODO: Move this to be defined on jobs queues as a shared constant
 JOB_TIMEOUT_DISABLED = -1
 
+HUB_DATASET_TAKE_ROWS = 500_000
+
 
 # TODO: Once we merge webhooks we should change the queue to use a different one (default queue is deleted there)
 @job(DEFAULT_QUEUE, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
@@ -47,4 +49,8 @@ async def import_dataset_from_hub_job(name: str, subset: str, split: str, datase
         async with SearchEngine.get_by_name(settings.search_engine) as search_engine:
             parsed_mapping = HubDatasetMapping.parse_obj(mapping)
 
-            await HubDataset(name, subset, split, parsed_mapping).import_to(db, search_engine, dataset)
+            await (
+                HubDataset(name, subset, split, parsed_mapping)
+                .take(HUB_DATASET_TAKE_ROWS)
+                .import_to(db, search_engine, dataset)
+            )
