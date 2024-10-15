@@ -48,7 +48,9 @@
               :disabled="isFocused"
             >
               <DatasetConfigurationField
-                v-for="field in dataset.selectedSubset.fields"
+                v-for="field in dataset.selectedSubset.fields.filter(
+                  (f) => f.name !== dataset.mappings.external_id
+                )"
                 :key="field.name"
                 :field="field"
                 :available-types="availableFieldTypes"

@@ -24,7 +24,7 @@
                 }"
                 :record="{
                   fields: Object.entries(firstRecord)
-                    .filter(([name]) => name !== 'id')
+                    .filter(([name]) => name !== dataset.mappings.external_id)
                     .map(([name, content]) => ({
                       name,
                       title: name,
