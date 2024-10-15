@@ -225,20 +225,3 @@ class TestHubDataset:
 
         records = (await db.execute(select(Record))).scalars().all()
         assert [record.external_id for record in records] == ["0", "1", "2", "3", "4"]
-
-    async def test_hub_dataset_num_rows(self):
-        hub_dataset = HubDataset(
-            name="lhoestq/demo1",
-            subset="default",
-            split="train",
-            mapping=HubDatasetMapping(
-                fields=[
-                    HubDatasetMappingItem(source="package_name", target="package_name"),
-                ],
-                metadata=[],
-                suggestions=[],
-                external_id=None,
-            ),
-        )
-
-        assert hub_dataset.num_rows == 5

@@ -37,17 +37,12 @@ RESET_ROW_IDX = -1
 
 class HubDataset:
     def __init__(self, name: str, subset: str, split: str, mapping: HubDatasetMapping):
-        self.dataset = load_dataset(path=name, name=subset, split=split)
+        self.dataset = load_dataset(path=name, name=subset, split=split, streaming=True)
         self.mapping = mapping
-        self.iterable_dataset = self.dataset.to_iterable_dataset()
         self.row_idx = RESET_ROW_IDX
 
-    @property
-    def num_rows(self) -> int:
-        return self.dataset.num_rows
-
     def take(self, n: int) -> Self:
-        self.iterable_dataset = self.iterable_dataset.take(n)
+        self.dataset = self.dataset.take(n)
 
         return self
 
@@ -57,7 +52,7 @@ class HubDataset:
 
         self._reset_row_idx()
 
-        batched_dataset = self.iterable_dataset.batch(batch_size=BATCH_SIZE)
+        batched_dataset = self.dataset.batch(batch_size=BATCH_SIZE)
         for batch in batched_dataset:
             await self._import_batch_to(db, search_engine, batch, dataset)
 
