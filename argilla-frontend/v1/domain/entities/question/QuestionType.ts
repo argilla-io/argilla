@@ -20,8 +20,8 @@ export class QuestionType extends String {
     super(value);
   }
 
-  public get value(): string {
-    return this.toLowerCase();
+  public get value(): QuestionTypes {
+    return this.toLowerCase() as QuestionTypes;
   }
 
   public static from(value: string): QuestionType | null {

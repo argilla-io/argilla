@@ -33,7 +33,7 @@ export class DatasetCreation {
 
   get mappedFields() {
     return this.fields.filter(
-      (f) => f.type.value !== "no mapping" || f.name !== "id"
+      (f) => f.type.value !== "no mapping" && f.name !== "id"
     );
   }
 
