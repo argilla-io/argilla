@@ -182,7 +182,9 @@ class CreateRecordsBulk:
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
-    async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
+    async def upsert_records_bulk(
+        self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert, raise_on_error: bool = True
+    ) -> RecordsBulkWithUpdateInfo:
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
 
         records = []
@@ -193,7 +195,13 @@ class UpsertRecordsBulk(CreateRecordsBulk):
                     try:
                         RecordCreateValidator.validate(RecordCreate.parse_obj(record_upsert), dataset)
                     except (UnprocessableEntityError, ValueError) as ex:
-                        raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+                        if raise_on_error:
+                            raise UnprocessableEntityError(
+                                f"record at position {idx} is not valid because {ex}"
+                            ) from ex
+                        else:
+                            # NOTE: Ignore the errors in this record and continue with the next one
+                            continue
 
                     record = Record(
                         fields=jsonable_encoder(record_upsert.fields),
@@ -207,7 +215,13 @@ class UpsertRecordsBulk(CreateRecordsBulk):
                     try:
                         RecordUpdateValidator.validate(RecordUpdate.parse_obj(record_upsert), dataset)
                     except (UnprocessableEntityError, ValueError) as ex:
-                        raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+                        if raise_on_error:
+                            raise UnprocessableEntityError(
+                                f"record at position {idx} is not valid because {ex}"
+                            ) from ex
+                        else:
+                            # NOTE: Ignore the errors in this record and continue with the next one
+                            continue
 
                     if self._metadata_is_set(record_upsert):
                         record.metadata_ = record_upsert.metadata

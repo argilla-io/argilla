@@ -73,7 +73,11 @@ class HubDataset:
         for i in range(batch_size):
             items.append(self._batch_row_to_record_schema(batch, i, dataset))
 
-        await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, RecordsBulkUpsertSchema(items=items))
+        await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(
+            dataset,
+            RecordsBulkUpsertSchema(items=items),
+            raise_on_error=False,
+        )
 
     def _batch_row_to_record_schema(self, batch: dict, index: int, dataset: Dataset) -> RecordUpsertSchema:
         return RecordUpsertSchema(
@@ -100,7 +104,7 @@ class HubDataset:
             if not field:
                 continue
 
-            if field.is_text:
+            if field.is_text and value is not None:
                 value = str(value)
 
             if field.is_image and isinstance(value, Image.Image):

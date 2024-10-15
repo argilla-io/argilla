@@ -157,6 +157,42 @@ class TestHubDataset:
             == "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aH"
         )
 
+    async def test_hub_dataset_import_to_with_invalid_rows(self, db: AsyncSession, mock_search_engine: SearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="letter", required=True, dataset=dataset)
+        await TextFieldFactory.create(name="count", dataset=dataset)
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset = HubDataset(
+            name="argilla-internal-testing/argilla-invalid-rows",
+            subset="default",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="letter", target="letter"),
+                    HubDatasetMappingItem(source="count", target="count"),
+                ],
+                external_id="id",
+            ),
+        )
+
+        await hub_dataset.import_to(db, mock_search_engine, dataset)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 4
+
+        records = (await db.execute(select(Record))).scalars().all()
+        assert records[0].external_id == "1.0"
+        assert records[0].fields == {"letter": "A", "count": "100.0"}
+        assert records[1].external_id == "2.0"
+        assert records[1].fields == {"letter": "B", "count": "200.0"}
+        assert records[2].external_id == "4.0"
+        assert records[2].fields == {"letter": "D", "count": None}
+        assert records[3].external_id == "5.0"
+        assert records[3].fields == {"letter": "E", "count": "500.0"}
+
     async def test_hub_dataset_import_to_idempotency_with_external_id(
         self, db: AsyncSession, mock_search_engine: SearchEngine
     ):
