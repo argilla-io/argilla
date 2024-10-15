@@ -5,7 +5,7 @@ import { DatasetCreation } from "../entities/hub/DatasetCreation";
 export type DatasetId = string;
 
 export interface IDatasetRepository {
-  create({ name, workspaceId }): Promise<DatasetId>;
+  create(dataset: DatasetCreation): Promise<DatasetId>;
   publish(datasetId: string): Promise<boolean>;
   import(datasetId: DatasetId, creation: DatasetCreation): Promise<void>;
   getById(id: string): Promise<Dataset>;

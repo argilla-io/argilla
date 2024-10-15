@@ -32,11 +32,18 @@ export const DATASET_API_ERRORS = {
 export class DatasetRepository implements IDatasetRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
-  async create({ name, workspaceId }): Promise<DatasetId> {
+  async create(dataset: DatasetCreation): Promise<DatasetId> {
     try {
       const { data } = await this.axios.post<BackendDataset>("/v1/datasets", {
-        name,
-        workspace_id: workspaceId,
+        name: dataset.name,
+        workspace_id: dataset.workspace.id,
+
+        metadata: {
+          repoId: dataset.repoId,
+          subset: dataset.selectedSubset.name,
+          split: dataset.selectedSubset.selectedSplit.name,
+          mapping: dataset.mappings,
+        },
       });
 
       return data.id;
@@ -71,21 +78,7 @@ export class DatasetRepository implements IDatasetRepository {
           name: creation.repoId,
           subset: creation.selectedSubset.name,
           split: creation.selectedSubset.selectedSplit.name,
-          mapping: {
-            fields: creation.mappedFields.map((field) => ({
-              source: field.name,
-              target: field.name,
-            })),
-            metadata: creation.metadata.map((metadata) => ({
-              source: metadata.name,
-              target: metadata.name,
-            })),
-            suggestions: creation.mappedQuestions.map((question) => ({
-              source: question.column,
-              target: question.name,
-            })),
-          },
-          external_id: "id",
+          mapping: creation.mappings,
         }
       );
     } catch (err) {

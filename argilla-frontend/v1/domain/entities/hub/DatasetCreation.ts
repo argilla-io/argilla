@@ -32,7 +32,9 @@ export class DatasetCreation {
   }
 
   get mappedFields() {
-    return this.fields.filter((f) => f.type.value !== "no mapping");
+    return this.fields.filter(
+      (f) => f.type.value !== "no mapping" || f.name !== "id"
+    );
   }
 
   get questions() {
@@ -49,5 +51,33 @@ export class DatasetCreation {
 
   get columns() {
     return this.selectedSubset.columns;
+  }
+
+  get mappings() {
+    const mappings: {
+      fields: { source: string; target: string }[];
+      metadata: { source: string; target: string }[];
+      suggestions: { source: string; target: string }[];
+      external_id?: string;
+    } = {
+      fields: this.mappedFields.map((field) => ({
+        source: field.name,
+        target: field.name,
+      })),
+      metadata: this.metadata.map((metadata) => ({
+        source: metadata.name,
+        target: metadata.name,
+      })),
+      suggestions: this.mappedQuestions.map((question) => ({
+        source: question.column,
+        target: question.name,
+      })),
+    };
+
+    if (this.fields.some((f) => f.name === "id")) {
+      mappings.external_id = "id";
+    }
+
+    return mappings;
   }
 }

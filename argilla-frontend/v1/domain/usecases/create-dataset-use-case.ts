@@ -26,10 +26,7 @@ export class CreateDatasetUseCase {
       dataset.workspace = new Workspace(workspace.id, workspace.name);
     }
 
-    const datasetCreated = await this.datasetRepository.create({
-      name: dataset.name,
-      workspaceId: dataset.workspace.id,
-    });
+    const datasetCreated = await this.datasetRepository.create(dataset);
 
     try {
       for (const field of dataset.mappedFields) {
