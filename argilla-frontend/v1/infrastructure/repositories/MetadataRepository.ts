@@ -74,7 +74,7 @@ export class MetadataRepository {
           name: metadata.name,
           title: metadata.title,
           settings: {
-            type: metadata.type,
+            type: metadata.adapteType,
           },
         }
       );

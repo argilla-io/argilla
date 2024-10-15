@@ -5,9 +5,6 @@ export class GetFirstRecordFromHub {
   constructor(private readonly hubRepository: HubRepository) {}
 
   execute(dataset: DatasetCreation) {
-    return this.hubRepository.getFirstRecord(
-      dataset.repoId,
-      dataset.selectedSubset.selectedSplit.name
-    );
+    return this.hubRepository.getFirstRecord(dataset);
   }
 }

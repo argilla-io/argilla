@@ -1,5 +1,5 @@
-/* eslint-disable camelcase */
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
+import { DatasetCreation } from "~/v1/domain/entities/hub/DatasetCreation";
 
 export class HubRepository {
   constructor(private axios: NuxtAxiosInstance) {}
@@ -12,22 +12,21 @@ export class HubRepository {
         )}`
       );
 
-      const { dataset_info } = data;
-
-      if ("datasets" in dataset_info) return dataset_info.datasets;
-
-      return dataset_info;
+      return data.dataset_info;
     } catch {
       return {};
     }
   }
 
-  async getFirstRecord(repoId: string, split: string): Promise<any> {
+  async getFirstRecord(dataset: DatasetCreation): Promise<any> {
     try {
+      const { repoId, selectedSubset } = dataset;
       const { data } = await this.axios.get(
         `https://datasets-server.huggingface.co/first-rows?dataset=${encodeURIComponent(
           repoId
-        )}&split=${split}&config=default`
+        )}&split=${selectedSubset.selectedSplit.name}&config=${
+          selectedSubset.name
+        }`
       );
 
       return data.rows[0].row;

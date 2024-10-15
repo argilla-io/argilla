@@ -1,71 +1,73 @@
 import { DatasetCreationBuilder } from "./DatasetCreationBuilder";
 
 const datasetInfo = {
-  description: "",
-  citation: "",
-  homepage: "",
-  license: "",
-  features: {
-    text_field: {
-      dtype: "string",
-      _type: "Value",
-    },
-    image_field: {
-      dtype: "string",
-      _type: "Image",
-    },
-    label_question: {
-      names: ["positive", "negative"],
-      _type: "ClassLabel",
-    },
-    chat_field: [
-      {
-        content: {
-          dtype: "string",
-          _type: "Value",
-        },
-        role: {
-          dtype: "string",
-          _type: "Value",
-        },
+  default: {
+    description: "",
+    citation: "",
+    homepage: "",
+    license: "",
+    features: {
+      text_field: {
+        dtype: "string",
+        _type: "Value",
       },
-    ],
-    metadata: {
-      dtype: "int32",
-      _type: "Value",
+      image_field: {
+        dtype: "string",
+        _type: "Image",
+      },
+      label_question: {
+        names: ["positive", "negative"],
+        _type: "ClassLabel",
+      },
+      chat_field: [
+        {
+          content: {
+            dtype: "string",
+            _type: "Value",
+          },
+          role: {
+            dtype: "string",
+            _type: "Value",
+          },
+        },
+      ],
+      metadata: {
+        dtype: "int32",
+        _type: "Value",
+      },
     },
+    builder_name: "parquet",
+    dataset_name: "duorc",
+    config_name: "SelfRC",
+    version: {
+      version_str: "0.0.0",
+      major: 0,
+      minor: 0,
+      patch: 0,
+    },
+    splits: {
+      train: {
+        name: "train",
+        num_bytes: 248966361,
+        num_examples: 60721,
+        dataset_name: null,
+      },
+      validation: {
+        name: "validation",
+        num_bytes: 56359392,
+        num_examples: 12961,
+        dataset_name: null,
+      },
+      test: {
+        name: "test",
+        num_bytes: 51022318,
+        num_examples: 12559,
+        dataset_name: null,
+      },
+    },
+    download_size: 21001846,
+    dataset_size: 356348071,
   },
-  builder_name: "parquet",
-  dataset_name: "duorc",
-  config_name: "SelfRC",
-  version: {
-    version_str: "0.0.0",
-    major: 0,
-    minor: 0,
-    patch: 0,
-  },
-  splits: {
-    train: {
-      name: "train",
-      num_bytes: 248966361,
-      num_examples: 60721,
-      dataset_name: null,
-    },
-    validation: {
-      name: "validation",
-      num_bytes: 56359392,
-      num_examples: 12961,
-      dataset_name: null,
-    },
-    test: {
-      name: "test",
-      num_bytes: 51022318,
-      num_examples: 12559,
-      dataset_name: null,
-    },
-  },
-  download_size: 21001846,
-  dataset_size: 356348071,
 };
 
 describe("DatasetCreation", () => {
@@ -109,11 +111,13 @@ describe("DatasetCreation", () => {
 
     it("create a required field if the dataset has just one field", () => {
       const datasetInfoWithOneField = {
-        ...datasetInfo,
-        features: {
-          text_field: {
-            dtype: "string",
-            _type: "Value",
+        default: {
+          ...datasetInfo.default,
+          features: {
+            text_field: {
+              dtype: "string",
+              _type: "Value",
+            },
           },
         },
       };
@@ -135,11 +139,13 @@ describe("DatasetCreation", () => {
 
     it("create a required question if the dataset has just one field", () => {
       const datasetInfoWithOneQuestion = {
-        ...datasetInfo,
-        features: {
-          label_question: {
-            names: ["positive", "negative"],
-            _type: "ClassLabel",
+        default: {
+          ...datasetInfo.default,
+          features: {
+            label_question: {
+              names: ["positive", "negative"],
+              _type: "ClassLabel",
+            },
           },
         },
       };
@@ -173,11 +179,13 @@ describe("DatasetCreation", () => {
 
     it("get no mapped feature", () => {
       const builder = new DatasetCreationBuilder("FAKE", {
-        ...datasetInfo,
-        features: {
-          no_mapped: {
-            dtype: "NO",
-            _type: "NO",
+        default: {
+          ...datasetInfo.default,
+          features: {
+            no_mapped: {
+              dtype: "NO",
+              _type: "NO",
+            },
           },
         },
       });
@@ -205,8 +213,10 @@ describe("DatasetCreation", () => {
   describe("addQuestions should", () => {
     it("add single label", () => {
       const datasetInfoWithNoQuestions = {
-        ...datasetInfo,
-        features: {},
+        default: {
+          ...datasetInfo.default,
+          features: {},
+        },
       };
       const builder = new DatasetCreationBuilder(
         "FAKE",
@@ -219,10 +229,10 @@ describe("DatasetCreation", () => {
         type: "label_selection",
       });
 
-      const firtsQuestion = datasetCreation.questions[0];
-      expect(firtsQuestion.name).toBe("First");
-      expect(firtsQuestion.type.isSingleLabelType).toBeTruthy();
-      expect(firtsQuestion.options).toEqual([
+      const firstQuestion = datasetCreation.questions[0];
+      expect(firstQuestion.name).toBe("First");
+      expect(firstQuestion.type.isSingleLabelType).toBeTruthy();
+      expect(firstQuestion.options).toEqual([
         {
           id: "1",
           text: "positive",
@@ -243,8 +253,10 @@ describe("DatasetCreation", () => {
 
     it("add ranking question", () => {
       const datasetInfoWithNoQuestions = {
-        ...datasetInfo,
-        features: {},
+        default: {
+          ...datasetInfo.default,
+          features: {},
+        },
       };
       const builder = new DatasetCreationBuilder(
         "FAKE",
@@ -257,10 +269,10 @@ describe("DatasetCreation", () => {
         type: "ranking",
       });
 
-      const firtsQuestion = datasetCreation.questions[0];
-      expect(firtsQuestion.name).toBe("First");
-      expect(firtsQuestion.type.isRankingType).toBeTruthy();
-      expect(firtsQuestion.options).toEqual([
+      const firstQuestion = datasetCreation.questions[0];
+      expect(firstQuestion.name).toBe("First");
+      expect(firstQuestion.type.isRankingType).toBeTruthy();
+      expect(firstQuestion.options).toEqual([
         {
           value: "option1",
           text: "Option 1",
