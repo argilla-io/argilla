@@ -80,7 +80,7 @@ export class DatasetRepository implements IDatasetRepository {
               source: metadata.name,
               target: metadata.name,
             })),
-            suggestions: creation.questions.map((question) => ({
+            suggestions: creation.mappedQuestions.map((question) => ({
               source: question.column,
               target: question.name,
             })),

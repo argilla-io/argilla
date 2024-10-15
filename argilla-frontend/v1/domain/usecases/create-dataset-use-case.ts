@@ -31,21 +31,25 @@ export class CreateDatasetUseCase {
       workspaceId: dataset.workspace.id,
     });
 
-    for (const field of dataset.mappedFields) {
-      await this.fieldRepository.create(datasetCreated, field);
+    try {
+      for (const field of dataset.mappedFields) {
+        await this.fieldRepository.create(datasetCreated, field);
+      }
+
+      for (const question of dataset.questions) {
+        await this.questionRepository.create(datasetCreated, question);
+      }
+
+      for (const metadata of dataset.metadata) {
+        await this.metadataRepository.create(datasetCreated, metadata);
+      }
+
+      await this.datasetRepository.publish(datasetCreated);
+
+      await this.datasetRepository.import(datasetCreated, dataset);
+    } catch {
+      this.datasetRepository.delete(datasetCreated);
     }
-
-    for (const question of dataset.questions) {
-      await this.questionRepository.create(datasetCreated, question);
-    }
-
-    for (const metadata of dataset.metadata) {
-      await this.metadataRepository.create(datasetCreated, metadata);
-    }
-
-    await this.datasetRepository.publish(datasetCreated);
-
-    await this.datasetRepository.import(datasetCreated, dataset);
 
     return datasetCreated;
   }

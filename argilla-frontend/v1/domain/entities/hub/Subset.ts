@@ -107,6 +107,8 @@ export class Subset {
       if (structure.structure?.length > 0) return "chat";
     };
 
+    if (structure.name === "id") return true;
+
     const field = FieldCreation.from(
       structure.name,
       getFieldType(structure),

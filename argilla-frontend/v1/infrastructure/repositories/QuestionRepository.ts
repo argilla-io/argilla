@@ -24,6 +24,7 @@ export class QuestionRepository implements IQuestionRepository {
         {
           name: question.name,
           title: question.title,
+          required: question.required,
           settings: question.settings,
         }
       );

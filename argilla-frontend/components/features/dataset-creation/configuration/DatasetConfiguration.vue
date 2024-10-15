@@ -23,14 +23,14 @@
                   },
                 }"
                 :record="{
-                  fields: Object.entries(firstRecord).map(
-                    ([name, content]) => ({
+                  fields: Object.entries(firstRecord)
+                    .filter(([name]) => name !== 'id')
+                    .map(([name, content]) => ({
                       name,
                       title: name,
                       content: `${content}`,
                       settings: {},
-                    })
-                  ),
+                    })),
                 }"
               />
             </div>

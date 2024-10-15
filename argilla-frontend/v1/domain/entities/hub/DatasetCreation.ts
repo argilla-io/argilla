@@ -39,6 +39,10 @@ export class DatasetCreation {
     return this.selectedSubset.questions;
   }
 
+  get mappedQuestions() {
+    return this.questions.filter((q) => q.column !== "no mapping");
+  }
+
   get metadata() {
     return this.selectedSubset.metadata;
   }

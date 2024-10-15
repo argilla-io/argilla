@@ -218,7 +218,8 @@ export const loadDependencyContainer = (context: Context) => {
         DatasetRepository,
         WorkspaceRepository,
         QuestionRepository,
-        FieldRepository
+        FieldRepository,
+        MetadataRepository
       )
       .build(),
 
