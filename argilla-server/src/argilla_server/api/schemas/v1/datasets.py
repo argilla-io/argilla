@@ -120,7 +120,7 @@ class Dataset(BaseModel):
     allow_extra_metadata: bool
     status: DatasetStatus
     distribution: DatasetDistribution
-    metadata: Dict[str, Any]
+    metadata: Optional[Dict[str, Any]]
     workspace_id: UUID
     last_activity_at: datetime
     inserted_at: datetime
@@ -143,7 +143,7 @@ class DatasetCreate(BaseModel):
         strategy=DatasetDistributionStrategy.overlap,
         min_submitted=1,
     )
-    metadata: Dict[str, Any] = {}
+    metadata: Optional[Dict[str, Any]] = None
     workspace_id: UUID
 
 
@@ -154,4 +154,4 @@ class DatasetUpdate(UpdateSchema):
     distribution: Optional[DatasetDistributionUpdate]
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
 
-    __non_nullable_fields__ = {"name", "allow_extra_metadata", "distribution", "metadata"}
+    __non_nullable_fields__ = {"name", "allow_extra_metadata", "distribution"}

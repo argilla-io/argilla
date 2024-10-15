@@ -57,7 +57,7 @@ class TestCreateDataset:
                 "strategy": DatasetDistributionStrategy.overlap,
                 "min_submitted": 1,
             },
-            "metadata": {},
+            "metadata": None,
             "workspace_id": str(workspace.id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -78,7 +78,6 @@ class TestCreateDataset:
                     "strategy": DatasetDistributionStrategy.overlap,
                     "min_submitted": 4,
                 },
-                "metadata": {},
                 "workspace_id": str(workspace.id),
             },
         )
@@ -96,7 +95,7 @@ class TestCreateDataset:
                 "strategy": DatasetDistributionStrategy.overlap,
                 "min_submitted": 4,
             },
-            "metadata": {},
+            "metadata": None,
             "workspace_id": str(workspace.id),
             "last_activity_at": dataset.last_activity_at.isoformat(),
             "inserted_at": dataset.inserted_at.isoformat(),
@@ -159,10 +158,10 @@ class TestCreateDataset:
         )
 
         assert response.status_code == 201
-        assert response.json()["metadata"] == {}
+        assert response.json()["metadata"] == None
 
         dataset = (await db.execute(select(Dataset))).scalar_one()
-        assert dataset.metadata_ == {}
+        assert dataset.metadata_ == None
 
     async def test_create_dataset_with_custom_metadata(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
@@ -185,7 +184,7 @@ class TestCreateDataset:
         dataset = (await db.execute(select(Dataset))).scalar_one()
         assert dataset.metadata_ == {"key": "value"}
 
-    @pytest.mark.parametrize("invalid_metadata", ["invalid_metadata", None, 123])
+    @pytest.mark.parametrize("invalid_metadata", ["invalid_metadata", 123])
     async def test_create_dataset_with_invalid_metadata(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict, invalid_metadata: Any
     ):

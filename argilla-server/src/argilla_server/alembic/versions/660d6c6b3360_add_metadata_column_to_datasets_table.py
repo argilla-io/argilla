@@ -32,7 +32,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column("datasets", sa.Column("metadata", sa.JSON(), server_default="{}", nullable=False))
+    op.add_column("datasets", sa.Column("metadata", sa.JSON(), nullable=True))
 
 
 def downgrade() -> None:

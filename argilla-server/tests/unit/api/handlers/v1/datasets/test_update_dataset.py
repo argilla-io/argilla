@@ -185,6 +185,18 @@ class TestUpdateDataset:
         assert response.status_code == 422
         assert dataset.metadata_ == {"key": "value"}
 
+    async def test_update_dataset_metadata_as_empty_dict(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create(metadata_={"key": "value"})
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"metadata": {}},
+        )
+
+        assert response.status_code == 200
+        assert dataset.metadata_ == {"key": "value"}
+
     async def test_update_dataset_metadata_as_none(self, async_client: AsyncClient, owner_auth_header: dict):
         dataset = await DatasetFactory.create(metadata_={"key": "value"})
 
@@ -194,5 +206,5 @@ class TestUpdateDataset:
             json={"metadata": None},
         )
 
-        assert response.status_code == 422
-        assert dataset.metadata_ == {"key": "value"}
+        assert response.status_code == 200
+        assert dataset.metadata_ == None
