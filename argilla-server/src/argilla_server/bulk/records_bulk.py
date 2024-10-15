@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi.encoders import jsonable_encoder
 
-from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpsert
+from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
 from argilla_server.api.schemas.v1.records_bulk import (
     RecordsBulk,
     RecordsBulkCreate,
@@ -39,7 +39,7 @@ from argilla_server.contexts.records import (
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
 from argilla_server.search_engine import SearchEngine
-from argilla_server.validators.records import RecordsBulkCreateValidator, RecordsBulkUpsertValidator
+from argilla_server.validators.records import RecordsBulkCreateValidator, RecordCreateValidator, RecordUpdateValidator
 from argilla_server.validators.responses import ResponseCreateValidator
 from argilla_server.validators.suggestions import SuggestionCreateValidator
 from argilla_server.validators.vectors import VectorValidator
@@ -184,26 +184,36 @@ class CreateRecordsBulk:
 class UpsertRecordsBulk(CreateRecordsBulk):
     async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
-        # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
-        # computed inside the validator
-        RecordsBulkUpsertValidator.validate(bulk_upsert, dataset, found_records)
 
         records = []
         async with self._db.begin_nested():
-            for record_upsert in bulk_upsert.items:
+            for idx, record_upsert in enumerate(bulk_upsert.items):
                 record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
                 if not record:
+                    try:
+                        RecordCreateValidator.validate(RecordCreate.parse_obj(record_upsert), dataset)
+                    except (UnprocessableEntityError, ValueError) as ex:
+                        raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+
                     record = Record(
                         fields=jsonable_encoder(record_upsert.fields),
                         metadata_=record_upsert.metadata,
                         external_id=record_upsert.external_id,
                         dataset_id=dataset.id,
                     )
-                elif self._metadata_is_set(record_upsert):
-                    record.metadata_ = record_upsert.metadata
-                    record.updated_at = datetime.utcnow()
 
-                records.append(record)
+                    records.append(record)
+                else:
+                    try:
+                        RecordUpdateValidator.validate(RecordUpdate.parse_obj(record_upsert), dataset)
+                    except (UnprocessableEntityError, ValueError) as ex:
+                        raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+
+                    if self._metadata_is_set(record_upsert):
+                        record.metadata_ = record_upsert.metadata
+                        record.updated_at = datetime.utcnow()
+
+                    records.append(record)
 
             self._db.add_all(records)
             await self._db.flush(records)
