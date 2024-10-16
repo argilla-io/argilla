@@ -92,10 +92,6 @@ export class QuestionCreation {
   }
 
   private initialize() {
-    if (this.settings.options && !this.settings.visible_options) {
-      this.settings.visible_options = this.settings.options.length;
-    }
-
     if (this.isSpanType) {
       this.settings.options = this.settings.options.map((option) => {
         return {
