@@ -87,7 +87,10 @@ export class Subset {
       this.questions.push(
         new QuestionCreation(structure.name, false, {
           type: "label_selection",
-          options: structure.options,
+          options: structure.options.map((o) => ({
+            text: o,
+            value: o,
+          })),
         })
       );
 
