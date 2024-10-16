@@ -43,3 +43,8 @@ export interface BackendProgress {
   completed: number;
   pending: number;
 }
+
+export interface BackendJob {
+  id: string;
+  status: string;
+}

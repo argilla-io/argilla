@@ -3,6 +3,7 @@ import {
   BackendDataset,
   BackendDatasetFeedbackTaskResponse,
   BackendDatasetWithWorkspace,
+  BackendJob,
   BackendProgress,
   BackendUpdateDataset,
 } from "../types/dataset";
@@ -11,6 +12,7 @@ import { largeCache, revalidateCache } from "./AxiosCache";
 import {
   DatasetId,
   IDatasetRepository,
+  JobId,
 } from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
@@ -70,9 +72,12 @@ export class DatasetRepository implements IDatasetRepository {
     }
   }
 
-  async import(datasetId: DatasetId, creation: DatasetCreation): Promise<void> {
+  async import(
+    datasetId: DatasetId,
+    creation: DatasetCreation
+  ): Promise<JobId> {
     try {
-      await this.axios.post<BackendDataset>(
+      const { data } = await this.axios.post<BackendJob>(
         `/v1/datasets/${datasetId}/import`,
         {
           name: creation.repoId,
@@ -81,6 +86,8 @@ export class DatasetRepository implements IDatasetRepository {
           mapping: creation.mappings,
         }
       );
+
+      return data.id;
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_IMPORTING_DATASET,
