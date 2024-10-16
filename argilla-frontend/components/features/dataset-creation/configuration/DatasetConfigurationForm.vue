@@ -1,45 +1,37 @@
 <template>
   <section class="config-form">
-    <div class="config-form__header">
-      <div class="config-form__selectors">
-        <DatasetConfigurationSelector
-          v-if="dataset.subsets.length > 1"
-          class="config-form__selector"
-          :options="dataset.subsets"
-          :value="dataset.selectedSubset.name"
-          @onValueChange="$emit('change-subset', $event)"
-        />
-        <DatasetConfigurationSelector
-          v-if="dataset.splits"
-          class="config-form__selector"
-          :options="dataset.splits"
-          :value="dataset.selectedSplit.name"
-          @onValueChange="$emit('change-split', $event)"
-        />
-      </div>
-      <div class="config-form__button-area">
-        <BaseButton
-          class="primary"
-          @click.prevent="
-            visibleDatasetCreationDialog = !visibleDatasetCreationDialog
-          "
-          >Create Dataset</BaseButton
-        >
-        <DatasetConfigurationDialog
-          v-if="visibleDatasetCreationDialog"
-          :dataset="dataset"
-          @close-dialog="visibleDatasetCreationDialog = false"
-          @create-dataset="createDataset"
-        />
-      </div>
+    <div class="config-form__button-area">
+      <BaseButton
+        class="primary"
+        @click.prevent="
+          visibleDatasetCreationDialog = !visibleDatasetCreationDialog
+        "
+        >Create Dataset</BaseButton
+      >
+      <DatasetConfigurationDialog
+        v-if="visibleDatasetCreationDialog"
+        :dataset="dataset"
+        @close-dialog="visibleDatasetCreationDialog = false"
+        @create-dataset="createDataset"
+      />
     </div>
+
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
         <div
           class="config-form__col"
           v-if="dataset.selectedSubset.fields.length"
         >
-          <div class="config-form__col__header">Fields</div>
+          <div class="config-form__col__header">
+            Fields
+            <DatasetConfigurationSelector
+              v-if="dataset.subsets.length > 1"
+              class="config-form__selector"
+              :options="dataset.subsets"
+              :value="dataset.selectedSubset.name"
+              @onValueChange="$emit('change-subset', $event)"
+            />
+          </div>
           <div class="config-form__col__content">
             <draggable
               class="config-form__draggable-area"
@@ -62,8 +54,21 @@
       </div>
       <div class="config-form__col-wrapper">
         <div class="config-form__col">
-          <div class="config-form__col__header">Questions</div>
-          <div class="config-form__col__content">
+          <div class="config-form__col__header">
+            Questions
+            <DatasetConfigurationAddQuestion
+              :options="[
+                'text',
+                'label_selection',
+                'multi_label_selection',
+                'rating',
+                'ranking',
+                'span',
+              ]"
+              @add-question="addQuestion($event)"
+            />
+          </div>
+          <div class="config-form__col__content --questions">
             <draggable
               v-if="dataset.selectedSubset.questions.length"
               class="config-form__draggable-area"
@@ -83,17 +88,6 @@
                 @is-focused="isFocused = $event"
               />
             </draggable>
-            <DatasetConfigurationAddQuestion
-              :options="[
-                'text',
-                'label_selection',
-                'multi_label_selection',
-                'rating',
-                'ranking',
-                'span',
-              ]"
-              @add-question="addQuestion($event)"
-            />
           </div>
         </div>
       </div>
@@ -146,16 +140,6 @@ export default {
   height: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  &__header {
-    display: flex;
-    gap: $base-space;
-    align-items: center;
-    justify-content: space-between;
-  }
-  &__selectors {
-    display: flex;
-    gap: $base-space;
-  }
   &__selector.selector {
     :deep(.dropdown__header) {
       background: var(--bg-opacity-4);
@@ -181,16 +165,22 @@ export default {
     border: 1px solid var(--bg-opacity-6);
     border-radius: $border-radius-m;
     &__header {
-      padding: $base-space * 2 $base-space * 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $base-space * 2 $base-space * 2;
       font-weight: 500;
     }
     &__content {
       display: flex;
       flex-direction: column;
-      padding: $base-space $base-space * 3 $base-space * 3;
+      padding: $base-space $base-space * 2 $base-space * 2;
       gap: $base-space;
       overflow: auto;
       height: 100%;
+      &.--questions {
+        padding-bottom: $base-space * 6.6;
+      }
     }
   }
   &__draggable-area {
@@ -199,7 +189,10 @@ export default {
     gap: $base-space;
   }
   &__button-area {
-    position: relative;
+    position: fixed;
+    right: $base-space * 3;
+    bottom: $base-space * 3;
+    z-index: 1;
   }
 }
 </style>

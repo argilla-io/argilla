@@ -88,6 +88,8 @@ export default {
     list-style: none;
     padding: calc($base-space / 2);
     margin: 0;
+    max-height: 140px;
+    overflow-y: auto;
   }
   &__option {
     padding: calc($base-space / 2);

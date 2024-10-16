@@ -17,35 +17,31 @@
       :options="columns"
       v-model="question.column"
     />
-    <!-- <BaseSwitch
-      v-if="question.settings.type.isTextType"
-      class="config-card__remove__switch"
-      v-model="question.use_markdown"
-      >{{ $t("useMarkdown") }}</BaseSwitch
-    > -->
-    <DatasetConfigurationLabels
-      v-if="
-        question.settings.type.isSingleLabelType ||
-        question.settings.type.isMultiLabelType
-      "
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
-    <DatasetConfigurationSpan
-      v-else-if="question.settings.type.isSpanType"
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
-    <DatasetConfigurationRating
-      v-else-if="question.settings.type.isRatingType"
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
-    <DatasetConfigurationRanking
-      v-else-if="question.settings.type.isRankingType"
-      v-model="question.settings.options"
-      @is-focused="$emit('is-focused', $event)"
-    />
+    <template v-if="noMapping">
+      <DatasetConfigurationLabels
+        v-if="
+          question.settings.type.isSingleLabelType ||
+          question.settings.type.isMultiLabelType
+        "
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+      <DatasetConfigurationSpan
+        v-else-if="question.settings.type.isSpanType"
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+      <DatasetConfigurationRating
+        v-else-if="question.settings.type.isRatingType"
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+      <DatasetConfigurationRanking
+        v-else-if="question.settings.type.isRankingType"
+        v-model="question.settings.options"
+        @is-focused="$emit('is-focused', $event)"
+      />
+    </template>
   </DatasetConfigurationCard>
 </template>
 
@@ -73,6 +69,11 @@ export default {
   model: {
     prop: "type",
     event: "change",
+  },
+  computed: {
+    noMapping() {
+      return this.question.column === "no mapping";
+    },
   },
   methods: {
     remove() {

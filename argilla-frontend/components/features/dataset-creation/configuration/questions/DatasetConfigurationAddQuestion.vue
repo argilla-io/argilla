@@ -9,8 +9,7 @@
       <BaseButton class="add-question-selector__button"
         ><span class="add-question-selector__button-icon"
           ><svgicon name="plus" /></span
-        >Add Question</BaseButton
-      >
+      ></BaseButton>
     </template>
     <template slot="dropdown-content">
       <ul class="add-question-selector__options">
@@ -55,7 +54,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .add-question-selector {
-  margin-right: auto;
   user-select: none;
   font-weight: 500;
   &__button {
@@ -70,6 +68,9 @@ export default {
 
   :deep(.dropdown__content) {
     min-width: 100%;
+    top: 0;
+    left: auto;
+    right: calc(100% + $base-space);
   }
 
   &__options {

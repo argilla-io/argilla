@@ -27,6 +27,14 @@
             v-model="dataset.workspace"
           />
         </div>
+        <div class="dataset-config-dialog__row" v-if="dataset.splits">
+          <label class="dataset-config-dialog__label">Select a split</label>
+          <DatasetConfigurationSelector
+            class="config-form__selector"
+            :options="dataset.splits"
+            v-model="dataset.selectedSplit.value"
+          />
+        </div>
         <p class="dataset-config-dialog__info">
           100 records will be added to the dataset.
         </p>
@@ -67,9 +75,9 @@ export default {
 <style lang="scss" scoped>
 .dataset-config-dialog {
   position: absolute;
-  right: 0;
+  right: -$base-space;
   left: auto;
-  top: calc(100% + $base-space);
+  bottom: -$base-space;
   display: block;
   width: 290px;
   margin-left: auto;
