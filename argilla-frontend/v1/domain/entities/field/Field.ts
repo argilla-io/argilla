@@ -7,7 +7,7 @@ interface OriginalField {
 
 export class Field {
   private original: OriginalField;
-  public readonly content: string;
+  public readonly content: string | unknown[];
 
   public readonly sdkRecord?: unknown;
 
@@ -25,6 +25,16 @@ export class Field {
     if (this.isCustomType) {
       this.sdkRecord = record;
       this.content = settings.template;
+    } else if (this.isChatType) {
+      const content = record?.fields[name] ?? "";
+      this.content = Array.isArray(content)
+        ? content
+        : [
+            {
+              content,
+              role: "user",
+            },
+          ];
     } else {
       this.content = record?.fields[name] ?? "";
     }

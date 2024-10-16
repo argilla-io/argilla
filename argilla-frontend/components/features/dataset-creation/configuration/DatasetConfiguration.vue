@@ -11,26 +11,18 @@
             <div class="dataset-config__fields">
               <Record
                 v-if="firstRecord"
+                :key="JSON.stringify(dataset.mappedFields)"
                 :recordCriteria="{
                   committed: {
                     searchText: {
                       value: {
-                        text: {
-                          text: '',
-                        },
+                        text: '',
                       },
                     },
                   },
                 }"
                 :record="{
-                  fields: Object.entries(firstRecord)
-                    .filter(([name]) => name !== dataset.mappings.external_id)
-                    .map(([name, content]) => ({
-                      name,
-                      title: name,
-                      content: `${content}`,
-                      settings: {},
-                    })),
+                  fields: dataset.createFields(firstRecord),
                 }"
               />
             </div>

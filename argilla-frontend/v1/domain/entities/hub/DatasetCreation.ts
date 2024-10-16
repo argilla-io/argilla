@@ -1,3 +1,4 @@
+import { Field } from "../field/Field";
 import { Workspace } from "../workspace/Workspace";
 import { Subset } from "./Subset";
 
@@ -79,5 +80,21 @@ export class DatasetCreation {
     }
 
     return mappings;
+  }
+
+  createFields(firstRawRecord: unknown): Field[] {
+    return this.mappedFields.map((field) => {
+      return new Field(
+        field.name,
+        field.name,
+        field.title,
+        this.name,
+        field.required,
+        field.settings,
+        {
+          fields: firstRawRecord,
+        }
+      );
+    });
   }
 }

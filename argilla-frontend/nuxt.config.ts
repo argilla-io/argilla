@@ -19,7 +19,7 @@ import Mode from "frontmatter-markdown-loader/mode";
 import { NuxtConfig } from "@nuxt/types";
 import pkg from "./package.json";
 
-const LOCAL_ENVIRONMENT = "https://frascuchon-argilla-template-space.hf.space";
+const LOCAL_ENVIRONMENT = "http://0.0.0.0:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
