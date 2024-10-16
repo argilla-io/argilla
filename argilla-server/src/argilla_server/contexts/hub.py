@@ -22,7 +22,6 @@ from PIL import Image
 from datasets import load_dataset
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from argilla_server.models.database import Dataset
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
@@ -34,12 +33,20 @@ from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 BATCH_SIZE = 100
 RESET_ROW_IDX = -1
 
+FEATURE_TYPE_IMAGE = "Image"
+FEATURE_TYPE_CLASS_LABEL = "ClassLabel"
+
 
 class HubDataset:
     def __init__(self, name: str, subset: str, split: str, mapping: HubDatasetMapping):
         self.dataset = load_dataset(path=name, name=subset, split=split, streaming=True)
         self.mapping = mapping
+        self.mapping_sources = mapping.sources
         self.row_idx = RESET_ROW_IDX
+
+    @property
+    def features(self) -> dict:
+        return self.dataset.features
 
     def take(self, n: int) -> Self:
         self.dataset = self.dataset.take(n)
@@ -71,7 +78,7 @@ class HubDataset:
 
         items = []
         for i in range(batch_size):
-            items.append(self._batch_row_to_record_schema(batch, i, dataset))
+            items.append(self._row_to_record_schema(self._batch_index_to_row(batch, i), dataset))
 
         await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(
             dataset,
@@ -79,27 +86,45 @@ class HubDataset:
             raise_on_error=False,
         )
 
-    def _batch_row_to_record_schema(self, batch: dict, index: int, dataset: Dataset) -> RecordUpsertSchema:
+    def _batch_index_to_row(self, batch: dict, index: int) -> dict:
+        row = {}
+        for key, values in batch.items():
+            if not key in self.mapping_sources:
+                continue
+
+            value = values[index]
+            feature = self.features[key]
+
+            if feature._type == FEATURE_TYPE_CLASS_LABEL:
+                row[key] = feature.int2str(value)
+            elif feature._type == FEATURE_TYPE_IMAGE and isinstance(value, Image.Image):
+                row[key] = pil_image_to_data_url(value)
+            else:
+                row[key] = value
+
+        return row
+
+    def _row_to_record_schema(self, row: dict, dataset: Dataset) -> RecordUpsertSchema:
         return RecordUpsertSchema(
             id=None,
-            external_id=self._batch_row_external_id(batch, index),
-            fields=self._batch_row_fields(batch, index, dataset),
-            metadata=self._batch_row_metadata(batch, index, dataset),
-            suggestions=self._batch_row_suggestions(batch, index, dataset),
+            external_id=self._row_external_id(row),
+            fields=self._row_fields(row, dataset),
+            metadata=self._row_metadata(row, dataset),
+            suggestions=self._row_suggestions(row, dataset),
             responses=None,
             vectors=None,
         )
 
-    def _batch_row_external_id(self, batch: dict, index: int) -> str:
+    def _row_external_id(self, row: dict) -> str:
         if not self.mapping.external_id:
             return str(self._next_row_idx())
 
-        return batch[self.mapping.external_id][index]
+        return row[self.mapping.external_id]
 
-    def _batch_row_fields(self, batch: dict, index: int, dataset: Dataset) -> dict:
+    def _row_fields(self, row: dict, dataset: Dataset) -> dict:
         fields = {}
         for mapping_field in self.mapping.fields:
-            value = batch[mapping_field.source][index]
+            value = row[mapping_field.source]
             field = dataset.field_by_name(mapping_field.target)
             if not field:
                 continue
@@ -107,17 +132,14 @@ class HubDataset:
             if field.is_text and value is not None:
                 value = str(value)
 
-            if field.is_image and isinstance(value, Image.Image):
-                value = pil_image_to_data_url(value)
-
             fields[field.name] = value
 
         return fields
 
-    def _batch_row_metadata(self, batch: dict, index: int, dataset: Dataset) -> dict:
+    def _row_metadata(self, row: dict, dataset: Dataset) -> dict:
         metadata = {}
         for mapping_metadata in self.mapping.metadata:
-            value = batch[mapping_metadata.source][index]
+            value = row[mapping_metadata.source]
             metadata_property = dataset.metadata_property_by_name(mapping_metadata.target)
             if not metadata_property:
                 continue
@@ -126,10 +148,10 @@ class HubDataset:
 
         return metadata
 
-    def _batch_row_suggestions(self, batch: dict, index: int, dataset: Dataset) -> list:
+    def _row_suggestions(self, row: dict, dataset: Dataset) -> list:
         suggestions = []
         for mapping_suggestion in self.mapping.suggestions:
-            value = batch[mapping_suggestion.source][index]
+            value = row[mapping_suggestion.source]
             question = dataset.question_by_name(mapping_suggestion.target)
             if not question:
                 continue
