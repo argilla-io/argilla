@@ -72,11 +72,11 @@ export default {
   font-weight: 400;
 
   :deep(.dropdown__header) {
-    background: var(--bg-accent-grey-1);
     justify-content: space-between;
     height: $base-space * 4;
     padding: 0 $base-space;
-    border: 1px solid var(--bg-opacity-10);
+    background: var(--bg-opacity-4);
+    border: none;
   }
 
   :deep(.dropdown__content) {

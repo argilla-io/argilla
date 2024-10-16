@@ -12,27 +12,13 @@
         </h3>
         <slot name="header" />
         <div class="config-card__row">
-          <DatasetConfigurationSelector
+          <DatasetConfigurationChipsSelector
             class="config-card__type"
             :options="availableTypes"
             @onValueChange="$emit('change-type', $event)"
             v-model="item.type"
           />
-          <BaseTooltip text="Required">
-            <BaseCheckbox
-              v-if="!hasNoMapping"
-              :value="item.required"
-              @input="item.required = !item.required"
-              class="config-card__required"
-            />
-          </BaseTooltip>
         </div>
-        <!-- <DatasetConfigurationInput
-          v-if="!hasNoMapping"
-          v-model="item.title"
-          @is-focused="$emit('is-focused', $event)"
-          placeholder="Title"
-        /> -->
         <slot></slot>
       </div>
     </div>
@@ -111,8 +97,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
     font-family: monospace, monospace;
     color: var(--fg-secondary);
     font-weight: 400;
-    @include font-size(12px);
-    margin-left: $base-space;
+    @include font-size(10px);
   }
   &__row {
     display: flex;
@@ -123,30 +108,6 @@ $no-mapping-color: hsl(0, 0%, 50%);
   &__type {
     flex: 1;
   }
-  &__required {
-    margin: 0;
-    :deep(.checkbox__container) {
-      border-color: var(--bg-opacity-20);
-    }
-  }
-  // TODO: validate this
-  // &:focus-within,
-  // &:focus {
-  //   transition: all 0.3s ease-in;
-  //   background: linear-gradient(
-  //     180deg,
-  //     hsla(from $validate-color h s l / 0) 0%,
-  //     hsla(from $validate-color h s l / 0) 100%
-  //   );
-  // }
-  // &:has(.dropdown__content) {
-  //   transition: all 0.3s ease-in;
-  //   background: linear-gradient(
-  //     180deg,
-  //     hsla(from $validate-color h s l / 0) 0%,
-  //     hsla(from $validate-color h s l / 0) 100%
-  //   );
-  // }
   &:has(.nomapping) {
     background: linear-gradient(
       180deg,

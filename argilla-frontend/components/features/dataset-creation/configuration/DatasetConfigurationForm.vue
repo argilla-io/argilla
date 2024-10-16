@@ -24,13 +24,16 @@
         >
           <div class="config-form__col__header">
             Fields
-            <DatasetConfigurationSelector
-              v-if="dataset.subsets.length > 1"
-              class="config-form__selector"
-              :options="dataset.subsets"
-              :value="dataset.selectedSubset.name"
-              @onValueChange="$emit('change-subset', $event)"
-            />
+            <div class="config-form__subset">
+              Subset:
+              <DatasetConfigurationSelector
+                v-if="dataset.subsets.length > 1"
+                class="config-form__selector"
+                :options="dataset.subsets"
+                :value="dataset.selectedSubset.name"
+                @onValueChange="$emit('change-subset', $event)"
+              />
+            </div>
           </div>
           <div class="config-form__col__content">
             <draggable
@@ -140,13 +143,6 @@ export default {
   height: 100%;
   max-width: 1000px;
   margin: 0 auto;
-  &__selector.selector {
-    :deep(.dropdown__header) {
-      background: var(--bg-opacity-4);
-      min-height: $base-space * 5;
-      border: none;
-    }
-  }
   &__content {
     display: flex;
     justify-content: space-between;
@@ -187,6 +183,12 @@ export default {
     display: flex;
     flex-direction: column;
     gap: $base-space;
+  }
+  &__subset {
+    display: flex;
+    gap: $base-space;
+    align-items: center;
+    font-weight: 400;
   }
   &__button-area {
     position: fixed;
