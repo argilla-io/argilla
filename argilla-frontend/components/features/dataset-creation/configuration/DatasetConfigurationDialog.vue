@@ -75,11 +75,11 @@ export default {
 <style lang="scss" scoped>
 .dataset-config-dialog {
   position: absolute;
-  right: -$base-space;
-  left: auto;
-  bottom: -$base-space;
+  right: 0;
+  left: 0;
+  width: calc(100% - $base-space * 3);
+  bottom: $base-space;
   display: block;
-  width: 290px;
   margin-left: auto;
   padding: 0;
   border: 1px solid var(--bg-opacity-10);
@@ -88,6 +88,8 @@ export default {
   z-index: 1;
   &__header {
     padding: $base-space * 2;
+    border-top-left-radius: $border-radius-m;
+    border-top-right-radius: $border-radius-m;
     background: linear-gradient(
       90deg,
       hsla(227, 31%, 57%, 0.1) 0%,

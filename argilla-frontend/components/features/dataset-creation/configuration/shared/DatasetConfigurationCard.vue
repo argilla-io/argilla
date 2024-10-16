@@ -62,12 +62,8 @@ $no-mapping-color: hsl(0, 0%, 50%);
   $this: &;
   position: relative;
   border-radius: $base-space * 2;
-  border: 1px solid hsla(from $validate-color h s l / 0.16);
-  background: linear-gradient(
-    180deg,
-    hsla(from $validate-color h s l / 0.16) 0%,
-    hsla(from $validate-color h s l / 0.1) 100%
-  );
+  border: 1px solid var(--bg-opacity-4);
+  background: hsla(from var(--bg-config-card) h s l / 0.8);
   transition: all 0.3s ease-in;
   &__wrapper {
     border-radius: $base-space * 2;

@@ -1,21 +1,5 @@
 <template>
   <section class="config-form">
-    <div class="config-form__button-area">
-      <BaseButton
-        class="primary"
-        @click.prevent="
-          visibleDatasetCreationDialog = !visibleDatasetCreationDialog
-        "
-        >Create Dataset</BaseButton
-      >
-      <DatasetConfigurationDialog
-        v-if="visibleDatasetCreationDialog"
-        :dataset="dataset"
-        @close-dialog="visibleDatasetCreationDialog = false"
-        @create-dataset="createDataset"
-      />
-    </div>
-
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
         <div
@@ -90,6 +74,21 @@
                 @is-focused="isFocused = $event"
               />
             </draggable>
+            <div class="config-form__button-area">
+              <BaseButton
+                class="primary"
+                @click.prevent="
+                  visibleDatasetCreationDialog = !visibleDatasetCreationDialog
+                "
+                >Create Dataset</BaseButton
+              >
+              <DatasetConfigurationDialog
+                v-if="visibleDatasetCreationDialog"
+                :dataset="dataset"
+                @close-dialog="visibleDatasetCreationDialog = false"
+                @create-dataset="createDataset"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -144,11 +143,12 @@ export default {
   margin: 0 auto;
   &__content {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: $base-space * 2;
     min-height: 0;
   }
   &__col-wrapper {
+    position: relative;
     width: 100%;
     max-width: 440px;
   }
@@ -162,6 +162,7 @@ export default {
     &__header {
       display: flex;
       justify-content: space-between;
+      min-height: $base-space * 8;
       align-items: center;
       padding: $base-space * 2 $base-space * 2;
       font-weight: 500;
@@ -174,7 +175,7 @@ export default {
       overflow: auto;
       height: 100%;
       &.--questions {
-        padding-bottom: $base-space * 6.6;
+        padding-bottom: $base-space * 9;
       }
     }
   }
@@ -190,10 +191,15 @@ export default {
     font-weight: 400;
   }
   &__button-area {
-    position: fixed;
-    right: $base-space * 3;
-    bottom: $base-space * 3;
-    z-index: 1;
+    display: flex;
+    justify-content: right;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: var(--bg-accent-grey-1);
+    padding: $base-space * 2;
+    width: 100%;
   }
 }
 </style>
