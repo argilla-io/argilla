@@ -12,11 +12,6 @@
       ><svgicon name="close"
     /></BaseButton>
 
-    <DatasetConfigurationSelector
-      class="config-card__type"
-      :options="columns"
-      v-model="question.column"
-    />
     <template v-if="noMapping">
       <DatasetConfigurationLabels
         v-if="
@@ -42,6 +37,18 @@
         @is-focused="$emit('is-focused', $event)"
       />
     </template>
+    <DatasetConfigurationColumnSelector
+      class="config-card__type"
+      :options="columns"
+      v-model="question.column"
+    />
+    <BaseCheckbox
+      class="config-card__required"
+      :value="question.required"
+      @input="question.required = !question.required"
+    >
+      Required question</BaseCheckbox
+    >
   </DatasetConfigurationCard>
 </template>
 
@@ -89,6 +96,19 @@ export default {
     top: $base-space * 1.5;
     right: $base-space * 1.5;
     padding: 0;
+  }
+  &__required {
+    display: flex;
+    gap: $base-space;
+    margin-top: $base-space;
+    @include font-size(12px);
+    flex-flow: row-reverse;
+    justify-content: flex-end;
+    &:deep(.checkbox__container) {
+      margin: 0;
+      border-color: var(--bg-opacity-20);
+      background: var(--bg-accent-grey-1);
+    }
   }
 }
 </style>

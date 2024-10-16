@@ -24,10 +24,9 @@
         >
           <div class="config-form__col__header">
             Fields
-            <div class="config-form__subset">
+            <div class="config-form__subset" v-if="dataset.subsets.length > 1">
               Subset:
               <DatasetConfigurationSelector
-                v-if="dataset.subsets.length > 1"
                 class="config-form__selector"
                 :options="dataset.subsets"
                 :value="dataset.selectedSubset.name"
