@@ -102,6 +102,8 @@ export class QuestionCreation {
         };
       });
     }
+
+    this.markAsRequired();
   }
 
   private createInitialAnswers(): QuestionAnswer {

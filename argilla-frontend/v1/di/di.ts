@@ -9,6 +9,7 @@ import {
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
 
+import { JobRepository } from "../infrastructure/repositories/JobRepository";
 import { useAxiosExtension } from "@/v1/infrastructure/services/useAxiosExtension";
 
 import {
@@ -84,6 +85,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
     register(WorkspaceRepository).withDependency(useAxios).build(),
+    register(JobRepository).withDependency(useAxios).build(),
 
     register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
     register(EnvironmentRepository).withDependency(useAxios).build(),
@@ -219,7 +221,8 @@ export const loadDependencyContainer = (context: Context) => {
         WorkspaceRepository,
         QuestionRepository,
         FieldRepository,
-        MetadataRepository
+        MetadataRepository,
+        JobRepository
       )
       .build(),
 
