@@ -168,14 +168,13 @@ class TestDatasetRecordsBulk:
         for record in updated_records:
             assert record.metadata_ == new_metadata
 
-    async def test_update_record_for_other_dataset(
+    async def test_upsert_record_for_other_dataset(
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
     ):
         dataset = await self.test_dataset()
         other_dataset = await self.test_dataset()
 
         record = await RecordFactory.create(dataset=dataset)
-
         response = await async_client.put(
             self.url(other_dataset.id),
             headers=owner_auth_header,
@@ -186,7 +185,7 @@ class TestDatasetRecordsBulk:
             },
         )
 
-        assert response.status_code == 422, response.json()
+        assert response.status_code == 422  # The insert is failing because no fields are provided
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(Record))).scalar_one().metadata_ is None
 

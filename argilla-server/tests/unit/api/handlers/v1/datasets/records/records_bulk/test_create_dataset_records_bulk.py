@@ -323,7 +323,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' has an invalid URL value",
+            "detail": f"Record at position 0 is not valid because image field 'image' has an invalid URL value",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -352,7 +352,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 2038 characters for Web URLs",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 2038 characters for Web URLs",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -381,7 +381,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -410,7 +410,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
