@@ -1,41 +1,52 @@
 import { DatasetCreation } from "../entities/hub/DatasetCreation";
+import { Workspace } from "../entities/workspace/Workspace";
 import { IDatasetRepository } from "../services/IDatasetRepository";
 import {
   FieldRepository,
+  MetadataRepository,
   QuestionRepository,
+  WorkspaceRepository,
 } from "~/v1/infrastructure/repositories";
 
 export class CreateDatasetUseCase {
   constructor(
     private readonly datasetRepository: IDatasetRepository,
+    private readonly workspaceRepository: WorkspaceRepository,
     private readonly questionRepository: QuestionRepository,
-    private readonly fieldRepository: FieldRepository
+    private readonly fieldRepository: FieldRepository,
+    private readonly metadataRepository: MetadataRepository
   ) {}
 
   async execute(dataset: DatasetCreation) {
-    // TODO: Crear workspace if not exists
+    if (!dataset.workspace) {
+      const workspace = await this.workspaceRepository.create(
+        dataset.workspace.name
+      );
 
-    const datasetCreated = await this.datasetRepository.create({
-      name: dataset.name,
-      workspaceId: "108b045c-a82e-4c75-a61b-0cddfb22c4c8",
-    });
-
-    for (const field of dataset.mappedFields) {
-      await this.fieldRepository.create(datasetCreated, field);
+      dataset.workspace = new Workspace(workspace.id, workspace.name);
     }
 
-    for (const question of dataset.questions) {
-      await this.questionRepository.create(datasetCreated, question);
+    const datasetCreated = await this.datasetRepository.create(dataset);
+
+    try {
+      for (const field of dataset.mappedFields) {
+        await this.fieldRepository.create(datasetCreated, field);
+      }
+
+      for (const question of dataset.questions) {
+        await this.questionRepository.create(datasetCreated, question);
+      }
+
+      for (const metadata of dataset.metadata) {
+        await this.metadataRepository.create(datasetCreated, metadata);
+      }
+
+      await this.datasetRepository.publish(datasetCreated);
+
+      await this.datasetRepository.import(datasetCreated, dataset);
+    } catch {
+      this.datasetRepository.delete(datasetCreated);
     }
-
-    await this.datasetRepository.publish(datasetCreated);
-
-    await this.datasetRepository.import({
-      datasetId: datasetCreated,
-      name: dataset.name,
-      subset: dataset.selectedSubset.name,
-      split: dataset.selectedSubset.selectedSplit.name,
-    });
 
     return datasetCreated;
   }

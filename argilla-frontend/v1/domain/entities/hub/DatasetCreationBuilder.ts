@@ -11,15 +11,13 @@ export class DatasetCreationBuilder {
   private readonly subsets: Subset[] = [];
   private readonly datasetName: string;
   constructor(private readonly repoId: string, datasetInfo: any) {
-    if (datasetInfo.default) {
-      this.datasetName = datasetInfo.default.dataset_name;
+    const firstKey = Object.keys(datasetInfo)[0];
+    const defaultSubset = datasetInfo[firstKey];
 
-      for (const [name, value] of Object.entries<Feature>(datasetInfo)) {
-        this.subsets.push(new Subset(name, value));
-      }
-    } else {
-      this.datasetName = datasetInfo.name;
-      this.subsets.push(new Subset("default", datasetInfo));
+    this.datasetName = defaultSubset.dataset_name;
+
+    for (const [name, value] of Object.entries<Feature>(datasetInfo)) {
+      this.subsets.push(new Subset(name, value));
     }
   }
 

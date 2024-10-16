@@ -32,6 +32,10 @@ export class FieldCreation {
     return this.settings.type;
   }
 
+  set type(value: FieldType) {
+    this.settings.type = value;
+  }
+
   get isTextType() {
     return this.type.isTextType;
   }

@@ -15,7 +15,7 @@
     <DatasetConfigurationSelector
       class="config-card__type"
       :options="columns"
-      v-model="question.datasetColumn"
+      v-model="question.column"
     />
     <!-- <BaseSwitch
       v-if="question.settings.type.isTextType"
@@ -23,31 +23,29 @@
       v-model="question.use_markdown"
       >{{ $t("useMarkdown") }}</BaseSwitch
     > -->
-    <template v-if="hasNoMapping">
-      <DatasetConfigurationLabels
-        v-if="
-          question.settings.type.isSingleLabelType ||
-          question.settings.type.isMultiLabelType
-        "
-        v-model="question.settings.options"
-        @is-focused="$emit('is-focused', $event)"
-      />
-      <DatasetConfigurationSpan
-        v-else-if="question.settings.type.isSpanType"
-        v-model="question.settings.options"
-        @is-focused="$emit('is-focused', $event)"
-      />
-      <DatasetConfigurationRating
-        v-else-if="question.settings.type.isRatingType"
-        v-model="question.settings.options"
-        @is-focused="$emit('is-focused', $event)"
-      />
-      <DatasetConfigurationRanking
-        v-else-if="question.settings.type.isRankingType"
-        v-model="question.settings.options"
-        @is-focused="$emit('is-focused', $event)"
-      />
-    </template>
+    <DatasetConfigurationLabels
+      v-if="
+        question.settings.type.isSingleLabelType ||
+        question.settings.type.isMultiLabelType
+      "
+      v-model="question.settings.options"
+      @is-focused="$emit('is-focused', $event)"
+    />
+    <DatasetConfigurationSpan
+      v-else-if="question.settings.type.isSpanType"
+      v-model="question.settings.options"
+      @is-focused="$emit('is-focused', $event)"
+    />
+    <DatasetConfigurationRating
+      v-else-if="question.settings.type.isRatingType"
+      v-model="question.settings.options"
+      @is-focused="$emit('is-focused', $event)"
+    />
+    <DatasetConfigurationRanking
+      v-else-if="question.settings.type.isRankingType"
+      v-model="question.settings.options"
+      @is-focused="$emit('is-focused', $event)"
+    />
   </DatasetConfigurationCard>
 </template>
 
@@ -76,11 +74,6 @@ export default {
     prop: "type",
     event: "change",
   },
-  computed: {
-    hasNoMapping() {
-      return this.question.datasetColumn === "no mapping";
-    },
-  },
   methods: {
     remove() {
       this.$emit("remove");
@@ -88,7 +81,6 @@ export default {
   },
 };
 </script>
-
 <style lang="scss" scoped>
 .config-card {
   &__remove.button {

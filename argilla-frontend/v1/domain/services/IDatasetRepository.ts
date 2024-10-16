@@ -1,12 +1,13 @@
 import { Dataset } from "../entities/dataset/Dataset";
 import { Progress } from "../entities/dataset/Progress";
+import { DatasetCreation } from "../entities/hub/DatasetCreation";
 
 export type DatasetId = string;
 
 export interface IDatasetRepository {
-  create({ name, workspaceId }): Promise<DatasetId>;
+  create(dataset: DatasetCreation): Promise<DatasetId>;
   publish(datasetId: string): Promise<boolean>;
-  import({ name, datasetId, subset, split }): Promise<void>;
+  import(datasetId: DatasetId, creation: DatasetCreation): Promise<void>;
   getById(id: string): Promise<Dataset>;
   getAll(): Promise<Dataset[]>;
   delete(datasetId: string);

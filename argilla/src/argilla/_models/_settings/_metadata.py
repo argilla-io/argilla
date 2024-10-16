@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import List, Literal, Optional, Union, Annotated
+from typing import List, Literal, Optional, Union, Annotated, Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
@@ -35,7 +35,7 @@ class BaseMetadataPropertySettings(BaseModel):
 
 class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
     type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = None
+    values: Optional[List[Any]] = None
 
     @field_validator("values")
     @classmethod
@@ -44,8 +44,6 @@ class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
             return None
         if not isinstance(values, list):
             raise ValueError(f"values must be a list, got {type(values)}")
-        elif not all(isinstance(value, str) for value in values):
-            raise ValueError("All values must be strings for terms metadata.")
         return values
 
 
@@ -104,12 +102,6 @@ class MetadataFieldModel(ResourceModel):
     visible_for_annotators: Optional[bool] = True
 
     dataset_id: Optional[UUID] = None
-
-    @field_validator("name")
-    @classmethod
-    def __name_lower(cls, name):
-        formatted_name = name.lower().replace(" ", "_")
-        return formatted_name
 
     @field_validator("title")
     @classmethod

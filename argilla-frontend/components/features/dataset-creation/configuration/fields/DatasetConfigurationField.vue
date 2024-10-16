@@ -1,7 +1,7 @@
 <template>
   <DatasetConfigurationCard
     :item="field"
-    :available-types="availableFieldTypes"
+    :available-types="availableTypes"
     @is-focused="$emit('is-focused', $event)"
   >
     <!-- <BaseSwitch
@@ -20,14 +20,9 @@ export default {
       type: Object,
       required: true,
     },
-    availableFieldTypes: {
+    availableTypes: {
       type: Array,
       required: true,
-    },
-  },
-  computed: {
-    hasNoMapping() {
-      return this.field.type.value === "no mapping";
     },
   },
   model: {

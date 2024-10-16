@@ -8,6 +8,13 @@ export const availableMetadataTypes = [
   MetadataType.from("terms"),
 ];
 
+const ADAPTED_TYPES = {
+  int32: "integer",
+  int64: "integer",
+  float32: "float",
+  float64: "float",
+};
+
 export type MetadataTypes = "int32" | "int64" | "float32" | "float64";
 
 export class MetadataCreation {
@@ -30,5 +37,9 @@ export class MetadataCreation {
     }
 
     return null;
+  }
+
+  get adapteType() {
+    return ADAPTED_TYPES[this.type.value];
   }
 }

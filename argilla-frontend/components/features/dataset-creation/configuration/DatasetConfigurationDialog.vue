@@ -22,7 +22,10 @@
         </div>
         <div class="dataset-config-dialog__row">
           <label class="dataset-config-dialog__label">Assign a workspace</label>
-          <DatasetConfigurationSelector :options="workspaceOptions" />
+          <DatasetConfigurationSelector
+            :options="workspaces"
+            v-model="dataset.workspace"
+          />
         </div>
         <p class="dataset-config-dialog__info">
           100 records will be added to the dataset.
@@ -45,11 +48,6 @@ export default {
     dataset: {
       type: Object,
       required: true,
-    },
-  },
-  computed: {
-    workspaceOptions() {
-      return this.workspaces.map((workspace) => workspace.name);
     },
   },
   methods: {

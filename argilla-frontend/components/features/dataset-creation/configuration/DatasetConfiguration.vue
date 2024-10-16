@@ -10,6 +10,7 @@
           <template #left>
             <div class="dataset-config__fields">
               <Record
+                v-if="firstRecord"
                 :recordCriteria="{
                   committed: {
                     searchText: {
@@ -22,23 +23,17 @@
                   },
                 }"
                 :record="{
-                  fields: [
-                    {
-                      title: 'Title',
-                      name: 'Name',
-                      content: 'lorem ipsum',
-                      settings: {
-                        use_markdown: false,
-                      },
-                    },
-                  ],
-                  questions: [],
+                  fields: Object.entries(firstRecord)
+                    .filter(([name]) => name !== dataset.mappings.external_id)
+                    .map(([name, content]) => ({
+                      name,
+                      title: name,
+                      content: `${content}`,
+                      settings: {},
+                    })),
                 }"
               />
             </div>
-            <!-- <div :style="{ overflow: 'auto', height: '100%' }">
-              <pre>{{ dataset }}</pre>
-            </div> -->
           </template>
           <template #right>
             <div class="dataset-config__questions-wrapper">
@@ -89,12 +84,20 @@
 </template>
 
 <script>
+import { useDatasetConfiguration } from "./useDatasetConfiguration";
+
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
     },
+  },
+  mounted() {
+    this.getFirstRecord(this.dataset);
+  },
+  setup() {
+    return useDatasetConfiguration();
   },
 };
 </script>

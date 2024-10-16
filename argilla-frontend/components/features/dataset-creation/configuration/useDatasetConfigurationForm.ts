@@ -4,10 +4,10 @@ import { availableQuestionTypes } from "~/v1/domain/entities/hub/QuestionCreatio
 import { CreateDatasetUseCase } from "~/v1/domain/usecases/create-dataset-use-case";
 
 export const useDatasetConfigurationForm = () => {
-  const useCase = useResolve(CreateDatasetUseCase);
+  const createDatasetUseCase = useResolve(CreateDatasetUseCase);
 
   const create = async (dataset: any) => {
-    await useCase.execute(dataset);
+    await createDatasetUseCase.execute(dataset);
   };
 
   return {

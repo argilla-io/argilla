@@ -109,6 +109,7 @@ export default {
 
 <style lang="scss" scoped>
 $resizabla-bar-color: #6794fe;
+$resizable-bar-width: $base-space;
 
 .resizable-v {
   $this: &;
@@ -131,6 +132,7 @@ $resizabla-bar-color: #6794fe;
     align-items: center;
     height: 100%;
     width: 100%;
+    margin-right: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       min-width: 100% !important;
       height: auto !important;
@@ -143,6 +145,7 @@ $resizabla-bar-color: #6794fe;
     justify-content: center;
     align-items: center;
     height: 100%;
+    margin-left: calc(-#{$resizable-bar-width} / 2);
     @include media("<desktop") {
       align-items: flex-end;
       min-width: 100% !important;
@@ -152,10 +155,8 @@ $resizabla-bar-color: #6794fe;
   }
 
   &__bar {
-    position: relative;
     height: 100%;
-    width: 1px;
-    background: var(--bg-opacity-10);
+    width: $resizable-bar-width;
     display: flex;
     justify-content: center;
     z-index: 1;
@@ -165,9 +166,8 @@ $resizabla-bar-color: #6794fe;
     }
 
     &__inner {
-      position: absolute;
       height: 100%;
-      width: 4px;
+      border-left: 1px solid var(--bg-opacity-10);
       transition: all 0.1s ease-in;
     }
 
@@ -175,7 +175,7 @@ $resizabla-bar-color: #6794fe;
     .--v-resizing & {
       #{$this}__bar__inner {
         transition: all 0.1s ease-in;
-        background: $resizabla-bar-color;
+        border: 2px solid $resizabla-bar-color;
       }
     }
   }

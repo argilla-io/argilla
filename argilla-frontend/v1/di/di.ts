@@ -8,8 +8,7 @@ import {
   UpdateMetricsEventHandler,
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
-import { LoadUserUseCase } from "../domain/usecases/load-user-use-case";
-import { CreateDatasetUseCase } from "../domain/usecases/create-dataset-use-case";
+
 import { useAxiosExtension } from "@/v1/infrastructure/services/useAxiosExtension";
 
 import {
@@ -63,6 +62,9 @@ import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
 import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-case";
 import { GetDatasetQuestionsGroupedUseCase } from "@/v1/domain/usecases/get-dataset-questions-grouped-use-case";
+import { LoadUserUseCase } from "@/v1/domain/usecases/load-user-use-case";
+import { CreateDatasetUseCase } from "@/v1/domain/usecases/create-dataset-use-case";
+import { GetFirstRecordFromHub } from "@/v1/domain/usecases/get-first-record-from-hub";
 import { AuthLoginUseCase } from "@/v1/domain/usecases/auth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
@@ -212,8 +214,16 @@ export const loadDependencyContainer = (context: Context) => {
       .build(),
 
     register(CreateDatasetUseCase)
-      .withDependencies(DatasetRepository, QuestionRepository, FieldRepository)
+      .withDependencies(
+        DatasetRepository,
+        WorkspaceRepository,
+        QuestionRepository,
+        FieldRepository,
+        MetadataRepository
+      )
       .build(),
+
+    register(GetFirstRecordFromHub).withDependency(HubRepository).build(),
   ];
 
   Container.register(dependencies);

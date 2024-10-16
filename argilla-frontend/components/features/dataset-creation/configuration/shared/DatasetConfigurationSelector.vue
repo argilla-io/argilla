@@ -6,7 +6,7 @@
     v-if="options.length"
   >
     <template slot="dropdown-header">
-      {{ value }}
+      {{ value?.name ?? value ?? "Select workspace" }}
       <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
@@ -19,7 +19,7 @@
           :key="index"
           @click="selectOption(option)"
         >
-          {{ option }}
+          {{ option?.name ?? option }}
         </li>
       </ul>
     </template>
@@ -30,7 +30,7 @@
 export default {
   props: {
     value: {
-      type: [String, Number],
+      type: [Object, String],
       required: true,
     },
     options: {

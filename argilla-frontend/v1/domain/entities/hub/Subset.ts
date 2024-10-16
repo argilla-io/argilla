@@ -1,6 +1,6 @@
 import { QuestionPrototype } from "../question/QuestionSetting";
 import { Feature } from "./DatasetCreationBuilder";
-import { FieldCreation, FieldCreationTypes } from "./FieldCreation";
+import { FieldCreation } from "./FieldCreation";
 import { MetadataTypes, MetadataCreation } from "./MetadataCreation";
 import { QuestionCreation } from "./QuestionCreation";
 

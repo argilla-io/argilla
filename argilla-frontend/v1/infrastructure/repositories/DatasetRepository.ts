@@ -14,6 +14,7 @@ import {
 } from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
+import { DatasetCreation } from "~/v1/domain/entities/hub/DatasetCreation";
 
 export const DATASET_API_ERRORS = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
@@ -24,16 +25,25 @@ export const DATASET_API_ERRORS = {
   ERROR_PATCHING_DATASET_GUIDELINES: "ERROR_PATCHING_DATASET_GUIDELINES",
   ERROR_DELETING_DATASET: "ERROR_DELETING_DATASET",
   ERROR_FETCHING_DATASET_PROGRESS: "ERROR_FETCHING_DATASET_PROGRESS",
+  ERROR_PUBLISHING_DATASET: "ERROR_PUBLISHING_DATASET",
+  ERROR_IMPORTING_DATASET: "ERROR_IMPORTING_DATASET",
 };
 
 export class DatasetRepository implements IDatasetRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
-  async create({ name, workspaceId }): Promise<DatasetId> {
+  async create(dataset: DatasetCreation): Promise<DatasetId> {
     try {
       const { data } = await this.axios.post<BackendDataset>("/v1/datasets", {
-        name,
-        workspace_id: workspaceId,
+        name: dataset.name,
+        workspace_id: dataset.workspace.id,
+
+        metadata: {
+          repoId: dataset.repoId,
+          subset: dataset.selectedSubset.name,
+          split: dataset.selectedSubset.selectedSplit.name,
+          mapping: dataset.mappings,
+        },
       });
 
       return data.id;
@@ -55,24 +65,25 @@ export class DatasetRepository implements IDatasetRepository {
       return data.id === datasetId;
     } catch (err) {
       throw {
-        response: DATASET_API_ERRORS.ERROR_FETCHING_DATASET_INFO,
+        response: DATASET_API_ERRORS.ERROR_PUBLISHING_DATASET,
       };
     }
   }
 
-  async import({ name, datasetId, subset, split }): Promise<void> {
+  async import(datasetId: DatasetId, creation: DatasetCreation): Promise<void> {
     try {
       await this.axios.post<BackendDataset>(
         `/v1/datasets/${datasetId}/import`,
         {
-          name,
-          subset,
-          split,
+          name: creation.repoId,
+          subset: creation.selectedSubset.name,
+          split: creation.selectedSubset.selectedSplit.name,
+          mapping: creation.mappings,
         }
       );
     } catch (err) {
       throw {
-        response: DATASET_API_ERRORS.ERROR_FETCHING_DATASET_INFO,
+        response: DATASET_API_ERRORS.ERROR_IMPORTING_DATASET,
       };
     }
   }

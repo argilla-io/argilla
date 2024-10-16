@@ -21,14 +21,14 @@
         <BaseButton
           class="primary"
           @click.prevent="
-            visibledatasetCreationDialog = !visibledatasetCreationDialog
+            visibleDatasetCreationDialog = !visibleDatasetCreationDialog
           "
           >Create Dataset</BaseButton
         >
         <DatasetConfigurationDialog
-          v-if="visibledatasetCreationDialog"
+          v-if="visibleDatasetCreationDialog"
           :dataset="dataset"
-          @close-dialog="visibledatasetCreationDialog = false"
+          @close-dialog="visibleDatasetCreationDialog = false"
           @create-dataset="createDataset"
         />
       </div>
@@ -48,10 +48,12 @@
               :disabled="isFocused"
             >
               <DatasetConfigurationField
-                v-for="field in dataset.selectedSubset.fields"
+                v-for="field in dataset.selectedSubset.fields.filter(
+                  (f) => f.name !== dataset.mappings.external_id
+                )"
                 :key="field.name"
                 :field="field"
-                :available-field-types="availableFieldTypes"
+                :available-types="availableFieldTypes"
                 @is-focused="isFocused = $event"
               />
             </draggable>
@@ -100,7 +102,7 @@
 </template>
 
 <script>
-import { useDatasetConfigurationForm } from "./UseDatasetConfigurationForm";
+import { useDatasetConfigurationForm } from "./useDatasetConfigurationForm";
 
 export default {
   props: {
@@ -112,7 +114,7 @@ export default {
   data() {
     return {
       isFocused: false,
-      visibledatasetCreationDialog: false,
+      visibleDatasetCreationDialog: false,
     };
   },
   methods: {
