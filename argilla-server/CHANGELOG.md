@@ -24,6 +24,10 @@ These are the section headers that we use:
 
 - Removed name pattern validation for Workspaces, Datasets, and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
 
+### Fixed
+
+- Fixed wrong field content conversion for empty text and partial chat fields. ([#5600](https://github.com/argilla-io/argilla/pull/5600))
+
 ## [2.3.1](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.3.1)
 
 ### Fixed
