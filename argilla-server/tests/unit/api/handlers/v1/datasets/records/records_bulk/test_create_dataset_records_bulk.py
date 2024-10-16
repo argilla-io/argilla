@@ -15,6 +15,10 @@
 from uuid import UUID
 
 import pytest
+from httpx import AsyncClient
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from argilla_server.enums import (
     DatasetStatus,
     QuestionType,
@@ -24,10 +28,6 @@ from argilla_server.enums import (
     DatasetDistributionStrategy,
 )
 from argilla_server.models.database import Record, Response, Suggestion, User
-from httpx import AsyncClient
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from tests.factories import (
     DatasetFactory,
     LabelSelectionQuestionFactory,
@@ -572,20 +572,10 @@ class TestCreateDatasetRecordsBulk:
                 "params": {
                     "errors": [
                         {
-                            "loc": ["body", "items", 0, "fields", "chat", 0, "content"],
-                            "msg": "field required",
-                            "type": "value_error.missing",
-                        },
-                        {
-                            "loc": ["body", "items", 0, "fields", "chat"],
-                            "msg": "value is not a valid dict",
-                            "type": "type_error.dict",
-                        },
-                        {
-                            "loc": ["body", "items", 0, "fields", "chat"],
-                            "msg": "str type expected",
-                            "type": "type_error.str",
-                        },
+                            "loc": ["body", "items", 0, "fields"],
+                            "msg": "Error parsing chat field 'chat': [{'loc': ('content',), 'msg': 'field required', 'type': 'value_error.missing'}]",
+                            "type": "value_error",
+                        }
                     ]
                 },
             }
