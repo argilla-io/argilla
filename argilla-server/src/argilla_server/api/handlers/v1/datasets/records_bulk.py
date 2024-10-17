@@ -67,7 +67,7 @@ async def create_dataset_records_bulk(
 async def upsert_dataset_records_bulk(
     *,
     dataset_id: UUID,
-    records_bulk_create: RecordsBulkUpsert,
+    records_bulk_upsert: RecordsBulkUpsert,
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
@@ -86,7 +86,7 @@ async def upsert_dataset_records_bulk(
 
     await authorize(current_user, DatasetPolicy.upsert_records(dataset))
 
-    records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_create)
+    records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_upsert)
 
     updated = len(records_bulk.updated_item_ids)
     created = len(records_bulk.items) - updated

@@ -285,6 +285,18 @@ class Question(DatabaseModel):
         return parse_obj_as(QuestionSettings, self.settings)
 
     @property
+    def is_text(self) -> bool:
+        return self.settings.get("type") == QuestionType.text
+
+    @property
+    def is_label_selection(self) -> bool:
+        return self.settings.get("type") == QuestionType.label_selection
+
+    @property
+    def is_rating(self) -> bool:
+        return self.settings.get("type") == QuestionType.rating
+
+    @property
     def type(self) -> QuestionType:
         return QuestionType(self.settings["type"])
 
@@ -412,7 +424,7 @@ class Dataset(DatabaseModel):
             if question.id == question_id:
                 return question
 
-    def question_by_name(self, name: str) -> Union["Question", None]:
+    def question_by_name(self, name: str) -> Union[Question, None]:
         for question in self.questions:
             if question.name == name:
                 return question
