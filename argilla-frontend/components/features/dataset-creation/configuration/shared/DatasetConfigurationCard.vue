@@ -16,6 +16,7 @@
         <slot name="header" />
         <div class="config-card__row">
           <DatasetConfigurationChipsSelector
+            :id="item.name"
             class="config-card__type"
             :options="availableTypes"
             @onValueChange="$emit('change-type', $event)"
@@ -76,6 +77,9 @@ $no-mapping-color: hsl(0, 0%, 50%);
     &:hover {
       transition: all 0.2s ease-in;
       box-shadow: 0 0 3px 1px var(--bg-opacity-10);
+      .config-card__icon {
+        opacity: 1;
+      }
     }
   }
   &__content {
@@ -94,7 +98,8 @@ $no-mapping-color: hsl(0, 0%, 50%);
   }
   &__icon {
     position: absolute;
-    left: 8px;
+    left: 6px;
+    opacity: 0;
   }
   &__dtype {
     font-family: monospace, monospace;

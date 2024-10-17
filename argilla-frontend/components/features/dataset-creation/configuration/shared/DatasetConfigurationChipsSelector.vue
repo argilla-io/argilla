@@ -2,18 +2,18 @@
   <ul class="chip-selector__options">
     <li
       class="chip-selector__option"
-      v-for="(option, index) in options"
-      :key="option.value"
+      v-for="option in options"
+      :key="`${id}-${option.value}`"
       @click="selectOption(option)"
     >
       <input
         class="chip-selector__input"
-        :id="index"
+        :id="`${id}-${option.value}`"
         type="radio"
         :checked="option.value === value.value"
         @change="selectOption(option)"
       />
-      <label :for="index">{{ option }}</label>
+      <label :for="`${id}-${option.value}`">{{ option }}</label>
     </li>
   </ul>
 </template>
@@ -21,6 +21,10 @@
 <script>
 export default {
   props: {
+    id: {
+      type: String,
+      required: true,
+    },
     value: {
       type: [Object, String],
       required: true,
