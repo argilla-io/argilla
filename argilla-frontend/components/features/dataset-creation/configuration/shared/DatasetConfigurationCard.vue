@@ -17,6 +17,7 @@
         <div class="config-card__row">
           <DatasetConfigurationChipsSelector
             :id="item.name"
+            :type="configType"
             class="config-card__type"
             :options="availableTypes"
             @onValueChange="$emit('change-type', $event)"
@@ -35,6 +36,10 @@ export default {
   props: {
     item: {
       type: Object,
+      required: true,
+    },
+    configType: {
+      type: String,
       required: true,
     },
     availableTypes: {
@@ -66,7 +71,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
   $this: &;
   position: relative;
   border-radius: $base-space * 2;
-  border: 1px solid var(--bg-opacity-4);
+  border: 1px solid hsl(from var(--bg-config-card) h s 78%);
   background: var(--bg-config-card);
   transition: all 0.3s ease-in;
   &__wrapper {
@@ -118,12 +123,13 @@ $no-mapping-color: hsl(0, 0%, 50%);
   }
   :deep(.chip-selector__input + label) {
     background: hsl(from var(--bg-accent-grey-1) h s l / 60%);
-    border-color: var(--bg-config-card);
+    border-color: hsl(from var(--bg-config-card) h s 80%);
   }
   :deep(.chip-selector__input:checked + label) {
     background: var(--bg-accent-grey-1);
   }
   &:has(.nomapping) {
+    border-color: var(--bg-opacity-10);
     background: var(--bg-opacity-4);
     :deep(.chip-selector__input + label) {
       background: hsl(from var(--bg-accent-grey-1) h s l / 50%);

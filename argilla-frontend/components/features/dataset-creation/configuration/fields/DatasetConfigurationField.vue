@@ -1,6 +1,7 @@
 <template>
   <DatasetConfigurationCard
     :item="field"
+    config-type="field"
     :available-types="availableTypes"
     @is-focused="$emit('is-focused', $event)"
   >

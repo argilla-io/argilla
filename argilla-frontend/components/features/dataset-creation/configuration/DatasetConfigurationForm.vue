@@ -210,12 +210,12 @@ export default {
     display: flex;
     justify-content: right;
     position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    bottom: 1px;
+    right: 1px;
+    left: 1px;
     background: var(--bg-accent-grey-1);
     padding: $base-space * 2;
-    width: 100%;
+    border-radius: $border-radius-m;
   }
 }
 </style>

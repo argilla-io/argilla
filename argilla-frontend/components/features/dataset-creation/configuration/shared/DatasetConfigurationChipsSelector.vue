@@ -13,7 +13,9 @@
         :checked="option.value === value.value"
         @change="selectOption(option)"
       />
-      <label :for="`${id}-${option.value}`">{{ option }}</label>
+      <label :for="`${id}-${option.value}`">{{
+        $t(`config.${type}.${option}`)
+      }}</label>
     </li>
   </ul>
 </template>
@@ -22,6 +24,10 @@
 export default {
   props: {
     id: {
+      type: String,
+      required: true,
+    },
+    type: {
       type: String,
       required: true,
     },
