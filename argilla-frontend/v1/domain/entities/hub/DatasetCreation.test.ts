@@ -106,7 +106,16 @@ describe("DatasetCreation", () => {
       expect(labelQuestion.name).toBe("label_question");
       expect(labelQuestion.type.isSingleLabelType).toBeTruthy();
       expect(labelQuestion.required).toBeTruthy();
-      expect(labelQuestion.options).toEqual(["positive", "negative"]);
+      expect(labelQuestion.options).toEqual([
+        {
+          text: "positive",
+          value: "positive",
+        },
+        {
+          text: "negative",
+          value: "negative",
+        },
+      ]);
     });
 
     it("create a required field if the dataset has just one field", () => {
