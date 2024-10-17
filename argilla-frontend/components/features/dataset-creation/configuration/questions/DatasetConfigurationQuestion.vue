@@ -1,6 +1,7 @@
 <template>
   <DatasetConfigurationCard
     :item="question"
+    config-type="question"
     :available-types="availableTypes"
     @is-focused="$emit('is-focused', $event)"
     @change-type="$emit('change-type', $event)"
@@ -12,11 +13,6 @@
       ><svgicon name="close"
     /></BaseButton>
 
-    <DatasetConfigurationSelector
-      class="config-card__type"
-      :options="columns"
-      v-model="question.column"
-    />
     <template v-if="noMapping">
       <DatasetConfigurationLabels
         v-if="
@@ -42,6 +38,19 @@
         @is-focused="$emit('is-focused', $event)"
       />
     </template>
+    <span class="separator"></span>
+    <DatasetConfigurationColumnSelector
+      class="config-card__type"
+      :options="columns"
+      v-model="question.column"
+    />
+    <BaseCheckbox
+      class="config-card__required"
+      :value="question.required"
+      @input="question.required = !question.required"
+    >
+      Required question</BaseCheckbox
+    >
   </DatasetConfigurationCard>
 </template>
 
@@ -89,6 +98,24 @@ export default {
     top: $base-space * 1.5;
     right: $base-space * 1.5;
     padding: 0;
+  }
+  &__required {
+    display: flex;
+    gap: $base-space;
+    @include font-size(12px);
+    flex-flow: row-reverse;
+    justify-content: flex-end;
+    &:deep(.checkbox__container) {
+      margin: 0;
+      border-color: var(--bg-opacity-20);
+      background: var(--bg-accent-grey-1);
+    }
+  }
+  .separator {
+    width: 100%;
+    height: 1px;
+    background: var(--bg-opacity-6);
+    margin-top: calc($base-space / 2);
   }
 }
 </style>

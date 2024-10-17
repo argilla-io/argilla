@@ -19,7 +19,7 @@
           :key="option"
           @click="selectOption(option)"
         >
-          {{ option }}
+          {{ $t(`config.question.${option}`) }}
         </li>
       </ul>
     </template>

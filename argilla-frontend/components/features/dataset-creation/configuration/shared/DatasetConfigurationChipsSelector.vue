@@ -2,18 +2,20 @@
   <ul class="chip-selector__options">
     <li
       class="chip-selector__option"
-      v-for="(option, index) in options"
-      :key="option.value"
+      v-for="option in options"
+      :key="`${id}-${option.value}`"
       @click="selectOption(option)"
     >
       <input
         class="chip-selector__input"
-        :id="index"
+        :id="`${id}-${option.value}`"
         type="radio"
         :checked="option.value === value.value"
         @change="selectOption(option)"
       />
-      <label :for="index">{{ option }}</label>
+      <label :for="`${id}-${option.value}`">{{
+        $t(`config.${type}.${option}`)
+      }}</label>
     </li>
   </ul>
 </template>
@@ -21,6 +23,14 @@
 <script>
 export default {
   props: {
+    id: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
     value: {
       type: [Object, String],
       required: true,
@@ -48,7 +58,7 @@ export default {
     flex-wrap: wrap;
     gap: $base-space;
     padding: 0;
-    margin: $base-space 0 0 0;
+    margin: $base-space 0 $base-space 0;
   }
   &__option {
     list-style: none;
@@ -64,19 +74,16 @@ export default {
       display: inline-block;
       padding: calc($base-space / 2) $base-space;
       border-radius: $border-radius-m;
-      background-color: var(--bg-accent-grey-3);
+      background: hsl(from var(--bg-accent-grey-1) h s l / 80%);
       cursor: pointer;
       transition: all 0.2s ease-in;
-      border: 1px solid var(--bg-opacity-10);
+      border: 1px solid hsl(from var(--bg-accent-grey-1) h s l / 80%);
       @include font-size(12px);
-      &:hover {
-        border-color: var(--bg-opacity-20);
-      }
     }
     &:checked + label {
-      border-color: var(--fg-cuaternary);
-      color: var(--fg-cuaternary);
-      background: var(--bg-accent-grey-1);
+      border-color: var(--fg-cuaternary) !important;
+      color: var(--fg-cuaternary) !important;
+      background: var(--bg-accent-grey-1) !important;
     }
   }
 }

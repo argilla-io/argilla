@@ -3,9 +3,12 @@
     <div class="config-card">
       <div class="config-card__content" :class="item.type.replace(/ /g, '')">
         <h3 class="config-card__title">
-          <svgicon width="6" name="draggable" color="var(--bg-opacity-20)" />{{
-            item.name
-          }}
+          <svgicon
+            class="config-card__icon"
+            width="6"
+            name="draggable"
+            color="var(--bg-opacity-20)"
+          />{{ item.name }}
           <span v-if="item.dtype" class="config-card__dtype">{{
             item.dtype
           }}</span>
@@ -13,6 +16,8 @@
         <slot name="header" />
         <div class="config-card__row">
           <DatasetConfigurationChipsSelector
+            :id="item.name"
+            :type="configType"
             class="config-card__type"
             :options="availableTypes"
             @onValueChange="$emit('change-type', $event)"
@@ -31,6 +36,10 @@ export default {
   props: {
     item: {
       type: Object,
+      required: true,
+    },
+    configType: {
+      type: String,
       required: true,
     },
     availableTypes: {
@@ -62,12 +71,8 @@ $no-mapping-color: hsl(0, 0%, 50%);
   $this: &;
   position: relative;
   border-radius: $base-space * 2;
-  border: 1px solid hsla(from $validate-color h s l / 0.16);
-  background: linear-gradient(
-    180deg,
-    hsla(from $validate-color h s l / 0.16) 0%,
-    hsla(from $validate-color h s l / 0.1) 100%
-  );
+  border: 1px solid hsl(from var(--bg-config-card) h s 78%);
+  background: var(--bg-config-card);
   transition: all 0.3s ease-in;
   &__wrapper {
     border-radius: $base-space * 2;
@@ -77,6 +82,9 @@ $no-mapping-color: hsl(0, 0%, 50%);
     &:hover {
       transition: all 0.2s ease-in;
       box-shadow: 0 0 3px 1px var(--bg-opacity-10);
+      .config-card__icon {
+        opacity: 1;
+      }
     }
   }
   &__content {
@@ -93,6 +101,12 @@ $no-mapping-color: hsl(0, 0%, 50%);
     font-weight: 500;
     @include font-size(14px);
   }
+  &__icon {
+    position: absolute;
+    left: 6px;
+    top: 19px;
+    opacity: 0;
+  }
   &__dtype {
     font-family: monospace, monospace;
     color: var(--fg-secondary);
@@ -108,19 +122,26 @@ $no-mapping-color: hsl(0, 0%, 50%);
   &__type {
     flex: 1;
   }
+  :deep(.chip-selector__input + label) {
+    background: hsl(from var(--bg-accent-grey-1) h s l / 60%);
+    border-color: hsl(from var(--bg-config-card) h s 80%);
+  }
+  :deep(.chip-selector__input:checked + label) {
+    background: var(--bg-accent-grey-1);
+  }
   &:has(.nomapping) {
-    background: linear-gradient(
-      180deg,
-      hsla(from $no-mapping-color h s l / 0.16) 0%,
-      hsla(from $no-mapping-color h s l / 0.1) 100%
-    );
+    border-color: var(--bg-opacity-10);
+    background: var(--bg-opacity-4);
+    :deep(.chip-selector__input + label) {
+      background: hsl(from var(--bg-accent-grey-1) h s l / 50%);
+      border-color: var(--bg-opacity-10);
+    }
+    :deep(.chip-selector__input:checked + label) {
+      background: var(--bg-accent-grey-1);
+    }
   }
   &:has(.error) {
-    background: linear-gradient(
-      180deg,
-      hsla(from $error-color h s l / 0.16) 0%,
-      hsla(from $error-color h s l / 0.1) 100%
-    );
+    background: hsla(from $error-color h s l / 0.16);
   }
   &:deep(.re-switch-label) {
     @include font-size(13px);

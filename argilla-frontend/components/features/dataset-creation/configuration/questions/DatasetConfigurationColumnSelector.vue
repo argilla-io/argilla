@@ -1,20 +1,23 @@
 <template>
   <BaseDropdown
-    class="selector"
+    class="column-selector"
     :visible="dropdownIsVisible"
     @visibility="onVisibility"
     v-if="options.length"
   >
     <template slot="dropdown-header">
-      {{ value?.name ?? value ?? "Select workspace" }}
-      <svgicon name="chevron-down" height="8" />
+      <svgicon name="assign" height="12" />
+      Link to column
+      <span v-if="!noMapping" class="column-selector__chip" v-text="value" />
     </template>
     <template slot="dropdown-content">
-      <slot name="optionsIntro" />
-      <ul class="selector__options">
+      <span class="column-selector__options__intro">Column</span>
+      <ul class="column-selector__options">
         <li
           :class="
-            option === value ? 'selector__option--selected' : 'selector__option'
+            option === value
+              ? 'column-selector__option--selected'
+              : 'column-selector__option'
           "
           v-for="(option, index) in filteredOptions"
           :key="index"
@@ -28,6 +31,7 @@
 </template>
 
 <script>
+import "assets/icons/assign";
 export default {
   props: {
     value: {
@@ -54,6 +58,9 @@ export default {
         (option) => JSON.stringify(option) !== JSON.stringify(this.value)
       );
     },
+    noMapping() {
+      return this.value === "no mapping";
+    },
   },
   methods: {
     onVisibility(value) {
@@ -68,20 +75,27 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.selector {
+.column-selector {
   user-select: none;
   font-weight: 400;
 
   :deep(.dropdown__header) {
-    justify-content: space-between;
-    height: $base-space * 4;
-    padding: 0 $base-space;
-    background: var(--bg-opacity-4);
+    display: flex;
+    gap: $base-space;
+    flex-wrap: wrap;
+    min-height: $base-space * 4;
     border: none;
+    color: var(--fg-cuaternary);
+    &:hover {
+      background: none;
+    }
   }
 
   :deep(.dropdown__content) {
-    min-width: 100%;
+    bottom: 0;
+    top: auto;
+    right: auto;
+    min-width: 140px;
   }
 
   &__options {
@@ -91,6 +105,18 @@ export default {
     margin: 0;
     max-height: 120px;
     overflow-y: auto;
+    &__intro {
+      display: block;
+      padding: 2px;
+      font-weight: 300;
+    }
+  }
+  &__chip {
+    padding: calc($base-space / 2) $base-space;
+    border-radius: $border-radius-m;
+    background: var(--bg-accent-grey-1);
+    color: var(--fg-cuaternary);
+    @include font-size(12px);
   }
   &__option {
     padding: calc($base-space / 2);
@@ -105,7 +131,7 @@ export default {
     }
     &--selected {
       background: var(--bg-opacity-4);
-      @extend .selector__option;
+      @extend .column-selector__option;
     }
   }
   .svg-icon {

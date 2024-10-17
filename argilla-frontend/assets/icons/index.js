@@ -1,6 +1,7 @@
 /* eslint-disable */
 require('./arrow-down')
 require('./arrow-up')
+require('./assign')
 require('./bulk-mode')
 require('./change-height')
 require('./check')

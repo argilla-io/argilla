@@ -1,21 +1,5 @@
 <template>
   <section class="config-form">
-    <div class="config-form__button-area">
-      <BaseButton
-        class="primary"
-        @click.prevent="
-          visibleDatasetCreationDialog = !visibleDatasetCreationDialog
-        "
-        >Create Dataset</BaseButton
-      >
-      <DatasetConfigurationDialog
-        v-if="visibleDatasetCreationDialog"
-        :dataset="dataset"
-        @close-dialog="visibleDatasetCreationDialog = false"
-        @create-dataset="createDataset"
-      />
-    </div>
-
     <div class="config-form__content">
       <div class="config-form__col-wrapper">
         <div
@@ -24,15 +8,20 @@
         >
           <div class="config-form__col__header">
             Fields
-            <div class="config-form__subset">
+            <div class="config-form__subset" v-if="dataset.subsets.length > 1">
               Subset:
               <DatasetConfigurationSelector
-                v-if="dataset.subsets.length > 1"
                 class="config-form__selector"
                 :options="dataset.subsets"
                 :value="dataset.selectedSubset.name"
                 @onValueChange="$emit('change-subset', $event)"
-              />
+              >
+                <template slot="optionsIntro">
+                  <span class="config-form__selector__intro"
+                    >Your can create a dataset from only one subset.
+                  </span>
+                </template>
+              </DatasetConfigurationSelector>
             </div>
           </div>
           <div class="config-form__col__content">
@@ -91,6 +80,22 @@
                 @is-focused="isFocused = $event"
               />
             </draggable>
+            <div class="config-form__button-area">
+              <BaseButton
+                class="primary"
+                @click.prevent="
+                  visibleDatasetCreationDialog = !visibleDatasetCreationDialog
+                "
+                >Create Dataset</BaseButton
+              >
+              <DatasetConfigurationDialog
+                v-if="visibleDatasetCreationDialog"
+                :dataset="dataset"
+                :is-loading="isLoading"
+                @close-dialog="visibleDatasetCreationDialog = false"
+                @create-dataset="createDataset"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -139,17 +144,18 @@ export default {
   display: flex;
   flex-direction: column;
   gap: $base-space;
-  padding: $base-space $base-space * 2 $base-space * 2 $base-space * 2;
+  padding: $base-space * 2;
   height: 100%;
   max-width: 1000px;
   margin: 0 auto;
   &__content {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: $base-space * 2;
     min-height: 0;
   }
   &__col-wrapper {
+    position: relative;
     width: 100%;
     max-width: 440px;
   }
@@ -163,8 +169,9 @@ export default {
     &__header {
       display: flex;
       justify-content: space-between;
+      min-height: $base-space * 6;
       align-items: center;
-      padding: $base-space * 2 $base-space * 2;
+      padding: $base-space $base-space * 2;
       font-weight: 500;
     }
     &__content {
@@ -175,7 +182,7 @@ export default {
       overflow: auto;
       height: 100%;
       &.--questions {
-        padding-bottom: $base-space * 6.6;
+        padding-bottom: $base-space * 9;
       }
     }
   }
@@ -184,6 +191,15 @@ export default {
     flex-direction: column;
     gap: $base-space;
   }
+  &__selector {
+    &__intro {
+      display: block;
+      padding: 4px;
+      background: var(--bg-congig-alert);
+      @include font-size(12px);
+      @include line-height(16px);
+    }
+  }
   &__subset {
     display: flex;
     gap: $base-space;
@@ -191,10 +207,15 @@ export default {
     font-weight: 400;
   }
   &__button-area {
-    position: fixed;
-    right: $base-space * 3;
-    bottom: $base-space * 3;
-    z-index: 1;
+    display: flex;
+    justify-content: right;
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    left: 1px;
+    background: var(--bg-accent-grey-1);
+    padding: $base-space * 2;
+    border-radius: $border-radius-m;
   }
 }
 </style>

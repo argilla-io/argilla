@@ -220,6 +220,7 @@ $resizable-bar-width: $base-space;
     flex-direction: column;
     justify-content: center;
     min-height: $collapsed-panel-height;
+    margin-top: calc(-#{$resizable-bar-width} / 2);
     &.panel {
       @include media(">=desktop") {
         border: none;
