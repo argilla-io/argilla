@@ -199,6 +199,77 @@ class TestHubDataset:
         record = (await db.execute(select(Record))).scalar_one()
         assert record.fields["label"] == "neg"
 
+    async def test_hub_dataset_import_to_with_class_label_suggestions_using_no_label(
+        self, db: AsyncSession, mock_search_engine: SearchEngine
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text", required=True, dataset=dataset)
+
+        question = await QuestionFactory.create(
+            name="label",
+            settings={
+                "type": QuestionType.label_selection,
+                "options": [
+                    {"value": "neg", "text": "Negative"},
+                    {"value": "pos", "text": "Positive"},
+                ],
+            },
+            dataset=dataset,
+        )
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset = HubDataset(
+            name="stanfordnlp/imdb",
+            subset="plain_text",
+            split="unsupervised",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="text", target="text"),
+                ],
+                suggestions=[
+                    HubDatasetMappingItem(source="label", target="label"),
+                ],
+            ),
+        )
+
+        await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
+
+        record = (await db.execute(select(Record))).scalar_one()
+        assert record.suggestions == []
+
+    async def test_hub_dataset_import_to_with_class_label_fields_using_no_label(
+        self, db: AsyncSession, mock_search_engine: SearchEngine
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text", required=True, dataset=dataset)
+        await TextFieldFactory.create(name="label", dataset=dataset)
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset = HubDataset(
+            name="stanfordnlp/imdb",
+            subset="plain_text",
+            split="unsupervised",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="text", target="text"),
+                    HubDatasetMappingItem(source="label", target="label"),
+                ],
+            ),
+        )
+
+        await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
+
+        record = (await db.execute(select(Record))).scalar_one()
+        assert "label" not in record.fields
+
     async def test_hub_dataset_import_to_with_image_fields(self, db: AsyncSession, mock_search_engine: SearchEngine):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)
 
@@ -261,7 +332,7 @@ class TestHubDataset:
         assert records[1].external_id == "2.0"
         assert records[1].fields == {"letter": "B", "count": "200.0"}
         assert records[2].external_id == "4.0"
-        assert records[2].fields == {"letter": "D", "count": None}
+        assert records[2].fields == {"letter": "D"}
         assert records[3].external_id == "5.0"
         assert records[3].fields == {"letter": "E", "count": "500.0"}
 
