@@ -91,6 +91,7 @@
               <DatasetConfigurationDialog
                 v-if="visibleDatasetCreationDialog"
                 :dataset="dataset"
+                :is-loading="isLoading"
                 @close-dialog="visibleDatasetCreationDialog = false"
                 @create-dataset="createDataset"
               />

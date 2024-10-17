@@ -39,6 +39,7 @@
         </p>
         <BaseButton
           :disabled="!dataset.name"
+          :loading="isLoading"
           type="submit"
           class="dataset-config-dialog__button primary full"
           >Create dataset</BaseButton
@@ -55,6 +56,10 @@ export default {
     dataset: {
       type: Object,
       required: true,
+    },
+    isLoading: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {
