@@ -155,8 +155,9 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False, refresh=True)
-        if errors:
-            raise RuntimeError(errors)
+
+        for error in errors:
+            self._LOGGER.error(f"Error in bulk operation: {error}")
 
     async def _refresh_index_request(self, index_name: str):
         await self.client.indices.refresh(index=index_name)

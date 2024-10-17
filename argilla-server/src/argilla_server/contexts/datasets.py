@@ -160,11 +160,9 @@ def _allowed_roles_for_metadata_property_create(metadata_property_create: Metada
 async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     await DatasetPublishValidator.validate(db, dataset)
 
-    async with db.begin_nested():
-        dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=False)
-        await search_engine.create_index(dataset)
+    dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=True)
 
-    await db.commit()
+    await search_engine.create_index(dataset)
 
     return dataset
 
@@ -180,11 +178,9 @@ async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict
 
 
 async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
-    async with db.begin_nested():
-        dataset = await dataset.delete(db, autocommit=False)
-        await search_engine.delete_index(dataset)
+    dataset = await dataset.delete(db, autocommit=True)
 
-    await db.commit()
+    await search_engine.delete_index(dataset)
 
     return dataset
 
@@ -239,22 +235,18 @@ async def create_metadata_property(
             f"for dataset with id `{dataset.id}`"
         )
 
-    async with db.begin_nested():
-        metadata_property = await MetadataProperty.create(
-            db,
-            name=metadata_property_create.name,
-            title=metadata_property_create.title,
-            settings=metadata_property_create.settings.dict(),
-            allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
-            dataset_id=dataset.id,
-            autocommit=False,
-        )
+    metadata_property = await MetadataProperty.create(
+        db,
+        name=metadata_property_create.name,
+        title=metadata_property_create.title,
+        settings=metadata_property_create.settings.dict(),
+        allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
+        dataset_id=dataset.id,
+        autocommit=True,
+    )
 
-        if dataset.is_ready:
-            await db.flush([metadata_property])
-            await search_engine.configure_metadata_property(dataset, metadata_property)
-
-    await db.commit()
+    if dataset.is_ready:
+        await search_engine.configure_metadata_property(dataset, metadata_property)
 
     return metadata_property
 
@@ -301,21 +293,17 @@ async def create_vector_settings(
             f"for dataset with id `{dataset.id}`"
         )
 
-    async with db.begin_nested():
-        vector_settings = await VectorSettings.create(
-            db,
-            name=vector_settings_create.name,
-            title=vector_settings_create.title,
-            dimensions=vector_settings_create.dimensions,
-            dataset_id=dataset.id,
-            autocommit=False,
-        )
+    vector_settings = await VectorSettings.create(
+        db,
+        name=vector_settings_create.name,
+        title=vector_settings_create.title,
+        dimensions=vector_settings_create.dimensions,
+        dataset_id=dataset.id,
+        autocommit=True,
+    )
 
-        if dataset.is_ready:
-            await db.flush([vector_settings])
-            await search_engine.configure_index_vectors(vector_settings)
-
-    await db.commit()
+    if dataset.is_ready:
+        await search_engine.configure_index_vectors(vector_settings)
 
     return vector_settings
 
@@ -789,12 +777,10 @@ async def preload_records_relationships_before_validate(db: AsyncSession, record
 async def delete_records(
     db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
 ) -> None:
-    async with db.begin_nested():
-        params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
-        records = await Record.delete_many(db=db, params=params, autocommit=False)
-        await search_engine.delete_records(dataset=dataset, records=records)
+    conditions = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+    records = await Record.delete_many(db=db, where=conditions, autocommit=True)
 
-    await db.commit()
+    await search_engine.delete_records(dataset=dataset, records=records)
 
 
 async def update_record(
@@ -829,11 +815,9 @@ async def update_record(
 
 
 async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record: Record) -> Record:
-    async with db.begin_nested():
-        record = await record.delete(db=db, autocommit=False)
-        await search_engine.delete_records(dataset=record.dataset, records=[record])
+    record = await record.delete(db=db, autocommit=True)
 
-    await db.commit()
+    await search_engine.delete_records(dataset=record.dataset, records=[record])
 
     return record
 
@@ -848,23 +832,22 @@ async def create_response(
 
     ResponseCreateValidator.validate(response_create, record)
 
-    async with db.begin_nested():
-        response = await Response.create(
-            db,
-            values=jsonable_encoder(response_create.values),
-            status=response_create.status,
-            record_id=record.id,
-            user_id=user.id,
-            autocommit=False,
-        )
-
-        await db.flush([response])
-        await _load_users_from_responses([response])
-        await _touch_dataset_last_activity_at(db, record.dataset)
-        await search_engine.update_record_response(response)
+    response = await Response.create(
+        db,
+        values=jsonable_encoder(response_create.values),
+        status=response_create.status,
+        record_id=record.id,
+        user_id=user.id,
+        autocommit=False,
+    )
+    await _touch_dataset_last_activity_at(db, record.dataset)
 
     await db.commit()
+
     await distribution.update_record_status(search_engine, record.id)
+
+    await _load_users_from_responses([response])
+    await search_engine.update_record_response(response)
 
     return response
 
@@ -874,21 +857,21 @@ async def update_response(
 ):
     ResponseUpdateValidator.validate(response_update, response.record)
 
-    async with db.begin_nested():
-        response = await response.update(
-            db,
-            values=jsonable_encoder(response_update.values),
-            status=response_update.status,
-            replace_dict=True,
-            autocommit=False,
-        )
-
-        await _load_users_from_responses(response)
-        await _touch_dataset_last_activity_at(db, response.record.dataset)
-        await search_engine.update_record_response(response)
+    response = await response.update(
+        db,
+        values=jsonable_encoder(response_update.values),
+        status=response_update.status,
+        replace_dict=True,
+        autocommit=False,
+    )
+    await _touch_dataset_last_activity_at(db, response.record.dataset)
 
     await db.commit()
+
     await distribution.update_record_status(search_engine, response.record_id)
+
+    await _load_users_from_responses(response)
+    await search_engine.update_record_response(response)
 
     return response
 
@@ -898,39 +881,39 @@ async def upsert_response(
 ) -> Response:
     ResponseUpsertValidator.validate(response_upsert, record)
 
-    async with db.begin_nested():
-        response = await Response.upsert(
-            db,
-            schema={
-                "values": jsonable_encoder(response_upsert.values),
-                "status": response_upsert.status,
-                "record_id": response_upsert.record_id,
-                "user_id": user.id,
-            },
-            constraints=[Response.record_id, Response.user_id],
-            autocommit=False,
-        )
-
-        await _load_users_from_responses(response)
-        await _touch_dataset_last_activity_at(db, response.record.dataset)
-        await search_engine.update_record_response(response)
+    response = await Response.upsert(
+        db,
+        schema={
+            "values": jsonable_encoder(response_upsert.values),
+            "status": response_upsert.status,
+            "record_id": response_upsert.record_id,
+            "user_id": user.id,
+        },
+        constraints=[Response.record_id, Response.user_id],
+        autocommit=False,
+    )
+    await _touch_dataset_last_activity_at(db, response.record.dataset)
 
     await db.commit()
+
     await distribution.update_record_status(search_engine, record.id)
+
+    await _load_users_from_responses(response)
+    await search_engine.update_record_response(response)
 
     return response
 
 
 async def delete_response(db: AsyncSession, search_engine: SearchEngine, response: Response) -> Response:
-    async with db.begin_nested():
-        response = await response.delete(db, autocommit=False)
-
-        await _load_users_from_responses(response)
-        await _touch_dataset_last_activity_at(db, response.record.dataset)
-        await search_engine.delete_record_response(response)
+    response = await response.delete(db, autocommit=False)
+    await _touch_dataset_last_activity_at(db, response.record.dataset)
 
     await db.commit()
+
     await distribution.update_record_status(search_engine, response.record_id)
+
+    await _load_users_from_responses(response)
+    await search_engine.delete_record_response(response)
 
     return response
 
@@ -971,17 +954,15 @@ async def upsert_suggestion(
 ) -> Suggestion:
     SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
 
-    async with db.begin_nested():
-        suggestion = await Suggestion.upsert(
-            db,
-            schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
-            constraints=[Suggestion.record_id, Suggestion.question_id],
-            autocommit=False,
-        )
-        await _preload_suggestion_relationships_before_index(db, suggestion)
-        await search_engine.update_record_suggestion(suggestion)
+    suggestion = await Suggestion.upsert(
+        db,
+        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
+        constraints=[Suggestion.record_id, Suggestion.question_id],
+        autocommit=True,
+    )
 
-    await db.commit()
+    await _preload_suggestion_relationships_before_index(db, suggestion)
+    await search_engine.update_record_suggestion(suggestion)
 
     return suggestion
 
@@ -992,12 +973,10 @@ async def delete_suggestions(
     params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
     suggestions = await list_suggestions_by_id_and_record_id(db, suggestions_ids, record.id)
 
-    async with db.begin_nested():
-        await Suggestion.delete_many(db=db, params=params, autocommit=False)
-        for suggestion in suggestions:
-            await search_engine.delete_record_suggestion(suggestion)
+    await Suggestion.delete_many(db=db, where=params, autocommit=True)
 
-    await db.commit()
+    for suggestion in suggestions:
+        await search_engine.delete_record_suggestion(suggestion)
 
 
 async def list_suggestions_by_id_and_record_id(
@@ -1016,10 +995,8 @@ async def list_suggestions_by_id_and_record_id(
 
 
 async def delete_suggestion(db: AsyncSession, search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:
-    async with db.begin_nested():
-        suggestion = await suggestion.delete(db, autocommit=False)
-        await search_engine.delete_record_suggestion(suggestion)
+    suggestion = await suggestion.delete(db, autocommit=True)
 
-    await db.commit()
+    await search_engine.delete_record_suggestion(suggestion)
 
     return suggestion

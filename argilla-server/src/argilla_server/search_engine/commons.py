@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
+import logging
 from abc import abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
@@ -268,6 +269,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     default_total_fields_limit: int = 2000
 
     client: Union[AsyncElasticsearch, AsyncOpenSearch] = dataclasses.field(init=False)
+
+    _LOGGER = logging.getLogger(__name__)
 
     async def create_index(self, dataset: Dataset):
         settings = self._configure_index_settings()
