@@ -120,7 +120,7 @@ export default {
     }
   }
   &__label {
-    color: var(--fg-tertiary);
+    color: var(--fg-secondary);
     @include font-size(12px);
     &--error {
       color: var(--fg-error);

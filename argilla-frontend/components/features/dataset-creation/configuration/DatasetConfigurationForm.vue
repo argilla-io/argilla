@@ -194,10 +194,10 @@ export default {
   &__selector {
     &__intro {
       display: block;
-      padding: 2px;
-      background: hsl(41, 100%, 82%, 0.8);
-      @include font-size(10px);
-      @include line-height(14px);
+      padding: 4px;
+      background: var(--bg-congig-alert);
+      @include font-size(12px);
+      @include line-height(16px);
     }
   }
   &__subset {
