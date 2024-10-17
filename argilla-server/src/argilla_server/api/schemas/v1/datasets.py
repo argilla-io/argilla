@@ -168,6 +168,15 @@ class HubDatasetMapping(BaseModel):
     suggestions: Optional[List[HubDatasetMappingItem]] = []
     external_id: Optional[str] = None
 
+    @property
+    def sources(self) -> List[str]:
+        fields_sources = [field.source for field in self.fields]
+        metadata_sources = [metadata.source for metadata in self.metadata]
+        suggestions_sources = [suggestion.source for suggestion in self.suggestions]
+        external_id_source = [self.external_id] if self.external_id else []
+
+        return list(set(fields_sources + metadata_sources + suggestions_sources + external_id_source))
+
 
 class HubDataset(BaseModel):
     name: str
