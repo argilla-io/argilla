@@ -92,7 +92,7 @@ class TestRecordsBulkValidators:
 
         with pytest.raises(
             UnprocessableEntityError,
-            match="record at position 1 is not valid because",
+            match="Record at position 1 is not valid because",
         ):
             await RecordsBulkCreateValidator.validate(db, records_create, dataset)
 
@@ -105,7 +105,7 @@ class TestRecordsBulkValidators:
             ]
         )
 
-        RecordsBulkUpsertValidator.validate(records_upsert, dataset)
+        await RecordsBulkUpsertValidator.validate(records_upsert, dataset)
 
     async def test_records_bulk_upsert_validator_with_draft_dataset(self, db: AsyncSession):
         dataset = await DatasetFactory.create(status="draft")
@@ -119,7 +119,7 @@ class TestRecordsBulkValidators:
                 ]
             )
 
-            RecordsBulkUpsertValidator.validate(records_upsert, dataset)
+            await RecordsBulkUpsertValidator.validate(records_upsert, dataset)
 
     async def test_records_bulk_upsert_validator_with_record_error(self, db: AsyncSession):
         dataset = await self.configure_dataset()
@@ -133,6 +133,6 @@ class TestRecordsBulkValidators:
 
         with pytest.raises(
             UnprocessableEntityError,
-            match="record at position 2 is not valid because",
+            match="Record at position 2 is not valid because",
         ):
-            RecordsBulkUpsertValidator.validate(records_upsert, dataset)
+            await RecordsBulkUpsertValidator.validate(records_upsert, dataset)
