@@ -1,5 +1,6 @@
 <template>
   <div class="fields__header">
+    <slot name="intro"></slot>
     <div class="fields__header--left">
       <BaseCheckbox
         v-if="Array.isArray(selectedRecords)"

@@ -2,11 +2,15 @@
   <div class="dataset-config">
     <HorizontalResizable
       :min-height-percent="30"
+      :top-percent-height="34"
       :id="`dataset-config-r-h-rz`"
       class="wrapper"
     >
       <template #up>
-        <VerticalResizable :id="`dataset-config-left-t-v-rz`">
+        <VerticalResizable
+          :id="`dataset-config-left-t-v-rz`"
+          :left-percent-width="64"
+        >
           <template #left>
             <div class="dataset-config__fields">
               <Record
@@ -24,7 +28,12 @@
                 :record="{
                   fields: dataset.createFields(firstRecord),
                 }"
-              />
+                ><template slot="intro">
+                  <span class="dataset-config__dataset-preview"
+                    >Dataset preview
+                  </span></template
+                >
+              </Record>
             </div>
           </template>
           <template #right>
@@ -32,7 +41,7 @@
               <p
                 v-if="!dataset.questions.length"
                 class="dataset-config__empty-questions"
-                v-text="'Your question will be here'"
+                v-text="'Your questions'"
               />
 
               <QuestionsComponent
@@ -48,6 +57,7 @@
         <VerticalResizable
           class="dataset-config__down"
           :id="`dataset-preview-t-v-rz`"
+          :left-percent-width="36"
         >
           <template #left>
             <div class="dataset-config__preview">
@@ -106,11 +116,17 @@ export default {
     width: 100%;
     height: 100%;
     padding: $base-space * 2;
+    :deep(.record) {
+      border-style: dashed;
+    }
   }
   &__down {
     display: flex;
     height: 100%;
     width: 100%;
+    :deep(.resizable-v__left) {
+      background: var(--bg-accent-grey-1);
+    }
   }
   &__preview {
     align-items: flex-start;
@@ -126,9 +142,13 @@ export default {
     padding: $base-space * 4;
     color: var(--fg-secondary);
     background-color: var(--bg-accent-grey-1);
-    border: 1px dashed var(--bg-opacity-10);
+    border: 1px dashed var(--bg-opacity-6);
     border-radius: $border-radius-m;
     margin: 0;
+    @include font-size(16px);
+  }
+  &__dataset-preview {
+    color: var(--fg-secondary);
     @include font-size(16px);
   }
   &__questions-wrapper {

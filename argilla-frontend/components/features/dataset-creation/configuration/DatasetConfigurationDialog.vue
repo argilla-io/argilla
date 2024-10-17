@@ -34,8 +34,8 @@
           />
         </div>
         <p class="dataset-config-dialog__info">
-          The created dataset will include the first xK rows and further records
-          can be logged via the python SDK.
+          The created dataset will include the first 10K rows and further
+          records can be logged via the python SDK.
         </p>
         <BaseButton
           :disabled="!dataset.name"

@@ -49,6 +49,10 @@ export default {
       type: Number,
       default: 50,
     },
+    topPercentHeight: {
+      type: Number,
+      default: 50,
+    },
   },
   data() {
     return {
@@ -105,10 +109,21 @@ export default {
     this.resizer.addEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);
 
     const savedPosition = this.getPosition();
-    this.isExpanded = savedPosition?.isExpanded ?? false;
-    this.upSide.style.height = savedPosition?.isExpanded
-      ? savedPosition?.position
-      : "100%";
+    if (savedPosition) {
+      if (savedPosition.isExpanded) {
+        this.isExpanded = savedPosition.isExpanded;
+        this.upSide.style.height = savedPosition.position;
+      } else {
+        this.isExpanded = false;
+        this.upSide.style.height = "100%";
+      }
+    } else if (this.topPercentHeight) {
+      this.isExpanded = false;
+      this.upSide.style.height = `${this.topPercentHeight}%`;
+    } else {
+      this.isExpanded = false;
+      this.upSide.style.height = "100%";
+    }
   },
   destroyed() {
     this.resizer.removeEventListener(EVENT.MOUSE_DOWN, this.mouseDownHandler);

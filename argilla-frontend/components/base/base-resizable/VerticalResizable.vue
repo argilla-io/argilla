@@ -30,6 +30,10 @@ export default {
       type: Number,
       default: 38,
     },
+    leftPercentWidth: {
+      type: Number,
+      default: 50,
+    },
   },
   data() {
     return {
@@ -56,6 +60,8 @@ export default {
     const savedPosition = this.getPosition();
     if (savedPosition) {
       this.leftSide.style.width = savedPosition;
+    } else if (this.leftPercentWidth) {
+      this.leftSide.style.width = `${this.leftPercentWidth}%`;
     }
   },
   destroyed() {

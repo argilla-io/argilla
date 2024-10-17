@@ -71,7 +71,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
   $this: &;
   position: relative;
   border-radius: $base-space * 2;
-  border: 1px solid hsl(from var(--bg-config-card) h s 78%);
+  border: 1px solid hsl(from var(--bg-config-card) h s 86%);
   background: var(--bg-config-card);
   transition: all 0.3s ease-in;
   &__wrapper {
@@ -124,14 +124,14 @@ $no-mapping-color: hsl(0, 0%, 50%);
   }
   :deep(.chip-selector__input + label) {
     background: hsl(from var(--bg-accent-grey-1) h s l / 60%);
-    border-color: hsl(from var(--bg-config-card) h s 80%);
+    border-color: hsl(from var(--bg-config-card) h s 86%);
   }
   :deep(.chip-selector__input:checked + label) {
     background: var(--bg-accent-grey-1);
   }
   &:has(.nomapping) {
     border-color: var(--bg-opacity-10);
-    background: var(--bg-opacity-4);
+    background: hsl(from var(--bg-config-card) h 40% 96%);
     :deep(.chip-selector__input + label) {
       background: hsl(from var(--bg-accent-grey-1) h s l / 50%);
       border-color: var(--bg-opacity-10);
