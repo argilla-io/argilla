@@ -54,17 +54,11 @@ class RecordValidatorBase(ABC):
     def _validate_fields(cls, fields: dict, dataset: Dataset) -> None:
         fields = fields or {}
 
-        cls._validate_empty_fields(fields=fields)
         cls._validate_required_fields(dataset=dataset, fields=fields)
         cls._validate_extra_fields(dataset=dataset, fields=fields)
         cls._validate_image_fields(dataset=dataset, fields=fields)
         cls._validate_chat_fields(dataset=dataset, fields=fields)
         cls._validate_custom_fields(dataset=dataset, fields=fields)
-
-    @classmethod
-    def _validate_empty_fields(cls, fields: Dict[str, str]) -> None:
-        if not fields:
-            raise UnprocessableEntityError("fields are empty")
 
     @classmethod
     def _validate_required_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
