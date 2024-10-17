@@ -11,6 +11,7 @@
       <span v-if="!noMapping" class="column-selector__chip" v-text="value" />
     </template>
     <template slot="dropdown-content">
+      <span class="column-selector__options__intro">Column</span>
       <ul class="column-selector__options">
         <li
           :class="
@@ -104,6 +105,11 @@ export default {
     margin: 0;
     max-height: 140px;
     overflow-y: auto;
+    &__intro {
+      display: block;
+      padding: 2px;
+      font-weight: 300;
+    }
   }
   &__chip {
     padding: calc($base-space / 2) $base-space;

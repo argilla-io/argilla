@@ -10,6 +10,7 @@
       <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
+      <slot name="optionsIntro" />
       <ul class="selector__options">
         <li
           :class="

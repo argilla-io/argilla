@@ -15,7 +15,13 @@
                 :options="dataset.subsets"
                 :value="dataset.selectedSubset.name"
                 @onValueChange="$emit('change-subset', $event)"
-              />
+              >
+                <template slot="optionsIntro">
+                  <span class="config-form__selector__intro"
+                    >Your can create a dataset from only one subset.
+                  </span>
+                </template>
+              </DatasetConfigurationSelector>
             </div>
           </div>
           <div class="config-form__col__content">
@@ -183,6 +189,15 @@ export default {
     display: flex;
     flex-direction: column;
     gap: $base-space;
+  }
+  &__selector {
+    &__intro {
+      display: block;
+      padding: 2px;
+      background: hsl(41, 100%, 82%, 0.8);
+      @include font-size(10px);
+      @include line-height(14px);
+    }
   }
   &__subset {
     display: flex;
