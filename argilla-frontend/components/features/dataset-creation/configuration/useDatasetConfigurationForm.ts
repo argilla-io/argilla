@@ -11,8 +11,7 @@ export const useDatasetConfigurationForm = () => {
   const create = async (dataset: any) => {
     const datasetId = await createDatasetUseCase.execute(dataset);
 
-    // TODO what happens if datasetId is null?
-    // if(!datasetId)
+    if (!datasetId) return;
 
     goToFeedbackTaskAnnotationPage(datasetId);
   };
