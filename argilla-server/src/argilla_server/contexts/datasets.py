@@ -36,7 +36,6 @@ from typing import (
 )
 from uuid import UUID
 
-from attr import attributes
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Select, and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
