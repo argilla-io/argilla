@@ -275,7 +275,7 @@ For a complete list of available fields and their content, have a look at the fi
 
 ```{note}
 The default behavior when not specifying any fields in the query string changed in version `>=0.16.0`.
-Before this version, Argilla searched in a mixture of the the deprecated `word` and `word.extended` fields that allowed searches for special characters like `!` and `.`.
+Before this version, Argilla searched in a mixture of the deprecated `word` and `word.extended` fields that allowed searches for special characters like `!` and `.`.
 If you want to search for special characters now, you have to specify the `text.exact` field.
 For example, this is the query if you want to search for words with an exclamation mark at the end: `text.exact:*\!`
 

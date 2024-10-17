@@ -28,7 +28,6 @@ from sqlalchemy import (
     sql,
 )
 from sqlalchemy.engine.default import DefaultExecutionContext
-from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -522,7 +521,7 @@ class User(DatabaseModel):
     async def is_member(self, workspace_id: UUID) -> bool:
         # TODO: Change query to use exists may improve performance
         return (
-            await WorkspaceUser.get_by(async_object_session(self), workspace_id=workspace_id, user_id=self.id)
+            await WorkspaceUser.get_by(self.current_async_session, workspace_id=workspace_id, user_id=self.id)
             is not None
         )
 
