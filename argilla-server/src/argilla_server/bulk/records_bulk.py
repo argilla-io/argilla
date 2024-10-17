@@ -145,7 +145,7 @@ class CreateRecordsBulk:
 
 class UpsertRecordsBulk(CreateRecordsBulk):
     async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
-        found_records = await self._fetch_existing_records(dataset, bulk_upsert.items)
+        found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
         # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
         # computed inside the validator
         await RecordsBulkUpsertValidator.validate(bulk_upsert, dataset, found_records)
@@ -182,7 +182,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
             updated_item_ids=[record.id for record in found_records.values()],
         )
 
-    async def _fetch_existing_records(
+    async def _fetch_existing_dataset_records(
         self,
         dataset: Dataset,
         records_upsert: List[RecordUpsert],
