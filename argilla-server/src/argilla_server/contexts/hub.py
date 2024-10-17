@@ -44,7 +44,7 @@ class HubDataset:
     def __init__(self, name: str, subset: str, split: str, mapping: HubDatasetMapping):
         self.dataset = load_dataset(path=name, name=subset, split=split, streaming=True)
         self.mapping = mapping
-        self.mapping_sources = mapping.sources
+        self.mapping_feature_names = mapping.sources
         self.row_idx = RESET_ROW_IDX
 
     @property
@@ -91,19 +91,19 @@ class HubDataset:
 
     def _batch_index_to_row(self, batch: dict, index: int) -> dict:
         row = {}
-        for key, values in batch.items():
-            if not key in self.mapping_sources:
+        for feature_name, values in batch.items():
+            if not feature_name in self.mapping_feature_names:
                 continue
 
             value = values[index]
-            feature = self.features[key]
+            feature = self.features[feature_name]
 
             if feature._type == FEATURE_TYPE_CLASS_LABEL:
-                row[key] = feature.int2str(value)
+                row[feature_name] = feature.int2str(value)
             elif feature._type == FEATURE_TYPE_IMAGE and isinstance(value, Image.Image):
-                row[key] = pil_image_to_data_url(value)
+                row[feature_name] = pil_image_to_data_url(value)
             else:
-                row[key] = value
+                row[feature_name] = value
 
         return row
 
