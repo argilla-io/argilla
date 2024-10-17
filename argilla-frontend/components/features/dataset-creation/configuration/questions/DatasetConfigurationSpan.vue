@@ -115,6 +115,7 @@ export default {
     width: 100%;
     outline: none;
     color: var(--fg-secondary);
+    @include font-size(12px);
     @include input-placeholder {
       color: var(--fg-tertiary);
     }
