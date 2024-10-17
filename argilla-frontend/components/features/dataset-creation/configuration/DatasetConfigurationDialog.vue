@@ -1,18 +1,16 @@
 <template>
   <transition name="fade" appear>
     <dialog class="dataset-config-dialog" v-click-outside="closeDialog">
-      <header class="dataset-config-dialog__header">
-        <h1 class="dataset-config-dialog__title">
-          Create the dataset on Argilla
-        </h1>
-      </header>
       <form
         class="dataset-config-dialog__content"
         @submit.prevent="createDataset"
       >
+        <h1 class="dataset-config-dialog__title">
+          Create the dataset in Argilla
+        </h1>
         <div class="dataset-config-dialog__row">
           <label class="dataset-config-dialog__label" for="datasetName"
-            >Edit the dataset name</label
+            >Dataset name</label
           >
           <DatasetConfigurationInput
             id="datasetName"
@@ -36,13 +34,14 @@
           />
         </div>
         <p class="dataset-config-dialog__info">
-          100 records will be added to the dataset.
+          The created dataset will include the first xK rows and further records
+          can be logged via the python SDK.
         </p>
         <BaseButton
           :disabled="!dataset.name"
           type="submit"
           class="dataset-config-dialog__button primary full"
-          >Create</BaseButton
+          >Create dataset</BaseButton
         >
       </form>
     </dialog>
@@ -110,7 +109,7 @@ export default {
   &__title {
     font-weight: 500;
     @include font-size(16px);
-    margin: 0;
+    margin: 0 0 $base-space 0;
   }
   &__label {
     font-weight: 400;

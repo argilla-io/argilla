@@ -65,7 +65,6 @@
               <DatasetConfigurationForm
                 :dataset="dataset"
                 @change-subset="$emit('change-subset', $event)"
-                @change-split="$emit('change-split', $event)"
               />
             </div>
           </template>
