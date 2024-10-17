@@ -170,7 +170,6 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         self._db.add_all(records)
         await self._db.flush(records)
         await self._upsert_records_relationships(records, bulk_upsert.items)
-
         await distribution.unsafe_update_records_status(self._db, records)
 
         await self._db.commit()
