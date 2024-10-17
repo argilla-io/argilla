@@ -35,6 +35,8 @@ from typing import (
     Union,
 )
 from uuid import UUID
+
+from attr import attributes
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Select, and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -808,6 +810,7 @@ async def update_record(
                 constraints=[Vector.record_id, Vector.vector_settings_id],
                 autocommit=False,
             )
+            await db.refresh(record, attribute_names=["vectors"])
 
     await db.commit()
 
