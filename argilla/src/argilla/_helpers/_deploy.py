@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import time
 import warnings
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
-from huggingface_hub import HfApi, SpaceRuntime, get_token, login, notebook_login
+from huggingface_hub import HfApi, SpaceStage, get_token, login, notebook_login
 from huggingface_hub.hf_api import RepoUrl
-from huggingface_hub.utils import is_google_colab, is_notebook
 
 from argilla._helpers._log import LoggingMixin
 
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from argilla.client import Argilla
 
 _SLEEP_TIME = 10
-_FROM_REPO_ID = "argilla/argilla-template-space"
+_ARGILLA_SPACE_TEMPLATE_REPO = "argilla/argilla-template-space"
 
 
 class SpacesDeploymentMixin(LoggingMixin):
@@ -39,89 +39,81 @@ class SpacesDeploymentMixin(LoggingMixin):
         repo_name: Optional[str] = "argilla",
         org_name: Optional[str] = None,
         hf_token: Optional[str] = None,
-        space_storage: Optional[Union[str, "SpaceStorage", None]] = None,
-        space_hardware: Optional[Union[str, "SpaceHardware"]] = "cpu-basic",
+        space_storage: Optional[Union[str, "SpaceStorage", Literal["small", "medium", "large"]]] = None,
+        space_hardware: Optional[Union[str, "SpaceHardware", Literal["cpu-basic", "cpu-upgrade"]]] = "cpu-basic",
         private: Optional[Union[bool, None]] = False,
-        overwrite: Optional[Union[bool, None]] = False,
     ) -> "Argilla":
         """
-        Deploys Argilla on Hugging Face Spaces.
+                Deploys Argilla on Hugging Face Spaces.
 
-        Args:
-            api_key (str): The API key of the owner user, which will be used as the password for the space.
-            repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
-            org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
-            hf_token (Optional[Union[str, SpaceStorage, None]]): The Hugging Face authentication token. Defaults to None.
-            space_storage (Optional[Union[str, SpaceStorage, None]]): The persistant storage size for the space. Defaults to None without persistant storage.
-            space_hardware (Optional[Union[str, SpaceStorage, None]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
-            private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
-            overwrite (Optional[Union[bool, None]]): Whether to overwrite the existing space. Defaults to False.
+                Args:
+                    api_key (str): The Argilla API key to be defined for the owner user and creator of the Space.
+                    repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
+                    org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
+                    hf_token (Optional[Union[str, None]]): The Hugging Face authentication token. Defaults to None.
+                    space_storage (Optional[Union[str, SpaceStorage]]): The persistant storage size for the space. Defaults to None without persistant storage.
+                    space_hardware (Optional[Union[str, SpaceHardware]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
+                    private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
 
-        Returns:
-            RepoUrl: The URL of the created space.
+                Returns:
+                    Argilla: The Argilla client.
 
-        Example:
-            ```Python
-            import argilla as rg
-            client = rg.Argilla.deploy_on_spaces(api_key="12345678")
-            ```
+                Example:
+                    ```Python
+                    import argilla as rg
+        api
+                    client = rg.Argilla.deploy_on_spaces(api_key="12345678")
+                    ```
         """
         hf_token = cls._acquire_hf_token(ht_token=hf_token)
-        api = HfApi(token=hf_token)
+        hf_api = HfApi(token=hf_token)
 
         # Get the org name from the repo name or default to the current user
-        token_username = api.whoami(token=hf_token)["name"]
+        token_username = hf_api.whoami()["name"]
         org_name = org_name or token_username
         repo_id = f"{org_name}/{repo_name}"
 
         # Define the api_key for the space
         secrets = [
             {"key": "API_KEY", "value": api_key, "description": "The API key of the owner user."},
-            {"key": "USERNAME", "value": token_username, "description": "The username of the owner user."},
-            {"key": "PASSWORD", "value": api_key, "description": "The password of the owner user."},
+            {"key": "WORKSPACE", "value": "argilla", "description": "The workspace of the space."},
         ]
 
+        # check API key length
+        if len(api_key) < 8:
+            raise ValueError(
+                "Provided API key has invalid length. Please provide an apikey with at least 8 characters."
+            )
+
         # Check if the space already exists
-        if api.repo_exists(repo_id=repo_id, repo_type="space", token=hf_token):
-            if cls._check_if_runtime_can_be_build(api.get_space_runtime(repo_id=repo_id, token=hf_token)):
-                api.restart_space(repo_id=repo_id, token=hf_token)
-            if overwrite:
-                for secret in secrets:
-                    api.add_space_secret(
-                        repo_id=repo_id,
-                        key=secret["key"],
-                        value=secret["value"],
-                        description=secret["description"],
-                        token=hf_token,
-                    )
-                if space_hardware:
-                    api.request_space_hardware(repo_id=repo_id, hardware=space_hardware, token=hf_token)
-                if space_storage:
-                    api.request_space_storage(repo_id=repo_id, storage=space_storage, token=hf_token)
-                else:
-                    cls._space_storage_warning()
+        if hf_api.repo_exists(repo_id=repo_id, repo_type="space"):
+            if cls._is_space_stopped(hf_api.get_space_runtime(repo_id=repo_id).stage):
+                hf_api.restart_space(repo_id=repo_id)
+            warnings.warn(
+                f"Space {repo_id} already exists. Using provided API key. If client authentication fails, go to "
+                "https://huggingface.co/spaces/{repo_id} to login with OAuth and get the correct API key.",
+                stacklevel=2,
+            )
         else:
             if space_storage is None:
                 cls._space_storage_warning()
-            api.duplicate_space(
-                from_id=_FROM_REPO_ID,
+
+            hf_api.duplicate_space(
+                from_id=_ARGILLA_SPACE_TEMPLATE_REPO,
                 to_id=repo_id,
                 private=private,
-                token=hf_token,
                 exist_ok=True,
                 hardware=space_hardware,
                 storage=space_storage,
                 secrets=secrets,
             )
 
-        repo_url: RepoUrl = api.create_repo(
-            repo_id=repo_id, repo_type="space", token=hf_token, exist_ok=True, space_sdk="docker"
-        )
+        repo_url: RepoUrl = hf_api.create_repo(repo_id=repo_id, repo_type="space", exist_ok=True, space_sdk="docker")
         api_url: str = (
             f"https://{cls._sanitize_url_component(org_name)}-{cls._sanitize_url_component(repo_name)}.hf.space/"
         )
         cls._log_message(cls, message=f"Argilla is being deployed at: {repo_url}")
-        while cls._check_if_running(api.get_space_runtime(repo_id=repo_id, token=hf_token)):
+        while cls._is_building(hf_api.get_space_runtime(repo_id=repo_id).stage):
             time.sleep(_SLEEP_TIME)
             cls._log_message(cls, message=f"Deployment in progress. Waiting {_SLEEP_TIME} seconds.")
 
@@ -151,45 +143,28 @@ class SpacesDeploymentMixin(LoggingMixin):
         return ht_token
 
     @classmethod
-    def _check_if_running(cls, runtime: SpaceRuntime) -> bool:
+    def _is_building(cls, stage: SpaceStage) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when being built."""
-        if runtime.stage in ["RUNNING"]:
-            return False
-        elif runtime.stage in [
-            "RUNNING_APP_STARTING",
-            "RUNNING_BUILDING",
-            "BUILDING",
-            "PAUSED",
-            "STOPPED",
-            "APP_STARTING",
-        ]:
+        if stage in ["RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return True
+        elif stage in ["RUNNING", "PAUSED", "STOPPED"]:
+            return False
         else:
-            raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
+            raise ValueError(f"Space configuration is wrong and in stage: {stage}")
 
     @classmethod
-    def _check_if_runtime_can_be_build(cls, runtime: SpaceRuntime) -> bool:
+    def _is_space_stopped(cls, stage: SpaceStage) -> bool:
         """Check the current stage of the space runtime. Simplified to return True when it can be built."""
-        if runtime.stage in ["RUNNING", "RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
+        if stage in ["RUNNING", "RUNNING_APP_STARTING", "RUNNING_BUILDING", "BUILDING", "APP_STARTING"]:
             return False
-        elif runtime.stage in ["PAUSED", "STOPPED"]:
+        elif stage in ["PAUSED", "STOPPED"]:
             return True
         else:
-            raise ValueError(f"Space configuration is wrong and in state: {runtime.stage}")
-
-    def __repr__(self) -> str:
-        if is_notebook() or is_google_colab():
-            from IPython.display import IFrame, display
-
-            display(IFrame(src=self.api_url, frameborder=0, width=850, height=600))
-            return f"Argilla has been deployed at: {self.api_url}"
-        else:
-            return super().__repr__()
+            raise ValueError(f"Space configuration is wrong and in stage: {stage}")
 
     @staticmethod
     def _sanitize_url_component(component: str) -> str:
         """Sanitize a component of a URL by replacing non-URL compatible characters."""
-        import re
 
         # Replace any character that's not alphanumeric or hyphen with a hyphen
         sanitized = re.sub(r"[^a-zA-Z0-9-]", "-", component)

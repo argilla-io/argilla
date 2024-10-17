@@ -14,27 +14,28 @@
 
 import uuid
 
+import pytest
+
 import argilla as rg
 from argilla._models import MetadataFieldModel, TermsMetadataPropertySettings
 
 
 class TestMetadata:
-    def test_create_metadata_terms(self):
-        property = rg.TermsMetadataProperty(
-            title="A metadata property", name="metadata", options=["option1", "option2"]
-        )
+    @pytest.mark.parametrize("options", [["option1", "option2"], [1, 2, 3, 4], [True, False]])
+    def test_create_metadata_terms(self, options: list):
+        property = rg.TermsMetadataProperty(title="A metadata property", name="metadata", options=options)
 
         assert property._model.type == "terms"
         assert property.title == "A metadata property"
         assert property.name == "metadata"
         assert property.visible_for_annotators is True
-        assert property.options == ["option1", "option2"]
+        assert property.options == options
 
         assert property.api_model().model_dump() == {
             "id": None,
             "dataset_id": None,
             "name": "metadata",
-            "settings": {"type": "terms", "values": ["option1", "option2"], "visible_for_annotators": True},
+            "settings": {"type": "terms", "values": options, "visible_for_annotators": True},
             "title": "A metadata property",
             "type": "terms",
             "visible_for_annotators": True,
@@ -89,3 +90,7 @@ class TestMetadata:
     def test_create_float_metadata_with_visible_for_annotators(self):
         metadata = rg.FloatMetadataProperty(name="integer", min=3.5, max=10.5, visible_for_annotators=False)
         assert metadata.visible_for_annotators is False
+
+    def test_create_terms_metadata_with_boolean_options(self):
+        metadata = rg.TermsMetadataProperty(name="metadata", options=[True, False])
+        assert metadata.options == [True, False]

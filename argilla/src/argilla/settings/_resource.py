@@ -186,6 +186,9 @@ class Settings(DefaultSettingsMixin, Resource):
         self._validate_empty_settings()
         self._validate_duplicate_names()
 
+        for field in self.fields:
+            field.validate()
+
     #####################
     #  Public methods   #
     #####################
@@ -513,6 +516,11 @@ class SettingsProperties(Sequence[Property]):
 
         if property.name in dir(self):
             raise ValueError(f"Property with name {property.name!r} conflicts with an existing attribute")
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+
+        return f"{repr([prop for prop in self])}"
 
 
 class QuestionsProperties(SettingsProperties[QuestionType]):

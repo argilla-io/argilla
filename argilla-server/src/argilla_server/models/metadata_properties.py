@@ -41,14 +41,14 @@ class BaseMetadataPropertySettings(BaseModel, ABC):
 
 class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
     type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = None
+    values: Optional[List[Any]] = None
 
-    def check_metadata(self, value: Union[str, List[str]]) -> None:
+    def check_metadata(self, value: Any) -> None:
         if self.values is None:
             return
 
         values = value
-        if isinstance(values, str):
+        if not isinstance(values, list):
             values = [value]
 
         for v in values:

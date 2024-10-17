@@ -19,7 +19,6 @@ from uuid import UUID
 from argilla_server.enums import UserRole
 from argilla_server.pydantic_v1 import BaseModel, Field, constr
 
-USER_USERNAME_REGEX = "^(?!-|_)[A-za-z0-9-_]+$"
 USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
 
@@ -43,7 +42,7 @@ class User(BaseModel):
 class UserCreate(BaseModel):
     first_name: constr(min_length=1, strip_whitespace=True)
     last_name: Optional[constr(min_length=1, strip_whitespace=True)]
-    username: str = Field(regex=USER_USERNAME_REGEX, min_length=1)
+    username: str = Field(..., min_length=1)
     role: Optional[UserRole]
     password: str = Field(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
 

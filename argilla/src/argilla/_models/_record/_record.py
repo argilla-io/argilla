@@ -18,7 +18,7 @@ import uuid
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 
-from argilla._models._record._metadata import MetadataModel, MetadataValue
+from argilla._models._record._metadata import MetadataModel
 from argilla._models._record._response import UserResponseModel
 from argilla._models._record._suggestion import SuggestionModel
 from argilla._models._record._vector import VectorModel
@@ -34,7 +34,9 @@ class ChatFieldValue(BaseModel):
     content: str
 
 
-FieldValue = Union[str, None, List[ChatFieldValue]]
+CustomFieldValue = dict
+
+FieldValue = Union[List[ChatFieldValue], List[dict], CustomFieldValue, str, None]
 
 
 class RecordModel(ResourceModel):
@@ -42,7 +44,7 @@ class RecordModel(ResourceModel):
 
     status: Literal["pending", "completed"] = "pending"
     fields: Optional[Dict[str, FieldValue]] = None
-    metadata: Optional[Union[List[MetadataModel], Dict[str, MetadataValue]]] = Field(default_factory=dict)
+    metadata: Optional[Union[List[MetadataModel], Dict[str, Any]]] = Field(default_factory=dict)
     vectors: Optional[List[VectorModel]] = Field(default_factory=list)
     responses: Optional[List[UserResponseModel]] = Field(default_factory=list)
     suggestions: Optional[Union[Tuple[SuggestionModel], List[SuggestionModel]]] = Field(default_factory=tuple)
@@ -63,9 +65,7 @@ class RecordModel(ResourceModel):
         return {metadata.name: metadata.value for metadata in value}
 
     @field_serializer("fields", when_used="always")
-    def serialize_fields(
-        self, value: Dict[str, Union[str, None, List[Dict[str, str]]]]
-    ) -> Optional[Dict[str, Union[str, None, List[Dict[str, str]]]]]:
+    def serialize_fields(self, value: Dict[str, FieldValue]) -> Optional[Dict[str, FieldValue]]:
         """Serialize empty fields to None."""
         if isinstance(value, dict) and len(value) == 0:
             return None

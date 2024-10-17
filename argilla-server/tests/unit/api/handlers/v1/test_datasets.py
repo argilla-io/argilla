@@ -916,10 +916,6 @@ class TestSuiteDatasets:
         "dataset_json",
         [
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},
@@ -1242,323 +1238,6 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
         assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    @pytest.mark.parametrize(
-        ("settings", "expected_settings"),
-        [
-            ({"type": "terms"}, {"type": "terms", "values": None}),
-            ({"type": "terms", "values": ["a"]}, {"type": "terms", "values": ["a"]}),
-            (
-                {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
-                {"type": "terms", "values": ["a", "b", "c", "d", "e"]},
-            ),
-            ({"type": "integer"}, {"type": "integer", "min": None, "max": None}),
-            ({"type": "integer", "min": 2}, {"type": "integer", "min": 2, "max": None}),
-            ({"type": "integer", "max": 10}, {"type": "integer", "min": None, "max": 10}),
-            ({"type": "integer", "min": 2, "max": 10}, {"type": "integer", "min": 2, "max": 10}),
-            ({"type": "float"}, {"type": "float", "min": None, "max": None}),
-            ({"type": "float", "min": 2}, {"type": "float", "min": 2, "max": None}),
-            ({"type": "float", "max": 10}, {"type": "float", "min": None, "max": 10}),
-            ({"type": "float", "min": 2, "max": 10}, {"type": "float", "min": 2, "max": 10}),
-            ({"type": "float", "min": 0.3, "max": 1.0}, {"type": "float", "min": 0.3, "max": 1.0}),
-        ],
-    )
-    async def test_create_dataset_metadata_property(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        owner_auth_header: dict,
-        settings: dict,
-        expected_settings: dict,
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": "title", "settings": settings}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-        response_body = response.json()
-        assert await db.get(MetadataProperty, UUID(response_body["id"]))
-        assert response_body == {
-            "id": str(UUID(response_body["id"])),
-            "name": "name",
-            "title": "title",
-            "settings": expected_settings,
-            "visible_for_annotators": True,
-            "dataset_id": str(dataset.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-        }
-
-    async def test_create_dataset_metadata_property_with_dataset_ready(
-        self,
-        async_client: "AsyncClient",
-        db: "AsyncSession",
-        mock_search_engine: "SearchEngine",
-        owner_auth_header: dict,
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        metadata_property_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "terms", "values": ["valueA", "valueB", "valueC"]},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-        response_body = response.json()
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
-
-        assert created_metadata_property
-        assert response_body == {
-            "id": str(UUID(response_body["id"])),
-            "visible_for_annotators": True,
-            "dataset_id": str(dataset.id),
-            "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
-            "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
-            **metadata_property_json,
-        }
-
-        mock_search_engine.configure_metadata_property.assert_called_once_with(dataset, created_metadata_property)
-
-    async def test_create_dataset_metadata_property_as_admin(self, async_client: "AsyncClient", db: "AsyncSession"):
-        workspace = await WorkspaceFactory.create()
-        admin = await AdminFactory.create(workspaces=[workspace])
-        dataset = await DatasetFactory.create(workspace=workspace)
-        metadata_property_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "terms", "values": ["a", "b", "c"]},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties",
-            headers={API_KEY_HEADER_NAME: admin.api_key},
-            json=metadata_property_json,
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-    @pytest.mark.parametrize(
-        "settings",
-        [
-            None,
-            {},
-            {"type": "wrong-type"},
-            {"type": None},
-            {"type": "terms", "values": []},
-            {"type": "integer", "min": 5, "max": 2},
-            {"type": "float", "min": 5.0, "max": 2.0},
-        ],
-    )
-    async def test_create_dataset_metadata_property_with_invalid_settings(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, settings: dict
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": "title", "settings": settings}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_metadata_property_as_admin_for_different_workspace(
-        self, async_client: "AsyncClient", db: "AsyncSession"
-    ):
-        workspace = await WorkspaceFactory.create()
-        admin = await AdminFactory.create(workspaces=[workspace])
-
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "terms", "values": ["a", "b", "c"]},
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties",
-            headers={API_KEY_HEADER_NAME: admin.api_key},
-            json=metadata_property_json,
-        )
-
-        assert response.status_code == 403
-        assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
-
-    async def test_create_dataset_metadata_property_as_annotator(self, async_client: "AsyncClient", db: "AsyncSession"):
-        annotator = await AnnotatorFactory.create()
-        dataset = await DatasetFactory.create()
-        question_json = {"name": "name", "title": "title", "settings": {"type": "terms", "values": ["a", "b", "c"]}}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties",
-            headers={API_KEY_HEADER_NAME: annotator.api_key},
-            json=question_json,
-        )
-
-        assert response.status_code == 403
-        assert (await db.execute(select(func.count(Question.id)))).scalar() == 0
-
-    @pytest.mark.parametrize(
-        "invalid_name",
-        [
-            None,
-            "",
-            "::",
-            "bad Name",
-            "¿pef",
-            "wrong:name",
-            "wrong.name" "**",
-            "a" * (METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH + 1),
-        ],
-    )
-    async def test_create_dataset_metadata_property_with_invalid_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, invalid_name: str
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": invalid_name, "title": "title", "settings": {"type": "terms"}}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_metadata_property_with_existent_name(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        metadata_property = await TermsMetadataPropertyFactory.create(name="name")
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{metadata_property.dataset_id}/metadata-properties",
-            headers=owner_auth_header,
-            json={
-                "name": "name",
-                "title": "title",
-                "settings": {"type": "terms", "values": ["a", "b", "c"]},
-            },
-        )
-
-        assert response.status_code == 409
-        assert response.json() == {
-            "detail": f"Metadata property with name `{metadata_property.name}` already exists for dataset with id `{metadata_property.dataset_id}`"
-        }
-
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-    @pytest.mark.parametrize(
-        "title",
-        ["", "a" * (METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH + 1)],
-    )
-    async def test_create_dataset_metadata_property_with_invalid_title(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, title: str
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": title, "settings": {"type": "terms"}}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(Field.id)))).scalar() == 0
-
-    async def test_create_dataset_metadata_property_visible_for_annotators(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "terms"},
-            "visible_for_annotators": True,
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-        response_body = response.json()
-        assert response_body["visible_for_annotators"] == True
-
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
-        assert created_metadata_property
-        assert created_metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
-
-    async def test_create_dataset_metadata_property_not_visible_for_annotators(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {
-            "name": "name",
-            "title": "title",
-            "settings": {"type": "terms"},
-            "visible_for_annotators": False,
-        }
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-        response_body = response.json()
-        assert response_body["visible_for_annotators"] == False
-
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
-        assert created_metadata_property
-        assert created_metadata_property.allowed_roles == [UserRole.admin]
-
-    async def test_create_dataset_metadata_property_without_visible_for_annotators(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create()
-        metadata_property_json = {"name": "name", "title": "title", "settings": {"type": "terms"}}
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties", headers=owner_auth_header, json=metadata_property_json
-        )
-
-        assert response.status_code == 201
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 1
-
-        response_body = response.json()
-        assert response_body["visible_for_annotators"] == True
-
-        created_metadata_property = await db.get(MetadataProperty, UUID(response_body["id"]))
-        assert created_metadata_property
-        assert created_metadata_property.allowed_roles == [UserRole.admin, UserRole.annotator]
-
-    @pytest.mark.parametrize("values", [[], ["value"] * (TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS + 1)])
-    async def test_create_dataset_terms_metadata_property_with_invalid_number_of_values(
-        self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict, values: List[str]
-    ):
-        dataset = await DatasetFactory.create()
-
-        response = await async_client.post(
-            f"/api/v1/datasets/{dataset.id}/metadata-properties",
-            headers=owner_auth_header,
-            json={"name": "name", "title": "title", "settings": {"type": "terms", "values": values}},
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(MetadataProperty.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin])
     @pytest.mark.parametrize("dataset_status", [DatasetStatus.draft, DatasetStatus.ready])
@@ -2072,6 +1751,11 @@ class TestSuiteDatasets:
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
                         },
@@ -2177,6 +1861,11 @@ class TestSuiteDatasets:
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "output"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "output"],
                             "msg": "str type expected",
                             "type": "type_error.str",
                         },
@@ -2268,6 +1957,44 @@ class TestSuiteDatasets:
         )
 
         assert response.status_code == 422
+
+    @pytest.mark.parametrize(
+        "MetadataPropertyFactoryType, settings, record_value",
+        [
+            (TermsMetadataPropertyFactory, {"values": ["a", "b", "c"]}, ["a", "b"]),
+            (TermsMetadataPropertyFactory, {"values": [1, 2, 3]}, [1, 2]),
+            (TermsMetadataPropertyFactory, {"values": [True, False]}, False),
+        ],
+    )
+    async def test_create_dataset_records_with_terms_metadata(
+        self,
+        async_client: "AsyncClient",
+        db: "AsyncSession",
+        owner_auth_header: dict,
+        MetadataPropertyFactoryType: Type[MetadataPropertyFactory],
+        settings: Dict[str, Any],
+        record_value: Any,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="completion", dataset=dataset)
+        await TextQuestionFactory.create(name="corrected", dataset=dataset)
+        await MetadataPropertyFactoryType.create(name="metadata-property", settings=settings, dataset=dataset)
+
+        records_json = {
+            "items": [
+                {
+                    "fields": {"completion": "text-input"},
+                    "metadata": {"metadata-property": record_value},
+                }
+            ]
+        }
+
+        response = await async_client.post(
+            f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
+        )
+
+        assert response.status_code == 201
+        assert [item["metadata"]["metadata-property"] for item in response.json()["items"]] == [record_value]
 
     @pytest.mark.parametrize(
         "MetadataPropertyFactoryType, settings, value",
@@ -4350,8 +4077,9 @@ class TestSuiteDatasets:
             items=[
                 SearchResponseItem(record_id=records[0].id, score=14.2),
                 SearchResponseItem(record_id=records[1].id, score=12.2),
+                SearchResponseItem(record_id=records[2].id, score=11.1),
             ],
-            total=2,
+            total=3,
         )
 
         query_json = {"query": {"vector": {"name": vector_settings.name, "value": selected_vector.value}}}
@@ -4359,13 +4087,13 @@ class TestSuiteDatasets:
             f"/api/v1/me/datasets/{dataset.id}/records/search",
             headers=owner_auth_header,
             json=query_json,
-            params={"offset": 0, "limit": 10},
+            params={"offset": 1, "limit": 3},
         )
 
         assert response.status_code == 200
         response_json = response.json()
         assert len(response_json["items"]) == 2
-        assert response_json["total"] == 2
+        assert response_json["total"] == 3
 
         mock_search_engine.search.assert_not_called()
         mock_search_engine.similarity_search.assert_called_once_with(
@@ -4375,8 +4103,34 @@ class TestSuiteDatasets:
             value=selected_vector.value,
             query=None,
             order=SimilarityOrder.most_similar,
-            max_results=10,
+            max_results=4,
         )
+
+    async def test_search_current_user_dataset_records_with_vector_value_and_max_results_offset(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
+    ):
+        workspace = await WorkspaceFactory.create()
+        dataset, _, records, *_ = await self.create_dataset_with_user_responses(owner, workspace)
+        vector_settings = await VectorSettingsFactory.create(dataset=dataset)
+        selected_vector = await VectorFactory.create(
+            vector_settings=vector_settings, record=records[0], value=[1, 2, 3]
+        )
+
+        query_json = {"query": {"vector": {"name": vector_settings.name, "value": selected_vector.value}}}
+        response = await async_client.post(
+            f"/api/v1/me/datasets/{dataset.id}/records/search",
+            headers=owner_auth_header,
+            json=query_json,
+            params={"offset": 1000},
+        )
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert len(response_json["items"]) == 0
+        assert response_json["total"] == 0
+
+        mock_search_engine.search.assert_not_called()
+        mock_search_engine.similarity_search.assert_not_called()
 
     async def test_search_current_user_dataset_records_with_vector_value_and_query(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner: User, owner_auth_header: dict
@@ -4635,10 +4389,10 @@ class TestSuiteDatasets:
         response = await async_client.put(f"/api/v1/datasets/{dataset.id}/publish", headers=owner_auth_header)
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "Dataset is already published"}
+        assert response.json() == {"detail": "Dataset has already been published"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_without_fields(
+    async def test_publish_dataset_without_required_fields(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4651,7 +4405,7 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": "Dataset cannot be published without required fields"}
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 0
 
-    async def test_publish_dataset_without_questions(
+    async def test_publish_dataset_without_required_questions(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
@@ -4740,10 +4494,6 @@ class TestSuiteDatasets:
         [
             {"name": None},
             {"name": ""},
-            {"name": "123$abc"},
-            {"name": "unit@test"},
-            {"name": "-test-dataset"},
-            {"name": "_test-dataset"},
             {"name": "a" * (DATASET_NAME_MAX_LENGTH + 1)},
             {"name": "test-dataset", "guidelines": ""},
             {"name": "test-dataset", "guidelines": "a" * (DATASET_GUIDELINES_MAX_LENGTH + 1)},

@@ -32,6 +32,7 @@ from tests.factories import (
     ImageFieldFactory,
     TextQuestionFactory,
     ChatFieldFactory,
+    CustomFieldFactory,
 )
 
 
@@ -472,6 +473,32 @@ class TestCreateDatasetRecordsBulk:
                 ],
             },
         )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_with_non_dicts(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": "invalid",
+                        },
+                    },
+                ],
+            },
+        )
+
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
@@ -543,6 +570,11 @@ class TestCreateDatasetRecordsBulk:
                         },
                         {
                             "loc": ["body", "items", 0, "fields", "chat"],
+                            "msg": "value is not a valid dict",
+                            "type": "type_error.dict",
+                        },
+                        {
+                            "loc": ["body", "items", 0, "fields", "chat"],
                             "msg": "str type expected",
                             "type": "type_error.str",
                         },
@@ -550,4 +582,68 @@ class TestCreateDatasetRecordsBulk:
                 },
             }
         }
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_custom_field_values(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await CustomFieldFactory.create(name="custom", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "custom": {"a": 1, "b": 2},
+                        },
+                    },
+                    {
+                        "fields": {
+                            "custom": {"c": 1, "b": 2},
+                        },
+                    },
+                    {
+                        "fields": {
+                            "custom": {"a": 1},
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201, response.json()
+        records = (await db.execute(select(Record))).scalars().all()
+        assert len(records) == 3
+        assert records[0].fields["custom"] == {"a": 1, "b": 2}
+        assert records[1].fields["custom"] == {"c": 1, "b": 2}
+        assert records[2].fields["custom"] == {"a": 1}
+
+    async def test_create_dataset_records_bulk_with_wrong_custom_field_value(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await CustomFieldFactory.create(name="custom", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "custom": "invalid",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
