@@ -29,7 +29,7 @@ from argilla_server.jobs.queues import DEFAULT_QUEUE
 # TODO: Move this to be defined on jobs queues as a shared constant
 JOB_TIMEOUT_DISABLED = -1
 
-HUB_DATASET_TAKE_ROWS = 500_000
+HUB_DATASET_TAKE_ROWS = 10_000
 
 
 # TODO: Once we merge webhooks we should change the queue to use a different one (default queue is deleted there)
