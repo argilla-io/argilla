@@ -136,12 +136,13 @@ async def list_datasets_by_workspace_id(db: AsyncSession, workspace_id: UUID) ->
     return result.scalars().all()
 
 
-async def create_dataset(db: AsyncSession, dataset_attrs: dict):
+async def create_dataset(db: AsyncSession, dataset_attrs: dict) -> Dataset:
     dataset = Dataset(
         name=dataset_attrs["name"],
         guidelines=dataset_attrs["guidelines"],
         allow_extra_metadata=dataset_attrs["allow_extra_metadata"],
         distribution=dataset_attrs["distribution"],
+        metadata_=dataset_attrs["metadata"],
         workspace_id=dataset_attrs["workspace_id"],
     )
 

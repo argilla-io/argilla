@@ -120,13 +120,13 @@ class TestImportFeaturesFromHub:
             name=dataset_name,
         )
 
-        assert created_dataset.settings.fields[0].name == "text"
-        assert list(created_dataset.records)[0].fields["text"] == "Hello World, how are you?"
+        assert created_dataset.settings.fields[0].name == "Text"
+        assert list(created_dataset.records)[0].fields["Text"] == "Hello World, how are you?"
 
     def test_import_from_hub_with_unlabelled_classes(self, client: rg.Argilla, token: str, dataset_name: str):
         created_dataset = rg.Dataset.from_hub(
             "argilla-internal-testing/test_import_from_hub_with_unlabelled_classes", token=token, name=dataset_name
         )
 
-        assert created_dataset.settings.fields[0].name == "text"
-        assert list(created_dataset.records)[0].fields["text"] == "Hello World, how are you?"
+        assert created_dataset.settings.fields[0].name == "Text"
+        assert list(created_dataset.records)[0].fields["Text"] == "Hello World, how are you?"

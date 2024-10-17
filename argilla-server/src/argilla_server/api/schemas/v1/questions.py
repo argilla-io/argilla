@@ -28,7 +28,6 @@ except ImportError:
     from typing_extensions import Annotated
 
 
-QUESTION_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 QUESTION_CREATE_NAME_MIN_LENGTH = 1
 QUESTION_CREATE_NAME_MAX_LENGTH = 200
 
@@ -287,7 +286,6 @@ QuestionSettings = Annotated[
 
 QuestionName = Annotated[
     constr(
-        regex=QUESTION_CREATE_NAME_REGEX,
         min_length=QUESTION_CREATE_NAME_MIN_LENGTH,
         max_length=QUESTION_CREATE_NAME_MAX_LENGTH,
     ),
