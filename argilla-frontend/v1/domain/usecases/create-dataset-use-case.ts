@@ -1,7 +1,7 @@
 import { DatasetCreation } from "../entities/hub/DatasetCreation";
 import { Workspace } from "../entities/workspace/Workspace";
 import { DatasetId, IDatasetRepository } from "../services/IDatasetRepository";
-import { JobRepository } from "~/v1/infrastructure/repositories/JobRepository";
+import { Debounce } from "~/v1/infrastructure/services";
 import {
   FieldRepository,
   MetadataRepository,
@@ -16,12 +16,11 @@ export class CreateDatasetUseCase {
     private readonly workspaceRepository: WorkspaceRepository,
     private readonly questionRepository: QuestionRepository,
     private readonly fieldRepository: FieldRepository,
-    private readonly metadataRepository: MetadataRepository,
-    private readonly jobRepository: JobRepository
+    private readonly metadataRepository: MetadataRepository
   ) {}
 
   async execute(dataset: DatasetCreation): Promise<DatasetId | null> {
-    if (!dataset.workspace) {
+    if (!dataset.workspace.id) {
       const workspace = await this.workspaceRepository.create(
         dataset.workspace.name
       );
@@ -30,6 +29,8 @@ export class CreateDatasetUseCase {
     }
 
     const datasetCreated = await this.datasetRepository.create(dataset);
+
+    if (!datasetCreated) return null;
 
     try {
       for (const field of dataset.mappedFields) {
@@ -46,29 +47,24 @@ export class CreateDatasetUseCase {
 
       await this.datasetRepository.publish(datasetCreated);
 
-      const jobId = await this.datasetRepository.import(
-        datasetCreated,
-        dataset
-      );
+      await this.datasetRepository.import(datasetCreated, dataset);
 
-      while (true) {
-        // TODO: what happen if the status is queued more than X seconds????
-        const status = await this.jobRepository.getJobStatus(jobId);
+      let retries = 0;
+      const debounce = Debounce.from(1000);
 
-        if (status.isFailed) break;
+      while (retries < 5) {
+        revalidateCache(`/v1/datasets/${datasetCreated}/progress`);
 
-        if (status.isQueued) continue;
+        const progress = await this.datasetRepository.getProgress(
+          datasetCreated
+        );
 
-        if (status.isStarted) {
-          revalidateCache(`/v1/datasets/${datasetCreated}/progress`);
-          const progress = await this.datasetRepository.getProgress(
-            datasetCreated
-          );
-
-          if (progress.hasAtLeastTenRecord) {
-            break;
-          }
+        if (progress.hasAtLeastTenRecord) {
+          break;
         }
+
+        await debounce.wait();
+        retries++;
       }
 
       return datasetCreated;
