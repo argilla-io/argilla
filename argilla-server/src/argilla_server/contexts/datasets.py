@@ -777,8 +777,11 @@ async def preload_records_relationships_before_validate(db: AsyncSession, record
 async def delete_records(
     db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
 ) -> None:
-    conditions = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
-    records = await Record.delete_many(db=db, where=conditions, autocommit=True)
+    records = await Record.delete_many(
+        db=db,
+        where=[Record.id.in_(records_ids), Record.dataset_id == dataset.id],
+        autocommit=True,
+    )
 
     await search_engine.delete_records(dataset=dataset, records=records)
 
@@ -800,16 +803,17 @@ async def update_record(
 
         if vectors:
             await Vector.upsert_many(
-                db, objects=vectors, constraints=[Vector.record_id, Vector.vector_settings_id], autocommit=False
+                db=db,
+                objects=vectors,
+                constraints=[Vector.record_id, Vector.vector_settings_id],
+                autocommit=False,
             )
-            await db.refresh(record, attribute_names=["vectors"])
-
-        if needs_search_engine_update:
-            await record.dataset.awaitable_attrs.vectors_settings
-            await _preload_record_relationships_before_index(db, record)
-            await search_engine.index_records(record.dataset, [record])
 
     await db.commit()
+
+    if needs_search_engine_update:
+        await _preload_record_relationships_before_index(db, record)
+        await search_engine.index_records(record.dataset, [record])
 
     return record
 
@@ -970,10 +974,13 @@ async def upsert_suggestion(
 async def delete_suggestions(
     db: AsyncSession, search_engine: SearchEngine, record: Record, suggestions_ids: List[UUID]
 ) -> None:
-    params = [Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id]
     suggestions = await list_suggestions_by_id_and_record_id(db, suggestions_ids, record.id)
 
-    await Suggestion.delete_many(db=db, where=params, autocommit=True)
+    await Suggestion.delete_many(
+        db=db,
+        where=[Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id],
+        autocommit=True,
+    )
 
     for suggestion in suggestions:
         await search_engine.delete_record_suggestion(suggestion)
