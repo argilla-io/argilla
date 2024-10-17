@@ -64,19 +64,19 @@ export default {
       display: inline-block;
       padding: calc($base-space / 2) $base-space;
       border-radius: $border-radius-m;
-      background-color: var(--bg-accent-grey-3);
+      background: hsl(from var(--bg-accent-grey-1) h s l / 80%);
       cursor: pointer;
       transition: all 0.2s ease-in;
-      border: 1px solid var(--bg-opacity-10);
+      border: 1px solid hsl(from var(--bg-accent-grey-1) h s l / 80%);
       @include font-size(12px);
       &:hover {
         border-color: var(--bg-opacity-20);
       }
     }
     &:checked + label {
-      border-color: var(--fg-cuaternary);
-      color: var(--fg-cuaternary);
-      background: var(--bg-accent-grey-1);
+      border-color: var(--fg-cuaternary) !important;
+      color: var(--fg-cuaternary) !important;
+      background: var(--bg-accent-grey-1) !important;
     }
   }
 }

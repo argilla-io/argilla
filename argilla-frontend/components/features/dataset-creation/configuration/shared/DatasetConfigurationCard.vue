@@ -66,7 +66,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
   position: relative;
   border-radius: $base-space * 2;
   border: 1px solid var(--bg-opacity-4);
-  background: hsla(from var(--bg-config-card) h s l / 0.8);
+  background: var(--bg-config-card);
   transition: all 0.3s ease-in;
   &__wrapper {
     border-radius: $base-space * 2;
@@ -111,19 +111,25 @@ $no-mapping-color: hsl(0, 0%, 50%);
   &__type {
     flex: 1;
   }
+  :deep(.chip-selector__input + label) {
+    background: hsl(from var(--bg-accent-grey-1) h s l / 60%);
+    border-color: var(--bg-config-card);
+  }
+  :deep(.chip-selector__input:checked + label) {
+    background: var(--bg-accent-grey-1);
+  }
   &:has(.nomapping) {
-    background: linear-gradient(
-      180deg,
-      hsla(from $no-mapping-color h s l / 0.16) 0%,
-      hsla(from $no-mapping-color h s l / 0.1) 100%
-    );
+    background: var(--bg-opacity-4);
+    :deep(.chip-selector__input + label) {
+      background: hsl(from var(--bg-accent-grey-1) h s l / 50%);
+      border-color: var(--bg-opacity-10);
+    }
+    :deep(.chip-selector__input:checked + label) {
+      background: var(--bg-accent-grey-1);
+    }
   }
   &:has(.error) {
-    background: linear-gradient(
-      180deg,
-      hsla(from $error-color h s l / 0.16) 0%,
-      hsla(from $error-color h s l / 0.1) 100%
-    );
+    background: hsla(from $error-color h s l / 0.16);
   }
   &:deep(.re-switch-label) {
     @include font-size(13px);
