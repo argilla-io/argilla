@@ -3,9 +3,12 @@
     <div class="config-card">
       <div class="config-card__content" :class="item.type.replace(/ /g, '')">
         <h3 class="config-card__title">
-          <svgicon width="6" name="draggable" color="var(--bg-opacity-20)" />{{
-            item.name
-          }}
+          <svgicon
+            class="config-card__icon"
+            width="6"
+            name="draggable"
+            color="var(--bg-opacity-20)"
+          />{{ item.name }}
           <span v-if="item.dtype" class="config-card__dtype">{{
             item.dtype
           }}</span>
@@ -88,6 +91,10 @@ $no-mapping-color: hsl(0, 0%, 50%);
     margin: 0;
     font-weight: 500;
     @include font-size(14px);
+  }
+  &__icon {
+    position: absolute;
+    left: 8px;
   }
   &__dtype {
     font-family: monospace, monospace;
