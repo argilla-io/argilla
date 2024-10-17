@@ -36,6 +36,9 @@ RESET_ROW_IDX = -1
 FEATURE_TYPE_IMAGE = "Image"
 FEATURE_TYPE_CLASS_LABEL = "ClassLabel"
 
+DATA_URL_DEFAULT_IMAGE_FORMAT = "png"
+DATA_URL_DEFAULT_IMAGE_MIMETYPE = "image/png"
+
 
 class HubDataset:
     def __init__(self, name: str, subset: str, split: str, mapping: HubDatasetMapping):
@@ -178,8 +181,11 @@ class HubDataset:
 def pil_image_to_data_url(image: Image.Image):
     buffer = io.BytesIO()
 
-    image.save(buffer, format=image.format)
+    image_format = image.format or DATA_URL_DEFAULT_IMAGE_FORMAT
+    image_mimetype = image.get_format_mimetype() if image.format else DATA_URL_DEFAULT_IMAGE_MIMETYPE
+
+    image.convert("RGB").save(buffer, format=image_format)
 
     base64_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-    return f"data:{image.get_format_mimetype()};base64,{base64_image}"
+    return f"data:{image_mimetype};base64,{base64_image}"
