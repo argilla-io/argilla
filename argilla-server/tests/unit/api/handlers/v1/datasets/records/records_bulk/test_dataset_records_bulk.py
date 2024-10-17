@@ -207,8 +207,9 @@ class TestDatasetRecordsBulk:
 
         await dataset.awaitable_attrs.metadata_properties
 
-    async def _configure_dataset_fields(self, dataset):
-        await TextFieldFactory.create(name="prompt", dataset=dataset)
-        await TextFieldFactory.create(name="response", dataset=dataset)
+    @classmethod
+    async def _configure_dataset_fields(cls, dataset):
+        await TextFieldFactory.create(name="prompt", dataset=dataset, required=True)
+        await TextFieldFactory.create(name="response", dataset=dataset, required=False)
 
         await dataset.awaitable_attrs.fields
