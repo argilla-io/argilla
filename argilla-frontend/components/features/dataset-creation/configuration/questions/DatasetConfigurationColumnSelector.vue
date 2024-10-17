@@ -92,7 +92,7 @@ export default {
   }
 
   :deep(.dropdown__content) {
-    bottom: 100%;
+    bottom: 0;
     top: auto;
     right: auto;
     min-width: 140px;
@@ -103,7 +103,7 @@ export default {
     list-style: none;
     padding: calc($base-space / 2);
     margin: 0;
-    max-height: 140px;
+    max-height: 120px;
     overflow-y: auto;
     &__intro {
       display: block;
