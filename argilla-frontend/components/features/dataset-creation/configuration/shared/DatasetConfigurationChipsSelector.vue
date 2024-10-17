@@ -79,9 +79,6 @@ export default {
       transition: all 0.2s ease-in;
       border: 1px solid hsl(from var(--bg-accent-grey-1) h s l / 80%);
       @include font-size(12px);
-      &:hover {
-        border-color: var(--bg-opacity-20);
-      }
     }
     &:checked + label {
       border-color: var(--fg-cuaternary) !important;
