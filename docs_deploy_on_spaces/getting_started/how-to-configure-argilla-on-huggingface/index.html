@@ -1047,6 +1047,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../how_to_guides/custom_fields/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Custom fields with layout templates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../how_to_guides/use_markdown_to_format_rich_content/" class="md-nav__link">
         
   
@@ -2390,11 +2411,7 @@ You can modify two things:</p>
 <li><strong>You want manage the Space together with other users</strong> (e.g., Space settings, etc.). Note that if you just want to manage your Argilla datasets, workspaces, you can achieve this by adding other Argilla <code>owner</code> roles to your Argilla Server.</li>
 <li><strong>More generally, you want to make available your space under an organization/community umbrella</strong>.</li>
 </ul>
-<p>The steps are very similar the <a href="../quickstart/">Quickstart guide</a> with two important differences:</p>
-<div class="admonition tip">
-<p class="admonition-title">Setup USERNAME</p>
-<p>You need to <strong>set up the <code>USERNAME</code> Space Secret with your Hugging Face username</strong>. This way, the first time you enter with the <code>Hugging Face Sign in</code> button, you'll be granted the <code>owner</code> role.</p>
-</div>
+<p>The steps are very similar the <a href="../quickstart/">Quickstart guide</a> with one important difference:</p>
 <div class="admonition tip">
 <p class="admonition-title">Enable Persistent Storage <code>SMALL</code></p>
 <p>Not setting persistent storage to <code>Small</code> means that <strong>you will loose your data when the Space restarts</strong>.</p>
@@ -2419,21 +2436,7 @@ You can modify two things:</p>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="space-secrets-overview">Space Secrets overview<a class="headerlink" href="#space-secrets-overview" title="Permanent link">&para;</a></h2>
-<p>There's two optional secrets to set up the <code>USERNAME</code> and <code>PASSWORD</code> of the <code>owner</code> of the Argilla Space. Remember that, by default Argilla Spaces are configured with a <em>Sign in with Hugging Face</em> button, which is also used to grant an <code>owner</code> to the creator of the Space for personal spaces.</p>
-<p>The <code>USERNAME</code> and <code>PASSWORD</code> are only useful in a couple of scenarios:</p>
-<ul>
-<li>You have <a href="#how-to-configure-and-disable-oauth-access">disabled Hugging Face OAuth</a>.</li>
-<li>You want to <a href="#how-to-deploy-argilla-under-a-hugging-face-organization">set up Argilla under an organization</a> and want your Hugging Face username to be granted the <code>owner</code> role.</li>
-</ul>
-<p>In summary, when setting up a Space:</p>
-<div class="admonition info">
-<p class="admonition-title">Creating a Space under your personal account</p>
-<p>If you are creating the Space under your personal account, <strong>don't insert any value for <code>USERNAME</code> and <code>PASSWORD</code></strong>. Once you launch the Space you will be able to Sign in with your Hugging Face username and the <code>owner</code> role.</p>
-</div>
-<div class="admonition info">
-<p class="admonition-title">Creating a Space under an organization</p>
-<p>If you are creating the Space under an organization <strong>make sure to insert your Hugging Face username in the secret <code>USERNAME</code></strong>. In this way, you'll be able to Sign in with your Hugging Face user.</p>
-</div>
+<p>Remember that, by default, Argilla Spaces are configured with a <em>Sign in with Hugging Face</em> button, which is also used to grant an <code>owner</code> to the creator of the Space. There are two optional secrets to set up the <code>USERNAME</code> and <code>PASSWORD</code> of the <code>owner</code> of Argilla Space. Those are useful when you want to create a different owner user to login into Argilla.</p>
 
 
 
