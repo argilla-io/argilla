@@ -225,3 +225,28 @@ class TestSettings:
 
         settings.vectors.remove("vector")
         assert len(settings.vectors) == 0
+
+    def test_adding_properties_with_override_enabled(self):
+        settings = rg.Settings()
+
+        settings.add(rg.TextField(name="text", title="text"))
+        assert len(settings.fields) == 1
+
+        settings.add(rg.TextQuestion(name="question", title="question"))
+        assert len(settings.questions) == 1
+
+        settings.add(rg.FloatMetadataProperty(name="text"), override=True)
+        assert len(settings.metadata) == 1
+        assert len(settings.fields) == 0
+
+    def test_adding_properties_with_disabled_override(self):
+        settings = rg.Settings()
+
+        settings.add(rg.TextField(name="text", title="text"))
+        assert len(settings.fields) == 1
+
+        settings.add(rg.TextQuestion(name="question", title="question"))
+        assert len(settings.questions) == 1
+
+        with pytest.raises(SettingsError, match="Property with name 'text' already exists"):
+            settings.add(rg.FloatMetadataProperty(name="text"), override=False)

@@ -289,6 +289,17 @@ class Settings(DefaultSettingsMixin, Resource):
     def add(
         self, property: Union[Field, VectorField, MetadataType, QuestionType], override: bool = True
     ) -> Union[Field, VectorField, MetadataType, QuestionType]:
+        """
+        Add a property to the settings
+
+        Args:
+            property: The property to add
+            override: If True, override the existing property with the same name. Otherwise, raise an error.  Defaults to True.
+
+        Returns:
+            The added property
+
+        """
         # review all settings properties and remove any existing property with the same name
         for attributes in [self.fields, self.questions, self.vectors, self.metadata]:
             for prop in attributes:
@@ -298,7 +309,7 @@ class Settings(DefaultSettingsMixin, Resource):
                         warnings.warn(message + ". Overriding the existing property.")
                         attributes.remove(prop)
                     else:
-                        raise ValueError(message)
+                        raise SettingsError(message)
 
         if isinstance(property, Field):
             self.fields.add(property)
