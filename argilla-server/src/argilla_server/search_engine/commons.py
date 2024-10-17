@@ -936,7 +936,3 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         """Executes request for bulk operations"""
         pass
-
-    @abstractmethod
-    async def _refresh_index_request(self, index_name: str):
-        pass
