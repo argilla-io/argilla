@@ -1,12 +1,12 @@
 <template>
-  <div class="resizable" :class="resizing ? '--v-resizing' : ''">
-    <div class="resizable__left"><slot name="left" /></div>
+  <div class="resizable-v" :class="resizing ? '--v-resizing' : ''">
+    <div class="resizable-v__left"><slot name="left" /></div>
 
-    <div class="resizable__bar" ref="resizableBar">
-      <div class="resizable__bar__inner" />
+    <div class="resizable-v__bar" ref="resizableBar">
+      <div class="resizable-v__bar__inner" />
     </div>
 
-    <div class="resizable__right"><slot name="right" /></div>
+    <div class="resizable-v__right"><slot name="right" /></div>
     <slot></slot>
   </div>
 </template>
@@ -25,6 +25,10 @@ export default {
     id: {
       type: String,
       default: "v-rz",
+    },
+    minWidthPercent: {
+      type: Number,
+      default: 38,
     },
   },
   data() {
@@ -59,8 +63,8 @@ export default {
   },
   methods: {
     limitElementWidth(element) {
-      element.style["max-width"] = "62%";
-      element.style["min-width"] = "38%";
+      element.style["max-width"] = `${100 - this.minWidthPercent}%`;
+      element.style["min-width"] = `${this.minWidthPercent}%`;
     },
     savePositionOnStartResizing(e) {
       this.leftSidePrevPosition = {
@@ -107,13 +111,17 @@ export default {
 $resizabla-bar-color: #6794fe;
 $resizable-bar-width: $base-space;
 
-.resizable {
+.resizable-v {
   $this: &;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   height: 100%;
   min-height: 0;
   width: 100%;
+  @include media("<desktop") {
+    flex-direction: column;
+  }
   &.--v-resizing {
     user-select: none;
   }

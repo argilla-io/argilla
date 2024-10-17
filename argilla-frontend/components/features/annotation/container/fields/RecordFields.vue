@@ -83,7 +83,7 @@ export default {
   },
   computed: {
     spanQuestions() {
-      return this.record?.questions.filter((q) => q.isSpanType);
+      return this.record?.questions?.filter((q) => q.isSpanType);
     },
   },
 };
