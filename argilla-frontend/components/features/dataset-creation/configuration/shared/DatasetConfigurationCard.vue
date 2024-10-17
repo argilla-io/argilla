@@ -104,6 +104,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
   &__icon {
     position: absolute;
     left: 6px;
+    top: 19px;
     opacity: 0;
   }
   &__dtype {
