@@ -5,9 +5,24 @@ interface OriginalField {
   settings: any;
 }
 
+const adaptContentForChatField = (content: any) => {
+  if (Array.isArray(content)) return content;
+
+  return [
+    {
+      content,
+      role: "user",
+    },
+  ];
+};
+
+const adaptContentForImageField = (content: any) => {
+  return content?.src ?? content;
+};
+
 export class Field {
   private original: OriginalField;
-  public readonly content: string | unknown[];
+  public readonly content: string | any | unknown[];
 
   public readonly sdkRecord?: unknown;
 
@@ -21,25 +36,15 @@ export class Field {
     record?: any
   ) {
     this.initializeOriginal();
+    this.content = record?.fields[name] ?? "";
 
     if (this.isCustomType) {
       this.sdkRecord = record;
       this.content = settings.template;
     } else if (this.isChatType) {
-      const content = record?.fields[name] ?? "";
-      this.content = Array.isArray(content)
-        ? content
-        : [
-            {
-              content,
-              role: "user",
-            },
-          ];
+      this.content = adaptContentForChatField(this.content);
     } else if (this.isImageType) {
-      const content = record?.fields[name] ?? "";
-      this.content = Object.hasOwn(content, "src") ? content.src : content;
-    } else {
-      this.content = record?.fields[name] ?? "";
+      this.content = adaptContentForImageField(this.content);
     }
   }
 
