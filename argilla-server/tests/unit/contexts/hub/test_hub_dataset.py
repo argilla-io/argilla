@@ -25,6 +25,7 @@ from argilla_server.contexts.hub import HubDataset
 from argilla_server.search_engine import SearchEngine
 
 from tests.factories import (
+    ChatFieldFactory,
     DatasetFactory,
     ImageFieldFactory,
     QuestionFactory,
@@ -269,6 +270,31 @@ class TestHubDataset:
 
         record = (await db.execute(select(Record))).scalar_one()
         assert "label" not in record.fields
+
+    async def test_hub_dataset_import_to_with_chat_fields(self, db: AsyncSession, mock_search_engine: SearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="messages", required=True, dataset=dataset)
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset = HubDataset(
+            name="mlabonne/ultrachat_200k_sft",
+            subset="default",
+            split="train_sft",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="messages", target="messages"),
+                ],
+            ),
+        )
+
+        await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
+
+        record = (await db.execute(select(Record))).scalar_one()
+        assert record.fields["messages"]
 
     async def test_hub_dataset_import_to_with_image_fields(self, db: AsyncSession, mock_search_engine: SearchEngine):
         dataset = await DatasetFactory.create(status=DatasetStatus.ready)

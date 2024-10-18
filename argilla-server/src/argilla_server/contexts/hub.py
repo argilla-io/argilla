@@ -20,6 +20,7 @@ from typing_extensions import Self
 
 from PIL import Image
 from datasets import load_dataset
+from datasets import features
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models.database import Dataset
@@ -32,9 +33,6 @@ from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 
 BATCH_SIZE = 100
 RESET_ROW_IDX = -1
-
-FEATURE_TYPE_IMAGE = "Image"
-FEATURE_TYPE_CLASS_LABEL = "ClassLabel"
 
 FEATURE_CLASS_LABEL_NO_LABEL = -1
 
@@ -100,12 +98,12 @@ class HubDataset:
             value = values[index]
             feature = self.features[feature_name]
 
-            if feature._type == FEATURE_TYPE_CLASS_LABEL:
+            if isinstance(feature, features.ClassLabel):
                 if value == FEATURE_CLASS_LABEL_NO_LABEL:
                     row[feature_name] = None
                 else:
                     row[feature_name] = feature.int2str(value)
-            elif feature._type == FEATURE_TYPE_IMAGE and isinstance(value, Image.Image):
+            elif isinstance(feature, features.Image) and isinstance(value, Image.Image):
                 row[feature_name] = pil_image_to_data_url(value)
             else:
                 row[feature_name] = value
