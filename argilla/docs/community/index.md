@@ -42,4 +42,12 @@ We are an open-source community-driven project not only focused on building a gr
 
     [:octicons-arrow-right-24: Roadmap ↗](https://github.com/orgs/argilla-io/projects/10/views/1)
 
+-   __Gurubase__
+
+    ---
+
+    Gurubase is an AI-powered platform designed to answer technical questions using focused knowledge bases. Argilla Guru leverages data from Argilla's GitHub repository and documentation to provide answers to your questions.
+
+    [:octicons-arrow-right-24: Ask Argilla Guru ↗](https://gurubase.io/g/argilla)
+
 </div>
