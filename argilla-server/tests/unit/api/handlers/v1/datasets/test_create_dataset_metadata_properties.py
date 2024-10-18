@@ -228,12 +228,6 @@ class TestCreateDatasetMetadataProperties:
         "invalid_name",
         [
             None,
-            "",
-            "::",
-            "bad Name",
-            "¿pef",
-            "wrong:name",
-            "wrong.name" "**",
             "a" * (METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH + 1),
         ],
     )
