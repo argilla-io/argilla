@@ -88,18 +88,21 @@ async def delete_user(
 
     return await accounts.delete_user(db, user)
 
-@router.patch("/users/{user_id}",status_code=status.HTTP_200_OK, response_model=UserSchema)
+
+@router.patch("/users/{user_id}", status_code=status.HTTP_200_OK, response_model=UserSchema)
 async def update_user(
     *,
     db: AsyncSession = Depends(get_async_db),
     user_id: UUID,
     user_update: UserUpdate,
-    current_user: User = Security(auth.get_current_user),):
-        user = await User.get_or_raise(db, user_id)
+    current_user: User = Security(auth.get_current_user),
+):
+    user = await User.get_or_raise(db, user_id)
 
-        await authorize(current_user, UserPolicy.update)
+    await authorize(current_user, UserPolicy.update)
 
-        return await accounts.update_user(db, user, user_update.dict())
+    return await accounts.update_user(db, user, user_update.dict())
+
 
 @router.get("/users/{user_id}/workspaces", response_model=Workspaces)
 async def list_user_workspaces(

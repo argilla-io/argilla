@@ -1,3 +1,17 @@
+#  Copyright 2021-present, the Recognai S.L. team.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 import pytest
 from uuid import UUID, uuid4
 from argilla_server.constants import API_KEY_HEADER_NAME
@@ -8,6 +22,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import UserFactory
+
 
 @pytest.mark.asyncio
 class TestUpdateUser:
@@ -88,7 +103,9 @@ class TestUpdateUser:
         assert response.status_code == 404
         assert response.json() == {"detail": f"User with id `{user_id}` not found"}
 
-    async def test_update_user_with_invalid_data(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_update_user_with_invalid_data(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
         user = await UserFactory.create()
 
         response = await async_client.put(
@@ -104,7 +121,9 @@ class TestUpdateUser:
 
         assert response.status_code == 422
 
-    async def test_update_user_with_duplicate_username(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_update_user_with_duplicate_username(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
         user1 = await UserFactory.create(username="user1")
         user2 = await UserFactory.create(username="user2")
 
