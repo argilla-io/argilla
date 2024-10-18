@@ -171,6 +171,50 @@ class TestHubDataset:
         assert record.suggestions[0].value == "neg"
         assert record.suggestions[0].question_id == question.id
 
+    async def test_hub_dataset_import_to_with_sequence_class_label_suggestions(
+        self, db: AsyncSession, mock_search_engine: SearchEngine
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text", required=True, dataset=dataset)
+
+        question = await QuestionFactory.create(
+            name="labels",
+            required=True,
+            settings={
+                "type": QuestionType.multi_label_selection,
+                "options": [
+                    {"value": "neutral", "text": "Neutral"},
+                    {"value": "admiration", "text": "Admiration"},
+                    {"value": "confusion", "text": "Confusion"},
+                ],
+            },
+            dataset=dataset,
+        )
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset = HubDataset(
+            name="google-research-datasets/go_emotions",
+            subset="simplified",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="text", target="text"),
+                ],
+                suggestions=[
+                    HubDatasetMappingItem(source="labels", target="labels"),
+                ],
+            ),
+        )
+
+        await hub_dataset.take(1).import_to(db, mock_search_engine, dataset)
+
+        record = (await db.execute(select(Record))).scalar_one()
+        assert record.suggestions[0].value == ["neutral"]
+
     async def test_hub_dataset_import_to_with_class_label_fields(
         self, db: AsyncSession, mock_search_engine: SearchEngine
     ):
