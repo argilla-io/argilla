@@ -85,13 +85,17 @@ export class Subset {
   private tryToCreateQuestion(structure: Structure) {
     if (this.isASingleLabel(structure)) {
       this.questions.push(
-        new QuestionCreation(structure.name, false, {
-          type: "label_selection",
-          options: structure.options.map((o) => ({
-            text: o,
-            value: o,
-          })),
-        })
+        new QuestionCreation(
+          structure.name,
+          {
+            type: "label_selection",
+            options: structure.options.map((o) => ({
+              text: o,
+              value: o,
+            })),
+          },
+          structure.name
+        )
       );
 
       return true;
@@ -212,6 +216,6 @@ export class Subset {
       return;
     }
 
-    this.questions.push(new QuestionCreation(name, false, settings));
+    this.questions.push(new QuestionCreation(name, settings));
   }
 }
