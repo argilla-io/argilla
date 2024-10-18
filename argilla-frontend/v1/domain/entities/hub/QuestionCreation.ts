@@ -28,16 +28,15 @@ export class QuestionCreation {
   public settings: QuestionSetting;
   public title: string;
   public readonly id: string;
+  public required: boolean;
   constructor(
     public readonly name: string,
-    public required: boolean,
-    public column: string,
-    settings: QuestionPrototype
+    settings: QuestionPrototype,
+    public column: string = "no mapping"
   ) {
     this.settings = new QuestionSetting(settings);
     this.title = this.name;
     this.id = this.name;
-    this.column = column;
 
     this.initialize();
   }
