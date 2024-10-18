@@ -36,6 +36,8 @@ RESET_ROW_IDX = -1
 FEATURE_TYPE_IMAGE = "Image"
 FEATURE_TYPE_CLASS_LABEL = "ClassLabel"
 
+FEATURE_CLASS_LABEL_NO_LABEL = -1
+
 DATA_URL_DEFAULT_IMAGE_FORMAT = "png"
 DATA_URL_DEFAULT_IMAGE_MIMETYPE = "image/png"
 
@@ -99,7 +101,10 @@ class HubDataset:
             feature = self.features[feature_name]
 
             if feature._type == FEATURE_TYPE_CLASS_LABEL:
-                row[feature_name] = feature.int2str(value)
+                if value == FEATURE_CLASS_LABEL_NO_LABEL:
+                    row[feature_name] = None
+                else:
+                    row[feature_name] = feature.int2str(value)
             elif feature._type == FEATURE_TYPE_IMAGE and isinstance(value, Image.Image):
                 row[feature_name] = pil_image_to_data_url(value)
             else:
@@ -129,7 +134,7 @@ class HubDataset:
         for mapping_field in self.mapping.fields:
             value = row[mapping_field.source]
             field = dataset.field_by_name(mapping_field.target)
-            if not field:
+            if value is None or not field:
                 continue
 
             if field.is_text and value is not None:
@@ -144,7 +149,7 @@ class HubDataset:
         for mapping_metadata in self.mapping.metadata:
             value = row[mapping_metadata.source]
             metadata_property = dataset.metadata_property_by_name(mapping_metadata.target)
-            if not metadata_property:
+            if value is None or not metadata_property:
                 continue
 
             metadata[metadata_property.name] = value
@@ -156,7 +161,7 @@ class HubDataset:
         for mapping_suggestion in self.mapping.suggestions:
             value = row[mapping_suggestion.source]
             question = dataset.question_by_name(mapping_suggestion.target)
-            if not question:
+            if value is None or not question:
                 continue
 
             if question.is_text or question.is_label_selection:
