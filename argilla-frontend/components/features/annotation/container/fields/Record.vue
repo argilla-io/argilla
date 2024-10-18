@@ -11,7 +11,10 @@
         :datasetVectors="datasetVectors"
         :selectedRecords="selectedRecords"
         @on-select-record="onSelectedRecord"
-      />
+        ><template slot="intro">
+          <slot name="intro" />
+        </template>
+      </RecordFieldsHeader>
       <div class="record__content">
         <RecordFields
           :record="record"
@@ -48,7 +51,7 @@ export default {
   computed: {
     spanQuestionsAnswers() {
       return this.record?.questions
-        .filter((q) => q.isSpanType)
+        ?.filter((q) => q.isSpanType)
         .map((q) => ({
           id: q.id,
           answer: q.answer.values,
@@ -61,7 +64,7 @@ export default {
       handler() {
         if (
           this.record?.questions
-            .filter((q) => q.isSpanType)
+            ?.filter((q) => q.isSpanType)
             .some((q) => q.isAnswerModified)
         ) {
           this.onSelectedRecord(true);

@@ -19,6 +19,10 @@ export class Progress {
     };
   }
 
+  get hasAtLeastTenRecord() {
+    return this.total >= 10;
+  }
+
   get isCompleted() {
     if (!this.hasMetrics) return false;
     if (this.total === 0) return false;

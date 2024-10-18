@@ -1,6 +1,10 @@
-class Debounce {
+export class Debounce {
   private timer: NodeJS.Timeout;
-  constructor(private readonly milliSeconds: number) {}
+  private constructor(private readonly milliSeconds: number) {}
+
+  static from(milliSeconds: number) {
+    return new Debounce(milliSeconds);
+  }
 
   wait() {
     this.stop();
@@ -21,7 +25,7 @@ class Debounce {
 }
 
 export const useDebounce = (milliSeconds: number) => {
-  const debounce = new Debounce(milliSeconds);
+  const debounce = Debounce.from(milliSeconds);
 
   return debounce;
 };
