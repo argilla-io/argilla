@@ -185,9 +185,9 @@ class CRUDMixin:
 
     @classmethod
     async def delete_many(
-        cls, db: AsyncSession, where: List["BinaryExpression"], autocommit: bool = True
+        cls, db: AsyncSession, conditions: List["BinaryExpression"], autocommit: bool = True
     ) -> List[Self]:
-        delete_stmt = sql.delete(cls).where(*where).returning(cls)
+        delete_stmt = sql.delete(cls).where(*conditions).returning(cls)
         result = await db.execute(delete_stmt)
         if autocommit:
             await db.commit()

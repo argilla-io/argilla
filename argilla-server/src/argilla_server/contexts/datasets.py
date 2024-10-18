@@ -780,7 +780,7 @@ async def delete_records(
 ) -> None:
     records = await Record.delete_many(
         db=db,
-        where=[Record.id.in_(records_ids), Record.dataset_id == dataset.id],
+        conditions=[Record.id.in_(records_ids), Record.dataset_id == dataset.id],
         autocommit=True,
     )
 
@@ -980,7 +980,7 @@ async def delete_suggestions(
 
     await Suggestion.delete_many(
         db=db,
-        where=[Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id],
+        conditions=[Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id],
         autocommit=True,
     )
 
