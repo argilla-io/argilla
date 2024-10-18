@@ -6,7 +6,7 @@
     v-if="options.length"
   >
     <template slot="dropdown-header">
-      {{ value?.name ?? value ?? "Select workspace" }}
+      {{ value?.name ?? value ?? "Select" }}
       <svgicon name="chevron-down" height="8" />
     </template>
     <template slot="dropdown-content">
