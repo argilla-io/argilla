@@ -102,6 +102,8 @@ class HubDataset:
                     row[feature_name] = None
                 else:
                     row[feature_name] = feature.int2str(value)
+            elif isinstance(feature, features.Sequence) and isinstance(feature.feature, features.ClassLabel):
+                row[feature_name] = [feature.feature.int2str(v) for v in value]
             elif isinstance(feature, features.Image) and isinstance(value, Image.Image):
                 row[feature_name] = pil_image_to_data_url(value)
             else:
@@ -163,6 +165,9 @@ class HubDataset:
 
             if question.is_text or question.is_label_selection:
                 value = str(value)
+
+            if question.is_multi_label_selection:
+                value = [str(v) for v in value]
 
             if question.is_rating:
                 value = int(value)

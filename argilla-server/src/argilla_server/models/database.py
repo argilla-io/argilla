@@ -293,6 +293,10 @@ class Question(DatabaseModel):
         return self.settings.get("type") == QuestionType.label_selection
 
     @property
+    def is_multi_label_selection(self) -> bool:
+        return self.settings.get("type") == QuestionType.multi_label_selection
+
+    @property
     def is_rating(self) -> bool:
         return self.settings.get("type") == QuestionType.rating
 
