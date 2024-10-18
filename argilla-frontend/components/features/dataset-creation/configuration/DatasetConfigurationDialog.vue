@@ -34,8 +34,8 @@
           />
         </div>
         <p class="dataset-config-dialog__info">
-          The created dataset will include the first xK rows and further records
-          can be logged via the python SDK.
+          The created dataset will include the first 10K rows and further
+          records can be logged via the python SDK.
         </p>
         <BaseButton
           :disabled="!dataset.name"
@@ -122,12 +122,17 @@ export default {
   }
   &__info {
     font-weight: 400;
-    @include font-size(13px);
+    @include font-size(11px);
     color: var(--fg-tertiary);
     margin-bottom: 0;
   }
   &__button.button {
     justify-content: center;
+  }
+  .selector {
+    &.dropdown {
+      @include font-size(12px);
+    }
   }
 }
 .fade-enter-active,

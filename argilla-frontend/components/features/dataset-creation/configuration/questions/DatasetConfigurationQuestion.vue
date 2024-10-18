@@ -38,6 +38,7 @@
         @is-focused="$emit('is-focused', $event)"
       />
     </template>
+    <span class="separator"></span>
     <DatasetConfigurationColumnSelector
       class="config-card__type"
       :options="columns"
@@ -101,7 +102,6 @@ export default {
   &__required {
     display: flex;
     gap: $base-space;
-    margin-top: $base-space;
     @include font-size(12px);
     flex-flow: row-reverse;
     justify-content: flex-end;
@@ -110,6 +110,12 @@ export default {
       border-color: var(--bg-opacity-20);
       background: var(--bg-accent-grey-1);
     }
+  }
+  .separator {
+    width: 100%;
+    height: 1px;
+    background: var(--bg-opacity-6);
+    margin-top: calc($base-space / 2);
   }
 }
 </style>

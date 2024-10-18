@@ -9,7 +9,6 @@ import {
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
 
-import { JobRepository } from "../infrastructure/repositories/JobRepository";
 import { useAxiosExtension } from "@/v1/infrastructure/services/useAxiosExtension";
 
 import {
@@ -27,6 +26,7 @@ import {
   AuthRepository,
   UserRepository,
   HubRepository,
+  JobRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -221,8 +221,7 @@ export const loadDependencyContainer = (context: Context) => {
         WorkspaceRepository,
         QuestionRepository,
         FieldRepository,
-        MetadataRepository,
-        JobRepository
+        MetadataRepository
       )
       .build(),
 

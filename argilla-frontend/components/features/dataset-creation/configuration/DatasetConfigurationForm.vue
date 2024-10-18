@@ -144,7 +144,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: $base-space;
-  padding: $base-space $base-space * 2 $base-space * 2 $base-space * 2;
+  padding: $base-space * 2;
   height: 100%;
   max-width: 1000px;
   margin: 0 auto;
@@ -169,9 +169,9 @@ export default {
     &__header {
       display: flex;
       justify-content: space-between;
-      min-height: $base-space * 8;
+      min-height: $base-space * 7;
       align-items: center;
-      padding: $base-space * 2 $base-space * 2;
+      padding: $base-space * 2 $base-space * 2 $base-space $base-space * 2;
       font-weight: 500;
     }
     &__content {
@@ -194,10 +194,10 @@ export default {
   &__selector {
     &__intro {
       display: block;
-      padding: 2px;
-      background: hsl(41, 100%, 82%, 0.8);
-      @include font-size(10px);
-      @include line-height(14px);
+      padding: 4px;
+      background: var(--bg-congig-alert);
+      @include font-size(12px);
+      @include line-height(16px);
     }
   }
   &__subset {

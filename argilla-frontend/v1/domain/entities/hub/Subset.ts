@@ -156,11 +156,20 @@ export class Subset {
 
   public addQuestion(name: string, settings: QuestionPrototype) {
     const { type } = settings;
-    if (type === "label_selection" || type === "multi_label_selection") {
+    if (type === "label_selection") {
       settings.options = [
         { text: "positive", id: "1", value: "positive" },
         { text: "negative", id: "2", value: "negative" },
         { text: "neutral", id: "3", value: "neutral" },
+      ];
+    }
+
+    if (type === "multi_label_selection") {
+      settings.options = [
+        { text: "news", id: "1", value: "news" },
+        { text: "sports", id: "2", value: "sports" },
+        { text: "international", id: "3", value: "international" },
+        { text: "politics", id: "4", value: "politics" },
       ];
     }
 
@@ -183,9 +192,9 @@ export class Subset {
 
     if (type === "span") {
       settings.options = [
-        { text: "positive", id: "1", value: "positive" },
-        { text: "negative", id: "2", value: "negative" },
-        { text: "neutral", id: "3", value: "neutral" },
+        { text: "organisation", id: "1", value: "organisation" },
+        { text: "person", id: "2", value: "person" },
+        { text: "event", id: "3", value: "event" },
       ];
       settings.allow_overlapping = true;
       settings.field = "text";

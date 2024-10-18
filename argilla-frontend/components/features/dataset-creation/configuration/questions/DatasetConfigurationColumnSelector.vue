@@ -7,7 +7,7 @@
   >
     <template slot="dropdown-header">
       <svgicon name="assign" height="12" />
-      Link to column
+      Map to column
       <span v-if="!noMapping" class="column-selector__chip" v-text="value" />
     </template>
     <template slot="dropdown-content">
