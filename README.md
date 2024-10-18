@@ -18,9 +18,6 @@
 <a href="https://huggingface.co/new-space?template=argilla/argilla-template-space">
 <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-sm.svg"/>
 </a>
-<a href="https://gurubase.io/g/argilla">
-<img src="https://img.shields.io/badge/Gurubase-Ask%20Argilla%20Guru-006BFF"/>
-</a>
 </p>
 
 <p align="center">
