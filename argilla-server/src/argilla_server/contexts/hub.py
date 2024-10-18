@@ -19,8 +19,7 @@ from typing import Union
 from typing_extensions import Self
 
 from PIL import Image
-from datasets import load_dataset
-from datasets import features
+from datasets import load_dataset, features
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models.database import Dataset
