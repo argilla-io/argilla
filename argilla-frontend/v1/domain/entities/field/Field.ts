@@ -37,7 +37,7 @@ export class Field {
           ];
     } else if (this.isImageType) {
       const content = record?.fields[name] ?? "";
-      this.content = content.hasOwnProperty("src") ? content.src : content;
+      this.content = Object.hasOwn(content, "src") ? content.src : content;
     } else {
       this.content = record?.fields[name] ?? "";
     }
