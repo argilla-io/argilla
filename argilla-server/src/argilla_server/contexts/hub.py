@@ -167,7 +167,10 @@ class HubDataset:
                 value = str(value)
 
             if question.is_multi_label_selection:
-                value = [str(v) for v in value]
+                if isinstance(value, list):
+                    value = [str(v) for v in value]
+                else:
+                    value = [str(value)]
 
             if question.is_rating:
                 value = int(value)
