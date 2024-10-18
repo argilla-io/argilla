@@ -169,9 +169,9 @@ export default {
     &__header {
       display: flex;
       justify-content: space-between;
-      min-height: $base-space * 6;
+      min-height: $base-space * 7;
       align-items: center;
-      padding: $base-space $base-space * 2;
+      padding: $base-space * 2 $base-space * 2 $base-space $base-space * 2;
       font-weight: 500;
     }
     &__content {
