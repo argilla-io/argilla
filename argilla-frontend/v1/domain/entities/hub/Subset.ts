@@ -85,7 +85,7 @@ export class Subset {
   private tryToCreateQuestion(structure: Structure) {
     if (this.isASingleLabel(structure)) {
       this.questions.push(
-        new QuestionCreation(structure.name, false, {
+        new QuestionCreation(structure.name, false, structure.name, {
           type: "label_selection",
           options: structure.options.map((o) => ({
             text: o,
@@ -212,6 +212,8 @@ export class Subset {
       return;
     }
 
-    this.questions.push(new QuestionCreation(name, false, settings));
+    this.questions.push(
+      new QuestionCreation(name, false, "no mapping", settings)
+    );
   }
 }

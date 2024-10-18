@@ -40,6 +40,7 @@
     </template>
     <span class="separator"></span>
     <DatasetConfigurationColumnSelector
+      v-if="!hiddenColumnSelector"
       class="config-card__type"
       :options="columns"
       v-model="question.column"
@@ -82,6 +83,12 @@ export default {
   computed: {
     noMapping() {
       return this.question.column === "no mapping";
+    },
+    hiddenColumnSelector() {
+      return (
+        this.question.settings.type.isRankingType ||
+        this.question.settings.type.isSpanType
+      );
     },
   },
   methods: {
