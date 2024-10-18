@@ -42,7 +42,7 @@ We are an open-source community-driven project not only focused on building a gr
 
     [:octicons-arrow-right-24: Roadmap ↗](https://github.com/orgs/argilla-io/projects/10/views/1)
 
-    __Gurubase__
+-   __Gurubase__
 
     ---
 
