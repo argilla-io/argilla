@@ -36,11 +36,10 @@ RESET_ROW_IDX = -1
 FEATURE_TYPE_IMAGE = "Image"
 FEATURE_TYPE_CLASS_LABEL = "ClassLabel"
 
-DATA_URL_DEFAULT_IMAGE_FORMAT = "png"
-DATA_URL_DEFAULT_IMAGE_MIMETYPE = "image/png"
-
 FEATURE_CLASS_LABEL_NO_LABEL = -1
 
+DATA_URL_DEFAULT_IMAGE_FORMAT = "png"
+DATA_URL_DEFAULT_IMAGE_MIMETYPE = "image/png"
 
 class HubDataset:
     def __init__(self, name: str, subset: str, split: str, mapping: HubDatasetMapping):
