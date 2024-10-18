@@ -32,7 +32,6 @@ export default {
     },
     leftPercentWidth: {
       type: Number,
-      default: 50,
     },
   },
   data() {

@@ -25,12 +25,16 @@
             v-model="dataset.workspace"
           />
         </div>
-        <div class="dataset-config-dialog__row" v-if="dataset.splits">
+
+        <div
+          class="dataset-config-dialog__row"
+          v-if="dataset.selectedSubset.splits?.length > 1"
+        >
           <label class="dataset-config-dialog__label">Select a split</label>
           <DatasetConfigurationSelector
             class="config-form__selector"
-            :options="dataset.splits"
-            v-model="dataset.selectedSplit.value"
+            :options="dataset.selectedSubset.splits"
+            v-model="dataset.selectedSplit"
           />
         </div>
         <p class="dataset-config-dialog__info">
@@ -38,7 +42,7 @@
           records can be logged via the python SDK.
         </p>
         <BaseButton
-          :disabled="!dataset.name"
+          :disabled="!dataset.name || !dataset.workspace"
           :loading="isLoading"
           type="submit"
           class="dataset-config-dialog__button primary full"

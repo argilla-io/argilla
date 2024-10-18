@@ -51,7 +51,6 @@ export default {
     },
     topPercentHeight: {
       type: Number,
-      default: 50,
     },
   },
   data() {

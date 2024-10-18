@@ -48,7 +48,7 @@ export default {
   }),
   methods: {
     loadDatasetFromHF() {
-      this.$emit("load-dataset-from-hf", this.repositoryId);
+      this.$emit("load-dataset-from-hf", this.repositoryId.trim());
     },
   },
 };
