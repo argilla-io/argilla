@@ -26,6 +26,7 @@ from argilla_server.errors.future import NotUniqueError, UnprocessableEntityErro
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.userinfo import UserInfo
+from argilla_server.api.schemas.v1.users import UserUpdate
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -156,6 +157,9 @@ async def create_user_with_random_password(
 
     return await create_user(db, user_attrs, workspaces)
 
+async def update_user(db: AsyncSession, user: User, user_update:UserUpdate) -> User:
+    params = user_update.dict(exclude_unset=True)
+    return await user.update(db, **params)
 
 async def delete_user(db: AsyncSession, user: User) -> User:
     return await user.delete(db)

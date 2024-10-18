@@ -18,6 +18,7 @@ These are the section headers that we use:
 
 ### Changed
 
+- User parameters can now be updated using the client ([#5614](https://github.com/argilla-io/argilla/issues/5614))
 - Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
 
 ## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0)

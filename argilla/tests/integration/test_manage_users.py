@@ -46,3 +46,30 @@ class TestManageUsers:
 
         user.add_to_workspace(workspace)
         assert user in workspace.users
+
+    def test_update_user(self, client: Argilla):
+        user = User(username=f"test_update_user_{uuid.uuid4()}", password="test_password")
+        client.users.add(user)
+
+        updated_username = f"updated_user_{uuid.uuid4()}"
+        user.username = updated_username
+        user.first_name = "Updated First Name"
+        user.last_name = "Updated Last Name"
+        user.role = "admin"
+        client.users.update(user)
+
+        updated_user = client.users(id=user.id)
+        assert updated_user.username == updated_username
+        assert updated_user.first_name == "Updated First Name"
+        assert updated_user.last_name == "Updated Last Name"
+        assert updated_user.role == "admin"
+
+    def test_update_user_with_duplicate_username(self, client: Argilla):
+        user1 = User(username=f"test_user1_{uuid.uuid4()}", password="test_password")
+        user2 = User(username=f"test_user2_{uuid.uuid4()}", password="test_password")
+        client.users.add(user1)
+        client.users.add(user2)
+
+        user2.username = user1.username
+        with pytest.raises(expected_exception=UnprocessableEntityError):
+            client.users.update(user2)

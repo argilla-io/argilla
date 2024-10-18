@@ -17,7 +17,7 @@ These are the section headers that we use:
 ## [Unreleased]()
 
 ### Changed
-
+- API endpoint added to the User router to allow updates to User objects ([#5614](https://github.com/argilla-io/argilla/issues/5614))
 - Changed supported values for terms metadata options to accept other than strings values. ([#5589](https://github.com/argilla-io/argilla/pull/5589))
 
 ### Removed
