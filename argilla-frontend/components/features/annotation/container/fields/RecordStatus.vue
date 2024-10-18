@@ -1,5 +1,6 @@
 <template>
   <span
+    v-if="record.status"
     :key="record.status"
     :class="['status-tag', getStatusInfo.class]"
     :title="getStatusInfo.name"

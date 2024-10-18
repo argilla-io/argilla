@@ -255,6 +255,23 @@ export default {
       team: "Team progress",
     },
   },
+  config: {
+    field: {
+      text: "Text field",
+      chat: "Chat field",
+      image: "Image field",
+      "no mapping": "No mapping",
+    },
+    question: {
+      text: "Text",
+      rating: "Rating",
+      label_selection: "Label",
+      ranking: "Ranking",
+      multi_label_selection: "Multi-label",
+      span: "Span",
+      "no mapping": "No mapping",
+    },
+  },
   persistentStorage: {
     adminOrOwner:
       "Persistent storage is not enabled. All data will be lost if this space restarts. Go to the space settings to enable it.",

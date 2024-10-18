@@ -9,6 +9,7 @@
         <HorizontalResizable
           :id="`${recordCriteria.datasetId}-r-h-rz`"
           class="wrapper__left"
+          collapsable
         >
           <template #up>
             <section class="wrapper__records">
@@ -119,6 +120,7 @@
         <HorizontalResizable
           :id="`${recordCriteria.datasetId}-q-h-rz}`"
           class="wrapper__right"
+          collapsable
         >
           <template #up>
             <QuestionsForm
@@ -445,7 +447,7 @@ export default {
   }
   &__left {
     @include media("<desktop") {
-      :deep(.resizable__down) {
+      :deep(.resizable-h__down) {
         display: none;
       }
     }
