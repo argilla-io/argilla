@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rich import print
-
 import logging
+
+from rich import print
 
 LOG_LEVEL_MAP = {
     "debug": logging.DEBUG,
@@ -56,7 +56,8 @@ class LoggingMixin:
         else:
             log_message(level=level, message=message)
 
-    def _is_interactive(self) -> bool:
+    @staticmethod
+    def _is_interactive() -> bool:
         import __main__ as main
 
         return not hasattr(main, "__file__")

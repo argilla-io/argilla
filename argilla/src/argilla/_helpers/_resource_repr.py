@@ -14,6 +14,8 @@
 
 from typing import Any, Dict
 
+from huggingface_hub.utils import is_google_colab, is_notebook
+
 RESOURCE_REPR_CONFIG = {
     "Dataset": {
         "columns": ["name", "id", "workspace_id", "updated_at"],
@@ -67,3 +69,16 @@ class ResourceHTMLReprMixin:
 
         html_table += "</table>"
         return html_table
+
+
+class NotebookHTMLReprMixin:
+    def __repr__(self) -> str:
+        """Display the Argilla space in a notebook or Google Colab."""
+
+        if is_notebook() or is_google_colab():
+            from IPython.display import IFrame, display
+
+            display(IFrame(src=self.api_url, frameborder=0, width=850, height=600))
+            return f"Argilla has been deployed at: {self.api_url}"
+        else:
+            return super().__repr__()

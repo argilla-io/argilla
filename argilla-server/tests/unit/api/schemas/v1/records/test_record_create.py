@@ -46,6 +46,30 @@ class TestRecordCreate:
         record_create = RecordCreate(fields={"field": {"key": "value"}})
         assert record_create.fields == {"field": {"key": "value"}}
 
+    def test_record_create_with_chat_field_object(self):
+        record_create = RecordCreate(
+            fields={
+                "field": [
+                    ChatFieldValue(role="user", content="Hello, how are you?"),
+                    ChatFieldValue(role="bot", content="I'm fine, thank you."),
+                ]
+            }
+        )
+
+        assert record_create.fields == {
+            "field": [
+                ChatFieldValue(role="user", content="Hello, how are you?"),
+                ChatFieldValue(role="bot", content="I'm fine, thank you."),
+            ]
+        }
+
+        assert record_create.fields == {
+            "field": [
+                ChatFieldValue(role="user", content="Hello, how are you?"),
+                ChatFieldValue(role="bot", content="I'm fine, thank you."),
+            ]
+        }
+
     def test_record_create_with_chat_field(self):
         record_create = RecordCreate(
             fields={

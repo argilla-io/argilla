@@ -107,7 +107,9 @@ class RecordCreate(BaseModel):
         for key, value in fields.items():
             if isinstance(value, list):
                 try:
-                    fields[key] = [ChatFieldValue(**item) for item in value]
+                    fields[key] = [
+                        item if isinstance(item, ChatFieldValue) else ChatFieldValue(**item) for item in value
+                    ]
                 except ValidationError as e:
                     raise ValueError(f"Error parsing chat field '{key}': {e.errors()}")
 

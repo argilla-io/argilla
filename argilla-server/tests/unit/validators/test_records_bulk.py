@@ -92,6 +92,6 @@ class TestRecordsBulkValidators:
 
         with pytest.raises(
             UnprocessableEntityError,
-            match="record at position 1 is not valid because",
+            match="Record at position 1 is not valid because",
         ):
             await RecordsBulkCreateValidator.validate(db, records_create, dataset)

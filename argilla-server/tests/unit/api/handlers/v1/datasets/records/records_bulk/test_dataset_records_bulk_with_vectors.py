@@ -232,8 +232,8 @@ class TestDatasetRecordsBulkWithVectors:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": f"Record at position 0 does not have valid vectors because vector with name=wrong_name "
-            f"does not exist for dataset_id={dataset.id}"
+            "detail": "Record at position 0 is not valid because record does not have valid vectors: "
+            f"vector with name=wrong_name does not exist for dataset_id={dataset.id}"
         }
 
     async def test_create_record_with_wrong_vector_value_in_bulk(
@@ -260,7 +260,7 @@ class TestDatasetRecordsBulkWithVectors:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": f"Record at position 0 does not have valid vectors because vector value for "
+            "detail": f"Record at position 0 is not valid because record does not have valid vectors: vector value for "
             f"vector name={vector_settings.name} must have 10 elements, got 5 elements"
         }
 
@@ -290,7 +290,7 @@ class TestDatasetRecordsBulkWithVectors:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": f"Record at position 0 does not have valid vectors because vector with name={other_vector_settings.name} "
+            "detail": f"Record at position 0 is not valid because record does not have valid vectors: vector with name={other_vector_settings.name} "
             f"does not exist for dataset_id={dataset.id}"
         }
 
@@ -319,7 +319,7 @@ class TestDatasetRecordsBulkWithVectors:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": "Record at position 0 does not have valid vectors because vector value for "
+            "detail": f"Record at position 0 is not valid because record does not have valid vectors: vector value for "
             f"vector name={vector_settings.name} must have 10 elements, got 5 elements"
         }
 

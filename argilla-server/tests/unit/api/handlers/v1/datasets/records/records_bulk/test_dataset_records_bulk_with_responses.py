@@ -317,7 +317,7 @@ class TestDatasetRecordsBulkWithResponses:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": "Record at position 0 does not have valid responses because "
+            "detail": "Record at position 0 is not valid because record does not have valid responses: "
             "found response value for non configured question with name='other-question'"
         }
 
@@ -348,8 +348,8 @@ class TestDatasetRecordsBulkWithResponses:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": "Record at position 0 does not have valid responses because 'wrong-label' "
-            "is not a valid label for label selection question.\n"
+            "detail": "Record at position 0 is not valid because record does not have valid responses: "
+            "'wrong-label' is not a valid label for label selection question.\n"
             "Valid labels are: ['label-a', 'label-b']"
         }
 
