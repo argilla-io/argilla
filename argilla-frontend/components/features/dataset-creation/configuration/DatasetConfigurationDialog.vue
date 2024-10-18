@@ -38,7 +38,7 @@
           records can be logged via the python SDK.
         </p>
         <BaseButton
-          :disabled="!dataset.name"
+          :disabled="!dataset.name || !dataset.workspace"
           :loading="isLoading"
           type="submit"
           class="dataset-config-dialog__button primary full"
