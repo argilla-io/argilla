@@ -37,7 +37,13 @@
                 )"
                 :key="field.name"
                 :field="field"
-                :available-types="availableFieldTypes"
+                :available-types="
+                  availableFieldTypes.filter(
+                    (a) =>
+                      a.value === 'no mapping' ||
+                      a.value === field.originalType.value
+                  )
+                "
                 @is-focused="isFocused = $event"
               />
             </draggable>

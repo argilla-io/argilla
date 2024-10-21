@@ -143,7 +143,11 @@ export class Subset {
 
   private createNoMappedFields(structure: Structure) {
     this.fields.push(
-      FieldCreation.from(structure.name, "no mapping", structure.type)
+      FieldCreation.from(
+        structure.name,
+        "no mapping",
+        structure.type ?? structure.kindObject
+      )
     );
   }
 

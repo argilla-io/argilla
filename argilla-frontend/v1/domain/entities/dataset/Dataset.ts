@@ -5,6 +5,18 @@ interface DatasetDistribution {
   minSubmitted: number;
 }
 
+interface DatasetMetadata {
+  repoId: string;
+  subset: string;
+  split: string;
+  mapping: {
+    fields: { source: string; target: string }[];
+    metadata: { source: string; target: string }[];
+    suggestions: { source: string; target: string }[];
+    external_id?: string;
+  };
+}
+
 interface OriginalDataset {
   guidelines: string;
   allowExtraMetadata: boolean;
@@ -24,6 +36,7 @@ export class Dataset {
     public readonly workspaceName: string,
     public allowExtraMetadata: boolean,
     public distribution: DatasetDistribution,
+    public readonly metadata: DatasetMetadata,
     public readonly createdAt: string,
     public updatedAt: string,
     public readonly lastActivityAt: string
@@ -125,6 +138,39 @@ export class Dataset {
 
   get isValidDistribution() {
     return this.validate().distribution.length === 0;
+  }
+
+  get createdFromUI() {
+    return !!this.metadata?.repoId;
+  }
+
+  createCodeSnippetFromHub() {
+    if (!this.createdFromUI) return;
+
+    const mappingArg = {};
+
+    for (const suggestion of this.metadata.mapping.suggestions) {
+      mappingArg[suggestion.source] = `${suggestion.target}.suggestion`;
+    }
+
+    const { repoId, subset, split } = this.metadata;
+
+    const snippet = `
+      import argilla as rg
+      from datasets import load_dataset
+      
+      client = rg.Argilla(...)
+      
+      ds = load_dataset("${repoId}", name="${subset}", split="${split}")
+      
+      dataset = client.datasets(name="${this.name}", workspace="${
+      this.workspaceName
+    }")
+      
+      dataset.records.log(ds, mapping=${JSON.stringify(mappingArg)})
+      `;
+
+    return snippet;
   }
 
   private initializeOriginal() {

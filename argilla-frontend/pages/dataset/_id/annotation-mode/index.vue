@@ -10,6 +10,10 @@
           :showSettingButton="true"
           :showCopyButton="true"
         />
+
+        <pre v-if="dataset?.createdFromUI">
+        {{ dataset.createCodeSnippetFromHub() }}
+        </pre>
       </template>
       <template v-slot:center>
         <PersistentStorageBanner />

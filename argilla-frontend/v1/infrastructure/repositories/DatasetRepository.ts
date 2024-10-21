@@ -111,6 +111,7 @@ export class DatasetRepository implements IDatasetRepository {
         strategy: dataset.distribution.strategy,
         minSubmitted: dataset.distribution.min_submitted,
       },
+      dataset.metadata,
       dataset.inserted_at,
       dataset.updated_at,
       dataset.last_activity_at
@@ -134,6 +135,7 @@ export class DatasetRepository implements IDatasetRepository {
             strategy: datasetFromBackend.distribution.strategy,
             minSubmitted: datasetFromBackend.distribution.min_submitted,
           },
+          datasetFromBackend.metadata,
           datasetFromBackend.inserted_at,
           datasetFromBackend.updated_at,
           datasetFromBackend.last_activity_at

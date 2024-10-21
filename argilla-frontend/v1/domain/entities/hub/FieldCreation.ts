@@ -16,16 +16,20 @@ export class FieldCreation {
   public title: string;
   public readonly settings: { type: FieldType };
 
+  public readonly originalType: FieldType;
+
   private constructor(
     public readonly name: string,
     type: string,
-    public readonly dtype: string
+    public readonly primitiveType: string
   ) {
     this.title = this.name;
 
     this.settings = {
       type: FieldType.from(type),
     };
+
+    this.originalType = FieldType.from(type);
   }
 
   get type(): FieldType {
@@ -59,10 +63,10 @@ export class FieldCreation {
   public static from(
     name: string,
     type: FieldCreationTypes,
-    dtype: string
+    primitiveType: string
   ): FieldCreation | null {
     if (availableFieldTypes.map((t) => t.value).includes(type)) {
-      return new FieldCreation(name, type, dtype);
+      return new FieldCreation(name, type, primitiveType);
     }
 
     return null;

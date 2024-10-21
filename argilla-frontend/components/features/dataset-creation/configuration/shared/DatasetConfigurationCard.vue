@@ -9,8 +9,8 @@
             name="draggable"
             color="var(--bg-opacity-20)"
           />{{ item.name }}
-          <span v-if="item.dtype" class="config-card__dtype">{{
-            item.dtype
+          <span v-if="item.primitiveType" class="config-card__primitive-type">{{
+            item.primitiveType
           }}</span>
         </h3>
         <slot name="header" />
@@ -107,10 +107,11 @@ $no-mapping-color: hsl(0, 0%, 50%);
     top: 19px;
     opacity: 0;
   }
-  &__dtype {
+  &__primitive-type {
     font-family: monospace, monospace;
     color: var(--fg-secondary);
     font-weight: 400;
+    text-transform: lowercase;
     @include font-size(10px);
   }
   &__row {
