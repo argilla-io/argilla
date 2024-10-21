@@ -9,11 +9,11 @@
           :breadcrumbs="breadcrumbs"
           :showSettingButton="true"
           :showCopyButton="true"
-        />
-
-        <pre v-if="dataset?.createdFromUI">
-        {{ dataset.createCodeSnippetFromHub() }}
-        </pre>
+        >
+          <template slot="dialog-cta" v-if="dataset?.createdFromUI">
+            <ImportData :snippet="dataset.createCodeSnippetFromHub()" />
+          </template>
+        </HeaderFeedbackTask>
       </template>
       <template v-slot:center>
         <PersistentStorageBanner />
