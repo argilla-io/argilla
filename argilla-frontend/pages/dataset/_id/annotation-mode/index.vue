@@ -10,7 +10,7 @@
           :showSettingButton="true"
           :showCopyButton="true"
         >
-          <template slot="dialog-cta" v-if="dataset?.createdFromUI">
+          <template slot="dialog-cta" v-if="dataset && dataset.createdFromUI">
             <ImportData
               :snippet="dataset.createCodeSnippetFromHub(getUser())"
             />
