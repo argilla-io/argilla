@@ -799,17 +799,16 @@ async def update_record(
         record.suggestions = []
         params["suggestions"] = suggestions
 
-    async with db.begin_nested():
-        record = await record.update(db, **params, replace_dict=True, autocommit=False)
+    record = await record.update(db, **params, replace_dict=True, autocommit=False)
 
-        if vectors:
-            await Vector.upsert_many(
-                db=db,
-                objects=vectors,
-                constraints=[Vector.record_id, Vector.vector_settings_id],
-                autocommit=False,
-            )
-            await db.refresh(record, attribute_names=["vectors"])
+    if vectors:
+        await Vector.upsert_many(
+            db=db,
+            objects=vectors,
+            constraints=[Vector.record_id, Vector.vector_settings_id],
+            autocommit=False,
+        )
+        await db.refresh(record, attribute_names=["vectors"])
 
     await db.commit()
 
