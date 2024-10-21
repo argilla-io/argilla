@@ -15,7 +15,7 @@
 import io
 import base64
 
-from typing import Union
+from typing import Union, Any
 from typing_extensions import Self
 
 from PIL import Image
@@ -94,20 +94,22 @@ class HubDataset:
             if not feature_name in self.mapping_feature_names:
                 continue
 
-            value = values[index]
-            feature = self.features[feature_name]
-
-            if isinstance(feature, features.ClassLabel):
-                if value == FEATURE_CLASS_LABEL_NO_LABEL:
-                    row[feature_name] = None
-                else:
-                    row[feature_name] = feature.int2str(value)
-            elif isinstance(feature, features.Image) and isinstance(value, Image.Image):
-                row[feature_name] = pil_image_to_data_url(value)
-            else:
-                row[feature_name] = value
+            row[feature_name] = self._cast_feature_value(self.features[feature_name], values[index])
 
         return row
+
+    def _cast_feature_value(self, feature: Any, value: Any) -> Any:
+        if isinstance(feature, features.ClassLabel):
+            if value == FEATURE_CLASS_LABEL_NO_LABEL:
+                return None
+            else:
+                return feature.int2str(value)
+        elif isinstance(feature, features.Sequence):
+            return [self._cast_feature_value(feature.feature, v) for v in value]
+        elif isinstance(feature, features.Image):
+            return pil_image_to_data_url(value)
+        else:
+            return value
 
     def _row_to_record_schema(self, row: dict, dataset: Dataset) -> RecordUpsertSchema:
         return RecordUpsertSchema(
@@ -163,6 +165,12 @@ class HubDataset:
 
             if question.is_text or question.is_label_selection:
                 value = str(value)
+
+            if question.is_multi_label_selection:
+                if isinstance(value, list):
+                    value = [str(v) for v in value]
+                else:
+                    value = [str(value)]
 
             if question.is_rating:
                 value = int(value)
