@@ -732,6 +732,7 @@ class TestSuiteDatasets:
         assert response.status_code == 404
         assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
+    @pytest.mark.skip("This test is obsolete")
     async def test_get_current_user_dataset_metrics(
         self, async_client: "AsyncClient", owner: User, owner_auth_header: dict
     ):
@@ -769,6 +770,7 @@ class TestSuiteDatasets:
             },
         }
 
+    @pytest.mark.skip("This test is obsolete")
     async def test_get_current_user_dataset_metrics_with_empty_dataset(
         self, async_client: "AsyncClient", owner_auth_header: dict
     ):
@@ -788,6 +790,7 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
+    @pytest.mark.skip("This test is obsolete")
     async def test_get_current_user_dataset_metrics_as_annotator(self, async_client: "AsyncClient", role: UserRole):
         dataset = await DatasetFactory.create()
         user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)

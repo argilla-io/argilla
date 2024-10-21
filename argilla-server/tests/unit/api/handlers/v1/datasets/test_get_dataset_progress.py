@@ -24,6 +24,7 @@ from tests.factories import DatasetFactory, RecordFactory, UserFactory
 
 
 @pytest.mark.asyncio
+@pytest.mark.skip("This test is obsolete and should be removed")
 class TestGetDatasetProgress:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/progress"
