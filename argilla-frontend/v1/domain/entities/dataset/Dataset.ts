@@ -1,3 +1,4 @@
+import { User } from "../user/User";
 import { Progress } from "./Progress";
 
 interface DatasetDistribution {
@@ -144,7 +145,7 @@ export class Dataset {
     return !!this.metadata?.repoId;
   }
 
-  createCodeSnippetFromHub() {
+  createCodeSnippetFromHub(user: User) {
     if (!this.createdFromUI) return;
 
     const mappingArg = {};
@@ -156,19 +157,23 @@ export class Dataset {
     const { repoId, subset, split } = this.metadata;
 
     const snippet = `
-      import argilla as rg
-      from datasets import load_dataset
+  \`\`\`python
+  import argilla as rg
+  from datasets import load_dataset
 
-      client = rg.Argilla(...)
+  client = rg.Argilla(
+    api_url="${window.location.origin}",
+    api_key="${user.apiKey}"
+  )
 
-      ds = load_dataset("${repoId}", name="${subset}", split="${split}")
+  ds = load_dataset("${repoId}", name="${subset}", split="${split}")
 
-      dataset = client.datasets(name="${this.name}", workspace="${
+  dataset = client.datasets(name="${this.name}", workspace="${
       this.workspaceName
     }")
 
-      dataset.records.log(ds, mapping=${JSON.stringify(mappingArg)})
-      `;
+  dataset.records.log(ds, mapping=${JSON.stringify(mappingArg)})
+  \`\`\``;
 
     return snippet;
   }

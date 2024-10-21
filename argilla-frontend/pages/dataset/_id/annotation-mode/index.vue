@@ -11,7 +11,9 @@
           :showCopyButton="true"
         >
           <template slot="dialog-cta" v-if="dataset?.createdFromUI">
-            <ImportData :snippet="dataset.createCodeSnippetFromHub()" />
+            <ImportData
+              :snippet="dataset.createCodeSnippetFromHub(getUser())"
+            />
           </template>
         </HeaderFeedbackTask>
       </template>

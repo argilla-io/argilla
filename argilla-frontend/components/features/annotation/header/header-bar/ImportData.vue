@@ -12,22 +12,9 @@
         v-click-outside="closeDialog"
       >
         <p class="import-data__title">Add records to your dataset</p>
-        <code class="import-data__code">
-          <pre v-text="snippet" />
-          <base-action-tooltip
-            class="import-data__copy"
-            :tooltip="$t('copied')"
-          >
-            <a href="#" @click.prevent="copy(snippet)">
-              <svgicon
-                color="var(--fg-secondary)"
-                name="copy"
-                width="16"
-                height="16"
-              />
-            </a>
-          </base-action-tooltip>
-        </code>
+        <div class="import-data__code">
+          <MarkdownRenderer :markdown="snippet" />
+        </div>
       </dialog>
     </transition>
   </div>
@@ -83,16 +70,9 @@ export default {
   &__code {
     position: relative;
     display: block;
-    padding: $base-space * 2;
-    background: var(--bg-opacity-4);
     border-radius: $border-radius-m;
     white-space: pre-wrap;
-    max-width: 70vw;
-    pre {
-      margin: 0;
-      overflow: auto;
-      white-space: pre-wrap;
-    }
+    min-width: 50vw;
   }
   &__copy {
     position: absolute;
