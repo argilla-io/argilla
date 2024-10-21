@@ -158,15 +158,15 @@ export class Dataset {
     const snippet = `
       import argilla as rg
       from datasets import load_dataset
-      
+
       client = rg.Argilla(...)
-      
+
       ds = load_dataset("${repoId}", name="${subset}", split="${split}")
-      
+
       dataset = client.datasets(name="${this.name}", workspace="${
       this.workspaceName
     }")
-      
+
       dataset.records.log(ds, mapping=${JSON.stringify(mappingArg)})
       `;
 
