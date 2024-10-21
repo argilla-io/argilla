@@ -12,12 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import asyncio
 import copy
 from collections import defaultdict
-
-import sqlalchemy
-
 from datetime import datetime
 from typing import (
     TYPE_CHECKING,
@@ -64,7 +60,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
-from argilla_server.enums import DatasetStatus, UserRole, RecordStatus
+from argilla_server.enums import DatasetStatus, UserRole
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
 from argilla_server.jobs import dataset_jobs
 from argilla_server.models import (
@@ -74,7 +70,6 @@ from argilla_server.models import (
     Question,
     Record,
     Response,
-    ResponseStatus,
     Suggestion,
     User,
     Vector,
@@ -379,89 +374,12 @@ async def _configure_query_relationships(
     return query
 
 
-async def get_user_dataset_metrics(db: AsyncSession, user_id: UUID, dataset_id: UUID) -> dict:
-    responses_submitted, responses_discarded, responses_draft, responses_pending = await asyncio.gather(
-        db.execute(
-            select(func.count(Response.id))
-            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-            .filter(
-                Response.user_id == user_id,
-                Response.status == ResponseStatus.submitted,
-            ),
-        ),
-        db.execute(
-            select(func.count(Response.id))
-            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-            .filter(
-                Response.user_id == user_id,
-                Response.status == ResponseStatus.discarded,
-            ),
-        ),
-        db.execute(
-            select(func.count(Response.id))
-            .join(Record, and_(Record.id == Response.record_id, Record.dataset_id == dataset_id))
-            .filter(
-                Response.user_id == user_id,
-                Response.status == ResponseStatus.draft,
-            ),
-        ),
-        db.execute(
-            select(func.count(Record.id))
-            .outerjoin(Response, and_(Response.record_id == Record.id, Response.user_id == user_id))
-            .filter(
-                Record.dataset_id == dataset_id,
-                Record.status == RecordStatus.pending,
-                Response.id == None,  # noqa
-            ),
-        ),
-    )
-
-    responses_submitted = responses_submitted.scalar_one()
-    responses_discarded = responses_discarded.scalar_one()
-    responses_draft = responses_draft.scalar_one()
-    responses_pending = responses_pending.scalar_one()
-    responses_total = responses_submitted + responses_discarded + responses_draft + responses_pending
-
-    return {
-        "responses": {
-            "total": responses_total,
-            "submitted": responses_submitted,
-            "discarded": responses_discarded,
-            "draft": responses_draft,
-            "pending": responses_pending,
-        },
-    }
+async def get_user_dataset_metrics(search_engine: SearchEngine, user: User, dataset: Dataset) -> dict:
+    return await search_engine.get_dataset_user_progress(dataset, user)
 
 
-async def get_dataset_progress(db: AsyncSession, dataset_id: UUID) -> dict:
-    records_completed, records_pending = await asyncio.gather(
-        db.execute(
-            select(func.count(Record.id)).where(
-                and_(
-                    Record.dataset_id == dataset_id,
-                    Record.status == RecordStatus.completed,
-                )
-            ),
-        ),
-        db.execute(
-            select(func.count(Record.id)).where(
-                and_(
-                    Record.dataset_id == dataset_id,
-                    Record.status == RecordStatus.pending,
-                )
-            ),
-        ),
-    )
-
-    records_completed = records_completed.scalar_one()
-    records_pending = records_pending.scalar_one()
-    records_total = records_completed + records_pending
-
-    return {
-        "total": records_total,
-        "completed": records_completed,
-        "pending": records_pending,
-    }
+async def get_dataset_progress(search_engine: SearchEngine, dataset: Dataset) -> dict:
+    return await search_engine.get_dataset_progress(dataset)
 
 
 async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:
