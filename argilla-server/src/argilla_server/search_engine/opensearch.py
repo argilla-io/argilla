@@ -116,7 +116,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html
-        await self.client.update(index=index_name, id=id, body=body, refresh="wait_for")
+        await self.client.update(index=index_name, id=id, body=body, refresh=True)
 
     async def put_index_mapping_request(self, index: str, mappings: dict):
         await self.client.indices.put_mapping(index=index, body={"properties": mappings})
@@ -151,9 +151,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
 
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html
-        _, errors = await helpers.async_bulk(
-            client=self.client, actions=actions, raise_on_error=False, refresh="wait_for"
-        )
+        _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False, refresh=True)
 
         for error in errors:
             self._LOGGER.error(f"Error in bulk operation: {error}")

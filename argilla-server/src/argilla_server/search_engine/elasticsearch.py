@@ -124,7 +124,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html
-        await self.client.update(index=index_name, id=id, **body, refresh="wait_for")
+        await self.client.update(index=index_name, id=id, **body, refresh=True)
 
     async def put_index_mapping_request(self, index: str, mappings: dict):
         await self.client.indices.put_mapping(index=index, properties=mappings)
@@ -158,7 +158,7 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
             client=self.client,
             actions=actions,
             raise_on_error=False,
-            refresh="wait_for",
+            refresh=True,
         )
 
         for error in errors:
