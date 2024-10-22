@@ -1,16 +1,22 @@
 import { useUser } from "~/v1/infrastructure/services/useUser";
+import { useRunningEnvironment } from "~/v1/infrastructure/services/useRunningEnvironment";
 export const useImportFromPython = () => {
+  const { isRunningOnHuggingFace } = useRunningEnvironment();
   const { getUser } = useUser();
 
   const user = getUser();
+
+  const HFHeader = isRunningOnHuggingFace()
+    ? `headers={"Authorization": f"Bearer {HF_TOKEN}"}`
+    : "";
 
   const snippet = `
 import argilla as rg
 
 client = rg.Argilla(
     api_url="${window.location.origin}",
-    api_key="${user.apiKey}", # with hidden info
-    # headers={"Authorization": f"Bearer {HF_TOKEN}"} # if 
+    api_key="${user.apiKey}",
+    ${HFHeader}
 )
 
 settings = rg.Settings(
