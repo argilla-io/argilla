@@ -1,12 +1,15 @@
 <template>
   <div class="new-dataset">
-    <HeaderFeedbackTask :breadcrumbs="[{ link: {}, name: 'Home' }]" />
-    <DatasetCreation
-      v-if="!datasetConfig"
-      @load-dataset-from-hf="onLoadDatasetFromHF"
+    <HeaderFeedbackTask
+      :breadcrumbs="[
+        { link: '/', name: 'Home' },
+        { name: 'dataset' },
+        { name: 'new' },
+        { name: datasetConfig?.repoId },
+      ]"
     />
     <DatasetConfiguration
-      v-else
+      v-if="datasetConfig"
       :dataset="datasetConfig"
       @change-subset="changeSubset($event)"
     />
@@ -17,10 +20,8 @@
 import { useNewDatasetViewModel } from "./useNewDatasetViewModel";
 
 export default {
-  methods: {
-    onLoadDatasetFromHF(repoId) {
-      this.getNewDatasetByRepoId(repoId);
-    },
+  mounted() {
+    this.getNewDatasetByRepoIdFromUrl();
   },
   setup() {
     return useNewDatasetViewModel();

@@ -1,5 +1,5 @@
 import { useResolve } from "ts-injecty";
-import { ref } from "@nuxtjs/composition-api";
+import { ref, useRoute } from "@nuxtjs/composition-api";
 import { GetDatasetCreationUseCase } from "~/v1/domain/usecases/get-dataset-creation-use-case";
 
 export const useNewDatasetViewModel = () => {
@@ -7,7 +7,14 @@ export const useNewDatasetViewModel = () => {
   const getDatasetCreationUseCase = useResolve(GetDatasetCreationUseCase);
 
   const getNewDatasetByRepoId = async (repositoryId: string) => {
-    datasetConfig.value = await getDatasetCreationUseCase.execute(repositoryId);
+    datasetConfig.value = await getDatasetCreationUseCase.execute(
+      decodeURI(repositoryId)
+    );
+  };
+
+  const getNewDatasetByRepoIdFromUrl = async () => {
+    const repositoryId = useRoute().value.params.id;
+    await getNewDatasetByRepoId(decodeURI(repositoryId));
   };
 
   const changeSubset = (name: string) => {
@@ -16,6 +23,7 @@ export const useNewDatasetViewModel = () => {
 
   return {
     getNewDatasetByRepoId,
+    getNewDatasetByRepoIdFromUrl,
     changeSubset,
     datasetConfig,
   };

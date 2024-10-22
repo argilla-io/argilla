@@ -73,6 +73,7 @@ export default {
     width: auto;
   }
   &__table {
+    padding: 0 $base-space * 4;
     min-height: 0;
     overflow: auto;
   }
