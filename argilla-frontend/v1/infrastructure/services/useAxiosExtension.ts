@@ -5,7 +5,7 @@ type PublicAxiosConfig = {
 };
 
 export interface PublicNuxtAxiosInstance extends NuxtAxiosInstance {
-  makePublic: (config: PublicAxiosConfig) => NuxtAxiosInstance;
+  makePublic: (config?: PublicAxiosConfig) => NuxtAxiosInstance;
 }
 
 export const useAxiosExtension = (axiosInstanceFn: () => NuxtAxiosInstance) => {
