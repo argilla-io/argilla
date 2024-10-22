@@ -740,10 +740,11 @@ class TestSuiteDatasets:
         owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
+        records = await RecordFactory.create_batch(size=8, dataset=dataset)
 
         mock_search_engine.get_dataset_user_progress.return_value = {
-            "total": 10,
-            "submitted": 5,
+            "total": 6,
+            "submitted": 3,
             "discarded": 3,
         }
 
@@ -755,11 +756,11 @@ class TestSuiteDatasets:
         assert response.status_code == 200
         assert response.json() == {
             "responses": {
-                "total": 10,
-                "submitted": 5,
+                "total": len(records),
+                "submitted": 3,
                 "discarded": 3,
                 "draft": 0,
-                "pending": 0,
+                "pending": 2,
             },
         }
 
@@ -797,10 +798,12 @@ class TestSuiteDatasets:
         role: UserRole,
     ):
         dataset = await DatasetFactory.create()
+        records = await RecordFactory.create_batch(size=6, dataset=dataset)
+
         user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)
 
         mock_search_engine.get_dataset_user_progress.return_value = {
-            "total": 6,
+            "total": len(records),
             "submitted": 2,
             "discarded": 1,
             "draft": 1,

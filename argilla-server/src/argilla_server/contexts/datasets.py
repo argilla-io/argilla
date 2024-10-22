@@ -374,12 +374,39 @@ async def _configure_query_relationships(
     return query
 
 
-async def get_user_dataset_metrics(search_engine: SearchEngine, user: User, dataset: Dataset) -> dict:
-    return await search_engine.get_dataset_user_progress(dataset, user)
+async def get_user_dataset_metrics(
+    db: AsyncSession,
+    search_engine: SearchEngine,
+    user: User,
+    dataset: Dataset,
+) -> dict:
+    total_records = await Record.count_by(db, dataset_id=dataset.id)
+    result = await search_engine.get_dataset_user_progress(dataset, user)
+
+    submitted_responses = result.get("submitted", 0)
+    discarded_responses = result.get("discarded", 0)
+    draft_responses = result.get("draft", 0)
+    pending_responses = total_records - submitted_responses - discarded_responses - draft_responses
+
+    return {
+        "total": total_records,
+        "submitted": submitted_responses,
+        "discarded": discarded_responses,
+        "draft": draft_responses,
+        "pending": pending_responses,
+    }
 
 
-async def get_dataset_progress(search_engine: SearchEngine, dataset: Dataset) -> dict:
-    return await search_engine.get_dataset_progress(dataset)
+async def get_dataset_progress(
+    search_engine: SearchEngine,
+    dataset: Dataset,
+) -> dict:
+    result = await search_engine.get_dataset_progress(dataset)
+    return {
+        "total": result.get("total", 0),
+        "completed": result.get("completed", 0),
+        "pending": result.get("pending", 0),
+    }
 
 
 async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:

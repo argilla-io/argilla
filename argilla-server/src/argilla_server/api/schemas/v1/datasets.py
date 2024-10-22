@@ -71,11 +71,11 @@ DatasetDistributionUpdate = DatasetOverlapDistributionUpdate
 
 
 class ResponseMetrics(BaseModel):
-    total: int = 0
-    submitted: int = 0
-    discarded: int = 0
-    draft: int = 0
-    pending: int = 0
+    total: int
+    submitted: int
+    discarded: int
+    draft: int
+    pending: int
 
 
 class DatasetMetrics(BaseModel):
@@ -83,9 +83,9 @@ class DatasetMetrics(BaseModel):
 
 
 class DatasetProgress(BaseModel):
-    total: int = 0
-    completed: int = 0
-    pending: int = 0
+    total: int
+    completed: int
+    pending: int
 
 
 class RecordResponseDistribution(BaseModel):
