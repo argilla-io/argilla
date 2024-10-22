@@ -83,7 +83,7 @@ export default {
       const trimmedOptionsArray = optionsArray.map((text) => ({
         value: text.trim(),
         id: text.trim(),
-        text: text.trim(),
+        text: text,
       }));
       this.$emit("on-value-change", trimmedOptionsArray);
       if (this.isDirty) {
