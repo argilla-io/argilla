@@ -3,27 +3,97 @@ import {
   BackendDataset,
   BackendDatasetFeedbackTaskResponse,
   BackendDatasetWithWorkspace,
+  BackendJob,
   BackendProgress,
   BackendUpdateDataset,
 } from "../types/dataset";
 import { Response } from "../types";
 import { largeCache, revalidateCache } from "./AxiosCache";
-import { IDatasetRepository } from "@/v1/domain/services/IDatasetRepository";
+import {
+  DatasetId,
+  IDatasetRepository,
+  JobId,
+} from "@/v1/domain/services/IDatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
+import { DatasetCreation } from "~/v1/domain/entities/hub/DatasetCreation";
 
 export const DATASET_API_ERRORS = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
   ERROR_FETCHING_WORKSPACES: "ERROR_FETCHING_WORKSPACES",
   ERROR_FETCHING_DATASET_INFO: "ERROR_FETCHING_DATASET_INFO",
+  ERROR_CREATING_DATASET: "ERROR_CREATING_DATASET",
   ERROR_FETCHING_WORKSPACE_INFO: "ERROR_FETCHING_WORKSPACE_INFO",
   ERROR_PATCHING_DATASET_GUIDELINES: "ERROR_PATCHING_DATASET_GUIDELINES",
   ERROR_DELETING_DATASET: "ERROR_DELETING_DATASET",
   ERROR_FETCHING_DATASET_PROGRESS: "ERROR_FETCHING_DATASET_PROGRESS",
+  ERROR_PUBLISHING_DATASET: "ERROR_PUBLISHING_DATASET",
+  ERROR_IMPORTING_DATASET: "ERROR_IMPORTING_DATASET",
 };
 
 export class DatasetRepository implements IDatasetRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
+
+  async create(dataset: DatasetCreation): Promise<DatasetId> {
+    try {
+      const { data } = await this.axios.post<BackendDataset>("/v1/datasets", {
+        name: dataset.name,
+        workspace_id: dataset.workspace.id,
+
+        metadata: {
+          repoId: dataset.repoId,
+          subset: dataset.selectedSubset.name,
+          split: dataset.selectedSubset.selectedSplit.name,
+          mapping: dataset.mappings,
+        },
+      });
+
+      return data.id;
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_CREATING_DATASET,
+      };
+    }
+  }
+
+  async publish(datasetId: string): Promise<boolean> {
+    try {
+      const { data } = await this.axios.put(
+        `/v1/datasets/${datasetId}/publish`
+      );
+
+      revalidateCache(`/v1/datasets/${datasetId}`);
+
+      return data.id === datasetId;
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_PUBLISHING_DATASET,
+      };
+    }
+  }
+
+  async import(
+    datasetId: DatasetId,
+    creation: DatasetCreation
+  ): Promise<JobId> {
+    try {
+      const { data } = await this.axios.post<BackendJob>(
+        `/v1/datasets/${datasetId}/import`,
+        {
+          name: creation.repoId,
+          subset: creation.selectedSubset.name,
+          split: creation.selectedSubset.selectedSplit.name,
+          mapping: creation.mappings,
+        }
+      );
+
+      return data.id;
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_IMPORTING_DATASET,
+      };
+    }
+  }
 
   async getById(id: string): Promise<Dataset> {
     const dataset = await this.getDatasetById(id);
@@ -41,6 +111,7 @@ export class DatasetRepository implements IDatasetRepository {
         strategy: dataset.distribution.strategy,
         minSubmitted: dataset.distribution.min_submitted,
       },
+      dataset.metadata,
       dataset.inserted_at,
       dataset.updated_at,
       dataset.last_activity_at
@@ -64,6 +135,7 @@ export class DatasetRepository implements IDatasetRepository {
             strategy: datasetFromBackend.distribution.strategy,
             minSubmitted: datasetFromBackend.distribution.min_submitted,
           },
+          datasetFromBackend.metadata,
           datasetFromBackend.inserted_at,
           datasetFromBackend.updated_at,
           datasetFromBackend.last_activity_at
