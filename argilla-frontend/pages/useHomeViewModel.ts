@@ -9,10 +9,10 @@ import { useRole } from "~/v1/infrastructure/services/useRole";
 export const useHomeViewModel = () => {
   const { isAdminOrOwnerRole } = useRole();
   const isLoadingDatasets = ref(false);
+  const { goToImportDatasetFromHub } = useRoutes();
   const { state: datasets } = useDatasets();
   const getDatasetsUseCase = useResolve(GetDatasetsUseCase);
-
-  const { goToImportDatasetFromHub } = useRoutes();
+  const getDatasetCreationUseCase = useResolve(GetDatasetCreationUseCase);
 
   useFocusTab(async () => {
     await onLoadDatasets();
@@ -22,17 +22,10 @@ export const useHomeViewModel = () => {
     loadDatasets();
   });
 
-  const datasetConfig = ref();
-
-  const getDatasetCreationUseCase = useResolve(GetDatasetCreationUseCase);
-
   const getNewDatasetByRepoId = async (repositoryId: string) => {
-    try {
-      datasetConfig.value = await getDatasetCreationUseCase.execute(
-        repositoryId
-      );
-      goToImportDatasetFromHub(repositoryId);
-    } catch (error) {}
+    await getDatasetCreationUseCase.execute(repositoryId);
+
+    goToImportDatasetFromHub(repositoryId);
   };
 
   const exampleDatasets = [

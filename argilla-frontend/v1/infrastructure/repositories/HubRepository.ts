@@ -1,8 +1,14 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
+import { PublicNuxtAxiosInstance } from "../services";
 import { DatasetCreation } from "~/v1/domain/entities/hub/DatasetCreation";
 
 export class HubRepository {
-  constructor(private axios: NuxtAxiosInstance) {}
+  private axios: NuxtAxiosInstance;
+  constructor(axios: PublicNuxtAxiosInstance) {
+    this.axios = axios.makePublic({
+      enableErrors: false,
+    });
+  }
 
   async getDatasetCreation(repoId: string): Promise<any> {
     try {
