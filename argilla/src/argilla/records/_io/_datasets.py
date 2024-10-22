@@ -25,6 +25,7 @@ from argilla._helpers._media import pil_to_data_uri, uncast_image
 if TYPE_CHECKING:
     from argilla.records import Record
     from argilla.datasets import Dataset
+    from argilla.records._mapping import IngestedRecordMapper
 
 
 def _cast_images_as_urls(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
@@ -187,7 +188,9 @@ class HFDatasetsIO:
         return hf_dataset
 
     @staticmethod
-    def _record_dicts_from_datasets(hf_dataset: "HFDataset") -> List[Dict[str, Union[str, float, int, list]]]:
+    def _record_dicts_from_datasets(
+        hf_dataset: "HFDataset", mapper: "IngestedRecordMapper"
+    ) -> List[Dict[str, Union[str, float, int, list]]]:
         """Creates a dictionaries from an HF dataset that can be passed to DatasetRecords.add or DatasetRecords.update.
 
         Parameters:
@@ -196,7 +199,8 @@ class HFDatasetsIO:
         Returns:
             Generator[Dict[str, Union[str, float, int, list]], None, None]: A generator of dictionaries to be passed to DatasetRecords.add or DatasetRecords.update.
         """
-        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset)
+
+        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset, mapper=mapper)
 
         try:
             hf_dataset = hf_dataset.to_iterable_dataset()
@@ -227,7 +231,7 @@ class HFDatasetsIO:
         return hf_dataset
 
     @staticmethod
-    def to_argilla(hf_dataset: "HFDataset") -> "HFDataset":
+    def to_argilla(hf_dataset: "HFDataset", mapper: "IngestedRecordMapper") -> "HFDataset":
         """Check if the Hugging Face dataset contains image features.
 
         Parameters:
@@ -236,6 +240,19 @@ class HFDatasetsIO:
         Returns:
             bool: True if the Hugging Face dataset contains image features, False otherwise.
         """
+        id_column_name = mapper.mapping.id.source
+        if id_column_name not in hf_dataset.column_names:
+            split = hf_dataset.split
+            warnings.warn(
+                message="Record id column not found in Hugging Face dataset. "
+                "Using row index and split for record ids.",
+            )
+
+            hf_dataset = hf_dataset.map(
+                lambda row, idx: {id_column_name: f"{split}_{idx}"},
+                with_indices=True,
+            )
+
         casted_features = defaultdict(list)
 
         for name, feature in hf_dataset.features.items():
