@@ -38,7 +38,7 @@ def test_settings_default_database_url(monkeypatch):
 
     settings = Settings()
 
-    assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
+    assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db"
 
 
 @pytest.mark.parametrize(
