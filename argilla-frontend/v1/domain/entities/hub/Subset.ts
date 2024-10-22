@@ -8,8 +8,9 @@ type Structure = {
   name: string;
   options?: string[];
   structure?: Structure[];
-  kindObject?: "Value" | "Image" | "ClassLabel";
+  kindObject?: "Value" | "Image" | "ClassLabel" | "Sequence";
   type?: "string" | MetadataTypes;
+  feature?: Feature;
 };
 
 export class Subset {
@@ -43,6 +44,13 @@ export class Subset {
               type: value.dtype,
             };
           }),
+        });
+      } else if (value.feature) {
+        this.structures.push({
+          name,
+          feature: value.feature,
+          kindObject: value._type,
+          type: value.dtype,
         });
       } else {
         this.structures.push({
@@ -90,6 +98,24 @@ export class Subset {
           {
             type: "label_selection",
             options: structure.options.map((o) => ({
+              text: o,
+              value: o,
+            })),
+          },
+          structure.name
+        )
+      );
+
+      return true;
+    }
+
+    if (this.isAMultiLabel(structure)) {
+      this.questions.push(
+        new QuestionCreation(
+          structure.name,
+          {
+            type: "multi_label_selection",
+            options: structure.feature.names.map((o) => ({
               text: o,
               value: o,
             })),
@@ -153,6 +179,13 @@ export class Subset {
 
   private isASingleLabel(structure: Structure) {
     return structure.kindObject === "ClassLabel";
+  }
+
+  private isAMultiLabel(structure: Structure) {
+    return (
+      structure.kindObject === "Sequence" &&
+      structure.feature._type === "ClassLabel"
+    );
   }
 
   public removeQuestion(name: string) {

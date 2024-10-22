@@ -29,6 +29,7 @@ export class QuestionCreation {
   public title: string;
   public readonly id: string;
   public required: boolean;
+  public readonly originalColumn: string;
   constructor(
     public readonly name: string,
     settings: QuestionPrototype,
@@ -38,7 +39,13 @@ export class QuestionCreation {
     this.title = this.name;
     this.id = this.name;
 
+    this.originalColumn = column;
+
     this.initialize();
+  }
+
+  get wasAutoMapped(): boolean {
+    return this.originalColumn !== "no mapping";
   }
 
   get type() {

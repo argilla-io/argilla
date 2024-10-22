@@ -5,6 +5,7 @@ export interface Feature {
   dtype: "string" | "int32" | "int64";
   _type: "Value" | "Image" | "ClassLabel";
   names?: string[];
+  feature?: Feature;
 }
 
 export class DatasetCreationBuilder {
