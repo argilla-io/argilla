@@ -35,7 +35,7 @@ export const useDatasetViewModel = () => {
     return [
       { link: { name: "datasets" }, name: t("breadcrumbs.home") },
       {
-        link: { path: `/datasets?workspaces=${dataset.workspace}` },
+        link: { path: `/?workspaces=${dataset.workspace}` },
         name: dataset.workspace,
       },
       {
