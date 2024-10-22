@@ -10,7 +10,7 @@ import argilla as rg
 client = rg.Argilla(
     api_url="${window.location.origin}",
     api_key="${user.apiKey}", # with hidden info
-    # headers={"Authorization": f"Bearer {HF_TOKEN}"} # if 
+    # headers={"Authorization": f"Bearer {HF_TOKEN}"} # if
 )
 
 settings = rg.Settings(
