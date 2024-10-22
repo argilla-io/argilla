@@ -25,24 +25,42 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: auto;
+  @include media(">tablet") {
+    overflow: visible;
+  }
   &__container {
+    flex-direction: column;
     height: 100%;
     min-height: 0;
     display: flex;
+    @include media(">tablet") {
+      flex-direction: row;
+    }
   }
   &__page-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow: auto;
-    padding: $base-space * 4 $base-space * 4 0 $base-space * 4;
+    padding: $base-space * 4;
+    background: var(--bg-accent-grey-1);
+    @include media(">tablet") {
+      overflow: auto;
+      padding: $base-space * 4 $base-space * 4 0 $base-space * 4;
+    }
   }
   &__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space * 4;
     height: 100%;
-    width: 500px;
+    width: 100%;
     padding: $base-space * 4;
-    background: var(--bg-opacity-4);
+    background: var(--bg-accent-grey-3);
+    @include media(">tablet") {
+      width: clamp(300px, 500px, 33vw);
+    }
   }
 }
 </style>

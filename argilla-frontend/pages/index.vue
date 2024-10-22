@@ -39,15 +39,29 @@
       />
     </template>
     <template v-slot:page-sidebar>
-      <div class="home__sidebar__buttons">
-        <ImportFromHub
-          :is-expanded="showImportDatasetInput"
-          @on-expand="showImportDatasetInput = true"
-          @on-close="showImportDatasetInput = false"
-          @on-import-dataset="importDataset"
-        />
-        <ImportFromPython v-if="!showImportDatasetInput" />
-      </div>
+      <template v-if="isAdminOrOwnerRole">
+        <div class="home__sidebar__buttons">
+          <ImportFromHub
+            :is-expanded="showImportDatasetInput"
+            @on-expand="showImportDatasetInput = true"
+            @on-close="showImportDatasetInput = false"
+            @on-import-dataset="importDataset"
+          />
+          <ImportFromPython v-if="!showImportDatasetInput" />
+        </div>
+        <div class="home__sidebar__content">
+          <p class="home__sidebar__title">Don’t know where to start?</p>
+          <p class="home__sidebar__subtitle">Explore these example datasets</p>
+          <div class="home__sidebar__cards">
+            <ExampleDataset
+              v-for="dataset in exampleDatasets"
+              :key="dataset.repoId"
+              :dataset="dataset"
+              @on-import-dataset="importDataset"
+            />
+          </div>
+        </div>
+      </template>
     </template>
   </Home>
 </template>
@@ -114,9 +128,29 @@ export default {
     padding: 0;
   }
   &__sidebar {
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: $base-space;
+      overflow: auto;
+    }
     &__buttons {
       display: flex;
       gap: $base-space;
+      flex-wrap: wrap;
+    }
+    &__title {
+      margin: 0;
+      font-weight: 500;
+    }
+    &__subtitle {
+      margin: 0 0 $base-space * 3 0;
+      font-weight: 300;
+    }
+    &__cards {
+      display: flex;
+      flex-direction: column;
+      gap: $base-space * 2;
     }
   }
 }
