@@ -85,12 +85,7 @@ export default {
       return this.question.column === "no mapping";
     },
     showColumnSelector() {
-      if (this.question.wasAutoMapped) return true;
-
-      return (
-        this.question.settings.type.isRankingType &&
-        this.question.settings.type.isSpanType
-      );
+      return this.question.wasAutoMapped;
     },
   },
   methods: {
