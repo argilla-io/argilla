@@ -12,12 +12,21 @@
     >
     <transition name="fade" appear>
       <dialog class="import-from-python__dialog" v-if="visibleSnippet">
-        <p class="import-from-python__title">Import from Python</p>
         <div class="import-from-python__content">
-          <BaseInputContainer>
-            <BaseInput v-model="repositoryId" placeholder="Repository ID" />
-          </BaseInputContainer>
-          <BaseButton>Import</BaseButton>
+          <BaseActionTooltip
+            class="import-from-python__copy-button"
+            :tooltip="$t('copied')"
+          >
+            <a href="#" @click.prevent="copy(snippet)">
+              <svgicon
+                name="copy"
+                width="16"
+                height="16"
+                color="var(--color-white)"
+              />
+            </a>
+          </BaseActionTooltip>
+          <pre><code class="import-from-python__code" language="python" v-highlight>{{ snippet }}</code></pre>
         </div>
       </dialog>
     </transition>
@@ -25,6 +34,7 @@
 </template>
 
 <script>
+import { useImportFromPython } from "./useImportFromPython";
 import "assets/icons/code";
 export default {
   data() {
@@ -39,6 +49,12 @@ export default {
     closeDialog() {
       this.visibleSnippet = false;
     },
+    copy(snippet) {
+      this.$copyToClipboard(snippet);
+    },
+  },
+  setup() {
+    return useImportFromPython();
   },
 };
 </script>
@@ -50,20 +66,40 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
+  &__code {
+    border-radius: $border-radius-m;
+  }
+  &__copy-button {
+    position: absolute !important;
+    top: $base-space * 3;
+    right: $base-space * 3;
+  }
   &__dialog {
+    position: absolute;
+    right: -$base-space * 2;
+    top: calc(100% + $base-space);
+    left: auto;
+    width: 50vw;
+    min-width: 400px;
     display: flex;
     flex-direction: column;
     gap: $base-space;
+    background: var(--bg-accent-grey-1);
     padding: $base-space * 2;
-    background-color: var(--bg-accent-grey-2);
+    border: 1px solid var(--bg-opacity-10);
     border-radius: $border-radius-m;
-    &__title {
-      font-weight: 500;
-    }
+    box-shadow: $shadow;
+    z-index: 2;
     &__content {
       display: flex;
       flex-direction: column;
       gap: $base-space;
+    }
+    pre {
+      white-space: pre-wrap;
+      margin: 0;
+      overflow: auto;
+      max-height: 500px;
     }
   }
   &__button.button {

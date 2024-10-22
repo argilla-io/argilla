@@ -41,7 +41,6 @@ export default {
   &__sidebar {
     height: 100%;
     width: 500px;
-    overflow: auto;
     padding: $base-space * 4;
     background: var(--bg-opacity-4);
   }

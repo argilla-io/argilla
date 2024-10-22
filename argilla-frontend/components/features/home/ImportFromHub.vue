@@ -102,6 +102,6 @@ export default {
 }
 .slide-right-enter,
 .slide-right-leave-to {
-  transform: translateX(-50%);
+  transform: translateX(50%);
 }
 </style>

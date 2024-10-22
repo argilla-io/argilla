@@ -1,7 +1,6 @@
 import { useResolve } from "ts-injecty";
-import { ref } from "@nuxtjs/composition-api";
+import { ref, useRoute } from "@nuxtjs/composition-api";
 import { GetDatasetCreationUseCase } from "~/v1/domain/usecases/get-dataset-creation-use-case";
-import { useRoute } from "@nuxtjs/composition-api";
 
 export const useNewDatasetViewModel = () => {
   const datasetConfig = ref();
