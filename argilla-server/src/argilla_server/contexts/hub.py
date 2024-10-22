@@ -42,6 +42,7 @@ DATA_URL_DEFAULT_IMAGE_MIMETYPE = "image/png"
 class HubDataset:
     def __init__(self, name: str, subset: str, split: str, mapping: HubDatasetMapping):
         self.dataset = load_dataset(path=name, name=subset, split=split, streaming=True)
+        self.split = split
         self.mapping = mapping
         self.mapping_feature_names = mapping.sources
         self.row_idx = RESET_ROW_IDX
@@ -124,7 +125,7 @@ class HubDataset:
 
     def _row_external_id(self, row: dict) -> str:
         if not self.mapping.external_id:
-            return str(self._next_row_idx())
+            return f"{self.split}_{self._next_row_idx()}"
 
         return row[self.mapping.external_id]
 

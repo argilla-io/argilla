@@ -473,4 +473,63 @@ class TestHubDataset:
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
 
         records = (await db.execute(select(Record))).scalars().all()
-        assert [record.external_id for record in records] == ["0", "1", "2", "3", "4"]
+        assert [record.external_id for record in records] == ["train_0", "train_1", "train_2", "train_3", "train_4"]
+
+    async def test_hub_dataset_import_to_idempotency_without_external_id_and_multiple_splits(
+        self, db: AsyncSession, mock_search_engine: SearchEngine
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="package_name", required=True, dataset=dataset)
+
+        await dataset.awaitable_attrs.fields
+        await dataset.awaitable_attrs.questions
+        await dataset.awaitable_attrs.metadata_properties
+
+        hub_dataset_train = HubDataset(
+            name="lhoestq/demo1",
+            subset="default",
+            split="train",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="package_name", target="package_name"),
+                ],
+            ),
+        )
+
+        hub_dataset_test = HubDataset(
+            name="lhoestq/demo1",
+            subset="default",
+            split="test",
+            mapping=HubDatasetMapping(
+                fields=[
+                    HubDatasetMappingItem(source="package_name", target="package_name"),
+                ],
+            ),
+        )
+
+        await hub_dataset_train.import_to(db, mock_search_engine, dataset)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
+
+        await hub_dataset_train.import_to(db, mock_search_engine, dataset)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
+
+        await hub_dataset_test.import_to(db, mock_search_engine, dataset)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 10
+
+        await hub_dataset_test.import_to(db, mock_search_engine, dataset)
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 10
+
+        records = (await db.execute(select(Record))).scalars().all()
+        assert [record.external_id for record in records] == [
+            "train_0",
+            "train_1",
+            "train_2",
+            "train_3",
+            "train_4",
+            "test_0",
+            "test_1",
+            "test_2",
+            "test_3",
+            "test_4",
+        ]
