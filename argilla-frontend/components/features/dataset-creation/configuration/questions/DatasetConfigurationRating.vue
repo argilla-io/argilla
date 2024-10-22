@@ -2,7 +2,8 @@
   <div class="dataset-config-rating__input-container">
     <input
       type="number"
-      min="2"
+      min="0"
+      max="11"
       :value="value.length"
       @input="onInput($event.target.value)"
       @focus="$emit('is-focused', true)"
@@ -29,15 +30,10 @@ export default {
     prop: "value",
     event: "on-value-change",
   },
-  computed: {
-    namesJoinedByCommas() {
-      return this.value.map((item) => item.name).join(", ");
-    },
-  },
   methods: {
     onInput(inputValue) {
       const valuesArray = Array.from({ length: inputValue }, (_, i) => ({
-        value: i + 1,
+        value: i,
       }));
       this.$emit("on-value-change", valuesArray);
     },
