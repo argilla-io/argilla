@@ -7,9 +7,9 @@
           v-if="dataset.selectedSubset.fields.length"
         >
           <div class="config-form__col__header">
-            Fields
+            {{ $t("datasetCreation.fields") }}
             <div class="config-form__subset" v-if="dataset.subsets.length > 1">
-              Subset:
+              {{ $t("datasetCreation.subset") }}:
               <DatasetConfigurationSelector
                 class="config-form__selector"
                 :options="dataset.subsets"
@@ -17,9 +17,9 @@
                 @onValueChange="$emit('change-subset', $event)"
               >
                 <template slot="optionsIntro">
-                  <span class="config-form__selector__intro"
-                    >Your can create a dataset from only one subset.
-                  </span>
+                  <span class="config-form__selector__intro">{{
+                    $t("datasetCreation.selectSubset")
+                  }}</span>
                 </template>
               </DatasetConfigurationSelector>
             </div>
@@ -53,7 +53,7 @@
       <div class="config-form__col-wrapper">
         <div class="config-form__col">
           <div class="config-form__col__header">
-            Questions
+            {{ $t("datasetCreation.questions") }}
             <DatasetConfigurationAddQuestion
               :options="[
                 'text',
@@ -92,7 +92,7 @@
                 @click.prevent="
                   visibleDatasetCreationDialog = !visibleDatasetCreationDialog
                 "
-                >Create Dataset</BaseButton
+                >{{ $t("datasetCreation.button") }}</BaseButton
               >
               <DatasetConfigurationDialog
                 v-if="visibleDatasetCreationDialog"

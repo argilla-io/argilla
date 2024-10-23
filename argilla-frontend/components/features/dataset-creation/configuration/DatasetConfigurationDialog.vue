@@ -5,21 +5,27 @@
         class="dataset-config-dialog__content"
         @submit.prevent="createDataset"
       >
-        <h1 class="dataset-config-dialog__title">
-          Create the dataset in Argilla
-        </h1>
+        <h1
+          class="dataset-config-dialog__title"
+          v-text="$t('datasetCreation.createDataset')"
+        />
         <div class="dataset-config-dialog__row">
-          <label class="dataset-config-dialog__label" for="datasetName"
-            >Dataset name</label
-          >
+          <label
+            class="dataset-config-dialog__label"
+            for="datasetName"
+            v-text="$t('datasetCreation.datasetName')"
+          />
           <DatasetConfigurationInput
             id="datasetName"
             v-model="dataset.name"
-            placeholder="Name"
+            :placeholder="$t('datasetCreation.datasetName')"
           />
         </div>
         <div class="dataset-config-dialog__row">
-          <label class="dataset-config-dialog__label">Assign a workspace</label>
+          <label
+            class="dataset-config-dialog__label"
+            v-text="$t('datasetCreation.assignWorkspace')"
+          />
           <DatasetConfigurationSelector
             :options="workspaces"
             v-model="dataset.workspace"
@@ -30,23 +36,26 @@
           class="dataset-config-dialog__row"
           v-if="dataset.selectedSubset.splits?.length > 1"
         >
-          <label class="dataset-config-dialog__label">Select a split</label>
+          <label
+            class="dataset-config-dialog__label"
+            v-text="$t('datasetCreation.selectSplit')"
+          />
           <DatasetConfigurationSelector
             class="config-form__selector"
             :options="dataset.selectedSubset.splits"
             v-model="dataset.selectedSplit"
           />
         </div>
-        <p class="dataset-config-dialog__info">
-          The created dataset will include the first 10K rows and further
-          records can be logged via the python SDK.
-        </p>
+        <p
+          class="dataset-config-dialog__info"
+          v-text="$t('datasetCreation.recordWarning')"
+        />
         <BaseButton
           :disabled="!dataset.name || !dataset.workspace || !dataset.isValid"
           :loading="isLoading"
           type="submit"
           class="dataset-config-dialog__button primary full"
-          >Create dataset</BaseButton
+          >{{ $t("datasetCreation.button") }}</BaseButton
         >
         <Validation
           v-if="!dataset.isValid"

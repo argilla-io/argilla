@@ -3,13 +3,14 @@
     <HeaderFeedbackTask
       :breadcrumbs="[
         { link: '/', name: 'Home' },
-        { name: 'dataset' },
         { name: 'new' },
         { name: datasetConfig?.repoId },
       ]"
     >
       <template slot="badge">
-        <p class="new-dataset__header-badge">Preview</p>
+        <p class="new-dataset__header-badge">
+          {{ $t("datasetCreation.preview") }}
+        </p>
       </template>
     </HeaderFeedbackTask>
     <DatasetConfiguration

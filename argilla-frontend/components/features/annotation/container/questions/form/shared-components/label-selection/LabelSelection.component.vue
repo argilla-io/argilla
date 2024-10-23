@@ -70,7 +70,11 @@
             :for="option.id"
             :title="option.text"
           >
-            <span class="key" v-text="keyboards[option.id]" />
+            <span
+              v-if="visibleShortcuts"
+              class="key"
+              v-text="keyboards[option.id]"
+            />
             <span class="label-text__text">{{ option.text }}</span>
             <span v-if="isSuggested(option)" class="label-text__suggestion">
               <svgicon class="label-text__suggestion__icon" name="suggestion" />
@@ -127,6 +131,10 @@ export default {
     isFocused: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   model: {

@@ -36,12 +36,13 @@
               <p
                 v-if="!dataset.questions.length"
                 class="dataset-config__empty-questions"
-                v-text="'Your questions'"
+                v-text="$t('datasetCreation.yourQuestions')"
               />
 
               <QuestionsComponent
-                class="dataset-config__questions"
                 v-else
+                class="dataset-config__questions"
+                :visible-shortcuts="false"
                 :questions="dataset.questions"
               />
             </div>

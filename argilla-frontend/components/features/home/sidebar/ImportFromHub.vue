@@ -11,7 +11,7 @@
         height="18"
         color="#F6C000"
       ></svgicon
-      >Import from Hub</BaseButton
+      >{{ $t("home.importFromHub") }}</BaseButton
     >
     <template v-else>
       <BaseButton

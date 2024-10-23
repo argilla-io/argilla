@@ -1,11 +1,11 @@
 <template>
   <div class="datasets-empty">
-    <span class="datasets-empty__message">None yet</span>
+    <span class="datasets-empty__message" v-text="$t('home.none')" />
     <div class="datasets-empty__cards">
       <DatasetListCard
-        title="Import a dataset from Hugging Face Hub"
-        text="Start with a dataset from the Hub by simply pasting the repository name"
-        button-text="Import dataset"
+        :title="$t('home.importTitle')"
+        :text="$t('home.importText')"
+        :button-text="$t('home.importButton')"
         button-type="hub"
         button-action="expand-import-dataset"
         @on-click="$emit('on-click-card', $event)"

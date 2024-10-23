@@ -28,7 +28,7 @@
       <PersistentStorageBanner class="home__banner" />
     </template>
     <template v-slot:page-content>
-      <h1 class="home__title">Argilla datasets</h1>
+      <h1 class="home__title" v-text="$t('home.argillaDatasets')" />
       <BaseLoading class="home__title" v-if="isLoadingDatasets" />
       <DatasetsTable
         v-else
@@ -50,8 +50,14 @@
           <ImportFromPython v-if="!showImportDatasetInput" />
         </div>
         <div class="home__sidebar__content">
-          <p class="home__sidebar__title">Don’t know where to start?</p>
-          <p class="home__sidebar__subtitle">Explore these example datasets</p>
+          <p
+            class="home__sidebar__title"
+            v-text="$t('home.exampleDatasetsTitle')"
+          />
+          <p
+            class="home__sidebar__subtitle"
+            v-text="$t('home.exampleDatasetsText')"
+          />
           <div class="home__sidebar__cards">
             <ExampleDatasetCard
               v-for="dataset in exampleDatasets"
@@ -64,8 +70,8 @@
       </template>
       <template v-else>
         <div class="home__sidebar__content">
-          <p class="home__sidebar__title">First time in Argilla?</p>
-          <p class="home__sidebar__subtitle">Take a look at these guides:</p>
+          <p class="home__sidebar__title" v-text="$t('home.guidesTitle')" />
+          <p class="home__sidebar__subtitle" v-text="$t('home.guidesText')" />
           <div class="home__sidebar__cards">
             <LinkCard
               badge="How to guide"
