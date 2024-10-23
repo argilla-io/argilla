@@ -47,5 +47,13 @@ class UserCreate(BaseModel):
     password: str = Field(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
 
 
+class UserUpdate(BaseModel):
+    first_name: Optional[constr(min_length=1, strip_whitespace=True)]
+    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
+    username: Optional[str]
+    role: Optional[UserRole]
+    password: Optional[str]
+
+
 class Users(BaseModel):
     items: List[User]
