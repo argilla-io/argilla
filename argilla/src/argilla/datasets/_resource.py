@@ -306,4 +306,5 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
         except Exception as e:
             warnings.warn(f"Error opening the URL in the browser: {e}")
         finally:
+            warnings.warn(f"Open the following URL in your browser to configure the dataset: {url}")
             return url
