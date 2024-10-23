@@ -92,6 +92,7 @@
                 @click.prevent="
                   visibleDatasetCreationDialog = !visibleDatasetCreationDialog
                 "
+                :disabled="!dataset.isValid"
                 >Create Dataset</BaseButton
               >
               <DatasetConfigurationDialog
