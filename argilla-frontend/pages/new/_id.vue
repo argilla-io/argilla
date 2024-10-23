@@ -7,7 +7,11 @@
         { name: 'new' },
         { name: datasetConfig?.repoId },
       ]"
-    />
+    >
+      <template slot="badge">
+        <p class="new-dataset__header-badge">Preview</p>
+      </template>
+    </HeaderFeedbackTask>
     <DatasetConfiguration
       v-if="datasetConfig"
       :dataset="datasetConfig"
@@ -34,5 +38,15 @@ export default {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  &__header-badge {
+    background-color: hsl(from var(--bg-config-card) h 30% 50%);
+    padding: calc($base-space / 2) $base-space;
+    border-radius: $border-radius;
+    margin: 0;
+    font-weight: 500;
+    margin-left: $base-space * 2;
+    @include font-size(12px);
+    @include line-height(16px);
+  }
 }
 </style>
