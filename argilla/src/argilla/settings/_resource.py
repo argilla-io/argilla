@@ -282,6 +282,8 @@ class Settings(DefaultSettingsMixin, Resource):
         return settings
 
     def __eq__(self, other: "Settings") -> bool:
+        if not (other and isinstance(other, Settings)):
+            return False
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
 
     #####################

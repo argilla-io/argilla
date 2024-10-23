@@ -13,6 +13,7 @@
 # limitations under the License.
 import copy
 import uuid
+from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
@@ -174,6 +175,15 @@ class TestSettings:
 
         other_settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
         assert other_settings.distribution == TaskDistribution(min_submitted=1)
+
+    def test_compare_equal_settings(self):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+        assert settings == settings
+
+    @pytest.mark.parametrize("other_settings", [None, "value", 100, rg.Settings()])
+    def test_compare_different_settings(self, other_settings: Any):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+        assert settings != other_settings
 
     def test_read_settings_without_distribution(self, mocker: "MockerFixture"):
         settings = rg.Settings(
