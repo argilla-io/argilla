@@ -3,8 +3,9 @@
     <input
       type="number"
       min="0"
-      max="11"
-      :value="value.length"
+      max="10"
+      step="1"
+      :value="value.length - 1"
       @input="onInput($event.target.value)"
       @focus="$emit('is-focused', true)"
       @blur="$emit('is-focused', false)"
@@ -32,9 +33,13 @@ export default {
   },
   methods: {
     onInput(inputValue) {
-      const valuesArray = Array.from({ length: inputValue }, (_, i) => ({
-        value: i,
-      }));
+      const valuesArray = Array.from(
+        { length: parseInt(inputValue) + 1 },
+        (_, i) => ({
+          value: i,
+        })
+      );
+
       this.$emit("on-value-change", valuesArray);
     },
   },
