@@ -1,6 +1,7 @@
 import { MetadataType } from "../metadata/MetadataType";
 
 export const availableMetadataTypes = [
+  MetadataType.from("int8"),
   MetadataType.from("int32"),
   MetadataType.from("int64"),
   MetadataType.from("float32"),
@@ -9,13 +10,14 @@ export const availableMetadataTypes = [
 ];
 
 const ADAPTED_TYPES = {
+  int8: "integer",
   int32: "integer",
   int64: "integer",
   float32: "float",
   float64: "float",
 };
 
-export type MetadataTypes = "int32" | "int64" | "float32" | "float64";
+export type MetadataTypes = "int8" | "int32" | "int64" | "float32" | "float64";
 
 export class MetadataCreation {
   public readonly type: MetadataType;
