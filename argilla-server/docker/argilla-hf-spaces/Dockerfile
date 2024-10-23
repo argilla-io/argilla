@@ -5,11 +5,6 @@ FROM ${ARGILLA_SERVER_IMAGE}:${ARGILLA_VERSION}
 
 USER root
 
-# Copy Argilla distribution files
-COPY scripts/start.sh /home/argilla
-COPY Procfile /home/argilla
-COPY requirements.txt /packages/requirements.txt
-
 RUN apt-get update && \
     apt-get install -y apt-transport-https gnupg wget
 
@@ -24,6 +19,13 @@ RUN wget -qO - https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyri
 RUN apt-get install -y lsb-release
 RUN echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
 
+
+# Copy Argilla distribution files
+COPY scripts/* /home/argilla
+COPY Procfile /home/argilla
+COPY requirements.txt /packages/requirements.txt
+
+# Install dependencies
 RUN \
     # Create a directory where Argilla will store the data
     mkdir /data && \
@@ -59,7 +61,6 @@ USER argilla
 ENV ELASTIC_CONTAINER=true
 ENV ES_JAVA_OPTS="-Xms1g -Xmx1g"
 
-ENV ARGILLA_HOME_PATH=/data/argilla
 ENV BACKGROUND_NUM_WORKERS=2
 ENV REINDEX_DATASETS=1
 
