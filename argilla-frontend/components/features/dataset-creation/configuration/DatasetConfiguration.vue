@@ -40,8 +40,9 @@
               />
 
               <QuestionsComponent
-                class="dataset-config__questions"
                 v-else
+                class="dataset-config__questions"
+                :visible-shortcuts="false"
                 :questions="dataset.questions"
               />
             </div>
