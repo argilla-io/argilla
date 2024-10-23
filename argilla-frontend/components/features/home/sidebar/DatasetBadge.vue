@@ -30,6 +30,7 @@ export default {
 .dataset-badge {
   display: flex;
   align-items: center;
+  min-height: 26px;
   box-shadow: 0 0 1px 1px var(--bg-opacity-10);
   border-radius: $border-radius;
 

@@ -13,11 +13,15 @@
         />
         <DatasetBadge v-for="tag in dataset.tags" :text="tag" :key="tag" />
       </div>
+      <p class="example-dataset__rows">
+        <svgicon name="rows" height="10" />{{ dataset.rows }} rows
+      </p>
     </div>
   </BaseButton>
 </template>
 
 <script>
+import "assets/icons/rows";
 export default {
   props: {
     dataset: {
@@ -56,6 +60,14 @@ export default {
     display: flex;
     gap: $base-space;
     flex-wrap: wrap;
+  }
+  &__rows {
+    display: flex;
+    align-items: center;
+    gap: calc($base-space / 2);
+    margin: 0;
+    color: var(--fg-tertiary);
+    @include font-size(12px);
   }
 }
 </style>

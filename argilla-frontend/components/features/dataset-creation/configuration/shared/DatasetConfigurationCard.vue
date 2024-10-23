@@ -128,7 +128,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
     border-color: hsl(from var(--bg-config-card) h s 86%);
   }
   :deep(.chip-selector__input:checked + label) {
-    background: var(--bg-accent-grey-1);
+    background: var(--bg-accent-grey-2);
   }
   &:has(.nomapping) {
     border-color: var(--bg-opacity-10);
@@ -138,7 +138,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
       border-color: var(--bg-opacity-10);
     }
     :deep(.chip-selector__input:checked + label) {
-      background: var(--bg-accent-grey-1);
+      background: var(--bg-accent-grey-2);
     }
   }
   &:has(.error) {
