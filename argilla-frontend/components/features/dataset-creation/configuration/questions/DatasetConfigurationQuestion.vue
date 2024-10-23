@@ -85,7 +85,7 @@ export default {
       return this.question.column === "no mapping";
     },
     showColumnSelector() {
-      return this.question.wasAutoMapped;
+      return this.question.wasAutoMapped || this.question.isTextType;
     },
   },
   methods: {
