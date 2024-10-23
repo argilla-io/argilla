@@ -30,8 +30,8 @@ dependencies = [
     "backoff>=1.11.1",
     # Database dependencies
     "alembic ~= 1.9.0",
-    "SQLAlchemy == 2.0.31",
-    "greenlet >= 2.0.0",
+    "SQLAlchemy == 2.0.35",
+    "greenlet ~= 3.1.0",
     # Async SQLite
     "aiosqlite == 0.20.0",
     # metrics
