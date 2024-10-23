@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { useImportFromPython } from "./useImportFromPython";
+import { useImportFromPython } from "../sidebar/useImportFromPython";
 import "assets/icons/code";
 export default {
   data() {
@@ -65,7 +65,6 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
   &__code {
     border-radius: $border-radius-m;
   }
@@ -104,12 +103,20 @@ export default {
   }
   &__button.button {
     min-height: 42px;
+    color: var(--fg-primary);
     background: linear-gradient(
       177.33deg,
-      var(--bg-accent-grey-1) 16.49%,
-      var(--bg-opacity-4) 114.03%
+      var(--bg-accent-grey-5) 20%,
+      var(--bg-opacity-4) 100%
     );
     box-shadow: 0 0 0 1px var(--bg-opacity-10);
+    &:hover {
+      background: linear-gradient(
+        177.33deg,
+        var(--bg-accent-grey-5) 20%,
+        var(--bg-opacity-2) 100%
+      );
+    }
   }
   &__button__icon {
     flex-shrink: 0;

@@ -7,7 +7,7 @@ export const useImportFromPython = () => {
   const user = getUser();
 
   const HFHeader = isRunningOnHuggingFace()
-    ? 'headers={"Authorization": f"Bearer {HF_TOKEN}"}'
+    ? "headers={'Authorization': f'Bearer {HF_TOKEN}'}"
     : "";
 
   const snippet = `

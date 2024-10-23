@@ -97,4 +97,24 @@ export class DatasetCreation {
       );
     });
   }
+
+  get isValid(): boolean {
+    return this.validate().question.length === 0;
+  }
+
+  validate(): Record<"question", string[]> {
+    const validations: Record<"question", string[]> = {
+      question: [],
+    };
+
+    if (this.questions.length === 0) {
+      validations.question.push("datasetCreation.atLeastOneQuestion");
+    }
+
+    if (!this.questions.some((q) => q.required)) {
+      validations.question.push("datasetCreation.atLeastOneRequired");
+    }
+
+    return validations;
+  }
 }

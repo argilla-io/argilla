@@ -6,18 +6,22 @@ import { CreateDatasetUseCase } from "~/v1/domain/usecases/create-dataset-use-ca
 import { useRoutes } from "~/v1/infrastructure/services";
 
 export const useDatasetConfigurationForm = () => {
+  const isLoading = ref(false);
   const { goToFeedbackTaskAnnotationPage } = useRoutes();
   const createDatasetUseCase = useResolve(CreateDatasetUseCase);
-  const isLoading = ref(false);
 
-  const create = async (dataset: any) => {
-    isLoading.value = true; //
-    const datasetId = await createDatasetUseCase.execute(dataset);
-    isLoading.value = false;
+  const create = async (dataset) => {
+    isLoading.value = true;
 
-    if (!datasetId) return;
+    try {
+      const datasetId = await createDatasetUseCase.execute(dataset);
 
-    goToFeedbackTaskAnnotationPage(datasetId);
+      if (!datasetId) return;
+
+      goToFeedbackTaskAnnotationPage(datasetId);
+    } finally {
+      isLoading.value = false;
+    }
   };
 
   return {

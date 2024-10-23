@@ -6,9 +6,9 @@
       v-if="!isExpanded"
       ><svgicon
         class="import-from-hub__button__icon"
-        name="import"
-        width="16"
-        height="16"
+        name="link"
+        width="18"
+        height="18"
         color="#F6C000"
       ></svgicon
       >Import from Hub</BaseButton
@@ -25,9 +25,9 @@
           <BaseInputContainer class="import-from-hub__input">
             <svgicon
               class="import-from-hub__button__icon"
-              name="import"
-              width="16"
-              height="16"
+              name="link"
+              width="20"
+              height="20"
               color="#F6C000"
             ></svgicon>
             <BaseInput v-model="repositoryId" placeholder="Repository ID" />
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import "assets/icons/import";
+import "assets/icons/link";
 import "assets/icons/chevron-right";
 export default {
   props: {
@@ -68,12 +68,20 @@ export default {
   }
   &__button.button {
     min-height: 42px;
+    color: var(--fg-primary);
     background: linear-gradient(
       177.33deg,
-      var(--bg-accent-grey-1) 16.49%,
-      var(--bg-opacity-4) 114.03%
+      var(--bg-accent-grey-5) 20%,
+      var(--bg-opacity-4) 100%
     );
     box-shadow: 0 0 0 1px var(--bg-opacity-10);
+    &:hover {
+      background: linear-gradient(
+        177.33deg,
+        var(--bg-accent-grey-5) 20%,
+        var(--bg-opacity-2) 100%
+      );
+    }
   }
   &__input {
     display: flex;
@@ -85,6 +93,13 @@ export default {
     background: var(--bg-accent-grey-2);
     border-radius: $border-radius;
     box-shadow: 0 0 0 1px var(--bg-opacity-10);
+    input {
+      font-weight: 500;
+      color: var(--fg-secondary);
+      @include input-placeholder {
+        color: var(--fg-tertiary);
+      }
+    }
   }
   &__close-button.button {
     margin-left: auto;
