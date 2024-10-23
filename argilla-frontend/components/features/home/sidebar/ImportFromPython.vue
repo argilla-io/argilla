@@ -12,20 +12,7 @@
     >
     <transition name="fade" appear>
       <dialog class="import-from-python__dialog" v-if="visibleSnippet">
-        <div class="import-from-python__content">
-          <BaseActionTooltip
-            class="import-from-python__copy-button"
-            :tooltip="$t('copied')"
-          >
-            <a href="#" @click.prevent="copy(snippet)">
-              <svgicon
-                name="copy"
-                width="16"
-                height="16"
-                color="var(--color-white)"
-              />
-            </a>
-          </BaseActionTooltip>
+        <div class="import-from-python__content" v-copy-code>
           <pre><code class="import-from-python__code" language="python" v-highlight>{{ snippet }}</code></pre>
         </div>
       </dialog>
@@ -48,9 +35,6 @@ export default {
     },
     closeDialog() {
       this.visibleSnippet = false;
-    },
-    copy(snippet) {
-      this.$copyToClipboard(snippet);
     },
   },
   setup() {
