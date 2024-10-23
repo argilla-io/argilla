@@ -28,10 +28,10 @@
               name="link"
               width="20"
               height="20"
-              color="#F6C000"
             ></svgicon>
             <BaseInput v-model="repositoryId" placeholder="Repository ID" />
             <BaseButton
+              :disabled="!repositoryId"
               class="secondary import-from-hub__button-submit"
               type="submit"
             >
@@ -93,12 +93,28 @@ export default {
     background: var(--bg-accent-grey-2);
     border-radius: $border-radius;
     box-shadow: 0 0 0 1px var(--bg-opacity-10);
+    &.re-has-value:focus-within {
+      box-shadow: 0 0 0 1px var(--fg-cuaternary);
+      .import-from-hub__button__icon {
+        fill: var(--fg-secondary);
+      }
+      .button {
+        background: var(--bg-action);
+        * {
+          fill: var(--color-white);
+        }
+      }
+    }
     input {
-      font-weight: 500;
       color: var(--fg-secondary);
       @include input-placeholder {
         color: var(--fg-tertiary);
       }
+    }
+  }
+  &__button {
+    &__icon {
+      fill: hsl(47, 100%, 48%);
     }
   }
   &__close-button.button {
@@ -117,6 +133,6 @@ export default {
 }
 .slide-right-enter,
 .slide-right-leave-to {
-  transform: translateX(50%);
+  transform: translateX(50px);
 }
 </style>

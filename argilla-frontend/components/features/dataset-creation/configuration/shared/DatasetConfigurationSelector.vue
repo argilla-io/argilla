@@ -32,7 +32,6 @@ export default {
   props: {
     value: {
       type: [Object, String],
-      required: true,
     },
     options: {
       type: Array,
@@ -78,6 +77,7 @@ export default {
     padding: 0 $base-space;
     background: var(--bg-opacity-4);
     border: none;
+    min-width: 160px;
   }
 
   :deep(.dropdown__content) {

@@ -72,8 +72,9 @@ export default {
   },
   computed: {
     translatedValidations() {
-      const firstValidation = this.dataset.validate().question[0];
-      return this.$t(firstValidation);
+      return this.dataset.validate().question.map((validation) => {
+        return this.$t(validation);
+      });
     },
   },
   methods: {

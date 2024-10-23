@@ -53,13 +53,41 @@
           <p class="home__sidebar__title">Don’t know where to start?</p>
           <p class="home__sidebar__subtitle">Explore these example datasets</p>
           <div class="home__sidebar__cards">
-            <ExampleDataset
+            <ExampleDatasetCard
               v-for="dataset in exampleDatasets"
               :key="dataset.repoId"
               :dataset="dataset"
               @on-import-dataset="importDataset"
             />
           </div>
+        </div>
+      </template>
+      <template v-else>
+        <div class="home__sidebar__content">
+          <p class="home__sidebar__title">First time in Argilla?</p>
+          <p class="home__sidebar__subtitle">Take a look at these guides:</p>
+          <div class="home__sidebar__cards">
+            <LinkCard
+              badge="How to guide"
+              text="Annotate your dataset"
+              link="https://docs.argilla.io/dev/how_to_guides/annotate/"
+            />
+            <LinkCard
+              badge="How to guide"
+              text="Query and filter records"
+              link="https://docs.argilla.io/dev/how_to_guides/query/"
+            />
+          </div>
+          <p class="home__sidebar__link">
+            Log to
+            <a
+              href="https://huggingface.co/spaces/argilla/argilla-template-space"
+              target="_blank"
+            >
+              Argilla_template_space</a
+            >
+            to try it out
+          </p>
         </div>
       </template>
     </template>
@@ -151,6 +179,10 @@ export default {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
+    }
+    &__link {
+      margin-top: $base-space * 4;
+      color: var(--fg-secondary);
     }
   }
 }
