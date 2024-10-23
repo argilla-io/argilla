@@ -210,7 +210,6 @@ export default {
 .dataset {
   &__table {
     width: 100%;
-    max-width: 1500px;
     display: flex;
     flex-direction: column;
     @include media("<=tablet") {
