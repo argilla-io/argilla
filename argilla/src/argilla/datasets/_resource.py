@@ -299,7 +299,7 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
             "split": split,
         }
 
-        url = f"{client.api_url}/new/{quote_plus(repo_id)}?{urlencode(params)}"
+        url = f"{client.api_url.removesuffix('/')}/new/{quote_plus(repo_id)}?{urlencode(params)}"
 
         try:
             webbrowser.open(url, new=2, autoraise=True)
