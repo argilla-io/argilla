@@ -255,6 +255,20 @@ export default {
       team: "Team progress",
     },
   },
+  home: {
+    argillaDatasets: "Argilla datasets",
+    none: "None yet",
+    importTitle: "Import a dataset from Hugging Face Hub",
+    importText:
+      "Start with a dataset from the Hub by simply pasting the repository name",
+    importButton: "Import dataset",
+    importFromHub: "Import from Hub",
+    importFromPython: "Import from Python",
+    exampleDatasetsTitle: "Don’t know where to start?",
+    exampleDatasetsText: "Explore these example datasets",
+    guidesTitle: "First time in Argilla?",
+    guidesText: "Take a look at these guides:",
+  },
   datasetCreation: {
     atLeastOneQuestion: "At least one question is required",
     atLeastOneRequired: "At least one required question is required",

@@ -8,7 +8,7 @@
         height="18"
         color="var(--bg-opacity-87)"
       ></svgicon
-      >Import from Python</BaseButton
+      >{{ $t("home.importFromPython") }}</BaseButton
     >
     <transition name="fade" appear>
       <dialog class="import-from-python__dialog" v-if="visibleSnippet">
