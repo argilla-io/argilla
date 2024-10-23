@@ -3,7 +3,7 @@
     <BaseButton
       class="primary"
       @click.prevent="visibleSnippet = !visibleSnippet"
-      >Import data</BaseButton
+      >{{ $t("datasetCreation.importData") }}</BaseButton
     >
     <transition name="fade" appear>
       <dialog
@@ -11,7 +11,7 @@
         class="import-data__dialog"
         v-click-outside="closeDialog"
       >
-        <p class="import-data__title">Add records to your dataset</p>
+        <p class="import-data__title">{{ $t("datasetCreation.addRecords") }}</p>
         <div class="import-data__code">
           <MarkdownRenderer :markdown="snippet" />
         </div>

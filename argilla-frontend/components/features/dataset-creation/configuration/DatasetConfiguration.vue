@@ -36,7 +36,7 @@
               <p
                 v-if="!dataset.questions.length"
                 class="dataset-config__empty-questions"
-                v-text="'Your questions'"
+                v-text="$t('datasetCreation.yourQuestions')"
               />
 
               <QuestionsComponent

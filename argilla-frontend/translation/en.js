@@ -258,6 +258,26 @@ export default {
   datasetCreation: {
     atLeastOneQuestion: "At least one question is required",
     atLeastOneRequired: "At least one required question is required",
+    createDataset: "Create the dataset in Argilla",
+    datasetName: "Dataset name",
+    name: "Name",
+    assignWorkspace: "Assign a workspace",
+    selectSplit: "Select a split",
+    recordWarning:
+      "The created dataset will include the first 10K rows and further records can be logged via the python SDK.",
+    button: "Create dataset",
+    fields: "Fields",
+    questions: "Questions",
+    yourQuestions: "Your questions",
+    requiredField: "Required field",
+    requiredQuestion: "Required question",
+    select: "Select",
+    mapToColumn: "Map to column",
+    subset: "Subset",
+    selectSubset: "Your can create a dataset from only one subset.",
+    preview: "Preview",
+    importData: "Import data",
+    addRecords: "Add records",
   },
   config: {
     field: {

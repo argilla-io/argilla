@@ -50,7 +50,7 @@
       :value="question.required"
       @input="question.required = !question.required"
     >
-      Required question</BaseCheckbox
+      {{ $t("datasetCreation.requiredQuestion") }}</BaseCheckbox
     >
   </DatasetConfigurationCard>
 </template>

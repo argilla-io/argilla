@@ -11,7 +11,7 @@
       :value="field.required"
       @input="field.required = !field.required"
     >
-      Required field</BaseCheckbox
+      {{ $t("datasetCreation.requiredField") }}</BaseCheckbox
     >
   </DatasetConfigurationCard>
 </template>
