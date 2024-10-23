@@ -51,7 +51,7 @@ export const useHomeViewModel = () => {
       tags: ["synthetic", "rlaif"],
       icon: "text-to-image",
       color: "hsl(38, 92%, 50%)",
-      rows: "15K",
+      rows: "350",
     },
   ];
 
