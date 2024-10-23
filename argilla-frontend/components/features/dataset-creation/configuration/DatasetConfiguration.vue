@@ -28,12 +28,7 @@
                 :record="{
                   fields: dataset.createFields(firstRecord),
                 }"
-                ><template slot="intro">
-                  <span class="dataset-config__dataset-preview"
-                    >Record preview
-                  </span></template
-                >
-              </Record>
+              />
             </div>
           </template>
           <template #right>

@@ -11,10 +11,7 @@
         :datasetVectors="datasetVectors"
         :selectedRecords="selectedRecords"
         @on-select-record="onSelectedRecord"
-        ><template slot="intro">
-          <slot name="intro" />
-        </template>
-      </RecordFieldsHeader>
+      />
       <div class="record__content">
         <RecordFields
           :record="record"

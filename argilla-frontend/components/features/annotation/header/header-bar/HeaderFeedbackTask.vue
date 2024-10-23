@@ -11,6 +11,9 @@
         <DatasetSettingsIconFeedbackTask />
       </div>
     </template>
+    <div class="topbar--left">
+      <slot name="badge"></slot>
+    </div>
     <div class="topbar--right">
       <slot name="dialog-cta"></slot>
       <user-avatar-tooltip />
@@ -56,5 +59,8 @@ export default {
   @include media("<=tablet") {
     gap: $base-space;
   }
+}
+.topbar--left {
+  margin-right: auto;
 }
 </style>
