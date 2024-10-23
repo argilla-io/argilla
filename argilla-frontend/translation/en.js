@@ -255,6 +255,10 @@ export default {
       team: "Team progress",
     },
   },
+  datasetCreation: {
+    atLeastOneQuestion: "At least one question is required",
+    atLeastOneRequired: "At least one required question is required",
+  },
   config: {
     field: {
       text: "Text field",
