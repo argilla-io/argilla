@@ -733,48 +733,51 @@ class TestSuiteDatasets:
         assert response.json() == {"detail": f"Dataset with id `{dataset_id}` not found"}
 
     async def test_get_current_user_dataset_metrics(
-        self, async_client: "AsyncClient", owner: User, owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner: User,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
-        record_a = await RecordFactory.create(dataset=dataset, status=RecordStatus.completed)
-        record_b = await RecordFactory.create(dataset=dataset, status=RecordStatus.completed)
-        record_c = await RecordFactory.create(dataset=dataset)
-        record_d = await RecordFactory.create(dataset=dataset)
-        await RecordFactory.create_batch(3, dataset=dataset)
-        await RecordFactory.create_batch(2, dataset=dataset, status=RecordStatus.completed)
-        await ResponseFactory.create(record=record_a, user=owner)
-        await ResponseFactory.create(record=record_b, user=owner, status=ResponseStatus.discarded)
-        await ResponseFactory.create(record=record_c, user=owner, status=ResponseStatus.discarded)
-        await ResponseFactory.create(record=record_d, user=owner, status=ResponseStatus.draft)
+        records = await RecordFactory.create_batch(size=8, dataset=dataset)
 
-        other_dataset = await DatasetFactory.create()
-        other_record_a = await RecordFactory.create(dataset=other_dataset)
-        other_record_b = await RecordFactory.create(dataset=other_dataset)
-        other_record_c = await RecordFactory.create(dataset=other_dataset)
-        await RecordFactory.create_batch(2, dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_a, user=owner)
-        await ResponseFactory.create(record=other_record_b)
-        await ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
+        mock_search_engine.get_dataset_user_progress.return_value = {
+            "total": 6,
+            "submitted": 3,
+            "discarded": 3,
+        }
 
-        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers=owner_auth_header)
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/metrics",
+            headers=owner_auth_header,
+        )
 
         assert response.status_code == 200
         assert response.json() == {
             "responses": {
-                "total": 7,
-                "submitted": 1,
-                "discarded": 2,
-                "draft": 1,
-                "pending": 3,
+                "total": len(records),
+                "submitted": 3,
+                "discarded": 3,
+                "draft": 0,
+                "pending": 2,
             },
         }
 
     async def test_get_current_user_dataset_metrics_with_empty_dataset(
-        self, async_client: "AsyncClient", owner_auth_header: dict
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
     ):
         dataset = await DatasetFactory.create()
 
-        response = await async_client.get(f"/api/v1/me/datasets/{dataset.id}/metrics", headers=owner_auth_header)
+        mock_search_engine.get_dataset_user_progress.return_value = {}
+
+        response = await async_client.get(
+            f"/api/v1/me/datasets/{dataset.id}/metrics",
+            headers=owner_auth_header,
+        )
 
         assert response.status_code == 200
         assert response.json() == {
@@ -788,28 +791,24 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_get_current_user_dataset_metrics_as_annotator(self, async_client: "AsyncClient", role: UserRole):
+    async def test_get_current_user_dataset_metrics_as_annotator(
+        self,
+        async_client: "AsyncClient",
+        mock_search_engine: SearchEngine,
+        role: UserRole,
+    ):
         dataset = await DatasetFactory.create()
-        user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)
-        record_a = await RecordFactory.create(dataset=dataset)
-        record_b = await RecordFactory.create(dataset=dataset, status=RecordStatus.completed)
-        record_c = await RecordFactory.create(dataset=dataset)
-        record_d = await RecordFactory.create(dataset=dataset)
-        await RecordFactory.create_batch(2, dataset=dataset)
-        await RecordFactory.create_batch(3, dataset=dataset, status=RecordStatus.completed)
-        await ResponseFactory.create(record=record_a, user=user)
-        await ResponseFactory.create(record=record_b, user=user)
-        await ResponseFactory.create(record=record_c, user=user, status=ResponseStatus.discarded)
-        await ResponseFactory.create(record=record_d, user=user, status=ResponseStatus.draft)
+        records = await RecordFactory.create_batch(size=6, dataset=dataset)
 
-        other_dataset = await DatasetFactory.create()
-        other_record_a = await RecordFactory.create(dataset=other_dataset)
-        other_record_b = await RecordFactory.create(dataset=other_dataset)
-        other_record_c = await RecordFactory.create(dataset=other_dataset)
-        await RecordFactory.create_batch(3, dataset=other_dataset)
-        await ResponseFactory.create(record=other_record_a, user=user)
-        await ResponseFactory.create(record=other_record_b)
-        await ResponseFactory.create(record=other_record_c, status=ResponseStatus.discarded)
+        user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)
+
+        mock_search_engine.get_dataset_user_progress.return_value = {
+            "total": len(records),
+            "submitted": 2,
+            "discarded": 1,
+            "draft": 1,
+            "pending": 2,
+        }
 
         response = await async_client.get(
             f"/api/v1/me/datasets/{dataset.id}/metrics",

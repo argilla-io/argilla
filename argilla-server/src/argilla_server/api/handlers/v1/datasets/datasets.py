@@ -143,37 +143,44 @@ async def get_dataset(
 @router.get("/me/datasets/{dataset_id}/metrics", response_model=DatasetMetrics)
 async def get_current_user_dataset_metrics(
     *,
-    db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return await datasets.get_user_dataset_metrics(db, current_user.id, dataset.id)
+    result = await datasets.get_user_dataset_metrics(db, search_engine, current_user, dataset)
+
+    return DatasetMetrics(responses=result)
 
 
 @router.get("/datasets/{dataset_id}/progress", response_model=DatasetProgress)
 async def get_dataset_progress(
     *,
-    db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return await datasets.get_dataset_progress(db, dataset.id)
+    result = await datasets.get_dataset_progress(search_engine, dataset)
+
+    return DatasetProgress(**result)
 
 
 @router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress)
 async def get_dataset_users_progress(
     *,
-    current_user: User = Security(auth.get_current_user),
     dataset_id: UUID,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
