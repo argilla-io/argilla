@@ -533,7 +533,7 @@ task = TrainingTask.for_sentence_similarity(
 )
 ```
 
-For datasets that where annotated with numerical values we could also pass the label strategy we want to use (let's assume we have another question in the dataset named "other-question" that contains values that come from rated answers):
+For datasets that were annotated with numerical values we could also pass the label strategy we want to use (let's assume we have another question in the dataset named "other-question" that contains values that come from rated answers):
 
 ```python
 task = TrainingTask.for_sentence_similarity(

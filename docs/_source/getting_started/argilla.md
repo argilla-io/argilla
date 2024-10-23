@@ -138,7 +138,7 @@ Finally, platforms like Snorkel, Prodigy or Scale, while more comprehensive, oft
 <summary>What is Argilla currently working on?</summary>
 <p>
 
-We are continuously working on improving Argilla's features and usability, focusing now concentrating on a three-pronged vision: the development of Argilla Core (open-source), Distilabel, and Argilla JS/TS. You can find a list of our current projects <a href="https://github.com/orgs/argilla-io/projects/10/views/1">here</a>.
+We are continuously working on improving Argilla's features and usability, focusing now on a three-pronged vision: the development of Argilla Core (open-source), Distilabel, and Argilla JS/TS. You can find a list of our current projects <a href="https://github.com/orgs/argilla-io/projects/10/views/1">here</a>.
 
 </p>
 </details>

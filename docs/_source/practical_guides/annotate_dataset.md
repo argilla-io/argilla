@@ -90,7 +90,7 @@ You can track your progress and the number of `Pending`, `Draft`, `Submitted` an
 
 In Argilla's Feedback Task datasets, you can annotate and process records in two ways:
 
-- **Focus view**: you can only see, respond and perfom actions on one record at a time. This is better for records that need to be examined closely and individually before responding.
+- **Focus view**: you can only see, respond and perform actions on one record at a time. This is better for records that need to be examined closely and individually before responding.
 - **Bulk view**: you can see multiple records in a list so you can respond and perform actions on more than one record at a time. This is useful for actions that can be taken on many records that have similar characteristics e.g., apply the same label to the results of a similarity search, discard all records in a specific language or save/submit records with a suggestion score over a safe threshold.
 
 ```{hint}
@@ -105,7 +105,7 @@ If you have a Span question in your dataset, you can always answer other questio
 
 In the queue of **Pending** records, you can change from _Focus_ to _Bulk_ view. Once in the _Bulk view_, you can expand or collapse records --i.e. see the full length of all records in the page or set a fixed height-- and select the number of records you want to see per page.
 
-To select or unselect all records in the page, click on the checkbox above the record list. To select or unselect specific records, click on the checkbox inside the individual record card. When you use filters inside the bulk view and the results are higher than the records visible in the page but lower than 1000, you will also have the option to select all of the results after you click on the checkbox. You can cancel this selection clicking on the _Cancel_ button.
+To select or unselect all records in the page, click on the checkbox above the record list. To select or unselect specific records, click on the checkbox inside the individual record card. When you use filters inside the bulk view and the results are higher than the records visible in the page but lower than 1000, you will also have the option to select all of the results after you click on the checkbox. You can cancel this selection by clicking on the _Cancel_ button.
 
 Once records are selected, choose the responses that apply to all selected records (if any) and do the desired action: _Discard_, _Save as draft_ or even _Submit_. Note that you can only submit the records if all required questions have been answered.
 
@@ -169,7 +169,7 @@ Not all filters listed below are available for all tasks.
 
 ##### Predictions filter
 
-This filter allows you to filter records with respect of their predictions:
+This filter allows you to filter records with respect to their predictions:
 
 - **Predicted as**: filter records by their predicted labels.
 - **Predicted ok**: filter records whose predictions do, or do not, match the annotations.
