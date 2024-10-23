@@ -42,12 +42,16 @@
           records can be logged via the python SDK.
         </p>
         <BaseButton
-          :disabled="!dataset.name || !dataset.workspace"
+          :disabled="!dataset.name || !dataset.workspace || !dataset.isValid"
           :loading="isLoading"
           type="submit"
           class="dataset-config-dialog__button primary full"
           >Create dataset</BaseButton
         >
+        <Validation
+          v-if="!dataset.isValid"
+          :validations="translatedValidations"
+        />
       </form>
     </dialog>
   </transition>
@@ -66,12 +70,20 @@ export default {
       default: false,
     },
   },
+  computed: {
+    translatedValidations() {
+      const firstValidation = this.dataset.validate().question[0];
+      return this.$t(firstValidation);
+    },
+  },
   methods: {
     closeDialog() {
       this.$emit("close-dialog");
     },
     createDataset() {
-      this.$emit("create-dataset");
+      if (this.dataset.isValid) {
+        this.$emit("create-dataset");
+      }
     },
   },
   setup() {
