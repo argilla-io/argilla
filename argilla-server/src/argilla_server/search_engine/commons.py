@@ -33,6 +33,7 @@ from argilla_server.models import (
     Suggestion,
     Vector,
     VectorSettings,
+    User,
 )
 from argilla_server.search_engine.base import (
     AndFilter,
@@ -51,7 +52,7 @@ from argilla_server.search_engine.base import (
     SearchResponses,
     SuggestionFilterScope,
     TermsFilter,
-    TermsMetadataMetrics,
+    TermsMetrics,
     TextQuery,
 )
 
@@ -393,6 +394,26 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             body={"script": f'ctx._source["suggestions"].remove("{suggestion.question.name}")'},
         )
 
+    async def get_dataset_progress(self, dataset: Dataset) -> dict:
+        index_name = es_index_name_for_dataset(dataset)
+
+        metrics = await self._compute_terms_metrics_for(index_name, "status")
+
+        return {"total": metrics.total, **{metric.term: metric.count for metric in metrics.values}}
+
+    async def get_dataset_user_progress(self, dataset: Dataset, user: User) -> dict:
+        index_name = es_index_name_for_dataset(dataset)
+
+        result = await self._compute_terms_metrics_for(
+            index_name,
+            field_name=es_field_for_response_property("status"),
+            query=es_nested_query(
+                path="responses",
+                query=es_term_query(es_field_for_response_property("user_id"), str(user.id)),
+            ),
+        )
+        return {"total": result.total, **{metric.term: metric.count for metric in result.values}}
+
     async def search(
         self,
         dataset: Dataset,
@@ -601,21 +622,27 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return metrics_class(min=stats["min"], max=stats["max"])
 
-    async def _metrics_for_terms_property(
-        self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
-    ) -> TermsMetadataMetrics:
-        field_name = es_field_for_metadata_property(metadata_property)
+    async def _compute_terms_metrics_for(
+        self, index_name: str, field_name: str, query: Optional[dict] = None
+    ) -> TermsMetrics:
         query = query or {"match_all": {}}
 
         total_terms = await self.__value_count_aggregation(index_name, field_name=field_name, query=query)
         if total_terms == 0:
-            return TermsMetadataMetrics(total=total_terms)
+            return TermsMetrics(total=total_terms)
 
-        terms_buckets = await self.__terms_aggregation(index_name, field_name=field_name, query=query, size=total_terms)
+        terms_buckets = await self._terms_aggregation(index_name, field_name=field_name, query=query, size=total_terms)
         terms_values = [
-            TermsMetadataMetrics.TermCount(term=bucket["key"], count=bucket["doc_count"]) for bucket in terms_buckets
+            TermsMetrics.TermCount(term=bucket["key"], count=bucket["doc_count"]) for bucket in terms_buckets
         ]
-        return TermsMetadataMetrics(total=total_terms, values=terms_values)
+
+        return TermsMetrics(total=total_terms, values=terms_values)
+
+    async def _metrics_for_terms_property(
+        self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
+    ) -> TermsMetrics:
+        field_name = es_field_for_metadata_property(metadata_property)
+        return await self._compute_terms_metrics_for(index_name, field_name, query)
 
     def _configure_index_mappings(self, dataset: Dataset) -> dict:
         return {
@@ -848,7 +875,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return fields
 
-    async def __terms_aggregation(self, index_name: str, field_name: str, query: dict, size: int) -> List[dict]:
+    async def _terms_aggregation(self, index_name: str, field_name: str, query: dict, size: int) -> List[dict]:
         aggregation_name = "terms_agg"
 
         terms_agg = {aggregation_name: {"terms": {"field": field_name, "size": min(size, self.max_terms_size)}}}
