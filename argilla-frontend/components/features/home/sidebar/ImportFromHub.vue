@@ -99,14 +99,13 @@ export default {
         fill: var(--fg-secondary);
       }
       .button {
-        background: var(--fg-cuaternary);
+        background: var(--bg-action);
         * {
           fill: var(--color-white);
         }
       }
     }
     input {
-      font-weight: 500;
       color: var(--fg-secondary);
       @include input-placeholder {
         color: var(--fg-tertiary);
