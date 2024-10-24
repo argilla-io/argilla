@@ -14,13 +14,11 @@
 
 import base64
 import io
-import re
 import warnings
 from pathlib import Path
 from typing import Union
 
 from PIL import Image
-from cairosvg import image
 
 
 def pil_to_data_uri(image_object: "Image") -> str:
