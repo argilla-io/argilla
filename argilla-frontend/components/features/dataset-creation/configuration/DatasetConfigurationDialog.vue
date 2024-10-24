@@ -26,7 +26,13 @@
             class="dataset-config-dialog__label"
             v-text="$t('datasetCreation.assignWorkspace')"
           />
+          <span
+            v-if="workspaces.length === 1"
+            class="dataset-config-dialog__unique-workspace"
+            v-text="dataset.workspace.name"
+          />
           <DatasetConfigurationSelector
+            v-else
             :options="workspaces"
             v-model="dataset.workspace"
           />
@@ -79,11 +85,26 @@ export default {
       default: false,
     },
   },
+  watch: {
+    firstWorkspace: {
+      handler(value) {
+        if (value) {
+          this.$set(this.dataset, "workspace", this.firstWorkspace);
+        }
+      },
+      deep: true,
+    },
+  },
   computed: {
     translatedValidations() {
       return this.dataset.validate().question.map((validation) => {
         return this.$t(validation);
       });
+    },
+    firstWorkspace() {
+      if (this.workspaces.length && !this.dataset.workspace) {
+        return this.workspaces[0];
+      }
     },
   },
   methods: {
@@ -94,6 +115,9 @@ export default {
       if (this.dataset.isValid) {
         this.$emit("create-dataset");
       }
+    },
+    selectWorkspace(workspace) {
+      this.$set(this.dataset, "workspace", workspace);
     },
   },
   setup() {
@@ -126,6 +150,17 @@ export default {
       hsla(227, 56%, 52%, 0) 100%
     );
   }
+  &__unique-workspace {
+    height: $base-space * 4;
+    line-height: $base-space * 4;
+    padding: 0 $base-space;
+    background: var(--bg-opacity-4);
+    border: none;
+    border-radius: $border-radius;
+    color: var(--fg-secondary);
+    @include font-size(12px);
+    user-select: none;
+  }
   &__content {
     display: flex;
     flex-direction: column;
@@ -149,6 +184,7 @@ export default {
   &__info {
     font-weight: 400;
     @include font-size(11px);
+    @include line-height(14px);
     color: var(--fg-tertiary);
     margin-bottom: 0;
   }
