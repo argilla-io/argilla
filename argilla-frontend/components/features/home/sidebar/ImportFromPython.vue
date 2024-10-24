@@ -12,6 +12,11 @@
     >
     <transition name="fade" appear>
       <dialog class="import-from-python__dialog" v-if="visibleSnippet">
+        <span
+          v-if="isRunningOnHF"
+          class="import-from-python__warning"
+          v-html="$t('home.importFromPythonHFWarning')"
+        />
         <div class="import-from-python__content" v-copy-code>
           <pre><code class="import-from-python__code" language="python" v-highlight>{{ snippet }}</code></pre>
         </div>
@@ -57,6 +62,18 @@ export default {
     top: $base-space * 3;
     right: $base-space * 3;
   }
+  &__warning {
+    background: var(--bg-banner-warning);
+    padding: calc($base-space / 2) $base-space;
+    @include font-size(12px);
+    :deep(a) {
+      color: var(--fg-primary);
+      outline: none;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
   &__dialog {
     position: absolute;
     right: -$base-space * 2;
@@ -66,23 +83,23 @@ export default {
     min-width: 400px;
     display: flex;
     flex-direction: column;
-    gap: $base-space;
+    padding: 0;
     background: var(--bg-accent-grey-1);
-    padding: $base-space * 2;
     border: 1px solid var(--bg-opacity-10);
     border-radius: $border-radius-m;
     box-shadow: $shadow;
     z-index: 2;
-    &__content {
-      display: flex;
-      flex-direction: column;
-      gap: $base-space;
-    }
     pre {
       margin: 0;
       overflow: auto;
       max-height: 500px;
     }
+  }
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
+    padding: $base-space * 2;
   }
   &__button.button {
     min-height: 42px;
