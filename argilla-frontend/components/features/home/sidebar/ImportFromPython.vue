@@ -79,7 +79,6 @@ export default {
       gap: $base-space;
     }
     pre {
-      white-space: pre-wrap;
       margin: 0;
       overflow: auto;
       max-height: 500px;

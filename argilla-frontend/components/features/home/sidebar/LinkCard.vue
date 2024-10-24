@@ -46,7 +46,7 @@ export default {
     flex-direction: column;
     gap: $base-space * 2;
   }
-  &__badge {
+  &__badge.badge {
     background: hsl(from hsl(235, 24%, 60%) h s l / 20%);
     border-color: hsl(from hsl(235, 24%, 60%) h s l / 30%);
   }
