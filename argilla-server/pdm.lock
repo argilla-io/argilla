@@ -5,7 +5,7 @@
 groups = ["default", "postgresql", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:48b12a94ef28b58816d58c6aeb07735c1c834e2b2edf9988649a3641ed3a08ab"
+content_hash = "sha256:066e76cb1e3cb4705b67f53c58bab3fbc941f60ebdf25a4fbfed9cc260a79ad4"
 
 [[metadata.targets]]
 requires_python = ">=3.8,<3.11"
@@ -152,7 +152,6 @@ version = "4.0.3"
 requires_python = ">=3.7"
 summary = "Timeout context manager for asyncio programs"
 groups = ["default", "postgresql"]
-marker = "python_version < \"3.12.0\""
 dependencies = [
     "typing-extensions>=3.6.5; python_version < \"3.8\"",
 ]

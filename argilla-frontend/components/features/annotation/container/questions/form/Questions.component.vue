@@ -22,6 +22,7 @@
         <SingleLabelComponent
           v-if="question.isSingleLabelType"
           ref="singleLabel"
+          :visible-shortcuts="visibleShortcuts"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
@@ -29,8 +30,9 @@
         />
 
         <MultiLabelComponent
-          ref="multiLabel"
           v-if="question.isMultiLabelType"
+          ref="multiLabel"
+          :visible-shortcuts="visibleShortcuts"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
@@ -56,6 +58,7 @@
         <SpanComponent
           v-if="question.isSpanType"
           ref="span"
+          :visible-shortcuts="visibleShortcuts"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           :enableSpanQuestionShortcutsGlobal="enableSpanQuestionShortcutsGlobal"
@@ -84,6 +87,10 @@ export default {
     isBulkMode: {
       type: Boolean,
       default: false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   computed: {

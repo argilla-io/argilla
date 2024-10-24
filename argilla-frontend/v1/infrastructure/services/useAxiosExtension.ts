@@ -1,16 +1,22 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 
+type PublicAxiosConfig = {
+  enableErrors: boolean;
+};
+
 export interface PublicNuxtAxiosInstance extends NuxtAxiosInstance {
-  makePublic: () => NuxtAxiosInstance;
+  makePublic: (config?: PublicAxiosConfig) => NuxtAxiosInstance;
 }
 
 export const useAxiosExtension = (axiosInstanceFn: () => NuxtAxiosInstance) => {
-  const makePublic = (axios: NuxtAxiosInstance) => {
+  const makePublic = (axios: NuxtAxiosInstance, config: PublicAxiosConfig) => {
     const publicAxios = axios.create({
       withCredentials: false,
     });
 
-    publicAxios.interceptors.response = axios.interceptors.response;
+    if (config.enableErrors) {
+      publicAxios.interceptors.response = axios.interceptors.response;
+    }
 
     return publicAxios;
   };
@@ -20,7 +26,11 @@ export const useAxiosExtension = (axiosInstanceFn: () => NuxtAxiosInstance) => {
 
     return {
       ...axios,
-      makePublic: () => makePublic(axios),
+      makePublic: (
+        config: PublicAxiosConfig = {
+          enableErrors: true,
+        }
+      ) => makePublic(axios, config),
     } as PublicNuxtAxiosInstance;
   };
 
