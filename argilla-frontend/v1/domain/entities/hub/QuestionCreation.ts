@@ -92,6 +92,29 @@ export class QuestionCreation {
     return this.createInitialAnswers();
   }
 
+  get isValid(): boolean {
+    return this.validate().length === 0;
+  }
+
+  validate(): string[] {
+    const errors = [];
+    if (this.isMultiLabelType || this.isSingleLabelType || this.isSpanType) {
+      if (this.options.length < 2) {
+        errors.push(
+          "datasetCreation.questions.labelSelection.atLeastTwoOptions"
+        );
+      }
+
+      if (this.options.some((option) => !option.id)) {
+        errors.push(
+          "datasetCreation.questions.labelSelection.optionsWithoutLabel"
+        );
+      }
+    }
+
+    return errors;
+  }
+
   public setSettings(settings: QuestionPrototype) {
     this.settings = new QuestionSetting(settings);
     this.initialize();

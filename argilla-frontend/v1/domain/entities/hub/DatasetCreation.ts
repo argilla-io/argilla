@@ -115,6 +115,10 @@ export class DatasetCreation {
       validations.question.push("datasetCreation.atLeastOneRequired");
     }
 
+    if (this.questions.some((q) => !q.isValid)) {
+      validations.question.push("datasetCreation.hasInvalidQuestions");
+    }
+
     return validations;
   }
 }

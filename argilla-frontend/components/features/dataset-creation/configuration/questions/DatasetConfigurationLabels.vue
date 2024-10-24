@@ -2,7 +2,7 @@
   <div>
     <div class="dataset-config-label__input-container">
       <input
-        :class="{ error: error }"
+        :class="{ error: errors.length }"
         type="text"
         :value="optionsJoinedByCommas"
         @input="onInput($event.target.value)"
@@ -14,8 +14,8 @@
     </div>
     <label
       class="dataset-config-label__label --error"
-      v-if="error"
-      v-text="error"
+      v-if="errors.length"
+      v-text="errors.join(', ')"
     />
     <label
       v-else
@@ -29,13 +29,13 @@
 export default {
   data() {
     return {
-      error: "",
+      errors: [],
       isDirty: false,
     };
   },
   props: {
-    value: {
-      type: Array,
+    question: {
+      type: Object,
       required: true,
     },
     placeholder: {
@@ -43,32 +43,14 @@ export default {
       default: "",
     },
   },
-  model: {
-    prop: "value",
-    event: "on-value-change",
-  },
   computed: {
     optionsJoinedByCommas() {
-      return this.value.map((item) => item.text).join(",");
-    },
-  },
-  watch: {
-    error(newValue) {
-      if (this.isDirty && newValue) {
-        this.validateOptions();
-      }
+      return this.question.options.map((item) => item.text).join(",");
     },
   },
   methods: {
     validateOptions() {
-      const options = this.value.map((item) => item.text);
-      if (!options.length) {
-        this.error = "At least two labels are required";
-      } else if (options.some((option) => !option)) {
-        this.error = "Empty labels are not allowed";
-      } else {
-        this.error = "";
-      }
+      this.errors = this.question.validate();
     },
     onFocus() {
       this.$emit("is-focused", true);
@@ -85,7 +67,9 @@ export default {
         id: text.trim(),
         text: text,
       }));
-      this.$emit("on-value-change", trimmedOptionsArray);
+
+      this.question.settings.options = trimmedOptionsArray;
+
       if (this.isDirty) {
         this.validateOptions();
       }
