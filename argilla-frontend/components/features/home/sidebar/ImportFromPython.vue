@@ -65,8 +65,8 @@ export default {
   &__warning {
     background: var(--bg-banner-warning);
     padding: calc($base-space / 2) $base-space;
-    border-top-left-radius: $border-radius;
-    border-top-right-radius: $border-radius;
+    border-top-left-radius: $border-radius-m;
+    border-top-right-radius: $border-radius-m;
     @include font-size(12px);
     :deep(a) {
       color: var(--fg-primary);
