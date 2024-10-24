@@ -265,7 +265,7 @@ export default {
     importFromHub: "Import from Hub",
     importFromPython: "Import from Python",
     importFromPythonHFWarning:
-      "If you're using a private Space, check the <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>docs</a",
+      "If you're using a private Space, check the <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>docs</a>.",
     exampleDatasetsTitle: "Don’t know where to start?",
     exampleDatasetsText: "Explore these example datasets",
     guidesTitle: "First time in Argilla?",
