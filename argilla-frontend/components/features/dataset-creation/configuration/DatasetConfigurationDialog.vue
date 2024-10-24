@@ -43,7 +43,7 @@
           <DatasetConfigurationSelector
             class="config-form__selector"
             :options="dataset.selectedSubset.splits"
-            v-model="dataset.selectedSplit"
+            v-model="dataset.selectedSubset.selectedSplit"
           />
         </div>
         <p

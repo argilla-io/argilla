@@ -98,8 +98,9 @@ export class Subset {
           {
             type: "label_selection",
             options: structure.options.map((o) => ({
-              text: o,
-              value: o,
+              text: o.trim(),
+              value: o.trim(),
+              id: o.trim(),
             })),
           },
           structure.name

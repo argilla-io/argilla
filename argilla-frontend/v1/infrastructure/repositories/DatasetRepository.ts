@@ -45,6 +45,7 @@ export class DatasetRepository implements IDatasetRepository {
           subset: dataset.selectedSubset.name,
           split: dataset.selectedSubset.selectedSplit.name,
           mapping: dataset.mappings,
+          imported: "UI",
         },
       });
 
