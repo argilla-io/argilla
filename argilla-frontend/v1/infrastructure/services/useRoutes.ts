@@ -19,8 +19,8 @@ type QueryParam = {
 };
 
 export const ROUTES = {
+  index: "/",
   signIn: "/sign-in",
-  datasets: "datasets",
   annotationPage: (datasetId: string) =>
     `/dataset/${datasetId}/annotation-mode`,
   settings: (id: string) => `/dataset/${id}/settings`,
@@ -61,8 +61,8 @@ export const useRoutes = () => {
     router.push(ROUTES.importDatasetFromHub(id));
   };
 
-  const goToDatasetsList = () => {
-    router.push({ path: `/${ROUTES.datasets}` });
+  const goToHome = () => {
+    router.push(ROUTES.index);
   };
 
   const goToSignIn = () => {
@@ -153,7 +153,7 @@ export const useRoutes = () => {
     getQuery,
     goToImportDatasetFromHub,
     goToFeedbackTaskAnnotationPage,
-    goToDatasetsList,
+    goToHome,
     goToSetting,
     getDatasetLink,
     setQueryParams,

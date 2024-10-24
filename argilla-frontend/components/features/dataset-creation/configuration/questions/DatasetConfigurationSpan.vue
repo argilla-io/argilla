@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="dataset-config-label__input-container">
+    <div
+      class="dataset-config-label__input-container"
+      :class="{ '--error': errors.length }"
+    >
       <input
-        :class="{ error: errors.length }"
         type="text"
         :value="optionsJoinedByCommas"
         @input="onInput($event.target.value)"
@@ -12,11 +14,7 @@
         class="dataset-config-label__input"
       />
     </div>
-    <label
-      class="dataset-config-label__label --error"
-      v-if="errors.length"
-      v-text="errors.join(', ')"
-    />
+    <Validation v-if="errors.length" :validations="translatedValidations" />
     <label
       v-else
       class="dataset-config-label__label"
@@ -46,6 +44,11 @@ export default {
   computed: {
     optionsJoinedByCommas() {
       return this.question.options.map((item) => item.text).join(",");
+    },
+    translatedValidations() {
+      return this.errors.map((validation) => {
+        return this.$t(validation);
+      });
     },
   },
   methods: {
@@ -88,6 +91,9 @@ $error-color: hsl(3, 100%, 69%);
     border-radius: $border-radius;
     border: 1px solid var(--bg-opacity-10);
     background: var(--bg-accent-grey-1);
+    &.--error {
+      border-color: $error-color;
+    }
     &:focus-within {
       border-color: var(--fg-cuaternary);
     }
@@ -108,9 +114,6 @@ $error-color: hsl(3, 100%, 69%);
   &__label {
     color: var(--fg-secondary);
     @include font-size(12px);
-    &.--error {
-      color: var(--fg-error);
-    }
   }
 }
 </style>
