@@ -45,7 +45,7 @@ class DatasetPublishValidator:
     @classmethod
     async def validate(cls, db: AsyncSession, dataset: Dataset) -> None:
         await cls._validate_has_not_been_published_yet(db, dataset)
-        await cls._validate_has_at_least_one_required_field(db, dataset)
+        await cls._validate_has_at_least_one_field(db, dataset)
         await cls._validate_has_at_least_one_required_question(db, dataset)
 
     @classmethod
@@ -54,9 +54,9 @@ class DatasetPublishValidator:
             raise UnprocessableEntityError("Dataset has already been published")
 
     @classmethod
-    async def _validate_has_at_least_one_required_field(cls, db: AsyncSession, dataset: Dataset) -> None:
-        if await Field.count_by(db, dataset_id=dataset.id, required=True) == 0:
-            raise UnprocessableEntityError("Dataset cannot be published without required fields")
+    async def _validate_has_at_least_one_field(cls, db: AsyncSession, dataset: Dataset) -> None:
+        if await Field.count_by(db, dataset_id=dataset.id) == 0:
+            raise UnprocessableEntityError("Dataset cannot be published without fields")
 
     @classmethod
     async def _validate_has_at_least_one_required_question(cls, db: AsyncSession, dataset: Dataset) -> None:

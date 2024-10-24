@@ -200,17 +200,6 @@ class HubImportExportMixin(DiskImportExportMixin):
     @staticmethod
     def _log_dataset_records(hf_dataset: "HFDataset", dataset: "Dataset"):
         """This method extracts the responses from a Hugging Face dataset and returns a list of `Record` objects"""
-        # THIS IS REQUIRED SINCE THE NAME RESTRICTION IN ARGILLA. HUGGING FACE DATASET COLUMNS ARE CASE SENSITIVE
-        # Also, there is a logic with column names including ".responses" and ".suggestion" in the name.
-        columns_map = {}
-        for column in hf_dataset.column_names:
-            if ".responses" in column or ".suggestion" in column:
-                columns_map[column] = column.lower()
-            else:
-                columns_map[column] = dataset.settings._sanitize_settings_name(column)
-
-        hf_dataset = hf_dataset.rename_columns(columns_map)
-
         # Identify columns that columns that contain responses
         responses_columns = [col for col in hf_dataset.column_names if ".responses" in col]
         response_questions = defaultdict(dict)
@@ -243,7 +232,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         # Extract responses and create Record objects
         records = []
-        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset)
+        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset, mapper=mapper)
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
             for question_name, values in response_questions.items():

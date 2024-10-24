@@ -35,9 +35,10 @@ from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
     fetch_records_by_ids_as_dict,
 )
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
 from argilla_server.search_engine import SearchEngine
-from argilla_server.validators.records import RecordsBulkCreateValidator, RecordsBulkUpsertValidator
+from argilla_server.validators.records import RecordsBulkCreateValidator, RecordUpsertValidator
 
 
 class CreateRecordsBulk:
@@ -144,16 +145,24 @@ class CreateRecordsBulk:
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
-    async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
+    async def upsert_records_bulk(
+        self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert, raise_on_error: bool = True
+    ) -> RecordsBulkWithUpdateInfo:
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
-        # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
-        # computed inside the validator
-        await RecordsBulkUpsertValidator.validate(bulk_upsert, dataset, found_records)
 
         records = []
-
-        for record_upsert in bulk_upsert.items:
+        for idx, record_upsert in enumerate(bulk_upsert.items):
             record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
+
+            try:
+                await RecordUpsertValidator.validate(record_upsert, dataset, record)
+            except Exception as ex:
+                if raise_on_error:
+                    raise UnprocessableEntityError(f"Record at position {idx} is not valid because {ex}") from ex
+                else:
+                    # NOTE: Ignore the errors for this record and continue with the next one
+                    continue
+
             if not record:
                 record = Record(
                     fields=jsonable_encoder(record_upsert.fields),

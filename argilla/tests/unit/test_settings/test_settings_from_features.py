@@ -38,24 +38,6 @@ def test_define_settings_from_features_image():
     assert settings.fields[0].name == "image_column"
 
 
-@pytest.mark.parametrize(
-    "column,name",
-    [
-        ("Text column", "text_column"),
-        ("text column", "text_column"),
-        ("text:column", "text_column"),
-        ("text.column", "text_column"),
-    ],
-)
-def test_define_settings_from_features_with_non_curated_column_name(column: str, name: str):
-    features = {column: {"_type": "Value", "dtype": "string"}}
-
-    settings = _define_settings_from_features(features, feature_mapping={})
-
-    assert len(settings.fields) == 1
-    assert settings.fields[0].name == name
-
-
 def test_define_settings_from_bool_features():
     features = {"text": {"_type": "Value", "dtype": "string"}, "bool_column": {"_type": "Value", "dtype": "bool"}}
     settings = _define_settings_from_features(features, feature_mapping={})
@@ -63,14 +45,6 @@ def test_define_settings_from_bool_features():
     assert len(settings.metadata) == 1
     assert isinstance(settings.metadata[0], rg.TermsMetadataProperty)
     assert settings.metadata[0].name == "bool_column"
-
-
-@pytest.mark.parametrize("column", ["text<column", "text>column", "text|column", "text]column", "text/column"])
-def test_define_settings_from_features_with_unsupported_column_name(column: str):
-    features = {column: {"_type": "Value", "dtype": "string"}}
-
-    with pytest.raises(SettingsError):
-        _define_settings_from_features(features, feature_mapping={})
 
 
 def test_define_settings_from_features_multiple():
