@@ -13,7 +13,7 @@
     <transition name="fade" appear>
       <dialog class="import-from-python__dialog" v-if="visibleSnippet">
         <span
-          v-if="isRunningOnHF"
+          v-if="!isRunningOnHF"
           class="import-from-python__warning"
           v-html="$t('home.importFromPythonHFWarning')"
         />
@@ -65,6 +65,8 @@ export default {
   &__warning {
     background: var(--bg-banner-warning);
     padding: calc($base-space / 2) $base-space;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
     @include font-size(12px);
     :deep(a) {
       color: var(--fg-primary);
