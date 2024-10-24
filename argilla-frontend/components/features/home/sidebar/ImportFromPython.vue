@@ -13,7 +13,7 @@
     <transition name="fade" appear>
       <dialog class="import-from-python__dialog" v-if="visibleSnippet">
         <span
-          v-if="!isRunningOnHF"
+          v-if="isRunningOnHF"
           class="import-from-python__warning"
           v-html="$t('home.importFromPythonHFWarning')"
         />
