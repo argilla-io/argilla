@@ -20,7 +20,7 @@ import warnings
 from argilla._exceptions import RecordsIngestionError
 from argilla.records._resource import Record
 from argilla.responses import Response
-from argilla.settings import AbstractField, VectorField
+from argilla.settings import FieldBase, VectorField
 from argilla.settings._metadata import MetadataPropertyBase
 from argilla.settings._question import QuestionPropertyBase
 from argilla.suggestions import Suggestion
@@ -184,7 +184,7 @@ class IngestedRecordMapper:
             attribute_route.type = AttributeType.SUGGESTION
         elif isinstance(schema_item, QuestionPropertyBase) and attribute_route.type == AttributeType.RESPONSE:
             attribute_route.type = AttributeType.RESPONSE
-        elif isinstance(schema_item, AbstractField):
+        elif isinstance(schema_item, FieldBase):
             attribute_route.type = AttributeType.FIELD
         elif isinstance(schema_item, VectorField):
             attribute_route.type = AttributeType.VECTOR

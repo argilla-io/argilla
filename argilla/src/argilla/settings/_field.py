@@ -40,10 +40,10 @@ except ImportError:
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-__all__ = ["Field", "AbstractField", "TextField", "ImageField", "ChatField", "CustomField"]
+__all__ = ["Field", "FieldBase", "TextField", "ImageField", "ChatField", "CustomField"]
 
 
-class AbstractField(ABC, SettingsPropertyBase):
+class FieldBase(ABC, SettingsPropertyBase):
     """Abstract base class to work with Field resources"""
 
     _model: FieldModel
@@ -96,7 +96,7 @@ class AbstractField(ABC, SettingsPropertyBase):
         return self
 
 
-class TextField(AbstractField):
+class TextField(FieldBase):
     """Text field for use in Argilla `Dataset` `Settings`"""
 
     def __init__(
@@ -136,7 +136,7 @@ class TextField(AbstractField):
         self._model.settings.use_markdown = value
 
 
-class ImageField(AbstractField):
+class ImageField(FieldBase):
     """Image field for use in Argilla `Dataset` `Settings`"""
 
     def __init__(
@@ -167,7 +167,7 @@ class ImageField(AbstractField):
         )
 
 
-class ChatField(AbstractField):
+class ChatField(FieldBase):
     """Chat field for use in Argilla `Dataset` `Settings`"""
 
     def __init__(
@@ -208,7 +208,7 @@ class ChatField(AbstractField):
         self._model.settings.use_markdown = value
 
 
-class CustomField(AbstractField):
+class CustomField(FieldBase):
     """Custom field for use in Argilla `Dataset` `Settings`"""
 
     def __init__(
