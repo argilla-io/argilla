@@ -96,6 +96,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$error-color: hsl(3, 100%, 69%);
 .dataset-config-label {
   &__input-container {
     width: 100%;
@@ -123,7 +124,7 @@ export default {
   &__label {
     color: var(--fg-secondary);
     @include font-size(12px);
-    &--error {
+    &.--error {
       color: var(--fg-error);
     }
   }
