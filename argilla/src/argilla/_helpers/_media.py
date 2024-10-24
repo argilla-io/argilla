@@ -14,11 +14,13 @@
 
 import base64
 import io
+import re
 import warnings
 from pathlib import Path
 from typing import Union
 
 from PIL import Image
+from cairosvg import image
 
 
 def pil_to_data_uri(image_object: "Image") -> str:
@@ -28,6 +30,8 @@ def pil_to_data_uri(image_object: "Image") -> str:
     Returns:
         str: The data URI string.
     """
+    if image_object is None:
+        return None
     if not isinstance(image_object, Image.Image):
         raise ValueError("The image_object must be a PIL Image object.")
 
