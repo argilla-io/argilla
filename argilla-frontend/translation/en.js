@@ -268,6 +268,7 @@ export default {
     exampleDatasetsText: "Explore these example datasets",
     guidesTitle: "First time in Argilla?",
     guidesText: "Take a look at these guides:",
+    pasteRepoIdPlaceholder: "Paste repoId name",
   },
   datasetCreation: {
     questions: {
