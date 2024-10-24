@@ -6,9 +6,7 @@ export const useImportFromPython = () => {
 
   const user = getUser();
 
-  const HFHeader = isRunningOnHuggingFace()
-    ? "headers=\"{'Authorization': f'Bearer {HF_TOKEN}'\"}"
-    : "";
+  const isRunningOnHF = isRunningOnHuggingFace();
 
   const snippet = `
 import argilla as rg
@@ -16,7 +14,6 @@ import argilla as rg
 client = rg.Argilla(
     api_url="${window.location.origin}",
     api_key="${user.apiKey}",
-    ${HFHeader}
 )
 
 settings = rg.Settings(
@@ -50,5 +47,5 @@ records = [
 dataset.records.log(records)
 `;
 
-  return { snippet };
+  return { snippet, isRunningOnHF };
 };
