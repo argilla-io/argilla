@@ -29,7 +29,10 @@
               width="20"
               height="20"
             ></svgicon>
-            <BaseInput v-model="repositoryId" placeholder="Repository ID" />
+            <BaseInput
+              v-model="repositoryId"
+              :placeholder="$t('home.pasteRepoIdPlaceholder')"
+            />
             <BaseButton
               :disabled="!repositoryId"
               class="secondary import-from-hub__button-submit"
@@ -55,7 +58,7 @@ export default {
   },
   data() {
     return {
-      repositoryId: "argilla/FinePersonas-v0.1",
+      repositoryId: "",
     };
   },
 };

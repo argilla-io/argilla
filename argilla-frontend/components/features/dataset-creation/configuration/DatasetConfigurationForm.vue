@@ -53,7 +53,7 @@
       <div class="config-form__col-wrapper">
         <div class="config-form__col">
           <div class="config-form__col__header">
-            {{ $t("datasetCreation.questions") }}
+            {{ $t("datasetCreation.questionsTitle") }}
             <DatasetConfigurationAddQuestion
               :options="[
                 'text',

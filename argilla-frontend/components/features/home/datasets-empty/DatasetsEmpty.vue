@@ -1,7 +1,7 @@
 <template>
   <div class="datasets-empty">
     <span class="datasets-empty__message" v-text="$t('home.none')" />
-    <div class="datasets-empty__cards">
+    <div class="datasets-empty__cards" v-if="isAdminOrOwnerRole">
       <DatasetListCard
         :title="$t('home.importTitle')"
         :text="$t('home.importText')"
@@ -17,7 +17,12 @@
 </template>
 
 <script>
-export default {};
+import { useDatasetEmptyViewModel } from "./useDatasetsEmpty";
+export default {
+  setup() {
+    return useDatasetEmptyViewModel();
+  },
+};
 </script>
 <style lang="scss" scoped>
 .dataset {

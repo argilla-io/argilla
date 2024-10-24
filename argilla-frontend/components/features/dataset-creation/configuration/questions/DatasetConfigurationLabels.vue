@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="dataset-config-label__input-container">
+    <div
+      :class="{ '--error': errors.length }"
+      class="dataset-config-label__input-container"
+    >
       <input
-        :class="{ error: error }"
         type="text"
         :value="optionsJoinedByCommas"
         @input="onInput($event.target.value)"
@@ -12,11 +14,7 @@
         class="dataset-config-label__input"
       />
     </div>
-    <label
-      class="dataset-config-label__label --error"
-      v-if="error"
-      v-text="error"
-    />
+    <Validation v-if="errors.length" :validations="translatedValidations" />
     <label
       v-else
       class="dataset-config-label__label"
@@ -29,13 +27,13 @@
 export default {
   data() {
     return {
-      error: "",
+      errors: [],
       isDirty: false,
     };
   },
   props: {
-    value: {
-      type: Array,
+    question: {
+      type: Object,
       required: true,
     },
     placeholder: {
@@ -43,32 +41,19 @@ export default {
       default: "",
     },
   },
-  model: {
-    prop: "value",
-    event: "on-value-change",
-  },
   computed: {
     optionsJoinedByCommas() {
-      return this.value.map((item) => item.text).join(",");
+      return this.question.options.map((item) => item.text).join(",");
     },
-  },
-  watch: {
-    error(newValue) {
-      if (this.isDirty && newValue) {
-        this.validateOptions();
-      }
+    translatedValidations() {
+      return this.errors.map((validation) => {
+        return this.$t(validation);
+      });
     },
   },
   methods: {
     validateOptions() {
-      const options = this.value.map((item) => item.text);
-      if (!options.length) {
-        this.error = "At least two labels are required";
-      } else if (options.some((option) => !option)) {
-        this.error = "Empty labels are not allowed";
-      } else {
-        this.error = "";
-      }
+      this.errors = this.question.validate();
     },
     onFocus() {
       this.$emit("is-focused", true);
@@ -85,7 +70,9 @@ export default {
         id: text.trim(),
         text: text,
       }));
-      this.$emit("on-value-change", trimmedOptionsArray);
+
+      this.question.settings.options = trimmedOptionsArray;
+
       if (this.isDirty) {
         this.validateOptions();
       }
@@ -103,6 +90,9 @@ $error-color: hsl(3, 100%, 69%);
     border-radius: $border-radius;
     border: 1px solid var(--bg-opacity-10);
     background: var(--bg-accent-grey-1);
+    &.--error {
+      border-color: $error-color;
+    }
     &:focus-within {
       border-color: var(--fg-cuaternary);
     }
@@ -123,9 +113,6 @@ $error-color: hsl(3, 100%, 69%);
   &__label {
     color: var(--fg-secondary);
     @include font-size(12px);
-    &.--error {
-      color: $error-color;
-    }
   }
 }
 </style>

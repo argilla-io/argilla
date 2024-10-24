@@ -19,12 +19,12 @@
           question.settings.type.isSingleLabelType ||
           question.settings.type.isMultiLabelType
         "
-        v-model="question.settings.options"
+        :question="question"
         @is-focused="$emit('is-focused', $event)"
       />
       <DatasetConfigurationSpan
         v-else-if="question.settings.type.isSpanType"
-        v-model="question.settings.options"
+        :question="question"
         @is-focused="$emit('is-focused', $event)"
       />
       <DatasetConfigurationRating

@@ -268,10 +268,18 @@ export default {
     exampleDatasetsText: "Explore these example datasets",
     guidesTitle: "First time in Argilla?",
     guidesText: "Take a look at these guides:",
+    pasteRepoIdPlaceholder: "Paste repoId name",
   },
   datasetCreation: {
+    questions: {
+      labelSelection: {
+        atLeastTwoOptions: "At least two options are required",
+        optionsWithoutLabel: "Empty options are not allowed",
+      },
+    },
     atLeastOneQuestion: "At least one question is required",
     atLeastOneRequired: "At least one required question is required",
+    hasInvalidQuestions: "Some questions are invalid",
     createDataset: "Create the dataset in Argilla",
     datasetName: "Dataset name",
     name: "Name",
@@ -281,7 +289,7 @@ export default {
       "The created dataset will include the first 10K rows and further records can be logged via the python SDK.",
     button: "Create dataset",
     fields: "Fields",
-    questions: "Questions",
+    questionsTitle: "Questions",
     yourQuestions: "Your questions",
     requiredField: "Required field",
     requiredQuestion: "Required question",
