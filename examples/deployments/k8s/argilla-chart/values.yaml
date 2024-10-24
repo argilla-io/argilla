@@ -17,7 +17,6 @@ argilla:
     enabled: true
     accessMode: ReadWriteOnce
     size: 2Gi
-    storageClass: "standard"
     mountPath: "/data"
   ingress:
     enabled: true
@@ -54,7 +53,6 @@ elasticsearch:
     enabled: true
     storage:
       size: 1Gi
-      storageClass: "standard"
       accessModes:
       - ReadWriteOnce
 
@@ -71,7 +69,6 @@ redis:
   master:
     persistence:
       enabled: true
-      storageClass: "standard"
       accessModes:
         - ReadWriteOnce
       size: 1Gi

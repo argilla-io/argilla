@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Changed
 
 - Changed supported values for terms metadata options to accept other than strings values. ([#5589](https://github.com/argilla-io/argilla/pull/5589))
+- Changed Helm chart to allow the use of a default storage class when none is explicitly specified. This ensures compatibility with environments like k3d that do not have a 'standard' storage class by default.
 
 ### Removed
 
