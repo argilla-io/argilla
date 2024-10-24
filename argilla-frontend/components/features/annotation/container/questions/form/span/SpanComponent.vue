@@ -8,6 +8,7 @@
     <EntityLabelSelectionComponent
       v-if="supportedSpanAnnotation"
       v-model="question.answer.options"
+      :visible-shortcuts="visibleShortcuts"
       :componentId="question.id"
       :maxOptionsToShowBeforeCollapse="this.question.settings.visible_options"
       :isFocused="isFocused"
@@ -42,6 +43,10 @@ export default {
     isBulkMode: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   computed: {

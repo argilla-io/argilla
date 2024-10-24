@@ -13,6 +13,16 @@ export const createEmptyDataset = () => {
       strategy: "FAKE",
       minSubmitted: 1,
     },
+    {
+      repoId: "FAKE_REPO_ID",
+      subset: "FAKE_SUBSET",
+      split: "FAKE_SPLIT",
+      mapping: {
+        fields: [{ source: "FAKE_SOURCE", target: "FAKE_TARGET" }],
+        metadata: [{ source: "FAKE_SOURCE", target: "FAKE_TARGET" }],
+        suggestions: [{ source: "FAKE_SOURCE", target: "FAKE_TARGET" }],
+      },
+    },
     "",
     "",
     ""

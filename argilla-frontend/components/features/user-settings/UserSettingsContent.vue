@@ -66,7 +66,7 @@ import { useUserInfoViewModel } from "./useUserInfoViewModel";
 export default {
   methods: {
     goToWorkspace(workspace) {
-      this.$router.push(`/datasets?workspaces=${workspace}`);
+      this.$router.push(`/?workspaces=${workspace}`);
     },
   },
   setup() {

@@ -17,6 +17,7 @@
 
 <template>
   <input
+    ref="input"
     class="input"
     :type="type"
     :name="name"
@@ -65,6 +66,7 @@ export default {
       this.setParentPlaceholder();
       this.handleMaxLength();
       this.updateValues();
+      this.$refs.input.focus();
     });
   },
 };

@@ -83,7 +83,7 @@ export default {
   },
   computed: {
     spanQuestions() {
-      return this.record?.questions.filter((q) => q.isSpanType);
+      return this.record?.questions?.filter((q) => q.isSpanType);
     },
   },
 };
@@ -95,7 +95,5 @@ export default {
   flex-direction: column;
   gap: $base-space;
   min-width: 0;
-  height: 100%;
-  min-height: 0;
 }
 </style>
