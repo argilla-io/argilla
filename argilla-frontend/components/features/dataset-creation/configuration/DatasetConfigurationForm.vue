@@ -159,6 +159,9 @@ export default {
     justify-content: center;
     gap: $base-space * 2;
     min-height: 0;
+    @include media("<tablet") {
+      flex-direction: column;
+    }
   }
   &__col-wrapper {
     position: relative;

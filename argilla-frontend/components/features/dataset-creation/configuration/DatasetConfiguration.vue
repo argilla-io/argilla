@@ -132,6 +132,9 @@ export default {
     width: 40vw;
     height: 100%;
     overflow: auto;
+    @include media("<tablet") {
+      width: 100%;
+    }
   }
   &__empty-questions {
     width: 100%;
