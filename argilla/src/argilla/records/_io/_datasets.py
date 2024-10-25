@@ -13,14 +13,13 @@
 # limitations under the License.
 
 import warnings
-from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
 
-from datasets import Dataset as HFDataset
+from datasets import Dataset as HFDataset, Sequence
 from datasets import Image, ClassLabel, Value
 
-from argilla.records._io._generic import GenericIO
 from argilla._helpers._media import pil_to_data_uri, uncast_image
+from argilla.records._io._generic import GenericIO
 
 if TYPE_CHECKING:
     from argilla.records import Record
@@ -56,6 +55,34 @@ def _cast_images_as_urls(hf_dataset: "HFDataset", columns: List[str]) -> "HFData
     return hf_dataset
 
 
+def _int2class_name(feature: ClassLabel, value: int) -> Optional[str]:
+    try:
+        return feature.int2str(value)
+    except Exception as ex:
+        warnings.warn(f"Could not cast {value} to string. Error: {ex}")
+        return None
+
+
+def _cast_class_label_sequence_as_string_list(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
+    def map2str_list(x: dict, column_name: str, features: dict):
+        value = x[column_name]
+        feature = features[column]
+
+        value = [_int2class_name(feature.feature, v) for v in value]
+        return {column: value}
+
+    for column in columns:
+        features = hf_dataset.features.copy()
+        features[column] = Sequence(Value("string"))
+        hf_dataset = hf_dataset.map(
+            map2str_list,
+            fn_kwargs={"column_name": column, "features": hf_dataset.features},
+            features=features,
+        )
+
+    return hf_dataset
+
+
 def _cast_classlabels_as_strings(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
     """Cast the class label features in the Hugging Face dataset as strings.
 
@@ -68,12 +95,10 @@ def _cast_classlabels_as_strings(hf_dataset: "HFDataset", columns: List[str]) ->
     """
 
     def label_column2str(x: dict, column: str, features: dict) -> Dict[str, Union[str, None]]:
-        try:
-            value = features[column].int2str(x[column])
-        except Exception as ex:
-            warnings.warn(f"Could not cast {x[column]} to string. Error: {ex}")
-            value = None
+        value = x[column]
+        feature = features[column]
 
+        value = _int2class_name(feature, value)
         return {column: value}
 
     for column in columns:
@@ -84,12 +109,6 @@ def _cast_classlabels_as_strings(hf_dataset: "HFDataset", columns: List[str]) ->
         )
 
     return hf_dataset
-
-
-FEATURE_CASTERS = {
-    Image: _cast_images_as_urls,
-    ClassLabel: _cast_classlabels_as_strings,
-}
 
 
 def _uncast_uris_as_images(hf_dataset: "HFDataset", columns: List[str]) -> "HFDataset":
@@ -253,15 +272,25 @@ class HFDatasetsIO:
                 with_indices=True,
             )
 
-        casted_features = defaultdict(list)
+        image_columns = []
+        class_label_columns = []
+        class_label_sequence_columns = []
 
         for name, feature in hf_dataset.features.items():
             if isinstance(feature, Image):
-                casted_features[Image].append(name)
-            if isinstance(feature, ClassLabel):
-                casted_features[ClassLabel].append(name)
+                image_columns.append(name)
+            elif isinstance(feature, ClassLabel):
+                class_label_columns.append(name)
+            elif isinstance(feature, Sequence) and isinstance(feature.feature, ClassLabel):
+                class_label_sequence_columns.append(name)
 
-        for feature_type, columns in casted_features.items():
-            hf_dataset = FEATURE_CASTERS[feature_type](hf_dataset, columns)
+        if image_columns:
+            hf_dataset = _cast_images_as_urls(hf_dataset, image_columns)
+
+        if class_label_columns:
+            hf_dataset = _cast_classlabels_as_strings(hf_dataset, class_label_columns)
+
+        if class_label_sequence_columns:
+            hf_dataset = _cast_class_label_sequence_as_string_list(hf_dataset, class_label_sequence_columns)
 
         return hf_dataset
