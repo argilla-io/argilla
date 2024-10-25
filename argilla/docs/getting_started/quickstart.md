@@ -56,7 +56,7 @@ The quickest way to start exploring the tool and create your first dataset is by
 
 To do this, log in to the Argilla UI and in the Home page click on "Import from Hub". You can choose one of the sample datasets or paste a repo id in the input. This will look something like `stanfordnlp/imdb`.
 
-Argilla will automatically interpret the columns in the dataset to map them to Fields and Questions. 
+Argilla will automatically interpret the columns in the dataset to map them to Fields and Questions.
 
 ![Screenshot of the dataset configuration page](...)
 
