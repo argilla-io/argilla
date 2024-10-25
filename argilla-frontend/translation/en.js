@@ -302,6 +302,7 @@ export default {
     preview: "Preview",
     importData: "Import data",
     addRecords: "Add records",
+    cantLoadRepository: "Not valid repo id",
   },
   config: {
     field: {

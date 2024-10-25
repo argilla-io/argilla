@@ -22,7 +22,10 @@
       >
       <form @submit.prevent="$emit('on-import-dataset', repositoryId)">
         <transition name="slide-right" appear>
-          <BaseInputContainer class="import-from-hub__input">
+          <BaseInputContainer
+            class="import-from-hub__input"
+            :class="{ '--error': error }"
+          >
             <svgicon
               class="import-from-hub__button__icon"
               name="link"
@@ -42,6 +45,9 @@
             ></BaseButton>
           </BaseInputContainer>
         </transition>
+        <span v-if="error" class="import-from-hub__error">{{
+          $t("datasetCreation.cantLoadRepository")
+        }}</span>
       </form>
     </template>
   </div>
@@ -55,6 +61,9 @@ export default {
     isExpanded: {
       type: Boolean,
     },
+    error: {
+      type: String,
+    },
   },
   data() {
     return {
@@ -65,6 +74,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$color-error: var(--color-brand);
 .import-from-hub {
   &.--expanded {
     width: 100%;
@@ -96,6 +106,9 @@ export default {
     background: var(--bg-accent-grey-2);
     border-radius: $border-radius;
     box-shadow: 0 0 0 1px var(--bg-opacity-10);
+    &.--error {
+      box-shadow: 0 0 0 1px $color-error !important;
+    }
     &.re-has-value:focus-within {
       box-shadow: 0 0 0 1px var(--fg-cuaternary);
       .import-from-hub__button__icon {
@@ -128,6 +141,12 @@ export default {
   }
   &__button-submit.button {
     padding: $base-space;
+  }
+  &__error {
+    display: block;
+    margin-top: $base-space;
+    color: $color-error;
+    @include font-size(12px);
   }
 }
 .slide-right-enter-active,
