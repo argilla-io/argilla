@@ -31,14 +31,14 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 !!! docker "Deploy with Docker"
      If you want to **run Argilla locally on your machine or a server**, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
 
-## Sign in into the Argilla UI
+## Sign in to the Argilla UI
+
 If everything went well, you should see the Argilla sign in page that looks like this:
 
 ![Focus view](../assets/images/getting_started/signin-hf-page.png){ width=100% height=100% }
 
 !!! info "Building errors"
     If you get a build error, sometimes restarting the Space from the Settings page works, otherwise [check the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
-
 
 In the sign in page:
 
@@ -48,7 +48,36 @@ In the sign in page:
 !!! info "Unauthorized error"
     Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button solves the issue.
 
-Congrats! Your Argilla server is ready to start your first project using the Python SDK. You now have full rights to create datasets. Follow the instructions in the home page, or keep reading this guide if you want a more detailed explanation.
+Congrats! Your Argilla server is ready to start your first project.
+
+## Import a dataset from the Hub
+
+The quickest way to start exploring the tool and create your first dataset is by importing an exiting one from the Hugging Face Hub.
+
+To do this, log in to the Argilla UI and in the Home page click on "Import from Hub". You can choose one of the sample datasets or paste a repo id in the input. This will look something like `stanfordnlp/imdb`.
+
+Argilla will automatically interpret the columns in the dataset to map them to Fields and Questions. 
+
+![Screenshot of the dataset configuration page](...)
+
+**Fields** include the data that you want feedback on, like text, chats, or images. If you want to exclude any of the Fields that Argilla identified for you, simply select the "No mapping" option.
+
+**Questions** are the feedback you want to collect, like labels, ratings, rankings, or text. If Argilla identified questions in your dataset that you don't want, you can eliminate them. You can also add questions of your own.
+
+!!! note
+    You will be able to modify some elements of the configuration of the dataset after it has been created from the Dataset Settings page e.g., the titles of fields and questions. Check all the settings you can modify in the [Update a dataset](../how_to_guides/dataset.md#update-a-dataset) section.
+
+When you're happy with the result, you'll need to give a name to your dataset, select a workspace and choose a split, if applicable. Then, Argilla will start importing the dataset in the background. Now you're all set up to start annotating!
+
+!!! note
+    If your dataset is bigger than 10k records, at this stage Argilla will only import the first 10k. You can import the rest of the records at any point using the Python SDK.
+
+    To do that, open your dataset and copy the code snippet provided under "Import data". Now, open a Jupyter or Google Colab notebook and install argilla:
+
+    ```python
+    !pip install argilla
+    ```
+    Then, paste and run your code snippet. This will import the remaining records to your dataset.
 
 ## Install the Python SDK
 
@@ -59,6 +88,7 @@ pip install argilla
 ```
 
 ## Create your first dataset
+
 For getting started with Argilla and its SDK, we recommend to use Jupyter Notebook or Google Colab.
 
 To start interacting with your Argilla server, you need to create a instantiate a client with an API key and API URL:
@@ -133,6 +163,7 @@ dataset.records.log(records=data, mapping={"text": "review"})
 🎉 You have successfully created your first dataset with Argilla. You can now access it in the Argilla UI and start annotating the records.
 
 ## Next steps
+
 - To learn how to create your datasets, workspace, and manage users, check the [how-to guides](../how_to_guides/index.md).
 
 - To learn Argilla with hands-on examples, check the [Tutorials section](../tutorials/index.md).
