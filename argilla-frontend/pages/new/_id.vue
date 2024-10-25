@@ -2,7 +2,7 @@
   <div class="new-dataset">
     <HeaderFeedbackTask
       :breadcrumbs="[
-        { link: '/', name: 'Home' },
+        { link: '/', name: $t('breadcrumbs.home') },
         { name: 'new' },
         { name: datasetConfig?.repoId },
       ]"
