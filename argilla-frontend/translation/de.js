@@ -35,7 +35,7 @@ export default {
   guidelines: "Richtlinien",
   taskDistribution: "Annotationsverteilung",
   minimumSubmittedResponses: "Erforderliche Mindestanzahl an eingereichten Antworten",
-  taskDistributionTooltip: 
+  taskDistributionTooltip:
     "Eine Aufgabe ist abgeschlossen, wenn alle Datensätze die \nMindestanzahl an eingereichten Antworten haben.",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
   required: "Erforderlich",
