@@ -60,7 +60,7 @@ settings = rg.Settings(
 )
 dataset = rg.Dataset(
     name=f"my_first_dataset",
-    workspace="argilla", # change this to your workspace
+    workspace="default", # change this to your workspace
     settings=settings,
     client=client,
 )
