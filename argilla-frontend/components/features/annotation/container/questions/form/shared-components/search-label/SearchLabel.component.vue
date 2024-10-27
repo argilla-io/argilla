@@ -19,6 +19,7 @@
       :value="value"
       :ref="searchRef"
       :placeholder="placeholder"
+      role="search"
       @input="$emit('input', $event.target.value)"
       @keydown.arrow-up.prevent="looseFocus"
       @keydown.arrow-down.prevent="looseFocus"

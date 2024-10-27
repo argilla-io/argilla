@@ -16,14 +16,16 @@
   -->
 <template>
   <transition appear name="fade">
-    <div class="table-info">
+    <div class="table-info" role="table">
       <div class="table-info__header">
         <slot name="columns">
-          <div class="table-info__item">
+          <div class="table-info__item" role="columnheader" aria-label="Table Header">
             <div
               v-for="(column, key) in columns"
               :key="key"
               :class="[`table-info__item__col`, column.class]"
+              :aria-label="column.name"
+              role="cell"
             >
               <lazy-table-filtrable-column
                 :column="column"
@@ -31,12 +33,14 @@
                 :filters="filters"
                 v-if="column.filtrable"
                 @applyFilters="onApplyFilters"
+                aria-label="Filter column {{ column.name }}"
               />
               <button
                 v-else-if="column.sortable"
                 :data-title="column.tooltip"
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
+                :aria-label="'Sort by ' + column.name"
               >
                 <svgicon width="18" height="18" name="sort" />
                 <span>{{ column.name }}</span>
@@ -50,17 +54,18 @@
       </div>
       <results-empty v-if="tableIsEmpty" :title="emptySearchInfo.title" />
       <template v-else>
-        <div class="table-info__body" ref="table">
-          <ul>
-            <li v-for="item in filteredResults" :key="item.id" :id="item.id">
+        <div class="table-info__body" ref="table" aria-label="Table Body">
+          <ul role="rowgroup">
+            <li v-for="item in filteredResults" :key="item.id" :id="item.id" role="row" :aria-label="'Row for ' + item.id">
               <nuxt-link :to="rowLink(item)" class="table-info__item">
                 <span
                   v-for="(column, idx) in columns"
                   :key="idx"
                   :class="[`table-info__item__col`, column.class]"
+                  role="cell"
                 >
                   <span :class="column.class">
-                    <span v-if="column.actions">
+                    <span v-if="column.actions" role="group" aria-label="Row actions">
                       <div class="table-info__actions">
                         <p
                           class="table-info__main"
@@ -74,6 +79,8 @@
                             v-for="(action, idx) in column.actions"
                             :key="idx"
                             :tooltip="action.tooltip"
+                            role="button"
+                            :aria-label="action.title"
                           >
                             <base-button
                               :title="action.title"
@@ -81,12 +88,14 @@
                               @click.prevent="
                                 onActionClicked(action.name, item)
                               "
+                              aria-hidden="true"
                             >
                               <svgicon
                                 v-if="action.icon !== undefined"
                                 :name="action.icon"
                                 width="16"
                                 height="16"
+                                aria-hidden="true"
                               />
                             </base-button>
                           </base-action-tooltip>
@@ -101,9 +110,10 @@
                     <nuxt-link v-else-if="column.link" :to="column.link(item)">
                       {{ itemValue(item, column) }}
                     </nuxt-link>
-                    <span v-else>{{ itemValue(item, column) }}</span>
-                    <span v-if="column.component">
+                    <span v-else >{{ itemValue(item, column) }}</span>
+                    <span v-if="column.component" aria-label="Dataset type">
                       <component
+                        aria-label="What is that?"
                         v-if="hydrate[item.id]"
                         :is="column.component.name"
                         v-bind="{ ...column.component.props(item) }"

@@ -32,6 +32,7 @@
       class="search-area__input"
       type="text"
       v-model.trim="searchValue"
+      role="search"
       :placeholder="$t('searchPlaceholder')"
       :aria-description="$t('searchPlaceholder')"
       autocomplete="off"

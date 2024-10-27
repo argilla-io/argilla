@@ -12,6 +12,8 @@
         :show-tooltip="showTooltip"
         :tooltip-position-fixed="false"
         :show-percent-in-tooltip="false"
+        role="progressbar"
+        :aria-valuenow="progress.percentage.completed"
       />
       <span class="team-progress__percent"
         >{{ progress.percentage.completed }}%</span

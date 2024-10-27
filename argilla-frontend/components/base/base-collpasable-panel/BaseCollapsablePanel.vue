@@ -2,11 +2,15 @@
   <div
     class="panel"
     :class="[
-      !isExpanded ? '--collapsed' : undefined,
-      hideOnDesktop ? '--mobile' : undefined,
-    ]"
+    !isExpanded ? '--collapsed' : undefined,
+    hideOnDesktop ? '--mobile' : undefined,
+  ]"
   >
-    <BaseButton class="panel__header" @click="toggleExpand(isExpanded)">
+    <BaseButton
+      class="panel__header"
+      @click="toggleExpand(isExpanded)"
+      :aria-expanded="isExpanded ? 'true' : 'false'"
+    >
       <div class="panel__header__container">
         <slot v-if="!isExpanded" name="panelHeader" />
         <div v-else style="width: 100%; text-align: left">
@@ -17,6 +21,7 @@
           :name="isExpanded ? 'chevron-down' : 'chevron-right'"
           width="12"
           height="12"
+          aria-hidden="true"
         />
       </div>
     </BaseButton>
@@ -60,6 +65,7 @@ export default {
   &__header {
     overflow: visible;
     color: var(--fg-secondary);
+
     &__container {
       width: 100%;
       display: flex;

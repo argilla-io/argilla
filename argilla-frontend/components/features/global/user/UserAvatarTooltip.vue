@@ -1,6 +1,6 @@
 <template>
   <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
-    <a class="user__button" @click.prevent="showSelector">
+    <a class="user__button" @click.prevent="showSelector" role="button" aria-label="User Button">
       {{ user.avatar }}
     </a>
     <div v-if="visibleSelector && user" class="user__content">

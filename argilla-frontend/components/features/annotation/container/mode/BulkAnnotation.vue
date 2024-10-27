@@ -11,7 +11,7 @@
           class="wrapper__left"
         >
           <template #up>
-            <section class="wrapper__records">
+            <section class="wrapper__records" aria-label="Bulk Annotation View">
               <DatasetFilters :recordCriteria="recordCriteria">
                 <ToggleAnnotationType
                   v-if="
@@ -162,6 +162,7 @@
       <BaseCollapsablePanel
         hideOnDesktop
         :isExpanded="expandedGuidelines"
+        :aria-expanded="expandedGuidelines"
         @toggle-expand="expandedGuidelines = !expandedGuidelines"
       >
         <template #panelHeader>

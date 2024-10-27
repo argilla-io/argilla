@@ -2,7 +2,7 @@
   <div class="resizable" :class="resizing ? '--v-resizing' : ''">
     <div class="resizable__left"><slot name="left" /></div>
 
-    <div class="resizable__bar" ref="resizableBar">
+    <div class="resizable__bar" ref="resizableBar" role="separator">
       <div class="resizable__bar__inner" />
     </div>
 

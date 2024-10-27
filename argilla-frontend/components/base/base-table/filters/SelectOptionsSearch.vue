@@ -5,7 +5,7 @@
       class="options-search__input"
       type="text"
       autofocus
-      :placeholder="placeholder"
+      :placeholder="$t('search')"
     />
     <a href="#" class="options-search__clear" @click.prevent="clear">
       <svgicon
@@ -22,10 +22,6 @@
 <script>
 export default {
   props: {
-    placeholder: {
-      type: String,
-      default: "Search...",
-    },
     value: {
       type: String,
       default: "",

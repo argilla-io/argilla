@@ -9,6 +9,7 @@
       name="chevron-down"
       width="16"
       height="8"
+      aria-hidden="true"
     />
   </div>
 </template>
