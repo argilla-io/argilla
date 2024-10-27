@@ -25,7 +25,7 @@
       class="search-area__icon --search"
       :data-title="$t('search')"
     >
-      <svgicon name="search" width="16" height="16" />
+      <svgicon name="search" width="16" height="16" aria-hidden="true"/>
     </BaseButton>
     <input
       ref="searchRef"
@@ -44,7 +44,7 @@
       v-if="showDelete"
       class="search-area__icon --close"
     >
-      <svgicon name="close" width="12" height="12" />
+      <svgicon name="close" width="12" height="12" aria-hidden="true" />
     </BaseButton>
 
     <BaseDropdown
@@ -58,7 +58,7 @@
           <span class="search-area__fields__header__text">{{
             selectedField.title
           }}</span>
-          <svgicon name="chevron-down" height="8" />
+          <svgicon name="chevron-down" height="8" aria-hidden="true"/>
         </span>
       </template>
       <template slot="dropdown-content">

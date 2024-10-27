@@ -1,5 +1,5 @@
 <template>
-  <div class="input-button">
+  <div class="input-button" role="button" :aria-label="option.text">
     <input
       ref="inputRef"
       type="checkbox"

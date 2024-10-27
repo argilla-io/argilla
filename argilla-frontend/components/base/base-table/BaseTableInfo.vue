@@ -42,7 +42,7 @@
                 @click="sort(column)"
                 :aria-label="'Sort by ' + column.name"
               >
-                <svgicon width="18" height="18" name="sort" />
+                <svgicon width="18" height="18" name="sort" aria-hidden="true"/>
                 <span>{{ column.name }}</span>
               </button>
               <button v-else :data-title="column.tooltip">
@@ -111,9 +111,9 @@
                       {{ itemValue(item, column) }}
                     </nuxt-link>
                     <span v-else >{{ itemValue(item, column) }}</span>
-                    <span v-if="column.component" aria-label="Dataset type">
+                    <span v-if="column.component">
                       <component
-                        aria-label="What is that?"
+                        :aria-label="column.component.name"
                         v-if="hydrate[item.id]"
                         :is="column.component.name"
                         v-bind="{ ...column.component.props(item) }"

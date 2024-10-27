@@ -10,6 +10,7 @@
       class="panel__header"
       @click="toggleExpand(isExpanded)"
       :aria-expanded="isExpanded ? 'true' : 'false'"
+      :aria-label="isExpanded ? 'Collapse Panel' : 'Expand Panel'"
     >
       <div class="panel__header__container">
         <slot v-if="!isExpanded" name="panelHeader" />

@@ -5,6 +5,8 @@
       :list="ranking.questions"
       :group="{ name: 'question' }"
       :sort="false"
+      role="listbox"
+      aria-orientation="vertical"
     >
       <div
         v-for="item in ranking.questions"
@@ -22,7 +24,7 @@
           :text="getSuggestedAgent(item)"
           minimalist
         >
-          <svgicon width="6" name="draggable" :id="`${item.value}-icon`" />
+          <svgicon width="6" name="draggable" :id="`${item.value}-icon`" aria-label="Dragging Icon"/>
           <span
             class="draggable__rank-card__title"
             v-text="item.text"

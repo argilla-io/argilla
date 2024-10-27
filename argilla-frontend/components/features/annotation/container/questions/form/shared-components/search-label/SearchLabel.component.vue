@@ -1,5 +1,5 @@
 <template>
-  <div class="search-area" @click="focusInSearch">
+  <div class="search-area" @click="focusInSearch" aria-label="Search Labels">
     <BaseIconWithBadge
       ref="iconSearchRef"
       class="search-area__icon --search"
@@ -36,6 +36,7 @@
       badge-horizontal-position="right"
       badge-border-color="white"
       @click-icon="resetValue"
+      aria-hidden="true"
     />
   </div>
 </template>

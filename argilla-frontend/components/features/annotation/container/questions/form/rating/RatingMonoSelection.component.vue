@@ -1,11 +1,13 @@
 <template>
   <div class="container">
-    <div class="inputs-area">
+    <div class="inputs-area" role="radiogroup" aria-label="Label-Options">
       <div
         class="input-button"
         v-for="option in options"
         :key="option.id"
         @keydown.enter.prevent
+        role="button"
+        :aria-label="option.text"
       >
         <BaseTooltip
           :title="isSuggested(option) ? $t('suggestion.name') : ''"

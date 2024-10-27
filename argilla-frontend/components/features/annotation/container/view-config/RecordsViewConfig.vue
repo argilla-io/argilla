@@ -14,7 +14,8 @@
           class="view-config__icon"
           width="20"
           height="20"
-          name="change-height" /></BaseButton
+          name="change-height" 
+          aria-hidden="true"/></BaseButton
     ></template>
     <template slot="dropdown-content">
       <div class="view-config__content">
