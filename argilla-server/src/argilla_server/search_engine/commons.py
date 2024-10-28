@@ -395,6 +395,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         )
 
     async def get_dataset_progress(self, dataset: Dataset) -> dict:
+        if dataset.is_draft:
+            return {}
+
         index_name = es_index_name_for_dataset(dataset)
 
         metrics = await self._compute_terms_metrics_for(index_name, "status")
@@ -402,6 +405,9 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return {"total": metrics.total, **{metric.term: metric.count for metric in metrics.values}}
 
     async def get_dataset_user_progress(self, dataset: Dataset, user: User) -> dict:
+        if dataset.is_draft:
+            return {}
+
         index_name = es_index_name_for_dataset(dataset)
 
         result = await self._compute_terms_metrics_for(
