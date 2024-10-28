@@ -20,7 +20,7 @@ from argilla_server.api.schemas.v1.metadata_properties import METADATA_PROPERTY_
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import MetadataPropertyType, UserRole
 from argilla_server.models import MetadataProperty, UserRole
-from argilla_server.search_engine import FloatMetadataMetrics, IntegerMetadataMetrics, TermsMetadataMetrics
+from argilla_server.search_engine import FloatMetadataMetrics, IntegerMetadataMetrics, TermsMetrics
 from sqlalchemy import func, select
 
 from tests.factories import (
@@ -46,7 +46,7 @@ class TestSuiteMetadataProperties:
         [
             (
                 TermsMetadataPropertyFactory,
-                TermsMetadataMetrics(total=10, values=[TermsMetadataMetrics.TermCount(term="term", count=10)]),
+                TermsMetrics(total=10, values=[TermsMetrics.TermCount(term="term", count=10)]),
                 {"type": "terms", "total": 10, "values": [{"term": "term", "count": 10}]},
             ),
             (

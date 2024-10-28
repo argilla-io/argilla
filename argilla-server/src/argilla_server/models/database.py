@@ -28,7 +28,6 @@ from sqlalchemy import (
     sql,
 )
 from sqlalchemy.engine.default import DefaultExecutionContext
-from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -286,6 +285,22 @@ class Question(DatabaseModel):
         return parse_obj_as(QuestionSettings, self.settings)
 
     @property
+    def is_text(self) -> bool:
+        return self.settings.get("type") == QuestionType.text
+
+    @property
+    def is_label_selection(self) -> bool:
+        return self.settings.get("type") == QuestionType.label_selection
+
+    @property
+    def is_multi_label_selection(self) -> bool:
+        return self.settings.get("type") == QuestionType.multi_label_selection
+
+    @property
+    def is_rating(self) -> bool:
+        return self.settings.get("type") == QuestionType.rating
+
+    @property
     def type(self) -> QuestionType:
         return QuestionType(self.settings["type"])
 
@@ -413,7 +428,7 @@ class Dataset(DatabaseModel):
             if question.id == question_id:
                 return question
 
-    def question_by_name(self, name: str) -> Union["Question", None]:
+    def question_by_name(self, name: str) -> Union[Question, None]:
         for question in self.questions:
             if question.name == name:
                 return question
@@ -510,7 +525,7 @@ class User(DatabaseModel):
     async def is_member(self, workspace_id: UUID) -> bool:
         # TODO: Change query to use exists may improve performance
         return (
-            await WorkspaceUser.get_by(async_object_session(self), workspace_id=workspace_id, user_id=self.id)
+            await WorkspaceUser.get_by(self.current_async_session, workspace_id=workspace_id, user_id=self.id)
             is not None
         )
 

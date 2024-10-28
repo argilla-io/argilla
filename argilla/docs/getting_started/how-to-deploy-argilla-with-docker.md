@@ -1,6 +1,7 @@
 ---
 description: Deploy Argilla with Docker
 ---
+
 This guide describes how to deploy the Argilla Server with `docker compose`. This is useful if you want to deploy Argilla locally, and/or have full control over the configuration the server, database, and search engine (Elasticsearch).
 
 First, you need to install `docker` on your machine and make sure you can run `docker compose`.

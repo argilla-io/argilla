@@ -29,6 +29,7 @@ from argilla_server.api.schemas.v1.datasets import (
     DatasetProgress,
     Datasets,
     DatasetUpdate,
+    HubDataset,
     UsersProgress,
 )
 from argilla_server.api.schemas.v1.fields import Field, FieldCreate, Fields
@@ -38,9 +39,11 @@ from argilla_server.api.schemas.v1.metadata_properties import (
     MetadataPropertyCreate,
 )
 from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
+from argilla_server.api.schemas.v1.jobs import Job as JobSchema
 from argilla_server.contexts import datasets
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus
+from argilla_server.jobs import hub_jobs
 from argilla_server.models import Dataset, User
 from argilla_server.search_engine import (
     SearchEngine,
@@ -143,37 +146,44 @@ async def get_dataset(
 @router.get("/me/datasets/{dataset_id}/metrics", response_model=DatasetMetrics)
 async def get_current_user_dataset_metrics(
     *,
-    db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return await datasets.get_user_dataset_metrics(db, current_user.id, dataset.id)
+    result = await datasets.get_user_dataset_metrics(db, search_engine, current_user, dataset)
+
+    return DatasetMetrics(responses=result)
 
 
 @router.get("/datasets/{dataset_id}/progress", response_model=DatasetProgress)
 async def get_dataset_progress(
     *,
-    db: AsyncSession = Depends(get_async_db),
     dataset_id: UUID,
+    db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    return await datasets.get_dataset_progress(db, dataset.id)
+    result = await datasets.get_dataset_progress(search_engine, dataset)
+
+    return DatasetProgress(**result)
 
 
 @router.get("/datasets/{dataset_id}/users/progress", response_model=UsersProgress)
 async def get_dataset_users_progress(
     *,
-    current_user: User = Security(auth.get_current_user),
     dataset_id: UUID,
     db: AsyncSession = Depends(get_async_db),
+    search_engine: SearchEngine = Depends(get_search_engine),
+    current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
@@ -301,3 +311,27 @@ async def update_dataset(
     await authorize(current_user, DatasetPolicy.update(dataset))
 
     return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
+
+
+# TODO: Maybe change /import to /import-from-hub?
+@router.post("/datasets/{dataset_id}/import", status_code=status.HTTP_202_ACCEPTED, response_model=JobSchema)
+async def import_dataset_from_hub(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    hub_dataset: HubDataset,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await Dataset.get_or_raise(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicy.import_from_hub(dataset))
+
+    job = hub_jobs.import_dataset_from_hub_job.delay(
+        name=hub_dataset.name,
+        subset=hub_dataset.subset,
+        split=hub_dataset.split,
+        dataset_id=dataset.id,
+        mapping=hub_dataset.mapping.dict(),
+    )
+
+    return JobSchema(id=job.id, status=job.get_status())

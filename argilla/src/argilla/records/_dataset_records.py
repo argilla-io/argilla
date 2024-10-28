@@ -422,11 +422,12 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
 
+        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
+
         if HFDatasetsIO._is_hf_dataset(dataset=records):
-            records = HFDatasetsIO._record_dicts_from_datasets(hf_dataset=records)
+            records = HFDatasetsIO._record_dicts_from_datasets(hf_dataset=records, mapper=record_mapper)
 
         ingested_records = []
-        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
         for record in records:
             try:
                 if isinstance(record, dict):

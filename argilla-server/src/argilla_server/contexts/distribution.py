@@ -18,6 +18,7 @@ import sqlalchemy
 from typing import List
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,6 +31,12 @@ MAX_TIME_RETRY_SQLALCHEMY_ERROR = 15
 
 
 async def unsafe_update_records_status(db: AsyncSession, records: List[Record]):
+    await db.execute(
+        select(Record)
+        .where(Record.id.in_([record.id for record in records]))
+        .options(selectinload(Record.dataset), selectinload(Record.responses_submitted))
+    )
+
     for record in records:
         await _update_record_status(db, record)
 
@@ -47,9 +54,9 @@ async def update_record_status(search_engine: SearchEngine, record_id: UUID) -> 
         )
 
         await _update_record_status(db, record)
-        await search_engine.partial_record_update(record, status=record.status)
-
         await db.commit()
+
+        await search_engine.partial_record_update(record, status=record.status)
 
         return record
 
