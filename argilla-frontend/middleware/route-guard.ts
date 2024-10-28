@@ -46,6 +46,10 @@ export default ({ $auth, route, redirect }: Context) => {
 
       if (!isRunningOnHuggingFace()) return redirect("/");
 
+      if (route.path !== "/") {
+        route.query.redirect = route.fullPath;
+      }
+
       break;
     default:
       if (!$auth.loggedIn) {
