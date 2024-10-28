@@ -226,6 +226,7 @@ export default {
   filterBy: "Filter nach...",
   fields: "Felder",
   questions: "Fragen",
+  general: "Übersicht",
   metadata: "Metadaten",
   vectors: "Vektoren",
   dangerZone: "Gefahrenzone",
