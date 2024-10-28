@@ -118,6 +118,7 @@ class TestImportFeaturesFromHub:
             "argilla-internal-testing/test_import_from_hub_with_upper_case_columns",
             token=token,
             name=dataset_name,
+            settings="auto",
         )
 
         assert created_dataset.settings.fields[0].name == "Text"
@@ -125,7 +126,10 @@ class TestImportFeaturesFromHub:
 
     def test_import_from_hub_with_unlabelled_classes(self, client: rg.Argilla, token: str, dataset_name: str):
         created_dataset = rg.Dataset.from_hub(
-            "argilla-internal-testing/test_import_from_hub_with_unlabelled_classes", token=token, name=dataset_name
+            "argilla-internal-testing/test_import_from_hub_with_unlabelled_classes",
+            token=token,
+            name=dataset_name,
+            settings="auto",
         )
 
         assert created_dataset.settings.fields[0].name == "Text"
@@ -137,6 +141,7 @@ class TestImportFeaturesFromHub:
             token=token,
             name=dataset_name,
             split="train",
+            settings="auto",
         )
 
         records = list(created_dataset.records)
