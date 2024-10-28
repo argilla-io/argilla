@@ -28,7 +28,6 @@ describe("OAuthLoginUseCase should", () => {
 
   test("call the backend after logout", async () => {
     const auth = mock<IAuthService>();
-
     const oauthRepository = mock<IOAuthRepository>();
     const loadUserUseCase = new LoadUserUseCase(auth, mock<IUserRepository>());
 
