@@ -21,7 +21,7 @@ jobs:
   build:
     services:
       argilla-server:
-        image: argilladev/argilla-hf-spaces:pr-5573
+        image: argilladev/argilla-hf-spaces:pr-5572
         ports:
           - 6900:6900
         env:

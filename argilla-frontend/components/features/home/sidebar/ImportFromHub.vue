@@ -10,6 +10,7 @@
         width="18"
         height="18"
         color="#F6C000"
+        aria-hidden="true"
       ></svgicon
       >{{ $t("home.importFromHub") }}</BaseButton
     >
@@ -18,7 +19,8 @@
         class="import-from-hub__close-button"
         @click="$emit('on-close')"
       >
-        <svgicon name="close" width="8"></svgicon>Close</BaseButton
+        <svgicon name="close" width="8" aria-hidden="true"></svgicon
+        >Close</BaseButton
       >
       <form @submit.prevent="$emit('on-import-dataset', repositoryId)">
         <transition name="slide-right" appear>
@@ -31,6 +33,7 @@
               name="link"
               width="20"
               height="20"
+              aria-hidden="true"
             ></svgicon>
             <BaseInput
               v-model="repositoryId"

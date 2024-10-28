@@ -11,10 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.ext.asyncio import AsyncAttrs, async_object_session, AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from argilla_server.models.mixins import CRUDMixin, TimestampMixin
@@ -32,3 +32,7 @@ class DatabaseModel(DeclarativeBase, AsyncAttrs, CRUDMixin, TimestampMixin):
 
     def is_relationship_loaded(self, relationship: str) -> bool:
         return relationship in self.__dict__
+
+    @property
+    def current_async_session(self) -> Optional[AsyncSession]:
+        return async_object_session(self)

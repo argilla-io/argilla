@@ -19,6 +19,7 @@ from httpx import AsyncClient
 
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import UserRole, RecordStatus
+from argilla_server.search_engine import SearchEngine
 
 from tests.factories import DatasetFactory, RecordFactory, UserFactory
 
@@ -28,11 +29,16 @@ class TestGetDatasetProgress:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/progress"
 
-    async def test_get_dataset_progress(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_progress(
+        self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
         dataset = await DatasetFactory.create()
 
-        records_completed = await RecordFactory.create_batch(3, status=RecordStatus.completed, dataset=dataset)
-        records_pending = await RecordFactory.create_batch(2, status=RecordStatus.pending, dataset=dataset)
+        mock_search_engine.get_dataset_progress.return_value = {
+            "total": 5,
+            "completed": 3,
+            "pending": 2,
+        }
 
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
@@ -43,8 +49,15 @@ class TestGetDatasetProgress:
             "total": 5,
         }
 
-    async def test_get_dataset_progress_with_empty_dataset(self, async_client: AsyncClient, owner_auth_header: dict):
+    async def test_get_dataset_progress_with_empty_dataset(
+        self,
+        async_client: AsyncClient,
+        mock_search_engine: SearchEngine,
+        owner_auth_header: dict,
+    ):
         dataset = await DatasetFactory.create()
+
+        mock_search_engine.get_dataset_progress.return_value = {}
 
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
@@ -56,9 +69,16 @@ class TestGetDatasetProgress:
         }
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])
-    async def test_get_dataset_progress_as_restricted_user(self, async_client: AsyncClient, user_role: UserRole):
+    async def test_get_dataset_progress_as_restricted_user(
+        self,
+        async_client: AsyncClient,
+        mock_search_engine: SearchEngine,
+        user_role: UserRole,
+    ):
         dataset = await DatasetFactory.create()
         user = await UserFactory.create(workspaces=[dataset.workspace], role=user_role)
+
+        mock_search_engine.get_dataset_progress.return_value = {}
 
         response = await async_client.get(self.url(dataset.id), headers={API_KEY_HEADER_NAME: user.api_key})
 
