@@ -286,25 +286,3 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
 
     def _with_client(self, client: Argilla) -> "Self":
         return super()._with_client(client=client)
-
-    @classmethod
-    def _run_settings_ui(cls, repo_id: str, subset: str, split: str, client: Optional["Argilla"] = None) -> str:
-        from urllib.parse import quote_plus, urlencode
-        import webbrowser
-
-        client = client or Argilla._get_default()
-
-        params = {
-            "subset": subset,
-            "split": split,
-        }
-
-        url = f"{client.api_url.removesuffix('/')}/new/{quote_plus(repo_id)}?{urlencode(params)}"
-
-        try:
-            webbrowser.open(url, new=2, autoraise=True)
-        except Exception as e:
-            warnings.warn(f"Error opening the URL in the browser: {e}")
-        finally:
-            warnings.warn(f"Open the following URL in your browser to configure the dataset: {url}")
-            return url
