@@ -16,6 +16,15 @@ export const useOAuthViewModel = () => {
     await tryLogin();
   });
 
+  const redirect = () => {
+    let { redirect } = router.getQuery();
+    if (Array.isArray(redirect)) {
+      redirect = redirect[0];
+    }
+
+    router.go(redirect || "/");
+  };
+
   const tryLogin = async () => {
     const { params, query } = routes.value;
 
@@ -23,12 +32,12 @@ export const useOAuthViewModel = () => {
 
     try {
       await oauthLoginUseCase.login(provider, query);
+      redirect();
     } catch {
       notification.notify({
         message: t("argilla.api.errors::UnauthorizedError"),
         type: "danger",
       });
-    } finally {
       router.go("/");
     }
   };
