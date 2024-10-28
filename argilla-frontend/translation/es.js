@@ -268,7 +268,7 @@ export default {
       "Si estás usando un Espacio privado, consulta la <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>documentación</a>.",
     exampleDatasetsTitle: "¿No sabes por dónde empezar?",
     exampleDatasetsText: "Explora estos datasets de ejemplo",
-    guidesTitle: "¿Primera vez en Argilla?",
+    guidesTitle: "¿No conoce Argilla?",
     guidesText: "Echa un vistazo a estas guías:",
     pasteRepoIdPlaceholder: "Pega un repo id",
     demoLink:
