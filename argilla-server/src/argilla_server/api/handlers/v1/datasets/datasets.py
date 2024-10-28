@@ -155,7 +155,7 @@ async def get_current_user_dataset_metrics(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    result = await datasets.get_user_dataset_metrics(db, search_engine, current_user, dataset)
+    result = await datasets.get_user_dataset_metrics(search_engine, current_user, dataset)
 
     return DatasetMetrics(responses=result)
 
