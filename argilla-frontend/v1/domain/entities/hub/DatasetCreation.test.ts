@@ -108,10 +108,12 @@ describe("DatasetCreation", () => {
       expect(labelQuestion.required).toBeTruthy();
       expect(labelQuestion.options).toEqual([
         {
+          id: "positive",
           text: "positive",
           value: "positive",
         },
         {
+          id: "negative",
           text: "negative",
           value: "negative",
         },
