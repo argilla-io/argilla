@@ -6,12 +6,14 @@ import {
 import { IAuthService } from "../services/IAuthService";
 import { IOAuthRepository } from "../services/IOAuthRepository";
 import { LoadUserUseCase } from "./load-user-use-case";
+import { RouterService } from "~/v1/domain/services/RouterService";
 
 export class OAuthLoginUseCase {
   constructor(
     private readonly auth: IAuthService,
     private readonly oauthRepository: IOAuthRepository,
-    private readonly loadUser: LoadUserUseCase
+    private readonly loadUser: LoadUserUseCase,
+    private readonly router: RouterService
   ) {}
 
   async getProviders(): Promise<OAuthProvider[]> {
@@ -26,6 +28,18 @@ export class OAuthLoginUseCase {
     return this.oauthRepository.authorize(provider);
   }
 
+  redirect() {
+    let { redirect } = this.router.getQuery();
+    if (Array.isArray(redirect)) {
+      redirect = redirect[0];
+    }
+
+    this.router.go(redirect || "/", {
+      external: false,
+      newWindow: false,
+    });
+  }
+
   async login(provider: ProviderType, oauthParams: OAuthParams) {
     await this.auth.logout();
 
@@ -35,6 +49,8 @@ export class OAuthLoginUseCase {
       await this.auth.setUserToken(token);
 
       await this.loadUser.execute();
+
+      this.redirect();
     }
   }
 }
