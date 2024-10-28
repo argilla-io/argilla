@@ -118,10 +118,9 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>")
 ```
 
-By default, the `Dataset.from_hub` method will try to open a dataset configuration page in the browser. If you want to load the dataset without opening the browser. This page will let you preview the dataset's configuration and records before creating it in Argilla.
-In that case, instead of returning a dataset object, it will return the url of the dataset configuration page.
+By default, the `Dataset.from_hub` method will return the URL of the dataset configuration page. This page will let you preview the dataset's configuration and records before creating it in Argilla.
 
-You can infer the dataset's settings automatically by setting the `settings` parameter to `"auto"`. This will infer the dataset's settings based on the dataset's features in `datasets.Features`.
+You can infer the settings of the dataset automatically by configuring the `settings` parameter to `"auto"`. This will infer the dataset's settings based on the dataset's features in `datasets.Features`.
 
 ```python
 
