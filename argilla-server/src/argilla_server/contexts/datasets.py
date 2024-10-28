@@ -363,12 +363,11 @@ async def _configure_query_relationships(
 
 
 async def get_user_dataset_metrics(
-    db: AsyncSession,
     search_engine: SearchEngine,
     user: User,
     dataset: Dataset,
 ) -> dict:
-    total_records = await Record.count_by(db, dataset_id=dataset.id)
+    total_records = (await get_dataset_progress(search_engine, dataset))["total"]
     result = await search_engine.get_dataset_user_progress(dataset, user)
 
     submitted_responses = result.get("submitted", 0)
