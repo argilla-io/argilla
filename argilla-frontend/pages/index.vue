@@ -48,6 +48,7 @@
             @on-import-dataset="importDataset"
             :error="error"
           />
+          <ImportFromPython v-if="!showImportDatasetInput" />
         </div>
         <div class="home__sidebar__content">
           <p
