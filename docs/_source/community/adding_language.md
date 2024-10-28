@@ -12,7 +12,7 @@ export default {
     text: "텍스트",
     ...
 ```
-2. Then update the i18n Nuxt: `argilla-frontend/nuxt.config.ts` 
+2. Then update the i18n Nuxt: `argilla-frontend/nuxt.config.ts`
 
 ```javascript
   i18n: {
