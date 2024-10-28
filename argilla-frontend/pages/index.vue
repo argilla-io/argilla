@@ -46,6 +46,7 @@
             @on-expand="showImportDatasetInput = true"
             @on-close="showImportDatasetInput = false"
             @on-import-dataset="importDataset"
+            :error="error"
           />
           <ImportFromPython v-if="!showImportDatasetInput" />
         </div>

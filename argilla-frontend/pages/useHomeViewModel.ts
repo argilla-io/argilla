@@ -13,6 +13,7 @@ export const useHomeViewModel = () => {
   const { state: datasets } = useDatasets();
   const getDatasetsUseCase = useResolve(GetDatasetsUseCase);
   const getDatasetCreationUseCase = useResolve(GetDatasetCreationUseCase);
+  const error = ref("");
 
   useFocusTab(async () => {
     await onLoadDatasets();
@@ -23,9 +24,12 @@ export const useHomeViewModel = () => {
   });
 
   const getNewDatasetByRepoId = async (repositoryId: string) => {
-    await getDatasetCreationUseCase.execute(repositoryId);
-
-    goToImportDatasetFromHub(repositoryId);
+    try {
+      await getDatasetCreationUseCase.execute(repositoryId);
+      goToImportDatasetFromHub(repositoryId);
+    } catch {
+      error.value = "datasetCreation.cantLoadRepository";
+    }
   };
 
   const exampleDatasets = [
@@ -73,5 +77,6 @@ export const useHomeViewModel = () => {
     getNewDatasetByRepoId,
     isAdminOrOwnerRole,
     exampleDatasets,
+    error,
   };
 };
