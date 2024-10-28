@@ -28,8 +28,6 @@ export default ({ $auth, route, redirect }: Context) => {
       if (route.params.omitCTA) return;
 
       if (isRunningOnHuggingFace()) {
-        // const { redirect: _, ...query } = route.query;
-
         return redirect({
           name: "welcome-hf-sign-in",
           query: route.query,
