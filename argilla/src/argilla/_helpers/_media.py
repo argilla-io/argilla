@@ -16,18 +16,20 @@ import base64
 import io
 import warnings
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 
 from PIL import Image
 
 
-def pil_to_data_uri(image_object: "Image") -> str:
+def pil_to_data_uri(image_object: Optional["Image"]) -> Optional[str]:
     """Convert a PIL image to a base64 data URI string.
     Parameters:
         image_object (Image): The PIL image to convert to a base64 data URI.
     Returns:
         str: The data URI string.
     """
+    if image_object is None:
+        return None
     if not isinstance(image_object, Image.Image):
         raise ValueError("The image_object must be a PIL Image object.")
 
