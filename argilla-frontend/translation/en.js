@@ -271,6 +271,8 @@ export default {
     guidesTitle: "First time in Argilla?",
     guidesText: "Take a look at these guides:",
     pasteRepoIdPlaceholder: "Paste a repo id",
+    demoLink:
+      "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
   },
   datasetCreation: {
     questions: {

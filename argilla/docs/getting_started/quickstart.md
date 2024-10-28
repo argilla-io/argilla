@@ -10,26 +10,59 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
     The **recommended choice to get started**. You can get up and running in under 5 minutes and don't need to maintain a server or run any commands.
 
-    If you're just getting started with Argilla, click the deploy button below:
+    === "No-code"
 
-    <div style="margin: 5px">
-            <a href="http://huggingface.co/new-space?template=argilla/argilla-template-space&name=my-argilla" target="_blank">
-                <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
-            </a>
-    </div>
-    You can use the default values following these steps:
+        If you're just getting started with Argilla, click the deploy button below:
 
-    - Leave the default Space owner (your personal account)
-    - Leave `USERNAME` and `PASSWORD` secrets empty since you'll sign in with your HF user as the Argilla Space `owner`.
-    - Click create Space to launch Argilla 🚀.
-    - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
+        <div style="margin: 5px">
+                <a href="http://huggingface.co/new-space?template=argilla/argilla-template-space&name=my-argilla" target="_blank">
+                    <img src="https://huggingface.co/datasets/huggingface/badges/raw/main/deploy-to-spaces-lg.svg" />
+                </a>
+        </div>
+
+        You can use the default values following these steps:
+
+        - Leave the default Space owner (your personal account)
+        - Leave `USERNAME` and `PASSWORD` secrets empty since you'll sign in with your HF user as the Argilla Space `owner`.
+        - Click create Space to launch Argilla 🚀.
+        - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
+
+    === "Python SDK"
+
+        If you want to deploy Argilla using the Python SDK, follow these steps:
+
+        First, install Argilla:
+
+        ```console
+        pip install argilla
+        ```
+
+        Next, we can use the `Argilla.deploy_on_spaces` method, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will automatically do the following:
+
+        - Deploy an Argilla Space on the Hugging Face Hub with [OAuth sign-in](#sign-in-into-the-argilla-ui) and a URL like `https://<your-username>-argilla.hf.space`, which takes around 2-3 minutes.
+        - Create a default workspace called `argilla` with an owner called `<your-username>` and an Argilla token set to `api_key`.
+        - Automatically return the authenticated Argilla client, which can directly be used to interact with your Argilla server.
+
+        ```python
+        import argilla as rg
+
+        authenticated_client = rg.Argilla.deploy_on_spaces(api_key="<api_key>")
+        ```
+
+        Learn how to [create your first dataset](create-your-first-dataset.md).
+
+
+    !!! tip "Argilla API Key"
+        Your Argilla API key can be found in the `My Settings` page of your Argilla Space. Take a look at the [sign in to the UI section](#sign-in-into-the-argilla-ui) to learn how to retrieve it.
 
     !!! warning "Persistent storage `SMALL`"
         Not setting persistent storage to `SMALL` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. If you want to **use the Space just for testing** you can use `FREE` temporarily.
+
     If you want to deploy Argilla within a Hugging Face organization, setup a more stable Space, or understand the settings, [check out the HF Spaces settings guide](how-to-configure-argilla-on-huggingface.md).
 
 !!! docker "Deploy with Docker"
-     If you want to **run Argilla locally on your machine or a server**, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
+
+    If you want to **run Argilla locally on your machine or a server**, or tune the server configuration, choose this option. To use this option, [check this guide](how-to-deploy-argilla-with-docker.md).
 
 ## Sign in to the Argilla UI
 
@@ -42,11 +75,12 @@ If everything went well, you should see the Argilla sign in page that looks like
 
 In the sign in page:
 
-1. Click on **Sign in with Hugging Face**
+1. Click on **Sign in with Hugging Face**.
+
 2. **Authorize the application** and you will be logged in into Argilla as an `owner`.
 
 !!! info "Unauthorized error"
-    Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button solves the issue.
+    Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button again will solve this issue.
 
 Congrats! Your Argilla server is ready to start your first project.
 
@@ -92,7 +126,7 @@ For getting started with Argilla and its SDK, we recommend to use Jupyter Notebo
 
 To start interacting with your Argilla server, you need to create a instantiate a client with an API key and API URL:
 
-- The `<api_key>` is in the `My Settings` page of your Argilla Space.
+- The `<api_key>` is in the `My Settings` page of your Argilla Space but make sure you are logged in with the `owner` account you used to create the Space.
 
 - The `<api_url>` is the URL shown in your browser if it ends with `*.hf.space`.
 

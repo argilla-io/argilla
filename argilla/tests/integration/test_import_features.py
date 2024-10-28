@@ -130,3 +130,16 @@ class TestImportFeaturesFromHub:
 
         assert created_dataset.settings.fields[0].name == "Text"
         assert list(created_dataset.records)[0].fields["Text"] == "Hello World, how are you?"
+
+    def test_import_with_row_id_as_record_id(self, client: rg.Argilla, token: str, dataset_name: str):
+        created_dataset = rg.Dataset.from_hub(
+            "argilla-internal-testing/test_import_from_hub_with_unlabelled_classes",
+            token=token,
+            name=dataset_name,
+            split="train",
+        )
+
+        records = list(created_dataset.records)
+
+        for idx, record in enumerate(records):
+            assert record.id == f"train_{idx}"

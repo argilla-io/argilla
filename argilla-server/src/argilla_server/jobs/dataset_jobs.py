@@ -31,7 +31,7 @@ JOB_RECORDS_YIELD_PER = 100
 
 
 @job(DEFAULT_QUEUE, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
-async def update_dataset_records_status_job(dataset_id: UUID):
+async def update_dataset_records_status_job(dataset_id: UUID) -> None:
     """This Job updates the status of all the records in the dataset when the distribution strategy changes."""
 
     record_ids = []

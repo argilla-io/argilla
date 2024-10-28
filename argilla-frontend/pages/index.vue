@@ -48,7 +48,6 @@
             @on-import-dataset="importDataset"
             :error="error"
           />
-          <ImportFromPython v-if="!showImportDatasetInput" />
         </div>
         <div class="home__sidebar__content">
           <p
@@ -85,16 +84,7 @@
               link="https://docs.argilla.io/dev/how_to_guides/query/"
             />
           </div>
-          <p class="home__sidebar__link">
-            Log to
-            <a
-              href="https://huggingface.co/spaces/argilla/argilla-template-space"
-              target="_blank"
-            >
-              Argilla_template_space</a
-            >
-            to try it out
-          </p>
+          <p class="home__sidebar__link" v-html="$t('home.demoLink')" />
         </div>
       </template>
     </template>

@@ -232,7 +232,7 @@ class HubImportExportMixin(DiskImportExportMixin):
 
         # Extract responses and create Record objects
         records = []
-        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset)
+        hf_dataset = HFDatasetsIO.to_argilla(hf_dataset=hf_dataset, mapper=mapper)
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
             for question_name, values in response_questions.items():

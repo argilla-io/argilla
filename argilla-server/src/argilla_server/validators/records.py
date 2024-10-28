@@ -14,20 +14,25 @@
 
 import copy
 import mimetypes
-
-from abc import ABC, abstractmethod
-from typing import Dict, List, Union, Any
-from uuid import UUID
+from abc import ABC
+from typing import Dict, List, Union, Any, Optional
 from urllib.parse import urlparse, ParseResult, ParseResultBytes
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
 from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
+from argilla_server.api.schemas.v1.responses import UserResponseCreate
+from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 from argilla_server.contexts import records
 from argilla_server.errors.future.base_errors import UnprocessableEntityError
 from argilla_server.models import Dataset, Record
+from argilla_server.pydantic_v1 import ValidationError
+from argilla_server.validators.responses import ResponseCreateValidator
+from argilla_server.validators.suggestions import SuggestionCreateValidator
+from argilla_server.validators.vectors import VectorValidator
 
 IMAGE_FIELD_WEB_URL_MAX_LENGTH = 2038
 IMAGE_FIELD_DATA_URL_MAX_LENGTH = 5_000_000
@@ -46,13 +51,8 @@ CHAT_FIELD_MAX_LENGTH = 500
 
 class RecordValidatorBase(ABC):
     @classmethod
-    @abstractmethod
-    def validate(cls, record: Union[RecordCreate, RecordUpdate], dataset: Dataset) -> None:
-        pass
-
-    @classmethod
-    def _validate_fields(cls, record: Union[RecordCreate, RecordUpdate], dataset: Dataset) -> None:
-        fields = record.fields or {}
+    def _validate_fields(cls, fields: dict, dataset: Dataset) -> None:
+        fields = fields or {}
 
         cls._validate_required_fields(dataset=dataset, fields=fields)
         cls._validate_extra_fields(dataset=dataset, fields=fields)
@@ -60,23 +60,24 @@ class RecordValidatorBase(ABC):
         cls._validate_chat_fields(dataset=dataset, fields=fields)
         cls._validate_custom_fields(dataset=dataset, fields=fields)
 
-    @staticmethod
-    def _validate_required_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
+    @classmethod
+    def _validate_required_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in dataset.fields:
             if field.required and not (field.name in fields and fields.get(field.name) is not None):
                 raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
 
-    @staticmethod
-    def _validate_extra_fields(dataset: Dataset, fields: Dict[str, str]) -> None:
+    @classmethod
+    def _validate_extra_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
         fields_copy = copy.copy(fields)
         for field in dataset.fields:
             fields_copy.pop(field.name, None)
         if fields_copy:
             raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
 
-    @staticmethod
-    def _validate_metadata(record: Union[RecordCreate, RecordUpdate], dataset: Dataset) -> None:
-        metadata = record.metadata or {}
+    @classmethod
+    def _validate_metadata(cls, metadata: dict, dataset: Dataset) -> None:
+        metadata = metadata or {}
+
         for name, value in metadata.items():
             metadata_property = dataset.metadata_property_by_name(name)
             # TODO(@frascuchon): Create a MetadataPropertyValidator instead of using the parsed_settings
@@ -173,27 +174,93 @@ class RecordValidatorBase(ABC):
         if not isinstance(value, dict):
             raise UnprocessableEntityError(f"custom field {name!r} value must be a dictionary")
 
+    @classmethod
+    def _validate_suggestions(cls, suggestions: List[SuggestionCreate], dataset: Dataset, record: Record):
+        if not suggestions:
+            return
+
+        try:
+            cls._validate_duplicated_suggestions(suggestions)
+
+            for suggestion in suggestions:
+                question = dataset.question_by_id(suggestion.question_id)
+
+                if question is None:
+                    raise UnprocessableEntityError(f"question id={suggestion.question_id} does not exists")
+
+                SuggestionCreateValidator.validate(suggestion, question.parsed_settings, record)
+        except (UnprocessableEntityError, ValueError, ValidationError) as ex:
+            raise UnprocessableEntityError(f"record does not have valid suggestions: {ex}") from ex
+
+    @classmethod
+    def _validate_duplicated_suggestions(cls, suggestions: List[SuggestionCreate]):
+        question_ids = [s.question_id for s in suggestions]
+
+        if len(question_ids) != len(set(question_ids)):
+            raise UnprocessableEntityError("found duplicate suggestions question IDs")
+
+    @classmethod
+    def _validate_vectors(cls, vectors: Optional[dict], dataset: Dataset):
+        if not vectors:
+            return
+
+        try:
+            for name, value in vectors.items():
+                settings = dataset.vector_settings_by_name(name)
+
+                if not settings:
+                    raise UnprocessableEntityError(
+                        f"vector with name={name} does not exist for dataset_id={dataset.id}"
+                    )
+
+                VectorValidator.validate(value, settings)
+        except (UnprocessableEntityError, ValueError) as ex:
+            raise UnprocessableEntityError(f"record does not have valid vectors: {ex}") from ex
+
+    @classmethod
+    async def _validate_responses(cls, responses: List[UserResponseCreate], dataset: Dataset, record: Record):
+        from argilla_server.contexts.accounts import list_users_by_ids
+
+        if not responses:
+            return
+        try:
+            user_ids = [response_create.user_id for response_create in responses]
+            users = await list_users_by_ids(dataset.current_async_session, set(user_ids))
+            users_by_id = {user.id: user for user in users}
+
+            for response_create in responses:
+                if response_create.user_id not in users_by_id:
+                    raise ValueError(f"user with id {response_create.user_id} not found")
+
+                ResponseCreateValidator.validate(response_create, record)
+        except (UnprocessableEntityError, ValueError) as ex:
+            raise UnprocessableEntityError(f"record does not have valid responses: {ex}") from ex
+
 
 class RecordCreateValidator(RecordValidatorBase):
     @classmethod
-    def validate(cls, record: RecordCreate, dataset: Dataset) -> None:
-        cls._validate_fields(record, dataset)
-        cls._validate_metadata(record, dataset)
+    async def validate(cls, record_create: RecordCreate, dataset: Dataset) -> None:
+        record = Record(fields=record_create.fields, dataset=dataset)
+
+        cls._validate_fields(record_create.fields, dataset)
+        cls._validate_metadata(record_create.metadata, dataset)
+        cls._validate_suggestions(record_create.suggestions, dataset, record=record)
+        cls._validate_vectors(record_create.vectors, dataset)
+        await cls._validate_responses(record_create.responses, dataset, record=record)
 
 
-class RecordUpdateValidator(RecordValidatorBase):
+class RecordUpsertValidator(RecordValidatorBase):
     @classmethod
-    def validate(cls, record: RecordUpdate, dataset: Dataset) -> None:
-        cls._validate_metadata(record, dataset)
-        cls._validate_duplicated_suggestions(record)
+    async def validate(cls, record_upsert: RecordUpsert, dataset: Dataset, record: Optional[Record]) -> None:
+        if record is None:
+            cls._validate_fields(record_upsert.fields, dataset)
+            record = Record(fields=record_upsert.fields, dataset=dataset)
 
-    @staticmethod
-    def _validate_duplicated_suggestions(record: RecordUpdate):
-        if not record.suggestions:
-            return
-        question_ids = [s.question_id for s in record.suggestions]
-        if len(question_ids) != len(set(question_ids)):
-            raise UnprocessableEntityError("found duplicate suggestions question IDs")
+        cls._validate_metadata(record_upsert.metadata, dataset)
+        cls._validate_vectors(record_upsert.vectors, dataset)
+
+        cls._validate_suggestions(record_upsert.suggestions, dataset, record=record)
+        await cls._validate_responses(record_upsert.responses, dataset, record=record)
 
 
 class RecordsBulkCreateValidator:
@@ -201,7 +268,7 @@ class RecordsBulkCreateValidator:
     async def validate(cls, db: AsyncSession, records_create: RecordsBulkCreate, dataset: Dataset) -> None:
         cls._validate_dataset_is_ready(dataset)
         await cls._validate_external_ids_are_not_present_in_db(db, records_create, dataset)
-        cls._validate_all_bulk_records(dataset, records_create.items)
+        await cls._validate_all_bulk_records(dataset, records_create.items)
 
     @staticmethod
     def _validate_dataset_is_ready(dataset: Dataset) -> None:
@@ -220,46 +287,9 @@ class RecordsBulkCreateValidator:
             raise UnprocessableEntityError(f"found records with same external ids: {', '.join(found_records)}")
 
     @staticmethod
-    def _validate_all_bulk_records(dataset: Dataset, records_create: List[RecordCreate]):
+    async def _validate_all_bulk_records(dataset: Dataset, records_create: List[RecordCreate]):
         for idx, record_create in enumerate(records_create):
             try:
-                RecordCreateValidator.validate(record_create, dataset)
-            except UnprocessableEntityError as ex:
-                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
-
-
-class RecordsBulkUpsertValidator:
-    @classmethod
-    def validate(
-        cls,
-        records_upsert: RecordsBulkUpsert,
-        dataset: Dataset,
-        existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
-    ) -> None:
-        cls._validate_dataset_is_ready(dataset)
-        cls._validate_all_bulk_records(dataset, records_upsert.items, existing_records_by_external_id_or_record_id)
-
-    @staticmethod
-    def _validate_dataset_is_ready(dataset: Dataset) -> None:
-        if not dataset.is_ready:
-            raise UnprocessableEntityError("records cannot be created or updated for a non published dataset")
-
-    @staticmethod
-    def _validate_all_bulk_records(
-        dataset: Dataset,
-        records_upsert: List[RecordUpsert],
-        existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
-    ):
-        existing_records_by_external_id_or_record_id = existing_records_by_external_id_or_record_id or {}
-        for idx, record_upsert in enumerate(records_upsert):
-            try:
-                record = existing_records_by_external_id_or_record_id.get(
-                    record_upsert.id
-                ) or existing_records_by_external_id_or_record_id.get(record_upsert.external_id)
-
-                if record:
-                    RecordUpdateValidator.validate(RecordUpdate.parse_obj(record_upsert), dataset)
-                else:
-                    RecordCreateValidator.validate(RecordCreate.parse_obj(record_upsert), dataset)
+                await RecordCreateValidator.validate(record_create, dataset)
             except (UnprocessableEntityError, ValueError) as ex:
-                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+                raise UnprocessableEntityError(f"Record at position {idx} is not valid because {ex}") from ex
