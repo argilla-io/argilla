@@ -175,6 +175,7 @@ class TestDatasetRecordsBulk:
         other_dataset = await self.test_dataset()
 
         record = await RecordFactory.create(dataset=dataset)
+
         response = await async_client.put(
             self.url(other_dataset.id),
             headers=owner_auth_header,
@@ -185,7 +186,9 @@ class TestDatasetRecordsBulk:
             },
         )
 
-        assert response.status_code == 422  # The insert is failing because no fields are provided
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Record at position 0 is not valid because fields cannot be empty"}
+
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(Record))).scalar_one().metadata_ is None
 

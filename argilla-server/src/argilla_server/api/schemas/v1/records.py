@@ -119,7 +119,7 @@ class RecordCreate(BaseModel):
                         f"allowed value of {CHAT_FIELDS_MAX_MESSAGES}"
                     )
 
-            return fields
+        return fields
 
     @validator("responses")
     @classmethod
