@@ -50,12 +50,12 @@ export const useHomeViewModel = () => {
       rows: "15K",
     },
     {
-      repoId: "dvilasuero/finepersonas-v0.1-tiny-flux-schnell",
-      task: "Text to Image",
-      tags: ["synthetic", "rlaif"],
-      icon: "text-to-image",
-      color: "hsl(38, 92%, 50%)",
-      rows: "350",
+      repoId: "fancyzhx/ag_news",
+      task: "Text Classification",
+      tags: ["topic-classification"],
+      icon: "text-classification",
+      color: "hsl(25, 95%, 53%)",
+      rows: "127K",
     },
   ];
 
