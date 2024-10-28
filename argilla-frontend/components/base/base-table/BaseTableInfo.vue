@@ -33,7 +33,7 @@
                 :filters="filters"
                 v-if="column.filtrable"
                 @applyFilters="onApplyFilters"
-                aria-label="Filter column {{ column.name }}"
+                :aria-label="'Filter column ' + column.name"
               />
               <button
                 v-else-if="column.sortable"
