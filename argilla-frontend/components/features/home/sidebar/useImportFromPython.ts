@@ -9,6 +9,9 @@ export const useImportFromPython = () => {
   const isRunningOnHF = isRunningOnHuggingFace();
 
   const snippet = `
+# pip install argilla
+# to run this code snippet
+
 import argilla as rg
 
 client = rg.Argilla(
@@ -26,21 +29,20 @@ settings = rg.Settings(
     questions=[
         rg.LabelQuestion(
             name="label",
-            labels=["label_1", "label_2"]
+            labels=["yes", "no"]
         ),
     ],
 )
 
 dataset = rg.Dataset(
     name="my_dataset",
-    workspace="my_workspace",
     settings=settings,
 )
 
 records = [
     {
         "text": "Do you need oxygen to breathe?",
-        "label": "label_1",
+        "label": "yes",
     }
 ]
 

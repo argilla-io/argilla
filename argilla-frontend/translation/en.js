@@ -270,9 +270,11 @@ export default {
       "If you're using a private Space, check the <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>docs</a>.",
     exampleDatasetsTitle: "Don’t know where to start?",
     exampleDatasetsText: "Explore these example datasets",
-    guidesTitle: "First time in Argilla?",
+    guidesTitle: "Not familiar with Argilla?",
     guidesText: "Take a look at these guides:",
     pasteRepoIdPlaceholder: "Paste a repo id",
+    demoLink:
+      "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
   },
   datasetCreation: {
     questions: {
