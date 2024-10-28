@@ -198,7 +198,7 @@ export const loadDependencyContainer = (context: Context) => {
     register(LoadUserUseCase).withDependencies(useAuth, UserRepository).build(),
 
     register(OAuthLoginUseCase)
-      .withDependencies(useAuth, OAuthRepository, LoadUserUseCase, useRoutes)
+      .withDependencies(useAuth, OAuthRepository, LoadUserUseCase)
       .build(),
 
     register(AuthLoginUseCase)
