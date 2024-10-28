@@ -132,6 +132,7 @@ class DatasetRecordsIterator:
             offset=self.__offset,
             with_responses=self.__with_responses,
             with_suggestions=self.__with_suggestions,
+            with_vectors=self.__with_vectors,
         )
         return [record_model for record_model, _ in search_items]
 

@@ -19,6 +19,7 @@ These are the section headers that we use:
 ### Changed
 
 - Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
+- Added support for `with_vectors` while fetching records along with a search query. ([#5638](https://github.com/argilla-io/argilla/pull/5638))
 
 ## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0)
 
