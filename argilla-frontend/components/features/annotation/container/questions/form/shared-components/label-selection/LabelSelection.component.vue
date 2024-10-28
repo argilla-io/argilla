@@ -7,7 +7,7 @@
           ref="searchComponentRef"
           v-model="searchInput"
           :searchRef="searchRef"
-          :placeholder="placeholder"
+          :placeholder="$t('spanAnnotation.searchLabels')"
         />
       </div>
       <div class="right-header">
@@ -111,10 +111,6 @@ export default {
     },
     suggestion: {
       type: Object,
-    },
-    placeholder: {
-      type: String,
-      default: () => "Search labels",
     },
     componentId: {
       type: String,

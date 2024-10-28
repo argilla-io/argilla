@@ -201,6 +201,7 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Hold 'Shift' to select character level",
     notSupported: "Span annotation is not supported for your browser",
+    searchLabels: "Search labels",
   },
   login: {
     title: "Sign in",
@@ -223,6 +224,7 @@ export default {
   filterBy: "Filter by...",
   fields: "Fields",
   questions: "Questions",
+  general: "General",
   metadata: "Metadata",
   vectors: "Vectors",
   dangerZone: "Danger zone",
