@@ -32,7 +32,7 @@ To load with Argilla, you'll just need to install Argilla as `pip install argill
 ```python
 import argilla as rg
 
-ds = rg.Dataset.from_hub("{{ repo_id }}")
+ds = rg.Dataset.from_hub("{{ repo_id }}", settings="auto")
 ```
 
 This will load the settings and records from the dataset repository and push them to you Argilla server for exploration and annotation.
