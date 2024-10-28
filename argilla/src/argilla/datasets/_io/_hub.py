@@ -119,7 +119,7 @@ class HubImportExportMixin(DiskImportExportMixin):
         workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
         with_records: bool = True,
-        settings: Union["Settings", Literal["auto", "ui"]] = "auto",
+        settings: Union["Settings", Literal["auto", "ui"]] = "ui",
         split: Optional[str] = None,
         subset: Optional[str] = None,
         **kwargs: Any,
@@ -134,7 +134,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
             settings: the settings to use to load the `Dataset`. If settings are "ui", a URL to configure the settings
                 through argilla will be returned. If settings are "auto",
-                the settings will be inferred from the `Features` of the dataset on the hub. Defaults to "auto".
+                the settings will be inferred from the `Features` of the dataset on the hub. Defaults to "ui".
             split: the split to load from the Hugging Face dataset. If not provided, the first split will be loaded.
             subset: the subset to load from the Hugging Face dataset. If not provided, the first subset will be loaded.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
@@ -145,6 +145,8 @@ class HubImportExportMixin(DiskImportExportMixin):
         from argilla.settings import Settings
         from datasets import load_dataset
         from huggingface_hub import snapshot_download
+
+        settings = settings or "ui"
 
         if name is None:
             name = repo_id
