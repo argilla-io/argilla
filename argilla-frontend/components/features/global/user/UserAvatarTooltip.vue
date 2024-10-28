@@ -17,7 +17,7 @@
           </div>
         </div>
       </div>
-      <div class="">
+      <div class="" role="list">
         <NuxtLink class="user__link" :to="{ name: 'user-settings' }">
           {{ $t("userAvatarTooltip.settings") }}
         </NuxtLink>

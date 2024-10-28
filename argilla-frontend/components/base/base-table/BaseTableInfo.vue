@@ -41,6 +41,7 @@
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
                 :aria-label="'Sort by ' + column.name"
+                :aria-sort="sortOrder === 'asc' ? 'descending' : 'ascending'"
               >
                 <svgicon width="18" height="18" name="sort" aria-hidden="true"/>
                 <span>{{ column.name }}</span>
