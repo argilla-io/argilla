@@ -742,6 +742,8 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
         records = await RecordFactory.create_batch(size=8, dataset=dataset)
 
+        mock_search_engine.get_dataset_progress.return_value = {"total": len(records)}
+
         mock_search_engine.get_dataset_user_progress.return_value = {
             "total": 6,
             "submitted": 3,
@@ -772,6 +774,7 @@ class TestSuiteDatasets:
     ):
         dataset = await DatasetFactory.create()
 
+        mock_search_engine.get_dataset_progress.return_value = {}
         mock_search_engine.get_dataset_user_progress.return_value = {}
 
         response = await async_client.get(
@@ -791,7 +794,7 @@ class TestSuiteDatasets:
         }
 
     @pytest.mark.parametrize("role", [UserRole.annotator, UserRole.admin])
-    async def test_get_current_user_dataset_metrics_as_annotator(
+    async def test_get_current_user_dataset_metrics_as_different_role(
         self,
         async_client: "AsyncClient",
         mock_search_engine: SearchEngine,
@@ -800,10 +803,13 @@ class TestSuiteDatasets:
         dataset = await DatasetFactory.create()
         records = await RecordFactory.create_batch(size=6, dataset=dataset)
 
-        user = await AnnotatorFactory.create(workspaces=[dataset.workspace], role=role)
+        user = await UserFactory.create(workspaces=[dataset.workspace], role=role)
+
+        mock_search_engine.get_dataset_progress.return_value = {
+            "total": len(records),
+        }
 
         mock_search_engine.get_dataset_user_progress.return_value = {
-            "total": len(records),
             "submitted": 2,
             "discarded": 1,
             "draft": 1,
