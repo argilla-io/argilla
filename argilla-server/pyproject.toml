@@ -39,6 +39,8 @@ dependencies = [
     # security dependencies
     "python-jose[cryptography] ~= 3.3.0",
     "passlib[bcrypt] ~= 1.7.4",
+    # required by fastapi
+    "python-multipart ~= 0.0.16",
     # OAuth2 integration
     "httpx ~= 0.27.0",
     "oauthlib ~= 3.2.0",
