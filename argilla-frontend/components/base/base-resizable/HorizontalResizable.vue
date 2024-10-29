@@ -4,7 +4,7 @@
       <slot name="up" />
     </div>
 
-    <div class="resizable__bar" ref="resizableBar">
+    <div class="resizable__bar" ref="resizableBar" role="separator">
       <div class="resizable__bar__inner" />
     </div>
 

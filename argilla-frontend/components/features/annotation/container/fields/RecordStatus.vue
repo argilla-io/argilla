@@ -3,7 +3,8 @@
     :key="record.status"
     :class="['status-tag', getStatusInfo.class]"
     :title="getStatusInfo.name"
-    ><span class="bullet"></span>
+    aria-label="Status of Record"
+    ><span class="bullet" aria-hidden="true"></span>
 
     <span>{{ getStatusInfo.name }}</span>
     <span

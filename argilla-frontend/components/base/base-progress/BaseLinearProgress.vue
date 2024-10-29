@@ -6,6 +6,8 @@
           v-for="(range, index) in filteredProgressRanges"
           :key="range.name"
           role="progressbar"
+          :aria-valuenow="getPercentage(range.value)"
+          :aria-label="range.name"
           :class="[
             'progress__range',
             showTooltip ? 'progress__range--with-tooltip' : null,
@@ -17,7 +19,7 @@
           @mouseenter="hoveredRange = range"
           @mouseleave="hoveredRange = null"
         >
-          <div class="progress__bar" :style="{ background: range.color }"></div>
+        <div class="progress__bar" :style="{ background: range.color }"></div>
         </div>
       </div>
       <template v-if="showTooltip && !!hoveredRange">
