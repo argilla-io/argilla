@@ -304,7 +304,7 @@ export default {
     preview: "Vista previa",
     importData: "Importar datos",
     addRecords: "Agregar records",
-    cantLoadRepository: "ID de repositorio no válido",
+    cantLoadRepository: "Dataset no encontrado o disponible en Hugging Face",
   },
   config: {
     field: {
