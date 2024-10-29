@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
 keywords = [
-    "data-science",
+    "data-spcience",
     "natural-language-processing",
     "text-labeling",
     "data-annotation",
@@ -64,9 +64,9 @@ dependencies = [
 
 [project.optional-dependencies]
 postgresql = [
-    "psycopg2 == 2.9.9",
+    "psycopg2 ~= 2.9.9",
     # Async PostgreSQL
-    "asyncpg == 0.29.0",
+    "asyncpg ~= 0.30.0",
 ]
 
 [project.urls]
