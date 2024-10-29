@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
 keywords = [
-    "data-spcience",
+    "data-science",
     "natural-language-processing",
     "text-labeling",
     "data-annotation",
