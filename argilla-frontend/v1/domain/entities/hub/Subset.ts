@@ -84,10 +84,6 @@ export class Subset {
     if (this.questions.length === 1) {
       this.questions[0].markAsRequired();
     }
-
-    if (this.fields.length === 1) {
-      this.fields[0].markAsRequired();
-    }
   }
 
   private tryToCreateQuestion(structure: Structure) {
