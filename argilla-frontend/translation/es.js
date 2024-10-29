@@ -305,6 +305,9 @@ export default {
     importData: "Importar datos",
     addRecords: "Agregar records",
     cantLoadRepository: "Dataset no encontrado o disponible en Hugging Face",
+    none: "Ninguno",
+    noWorkspaces:
+      "Por favor, sigue <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>esta guía</a> para crear un espacio de trabajo",
   },
   config: {
     field: {

@@ -26,8 +26,15 @@
             class="dataset-config-dialog__label"
             v-text="$t('datasetCreation.assignWorkspace')"
           />
+          <template v-if="!workspaces.length">
+            <span
+              class="dataset-config-dialog__unique-workspace"
+              v-text="$t('datasetCreation.none')"
+            />
+            <Validation :validations="[$t('datasetCreation.noWorkspaces')]" />
+          </template>
           <span
-            v-if="workspaces.length === 1"
+            v-else-if="workspaces.length === 1"
             class="dataset-config-dialog__unique-workspace"
             v-text="dataset.workspace.name"
           />
@@ -72,9 +79,11 @@
   </transition>
 </template>
 <script>
+import Validation from "../../annotation/settings/Validation.vue";
 import { useDatasetConfigurationNameAndWorkspace } from "./useDatasetConfigurationNameAndWorkspace";
 
 export default {
+  components: { Validation },
   props: {
     dataset: {
       type: Object,

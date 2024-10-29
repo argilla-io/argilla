@@ -29,6 +29,9 @@ $color-error: var(--color-brand);
   display: block;
   @include font-size(12px);
   color: $color-error;
+  :deep(a) {
+    color: $color-error;
+  }
 }
 .--has-error {
   input,
