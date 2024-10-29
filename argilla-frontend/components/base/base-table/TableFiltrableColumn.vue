@@ -5,7 +5,7 @@
       @click="openFilter(column)"
       :class="[visibleFilter || selectedOptions.length ? 'active' : '']"
     >
-      <svgicon name="filter" width="16" aria-hidden="true"/>
+      <svgicon name="filter" width="16" aria-hidden="true" />
       {{ column.name }}
     </button>
     <div class="table__filter" v-click-outside="close" v-if="visibleFilter">
