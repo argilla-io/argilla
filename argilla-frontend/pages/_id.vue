@@ -3,8 +3,7 @@
     <HeaderFeedbackTask
       :breadcrumbs="[
         { link: '/', name: $t('breadcrumbs.home') },
-        { name: 'new' },
-        { name: datasetConfig?.repoId },
+        { name: repoIdWithoutOrg },
       ]"
     >
       <template slot="badge">
@@ -30,6 +29,11 @@ export default {
   },
   setup() {
     return useNewDatasetViewModel();
+  },
+  computed: {
+    repoIdWithoutOrg() {
+      return this.datasetConfig?.repoId?.split("/")[1];
+    },
   },
 };
 </script>
