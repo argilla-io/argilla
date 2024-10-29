@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
+
 ### Fixed
 - Refine German translations and update non-localized UI elements [#5632](https://github.com/argilla-io/argilla/pull/5632)
 
