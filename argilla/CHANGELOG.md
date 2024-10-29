@@ -36,7 +36,7 @@ These are the section headers that we use:
 - Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
 - Added similarity search support. ([#5546](https://github.com/argilla-io/argilla/pull/5546))
 - Added filter support for `id`, `_server_id`, `inserted_at` and `updated_at` record attributes. ([#5545](https://github.com/argilla-io/argilla/pull/5545))
-- Added support to read argilla credentials from colab secrets. ([#5541](https://github.com/argilla-io/argilla/pull/5541)))
+- Added support to read argilla credentials from colab secrets. ([#5541](https://github.com/argilla-io/argilla/pull/5541))
 
 ### Changed
 
