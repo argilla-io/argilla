@@ -17,7 +17,7 @@ import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union, Literal
 from uuid import UUID
 
 from datasets import DatasetDict
@@ -119,11 +119,11 @@ class HubImportExportMixin(DiskImportExportMixin):
         workspace: Optional[Union["Workspace", str]] = None,
         client: Optional["Argilla"] = None,
         with_records: bool = True,
-        settings: Optional["Settings"] = None,
+        settings: Union["Settings", Literal["auto", "ui"]] = "ui",
         split: Optional[str] = None,
         subset: Optional[str] = None,
         **kwargs: Any,
-    ) -> "Dataset":
+    ) -> Union["Dataset", str]:
         """Loads a `Dataset` from the Hugging Face Hub.
 
         Parameters:
@@ -132,21 +132,34 @@ class HubImportExportMixin(DiskImportExportMixin):
             workspace (Union[Workspace, str], optional): The workspace to import the dataset to. Defaults to None and default workspace is used.
             client: the client to use to load the `Dataset`. If not provided, the default client will be used.
             with_records: whether to load the records from the Hugging Face dataset. Defaults to `True`.
-            settings: the settings to use to load the `Dataset`. If not provided, the settings will be loaded from the Hugging Face dataset.
+            settings: the settings to use to load the `Dataset`. If settings are "ui", a URL to configure the settings
+                through argilla will be returned. If settings are "auto",
+                the settings will be inferred from the `Features` of the dataset on the hub. Defaults to "ui".
             split: the split to load from the Hugging Face dataset. If not provided, the first split will be loaded.
+            subset: the subset to load from the Hugging Face dataset. If not provided, the first subset will be loaded.
             **kwargs: the kwargs to pass to `datasets.Dataset.load_from_hub`.
 
         Returns:
             A `Dataset` loaded from the Hugging Face Hub.
         """
+        from argilla.settings import Settings
         from datasets import load_dataset
         from huggingface_hub import snapshot_download
-        from argilla import Dataset
+
+        settings = settings or "ui"
 
         if name is None:
-            name = Dataset._sanitize_name(repo_id)
+            name = repo_id
 
-        if settings is not None:
+        if settings == "ui":
+            return cls._run_settings_ui(
+                repo_id=repo_id,
+                subset=subset,
+                split=split,
+                client=client,
+            )
+
+        elif isinstance(settings, Settings):
             dataset = cls(name=name, settings=settings)
             dataset.create()
         else:
@@ -304,3 +317,25 @@ class HubImportExportMixin(DiskImportExportMixin):
                     else:
                         sample_huggingface_record[key] = "Record value is not serializable"
             return sample_huggingface_record
+
+    @classmethod
+    def _run_settings_ui(cls, repo_id: str, subset: str, split: str, client: Optional["Argilla"] = None) -> str:
+        from urllib.parse import quote_plus, urlencode
+        import webbrowser
+
+        client = client or Argilla._get_default()
+
+        params = {
+            "subset": subset,
+            "split": split,
+        }
+
+        url = f"{client.api_url.removesuffix('/')}/new/{quote_plus(repo_id)}?{urlencode(params)}"
+
+        try:
+            webbrowser.open(url, new=2, autoraise=True)
+        except Exception as e:
+            warnings.warn(f"Error opening the URL in the browser: {e}")
+        finally:
+            warnings.warn(f"Open the following URL in your browser to configure the dataset: {url}")
+            return url

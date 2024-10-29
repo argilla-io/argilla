@@ -7,7 +7,7 @@
           ref="searchComponentRef"
           v-model="searchInput"
           :searchRef="searchRef"
-          :placeholder="placeholder"
+          :placeholder="$t('spanAnnotation.searchLabels')"
         />
       </div>
       <div class="right-header">
@@ -26,6 +26,7 @@
             width="18"
             height="18"
             :name="iconToShowInTheCollapseButton"
+            aria-hidden="true"
           />
         </button>
       </div>
@@ -37,12 +38,17 @@
       :css="options.length < 50"
       class="inputs-area"
       v-if="filteredOptions.length"
+      role="group"
+      aria-multiselectable="multiple"
+      aria-label="Label-Options"
     >
       <div
         class="input-button"
         v-for="(option, index) in visibleOptions"
         :key="option.id"
         @keydown.enter.prevent
+        role="button"
+        :aria-label="option.text"
       >
         <input
           ref="options"
@@ -111,10 +117,6 @@ export default {
     },
     suggestion: {
       type: Object,
-    },
-    placeholder: {
-      type: String,
-      default: () => "Search labels",
     },
     componentId: {
       type: String,

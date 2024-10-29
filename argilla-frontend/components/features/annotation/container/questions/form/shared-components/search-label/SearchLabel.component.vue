@@ -1,5 +1,5 @@
 <template>
-  <div class="search-area" @click="focusInSearch">
+  <div class="search-area" @click="focusInSearch" aria-label="Search Labels">
     <BaseIconWithBadge
       ref="iconSearchRef"
       class="search-area__icon --search"
@@ -19,6 +19,7 @@
       :value="value"
       :ref="searchRef"
       :placeholder="placeholder"
+      role="search"
       @input="$emit('input', $event.target.value)"
       @keydown.arrow-up.prevent="looseFocus"
       @keydown.arrow-down.prevent="looseFocus"
@@ -35,6 +36,7 @@
       badge-horizontal-position="right"
       badge-border-color="white"
       @click-icon="resetValue"
+      aria-hidden="true"
     />
   </div>
 </template>

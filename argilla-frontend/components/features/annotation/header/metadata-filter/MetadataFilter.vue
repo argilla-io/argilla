@@ -34,7 +34,7 @@
             @click="selectMetadataCategory(null)"
           >
             <span v-text="visibleCategory.title" />
-            <svgicon name="chevron-left" width="12" height="12" />
+            <svgicon name="chevron-left" width="12" height="12" aria-hidden="true"/>
           </div>
           <div class="metadata-filter__content">
             <LabelsSelector

@@ -28,6 +28,7 @@ from argilla_server.enums import (
     SimilarityOrder,
     RecordStatus,
     SortOrder,
+    DatasetStatus,
 )
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings, Vector
 from argilla_server.search_engine import (
@@ -120,6 +121,7 @@ async def test_banking_sentiment_dataset_non_indexed():
             await FloatMetadataPropertyFactory.create(name="seq_float"),
         ],
         questions=[text_question, rating_question],
+        status=DatasetStatus.ready,
     )
 
     records = [
@@ -1352,6 +1354,13 @@ class TestBaseElasticAndOpenSearchEngine:
             "submitted": 1,
         }
 
+    async def test_get_dataset_user_progress_for_draft_dataset(self, search_engine: BaseElasticAndOpenSearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        user = await UserFactory.create()
+
+        progress = await search_engine.get_dataset_user_progress(dataset, user=user)
+        assert progress == {}
+
     async def test_get_dataset_progress_with_pending_records(
         self,
         search_engine: BaseElasticAndOpenSearchEngine,
@@ -1387,6 +1396,11 @@ class TestBaseElasticAndOpenSearchEngine:
 
         progress = await search_engine.get_dataset_progress(dataset)
         assert progress == {"total": len(records), "completed": len(records)}
+
+    async def test_get_dataset_progress_for_draft_dataset(self, search_engine: BaseElasticAndOpenSearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        progress = await search_engine.get_dataset_progress(dataset)
+        assert progress == {}
 
     @pytest.mark.parametrize(
         ("property_name", "expected_metrics"),

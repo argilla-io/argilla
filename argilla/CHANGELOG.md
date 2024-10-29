@@ -16,9 +16,16 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
+
 ### Changed
 
 - Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
+- Added support for `with_vectors` while fetching records along with a search query. ([#5638](https://github.com/argilla-io/argilla/pull/5638))
+
+### Removed
+
+- Removed name sanitizing for dataset settings names. This may cause issues with old server versions. Especially when working with `from_hub`. ([#5574](https://github.com/argilla-io/argilla/pull/5574))
 
 ### Removed
 

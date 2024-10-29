@@ -26,21 +26,20 @@ settings = rg.Settings(
     questions=[
         rg.LabelQuestion(
             name="label",
-            labels=["label_1", "label_2"]
+            labels=["yes", "no"]
         ),
     ],
 )
 
 dataset = rg.Dataset(
     name="my_dataset",
-    workspace="my_workspace",
     settings=settings,
 )
 
 records = [
     {
         "text": "Do you need oxygen to breathe?",
-        "label": "label_1",
+        "label": "yes",
     }
 ]
 

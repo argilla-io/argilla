@@ -58,7 +58,7 @@ export default {
     flex-wrap: wrap;
     gap: $base-space;
     padding: 0;
-    margin: $base-space 0 $base-space 0;
+    margin: $base-space 0 0;
   }
   &__option {
     list-style: none;

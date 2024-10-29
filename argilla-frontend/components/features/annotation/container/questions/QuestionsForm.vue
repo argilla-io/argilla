@@ -5,6 +5,7 @@
     @submit.stop.prevent=""
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
+    aria-label="Annotation Questions"
   >
     <div class="questions-form__content">
       <QuestionsComponent

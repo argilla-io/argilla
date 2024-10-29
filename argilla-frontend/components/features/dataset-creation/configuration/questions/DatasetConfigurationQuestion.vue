@@ -119,7 +119,7 @@ export default {
     width: 100%;
     height: 1px;
     background: var(--bg-opacity-6);
-    margin-top: calc($base-space / 2);
+    margin-top: $base-space;
   }
 }
 </style>

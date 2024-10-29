@@ -56,10 +56,6 @@ export class FieldCreation {
     return this.type.isCustomType;
   }
 
-  markAsRequired() {
-    this.required = true;
-  }
-
   public static from(
     name: string,
     type: FieldCreationTypes,

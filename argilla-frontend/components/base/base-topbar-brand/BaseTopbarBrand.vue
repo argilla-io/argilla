@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <div class="topbar">
-    <brand-icon class="brand-icon" color="white" />
+  <div class="topbar" role="banner" aria-label="Top navigation bar">
+    <brand-icon class="brand-icon" color="white" aria-label="Argilla icon"/>
     <slot />
   </div>
 </template>

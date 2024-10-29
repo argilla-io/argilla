@@ -201,6 +201,7 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Hold 'Shift' to select character level",
     notSupported: "Span annotation is not supported for your browser",
+    searchLabels: "Search labels",
   },
   login: {
     title: "Sign in",
@@ -223,6 +224,7 @@ export default {
   filterBy: "Filter by...",
   fields: "Fields",
   questions: "Questions",
+  general: "General",
   metadata: "Metadata",
   vectors: "Vectors",
   dangerZone: "Danger zone",
@@ -268,7 +270,7 @@ export default {
       "If you're using a private Space, check the <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>docs</a>.",
     exampleDatasetsTitle: "Don’t know where to start?",
     exampleDatasetsText: "Explore these example datasets",
-    guidesTitle: "First time in Argilla?",
+    guidesTitle: "Not familiar with Argilla?",
     guidesText: "Take a look at these guides:",
     pasteRepoIdPlaceholder: "Paste a repo id",
     demoLink:
@@ -304,6 +306,10 @@ export default {
     preview: "Preview",
     importData: "Import data",
     addRecords: "Add records",
+    cantLoadRepository: "Dataset not found or available on Hugging Face",
+    none: "None",
+    noWorkspaces:
+      "Please, follow the <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>guide</a> to create a workspace",
   },
   config: {
     field: {

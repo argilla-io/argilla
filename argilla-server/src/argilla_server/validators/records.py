@@ -52,13 +52,17 @@ CHAT_FIELD_MAX_LENGTH = 500
 class RecordValidatorBase(ABC):
     @classmethod
     def _validate_fields(cls, fields: dict, dataset: Dataset) -> None:
-        fields = fields or {}
-
+        cls._validate_non_empty_fields(fields=fields)
         cls._validate_required_fields(dataset=dataset, fields=fields)
         cls._validate_extra_fields(dataset=dataset, fields=fields)
         cls._validate_image_fields(dataset=dataset, fields=fields)
         cls._validate_chat_fields(dataset=dataset, fields=fields)
         cls._validate_custom_fields(dataset=dataset, fields=fields)
+
+    @classmethod
+    def _validate_non_empty_fields(cls, fields: Dict[str, str]) -> None:
+        if not (isinstance(fields, dict) and len(fields) >= 1):
+            raise UnprocessableEntityError("fields cannot be empty")
 
     @classmethod
     def _validate_required_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
