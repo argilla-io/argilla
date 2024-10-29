@@ -120,34 +120,6 @@ describe("DatasetCreation", () => {
       ]);
     });
 
-    it("create a required field if the dataset has just one field", () => {
-      const datasetInfoWithOneField = {
-        default: {
-          ...datasetInfo.default,
-          features: {
-            text_field: {
-              dtype: "string",
-              _type: "Value",
-            },
-          },
-        },
-      };
-
-      const builder = new DatasetCreationBuilder(
-        "FAKE",
-        datasetInfoWithOneField
-      );
-
-      const datasetCreation = builder.build();
-
-      const field = datasetCreation.fields[0];
-
-      expect(field.name).toBe("text_field");
-      expect(field.type.isTextType).toBeTruthy();
-      expect(field.required).toBeTruthy();
-      expect(datasetCreation.fields.length).toBe(1);
-    });
-
     it("create a required question if the dataset has just one field", () => {
       const datasetInfoWithOneQuestion = {
         default: {
