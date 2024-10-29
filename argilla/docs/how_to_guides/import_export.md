@@ -115,7 +115,20 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>")
+rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>")
+```
+
+By default, the `Dataset.from_hub` method will return the URL of the dataset configuration page. This page will let you preview the dataset's configuration and records before creating it in Argilla.
+
+You can infer the settings of the dataset automatically by configuring the `settings` parameter to `"auto"`. This will infer the dataset's settings based on the dataset's features in `datasets.Features`.
+
+```python
+
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", settings="auto")
 ```
 
 The `rg.Dataset.from_hub` method loads the configuration and records from the dataset repo. If you only want to load records, you can pass a `datasets.Dataset` object to the `rg.Dataset.log` method. This enables you to configure your own dataset and reuse existing Hub datasets. See the [guide on records](record.md) for more information.
@@ -126,7 +139,7 @@ The `rg.Dataset.from_hub` method loads the configuration and records from the da
     The example above will pull the dataset's `Settings` and records from the hub. If you only want to pull the dataset's configuration, you can set the `with_records` parameter to `False`. This is useful if you're just interested in a specific dataset template or you want to make changes in the records.
 
     ```python
-    dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", with_records=False)
+    dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", with_records=False, settings="auto")
     ```
 
     You could then log the dataset's records using the `load_dataset` method of the `datasets` package and pass the dataset to the `rg.Dataset.log` method.

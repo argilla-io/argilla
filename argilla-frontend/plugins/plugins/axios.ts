@@ -19,11 +19,13 @@ import { AxiosError } from "axios";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 type BackendError = {
-  detail: {
-    params: {
-      detail: string;
-    };
-  };
+  detail:
+    | {
+        params: {
+          detail: string;
+        };
+      }
+    | string;
   code?: string;
   message?: string;
 };
@@ -57,6 +59,11 @@ export default ({ $axios, app }) => {
           type: "danger",
         });
       }
+    } else if (data.detail && typeof data.detail === "string") {
+      notification.notify({
+        message: data.detail.toString(),
+        type: "danger",
+      });
     }
 
     throw error;

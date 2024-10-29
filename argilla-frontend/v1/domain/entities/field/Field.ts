@@ -1,11 +1,28 @@
+import { FieldType } from "./FieldType";
+
 interface OriginalField {
   title: string;
   settings: any;
 }
 
+const adaptContentForChatField = (content: any) => {
+  if (Array.isArray(content)) return content;
+
+  return [
+    {
+      content,
+      role: "user",
+    },
+  ];
+};
+
+const adaptContentForImageField = (content: any) => {
+  return content?.src ?? content;
+};
+
 export class Field {
   private original: OriginalField;
-  public readonly content: string;
+  public readonly content: string | any | unknown[];
 
   public readonly sdkRecord?: unknown;
 
@@ -19,33 +36,36 @@ export class Field {
     record?: any
   ) {
     this.initializeOriginal();
+    this.content = record?.fields[name] ?? "";
 
     if (this.isCustomType) {
       this.sdkRecord = record;
       this.content = settings.template;
-    } else {
-      this.content = record?.fields[name] ?? "";
+    } else if (this.isChatType) {
+      this.content = adaptContentForChatField(this.content);
+    } else if (this.isImageType) {
+      this.content = adaptContentForImageField(this.content);
     }
   }
 
   get isTextType() {
-    return this.type === "text";
+    return this.type.isTextType;
   }
 
   get isImageType() {
-    return this.type === "image";
+    return this.type.isImageType;
   }
 
   get isChatType() {
-    return this.type === "chat";
+    return this.type.isChatType;
   }
 
   get isCustomType() {
-    return this.type === "custom";
+    return this.type.isCustomType;
   }
 
   private get type() {
-    return this.settings?.type?.toLowerCase() ?? null;
+    return FieldType.from(this.settings?.type);
   }
 
   get isModified(): boolean {

@@ -76,7 +76,11 @@
             :for="option.id"
             :title="option.text"
           >
-            <span class="key" v-text="keyboards[option.id]" />
+            <span
+              v-if="visibleShortcuts"
+              class="key"
+              v-text="keyboards[option.id]"
+            />
             <span class="label-text__text">{{ option.text }}</span>
             <span v-if="isSuggested(option)" class="label-text__suggestion">
               <svgicon class="label-text__suggestion__icon" name="suggestion" />
@@ -106,7 +110,6 @@ export default {
   props: {
     maxOptionsToShowBeforeCollapse: {
       type: Number,
-      required: true,
     },
     options: {
       type: Array,
@@ -130,6 +133,10 @@ export default {
     isFocused: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   model: {
@@ -210,18 +217,16 @@ export default {
       }
 
       const remainingSorted = options
-        .slice(this.maxOptionsToShowBeforeCollapse)
+        .slice(this.maxVisibleOptions)
         .filter((option) => option.isSelected);
 
-      return options
-        .slice(0, this.maxOptionsToShowBeforeCollapse)
-        .concat(remainingSorted);
+      return options.slice(0, this.maxVisibleOptions).concat(remainingSorted);
     },
     numberToShowInTheCollapseButton() {
       return this.filteredOptions.length - this.visibleOptions.length;
     },
     showCollapseButton() {
-      return this.filteredOptions.length > this.maxOptionsToShowBeforeCollapse;
+      return this.filteredOptions.length > this.maxVisibleOptions;
     },
     showSearch() {
       return (
@@ -238,6 +243,9 @@ export default {
     },
     iconToShowInTheCollapseButton() {
       return this.isExpanded ? "chevron-up" : "chevron-down";
+    },
+    maxVisibleOptions() {
+      return this.maxOptionsToShowBeforeCollapse ?? this.options.length + 1;
     },
   },
   methods: {
@@ -332,7 +340,7 @@ export default {
     expandLabelsOnTab(index) {
       if (!this.showCollapseButton) return;
 
-      if (index === this.maxOptionsToShowBeforeCollapse - 1) {
+      if (index === this.maxVisibleOptions - 1) {
         this.isExpanded = true;
       }
     },

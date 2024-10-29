@@ -1,14 +1,35 @@
+const availableQuestionTypes = [
+  "label_selection",
+  "multi_label_selection",
+  "ranking",
+  "text",
+  "span",
+  "rating",
+];
+
+export type QuestionTypes =
+  | "label_selection"
+  | "multi_label_selection"
+  | "ranking"
+  | "text"
+  | "span"
+  | "rating";
+
 export class QuestionType extends String {
   private constructor(value: string) {
     super(value);
   }
 
-  public get value(): string {
-    return this.toLowerCase();
+  public get value(): QuestionTypes {
+    return this.toLowerCase() as QuestionTypes;
   }
 
-  public static from(value: string): QuestionType {
-    return new QuestionType(value);
+  public static from(value: string): QuestionType | null {
+    if (availableQuestionTypes.includes(value)) {
+      return new QuestionType(value);
+    }
+
+    return null;
   }
 
   public get isRankingType(): boolean {

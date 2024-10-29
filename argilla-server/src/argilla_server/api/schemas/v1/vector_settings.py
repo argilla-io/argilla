@@ -20,7 +20,6 @@ from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
 
-VECTOR_SETTINGS_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
 VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
 
@@ -63,7 +62,6 @@ class VectorsSettings(BaseModel):
 class VectorSettingsCreate(BaseModel):
     name: str = Field(
         ...,
-        regex=VECTOR_SETTINGS_CREATE_NAME_REGEX,
         min_length=VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH,
         max_length=VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
         description="The title of the vector settings",
