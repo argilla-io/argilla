@@ -156,9 +156,9 @@ export default {
   margin: 0 auto;
   &__content {
     display: flex;
-    justify-content: center;
     gap: $base-space * 2;
     min-height: 0;
+    height: 100%;
     @include media("<tablet") {
       flex-direction: column;
     }
