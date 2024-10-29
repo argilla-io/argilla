@@ -18,8 +18,13 @@ These are the section headers that we use:
 
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
+### Added
+
+- Added `Argilla.deploy_on_spaces` to deploy the Argilla server on Hugging Face Spaces. ([#5547](https://github.com/argilla-io/argilla/pull/5547))
+
 ### Changed
 
+- Changed `Dataset.from_hub` method to open configure URL when `settings="ui"`. ([#5622](https://github.com/argilla-io/argilla/pull/5622))
 - Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
 - Added support for `with_vectors` while fetching records along with a search query. ([#5638](https://github.com/argilla-io/argilla/pull/5638))
 
