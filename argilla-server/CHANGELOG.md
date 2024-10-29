@@ -20,6 +20,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Added new `POST /api/v1/datasets/:dataset_id/import` to import datasets from Hugging Face as a background job. ([#5572](https://github.com/argilla-io/argilla/pull/5572))
 - Added new `metadata` attribute for endpoints getting, creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
 - Added new validation to avoid the creation of records with empty `fields` attributes. ([#5639](https://github.com/argilla-io/argilla/pull/5639))
 
@@ -31,11 +32,8 @@ These are the section headers that we use:
 
 ### Removed
 
-- Removed name pattern restrictions for Fields. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
-- Removed name pattern restrictions for Questions. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
-- Removed name pattern restrictions for Metadata Properties. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
-- Removed name pattern restrictions for Vector Settings. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
-- Removed name pattern validation for Workspaces, Datasets, and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
+- Removed name pattern restrictions for Fields, Questions, Metadata Properties and Vector Settings. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+- Removed name pattern validation for Datasets, Workspaces and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
 
 ### Fixed
 
