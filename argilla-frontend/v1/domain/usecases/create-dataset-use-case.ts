@@ -52,7 +52,7 @@ export class CreateDatasetUseCase {
       let retries = 0;
       const debounce = Debounce.from(1000);
 
-      while (retries < 5) {
+      while (retries < 30) {
         revalidateCache(`/v1/datasets/${datasetCreated}/progress`);
 
         const progress = await this.datasetRepository.getProgress(
