@@ -5,7 +5,7 @@
 groups = ["default", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:bf5b8849733dc8abae4ff4b8e04313f6846497f527786541e0cc00f811a9c94f"
+content_hash = "sha256:cb3eed9aab0ff617c600e74fd4fee49546bd0bec6f911b5d215943b59aa6ad4d"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -2191,6 +2191,17 @@ dependencies = [
 files = [
     {file = "python-jose-3.3.0.tar.gz", hash = "sha256:55779b5e6ad599c6336191246e95eb2293a9ddebd555f796a65f838f07e5d78a"},
     {file = "python_jose-3.3.0-py2.py3-none-any.whl", hash = "sha256:9b1376b023f8b298536eedd47ae1089bcdb848f1535ab30555cd92002d78923a"},
+]
+
+[[package]]
+name = "python-multipart"
+version = "0.0.16"
+requires_python = ">=3.8"
+summary = "A streaming multipart parser for Python"
+groups = ["default"]
+files = [
+    {file = "python_multipart-0.0.16-py3-none-any.whl", hash = "sha256:c2759b7b976ef3937214dfb592446b59dfaa5f04682a076f78b117c94776d87a"},
+    {file = "python_multipart-0.0.16.tar.gz", hash = "sha256:8dee37b88dab9b59922ca173c35acb627cc12ec74019f5cd4578369c6df36554"},
 ]
 
 [[package]]
