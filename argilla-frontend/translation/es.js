@@ -256,7 +256,7 @@ export default {
     },
   },
   home: {
-    argillaDatasets: "Datasets de Argilla",
+    argillaDatasets: "Tus datasets",
     none: "Sin datasets",
     importTitle: "Importar un dataset desde Hugging Face Hub",
     importText:

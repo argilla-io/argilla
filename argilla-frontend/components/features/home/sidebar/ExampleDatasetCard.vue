@@ -59,6 +59,8 @@ export default {
   &__title {
     margin: 0;
     color: var(--fg-primary);
+    white-space: pre-line;
+    @include line-height(18px);
   }
   &__tags {
     display: flex;

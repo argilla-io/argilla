@@ -55,7 +55,8 @@ export default {
   &__text {
     font-weight: 400;
     color: var(--fg-secondary);
-    padding: calc($base-space / 2) $base-space;
+    padding: calc($base-space / 2) $base-space calc($base-space / 2)
+      calc($base-space / 2);
   }
 }
 </style>
