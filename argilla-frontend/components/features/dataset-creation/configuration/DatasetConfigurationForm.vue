@@ -29,23 +29,32 @@
               class="config-form__draggable-area"
               :list="dataset.selectedSubset.fields"
               :group="{ name: 'fields' }"
+              ghost-class="config-form__ghost"
               :disabled="isFocused"
+              @start="drag = true"
+              @end="drag = false"
             >
-              <DatasetConfigurationField
-                v-for="field in dataset.selectedSubset.fields.filter(
-                  (f) => f.name !== dataset.mappings.external_id
-                )"
-                :key="field.name"
-                :field="field"
-                :available-types="
-                  availableFieldTypes.filter(
-                    (a) =>
-                      a.value === 'no mapping' ||
-                      a.value === field.originalType.value
-                  )
-                "
-                @is-focused="isFocused = $event"
-              />
+              <transition-group
+                class="config-form__draggable-area-wrapper"
+                type="transition"
+                :name="!drag ? 'flip-list' : null"
+              >
+                <DatasetConfigurationField
+                  v-for="field in dataset.selectedSubset.fields.filter(
+                    (f) => f.name !== dataset.mappings.external_id
+                  )"
+                  :key="field.name"
+                  :field="field"
+                  :available-types="
+                    availableFieldTypes.filter(
+                      (a) =>
+                        a.value === 'no mapping' ||
+                        a.value === field.originalType.value
+                    )
+                  "
+                  @is-focused="isFocused = $event"
+                />
+              </transition-group>
             </draggable>
           </div>
         </div>
@@ -70,21 +79,28 @@
             <draggable
               v-if="dataset.selectedSubset.questions.length"
               class="config-form__draggable-area"
+              ghost-class="config-form__ghost"
               :list="dataset.selectedSubset.questions"
               :group="{ name: 'questions' }"
               :disabled="isFocused"
             >
-              <DatasetConfigurationQuestion
-                v-for="question in dataset.selectedSubset.questions"
-                :key="question.name"
-                :question="question"
-                :columns="dataset.selectedSubset.columns"
-                :remove-is-allowed="true"
-                :available-types="availableQuestionTypes"
-                @remove="dataset.selectedSubset.removeQuestion(question.name)"
-                @change-type="onTypeIsChanged(question.name, $event)"
-                @is-focused="isFocused = $event"
-              />
+              <transition-group
+                class="config-form__draggable-area-wrapper"
+                type="transition"
+                :name="!drag ? 'flip-list' : null"
+              >
+                <DatasetConfigurationQuestion
+                  v-for="question in dataset.selectedSubset.questions"
+                  :key="question.name"
+                  :question="question"
+                  :columns="dataset.selectedSubset.columns"
+                  :remove-is-allowed="true"
+                  :available-types="availableQuestionTypes"
+                  @remove="dataset.selectedSubset.removeQuestion(question.name)"
+                  @change-type="onTypeIsChanged(question.name, $event)"
+                  @is-focused="isFocused = $event"
+                />
+              </transition-group>
             </draggable>
           </div>
         </div>
@@ -123,6 +139,7 @@ export default {
     return {
       isFocused: false,
       visibleDatasetCreationDialog: false,
+      drag: false,
     };
   },
   methods: {
@@ -199,6 +216,15 @@ export default {
     flex-direction: column;
     gap: $base-space;
   }
+  &__draggable-area-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
+  }
+  &__ghost {
+    opacity: 0.5;
+    background: lime;
+  }
   &__selector {
     &__intro {
       display: block;
@@ -220,6 +246,9 @@ export default {
       width: 100%;
       justify-content: center;
     }
+  }
+  .flip-list-move {
+    transition: transform 0.3s;
   }
 }
 </style>
