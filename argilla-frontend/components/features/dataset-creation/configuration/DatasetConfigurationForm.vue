@@ -86,23 +86,23 @@
                 @is-focused="isFocused = $event"
               />
             </draggable>
-            <div class="config-form__button-area">
-              <BaseButton
-                class="primary"
-                @click.prevent="
-                  visibleDatasetCreationDialog = !visibleDatasetCreationDialog
-                "
-                >{{ $t("datasetCreation.button") }}</BaseButton
-              >
-              <DatasetConfigurationDialog
-                v-if="visibleDatasetCreationDialog"
-                :dataset="dataset"
-                :is-loading="isLoading"
-                @close-dialog="visibleDatasetCreationDialog = false"
-                @create-dataset="createDataset"
-              />
-            </div>
           </div>
+        </div>
+        <div class="config-form__button-area">
+          <BaseButton
+            class="primary"
+            @click.prevent="
+              visibleDatasetCreationDialog = !visibleDatasetCreationDialog
+            "
+            >{{ $t("datasetCreation.button") }}</BaseButton
+          >
+          <DatasetConfigurationDialog
+            v-if="visibleDatasetCreationDialog"
+            :dataset="dataset"
+            :is-loading="isLoading"
+            @close-dialog="visibleDatasetCreationDialog = false"
+            @create-dataset="createDataset"
+          />
         </div>
       </div>
     </div>
@@ -149,21 +149,22 @@ export default {
 .config-form {
   display: flex;
   flex-direction: column;
+  height: 100%;
   gap: $base-space;
   padding: $base-space * 2;
-  height: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
   &__content {
     display: flex;
-    justify-content: center;
     gap: $base-space * 2;
     min-height: 0;
+    height: 100%;
     @include media("<tablet") {
       flex-direction: column;
     }
   }
   &__col-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space * 2;
     position: relative;
     width: 100%;
     max-width: 440px;
@@ -172,6 +173,7 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
     background: var(--bg-accent-grey-1);
     border: 1px solid var(--bg-opacity-6);
     border-radius: $border-radius-m;
@@ -190,9 +192,6 @@ export default {
       gap: $base-space;
       overflow: auto;
       height: 100%;
-      &.--questions {
-        padding-bottom: $base-space * 9;
-      }
     }
   }
   &__draggable-area {
@@ -217,14 +216,10 @@ export default {
   }
   &__button-area {
     display: flex;
-    justify-content: right;
-    position: absolute;
-    bottom: 1px;
-    right: 1px;
-    left: 1px;
-    background: var(--bg-accent-grey-1);
-    padding: $base-space * 2;
-    border-radius: $border-radius-m;
+    .button {
+      width: 100%;
+      justify-content: center;
+    }
   }
 }
 </style>
