@@ -9,6 +9,9 @@ export const useImportFromPython = () => {
   const isRunningOnHF = isRunningOnHuggingFace();
 
   const snippet = `
+# pip install argilla
+# to run this code snippet
+
 import argilla as rg
 
 client = rg.Argilla(
