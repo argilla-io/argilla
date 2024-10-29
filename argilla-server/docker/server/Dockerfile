@@ -1,4 +1,4 @@
-FROM python:3.10-slim AS builder
+FROM python:3.13-slim AS builder
 
 # Copying argilla distribution files
 COPY dist/*.whl /packages/
@@ -15,7 +15,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /packages
 
-FROM python:3.10-slim
+FROM python:3.13-slim
 
 # Environment Variables
 ENV USERNAME=""
