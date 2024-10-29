@@ -31,19 +31,20 @@ export default {
   display: flex;
   align-items: center;
   min-height: 26px;
-  box-shadow: 0 0 1px 1px var(--bg-opacity-10);
-  border-radius: $border-radius;
+  border: 1px solid var(--bg-opacity-10);
+  border-radius: $border-radius-l;
+  @include font-size(13px);
 
   &__icon-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: calc($base-space / 1.5) $base-space;
-    border-radius: $border-radius;
+    padding: calc($base-space / 1.8) $base-space;
+    border-radius: $border-radius-l;
     background: linear-gradient(
-      180deg,
-      hsl(from v-bind(color) h s l / 1%) 0%,
-      hsl(from v-bind(color) h s l / 10%) 100%
+      90deg,
+      hsl(from v-bind(color) h s l / 10%) 0%,
+      hsl(from v-bind(color) h s l / 1%) 100%
     );
   }
   &__icon {

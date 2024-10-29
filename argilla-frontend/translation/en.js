@@ -264,7 +264,7 @@ export default {
     importText:
       "Start with a dataset from the Hub by simply pasting the repository name",
     importButton: "Import dataset",
-    importFromHub: "Import from Hub",
+    importFromHub: "Import dataset from Hugging Face",
     importFromPython: "Import from Python",
     importFromPythonHFWarning:
       "If you're using a private Space, check the <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>docs</a>.",
@@ -272,7 +272,7 @@ export default {
     exampleDatasetsText: "Explore these example datasets",
     guidesTitle: "Not familiar with Argilla?",
     guidesText: "Take a look at these guides:",
-    pasteRepoIdPlaceholder: "Paste a repo id",
+    pasteRepoIdPlaceholder: "Paste a repo id e.g., stanfordnlp/imdb",
     demoLink:
       "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
   },

@@ -50,6 +50,7 @@
           />
           <ImportFromPython v-if="!showImportDatasetInput" />
         </div>
+        <BaseSeparator />
         <div class="home__sidebar__content">
           <p
             class="home__sidebar__title"
@@ -75,12 +76,12 @@
           <p class="home__sidebar__subtitle" v-text="$t('home.guidesText')" />
           <div class="home__sidebar__cards">
             <LinkCard
-              badge="How to guide"
+              type="How to guide"
               text="Annotate your dataset"
               link="https://docs.argilla.io/dev/how_to_guides/annotate/"
             />
             <LinkCard
-              badge="How to guide"
+              type="How to guide"
               text="Query and filter records"
               link="https://docs.argilla.io/dev/how_to_guides/query/"
             />
