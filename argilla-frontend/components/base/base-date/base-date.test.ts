@@ -1,12 +1,5 @@
 import { mount } from "@vue/test-utils";
 import BaseDateVue from "./BaseDate.vue";
-import "vue-i18n";
-
-const mocks = {
-  $i18n: {
-    locale: "en",
-  },
-};
 
 const dateMocked = new Date("2023-07-19 00:00:00");
 jest.useFakeTimers("modern").setSystemTime(dateMocked);
