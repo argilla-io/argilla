@@ -279,7 +279,7 @@ To collect feedback for your dataset, you need to formulate questions that annot
     ```python
     rg.RatingQuestion(
         name="rating",
-        values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         title="How satisfied are you with the response?",
         description="1 = very unsatisfied, 10 = very satisfied",
         required=True,
@@ -338,7 +338,7 @@ Metadata properties allow you to configure the use of metadata information for t
     ```python
     rg.TermsMetadataProperty(
         name="terms",
-        options=["group-a", "group-b", "group-c"]
+        options=["group-a", "group-b", "group-c"],
         title="Annotation groups",
         visible_for_annotators=True,
     )
