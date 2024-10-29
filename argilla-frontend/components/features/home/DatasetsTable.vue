@@ -1,30 +1,31 @@
 <template>
-  <div class="container">
-    <datasets-empty v-if="!datasets.length" />
-    <div class="dataset__table" v-else>
-      <div class="interactions">
-        <base-search-bar
-          @input="onSearch"
-          :querySearch="querySearch"
-          :placeholder="$t('searchDatasets')"
-        />
-      </div>
-      <BaseTableInfo
-        ref="table"
-        :data="datasets"
-        :columns="tableColumns"
-        :row-link="datasetLink"
-        :sorted-order="sortedOrder"
-        :sorted-by-field="sortedByField"
-        search-on="name"
-        :query-search="querySearch"
-        :empty-search-info="emptySearchInfo"
-        :active-filters="activeFilters"
-        @sort-column="onSortColumns"
-        @onActionClicked="onActionClicked"
-        @filter-applied="onColumnFilterApplied"
+  <DatasetsEmpty
+    v-if="!datasets.length"
+    @on-click-card="$emit('on-click-card', $event)"
+  />
+  <div class="dataset__table" v-else>
+    <div class="interactions">
+      <base-search-bar
+        @input="onSearch"
+        :querySearch="querySearch"
+        :placeholder="$t('searchDatasets')"
       />
     </div>
+    <BaseTableInfo
+      ref="table"
+      :data="datasets"
+      :columns="tableColumns"
+      :row-link="datasetLink"
+      :sorted-order="sortedOrder"
+      :sorted-by-field="sortedByField"
+      search-on="name"
+      :query-search="querySearch"
+      :empty-search-info="emptySearchInfo"
+      :active-filters="activeFilters"
+      @sort-column="onSortColumns"
+      @onActionClicked="onActionClicked"
+      @filter-applied="onColumnFilterApplied"
+    />
   </div>
 </template>
 
@@ -206,19 +207,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
-  display: flex;
-  justify-content: center;
-  padding: 0 4em;
-  @include media("<=tablet") {
-    padding: 0 $base-space * 2;
-  }
-}
 .dataset {
   &__table {
     width: 100%;
-    max-width: 1500px;
-    padding: 0 $base-space * 6;
     display: flex;
     flex-direction: column;
     @include media("<=tablet") {
@@ -229,7 +220,7 @@ export default {
 .interactions {
   display: flex;
   align-items: flex-end;
-  margin: 2em 0 1em 0;
+  margin: $base-space * 3 0 0 0;
 }
 
 .search-area {

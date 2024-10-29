@@ -46,6 +46,7 @@
         v-for="(option, index) in visibleOptions"
         :key="option.id"
         ref="options"
+        :visible-shortcuts="visibleShortcuts"
         :option="option"
         :keyboards="keyboards"
         v-model="option.isSelected"
@@ -85,6 +86,10 @@ export default {
     enableSpanQuestionShortcutsGlobal: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   model: {

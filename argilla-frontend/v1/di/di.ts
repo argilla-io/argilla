@@ -8,7 +8,7 @@ import {
   UpdateMetricsEventHandler,
   UpdateTeamProgressEventHandler,
 } from "../infrastructure/events";
-import { LoadUserUseCase } from "../domain/usecases/load-user-use-case";
+
 import { useAxiosExtension } from "@/v1/infrastructure/services/useAxiosExtension";
 
 import {
@@ -25,6 +25,8 @@ import {
   WorkspaceRepository,
   AuthRepository,
   UserRepository,
+  HubRepository,
+  JobRepository,
 } from "@/v1/infrastructure/repositories";
 
 import { useRole, useRoutes } from "@/v1/infrastructure/services";
@@ -34,6 +36,7 @@ import { useDatasets } from "@/v1/infrastructure/storage/DatasetsStorage";
 import { useMetrics } from "@/v1/infrastructure/storage/MetricsStorage";
 import { useDatasetSetting } from "@/v1/infrastructure/storage/DatasetSettingStorage";
 
+import { GetDatasetCreationUseCase } from "@/v1/domain/usecases/get-dataset-creation-use-case";
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { GetDatasetProgressUseCase } from "@/v1/domain/usecases/get-dataset-progress-use-case";
@@ -60,6 +63,9 @@ import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
 import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-case";
 import { GetDatasetQuestionsGroupedUseCase } from "@/v1/domain/usecases/get-dataset-questions-grouped-use-case";
+import { LoadUserUseCase } from "@/v1/domain/usecases/load-user-use-case";
+import { CreateDatasetUseCase } from "@/v1/domain/usecases/create-dataset-use-case";
+import { GetFirstRecordFromHub } from "@/v1/domain/usecases/get-first-record-from-hub";
 import { AuthLoginUseCase } from "@/v1/domain/usecases/auth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
@@ -69,6 +75,7 @@ export const loadDependencyContainer = (context: Context) => {
   const dependencies = [
     register(UpdateMetricsEventHandler).build(),
     register(UpdateTeamProgressEventHandler).build(),
+    register(HubRepository).withDependency(useAxios).build(),
     register(DatasetRepository).withDependency(useAxios).build(),
     register(RecordRepository).withDependency(useAxios).build(),
     register(QuestionRepository).withDependency(useAxios).build(),
@@ -78,11 +85,14 @@ export const loadDependencyContainer = (context: Context) => {
     register(VectorRepository).withDependency(useAxios).build(),
     register(AgentRepository).withDependency(useAxios).build(),
     register(WorkspaceRepository).withDependency(useAxios).build(),
+    register(JobRepository).withDependency(useAxios).build(),
 
     register(OAuthRepository).withDependencies(useAxios, useRoutes).build(),
     register(EnvironmentRepository).withDependency(useAxios).build(),
     register(AuthRepository).withDependency(useAxios).build(),
     register(UserRepository).withDependency(useAxios).build(),
+
+    register(GetDatasetCreationUseCase).withDependency(HubRepository).build(),
 
     register(DeleteDatasetUseCase).withDependency(DatasetRepository).build(),
 
@@ -204,6 +214,18 @@ export const loadDependencyContainer = (context: Context) => {
     register(AuthLoginUseCase)
       .withDependencies(useAuth, AuthRepository, LoadUserUseCase)
       .build(),
+
+    register(CreateDatasetUseCase)
+      .withDependencies(
+        DatasetRepository,
+        WorkspaceRepository,
+        QuestionRepository,
+        FieldRepository,
+        MetadataRepository
+      )
+      .build(),
+
+    register(GetFirstRecordFromHub).withDependency(HubRepository).build(),
   ];
 
   Container.register(dependencies);
