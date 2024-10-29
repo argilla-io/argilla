@@ -31,7 +31,7 @@
             @click="selectSuggestion(null)"
           >
             <span v-text="selectedSuggestion.name" />
-            <svgicon name="chevron-left" width="12" height="12" />
+            <svgicon name="chevron-left" width="12" height="12" aria-hidden="true"/>
           </div>
           <div>
             <CategoriesSelector

@@ -23,6 +23,8 @@
       events: ['mousedown'],
       handler: onClose,
     }"
+    role="button"
+    aria-haspopup="menu"
   >
     <div class="dropdown__header" @click="onClick">
       <slot name="dropdown-header" />

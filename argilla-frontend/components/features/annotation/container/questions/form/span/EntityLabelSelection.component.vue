@@ -30,6 +30,7 @@
             width="18"
             height="18"
             :name="iconToShowInTheCollapseButton"
+            aria-hidden="true"
           />
         </button>
       </div>
@@ -41,6 +42,9 @@
       name="shuffle"
       class="inputs-area"
       v-if="filteredOptions.length"
+      role="group"
+      aria-multiselectable="multiple"
+      aria-label="Label-Options"
     >
       <EntityLabelBadge
         v-for="(option, index) in visibleOptions"

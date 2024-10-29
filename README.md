@@ -5,7 +5,7 @@
   Argilla
   <br>
 </h1>
-<h3 align="center">Work on data together, make your model outputs better!</h2>
+<h3 align="center">Build high quality datasets for your AI models</h2>
 
 <p align="center">
 <a  href="https://pypi.org/project/argilla/">

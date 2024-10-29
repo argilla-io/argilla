@@ -20,6 +20,7 @@
         :width="badgeSize"
         :height="badgeSize"
         :color="iconColor"
+        :aria-label="icon + ' icon'"
       />
     </i>
   </BaseButton>

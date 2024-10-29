@@ -7,7 +7,7 @@
         collapsable
       >
         <template #up>
-          <section class="wrapper__records">
+          <section class="wrapper__records" aria-label="Focus Annotation View">
             <DatasetFilters :recordCriteria="recordCriteria">
               <ToggleAnnotationType
                 v-if="
