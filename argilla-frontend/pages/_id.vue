@@ -3,8 +3,7 @@
     <HeaderFeedbackTask
       :breadcrumbs="[
         { link: '/', name: $t('breadcrumbs.home') },
-        { name: 'new' },
-        { name: datasetConfig?.repoId },
+        { name: repoIdWithoutOrg },
       ]"
     >
       <template slot="badge">
@@ -31,6 +30,11 @@ export default {
   setup() {
     return useNewDatasetViewModel();
   },
+  computed: {
+    repoIdWithoutOrg() {
+      return this.datasetConfig?.repoId?.split("/")[1];
+    },
+  },
 };
 </script>
 
@@ -40,7 +44,7 @@ export default {
   display: flex;
   flex-direction: column;
   &__header-badge {
-    background-color: hsl(from var(--bg-config-card) h 30% 50%);
+    background-color: hsl(from var(--color-brand) h 70% 60%);
     padding: calc($base-space / 2) $base-space;
     border-radius: $border-radius;
     margin: 0;

@@ -1,7 +1,6 @@
 name: Deploy Argilla environment
 
 on:
-
   workflow_dispatch:
     inputs:
       image-name:
@@ -29,8 +28,8 @@ jobs:
     # Grant permissions to `GITHUB_TOKEN` for Google Cloud Workload Identity Provider
     permissions:
       contents: read
-      id-token: write
-      pull-requests: write
+      # id-token: write
+      # pull-requests: write
 
     steps:
       - uses: actions/checkout@v4

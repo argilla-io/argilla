@@ -1,7 +1,7 @@
 <template>
   <BaseButton class="guide-link" target="_blank" :href="link">
     <div class="guide-link__content">
-      <BaseBadge :text="badge" class="guide-link__badge" />
+      <p class="guide-link__type">{{ type }}</p>
       <p class="guide-link__title">{{ text }}</p>
     </div>
   </BaseButton>
@@ -10,7 +10,7 @@
 <script>
 export default {
   props: {
-    badge: {
+    type: {
       type: String,
       required: true,
     },
@@ -29,13 +29,16 @@ export default {
 <style lang="scss" scoped>
 .guide-link {
   &.button {
-    width: 100%;
+    max-width: 75%;
     padding: $base-space * 2;
     border: 1px solid var(--bg-opacity-6);
     border-radius: $border-radius-m;
     background: var(--bg-accent-grey-2);
     color: var(--fg-primary);
     text-align: left;
+    @include media("<desktop") {
+      max-width: 100%;
+    }
     &:hover {
       background: var(--bg-accent-grey-3);
       border: 1px solid var(--bg-opacity-10);
@@ -46,9 +49,10 @@ export default {
     flex-direction: column;
     gap: $base-space * 2;
   }
-  &__badge.badge {
-    background: hsl(from hsl(235, 24%, 60%) h s l / 20%);
-    border-color: hsl(from hsl(235, 24%, 60%) h s l / 30%);
+  &__type {
+    margin: 0;
+    color: var(--fg-tertiary);
+    @include font-size(12px);
   }
   &__title {
     margin: 0;
