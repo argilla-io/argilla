@@ -48,7 +48,7 @@ jobs:
     # Grant permissions to `GITHUB_TOKEN` for Google Cloud Workload Identity Provider
     permissions:
       contents: read
-      id-token: write
+      # id-token: write
 
     outputs:
       version: ${{ steps.docker-image-tag-from-ref.outputs.docker-image-tag }}
