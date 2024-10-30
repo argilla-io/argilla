@@ -280,7 +280,7 @@ export default {
     questions: {
       labelSelection: {
         atLeastTwoOptions: "Mindestens zwei Optionen müssen vorhanden sein",
-        optionsWithoutLabel: "Optionen ohne Label sind nicht erlaubt",        
+        optionsWithoutLabel: "Optionen ohne Label sind nicht erlaubt",
       },
     },
     atLeastOneQuestion: "Mindestens eine Frage wird benötigt",
