@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed error updating dataset.updated_at when updating dataset.last_activity_at. ([#]())
+
+## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.1...v2.4.0)
+
 ### Added
 
 - Added new `metadata` attribute for endpoints getting, creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
