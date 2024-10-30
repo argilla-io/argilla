@@ -19,7 +19,11 @@
     <div class="table-info" role="table">
       <div class="table-info__header">
         <slot name="columns">
-          <div class="table-info__item" role="columnheader" aria-label="Table Header">
+          <div
+            class="table-info__item"
+            role="columnheader"
+            aria-label="Table Header"
+          >
             <div
               v-for="(column, key) in columns"
               :key="key"
@@ -43,7 +47,12 @@
                 :aria-label="'Sort by ' + column.name"
                 :aria-sort="sortOrder === 'asc' ? 'descending' : 'ascending'"
               >
-                <svgicon width="18" height="18" name="sort" aria-hidden="true"/>
+                <svgicon
+                  width="18"
+                  height="18"
+                  name="sort"
+                  aria-hidden="true"
+                />
                 <span>{{ column.name }}</span>
               </button>
               <button v-else :data-title="column.tooltip">
@@ -57,7 +66,13 @@
       <template v-else>
         <div class="table-info__body" ref="table" aria-label="Table Body">
           <ul role="rowgroup">
-            <li v-for="item in filteredResults" :key="item.id" :id="item.id" role="row" :aria-label="'Row for ' + item.id">
+            <li
+              v-for="item in filteredResults"
+              :key="item.id"
+              :id="item.id"
+              role="row"
+              :aria-label="'Row for ' + item.id"
+            >
               <nuxt-link :to="rowLink(item)" class="table-info__item">
                 <span
                   v-for="(column, idx) in columns"
@@ -66,7 +81,11 @@
                   role="cell"
                 >
                   <span :class="column.class">
-                    <span v-if="column.actions" role="group" aria-label="Row actions">
+                    <span
+                      v-if="column.actions"
+                      role="group"
+                      aria-label="Row actions"
+                    >
                       <div class="table-info__actions">
                         <p
                           class="table-info__main"
@@ -111,7 +130,7 @@
                     <nuxt-link v-else-if="column.link" :to="column.link(item)">
                       {{ itemValue(item, column) }}
                     </nuxt-link>
-                    <span v-else >{{ itemValue(item, column) }}</span>
+                    <span v-else>{{ itemValue(item, column) }}</span>
                     <span v-if="column.component">
                       <component
                         :aria-label="column.component.name"

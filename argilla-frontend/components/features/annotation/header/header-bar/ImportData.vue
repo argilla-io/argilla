@@ -1,7 +1,7 @@
 <template>
   <div class="import-data">
     <BaseButton
-      class="primary"
+      class="primary import-data__button"
       @click.prevent="visibleSnippet = !visibleSnippet"
       >{{ $t("datasetCreation.importData") }}</BaseButton
     >
@@ -78,6 +78,12 @@ export default {
     position: absolute;
     top: $base-space;
     right: $base-space;
+  }
+  &__button.button {
+    background: hsl(0, 1%, 18%);
+    &:hover {
+      background: hsl(0, 1%, 22%);
+    }
   }
 }
 .fade-enter-active,
