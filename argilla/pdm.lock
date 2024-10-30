@@ -7,7 +7,6 @@ strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
 content_hash = "sha256:6f49f28d670ea9bd2cddad3e1b380bad7b6b236a6d15a8ea443bca0c3882b19c"
 
-
 [[metadata.targets]]
 requires_python = ">=3.9,<3.13"
 
