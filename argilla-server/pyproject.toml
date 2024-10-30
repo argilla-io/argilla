@@ -29,7 +29,7 @@ dependencies = [
     "backoff ~= 2.2.0",
     # Database dependencies
     "alembic ~= 1.13.0",
-    "SQLAlchemy == 2.0.35",
+    "SQLAlchemy ~= 2.0.0",
     "greenlet ~= 3.1.0",
     # Async SQLite
     "aiosqlite == 0.20.0",
