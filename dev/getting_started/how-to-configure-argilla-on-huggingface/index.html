@@ -2431,12 +2431,26 @@ You can modify two things:</p>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">,</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">HF_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="space-secrets-overview">Space Secrets overview<a class="headerlink" href="#space-secrets-overview" title="Permanent link">&para;</a></h2>
-<p>Remember that, by default, Argilla Spaces are configured with a <em>Sign in with Hugging Face</em> button, which is also used to grant an <code>owner</code> to the creator of the Space. There are two optional secrets to set up the <code>USERNAME</code> and <code>PASSWORD</code> of the <code>owner</code> of Argilla Space. Those are useful when you want to create a different owner user to login into Argilla.</p>
+<p>There's two optional secrets to set up the <code>USERNAME</code> and <code>PASSWORD</code> of the <code>owner</code> of the Argilla Space. Remember that, by default Argilla Spaces are configured with a <em>Sign in with Hugging Face</em> button, which is also used to grant an <code>owner</code> to the creator of the Space for personal spaces.</p>
+<p>The <code>USERNAME</code> and <code>PASSWORD</code> are only useful in a couple of scenarios:</p>
+<ul>
+<li>You have <a href="#how-to-configure-and-disable-oauth-access">disabled Hugging Face OAuth</a>.</li>
+<li>You want to <a href="#how-to-deploy-argilla-under-a-hugging-face-organization">set up Argilla under an organization</a> and want your Hugging Face username to be granted the <code>owner</code> role.</li>
+</ul>
+<p>In summary, when setting up a Space:</p>
+<div class="admonition info">
+<p class="admonition-title">Creating a Space under your personal account</p>
+<p>If you are creating the Space under your personal account, <strong>don't insert any value for <code>USERNAME</code> and <code>PASSWORD</code></strong>. Once you launch the Space you will be able to Sign in with your Hugging Face username and the <code>owner</code> role.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Creating a Space under an organization</p>
+<p>If you are creating the Space under an organization <strong>make sure to insert your Hugging Face username in the secret <code>USERNAME</code></strong>. In this way, you'll be able to Sign in with your Hugging Face user.</p>
+</div>
 
 
 
