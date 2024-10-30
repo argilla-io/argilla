@@ -2351,7 +2351,7 @@
 <li>How to use Private Spaces</li>
 </ul>
 <div class="admonition tip">
-<p class="admonition-title">Looking to get started easily?</p>
+<p class="admonition-title">Looking to get started easily or deploy Argilla with the Python SDK?</p>
 <p>If you just discovered Argilla and want to get started quickly, go to the <a href="../quickstart/">Quickstart guide</a>.</p>
 </div>
 <h2 id="persistent-storage">Persistent storage<a class="headerlink" href="#persistent-storage" title="Permanent link">&para;</a></h2>
@@ -2411,11 +2411,7 @@ You can modify two things:</p>
 <li><strong>You want manage the Space together with other users</strong> (e.g., Space settings, etc.). Note that if you just want to manage your Argilla datasets, workspaces, you can achieve this by adding other Argilla <code>owner</code> roles to your Argilla Server.</li>
 <li><strong>More generally, you want to make available your space under an organization/community umbrella</strong>.</li>
 </ul>
-<p>The steps are very similar the <a href="../quickstart/">Quickstart guide</a> with two important differences:</p>
-<div class="admonition tip">
-<p class="admonition-title">Setup USERNAME</p>
-<p>You need to <strong>set up the <code>USERNAME</code> Space Secret with your Hugging Face username</strong>. This way, the first time you enter with the <code>Hugging Face Sign in</code> button, you'll be granted the <code>owner</code> role.</p>
-</div>
+<p>The steps are very similar the <a href="../quickstart/">Quickstart guide</a> with one important difference:</p>
 <div class="admonition tip">
 <p class="admonition-title">Enable Persistent Storage <code>SMALL</code></p>
 <p>Not setting persistent storage to <code>Small</code> means that <strong>you will loose your data when the Space restarts</strong>.</p>
@@ -2435,7 +2431,7 @@ You can modify two things:</p>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">,</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">HF_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">)</span>
 </span></code></pre></div>
