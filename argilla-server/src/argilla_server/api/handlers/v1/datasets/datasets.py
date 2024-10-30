@@ -313,7 +313,6 @@ async def update_dataset(
     return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
 
 
-# TODO: Maybe change /import to /import-from-hub?
 @router.post("/datasets/{dataset_id}/import", status_code=status.HTTP_202_ACCEPTED, response_model=JobSchema)
 async def import_dataset_from_hub(
     *,
