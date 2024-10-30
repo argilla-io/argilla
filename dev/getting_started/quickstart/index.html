@@ -617,18 +617,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#sign-in-into-the-argilla-ui" class="md-nav__link">
+  <a href="#sign-in-to-the-argilla-ui" class="md-nav__link">
     <span class="md-ellipsis">
-      Sign in into the Argilla UI
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-the-python-sdk" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install the Python SDK
+      Sign in to the Argilla UI
     </span>
   </a>
   
@@ -638,6 +629,24 @@
   <a href="#create-your-first-dataset" class="md-nav__link">
     <span class="md-ellipsis">
       Create your first dataset
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-and-connect-the-python-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install and connect the Python SDK
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-your-dataset-to-the-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export your dataset to the Hub
     </span>
   </a>
   
@@ -2271,18 +2280,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#sign-in-into-the-argilla-ui" class="md-nav__link">
+  <a href="#sign-in-to-the-argilla-ui" class="md-nav__link">
     <span class="md-ellipsis">
-      Sign in into the Argilla UI
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-the-python-sdk" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install the Python SDK
+      Sign in to the Argilla UI
     </span>
   </a>
   
@@ -2292,6 +2292,24 @@
   <a href="#create-your-first-dataset" class="md-nav__link">
     <span class="md-ellipsis">
       Create your first dataset
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-and-connect-the-python-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install and connect the Python SDK
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export-your-dataset-to-the-hub" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export your dataset to the Hub
     </span>
   </a>
   
@@ -2384,7 +2402,7 @@
 <p class="admonition-title">Deploy with Docker</p>
 <p>If you want to <strong>run Argilla locally on your machine or a server</strong>, or tune the server configuration, choose this option. To use this option, <a href="../how-to-deploy-argilla-with-docker/">check this guide</a>.</p>
 </div>
-<h2 id="sign-in-into-the-argilla-ui">Sign in into the Argilla UI<a class="headerlink" href="#sign-in-into-the-argilla-ui" title="Permanent link">&para;</a></h2>
+<h2 id="sign-in-to-the-argilla-ui">Sign in to the Argilla UI<a class="headerlink" href="#sign-in-to-the-argilla-ui" title="Permanent link">&para;</a></h2>
 <p>If everything went well, you should see the Argilla sign in page that looks like this:</p>
 <p><img alt="Focus view" height="100%" src="../../assets/images/getting_started/signin-hf-page.png" width="100%" /></p>
 <div class="admonition info">
@@ -2404,14 +2422,30 @@
 <p class="admonition-title">Unauthorized error</p>
 <p>Sometimes, after authorizing you'll see an unauthorized error, and get redirected to the sign in page. Typically, clicking the Sign in button again will solve this issue.</p>
 </div>
-<p>Congrats! Your Argilla server is ready to start your first project using the Python SDK. You now have full rights to create datasets. Follow the instructions in the home page, or keep reading this guide if you want a more detailed explanation.</p>
-<h2 id="install-the-python-sdk">Install the Python SDK<a class="headerlink" href="#install-the-python-sdk" title="Permanent link">&para;</a></h2>
-<p>To manage workspaces and datasets in Argilla, you need to use the Argilla Python SDK. You can install it with pip as follows:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">pip install argilla</span>
-</span></code></pre></div>
+<p>Congrats! Your Argilla server is ready to start your first project.</p>
 <h2 id="create-your-first-dataset">Create your first dataset<a class="headerlink" href="#create-your-first-dataset" title="Permanent link">&para;</a></h2>
-<p>For getting started with Argilla and its SDK, we recommend to use Jupyter Notebook or Google Colab.</p>
-<p>To start interacting with your Argilla server, you need to create a instantiate a client with an API key and API URL:</p>
+<p>The quickest way to start exploring the tool and create your first dataset is by importing an exiting one from the Hugging Face Hub.</p>
+<p>To do this, log in to the Argilla UI and in the Home page click on "Import from Hub". You can choose one of the sample datasets or paste a repo id in the input. This will look something like <code>stanfordnlp/imdb</code>.</p>
+<p>Argilla will automatically interpret the columns in the dataset to map them to Fields and Questions.</p>
+<p><strong>Fields</strong> include the data that you want feedback on, like text, chats, or images. If you want to exclude any of the Fields that Argilla identified for you, simply select the "No mapping" option.</p>
+<p><strong>Questions</strong> are the feedback you want to collect, like labels, ratings, rankings, or text. If Argilla identified questions in your dataset that you don't want, you can eliminate them. You can also add questions of your own.</p>
+<p><img alt="Screenshot of the dataset configuration page" src="../../assets/images/getting_started/dataset_configurator.png" /></p>
+<p>Note that you will be able to modify some elements of the configuration of the dataset after it has been created from the Dataset Settings page e.g., the titles of fields and questions. Check all the settings you can modify in the <a href="../../how_to_guides/dataset/#update-a-dataset">Update a dataset</a> section.</p>
+<p>When you're happy with the result, you'll need to give a name to your dataset, select a workspace and choose a split, if applicable. Then, Argilla will start importing the dataset in the background. Now you're all set up to start annotating!</p>
+<div class="admonition info">
+<p class="admonition-title">Importing long datasets</p>
+<p>Argilla will only import the first 10k rows of a dataset. If your dataset is larger, you can import the rest of the records at any point using the Python SDK.</p>
+<p>To do that, open your dataset and copy the code snippet provided under "Import data". Now, open a Jupyter or Google Colab notebook and install argilla:</p>
+<p><div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">argilla</span>
+</span></code></pre></div>
+Then, paste and run your code snippet. This will import the remaining records to your dataset.</p>
+</div>
+<h2 id="install-and-connect-the-python-sdk">Install and connect the Python SDK<a class="headerlink" href="#install-and-connect-the-python-sdk" title="Permanent link">&para;</a></h2>
+<p>For getting started with Argilla and its SDK, we recommend to use Jupyter Notebook or Google Colab. You will need this to manage users, workspaces and datasets in Argilla.</p>
+<p>In your notebook, you can install the Argilla SDK with pip as follows:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err">!</span><span class="n">pip</span> <span class="n">install</span> <span class="n">argilla</span>
+</span></code></pre></div>
+<p>To start interacting with your Argilla server, you need to instantiate a client with an API key and API URL:</p>
 <ul>
 <li>
 <p>The <code>&lt;api_key&gt;</code> is in the <code>My Settings</code> page of your Argilla Space but make sure you are logged in with the <code>owner</code> account you used to create the Space.</p>
@@ -2420,64 +2454,38 @@
 <p>The <code>&lt;api_url&gt;</code> is the URL shown in your browser if it ends with <code>*.hf.space</code>.</p>
 </li>
 </ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">)</span>
 </span></code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">You can't find your API URL</p>
-<p>If you're using Spaces, sometimes the Argilla UI is embedded into the Hub UI so the URL of the browser won't match the API URL. In these scenarios, there are two options:
-    1. Click on the three points menu at the top of the Space, select "Embed this Space", and open the direct URL.
-    2. Use this pattern: <code>https://[your-owner-name]-[your_space_name].hf.space</code>.</p>
+<p>If you're using Spaces, sometimes the Argilla UI is embedded into the Hub UI so the URL of the browser won't match the API URL. In these scenarios, you have several options:</p>
+<ol>
+<li>In the Home page of Argilla, click on "Import from the SDK". You will find your API URL and key in the code snippet provided.</li>
+<li>Click on the three points menu at the top of the Space, select "Embed this Space", and open the direct URL.</li>
+<li>Use this pattern: <code>https://[your-owner-name]-[your_space_name].hf.space</code>.</li>
+</ol>
 </div>
-<p>To create a dataset with a simple text classification task, first, you need to <strong>define the dataset settings</strong>.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Settings</span><span class="p">(</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">guidelines</span><span class="o">=</span><span class="s2">&quot;Classify the reviews as positive or negative.&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;review&quot;</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Text from the review&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>            <span class="n">use_markdown</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="p">),</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="p">],</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">questions</span><span class="o">=</span><span class="p">[</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="n">rg</span><span class="o">.</span><span class="n">LabelQuestion</span><span class="p">(</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_label&quot;</span><span class="p">,</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;In which category does this article fit?&quot;</span><span class="p">,</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>            <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;positive&quot;</span><span class="p">,</span> <span class="s2">&quot;negative&quot;</span><span class="p">],</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>        <span class="p">)</span>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="p">],</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="p">)</span>
+<p>To check that everything is running correctly, you can call <code>me</code>. This should return your user information:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">me</span>
 </span></code></pre></div>
-<p>Now you can <strong>create the dataset with these settings</strong>. Publish the dataset to make it available in the UI and add the records.</p>
-<div class="admonition info">
-<p class="admonition-title">About workspaces</p>
-<p>Workspaces in Argilla group datasets and user access rights. The <code>workspace</code> parameter is optional in this case. If you don't specify it, the dataset will be created in the default workspace <code>argilla</code>.</p>
-<p>By default, <strong>this workspace will be visible to users joining with the Sign in with Hugging Face button</strong>. You can create other workspaces and decide to grant access to users either with the SDK or the <a href="../how-to-configure-argilla-on-huggingface/">changing the OAuth configuration</a>.</p>
-</div>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;my_first_dataset&quot;</span><span class="p">,</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">client</span><span class="o">=</span><span class="n">client</span><span class="p">,</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="c1">#workspace=&quot;argilla&quot;</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">)</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">dataset</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
-</span></code></pre></div>
-<p>Now you can <strong>add records to your dataset</strong>. We will use the IMDB dataset from the Hugging Face Datasets library as an example. The <code>mapping</code> parameter indicates which keys/columns in the source dataset correspond to the Argilla dataset fields.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+<p>From here, you can manage all of your assets in Argilla, including updating the dataset we created earlier and adding advanced information, such as vectors, metadata or suggestions. To learn how to do this, check our <a href="../../how_to_guides/">how to guides</a>.</p>
+<h2 id="export-your-dataset-to-the-hub">Export your dataset to the Hub<a class="headerlink" href="#export-your-dataset-to-the-hub" title="Permanent link">&para;</a></h2>
+<p>Once you've spent some time annotating your dataset in Argilla, you can upload it back to the Hugging Face Hub to share with others or version control it.</p>
+<p>To do that, first follow the steps in the previous section to connect to your Argilla server using the SDK. Then, you can load your dataset and export it to the hub like this:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_dataset&quot;</span><span class="p">)</span>
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">data</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;imdb&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train[:100]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">dataset</span><span class="o">.</span><span class="n">records</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;review&quot;</span><span class="p">})</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">dataset</span><span class="o">.</span><span class="n">to_hub</span><span class="p">(</span><span class="n">repo_id</span><span class="o">=</span><span class="s2">&quot;&lt;my_org&gt;/&lt;my_dataset&gt;&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<p>🎉 You have successfully created your first dataset with Argilla. You can now access it in the Argilla UI and start annotating the records.</p>
+<p>For more info on exporting datasets to the Hub, read our guide on <a href="../../how_to_guides/import_export/#export-to-hub">exporting datasets</a>.</p>
 <h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
-<p>To learn how to create your datasets, workspace, and manage users, check the <a href="../../how_to_guides/">how-to guides</a>.</p>
+<p>To learn how to create your own datasets, workspaces, and manage users, check the <a href="../../how_to_guides/">how-to guides</a>.</p>
 </li>
 <li>
 <p>To learn Argilla with hands-on examples, check the <a href="../../tutorials/">Tutorials section</a>.</p>
