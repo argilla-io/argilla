@@ -283,8 +283,8 @@ export default {
         optionsWithoutLabel: "Empty options are not allowed",
       },
     },
-    atLeastOneQuestion: "At least one question is required",
-    atLeastOneRequired: "At least one required question is required",
+    atLeastOneQuestion: "At least one question is required.",
+    atLeastOneRequired: "At least one required question is needed.",
     hasInvalidQuestions: "Some questions are invalid",
     createDataset: "Create the dataset in Argilla",
     datasetName: "Dataset name",
@@ -309,7 +309,7 @@ export default {
     cantLoadRepository: "Dataset not found or available on Hugging Face",
     none: "None",
     noWorkspaces:
-      "Please, follow the <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>guide</a> to create a workspace",
+      "Please, follow this <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>guide</a> to create a workspace",
   },
   config: {
     field: {

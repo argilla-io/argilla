@@ -50,7 +50,7 @@
           />
           <ImportFromPython v-if="!showImportDatasetInput" />
         </div>
-        <BaseSeparator />
+        <BaseSeparator class="home__sidebar__separator" />
         <div class="home__sidebar__content">
           <p
             class="home__sidebar__title"
@@ -182,6 +182,10 @@ export default {
     &__link {
       margin-top: $base-space * 4;
       color: var(--fg-secondary);
+    }
+    &__separator {
+      max-width: 75%;
+      margin: 0 auto;
     }
   }
 }

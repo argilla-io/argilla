@@ -46,6 +46,10 @@ export default {
       hsl(from v-bind(color) h s l / 10%) 0%,
       hsl(from v-bind(color) h s l / 1%) 100%
     );
+    & + .dataset-badge__text {
+      padding: calc($base-space / 2) $base-space calc($base-space / 2)
+        calc($base-space / 2);
+    }
   }
   &__icon {
     fill: v-bind(color);
@@ -55,8 +59,7 @@ export default {
   &__text {
     font-weight: 400;
     color: var(--fg-secondary);
-    padding: calc($base-space / 2) $base-space calc($base-space / 2)
-      calc($base-space / 2);
+    padding: calc($base-space / 2) $base-space;
   }
 }
 </style>
