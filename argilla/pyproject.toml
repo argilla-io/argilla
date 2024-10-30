@@ -64,6 +64,7 @@ dev = [
     "CairoSVG >= 2.7.1",
     "mknotebooks >= 0.8.0",
     "pytest-retry>=1.5",
+    "pyarrow~=18.0.0",
 ]
 
 [tool.pdm.scripts]
