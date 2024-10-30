@@ -2,9 +2,9 @@
   <div
     class="panel"
     :class="[
-    !isExpanded ? '--collapsed' : undefined,
-    hideOnDesktop ? '--mobile' : undefined,
-  ]"
+      !isExpanded ? '--collapsed' : undefined,
+      hideOnDesktop ? '--mobile' : undefined,
+    ]"
   >
     <BaseButton
       class="panel__header"

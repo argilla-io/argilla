@@ -46,6 +46,10 @@ export default {
       type: String,
       default: "text",
     },
+    autofocus: {
+      type: Boolean,
+      default: false,
+    },
   },
   mounted() {
     this.$nextTick(() => {
@@ -66,7 +70,9 @@ export default {
       this.setParentPlaceholder();
       this.handleMaxLength();
       this.updateValues();
-      this.$refs.input.focus();
+      if (this.autofocus) {
+        this.$refs.input.focus();
+      }
     });
   },
 };

@@ -39,6 +39,8 @@ dataset = rg.Dataset(
     settings=settings,
 )
 
+dataset.create()
+
 records = [
     {
         "text": "Do you need oxygen to breathe?",
