@@ -87,7 +87,6 @@ class TestSuiteResponses:
         dataset_previous_updated_at = dataset.updated_at
 
         resp = await async_client.put(f"/api/v1/responses/{response.id}", headers=owner_auth_header, json=response_json)
-        await db.refresh(dataset)
 
         assert resp.status_code == 200
         assert (await db.get(Response, response.id)).values == response_json["values"]
@@ -419,7 +418,6 @@ class TestSuiteResponses:
         dataset_previous_updated_at = dataset.updated_at
 
         resp = await async_client.delete(f"/api/v1/responses/{response.id}", headers=owner_auth_header)
-        await db.refresh(dataset)
 
         assert resp.status_code == 200
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
