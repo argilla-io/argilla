@@ -25,7 +25,12 @@
           :data-title="$t('status')"
         >
           {{ currentOptionName }}
-          <svgicon name="chevron-down" width="8" height="8" aria-hidden="true"/>
+          <svgicon
+            name="chevron-down"
+            width="8"
+            height="8"
+            aria-hidden="true"
+          />
         </BaseButton>
       </span>
       <span slot="dropdown-content">

@@ -36,6 +36,7 @@
               aria-hidden="true"
             ></svgicon>
             <BaseInput
+              autofocus
               v-model="repositoryId"
               :placeholder="$t('home.pasteRepoIdPlaceholder')"
             />

@@ -36,12 +36,16 @@ export default {
 .example-dataset {
   &.button {
     width: 100%;
+    max-width: 75%;
     padding: $base-space * 2;
     border: 1px solid var(--bg-opacity-6);
     border-radius: $border-radius-m;
     background: var(--bg-accent-grey-2);
     color: var(--fg-primary);
     text-align: left;
+    @include media("<desktop") {
+      max-width: 100%;
+    }
     &:hover {
       background: var(--bg-accent-grey-3);
       border: 1px solid var(--bg-opacity-10);
@@ -55,6 +59,8 @@ export default {
   &__title {
     margin: 0;
     color: var(--fg-primary);
+    white-space: pre-line;
+    @include line-height(18px);
   }
   &__tags {
     display: flex;

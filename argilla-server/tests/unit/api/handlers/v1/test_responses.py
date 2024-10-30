@@ -103,6 +103,7 @@ class TestSuiteResponses:
             "updated_at": datetime.fromisoformat(resp_body["updated_at"]).isoformat(),
         }
 
+        await db.refresh(dataset)
         assert dataset.last_activity_at > dataset_previous_last_activity_at
         assert dataset.updated_at == dataset_previous_updated_at
 
@@ -423,6 +424,7 @@ class TestSuiteResponses:
         assert resp.status_code == 200
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
+        await db.refresh(dataset)
         assert dataset.last_activity_at > dataset_previous_last_activity_at
         assert dataset.updated_at == dataset_previous_updated_at
 
