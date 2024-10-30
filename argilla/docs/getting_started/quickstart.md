@@ -96,7 +96,7 @@ Argilla will automatically interpret the columns in the dataset to map them to F
 
 **Questions** are the feedback you want to collect, like labels, ratings, rankings, or text. If Argilla identified questions in your dataset that you don't want, you can eliminate them. You can also add questions of your own.
 
-![Screenshot of the dataset configuration page](../assets/images/getting_started/dataset_configurator.jpeg)
+![Screenshot of the dataset configuration page](../assets/images/getting_started/dataset_configurator.png)
 
 Note that you will be able to modify some elements of the configuration of the dataset after it has been created from the Dataset Settings page e.g., the titles of fields and questions. Check all the settings you can modify in the [Update a dataset](../how_to_guides/dataset.md#update-a-dataset) section.
 
