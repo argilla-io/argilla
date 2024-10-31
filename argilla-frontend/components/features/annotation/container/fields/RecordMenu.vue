@@ -80,6 +80,7 @@ export default {
     list-style: none;
     padding: $base-space;
     margin: 0;
+    border: 1px solid var(--bg-opacity-1);
     li {
       border-radius: $border-radius-s;
       transition: background-color 0.3s ease;

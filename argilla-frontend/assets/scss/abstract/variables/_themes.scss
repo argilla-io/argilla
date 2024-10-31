@@ -164,9 +164,7 @@
 }
 
 [data-theme="high-contrast"] {
-  --color-black: hsla(0, 0%, 0%, 0.87);
-  --color-white: hsl(0, 0%, 100%);
-  --color-dark-grey: hsl(207, 9%, 19%);
+  --color-black: hsla(0, 0%, 0%, 100%);
   --color-brand: hsl(3, 99%, 28%);
   --color-brand-secondary: hsl(19, 85%, 81%);
   --color-danger: var(--color-brand);
@@ -244,8 +242,8 @@
   --bg-banner-error: hsl(3, 100%, 92%);
   --bg-tooltip: var(--color-dark-grey);
   --fg-chat-1: #198700;
-  --fg-chat-2: #998a00;
-  --fg-chat-3: #aa2d00;
+  --fg-chat-2: #933e00;
+  --fg-chat-3: #ae0000;
   --fg-chat-4: #86008d;
   --fg-chat-5: #002dd0;
 }

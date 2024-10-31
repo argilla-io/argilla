@@ -41,6 +41,7 @@ export default {
   padding-bottom: 0;
   padding-right: 1.2em;
   padding-left: $base-space * 2;
+  border: 1px solid var(--bg-opacity-1);
   a {
     text-decoration: none;
     @include media("<=tablet") {
