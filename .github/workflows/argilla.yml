@@ -17,11 +17,14 @@ on:
     paths:
       - "argilla/**"
 
+permissions:
+  id-token: write
+
 jobs:
   build:
     services:
       argilla-server:
-        image: argilladev/argilla-hf-spaces:pr-5572
+        image: argilladev/argilla-hf-spaces:develop
         ports:
           - 6900:6900
         env:
@@ -85,8 +88,6 @@ jobs:
       # contents: read
       # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
       id-token: write
-      # This permission is needed for creating tags
-      contents: write
 
     needs:
       - build

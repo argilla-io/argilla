@@ -59,7 +59,7 @@ export default {
     padding: $base-space * 4;
     background: var(--bg-accent-grey-3);
     @include media(">tablet") {
-      width: clamp(300px, 36vw, 600px);
+      width: clamp(300px, 39vw, 600px);
     }
   }
 }

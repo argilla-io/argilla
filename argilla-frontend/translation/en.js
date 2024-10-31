@@ -258,13 +258,13 @@ export default {
     },
   },
   home: {
-    argillaDatasets: "Argilla datasets",
+    argillaDatasets: "Your datasets",
     none: "None yet",
     importTitle: "Import a dataset from Hugging Face Hub",
     importText:
       "Start with a dataset from the Hub by simply pasting the repository name",
     importButton: "Import dataset",
-    importFromHub: "Import from Hub",
+    importFromHub: "Import dataset from Hugging Face",
     importFromPython: "Import from Python",
     importFromPythonHFWarning:
       "If you're using a private Space, check the <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>docs</a>.",
@@ -272,7 +272,7 @@ export default {
     exampleDatasetsText: "Explore these example datasets",
     guidesTitle: "Not familiar with Argilla?",
     guidesText: "Take a look at these guides:",
-    pasteRepoIdPlaceholder: "Paste a repo id",
+    pasteRepoIdPlaceholder: "Paste a repo id e.g., stanfordnlp/imdb",
     demoLink:
       "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
   },
@@ -283,8 +283,8 @@ export default {
         optionsWithoutLabel: "Empty options are not allowed",
       },
     },
-    atLeastOneQuestion: "At least one question is required",
-    atLeastOneRequired: "At least one required question is required",
+    atLeastOneQuestion: "At least one question is required.",
+    atLeastOneRequired: "At least one required question is needed.",
     hasInvalidQuestions: "Some questions are invalid",
     createDataset: "Create the dataset in Argilla",
     datasetName: "Dataset name",
@@ -309,7 +309,7 @@ export default {
     cantLoadRepository: "Dataset not found or available on Hugging Face",
     none: "None",
     noWorkspaces:
-      "Please, follow the <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>guide</a> to create a workspace",
+      "Please, follow this <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>guide</a> to create a workspace",
   },
   config: {
     field: {

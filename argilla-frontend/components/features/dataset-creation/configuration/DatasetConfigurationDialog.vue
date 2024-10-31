@@ -72,7 +72,7 @@
         >
         <Validation
           v-if="!dataset.isValid"
-          :validations="translatedValidations"
+          :validations="firstTranslatedValidation"
         />
       </form>
     </dialog>
@@ -105,6 +105,9 @@ export default {
     },
   },
   computed: {
+    firstTranslatedValidation() {
+      return [this.translatedValidations[0]];
+    },
     translatedValidations() {
       return this.dataset.validate().question.map((validation) => {
         return this.$t(validation);
@@ -140,8 +143,8 @@ export default {
   position: absolute;
   right: 0;
   left: 0;
-  width: calc(100% - $base-space * 3);
-  bottom: $base-space;
+  width: 100%;
+  bottom: -4px;
   display: block;
   margin-left: auto;
   padding: 0;

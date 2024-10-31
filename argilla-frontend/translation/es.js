@@ -256,13 +256,13 @@ export default {
     },
   },
   home: {
-    argillaDatasets: "Datasets de Argilla",
+    argillaDatasets: "Tus datasets",
     none: "Sin datasets",
     importTitle: "Importar un dataset desde Hugging Face Hub",
     importText:
       "Comienza con un conjunto de datos del Hub simplemente pegando el nombre del repositorio",
     importButton: "Importar dataset",
-    importFromHub: "Importar desde el Hub",
+    importFromHub: "Importar dataset desde Hugging Face",
     importFromPython: "Importar desde Python",
     importFromPythonHFWarning:
       "Si estás usando un Espacio privado, consulta la <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>documentación</a>.",
@@ -270,7 +270,7 @@ export default {
     exampleDatasetsText: "Explora estos datasets de ejemplo",
     guidesTitle: "¿No conoce Argilla?",
     guidesText: "Echa un vistazo a estas guías:",
-    pasteRepoIdPlaceholder: "Pega un repo id",
+    pasteRepoIdPlaceholder: "Pega un repo id id p.ej., stanfordnlp/imdb",
     demoLink:
       "Entra en esta <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> para probar Argilla",
   },
@@ -281,8 +281,8 @@ export default {
         optionsWithoutLabel: "No se permiten opciones vacías",
       },
     },
-    atLeastOneQuestion: "Se requiere al menos una pregunta",
-    atLeastOneRequired: "Se requiere al menos una pregunta obligatoria",
+    atLeastOneQuestion: "Se requiere al menos una pregunta.",
+    atLeastOneRequired: "Se requiere al menos una pregunta obligatoria.",
     hasInvalidQuestions: "Algunas preguntas son inválidas",
     createDataset: "Crea el dataset en Argilla",
     datasetName: "Nombre del dataset",

@@ -115,6 +115,7 @@ export class Subset {
             options: structure.feature.names.map((o) => ({
               text: o,
               value: o,
+              id: o,
             })),
           },
           structure.name

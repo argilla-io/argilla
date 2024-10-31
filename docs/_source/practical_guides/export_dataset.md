@@ -20,7 +20,7 @@ remote_dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-wor
 local_dataset = remote_dataset.pull(max_records=100) # get first 100 records
 ```
 
-If your dataset includes vectors, by default these will **not** get pulled with the rest of the dataset in order to improve performace. If you would like to pull the vectors in your records, you will need to specify it like so:
+If your dataset includes vectors, by default these will **not** get pulled with the rest of the dataset in order to improve performance. If you would like to pull the vectors in your records, you will need to specify it like so:
 
 ::::{tab-set}
 

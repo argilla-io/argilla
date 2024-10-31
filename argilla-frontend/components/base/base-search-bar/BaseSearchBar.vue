@@ -17,7 +17,13 @@
 
 <template>
   <base-input-container class="search-area" :class="filter ? 'active' : null">
-    <svgicon name="search" width="20" height="20" color="#acacac" aria-hidden="true" />
+    <svgicon
+      name="search"
+      width="20"
+      height="20"
+      color="#acacac"
+      aria-hidden="true"
+    />
     <base-input
       class="search-area__input"
       role="search"
