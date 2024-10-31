@@ -321,6 +321,8 @@ class HubImportExportMixin(DiskImportExportMixin):
     @classmethod
     def _run_settings_ui(cls, repo_id: str, subset: str, split: str, client: Optional["Argilla"] = None) -> str:
         from urllib.parse import quote_plus, urlencode
+        from argilla.client import Argilla
+
         import webbrowser
 
         client = client or Argilla._get_default()

@@ -7,7 +7,11 @@
     aria-label="Data Record Field"
   >
     <div class="title-area --body2">
-      <span class="text_field_component__title-content" v-text="title" :aria-label="'Field Name: ' + title" />
+      <span
+        class="text_field_component__title-content"
+        v-text="title"
+        :aria-label="'Field Name: ' + title"
+      />
       <BaseActionTooltip
         class="text_field_component__tooltip"
         :tooltip="$t('copied')"
@@ -20,11 +24,21 @@
           @click.prevent="$copyToClipboard(fieldText)"
           role="button"
         >
-          <svgicon color="#acacac" name="copy" width="18" height="18" aria-hidden="true"/>
+          <svgicon
+            color="#acacac"
+            name="copy"
+            width="18"
+            height="18"
+            aria-hidden="true"
+          />
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div id="fields-content" class="text_field_component__area --body1" :aria-label="'Data entry for Field: ' + title" >
+    <div
+      id="fields-content"
+      class="text_field_component__area --body1"
+      :aria-label="'Data entry for Field: ' + title"
+    >
       <p
         :class="[
           allowOverlapping

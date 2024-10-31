@@ -24,7 +24,7 @@ export const ROUTES = {
   annotationPage: (datasetId: string) =>
     `/dataset/${datasetId}/annotation-mode`,
   settings: (id: string) => `/dataset/${id}/settings`,
-  importDatasetFromHub: (id: string) => `/new/${encodeURIComponent(id)}`,
+  importDatasetFromHub: (id: string) => `/${encodeURIComponent(id)}`,
 };
 
 export const useRoutes = () => {

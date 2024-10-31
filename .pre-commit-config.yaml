@@ -75,12 +75,12 @@ repos:
   # Helm lint hook
   ##############################################################################
   - repo: https://github.com/gruntwork-io/pre-commit
-    rev: v0.1.23
+    rev: v0.1.24
     hooks:
       - id: helmlint
         name: Helm lint
         files: '^examples/deployments/k8s/.*\.yaml$'
-        args: ['helm', 'lint','examples/deployments/k8s/']
+        args: ["helm", "lint", "examples/deployments/k8s/"]
 
 ci:
   autofix_commit_msg: |
@@ -90,5 +90,6 @@ ci:
   autoupdate_branch: ""
   autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
-  skip: []
+  skip:
+    - helmlint # Disabling helmlint on CI by now because helm dependency is not available
   submodules: false
