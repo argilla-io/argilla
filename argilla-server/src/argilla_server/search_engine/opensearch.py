@@ -115,7 +115,7 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         await self.client.indices.delete(index_name, ignore=[404], ignore_unavailable=True)
 
     async def _update_document_request(self, index_name: str, id: str, body: dict):
-        # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html
         await self.client.update(index=index_name, id=id, body=body, refresh=True)
 
     async def put_index_mapping_request(self, index: str, mappings: dict):
@@ -150,10 +150,8 @@ class OpenSearchEngine(BaseElasticAndOpenSearchEngine):
         return await self.client.indices.exists(index=index_name)
 
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
-        # https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html#refresh-api-desc
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-refresh.html
         _, errors = await helpers.async_bulk(client=self.client, actions=actions, raise_on_error=False, refresh=True)
-        if errors:
-            raise RuntimeError(errors)
 
-    async def _refresh_index_request(self, index_name: str):
-        await self.client.indices.refresh(index=index_name)
+        for error in errors:
+            self._LOGGER.error(f"Error in bulk operation: {error}")

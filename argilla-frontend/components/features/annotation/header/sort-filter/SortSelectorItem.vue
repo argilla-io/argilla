@@ -36,6 +36,10 @@
         width="16"
         height="16"
         :name="category.sort === 'asc' ? 'arrow-up' : 'arrow-down'"
+        :aria-label="
+          'Change sort direction to ' +
+          (category.sort === 'asc' ? 'up' : 'down')
+        "
       />
     </BaseButton>
     <BaseButton
