@@ -1,7 +1,6 @@
 name: Deploy Argilla environment
 
 on:
-
   workflow_dispatch:
     inputs:
       image-name:

@@ -50,9 +50,9 @@ export class CreateDatasetUseCase {
       await this.datasetRepository.import(datasetCreated, dataset);
 
       let retries = 0;
-      const debounce = Debounce.from(1000);
+      const debounce = Debounce.from(3000);
 
-      while (retries < 5) {
+      while (retries < 10) {
         revalidateCache(`/v1/datasets/${datasetCreated}/progress`);
 
         const progress = await this.datasetRepository.getProgress(

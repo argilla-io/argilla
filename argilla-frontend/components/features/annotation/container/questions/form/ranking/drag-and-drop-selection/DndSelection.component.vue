@@ -24,7 +24,12 @@
           :text="getSuggestedAgent(item)"
           minimalist
         >
-          <svgicon width="6" name="draggable" :id="`${item.value}-icon`" aria-label="Dragging Icon"/>
+          <svgicon
+            width="6"
+            name="draggable"
+            :id="`${item.value}-icon`"
+            aria-label="Dragging Icon"
+          />
           <span
             class="draggable__rank-card__title"
             v-text="item.text"
