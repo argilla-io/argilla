@@ -1,5 +1,5 @@
 <template>
-  <div class="title-area --body1">
+  <div class="title-area --body1" :aria-label="question.title">
     <span
       class="suggestion-info"
       v-text="question.title"
@@ -19,6 +19,8 @@
         content: tooltipMessage,
         open: openTooltip,
       }"
+      role="tooltip"
+      :aria-label="tooltipMessage"
     />
   </div>
 </template>

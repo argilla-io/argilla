@@ -9,6 +9,17 @@ export interface BackendDataset {
     strategy: string;
     min_submitted: number;
   };
+  metadata: {
+    repoId: string;
+    subset: string;
+    split: string;
+    mapping: {
+      fields: { source: string; target: string }[];
+      metadata: { source: string; target: string }[];
+      suggestions: { source: string; target: string }[];
+      external_id?: string;
+    };
+  };
   inserted_at: string;
   updated_at: string;
   last_activity_at: string;
@@ -42,4 +53,9 @@ export interface BackendProgress {
   total: number;
   completed: number;
   pending: number;
+}
+
+export interface BackendJob {
+  id: string;
+  status: string;
 }

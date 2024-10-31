@@ -26,8 +26,12 @@ export default {
 <style lang="scss" scoped>
 $color-error: var(--color-brand);
 .--error-message {
+  display: block;
   @include font-size(12px);
   color: $color-error;
+  :deep(a) {
+    color: $color-error;
+  }
 }
 .--has-error {
   input,

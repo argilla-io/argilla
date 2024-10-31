@@ -211,6 +211,7 @@ class TestHubImportExportMixin:
                     with_records=with_records_import,
                     token=token,
                     name=f"test_{uuid.uuid4()}",
+                    settings="auto",
                 )
         else:
             new_dataset = rg.Dataset.from_hub(
@@ -219,6 +220,7 @@ class TestHubImportExportMixin:
                 with_records=with_records_import,
                 token=token,
                 name=f"test_{uuid.uuid4()}",
+                settings="auto",
             )
 
         if with_records_import and with_records_export:
@@ -398,6 +400,7 @@ class TestHubImportExportMixin:
             token=token,
             name=mock_dataset_name,
             with_records=with_records_export,
+            settings="auto",
         )
 
         if with_records_export:

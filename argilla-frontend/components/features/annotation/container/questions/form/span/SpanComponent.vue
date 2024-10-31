@@ -1,13 +1,19 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent :question="question" />
-    <div class="question__warning" v-if="warningMessage">
-      <svgicon name="danger" width="16" height="16" />
+    <div
+      class="question__warning"
+      v-if="warningMessage"
+      role="status"
+      aria-live="polite"
+    >
+      <svgicon name="danger" width="16" height="16" aria-hidden="true" />
       <span v-text="warningMessage" />
     </div>
     <EntityLabelSelectionComponent
       v-if="supportedSpanAnnotation"
       v-model="question.answer.options"
+      :visible-shortcuts="visibleShortcuts"
       :componentId="question.id"
       :maxOptionsToShowBeforeCollapse="this.question.settings.visible_options"
       :isFocused="isFocused"
@@ -42,6 +48,10 @@ export default {
     isBulkMode: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   computed: {

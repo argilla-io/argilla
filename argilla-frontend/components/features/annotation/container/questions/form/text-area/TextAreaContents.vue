@@ -23,6 +23,7 @@
       @change-text="onChangeTextArea"
       @on-change-focus="onChangeFocus"
       @on-exit-edition-mode="onExitEditionMode"
+      role="textbox"
     />
   </div>
 </template>

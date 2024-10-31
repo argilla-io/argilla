@@ -52,13 +52,17 @@ CHAT_FIELD_MAX_LENGTH = 500
 class RecordValidatorBase(ABC):
     @classmethod
     def _validate_fields(cls, fields: dict, dataset: Dataset) -> None:
-        fields = fields or {}
-
+        cls._validate_non_empty_fields(fields=fields)
         cls._validate_required_fields(dataset=dataset, fields=fields)
         cls._validate_extra_fields(dataset=dataset, fields=fields)
         cls._validate_image_fields(dataset=dataset, fields=fields)
         cls._validate_chat_fields(dataset=dataset, fields=fields)
         cls._validate_custom_fields(dataset=dataset, fields=fields)
+
+    @classmethod
+    def _validate_non_empty_fields(cls, fields: Dict[str, str]) -> None:
+        if not (isinstance(fields, dict) and len(fields) >= 1):
+            raise UnprocessableEntityError("fields cannot be empty")
 
     @classmethod
     def _validate_required_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
@@ -291,41 +295,5 @@ class RecordsBulkCreateValidator:
         for idx, record_create in enumerate(records_create):
             try:
                 await RecordCreateValidator.validate(record_create, dataset)
-            except (UnprocessableEntityError, ValueError) as ex:
-                raise UnprocessableEntityError(f"Record at position {idx} is not valid because {ex}") from ex
-
-
-class RecordsBulkUpsertValidator:
-    @classmethod
-    async def validate(
-        cls,
-        records_upsert: RecordsBulkUpsert,
-        dataset: Dataset,
-        existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
-    ) -> None:
-        cls._validate_dataset_is_ready(dataset)
-        await cls._validate_all_bulk_records(
-            dataset, records_upsert.items, existing_records_by_external_id_or_record_id
-        )
-
-    @staticmethod
-    def _validate_dataset_is_ready(dataset: Dataset) -> None:
-        if not dataset.is_ready:
-            raise UnprocessableEntityError("records cannot be created or updated for a non published dataset")
-
-    @staticmethod
-    async def _validate_all_bulk_records(
-        dataset: Dataset,
-        records_upsert: List[RecordUpsert],
-        existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
-    ):
-        existing_records_by_external_id_or_record_id = existing_records_by_external_id_or_record_id or {}
-        for idx, record_upsert in enumerate(records_upsert):
-            try:
-                record = existing_records_by_external_id_or_record_id.get(
-                    record_upsert.id
-                ) or existing_records_by_external_id_or_record_id.get(record_upsert.external_id)
-
-                await RecordUpsertValidator.validate(record_upsert, dataset, record)
             except (UnprocessableEntityError, ValueError) as ex:
                 raise UnprocessableEntityError(f"Record at position {idx} is not valid because {ex}") from ex
