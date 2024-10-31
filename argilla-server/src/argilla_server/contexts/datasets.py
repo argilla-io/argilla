@@ -100,7 +100,12 @@ CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT = 5
 
 async def _touch_dataset_last_activity_at(db: AsyncSession, dataset: Dataset) -> None:
     await db.execute(
-        sqlalchemy.update(Dataset).where(Dataset.id == dataset.id).values(last_activity_at=datetime.utcnow())
+        sqlalchemy.update(Dataset)
+        .where(Dataset.id == dataset.id)
+        .values(
+            last_activity_at=datetime.utcnow(),
+            updated_at=Dataset.__table__.c.updated_at,
+        )
     )
 
 
