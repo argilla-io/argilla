@@ -19,11 +19,10 @@ Vue.directive("circle", {
     element.style.display = "flex";
     element.style.alignItems = "center";
     element.style.justifyContent = "center";
-    element.style.backgroundColor = "#ff675f";
-    element.style.color = "white";
     element.style.height = circleDiameter;
     element.style.width = circleDiameter;
     element.style.borderRadius = "50%";
+    element.style.border = "1px solid var(--bg-opacity-1)"
     element.style.fontSize = "1rem";
     element.style.fontWeight = "500";
     element.style.lineHeight = "34px";
