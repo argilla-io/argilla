@@ -91,7 +91,7 @@ class SpacesDeploymentMixin(LoggingMixin):
                 hf_api.restart_space(repo_id=repo_id)
             warnings.warn(
                 f"Space {repo_id} already exists. Using provided API key. If client authentication fails, go to "
-                "https://huggingface.co/spaces/{repo_id} to login with OAuth and get the correct API key.",
+                f"https://huggingface.co/spaces/{repo_id} to login with OAuth and get the correct API key.",
                 stacklevel=2,
             )
         else:

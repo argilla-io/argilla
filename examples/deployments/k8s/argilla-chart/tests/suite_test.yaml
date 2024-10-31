@@ -86,7 +86,6 @@ tests:
       argilla.persistence.enabled: true
       argilla.persistence.accessMode: ReadWriteOnce
       argilla.persistence.size: 5Gi
-      argilla.persistence.storageClass: standard
     templates:
       - templates/pvc.yaml
     asserts:
@@ -98,9 +97,7 @@ tests:
       - equal:
           path: spec.resources.requests.storage
           value: 5Gi
-      - equal:
-          path: spec.storageClassName
-          value: standard
+      - notHasKey: spec.storageClassName
 
   - it: should render service correctly
     templates:

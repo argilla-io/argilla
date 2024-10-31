@@ -19,6 +19,10 @@ defaults:
   run:
     working-directory: argilla
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest

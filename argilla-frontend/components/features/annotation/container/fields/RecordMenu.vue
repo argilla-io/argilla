@@ -6,8 +6,14 @@
       @visibility="onVisibility"
     >
       <template slot="dropdown-header">
-        <BaseButton class="record-menu__header">
-          <svgicon name="kebab" width="20" height="20" />
+        <BaseButton
+          class="record-menu__header"
+          :aria-label="
+            (dropdownIsVisible ? 'Collapse' : 'Expand') +
+            ' Record Dropdown for Extra Information'
+          "
+        >
+          <svgicon name="kebab" width="20" height="20" aria-hidden="true" />
         </BaseButton>
       </template>
       <template slot="dropdown-content">
