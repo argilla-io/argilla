@@ -49,7 +49,6 @@ class DatasetQuestionEventSchema(BaseModel):
     description: Optional[str]
     required: bool
     settings: dict
-    # dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
@@ -63,7 +62,6 @@ class DatasetFieldEventSchema(BaseModel):
     title: str
     required: bool
     settings: dict
-    # dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
@@ -77,7 +75,6 @@ class DatasetMetadataPropertyEventSchema(BaseModel):
     title: str
     settings: dict
     visible_for_annotators: bool
-    # dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
@@ -90,7 +87,6 @@ class DatasetVectorSettingsEventSchema(BaseModel):
     name: str
     title: str
     dimensions: int
-    # dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
@@ -126,6 +122,7 @@ class RecordEventSchema(BaseModel):
     fields: dict
     metadata: Optional[dict] = Field(None, alias="metadata_")
     external_id: Optional[str]
+    # TODO:
     # responses:
     # - Create a new `GET /api/v1/records/{record_id}/responses` endpoint.
     # - Or use `/api/v1/records/{record_id}` endpoint.

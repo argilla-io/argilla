@@ -24,10 +24,7 @@ from argilla_server.contexts.hub import HubDataset
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.search_engine.base import SearchEngine
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
-from argilla_server.jobs.queues import LOW_QUEUE
-
-# TODO: Move this to be defined on jobs queues as a shared constant
-JOB_TIMEOUT_DISABLED = -1
+from argilla_server.jobs.queues import LOW_QUEUE, JOB_TIMEOUT_DISABLED
 
 HUB_DATASET_TAKE_ROWS = 10_000
 

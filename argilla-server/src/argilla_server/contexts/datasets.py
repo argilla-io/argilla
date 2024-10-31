@@ -180,7 +180,7 @@ def _allowed_roles_for_metadata_property_create(metadata_property_create: Metada
 async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     await DatasetPublishValidator.validate(db, dataset)
 
-    dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=True)
+    dataset = await dataset.update(db, status=DatasetStatus.ready)
 
     await search_engine.create_index(dataset)
 
@@ -269,7 +269,6 @@ async def create_metadata_property(
         settings=metadata_property_create.settings.dict(),
         allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
         dataset_id=dataset.id,
-        autocommit=True,
     )
 
     if dataset.is_ready:
@@ -326,7 +325,6 @@ async def create_vector_settings(
         title=vector_settings_create.title,
         dimensions=vector_settings_create.dimensions,
         dataset_id=dataset.id,
-        autocommit=True,
     )
 
     if dataset.is_ready:
@@ -763,7 +761,7 @@ async def delete_records(
             await build_record_event_v1(db, RecordEvent.deleted, record),
         )
 
-    records = await Record.delete_many(db, params)
+    records = await Record.delete_many(db, conditions=params)
 
     await search_engine.delete_records(dataset=dataset, records=records)
 
@@ -964,7 +962,6 @@ async def upsert_suggestion(
         db,
         schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
         constraints=[Suggestion.record_id, Suggestion.question_id],
-        autocommit=True,
     )
 
     await _preload_suggestion_relationships_before_index(db, suggestion)
@@ -981,7 +978,6 @@ async def delete_suggestions(
     await Suggestion.delete_many(
         db=db,
         conditions=[Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id],
-        autocommit=True,
     )
 
     for suggestion in suggestions:
@@ -1004,7 +1000,7 @@ async def list_suggestions_by_id_and_record_id(
 
 
 async def delete_suggestion(db: AsyncSession, search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:
-    suggestion = await suggestion.delete(db, autocommit=True)
+    suggestion = await suggestion.delete(db)
 
     await search_engine.delete_record_suggestion(suggestion)
 
