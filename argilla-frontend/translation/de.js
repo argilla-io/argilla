@@ -35,7 +35,8 @@ export default {
   annotationGuidelines: "Annotationsrichtlinien",
   guidelines: "Richtlinien",
   taskDistribution: "Annotationsverteilung",
-  minimumSubmittedResponses: "Erforderliche Mindestanzahl an eingereichten Antworten",
+  minimumSubmittedResponses:
+    "Erforderliche Mindestanzahl an eingereichten Antworten",
   taskDistributionTooltip:
     "Eine Aufgabe ist abgeschlossen, wenn alle Datensätze die \nMindestanzahl an eingereichten Antworten haben.",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
@@ -49,11 +50,11 @@ export default {
       "Der Datensatz ist leer. Sie können Datensätze mit dem Python SDK hinzufügen. Siehe <a href='https://docs.argilla.io/latest/how_to_guides/record/'>Dokumentation</a> zum Hinzufügen von Einträgen.",
     taskDistributionCompleted: "🎉 Die Aufgabe ist erledigt!",
     noSubmittedRecords: "Sie haben noch keinen Datensatz eingereicht",
-    noRecordsFound: "Sie haben keine {status} Datensätze, welche Ihrer Anfrage entsprechen",
+    noRecordsFound:
+      "Sie haben keine {status} Datensätze, welche Ihrer Anfrage entsprechen",
     noRecords: "Sie haben keine {status} Datensätze",
     noPendingRecordsToAnnotate: "🎉 Die Aufgabe ist erledigt!",
-    noDraftRecordsToReview:
-      "Sie haben keine Entwürfe zu prüfen",
+    noDraftRecordsToReview: "Sie haben keine Entwürfe zu prüfen",
   },
   breadcrumbs: {
     home: "Start",

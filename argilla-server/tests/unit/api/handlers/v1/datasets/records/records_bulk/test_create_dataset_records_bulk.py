@@ -228,6 +228,35 @@ class TestCreateDatasetRecordsBulk:
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 6
 
+    async def test_create_dataset_records_bulk_with_empty_fields(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": "value",
+                        },
+                    },
+                    {
+                        "fields": {},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Record at position 1 is not valid because fields cannot be empty"}
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
     @pytest.mark.parametrize(
         "web_url",
         [

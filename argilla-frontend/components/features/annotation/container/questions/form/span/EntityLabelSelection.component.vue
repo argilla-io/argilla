@@ -30,6 +30,7 @@
             width="18"
             height="18"
             :name="iconToShowInTheCollapseButton"
+            aria-hidden="true"
           />
         </button>
       </div>
@@ -41,11 +42,15 @@
       name="shuffle"
       class="inputs-area"
       v-if="filteredOptions.length"
+      role="group"
+      aria-multiselectable="multiple"
+      aria-label="Label-Options"
     >
       <EntityLabelBadge
         v-for="(option, index) in visibleOptions"
         :key="option.id"
         ref="options"
+        :visible-shortcuts="visibleShortcuts"
         :option="option"
         :keyboards="keyboards"
         v-model="option.isSelected"
@@ -85,6 +90,10 @@ export default {
     enableSpanQuestionShortcutsGlobal: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   model: {

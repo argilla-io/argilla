@@ -12,8 +12,12 @@
         :show-tooltip="showTooltip"
         :tooltip-position-fixed="false"
         :show-percent-in-tooltip="false"
+        role="progressbar"
+        :aria-valuenow="progress.percentage.completed"
+        aria-label="Team Annotation-Progress"
+        aria-labelledby="team-progress-percent"
       />
-      <span class="team-progress__percent"
+      <span id="team-progress-percent" class="team-progress__percent"
         >{{ progress.percentage.completed }}%</span
       >
       <span v-if="visibleProgressValues" class="team-progress__info">

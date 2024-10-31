@@ -16,13 +16,28 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed error so now `_touch_dataset_last_activity_at` function is not updating dataset's `updated_at` column. ([#5656](https://github.com/argilla-io/argilla/pull/5656))
+
+## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.1...v2.4.0)
+
+### Added
+
+- Added new `POST /api/v1/datasets/:dataset_id/import` to import datasets from Hugging Face as a background job. ([#5572](https://github.com/argilla-io/argilla/pull/5572))
+- Added new `metadata` attribute for endpoints getting, creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
+- Added new validation to avoid the creation of records with empty `fields` attributes. ([#5639](https://github.com/argilla-io/argilla/pull/5639))
+
 ### Changed
 
+- Now it is possible to publish a dataset without required fields. Allowing being published with at least one field (required or not). ([#5569](https://github.com/argilla-io/argilla/pull/5569))
 - Changed supported values for terms metadata options to accept other than strings values. ([#5589](https://github.com/argilla-io/argilla/pull/5589))
+- Changed Helm chart to allow the use of a default storage class when none is explicitly specified. This ensures compatibility with environments like k3d that do not have a 'standard' storage class by default.
 
 ### Removed
 
-- Removed name pattern validation for Workspaces, Datasets, and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
+- Removed name pattern restrictions for Fields, Questions, Metadata Properties and Vector Settings. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+- Removed name pattern validation for Datasets, Workspaces and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
 
 ### Fixed
 

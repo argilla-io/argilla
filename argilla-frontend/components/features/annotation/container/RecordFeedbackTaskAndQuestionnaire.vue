@@ -6,6 +6,7 @@
       recordCriteria.committed.page.isBulkMode &&
       recordCriteria.committed.isPending
     "
+    role="main"
     :record-criteria="recordCriteria"
     :dataset-vectors="datasetVectors"
     :records="records"
@@ -17,6 +18,7 @@
   />
   <FocusAnnotation
     v-else
+    role="main"
     :record-criteria="recordCriteria"
     :dataset-vectors="datasetVectors"
     :records="records"

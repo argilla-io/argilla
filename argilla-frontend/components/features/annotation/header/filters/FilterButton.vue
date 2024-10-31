@@ -1,6 +1,12 @@
 <template>
   <div :class="isButtonActive ? 'filter-button--active' : 'filter-button'">
-    <svgicon v-if="iconName" :name="iconName" width="16" height="16" />
+    <svgicon
+      v-if="iconName"
+      :name="iconName"
+      width="16"
+      height="16"
+      aria-hidden="true"
+    />
     <BaseButton class="filter-button__button">{{ buttonName }}</BaseButton>
     <slot></slot>
     <svgicon
@@ -9,6 +15,7 @@
       name="chevron-down"
       width="16"
       height="8"
+      aria-hidden="true"
     />
   </div>
 </template>

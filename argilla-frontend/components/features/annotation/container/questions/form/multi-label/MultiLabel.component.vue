@@ -3,6 +3,7 @@
     <QuestionHeaderComponent :question="question" />
 
     <LabelSelectionComponent
+      :visible-shortcuts="visibleShortcuts"
       :componentId="question.id"
       :suggestion="question.suggestion"
       :maxOptionsToShowBeforeCollapse="question.settings.visible_options"
@@ -26,6 +27,10 @@ export default {
     isFocused: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   methods: {

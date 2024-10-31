@@ -284,13 +284,5 @@ class Dataset(Resource, HubImportExportMixin, DiskImportExportMixin):
     def _is_published(self) -> bool:
         return self._model.status == "ready"
 
-    @classmethod
-    def _sanitize_name(cls, name: str):
-        name = name.replace(" ", "_")
-
-        for character in ["/", "\\", ".", ",", ";", ":", "-", "+", "="]:
-            name = name.replace(character, "-")
-        return name
-
     def _with_client(self, client: Argilla) -> "Self":
         return super()._with_client(client=client)
