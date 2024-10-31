@@ -298,8 +298,8 @@ class TestDatasetRecordsBulkWithSuggestions:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": "Record at position 0 does not have valid suggestions because "
-            f"question with question_id={other_question.id} does not exist"
+            "detail": "Record at position 0 is not valid because record does not have valid suggestions: "
+            f"question id={other_question.id} does not exists"
         }
 
     async def test_create_record_with_wrong_suggestion_value_in_bulk(
@@ -328,8 +328,8 @@ class TestDatasetRecordsBulkWithSuggestions:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": "Record at position 0 does not have valid suggestions because suggestion for question name=label "
-            "is not valid: 'wrong-label' is not a valid label for label selection question.\n"
+            "detail": f"Record at position 0 is not valid because record does not have valid suggestions: "
+            "'wrong-label' is not a valid label for label selection question.\n"
             "Valid labels are: ['label-a', 'label-b']"
         }
 
@@ -339,7 +339,7 @@ class TestDatasetRecordsBulkWithSuggestions:
         dataset = await self.test_dataset()
         question = dataset.question_by_name("label")
         record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
-        suggestion = await SuggestionFactory.create(record=record, question=question, value="label-a")
+        await SuggestionFactory.create(record=record, question=question, value="label-a")
         other_question = await TextQuestionFactory.create(name="other-question")
 
         response = await async_client.put(
@@ -359,8 +359,8 @@ class TestDatasetRecordsBulkWithSuggestions:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": f"Record at position 0 does not have valid suggestions because "
-            f"question with question_id={other_question.id} does not exist"
+            "detail": "Record at position 0 is not valid because record does not have valid suggestions: "
+            f"question id={other_question.id} does not exists"
         }
 
     async def test_update_record_with_wrong_suggestion_value_in_bulk(
@@ -369,7 +369,7 @@ class TestDatasetRecordsBulkWithSuggestions:
         dataset = await self.test_dataset()
         question = dataset.question_by_name("label")
         record = await RecordFactory.create(dataset=dataset, fields={"prompt": "Does exercise help reduce stress?"})
-        suggestion = await SuggestionFactory.create(record=record, question=question, value="label-a")
+        await SuggestionFactory.create(record=record, question=question, value="label-a")
 
         response = await async_client.put(
             self.url(dataset.id),
@@ -388,12 +388,13 @@ class TestDatasetRecordsBulkWithSuggestions:
 
         assert response.status_code == 422, response.json()
         assert response.json() == {
-            "detail": "Record at position 0 does not have valid suggestions because suggestion for question name=label "
-            "is not valid: 'wrong-label' is not a valid label for label selection question.\n"
+            "detail": f"Record at position 0 is not valid because record does not have valid suggestions: "
+            "'wrong-label' is not a valid label for label selection question.\n"
             "Valid labels are: ['label-a', 'label-b']"
         }
 
-    async def _configure_dataset_fields(self, dataset: Dataset):
+    @classmethod
+    async def _configure_dataset_fields(cls, dataset: Dataset):
         await TextFieldFactory.create(name="prompt", dataset=dataset)
         await TextFieldFactory.create(name="response", dataset=dataset)
 

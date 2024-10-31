@@ -10,7 +10,7 @@ This section details how to configure and deploy Argilla on Hugging Face Spaces.
 - How to configure and disable HF OAuth access
 - How to use Private Spaces
 
-!!! tip "Looking to get started easily?"
+!!! tip "Looking to get started easily or deploy Argilla with the Python SDK?"
     If you just discovered Argilla and want to get started quickly, go to the [Quickstart guide](quickstart.md).
 
 ## Persistent storage
@@ -107,14 +107,23 @@ HF_TOKEN = "..."
 
 client = rg.Argilla(
     api_url="<api_url>",
-    api_key="<api_key>"
+    api_key="<api_key>",
     headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
 
-
 ## Space Secrets overview
 
-Remember that, by default, Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space. There are two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of Argilla Space. Those are useful when you want to create a different owner user to login into Argilla.
+There's two optional secrets to set up the `USERNAME` and `PASSWORD` of the `owner` of the Argilla Space. Remember that, by default Argilla Spaces are configured with a *Sign in with Hugging Face* button, which is also used to grant an `owner` to the creator of the Space for personal spaces.
 
+The `USERNAME` and `PASSWORD` are only useful in a couple of scenarios:
 
+- You have [disabled Hugging Face OAuth](#how-to-configure-and-disable-oauth-access).
+- You want to [set up Argilla under an organization](#how-to-deploy-argilla-under-a-hugging-face-organization) and want your Hugging Face username to be granted the `owner` role.
+
+In summary, when setting up a Space:
+!!! info "Creating a Space under your personal account"
+    If you are creating the Space under your personal account, **don't insert any value for `USERNAME` and `PASSWORD`**. Once you launch the Space you will be able to Sign in with your Hugging Face username and the `owner` role.
+
+!!! info "Creating a Space under an organization"
+    If you are creating the Space under an organization **make sure to insert your Hugging Face username in the secret `USERNAME`**. In this way, you'll be able to Sign in with your Hugging Face user.

@@ -25,6 +25,7 @@ from argilla_server.api.policies.v1.vector_settings_policy import VectorSettings
 from argilla_server.api.policies.v1.workspace_policy import WorkspacePolicy
 from argilla_server.api.policies.v1.workspace_user_policy import WorkspaceUserPolicy
 from argilla_server.api.policies.v1.webhook_policy import WebhookPolicy
+from argilla_server.api.policies.v1.job_policy import JobPolicy
 
 __all__ = [
     "DatasetPolicy",
@@ -39,6 +40,7 @@ __all__ = [
     "WorkspacePolicy",
     "WorkspaceUserPolicy",
     "WebhookPolicy",
+    "JobPolicy",
     "authorize",
     "is_authorized",
 ]

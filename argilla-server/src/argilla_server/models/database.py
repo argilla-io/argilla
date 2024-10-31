@@ -29,7 +29,6 @@ from sqlalchemy import (
     sql,
 )
 from sqlalchemy.engine.default import DefaultExecutionContext
-from sqlalchemy.ext.asyncio import async_object_session
 from sqlalchemy.ext.mutable import MutableDict, MutableList
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -292,6 +291,22 @@ class Question(DatabaseModel):
         return parse_obj_as(QuestionSettings, self.settings)
 
     @property
+    def is_text(self) -> bool:
+        return self.settings.get("type") == QuestionType.text
+
+    @property
+    def is_label_selection(self) -> bool:
+        return self.settings.get("type") == QuestionType.label_selection
+
+    @property
+    def is_multi_label_selection(self) -> bool:
+        return self.settings.get("type") == QuestionType.multi_label_selection
+
+    @property
+    def is_rating(self) -> bool:
+        return self.settings.get("type") == QuestionType.rating
+
+    @property
     def type(self) -> QuestionType:
         return QuestionType(self.settings["type"])
 
@@ -350,6 +365,7 @@ class Dataset(DatabaseModel):
     allow_extra_metadata: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
     status: Mapped[DatasetStatus] = mapped_column(DatasetStatusEnum, default=DatasetStatus.draft, index=True)
     distribution: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSON))
+    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
     workspace_id: Mapped[UUID] = mapped_column(ForeignKey("workspaces.id", ondelete="CASCADE"), index=True)
     inserted_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=inserted_at_current_value, onupdate=datetime.utcnow)
@@ -418,7 +434,7 @@ class Dataset(DatabaseModel):
             if question.id == question_id:
                 return question
 
-    def question_by_name(self, name: str) -> Union["Question", None]:
+    def question_by_name(self, name: str) -> Union[Question, None]:
         for question in self.questions:
             if question.name == name:
                 return question
@@ -515,7 +531,7 @@ class User(DatabaseModel):
     async def is_member(self, workspace_id: UUID) -> bool:
         # TODO: Change query to use exists may improve performance
         return (
-            await WorkspaceUser.get_by(async_object_session(self), workspace_id=workspace_id, user_id=self.id)
+            await WorkspaceUser.get_by(self.current_async_session, workspace_id=workspace_id, user_id=self.id)
             is not None
         )
 

@@ -12,13 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from uuid import UUID
-
 import pytest
-from fastapi.encoders import jsonable_encoder
+
+from uuid import UUID
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
 from argilla_server.enums import (
     DatasetStatus,
@@ -32,6 +32,8 @@ from argilla_server.jobs.queues import HIGH_QUEUE
 from argilla_server.models.database import Record, Response, Suggestion, User
 from argilla_server.webhooks.v1.enums import RecordEvent
 from argilla_server.webhooks.v1.records import build_record_event
+from argilla_server.models.database import Record, Response, Suggestion, User
+
 from tests.factories import (
     DatasetFactory,
     LabelSelectionQuestionFactory,
@@ -233,6 +235,35 @@ class TestCreateDatasetRecordsBulk:
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 6
 
+    async def test_create_dataset_records_bulk_with_empty_fields(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": "value",
+                        },
+                    },
+                    {
+                        "fields": {},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Record at position 1 is not valid because fields cannot be empty"}
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
     @pytest.mark.parametrize(
         "web_url",
         [
@@ -336,7 +367,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' has an invalid URL value",
+            "detail": f"Record at position 0 is not valid because image field 'image' has an invalid URL value",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -365,7 +396,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 2038 characters for Web URLs",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 2038 characters for Web URLs",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -394,7 +425,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -423,7 +454,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -577,20 +608,10 @@ class TestCreateDatasetRecordsBulk:
                 "params": {
                     "errors": [
                         {
-                            "loc": ["body", "items", 0, "fields", "chat", 0, "content"],
-                            "msg": "field required",
-                            "type": "value_error.missing",
-                        },
-                        {
-                            "loc": ["body", "items", 0, "fields", "chat"],
-                            "msg": "value is not a valid dict",
-                            "type": "type_error.dict",
-                        },
-                        {
-                            "loc": ["body", "items", 0, "fields", "chat"],
-                            "msg": "str type expected",
-                            "type": "type_error.str",
-                        },
+                            "loc": ["body", "items", 0, "fields"],
+                            "msg": "Error parsing chat field 'chat': [{'loc': ('content',), 'msg': 'field required', 'type': 'value_error.missing'}]",
+                            "type": "value_error",
+                        }
                     ]
                 },
             }

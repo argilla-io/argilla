@@ -17,12 +17,12 @@ import pytest
 from uuid import UUID
 from httpx import AsyncClient
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 
 from argilla_server.models import User, Record
 from argilla_server.jobs.queues import HIGH_QUEUE
+from argilla_server.models import User, Record
 from argilla_server.enums import DatasetDistributionStrategy, ResponseStatus, DatasetStatus, RecordStatus
 from argilla_server.webhooks.v1.enums import RecordEvent
 from argilla_server.webhooks.v1.records import build_record_event
@@ -42,6 +42,67 @@ from tests.factories import (
 class TestUpsertDatasetRecordsBulk:
     def url(self, dataset_id: UUID) -> str:
         return f"/api/v1/datasets/{dataset_id}/records/bulk"
+
+    async def test_upsert_dataset_records_with_empty_fields_creating_record(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": "value",
+                        },
+                    },
+                    {
+                        "fields": {},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Record at position 1 is not valid because fields cannot be empty"}
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_upsert_dataset_records_with_empty_fields_updating_record(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"text-field": "value"}, dataset=dataset)
+
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": "value",
+                        },
+                    },
+                    {
+                        "id": str(record.id),
+                        "fields": {},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 200
+
+        assert record.fields == {"text-field": "value"}
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 2
 
     async def test_upsert_dataset_records_bulk_updates_records_status(
         self, async_client: AsyncClient, owner: User, owner_auth_header: dict

@@ -42,7 +42,7 @@ export const useDatasetSettingViewModel = () => {
   const configureTabs = (datasetSettings: DatasetSetting) => {
     tabs.value.push({
       id: "general",
-      name: "General",
+      name: t("general"),
       component: "SettingsInfo",
     });
     tabs.value.push({

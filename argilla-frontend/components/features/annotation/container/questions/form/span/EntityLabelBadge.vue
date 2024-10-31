@@ -1,5 +1,5 @@
 <template>
-  <div class="input-button">
+  <div class="input-button" role="button" :aria-label="option.text">
     <input
       ref="inputRef"
       type="checkbox"
@@ -22,7 +22,7 @@
       :for="option.id"
       :title="option.text"
     >
-      <span class="key" v-text="keyboards[option.id]" />
+      <span v-if="visibleShortcuts" class="key" v-text="keyboards[option.id]" />
       <span>{{ option.text }}</span>
     </label>
   </div>
@@ -38,6 +38,10 @@ export default {
     keyboards: {
       type: Object,
       default: () => ({}),
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   computed: {

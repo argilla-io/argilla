@@ -40,13 +40,13 @@ RUN \
     chmod +x /home/argilla/start_argilla_server.sh && \
     # Give ownership of the data directory to the argilla user
     chown -R argilla:argilla /data && \
+    # Install additional tools to be used in the start.sh script to get default username and generate passwords
+    apt-get install -y curl jq pwgen && \
     # Clean up
     apt-get remove -y wget gnupg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    rm -rf /packages && \
-    # Install pwgen curl and jq
-    apt-get update && apt-get install -y curl jq pwgen
+    rm -rf /packages
 
 COPY config/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 

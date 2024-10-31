@@ -16,13 +16,14 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
+
 from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
+from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator, ValidationError
 from argilla_server.pydantic_v1.utils import GetterDict
 from argilla_server.search_engine import TextQuery
 
@@ -86,7 +87,7 @@ class Record(BaseModel):
         getter_dict = RecordGetterDict
 
 
-FieldValueCreate = Union[List[ChatFieldValue], Dict[StrictStr, Any], StrictStr, None]
+FieldValueCreate = Union[StrictStr, List[ChatFieldValue], Dict[StrictStr, Any], None]
 
 
 class RecordCreate(BaseModel):
@@ -97,14 +98,25 @@ class RecordCreate(BaseModel):
     suggestions: Optional[List[SuggestionCreate]]
     vectors: Optional[Dict[str, List[float]]]
 
-    @validator("fields")
+    @validator("fields", pre=True)
     @classmethod
-    def validate_chat_fields(cls, fields):
+    def validate_chat_field_content(cls, fields: Any):
+        if not isinstance(fields, dict):
+            return fields
+
         for key, value in fields.items():
-            if isinstance(value, list) and all(isinstance(item, ChatFieldValue) for item in value):
+            if isinstance(value, list):
+                try:
+                    fields[key] = [
+                        item if isinstance(item, ChatFieldValue) else ChatFieldValue(**item) for item in value
+                    ]
+                except ValidationError as e:
+                    raise ValueError(f"Error parsing chat field '{key}': {e.errors()}")
+
                 if len(value) > CHAT_FIELDS_MAX_MESSAGES:
                     raise ValueError(
-                        f"Number of chat messages in field '{key}' exceeds the maximum allowed value of {CHAT_FIELDS_MAX_MESSAGES}"
+                        f"Number of chat messages in field '{key}' exceeds the maximum "
+                        f"allowed value of {CHAT_FIELDS_MAX_MESSAGES}"
                     )
 
         return fields

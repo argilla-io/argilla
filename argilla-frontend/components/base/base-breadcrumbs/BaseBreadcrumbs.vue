@@ -17,7 +17,7 @@
 
 <template>
   <div class="breadcrumbs">
-    <ul>
+    <ul role="navigation">
       <li v-for="breadcrumb in filteredBreadcrumbs" :key="breadcrumb.name">
         <nuxt-link
           class="breadcrumbs__item"

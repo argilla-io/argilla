@@ -28,6 +28,7 @@ from argilla_server.enums import (
     SimilarityOrder,
     RecordStatus,
     SortOrder,
+    DatasetStatus,
 )
 from argilla_server.models import Dataset, Question, Record, User, VectorSettings, Vector
 from argilla_server.search_engine import (
@@ -120,6 +121,7 @@ async def test_banking_sentiment_dataset_non_indexed():
             await FloatMetadataPropertyFactory.create(name="seq_float"),
         ],
         questions=[text_question, rating_question],
+        status=DatasetStatus.ready,
     )
 
     records = [
@@ -1321,6 +1323,84 @@ class TestBaseElasticAndOpenSearchEngine:
 
         results = opensearch.get(index=index_name, id=record.id)
         assert results["_source"]["responses"] == []
+
+    async def test_get_dataset_user_progress_without_responses(
+        self,
+        search_engine: BaseElasticAndOpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        user = await UserFactory.create()
+        progress = await search_engine.get_dataset_user_progress(test_banking_sentiment_dataset, user=user)
+        assert progress == {"total": 0}
+
+    async def test_get_dataset_user_progress_with_response(
+        self,
+        search_engine: BaseElasticAndOpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        record = test_banking_sentiment_dataset.records[0]
+        question = test_banking_sentiment_dataset.questions[0]
+
+        response = await ResponseFactory.create(record=record, values={question.name: {"value": "test"}})
+        record = await response.awaitable_attrs.record
+        await record.awaitable_attrs.dataset
+        await search_engine.update_record_response(response)
+
+        progress = await search_engine.get_dataset_user_progress(test_banking_sentiment_dataset, user=response.user)
+        assert progress == {
+            "total": 1,
+            "submitted": 1,
+        }
+
+    async def test_get_dataset_user_progress_for_draft_dataset(self, search_engine: BaseElasticAndOpenSearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        user = await UserFactory.create()
+
+        progress = await search_engine.get_dataset_user_progress(dataset, user=user)
+        assert progress == {}
+
+    async def test_get_dataset_progress_with_pending_records(
+        self,
+        search_engine: BaseElasticAndOpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        dataset = test_banking_sentiment_dataset
+        records = dataset.records
+
+        for record in records:
+            record.status = RecordStatus.pending
+
+        await refresh_dataset(dataset)
+        await refresh_records(records)
+        await search_engine.index_records(dataset, records)
+
+        progress = await search_engine.get_dataset_progress(dataset)
+        assert progress == {"total": len(records), "pending": len(records)}
+
+    async def test_get_dataset_progress_with_completed_records(
+        self,
+        search_engine: BaseElasticAndOpenSearchEngine,
+        opensearch: OpenSearch,
+        test_banking_sentiment_dataset: Dataset,
+    ):
+        dataset = test_banking_sentiment_dataset
+        records = dataset.records
+        for record in records:
+            record.status = RecordStatus.completed
+
+        await refresh_records(records)
+        await search_engine.index_records(dataset, records)
+
+        progress = await search_engine.get_dataset_progress(dataset)
+        assert progress == {"total": len(records), "completed": len(records)}
+
+    async def test_get_dataset_progress_for_draft_dataset(self, search_engine: BaseElasticAndOpenSearchEngine):
+        dataset = await DatasetFactory.create(status=DatasetStatus.draft)
+        progress = await search_engine.get_dataset_progress(dataset)
+        assert progress == {}
 
     @pytest.mark.parametrize(
         ("property_name", "expected_metrics"),
