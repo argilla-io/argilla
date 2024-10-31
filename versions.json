@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_fix-small-issues",
+    "title": "docs_fix-small-issues",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
