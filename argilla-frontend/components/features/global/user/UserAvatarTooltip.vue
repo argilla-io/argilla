@@ -138,6 +138,7 @@ $buttonSize: 34px;
     padding-top: $base-space * 2;
     background: var(--color-dark-grey);
     border-radius: $border-radius;
+    border: 1px solid var(--bg-opacity-1);
     @include font-size(14px);
     font-weight: 400;
     color: var(--color-white);

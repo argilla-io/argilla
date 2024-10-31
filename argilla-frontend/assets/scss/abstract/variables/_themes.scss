@@ -212,9 +212,9 @@
   --fg-filter-badge-accent: hsl(239, 100%, 39%);
   --bg-filter-badge: hsl(240, 100%, 92%);
   --bg-filter-badge-accent: hsl(240, 100%, 90%);
-  --fg-label: hsl(239, 100%, 36%);
-  --fg-label-2: hsl(239, 100%, 27%);
-  --bg-label: hsl(239, 100%, 27%);
+  --fg-label: var(--color-black);
+  --fg-label-2: var(--color-black);
+  --bg-label: var(--color-black);
   --bg-label-unselected: hsl(0, 0%, 96%);
   --bg-label-unselected-hover: hsla(0, 0%, 0%, 0.06);
   --bg-field: linear-gradient(45deg, var(--bg-opacity-2), var(--bg-opacity-1));
