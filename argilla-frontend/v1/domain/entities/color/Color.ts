@@ -78,7 +78,7 @@ export class Color extends String {
       const min = Math.min(r, g, b);
       const delta = max - min;
       let h = 0, s = 0, l = (max + min) / 2;
-      
+
       if (delta !== 0) {
           s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
           switch (max) {
