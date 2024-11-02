@@ -17,11 +17,13 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   argilla:
-    image: argilla/argilla-quickstart:latest
+    image: argilla/argilla-hf-spaces:latest
     environment:
-      ARGILLA_ENABLE_TELEMETRY: 0
+      HF_HUB_DISABLE_TELEMETRY: 1
       ARGILLA_BASE_URL: /argilla
-      ARGILLA_AUTH_SECRET_KEY: ${ARGILLA_AUTH_SECRET_KEY:? Please generate a 32 character random string with `openssl rand -hex 32`}
+      USERNAME: argilla
+      PASSWORD: 12345678
+      API_KEY: argilla.apikey
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.argilla.rule=PathPrefix(`/argilla/`)"

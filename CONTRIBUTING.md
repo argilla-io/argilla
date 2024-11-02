@@ -11,13 +11,11 @@ helped you, or simply ⭐️ the repository to say thank you.
 However you choose to contribute, please be mindful and respect our
 [code of conduct](https://github.com/argilla-io/argilla/blob/main/CODE_OF_CONDUCT.md).
 
-For contributions, we work together to regreen the earth with [JustDiggit](https://justdiggit.org/) via our [Argilla Community Growers](https://argilla.io/blog/introducing-argilla-community-growers/) initiative.
-
 ## Need some help?
 
-We understand that getting started might be scary and difficult, therefore, we provide a guided contributor mentorship program. Feel free to schedule a meeting [here](https://calendly.com/argilla-office-hours/30min) to get you started. Alternatively, you can start with [joining our Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and reaching out in our [contributor channel](https://rubrixworkspace.slack.com/archives/C05BCGM277B).
+We understand that getting started might be a bit difficult, therefore, you can join our discord channel [#argilla-distilabel-general](https://discord.gg/hugging-face-879548962464493619) by selecting *Argilla* in *Channels and Roles* after joining the Discord.
 
 ## Want to work on your own?
 
-For more seasoned contributors, we recommend taking a look at the [contributor section](https://docs.argilla.io/en/latest/community/contributing.html) in our docs.
+For more seasoned contributors, we recommend taking a look at the [contributor section](https://docs.argilla.io/latest/community/contributor/) in our docs.
 

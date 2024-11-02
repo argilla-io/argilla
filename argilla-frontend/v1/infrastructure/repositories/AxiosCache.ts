@@ -1,5 +1,7 @@
 const threeSecondsOfCache = 3;
 const oneSecond = 1000;
+const cacheControlHeader = "cache-control";
+const cacheRevalidateHeader = "must-revalidate";
 
 export const getCacheKey = (config) => {
   if (!config.params) return `${config.method}-${config.url}`;
@@ -13,6 +15,16 @@ export const revalidateCache = (key: string) => {
   if (!cache.has(internalKey)) return;
 
   cache.delete(internalKey);
+};
+
+const getCachedSeconds = (response: any) => {
+  const getSeconds = (secondsFromMaxAge: string) =>
+    secondsFromMaxAge.replace("max-age", "").replace("=", "");
+
+  if (response.config.headers[cacheRevalidateHeader])
+    return getSeconds(response.config.headers[cacheRevalidateHeader]);
+
+  return getSeconds(response.config.headers[cacheControlHeader]);
 };
 
 type Cache = {
@@ -55,20 +67,27 @@ export const loadCache = (axios) => {
     if (request.method === "get") {
       const key = getCacheKey(request);
 
-      if (cache.has(key)) {
-        const { data, headers } = cache.get(key);
+      if (request.headers[cacheControlHeader]) {
+        if (cache.has(key)) {
+          const { data, headers } = cache.get(key);
 
-        request.data = data;
+          request.data = data;
 
-        request.adapter = () =>
-          Promise.resolve({
-            data,
-            status: request.status,
-            statusText: request.statusText,
-            headers,
-            config: request,
-            request,
-          });
+          request.adapter = () =>
+            Promise.resolve({
+              data,
+              status: request.status,
+              statusText: request.statusText,
+              headers,
+              config: request,
+              request,
+            });
+        } else {
+          request.headers[cacheRevalidateHeader] =
+            request.headers[cacheControlHeader];
+
+          request.headers[cacheControlHeader] = cacheRevalidateHeader;
+        }
       }
     }
 
@@ -77,12 +96,9 @@ export const loadCache = (axios) => {
 
   axios.interceptors.response.use((response) => {
     if (response.config.method === "get") {
-      if (!response.config.headers["cache-control"]) return response;
+      if (!response.config.headers[cacheControlHeader]) return response;
 
-      const seconds = response.config.headers["cache-control"]
-        .replace("max-age", "")
-        .replace("=", "");
-
+      const seconds = getCachedSeconds(response);
       const key = getCacheKey(response.config);
       cache.set(
         key,
@@ -93,4 +109,16 @@ export const loadCache = (axios) => {
 
     return response;
   });
+};
+
+export const largeCache = () => {
+  return {
+    headers: { "cache-control": "max-age=600" },
+  };
+};
+
+export const mediumCache = () => {
+  return {
+    headers: { "cache-control": "max-age=120" },
+  };
 };

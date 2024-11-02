@@ -78,13 +78,13 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$slider-color: $primary-color;
-$slider-light-color: rgba(0, 26, 255, 0.1);
+$slider-color: var(--bg-action);
+$slider-light-color: hsla(from var(--fg-cuaternary) h s l / 20%);
 $slider-thumb-size: 16px;
 label {
   width: fit-content;
   height: 14px;
-  color: $black-54;
+  color: var(--fg-secondary);
 }
 
 .range {
@@ -101,7 +101,7 @@ label {
     display: flex;
     width: 100%;
     justify-content: space-between;
-    color: $black-37;
+    color: var(--fg-tertiary);
     @include font-size(12px);
   }
   &__progress-value {
@@ -111,8 +111,8 @@ label {
     margin-left: -15px;
     width: 30px;
     text-align: center;
-    color: palette(white);
-    background: palette(grey, 200);
+    color: var(--color-white);
+    background: var(--color-black);
     border-radius: $border-radius-s;
     @include font-size(12px);
     &:before {
@@ -120,7 +120,7 @@ label {
       left: calc(50% - 6px);
       top: 0;
       transform: translateY(-50%);
-      @include triangle(top, 6px, 6px, palette(grey, 200));
+      @include triangle(top, 6px, 6px, var(--color-black));
     }
     .range:hover & {
       display: block;
@@ -134,7 +134,7 @@ label {
     outline: none;
     border-radius: 15px;
     height: 6px;
-    background: $black-10;
+    background: var(--bg-opacity-10);
   }
 }
 

@@ -16,7 +16,10 @@ from typing import Any, Optional
 
 from starlette.authentication import BaseUser
 
+from argilla_server.enums import UserRole
 from argilla_server.security.authentication.claims import Claims
+
+_DEFAULT_USER_ROLE = UserRole.annotator
 
 
 class UserInfo(BaseUser, dict):
@@ -25,6 +28,19 @@ class UserInfo(BaseUser, dict):
     @property
     def is_authenticated(self) -> bool:
         return True
+
+    @property
+    def username(self) -> str:
+        return self["username"]
+
+    @property
+    def first_name(self) -> str:
+        return self.get("first_name") or self.username
+
+    @property
+    def role(self) -> UserRole:
+        role = self.get("role") or _DEFAULT_USER_ROLE
+        return UserRole(role)
 
     def use_claims(self, claims: Optional[Claims]) -> "UserInfo":
         claims = claims or {}

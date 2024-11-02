@@ -1,41 +1,86 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-yaml
+        exclude: argilla/mkdocs.yml|examples/deployments/k8s
       - id: end-of-file-fixer
-        exclude_types: [ text, jupyter ]
+        exclude_types: [text, jupyter]
       - id: trailing-whitespace
 
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff-format
+
+  ##############################################################################
+  # argilla specific hooks
+  ##############################################################################
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff
+        files: 'argilla/src/.*\.py$'
+        args:
+          - --fix
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.4
+    rev: v1.5.5
     hooks:
       - id: insert-license
         name: "Insert license header in Python source files"
-        files: \.py$
+        files: '^argilla/.*\.py$'
+        exclude: ^argilla/docs/snippets/
         args:
           - --license-filepath
-          - license_header.txt
+          - argilla/LICENSE_HEADER
           - --fuzzy-match-generates-todo
-          # - --remove-header
-
-  - repo: https://github.com/psf/black
-    rev: 23.10.1
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
     hooks:
-      - id: black
-        additional_dependencies: [ "typer==0.7.0" ]
-        # only run for argilla/ files
-        files: '^argilla/.*\.py'
-        args: [ --line-length=120 ]
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.3
-    hooks:
-      # Simulate isort via (the much faster) ruff
-      - id: ruff
+      - id: nbstripout
+        files: '^argilla/.*\.ipynb$'
         args:
-          - --select=I
+          - --keep-count
+          - --keep-output
+          # - --keep-prompt-number
+          # - --keep-cell-ids
+          # - --keep-markdown
+          # - --keep-output-timestamp
+          # - --keep-execution-count
+          # - --keep-metadata
+          # - --keep-version
+  ##############################################################################
+  # argilla-server specific hooks
+  ##############################################################################
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.8
+    hooks:
+      - id: ruff
+        files: 'argila-server/src/.*\.py$'
+        args:
           - --fix
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        name: "Insert license header in Python source files"
+        files: '^argilla-server/.*\.py$'
+        args:
+          - --license-filepath
+          - argilla-server/LICENSE_HEADER
+          - --fuzzy-match-generates-todo
+
+  ##############################################################################
+  # Helm lint hook
+  ##############################################################################
+  - repo: https://github.com/gruntwork-io/pre-commit
+    rev: v0.1.24
+    hooks:
+      - id: helmlint
+        name: Helm lint
+        files: '^examples/deployments/k8s/.*\.yaml$'
+        args: ["helm", "lint", "examples/deployments/k8s/"]
 
 ci:
   autofix_commit_msg: |
@@ -45,5 +90,6 @@ ci:
   autoupdate_branch: ""
   autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
-  skip: [ ]
+  skip:
+    - helmlint # Disabling helmlint on CI by now because helm dependency is not available
   submodules: false

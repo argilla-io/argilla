@@ -14,7 +14,7 @@
 
 from typing import ClassVar, List, Optional
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends
 from fastapi.security import SecurityScopes
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.authentication import AuthenticationBackend
@@ -28,6 +28,32 @@ from argilla_server.security.authentication.db import APIKeyAuthenticationBacken
 from argilla_server.security.authentication.userinfo import UserInfo
 
 
+def set_request_user(request: Request, user: User):
+    """
+    Set the request user in the request state.
+
+    Parameters:
+        request: The request object.
+        user: The user.
+
+    """
+
+    request.state.user = user
+
+
+def get_request_user(request: Request) -> Optional[User]:
+    """
+    Get the current user from the request.
+
+    Parameters:
+        request (Request): The request object.
+
+    Returns:
+        The user if available, None otherwise.
+    """
+    return getattr(request.state, "user", None)
+
+
 class AuthenticationProvider:
     """Authentication provider for the API requests."""
 
@@ -39,9 +65,6 @@ class AuthenticationProvider:
     @classmethod
     def new_instance(cls):
         return AuthenticationProvider()
-
-    def configure_app(self, app: FastAPI) -> None:
-        pass
 
     async def get_current_user(
         self,
@@ -61,6 +84,7 @@ class AuthenticationProvider:
         if not user:
             raise UnauthorizedError()
 
+        set_request_user(request, user)
         return user
 
     async def _authenticate_request_user(self, db: AsyncSession, request: Request) -> Optional[UserInfo]:

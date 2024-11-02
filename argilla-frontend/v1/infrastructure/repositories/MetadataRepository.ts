@@ -1,12 +1,15 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendMetadata, Response } from "../types";
 import { MetadataMetricsRepository } from "./MetadataMetricsRepository";
-import { revalidateCache } from "./AxiosCache";
+import { mediumCache, revalidateCache } from "./AxiosCache";
 import { Metadata } from "~/v1/domain/entities/metadata/Metadata";
+import { MetadataCreation } from "~/v1/domain/entities/hub/MetadataCreation";
+import { DatasetId } from "~/v1/domain/services/IDatasetRepository";
 
 const METADATA_API_ERRORS = {
   ERROR_FETCHING_METADATA: "ERROR_FETCHING_METADATA",
   ERROR_UPDATING_METADATA: "ERROR_UPDATING_METADATA",
+  ERROR_CREATING_METADATA: "ERROR_CREATING_METADATA",
 };
 
 export class MetadataRepository {
@@ -32,7 +35,7 @@ export class MetadataRepository {
       // TODO: Review this endpoint, for admin should be /v1/datasets/${datasetId}/metadata-properties without ME.
       const { data } = await this.axios.get<Response<BackendMetadata[]>>(
         `/v1/me/datasets/${datasetId}/metadata-properties`,
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return data.items;
@@ -56,6 +59,32 @@ export class MetadataRepository {
     } catch (err) {
       throw {
         response: METADATA_API_ERRORS.ERROR_UPDATING_METADATA,
+      };
+    }
+  }
+
+  async create(
+    datasetId: DatasetId,
+    metadata: MetadataCreation
+  ): Promise<BackendMetadata> {
+    try {
+      const { data } = await this.axios.post<BackendMetadata>(
+        `/v1/datasets/${datasetId}/metadata-properties`,
+        {
+          name: metadata.name,
+          title: metadata.title,
+          settings: {
+            type: metadata.adapteType,
+          },
+        }
+      );
+
+      revalidateCache(`/v1/datasets/${datasetId}/metadata-properties`);
+
+      return data;
+    } catch (err) {
+      throw {
+        response: METADATA_API_ERRORS.ERROR_CREATING_METADATA,
       };
     }
   }

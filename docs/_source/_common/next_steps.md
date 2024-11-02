@@ -11,7 +11,7 @@
   tabindex="0"
 ></iframe>
 
-🙋‍♀️ Join the Argilla community on [Slack](https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g) and get direct support from the community.
+🙋‍♀️ Join the Argilla community on [Discord](http://hf.co/join/discord) and get direct support from the community in #argilla-distilabel-general and #argilla-distilabel-help.
 
 ⭐ Argilla [Github repo](https://github.com/argilla-io/argilla) to stay updated about new releases and tutorials.
 

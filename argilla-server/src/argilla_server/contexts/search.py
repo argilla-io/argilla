@@ -18,63 +18,69 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from argilla_server.models import MetadataProperty, Question, Suggestion
-from argilla_server.schemas.v1.records import (
+from argilla_server.api.schemas.v1.records import (
     FilterScope,
     MetadataFilterScope,
     RecordFilterScope,
     SearchRecordsQuery,
 )
-from argilla_server.schemas.v1.responses import ResponseFilterScope
-from argilla_server.schemas.v1.suggestions import SuggestionFilterScope
+from argilla_server.api.schemas.v1.responses import ResponseFilterScope
+from argilla_server.api.schemas.v1.suggestions import SuggestionFilterScope
+from argilla_server.models import MetadataProperty, Question, Suggestion, Dataset
 
 
 class SearchRecordsQueryValidator:
-    def __init__(self, db: AsyncSession, query: SearchRecordsQuery, dataset_id: UUID):
-        self._db = db
-        self._query = query
-        self._dataset_id = dataset_id
+    @classmethod
+    async def validate(cls, db: AsyncSession, dataset: Dataset, query: SearchRecordsQuery) -> None:
+        if query.filters:
+            for filter in query.filters.and_:
+                await cls._validate_filter_scope(db, dataset, filter.scope)
 
-    async def validate(self) -> None:
-        if self._query.filters:
-            for filter in self._query.filters.and_:
-                await self._validate_filter_scope(filter.scope)
+        if query.sort:
+            for order in query.sort:
+                await cls._validate_filter_scope(db, dataset, order.scope)
 
-        if self._query.sort:
-            for order in self._query.sort:
-                await self._validate_filter_scope(order.scope)
-
-    async def _validate_filter_scope(self, filter_scope: FilterScope) -> None:
+    @classmethod
+    async def _validate_filter_scope(cls, db: AsyncSession, dataset: Dataset, filter_scope: FilterScope) -> None:
         if isinstance(filter_scope, RecordFilterScope):
             return
         elif isinstance(filter_scope, ResponseFilterScope):
-            await self._validate_response_filter_scope(filter_scope)
+            await cls._validate_response_filter_scope(db, dataset, filter_scope)
         elif isinstance(filter_scope, SuggestionFilterScope):
-            await self._validate_suggestion_filter_scope(filter_scope)
+            await cls._validate_suggestion_filter_scope(db, dataset, filter_scope)
         elif isinstance(filter_scope, MetadataFilterScope):
-            await self._validate_metadata_filter_scope(filter_scope)
+            await cls._validate_metadata_filter_scope(db, dataset, filter_scope)
         else:
             raise ValueError(f"Unknown filter scope entity `{filter_scope.entity}`")
 
-    async def _validate_response_filter_scope(self, filter_scope: ResponseFilterScope) -> None:
+    @staticmethod
+    async def _validate_response_filter_scope(
+        db: AsyncSession, dataset: Dataset, filter_scope: ResponseFilterScope
+    ) -> None:
         if filter_scope.question is None:
             return
 
-        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
+        await Question.get_by_or_raise(db, name=filter_scope.question, dataset_id=dataset.id)
 
-    async def _validate_suggestion_filter_scope(self, filter_scope: SuggestionFilterScope) -> None:
-        await Question.get_by_or_raise(self._db, name=filter_scope.question, dataset_id=self._dataset_id)
+    @staticmethod
+    async def _validate_suggestion_filter_scope(
+        db: AsyncSession, dataset: Dataset, filter_scope: SuggestionFilterScope
+    ) -> None:
+        await Question.get_by_or_raise(db, name=filter_scope.question, dataset_id=dataset.id)
 
-    async def _validate_metadata_filter_scope(self, filter_scope: MetadataFilterScope) -> None:
+    @staticmethod
+    async def _validate_metadata_filter_scope(
+        db: AsyncSession, dataset: Dataset, filter_scope: MetadataFilterScope
+    ) -> None:
         await MetadataProperty.get_by_or_raise(
-            self._db,
+            db,
             name=filter_scope.metadata_property,
-            dataset_id=self._dataset_id,
+            dataset_id=dataset.id,
         )
 
 
-async def validate_search_records_query(db: AsyncSession, query: SearchRecordsQuery, dataset_id: UUID) -> None:
-    await SearchRecordsQueryValidator(db, query, dataset_id).validate()
+async def validate_search_records_query(db: AsyncSession, query: SearchRecordsQuery, dataset: Dataset) -> None:
+    await SearchRecordsQueryValidator.validate(db, dataset, query)
 
 
 async def get_dataset_suggestion_agents_by_question(db: AsyncSession, dataset_id: UUID) -> List[Mapping[str, Any]]:

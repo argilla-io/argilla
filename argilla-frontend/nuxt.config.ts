@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { NuxtConfig } from "@nuxt/types";
 import Mode from "frontmatter-markdown-loader/mode";
+import { NuxtConfig } from "@nuxt/types";
 import pkg from "./package.json";
 
-const LOCAL_ENVIRONMENT = "http://localhost:6900";
+const LOCAL_ENVIRONMENT = "http://0.0.0.0:6900";
 const BASE_URL = process.env.API_BASE_URL ?? LOCAL_ENVIRONMENT;
 const DIST_FOLDER = process.env.DIST_FOLDER || "dist";
 
@@ -68,17 +68,15 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/axios.ts" },
     { src: "~/plugins/plugins/axios-cache.ts" },
     { src: "~/plugins/plugins/svg-icon.js" },
-    { src: "~/plugins/plugins/vue-vega.js" },
     { src: "~/plugins/plugins/click-outside.js" },
-    { src: "~/plugins/plugins/virtual-scroller.js" },
-    { src: "~/plugins/plugins/toast.js" },
-    { src: "~/plugins/plugins/highlight-search.js" },
+    { src: "~/plugins/plugins/toast.ts" },
     { src: "~/plugins/plugins/copy-to-clipboard.js" },
     { src: "~/plugins/plugins/filters.js" },
-    { src: "~/plugins/plugins/variables.js" },
     { src: "~/plugins/plugins/vue-draggable.js" },
     { src: "~/plugins/plugins/platform.ts" },
     { src: "~/plugins/plugins/language.ts" },
+    { src: "~/plugins/plugins/color-schema" },
+    { src: "~/plugins/plugins/color-generator.ts" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -104,18 +102,13 @@ const config: NuxtConfig = {
     "@nuxtjs/style-resources",
     "@nuxtjs/axios",
     "@nuxtjs/auth-next",
-    "nuxt-highlightjs",
-    "@nuxtjs/i18n",
     [
-      "nuxt-mq",
+      "nuxt-highlightjs",
       {
-        breakpoints: {
-          sm: 450,
-          md: 1901,
-          lg: Infinity,
-        },
+        style: "obsidian",
       },
     ],
+    "@nuxtjs/i18n",
   ],
 
   i18n: {
@@ -127,6 +120,10 @@ const config: NuxtConfig = {
       {
         code: "de",
         file: "de.js",
+      },
+      {
+        code: "es",
+        file: "es.js",
       },
     ],
     detectBrowserLanguage: false,
@@ -184,24 +181,11 @@ const config: NuxtConfig = {
 
   auth: {
     strategies: {
-      basic: {
-        scheme: "local",
-        token: {
-          property: "access_token",
-        },
-        user: {
-          property: false,
-          autoFetch: true,
-        },
+      local: {
         endpoints: {
-          login: {
-            url: "/security/token",
-            method: "post",
-            propertyName: "access_token",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          },
           logout: false,
-          user: { url: "/me", propertyName: false },
+          user: false,
+          login: false,
         },
       },
     },
@@ -211,25 +195,15 @@ const config: NuxtConfig = {
   },
 
   router: {
-    middleware: ["auth-guard"],
+    middleware: ["route-guard", "me"],
     base: process.env.BASE_URL ?? "/",
   },
 
   publicRuntimeConfig: {
     clientVersion: pkg.version,
-    slackCommunity:
-      "https://join.slack.com/t/rubrixworkspace/shared_invite/zt-whigkyjn-a3IUJLD7gDbTZ0rKlvcJ5g",
     documentationSite: "https://docs.argilla.io/",
-    documentationSiteQuickStart:
-      "https://docs.argilla.io/en/latest/getting_started/quickstart.html",
-    documentationSiteSemanticSearch:
-      "https://docs.argilla.io/en/latest/reference/webapp/features.html#semantic-search",
-    documentationSiteLabelScheme:
-      "https://docs.argilla.io/en/latest/guides/log_load_and_prepare_data.html#define-a-labeling-schema",
-    documentationSiteQueryDatasets:
-      "https://docs.argilla.io/en/latest/guides/query_datasets.html",
     documentationPersistentStorage:
-      "https://docs.argilla.io/en/latest/getting_started/installation/deployments/huggingface-spaces.html#setting-up-persistent-storage",
+      "https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#persistent-storage",
   },
 };
 export default config;

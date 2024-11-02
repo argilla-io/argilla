@@ -13,35 +13,75 @@
 #  limitations under the License.
 
 import copy
-from abc import ABC, abstractmethod
-from typing import Dict, List, Union
+import mimetypes
+from abc import ABC
+from typing import Dict, List, Union, Any, Optional
+from urllib.parse import urlparse, ParseResult, ParseResultBytes
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.api.schemas.v1.chat import ChatFieldValue
+from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
+from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
+from argilla_server.api.schemas.v1.responses import UserResponseCreate
+from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 from argilla_server.contexts import records
 from argilla_server.errors.future.base_errors import UnprocessableEntityError
 from argilla_server.models import Dataset, Record
-from argilla_server.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
-from argilla_server.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
+from argilla_server.pydantic_v1 import ValidationError
+from argilla_server.validators.responses import ResponseCreateValidator
+from argilla_server.validators.suggestions import SuggestionCreateValidator
+from argilla_server.validators.vectors import VectorValidator
+
+IMAGE_FIELD_WEB_URL_MAX_LENGTH = 2038
+IMAGE_FIELD_DATA_URL_MAX_LENGTH = 5_000_000
+IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES = [
+    "image/avif",
+    "image/gif",
+    "image/ico",
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/svg",
+    "image/webp",
+]
+CHAT_FIELD_MAX_LENGTH = 500
 
 
 class RecordValidatorBase(ABC):
-    def __init__(self, record_change: Union[RecordCreate, RecordUpdate]):
-        self._record_change = record_change
+    @classmethod
+    def _validate_fields(cls, fields: dict, dataset: Dataset) -> None:
+        cls._validate_non_empty_fields(fields=fields)
+        cls._validate_required_fields(dataset=dataset, fields=fields)
+        cls._validate_extra_fields(dataset=dataset, fields=fields)
+        cls._validate_image_fields(dataset=dataset, fields=fields)
+        cls._validate_chat_fields(dataset=dataset, fields=fields)
+        cls._validate_custom_fields(dataset=dataset, fields=fields)
 
-    @abstractmethod
-    def validate_for(self, dataset: Dataset) -> None:
-        pass
+    @classmethod
+    def _validate_non_empty_fields(cls, fields: Dict[str, str]) -> None:
+        if not (isinstance(fields, dict) and len(fields) >= 1):
+            raise UnprocessableEntityError("fields cannot be empty")
 
-    def _validate_fields(self, dataset: Dataset) -> None:
-        fields = self._record_change.fields or {}
+    @classmethod
+    def _validate_required_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
+        for field in dataset.fields:
+            if field.required and not (field.name in fields and fields.get(field.name) is not None):
+                raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
 
-        self._validate_required_fields(dataset, fields)
-        self._validate_extra_fields(dataset, fields)
+    @classmethod
+    def _validate_extra_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
+        fields_copy = copy.copy(fields)
+        for field in dataset.fields:
+            fields_copy.pop(field.name, None)
+        if fields_copy:
+            raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
 
-    def _validate_metadata(self, dataset: Dataset) -> None:
-        metadata = self._record_change.metadata or {}
+    @classmethod
+    def _validate_metadata(cls, metadata: dict, dataset: Dataset) -> None:
+        metadata = metadata or {}
+
         for name, value in metadata.items():
             metadata_property = dataset.metadata_property_by_name(name)
             # TODO(@frascuchon): Create a MetadataPropertyValidator instead of using the parsed_settings
@@ -59,102 +99,201 @@ class RecordValidatorBase(ABC):
                     "and extra metadata is not allowed for this dataset"
                 )
 
-    def _validate_required_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
-        for field in dataset.fields:
-            if field.required and not (field.name in fields and fields.get(field.name) is not None):
-                raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
+    @classmethod
+    def _validate_image_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
+        for field in filter(lambda field: field.is_image, dataset.fields):
+            cls._validate_image_field(field.name, fields.get(field.name))
 
-    def _validate_extra_fields(self, dataset: Dataset, fields: Dict[str, str]) -> None:
-        fields_copy = copy.copy(fields)
-        for field in dataset.fields:
-            fields_copy.pop(field.name, None)
-        if fields_copy:
-            raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())}")
+    @classmethod
+    def _validate_chat_fields(cls, dataset: Dataset, fields: Dict[str, Any]) -> None:
+        for field in filter(lambda field: field.is_chat, dataset.fields):
+            cls._validate_chat_field(field.name, fields.get(field.name))
 
-
-class RecordCreateValidator(RecordValidatorBase):
-    def __init__(self, record_create: RecordCreate):
-        super().__init__(record_create)
-
-    def validate_for(self, dataset: Dataset) -> None:
-        self._validate_fields(dataset)
-        self._validate_metadata(dataset)
-
-
-class RecordUpdateValidator(RecordValidatorBase):
-    def __init__(self, record_update: RecordUpdate):
-        super().__init__(record_update)
-
-    def validate_for(self, dataset: Dataset) -> None:
-        self._validate_metadata(dataset)
-        self._validate_duplicated_suggestions()
-
-    def _validate_duplicated_suggestions(self):
-        if not self._record_change.suggestions:
+    @classmethod
+    def _validate_image_field(cls, field_name: str, field_value: Union[str, None]) -> None:
+        if field_value is None:
             return
-        question_ids = [s.question_id for s in self._record_change.suggestions]
+
+        try:
+            parse_result = urlparse(field_value)
+        except ValueError:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+        if parse_result.scheme in ["http", "https"]:
+            return cls._validate_web_url(field_name, field_value, parse_result)
+        elif parse_result.scheme in ["data"]:
+            return cls._validate_data_url(field_name, field_value, parse_result)
+        else:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+    @classmethod
+    def _validate_chat_field(cls, field_name: str, field_value: Any) -> None:
+        # This validator is needed because pydantic can resolve values as Dicts since we have a new custom  field
+        if field_value is None:
+            return
+
+        if not isinstance(field_value, list) or any(not isinstance(message, ChatFieldValue) for message in field_value):
+            raise UnprocessableEntityError(f"chat field {field_name!r} value must be a list of messages")
+
+    @staticmethod
+    def _validate_web_url(
+        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+    ) -> None:
+        if not parse_result.netloc or not parse_result.path:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+        if len(field_value) > IMAGE_FIELD_WEB_URL_MAX_LENGTH:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_WEB_URL_MAX_LENGTH} characters for Web URLs"
+            )
+
+    @staticmethod
+    def _validate_data_url(
+        field_name: str, field_value: str, parse_result: Union[ParseResult, ParseResultBytes]
+    ) -> None:
+        if not parse_result.path:
+            raise UnprocessableEntityError(f"image field {field_name!r} has an invalid URL value")
+
+        if len(field_value) > IMAGE_FIELD_DATA_URL_MAX_LENGTH:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is exceeding the maximum length of {IMAGE_FIELD_DATA_URL_MAX_LENGTH} characters for Data URLs"
+            )
+
+        type, encoding = mimetypes.guess_type(field_value)
+        if type not in IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES:
+            raise UnprocessableEntityError(
+                f"image field {field_name!r} value is using an unsupported MIME type, supported MIME types are: {IMAGE_FIELD_DATA_URL_VALID_MIME_TYPES!r}"
+            )
+
+    @classmethod
+    def _validate_custom_fields(cls, dataset: Dataset, fields: Dict[str, Any]) -> None:
+        for field in filter(lambda field: field.is_custom, dataset.fields):
+            cls._validate_custom_field(field.name, fields.get(field.name))
+
+    @classmethod
+    def _validate_custom_field(cls, name: str, value: Any) -> None:
+        if value is None:
+            return
+
+        if not isinstance(value, dict):
+            raise UnprocessableEntityError(f"custom field {name!r} value must be a dictionary")
+
+    @classmethod
+    def _validate_suggestions(cls, suggestions: List[SuggestionCreate], dataset: Dataset, record: Record):
+        if not suggestions:
+            return
+
+        try:
+            cls._validate_duplicated_suggestions(suggestions)
+
+            for suggestion in suggestions:
+                question = dataset.question_by_id(suggestion.question_id)
+
+                if question is None:
+                    raise UnprocessableEntityError(f"question id={suggestion.question_id} does not exists")
+
+                SuggestionCreateValidator.validate(suggestion, question.parsed_settings, record)
+        except (UnprocessableEntityError, ValueError, ValidationError) as ex:
+            raise UnprocessableEntityError(f"record does not have valid suggestions: {ex}") from ex
+
+    @classmethod
+    def _validate_duplicated_suggestions(cls, suggestions: List[SuggestionCreate]):
+        question_ids = [s.question_id for s in suggestions]
+
         if len(question_ids) != len(set(question_ids)):
             raise UnprocessableEntityError("found duplicate suggestions question IDs")
 
+    @classmethod
+    def _validate_vectors(cls, vectors: Optional[dict], dataset: Dataset):
+        if not vectors:
+            return
+
+        try:
+            for name, value in vectors.items():
+                settings = dataset.vector_settings_by_name(name)
+
+                if not settings:
+                    raise UnprocessableEntityError(
+                        f"vector with name={name} does not exist for dataset_id={dataset.id}"
+                    )
+
+                VectorValidator.validate(value, settings)
+        except (UnprocessableEntityError, ValueError) as ex:
+            raise UnprocessableEntityError(f"record does not have valid vectors: {ex}") from ex
+
+    @classmethod
+    async def _validate_responses(cls, responses: List[UserResponseCreate], dataset: Dataset, record: Record):
+        from argilla_server.contexts.accounts import list_users_by_ids
+
+        if not responses:
+            return
+        try:
+            user_ids = [response_create.user_id for response_create in responses]
+            users = await list_users_by_ids(dataset.current_async_session, set(user_ids))
+            users_by_id = {user.id: user for user in users}
+
+            for response_create in responses:
+                if response_create.user_id not in users_by_id:
+                    raise ValueError(f"user with id {response_create.user_id} not found")
+
+                ResponseCreateValidator.validate(response_create, record)
+        except (UnprocessableEntityError, ValueError) as ex:
+            raise UnprocessableEntityError(f"record does not have valid responses: {ex}") from ex
+
+
+class RecordCreateValidator(RecordValidatorBase):
+    @classmethod
+    async def validate(cls, record_create: RecordCreate, dataset: Dataset) -> None:
+        record = Record(fields=record_create.fields, dataset=dataset)
+
+        cls._validate_fields(record_create.fields, dataset)
+        cls._validate_metadata(record_create.metadata, dataset)
+        cls._validate_suggestions(record_create.suggestions, dataset, record=record)
+        cls._validate_vectors(record_create.vectors, dataset)
+        await cls._validate_responses(record_create.responses, dataset, record=record)
+
+
+class RecordUpsertValidator(RecordValidatorBase):
+    @classmethod
+    async def validate(cls, record_upsert: RecordUpsert, dataset: Dataset, record: Optional[Record]) -> None:
+        if record is None:
+            cls._validate_fields(record_upsert.fields, dataset)
+            record = Record(fields=record_upsert.fields, dataset=dataset)
+
+        cls._validate_metadata(record_upsert.metadata, dataset)
+        cls._validate_vectors(record_upsert.vectors, dataset)
+
+        cls._validate_suggestions(record_upsert.suggestions, dataset, record=record)
+        await cls._validate_responses(record_upsert.responses, dataset, record=record)
+
 
 class RecordsBulkCreateValidator:
-    def __init__(self, records_create: RecordsBulkCreate, db: AsyncSession):
-        self._records_create = records_create
-        self._db = db
+    @classmethod
+    async def validate(cls, db: AsyncSession, records_create: RecordsBulkCreate, dataset: Dataset) -> None:
+        cls._validate_dataset_is_ready(dataset)
+        await cls._validate_external_ids_are_not_present_in_db(db, records_create, dataset)
+        await cls._validate_all_bulk_records(dataset, records_create.items)
 
-    async def validate_for(self, dataset: Dataset) -> None:
-        self._validate_dataset_is_ready(dataset)
-        await self._validate_external_ids_are_not_present_in_db(dataset)
-        self._validate_all_bulk_records(dataset, self._records_create.items)
-
-    def _validate_dataset_is_ready(self, dataset: Dataset) -> None:
+    @staticmethod
+    def _validate_dataset_is_ready(dataset: Dataset) -> None:
         if not dataset.is_ready:
             raise UnprocessableEntityError("records cannot be created for a non published dataset")
 
-    async def _validate_external_ids_are_not_present_in_db(self, dataset: Dataset):
-        external_ids = [r.external_id for r in self._records_create.items if r.external_id is not None]
-        records_by_external_id = await records.fetch_records_by_external_ids_as_dict(self._db, dataset, external_ids)
+    @staticmethod
+    async def _validate_external_ids_are_not_present_in_db(
+        db: AsyncSession, records_create: RecordsBulkCreate, dataset: Dataset
+    ):
+        external_ids = [r.external_id for r in records_create.items if r.external_id is not None]
+        records_by_external_id = await records.fetch_records_by_external_ids_as_dict(db, dataset, external_ids)
 
         found_records = [str(external_id) for external_id in external_ids if external_id in records_by_external_id]
         if found_records:
             raise UnprocessableEntityError(f"found records with same external ids: {', '.join(found_records)}")
 
-    def _validate_all_bulk_records(self, dataset: Dataset, records_create: List[RecordCreate]):
+    @staticmethod
+    async def _validate_all_bulk_records(dataset: Dataset, records_create: List[RecordCreate]):
         for idx, record_create in enumerate(records_create):
             try:
-                RecordCreateValidator(record_create).validate_for(dataset)
-            except UnprocessableEntityError as ex:
-                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
-
-
-class RecordsBulkUpsertValidator:
-    def __init__(
-        self,
-        records_upsert: RecordsBulkUpsert,
-        db: AsyncSession,
-        existing_records_by_external_id_or_record_id: Union[Dict[Union[str, UUID], Record], None] = None,
-    ):
-        self._db = db
-        self._records_upsert = records_upsert
-        self._existing_records_by_external_id_or_record_id = existing_records_by_external_id_or_record_id or {}
-
-    def validate_for(self, dataset: Dataset) -> None:
-        self.validate_dataset_is_ready(dataset)
-        self._validate_all_bulk_records(dataset, self._records_upsert.items)
-
-    def validate_dataset_is_ready(self, dataset: Dataset) -> None:
-        if not dataset.is_ready:
-            raise UnprocessableEntityError("records cannot be created or updated for a non published dataset")
-
-    def _validate_all_bulk_records(self, dataset: Dataset, records_upsert: List[RecordUpsert]):
-        for idx, record_upsert in enumerate(records_upsert):
-            try:
-                record = self._existing_records_by_external_id_or_record_id.get(
-                    record_upsert.external_id or record_upsert.id
-                )
-                if record:
-                    RecordUpdateValidator(RecordUpdate.parse_obj(record_upsert)).validate_for(dataset)
-                else:
-                    RecordCreateValidator(RecordCreate.parse_obj(record_upsert)).validate_for(dataset)
+                await RecordCreateValidator.validate(record_create, dataset)
             except (UnprocessableEntityError, ValueError) as ex:
-                raise UnprocessableEntityError(f"record at position {idx} is not valid because {ex}") from ex
+                raise UnprocessableEntityError(f"Record at position {idx} is not valid because {ex}") from ex

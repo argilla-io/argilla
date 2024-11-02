@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <div class="topbar">
-    <brand-icon class="brand-icon" color="white" />
+  <div class="topbar" role="banner" aria-label="Top navigation bar">
+    <brand-icon class="brand-icon" color="white" aria-label="Argilla icon" />
     <slot />
   </div>
 </template>
@@ -35,8 +35,8 @@ export default {
   align-items: center;
   min-height: $topbarHeight;
   position: relative;
-  background: $black-87;
-  color: palette(white);
+  background: var(--bg-black);
+  color: var(--fg-lighter);
   padding-top: 0;
   padding-bottom: 0;
   padding-right: 1.2em;

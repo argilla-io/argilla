@@ -1,7 +1,8 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendField, Response } from "../types/";
-import { revalidateCache } from "./AxiosCache";
+import { mediumCache, revalidateCache } from "./AxiosCache";
 import { Field } from "~/v1/domain/entities/field/Field";
+import { FieldCreation } from "~/v1/domain/entities/hub/FieldCreation";
 
 export const enum FIELD_API_ERRORS {
   GET_QUESTIONS = "ERROR_FETCHING_FIELDS",
@@ -11,11 +12,31 @@ export const enum FIELD_API_ERRORS {
 export class FieldRepository {
   constructor(private readonly axios: NuxtAxiosInstance) {}
 
+  async create(datasetId: string, field: FieldCreation): Promise<BackendField> {
+    try {
+      const { data } = await this.axios.post<BackendField>(
+        `/v1/datasets/${datasetId}/fields`,
+        {
+          name: field.name,
+          title: field.title,
+          required: field.required,
+          settings: field.settings,
+        }
+      );
+
+      return data;
+    } catch (err) {
+      throw {
+        response: FIELD_API_ERRORS.UPDATE,
+      };
+    }
+  }
+
   async getFields(datasetId: string): Promise<BackendField[]> {
     try {
       const { data } = await this.axios.get<Response<BackendField[]>>(
         `/v1/datasets/${datasetId}/fields`,
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return data.items;

@@ -16,19 +16,24 @@
 """
 Common environment vars / settings
 """
+
 import logging
 import os
 import re
 import warnings
 from pathlib import Path
-from typing import List, Optional
-from urllib.parse import urlparse
+from typing import Dict, List, Optional
 
 from argilla_server.constants import (
+    DATABASE_POSTGRESQL,
+    DATABASE_SQLITE,
+    DEFAULT_DATABASE_POSTGRESQL_MAX_OVERFLOW,
+    DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
+    DEFAULT_DATABASE_SQLITE_TIMEOUT,
     DEFAULT_LABEL_SELECTION_OPTIONS_MAX_ITEMS,
-    DEFAULT_MAX_KEYWORD_LENGTH,
     DEFAULT_SPAN_OPTIONS_MAX_ITEMS,
-    DEFAULT_TELEMETRY_KEY,
+    SEARCH_ENGINE_ELASTICSEARCH,
+    SEARCH_ENGINE_OPENSEARCH,
 )
 from argilla_server.pydantic_v1 import BaseSettings, Field, root_validator, validator
 
@@ -70,51 +75,40 @@ class Settings(BaseSettings):
 
     home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
     base_url: Optional[str] = Field(description="The default base url where server will be deployed")
+
     database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
+    # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.pool_size
+    database_postgresql_pool_size: Optional[int] = Field(
+        default=DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
+        description="The number of connections to keep open inside the database connection pool",
+    )
+    # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.max_overflow
+    database_postgresql_max_overflow: Optional[int] = Field(
+        default=DEFAULT_DATABASE_POSTGRESQL_MAX_OVERFLOW,
+        description="The number of connections that can be opened above and beyond the pool_size setting",
+    )
+    # https://docs.python.org/3/library/sqlite3.html#sqlite3.connect
+    database_sqlite_timeout: Optional[int] = Field(
+        default=DEFAULT_DATABASE_SQLITE_TIMEOUT,
+        description="SQLite database connection timeout in seconds",
+    )
 
     elasticsearch: str = "http://localhost:9200"
     elasticsearch_ssl_verify: bool = True
     elasticsearch_ca_path: Optional[str] = None
     cors_origins: List[str] = ["*"]
 
+    redis_url: str = "redis://localhost:6379/0"
+
     docs_enabled: bool = True
 
-    namespace: str = Field(default=None, regex=r"^[a-z]+$")
-
-    enable_migration: bool = Field(
-        default=False,
-        description="If enabled, try to migrate data from old rubrix installation",
-    )
-
     # Analyzer configuration
-    default_es_search_analyzer: str = "standard"
-    exact_es_search_analyzer: str = "whitespace"
-    # This line will be enabled once words field won't be used anymore
-    # wordcloud_es_search_analyzer: str = "multilingual_stop_analyzer"
-
     es_records_index_shards: int = 1
     es_records_index_replicas: int = 0
 
     es_mapping_total_fields_limit: int = 2000
 
-    search_engine: str = "elasticsearch"
-
-    vectors_fields_limit: int = Field(
-        default=5,
-        description="Max number of supported vectors per record",
-    )
-
-    metadata_fields_limit: int = Field(
-        default=50,
-        gt=0,
-        le=100,
-        description="Max number of fields in metadata",
-    )
-    metadata_field_length: int = Field(
-        default=DEFAULT_MAX_KEYWORD_LENGTH,
-        description="Max length supported for the string metadata fields."
-        " Values containing higher than this will be truncated",
-    )
+    search_engine: str = SEARCH_ENGINE_ELASTICSEARCH
 
     # Questions settings
     label_selection_options_max_items: int = Field(
@@ -133,9 +127,24 @@ class Settings(BaseSettings):
         description="If True, show a warning when Hugging Face space persistent storage is disabled",
     )
 
+    # Hugging Face telemetry
+    enable_telemetry: bool = Field(
+        default=True, description="The telemetry configuration for Hugging Face hub telemetry. "
+    )
+
     # See also the telemetry.py module
-    enable_telemetry: bool = True
-    telemetry_key: str = DEFAULT_TELEMETRY_KEY
+    @validator("enable_telemetry", pre=True, always=True)
+    def set_enable_telemetry(cls, enable_telemetry: bool) -> bool:
+        if os.getenv("HF_HUB_DISABLE_TELEMETRY") == "1" or os.getenv("HF_HUB_OFFLINE") == "1":
+            enable_telemetry = False
+        if os.getenv("ARGILLA_ENABLE_TELEMETRY") == "0":
+            os.environ["HF_HUB_DISABLE_TELEMETRY"] = "1"
+            warnings.warn(
+                "environment vairbale ARGILLA_ENABLE_TELEMETRY is deprecated, use HF_HUB_DISABLE_TELEMETRY or HF_HUB_OFFLINE instead."
+            )
+            enable_telemetry = False
+
+        return enable_telemetry
 
     @validator("home_path", always=True)
     def set_home_path_default(cls, home_path: str):
@@ -188,41 +197,43 @@ class Settings(BaseSettings):
         return values
 
     @property
-    def dataset_index_name(self) -> str:
-        ns = self.namespace
-        if ns:
-            return f"{self.namespace}.{self.__DATASETS_INDEX_NAME__}"
-        return self.__DATASETS_INDEX_NAME__
+    def database_engine_args(self) -> Dict:
+        if self.database_is_sqlite:
+            return {
+                "connect_args": {
+                    "timeout": self.database_sqlite_timeout,
+                },
+            }
+
+        if self.database_is_postgresql:
+            return {
+                "pool_size": self.database_postgresql_pool_size,
+                "max_overflow": self.database_postgresql_max_overflow,
+            }
+
+        return {}
 
     @property
-    def dataset_records_index_name(self) -> str:
-        ns = self.namespace
-        if ns:
-            return f"{self.namespace}.{self.__DATASETS_RECORDS_INDEX_NAME__}"
-        return self.__DATASETS_RECORDS_INDEX_NAME__
+    def database_is_sqlite(self) -> bool:
+        if self.database_url is None:
+            return False
+
+        return self.database_url.lower().startswith(DATABASE_SQLITE)
 
     @property
-    def old_dataset_index_name(self) -> str:
-        index_name = ".rubrix<NAMESPACE>.datasets-v0"
-        ns = self.namespace
-        if ns is None:
-            return index_name.replace("<NAMESPACE>", "")
-        return index_name.replace("<NAMESPACE>", f".{ns}")
+    def database_is_postgresql(self) -> bool:
+        if self.database_url is None:
+            return False
+
+        return self.database_url.lower().startswith(DATABASE_POSTGRESQL)
 
     @property
-    def old_dataset_records_index_name(self) -> str:
-        index_name = ".rubrix<NAMESPACE>.dataset.{}.records-v0"
-        ns = self.namespace
-        if ns is None:
-            return index_name.replace("<NAMESPACE>", "")
-        return index_name.replace("<NAMESPACE>", f".{ns}")
+    def search_engine_is_elasticsearch(self) -> bool:
+        return self.search_engine == SEARCH_ENGINE_ELASTICSEARCH
 
-    def obfuscated_elasticsearch(self) -> str:
-        """Returns configured elasticsearch url obfuscating the provided password, if any"""
-        parsed = urlparse(self.elasticsearch)
-        if parsed.password:
-            return self.elasticsearch.replace(parsed.password, "XXXX")
-        return self.elasticsearch
+    @property
+    def search_engine_is_opensearch(self) -> bool:
+        return self.search_engine == SEARCH_ENGINE_OPENSEARCH
 
     class Config:
         env_prefix = "ARGILLA_"

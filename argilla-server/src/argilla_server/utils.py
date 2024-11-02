@@ -14,7 +14,7 @@
 
 import re
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 from uuid import UUID
 
 from fastapi import HTTPException, Query
@@ -108,7 +108,7 @@ def parse_query_param(
         query_param_typing = Optional[List[str]]
 
     def _parse(
-        param_values: Optional[query_param_typing] = Query(None, alias=name, **kwargs)
+        param_values: Optional[query_param_typing] = Query(None, alias=name, **kwargs),
     ) -> Union[Dict[str, Any], T, None]:
         if param_values is None:
             return None

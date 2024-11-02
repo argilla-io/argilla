@@ -43,7 +43,7 @@ trainer.predict("This is awesome!")
 
 #### Supported Frameworks
 
-We plan on adding more support for other tasks and frameworks so feel free to reach out on our Slack or GitHub to help us prioritize each task.
+We plan on adding more support for other tasks and frameworks so feel free to reach out on our Discord channel or GitHub to help us prioritize each task.
 
 | Task/Framework                  | TRL  | OpenAI | SetFit | spaCy | Transformers | PEFT | SentenceTransformers |
 |:--------------------------------|:-----|:-------|:-------|:------|:-------------|:-----|:---------------------|

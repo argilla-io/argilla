@@ -141,7 +141,7 @@ import argilla as rg
 from argilla.client.feedback.metrics import AgreementMetric
 
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
-metric = AgreementMetric(dataset=feedback_dataset, question_name="question_name")
+metric = AgreementMetric(dataset=feedback_dataset, field_name="text", question_name="question_name")
 agreement_metrics = metric.compute("alpha")
 # >>> agreement_metrics
 # [AgreementMetricResult(metric_name='alpha', count=1000, result=0.467889)]
@@ -156,7 +156,7 @@ import argilla as rg
 
 #dataset = rg.FeedbackDataset.from_huggingface("argilla/go_emotions_raw")
 
-agreement_metrics = dataset.compute_agreement_metrics(question_name="label", metric_names="alpha")
+agreement_metrics = dataset.compute_agreement_metrics(question_name="label", field_name="text", metric_names="alpha")
 agreement_metrics
 
 # AgreementMetricResult(metric_name='alpha', count=191792, result=0.2703263452657748)

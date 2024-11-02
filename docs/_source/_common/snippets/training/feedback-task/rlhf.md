@@ -3,11 +3,11 @@ title: RLHF
 description: Reinforcement Learning with Human Feedback (RLHF) proved to be the driving force behind the power of ChatGPT and other LLMs. Argilla does provides an integration for Reinforcement Learning with Human Feedback (RLHF) with the ArgillaTrainer class. Generally, this is done in three steps (1) SFT, (2) Reward Modeling and (3) PPO.
 links:
   - linkText: Practical guide to SFT
-    linkLink: https://docs.argilla.io/en/latest/guides/llms/practical_guides/fine_tune.html#supervised-finetuning
+    linkLink: https://docs.v1.argilla.io/en/latest/guides/llms/practical_guides/fine_tune.html#supervised-finetuning
   - linkText: Practical Guide to Reward Modeling
-    linkLink: https://docs.argilla.io/en/latest/guides/llms/practical_guides/fine_tune.html#reward-modeling
+    linkLink: https://docs.v1.argilla.io/en/latest/guides/llms/practical_guides/fine_tune.html#reward-modeling
   - linkText: Practical Guide to PPO
-    linkLink: https://docs.argilla.io/en/latest/guides/llms/practical_guides/fine_tune.html#proximal-policy-optimization
+    linkLink: https://docs.v1.argilla.io/en/latest/guides/llms/practical_guides/fine_tune.html#proximal-policy-optimization
 ---
 
 ```python

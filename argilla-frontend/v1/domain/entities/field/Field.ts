@@ -1,30 +1,74 @@
+import { FieldType } from "./FieldType";
+
 interface OriginalField {
   title: string;
   settings: any;
 }
+
+const adaptContentForChatField = (content: any) => {
+  if (Array.isArray(content)) return content;
+
+  return [
+    {
+      content,
+      role: "user",
+    },
+  ];
+};
+
+const adaptContentForImageField = (content: any) => {
+  return content?.src ?? content;
+};
+
 export class Field {
   private original: OriginalField;
+  public readonly content: string | any | unknown[];
+
+  public readonly sdkRecord?: unknown;
+
   constructor(
     public readonly id: string,
     public readonly name: string,
     public title: string,
-    public readonly content: string,
     public readonly datasetId: string,
-    public readonly required: boolean,
-    public settings: any
+    public readonly isRequired: boolean,
+    public settings: any,
+    record?: any
   ) {
     this.initializeOriginal();
+    this.content = record?.fields[name] ?? "";
+
+    if (this.isCustomType) {
+      this.sdkRecord = record;
+      this.content = settings.template;
+    } else if (this.isChatType) {
+      this.content = adaptContentForChatField(this.content);
+    } else if (this.isImageType) {
+      this.content = adaptContentForImageField(this.content);
+    }
   }
 
-  public get isTextType() {
-    return this.fieldType === "text";
+  get isTextType() {
+    return this.type.isTextType;
   }
 
-  private get fieldType() {
-    return this.settings?.type?.toLowerCase() ?? null;
+  get isImageType() {
+    return this.type.isImageType;
   }
 
-  public get isModified(): boolean {
+  get isChatType() {
+    return this.type.isChatType;
+  }
+
+  get isCustomType() {
+    return this.type.isCustomType;
+  }
+
+  private get type() {
+    return FieldType.from(this.settings?.type);
+  }
+
+  get isModified(): boolean {
     return (
       this.title.trim() !== this.original.title ||
       this.settings.use_markdown !== this.original.settings.use_markdown
@@ -32,7 +76,7 @@ export class Field {
   }
 
   private MAX_TITLE_LENGTH = 500;
-  public validate(): Record<"title", string[]> {
+  validate(): Record<"title", string[]> {
     const validations: Record<"title", string[]> = {
       title: [],
     };
@@ -45,7 +89,7 @@ export class Field {
     return validations;
   }
 
-  public get isFieldValid(): boolean {
+  get isFieldValid(): boolean {
     return this.validate().title.length === 0;
   }
 

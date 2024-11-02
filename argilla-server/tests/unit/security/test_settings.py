@@ -11,10 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+import json
 import os
+import tempfile
 from unittest import mock
 
+from argilla_server.security.authentication.oauth2 import OAuth2Settings
 from argilla_server.security.settings import Settings
 
 
@@ -58,3 +60,14 @@ def test_configure_oauth_cfg():
         settings = Settings()
 
         assert settings.oauth_cfg == oauth_cfg
+
+
+def test_configure_oauth_with_none_allowed_workspaces():
+    with tempfile.NamedTemporaryFile(mode="wt") as file:
+        file.writelines(["allowed_workspaces:", ""])
+        file.flush()
+
+        with mock.patch.dict(os.environ, {"ARGILLA_AUTH_OAUTH_CFG": file.name}):
+            settings = Settings()
+
+            assert settings.oauth.allowed_workspaces == []

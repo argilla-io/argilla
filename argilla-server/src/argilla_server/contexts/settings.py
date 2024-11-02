@@ -12,12 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Any, Dict, Union
+from typing import Union
 
-from argilla_server.schemas.v1.settings import ArgillaSettings, HuggingfaceSettings, Settings
+from argilla_server.api.schemas.v1.settings import ArgillaSettings, Settings
+from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS, HuggingfaceSettings
 from argilla_server.settings import settings
-
-HUGGINGFACE_SETTINGS = HuggingfaceSettings()
 
 
 def get_settings() -> Settings:

@@ -39,7 +39,8 @@ try:
     version_ = rg.__version__
 except ModuleNotFoundError:
     version_ = os.environ.get("VERSION")
-
+except AttributeError:
+    version_ = os.environ.get("VERSION")
 
 project = "Argilla"
 copyright = f"{datetime.today().year}, Argilla.io"
@@ -82,9 +83,7 @@ myst_substitutions = {
     "pipversion": "" if "dev" in release else "==" + release,
     "dockertag": "master" if "dev" in release else "v" + release,
 }
-myst_substitutions[
-    "dockercomposeyaml"
-] = """```yaml
+myst_substitutions["dockercomposeyaml"] = """```yaml
 # docker-compose.yaml
 version: "3"
 
@@ -97,12 +96,8 @@ services:
      ARGILLA_ELASTICSEARCH: <elasticsearch-host_and_port>
      ARGILLA_AUTH_SECRET_KEY: Please generate a 32 character random string with: openssl rand -hex 32
    restart: unless-stopped
-```""".format(
-    myst_substitutions["dockertag"]
-)
-myst_substitutions[
-    "dockercomposeuseryaml"
-] = """```yaml
+```""".format(myst_substitutions["dockertag"])
+myst_substitutions["dockercomposeuseryaml"] = """```yaml
 # docker-compose.yaml
 services:
   argilla:
@@ -118,15 +113,15 @@ services:
       # We mount the local file .users.yaml in remote container in path /config/.users.yaml
       - ${}/.users.yaml:/config/.users.yaml
   ...
-```""".format(
-    myst_substitutions["dockertag"], "PWD"
-)
+```""".format(myst_substitutions["dockertag"], "PWD")
 
 # Do not execute the notebooks when building the docs
 nbsphinx_execute = "never"
 
 # open html file as Python string
-getting_started_html = open("./_common/getting_started.html", "r", encoding="utf8").read()
+getting_started_html = open(
+    "./_common/getting_started.html", "r", encoding="utf8"
+).read()
 next_steps_html = open("./_common/next_steps.html", "r", encoding="utf8").read()
 
 # -- AUTODOC IMPORT MOCKS ---------------------------------------------------
@@ -354,7 +349,7 @@ pygments_dark_style = "material"
 
 
 # Open graph meta
-ogp_image = "https://docs.argilla.io/en/latest/_static/images/og-doc.png"
+ogp_image = "https://docs.v1.argilla.io/en/latest/_static/images/og-doc.png"
 
 ogp_custom_meta_tags = [
     '<meta name="twitter:card" content="summary_large_image" />',

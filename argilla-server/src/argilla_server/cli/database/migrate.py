@@ -20,9 +20,7 @@ from alembic.config import Config
 from alembic.script import ScriptDirectory
 from alembic.util import CommandError
 
-from argilla_server.cli import typer_ext
 from argilla_server.database import ALEMBIC_CONFIG_FILE, TAGGED_REVISIONS
-
 from . import utils
 
 
@@ -50,4 +48,4 @@ def migrate_db(revision: Optional[str] = typer.Option(default="head", help="DB R
 
 
 if __name__ == "__main__":
-    typer_ext.run(migrate_db)
+    typer.run(migrate_db)

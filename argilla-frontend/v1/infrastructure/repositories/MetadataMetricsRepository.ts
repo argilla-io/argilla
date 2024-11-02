@@ -1,5 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { BackendMetadataMetric } from "../types";
+import { mediumCache } from "./AxiosCache";
 
 const RECORD_API_ERRORS = {
   ERROR_FETCHING_METADATA_METRIC: "ERROR_FETCHING_METADATA_METRIC",
@@ -12,7 +13,7 @@ export class MetadataMetricsRepository {
     try {
       const { data } = await this.axios.get<BackendMetadataMetric>(
         `/v1/metadata-properties/${metadataId}/metrics`,
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return {

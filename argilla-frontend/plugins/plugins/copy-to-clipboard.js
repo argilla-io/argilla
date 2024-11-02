@@ -15,17 +15,27 @@
  * limitations under the License.
  */
 
-export default (context, inject) => {
-  const copyToClipboard = function (text) {
-    if (document.querySelector(".hidden-input")) {
-      document.querySelector(".hidden-input").remove();
+export default (_, inject) => {
+  const unsecuredCopyToClipboard = (text) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+    } catch (err) {
+      console.error("Unable to copy to clipboard", err);
     }
-    const myTemporaryInputElement = document.createElement("textarea");
-    myTemporaryInputElement.className = "hidden-input";
-    myTemporaryInputElement.value = text;
-    document.body.appendChild(myTemporaryInputElement);
-    myTemporaryInputElement.select();
-    document.execCommand("Copy");
+    document.body.removeChild(textArea);
+  };
+
+  const copyToClipboard = function (text) {
+    if (window.isSecureContext && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    } else {
+      unsecuredCopyToClipboard(text);
+    }
   };
 
   inject("copyToClipboard", copyToClipboard);

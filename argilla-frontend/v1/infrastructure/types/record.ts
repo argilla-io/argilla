@@ -31,10 +31,11 @@ export interface BackendRecord {
   id: string;
   suggestions: BackendSuggestion[];
   responses: BackendResponseResponse[];
-  fields: { [key: string]: string };
+  fields: { [key: string]: string | any };
   updated_at: Date;
   inserted_at: Date;
   metadata?: { [key: string]: string };
+  status: "pending" | "completed";
   query_score: number;
 }
 
@@ -83,7 +84,7 @@ export interface BackendAdvanceSearchQuery {
       field?: string;
     };
   };
-  filters?: {
+  filters: {
     and: AndFilterBackendSearchQuery[];
   };
   sort?: BackendSort[];

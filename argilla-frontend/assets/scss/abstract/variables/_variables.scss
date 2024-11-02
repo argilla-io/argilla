@@ -15,118 +15,6 @@
  * limitations under the License.
  */
 
-// Color map
-//-----------
-$palettes: (
-  white: (
-    base: #ffffff,
-  ),
-  black: (
-    base: #000000,
-  ),
-  grey: (
-    100: #212121,
-    150: #2d3236,
-    200: #4d4d4d,
-    300: #686a6d,
-    400: #838589,
-    500: #a7a7a7,
-    600: #e6e6e6,
-    700: #f5f5f5,
-    800: #fafafa,
-  ),
-  blue: (
-    100: #52a3ed,
-    500: #3e5cc9,
-  ),
-  purple: (
-    100: #3b3269,
-    200: #4c4ea3,
-    300: #d6d6ff,
-    400: #eeeeff,
-    800: #f0f0fe,
-    900: #f6f6fe,
-  ),
-  pink: (
-    base: #f2067a,
-  ),
-  yellow: (
-    400: #fee075,
-  ),
-  orange: (
-    400: #fdbc4d,
-  ),
-  orange-red-crayola: (
-    base: #ff675f,
-  ),
-  apricot: (
-    light: #fffbfa,
-    base: #f8c0a7,
-    dark: #fd8f5e,
-  ),
-  brown: (
-    base: #bb720a,
-  ),
-  green: (
-    base: #60a018,
-  ),
-  red: (
-    base: #cf3832,
-  ),
-  turquoise: (
-    base: #08a4bd,
-  ),
-);
-
-// Colours
-//-----------
-$brand-primary-color: palette(orange-red-crayola);
-$brand-secondary-color: palette(apricot);
-$primary-color: palette(blue, 500);
-$primary-lighten-color: lighten($primary-color, 10%);
-$primary-darken-color: darken($primary-color, 10%);
-$secondary-color: palette(grey, 200);
-$secondary-lighten-color: lighten(palette(grey, 200), 5%);
-$secondary-darken-color: darken(palette(grey, 200), 5%);
-$highlight: $brand-primary-color;
-$similarity-color: palette(orange-red-crayola);
-$bg: palette(grey, 800);
-
-// Black opacity
-//-----------
-$black-87: rgba(0, 0, 0, 0.87);
-$black-54: rgba(0, 0, 0, 0.6);
-$black-37: rgba(0, 0, 0, 0.37);
-$black-20: rgba(0, 0, 0, 0.2);
-$black-10: rgba(0, 0, 0, 0.1);
-$black-6: rgba(0, 0, 0, 0.06);
-$black-4: rgba(0, 0, 0, 0.04);
-
-// States
-//-----------
-$error: palette(pink);
-$danger: palette(red);
-$warning: palette(apricot, dark);
-$success: palette(green);
-$info: palette(grey, 600);
-
-// Status color
-//----------------
-$submitted-color: $primary-color;
-$discarded-color: palette(grey, 500);
-$pending-color: palette(brown);
-$draft-color: palette(turquoise);
-
-$submitted-color-medium: #92a8fc;
-$discarded-color-medium: #cbcbcb;
-$pending-color-medium: #fbc27d;
-$draft-color-medium: #93d9e3;
-
-$submitted-color-light: #b3c4ff;
-$discarded-color-light: #e0dddd;
-$pending-color-light: #fdebd9;
-$draft-color-light: #b2e6ee;
-
 // Fonts
 //-----------
 $primary-font-family: "Inter", "Helvetica", "Arial", sans-serif;
@@ -136,20 +24,6 @@ $tertiary-font-family: "Roboto Condensed", sans-serif;
 $quaternary-font-family: "Roboto Mono", monospace;
 $base-font-size: 14px;
 $base-line-height: 1.4em;
-
-// Easing
-//-----------
-// http://cubic-bezier.com/
-// ease-in fast->slow
-// ease-out slow->fast
-//
-// $cb-fast -> ease-in
-// $cb-normal -> ease-in forzado
-// $cb-slow -> ease-out
-
-$cb-fast: cubic-bezier(0, 0, 0.24, 0.9);
-$cb-normal: cubic-bezier(0.02, 0.42, 0.01, 0.51);
-$cb-slow: cubic-bezier(0.59, 0, 0.68, 0.69);
 
 // Grid
 //-----------
@@ -202,13 +76,4 @@ $swift-linear-timing-function: linear !default;
 $swift-linear: all $swift-linear-duration $swift-linear-timing-function !default;
 
 // topbar
-$topbarHeight: 56px;
-
-// sidebar
-$sidebarPanelWidth: 280px;
-$sidebarMenuWidth: 70px;
-$sidebarWidth: $sidebarPanelWidth + $sidebarMenuWidth;
-
-// record
-$record-reference-border-color: palette(apricot, dark);
-$record-reference-background-color: palette(apricot, light);
+$topbarHeight: $base-space * 7;

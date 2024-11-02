@@ -6,11 +6,11 @@ import { Suggestion } from "../../entities/question/Suggestion";
 import { Vector } from "../../entities/vector/Vector";
 import { IDatasetRepository } from "../../services/IDatasetRepository";
 import { IDatasetSettingStorage } from "../../services/IDatasetSettingStorage";
+import { IQuestionRepository } from "../../services/IQuestionRepository";
 import { RoleService } from "../../services/RoleService";
 import {
   FieldRepository,
   MetadataRepository,
-  QuestionRepository,
   VectorRepository,
 } from "~/v1/infrastructure/repositories";
 
@@ -18,7 +18,7 @@ export class GetDatasetSettingsUseCase {
   constructor(
     private readonly roleService: RoleService,
     private readonly datasetRepository: IDatasetRepository,
-    private readonly questionRepository: QuestionRepository,
+    private readonly questionRepository: IQuestionRepository,
     private readonly fieldRepository: FieldRepository,
     private readonly vectorRepository: VectorRepository,
     private readonly metadataRepository: MetadataRepository,
@@ -77,7 +77,6 @@ export class GetDatasetSettingsUseCase {
         datasetId,
         question.title,
         question.required,
-
         question.settings
       );
     });
@@ -89,7 +88,6 @@ export class GetDatasetSettingsUseCase {
         field.id,
         field.name,
         field.title,
-        "",
         datasetId,
         field.required,
         field.settings

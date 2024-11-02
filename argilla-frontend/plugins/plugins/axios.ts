@@ -15,59 +15,37 @@
  * limitations under the License.
  */
 
-import { Model } from "@vuex-orm/core";
-import { ExpiredAuthSessionError } from "@nuxtjs/auth-next/dist/runtime";
 import { AxiosError } from "axios";
-import { Notification } from "@/models/Notifications";
-
-import { currentWorkspace } from "@/models/Workspace";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 type BackendError = {
-  detail: {
-    params: {
-      detail: string;
-    };
-  };
+  detail:
+    | {
+        params: {
+          detail: string;
+        };
+      }
+    | string;
   code?: string;
   message?: string;
 };
 
 export default ({ $axios, app }) => {
-  Model.setAxios($axios);
-
-  $axios.interceptors.request.use((config) => {
-    const currentUser = app.$auth.user;
-
-    if (!currentUser) {
-      return config;
-    }
-
-    const ws = currentWorkspace(app.context.route);
-    if (ws) {
-      config.headers["X-Argilla-Workspace"] = ws;
-    }
-    return config;
-  });
+  const notification = useNotifications();
 
   $axios.onError((error: AxiosError<BackendError>) => {
     const { status, data } = error.response ?? {};
     const t = (key: string) => app.i18n.t(key);
 
-    Notification.dispatch("clear");
-
-    switch (status) {
-      case 401: {
-        if (error instanceof ExpiredAuthSessionError) app.$auth.logout();
-      }
-    }
+    notification.clear();
 
     const errorHandledKey = `validations.http.${status}.message`;
     const handledTranslatedError = t(errorHandledKey);
 
     if (handledTranslatedError !== errorHandledKey) {
-      Notification.dispatch("notify", {
+      notification.notify({
         message: handledTranslatedError,
-        type: "error",
+        type: "danger",
       });
     }
 
@@ -76,11 +54,16 @@ export default ({ $axios, app }) => {
       const handledTranslatedError = t(errorHandledKey);
 
       if (handledTranslatedError !== errorHandledKey) {
-        Notification.dispatch("notify", {
+        notification.notify({
           message: handledTranslatedError,
-          type: "error",
+          type: "danger",
         });
       }
+    } else if (data.detail && typeof data.detail === "string") {
+      notification.notify({
+        message: data.detail.toString(),
+        type: "danger",
+      });
     }
 
     throw error;

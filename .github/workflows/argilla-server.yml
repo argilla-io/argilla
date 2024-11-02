@@ -4,37 +4,31 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-defaults:
-  run:
-    shell: bash -l {0}
-    working-directory: argilla-server
-
 on:
   workflow_dispatch:
+
   push:
-    tags:
-      - "*"
     branches:
       - main
       - develop
       - releases/**
+
   pull_request:
     paths:
-      - argilla-server/**
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-      - ready_for_review
-  release:
-    types:
-      - published
+      - "argilla-server/**"
+
+permissions:
+  id-token: write
 
 jobs:
   build:
     name: Build `argilla-server` package
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+        working-directory: argilla-server
 
     services:
       elasticsearch:
@@ -60,8 +54,18 @@ jobs:
         ports:
           - 5432:5432
 
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     env:
-      ARGILLA_ENABLE_TELEMETRY: 0
+      HF_HUB_DISABLE_TELEMETRY: 1
 
     steps:
       - name: Checkout Code 🛎
@@ -118,45 +122,36 @@ jobs:
           name: argilla-server
           path: argilla-server/dist
 
-  build_server_docker_image:
-    name: Build Argilla server docker image
-    uses: ./.github/workflows/argilla-server.build-docker-image.yml
+  build_docker_images:
+    name: Build docker images
+    uses: ./.github/workflows/argilla-server.build-docker-images.yml
+    if: |
+      github.ref == 'refs/heads/main'
+      || github.ref == 'refs/heads/develop'
+      || contains(github.ref, 'releases/')
+      || github.event_name == 'workflow_dispatch'
+      || github.event_name == 'pull_request'
     needs:
       - build
     with:
-      download-python-package: true
-      image-name: argilla/argilla-server
-      dockerfile: argilla-server/docker/server/Dockerfile
-      context: argilla-server/docker/server
-      readme: argilla-server/README.md
-      platforms: linux/amd64,linux/arm64
-    secrets: inherit
-
-  build_quickstart_docker_image:
-    name: Build Argilla quickstart docker image
-    uses: ./.github/workflows/argilla-server.build-docker-image.yml
-    needs: build_server_docker_image
-    with:
-      download-python-package: false
-      image-name: argilla/argilla-quickstart
-      dockerfile: argilla-server/docker/quickstart/Dockerfile
-      context: argilla-server/docker/quickstart
-      readme: argilla-server/docker/quickstart/README.md
-      platforms: linux/amd64,linux/arm64
-      build-args: |
-        ARGILLA_VERSION=${{ needs.build_server_docker_image.outputs.version }}
+      is_release: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+      publish_latest: ${{ github.ref == 'refs/heads/main' }}
     secrets: inherit
 
   # This job will publish argilla-server python package into PyPI repository
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
 
     needs:
       - build
-      - build_server_docker_image
-      - build_quickstart_docker_image
+      - build_docker_images
+
+    defaults:
+      run:
+        shell: bash -l {0}
+        working-directory: argilla-server
 
     permissions:
       # This permission is needed for private repositories.
@@ -181,14 +176,25 @@ jobs:
           cache-dependency-path: argilla-server/pdm.lock
           cache: true
 
+      - name: Read package info
+        run: |
+          PACKAGE_VERSION=$(pdm show --version)
+          PACKAGE_NAME=$(pdm show --name)
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
+
       - name: Publish Package to PyPI test environment 🥪
+        continue-on-error: true
         run: |
           pdm publish --no-build --repository testpypi
 
       - name: Test Installing 🍿
+        continue-on-error: true
         run: |
-          pip install --index-url https://test.pypi.org/simple --no-deps argilla-server==${GITHUB_REF#refs/*/v}
+          pip install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
+        if: github.ref == 'refs/heads/main'
         run: |
           pdm publish --no-build

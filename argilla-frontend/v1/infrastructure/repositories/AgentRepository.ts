@@ -1,5 +1,6 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { Response } from "../types";
+import { mediumCache } from "./AxiosCache";
 
 interface BackendAgent {
   question: {
@@ -20,7 +21,7 @@ export class AgentRepository {
     try {
       const { data } = await this.axios.get<Response<BackendAgent[]>>(
         `/v1/datasets/${datasetId}/records/search/suggestions/options`,
-        { headers: { "cache-control": "max-age=120" } }
+        mediumCache()
       );
 
       return data.items;

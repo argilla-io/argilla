@@ -12,12 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-__all__ = ["NotFoundError", "NotUniqueError", "UnprocessableEntityError", "AuthenticationError", "MissingVectorError"]
+__all__ = [
+    "NotFoundError",
+    "NotUniqueError",
+    "UnprocessableEntityError",
+    "AuthenticationError",
+    "MissingVectorError",
+    "UpdateDistributionWithExistingResponsesError",
+]
 
 NOT_FOUND_ERROR = "not_found"
 NOT_UNIQUE_ERROR = "not_unique"
 UNPROCESSABLE_ENTITY_ERROR_CODE = "unprocessable_entity"
 MISSING_VECTOR_ERROR_CODE = "missing_vector"
+UPDATE_DISTRIBUTION_WITH_EXISTING_RESPONSES_ERROR_CODE = "update_distribution_with_existing_responses"
 
 
 class NotFoundError(Exception):
@@ -47,6 +55,11 @@ class UnprocessableEntityError(Exception):
 # TODO: Once we move to v2.0 we can remove this error and use UnprocessableEntityError
 class MissingVectorError(UnprocessableEntityError):
     pass
+
+
+class UpdateDistributionWithExistingResponsesError(UnprocessableEntityError):
+    def __init__(self, message: str):
+        super().__init__(message, code=UPDATE_DISTRIBUTION_WITH_EXISTING_RESPONSES_ERROR_CODE)
 
 
 class AuthenticationError(Exception):

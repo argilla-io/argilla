@@ -23,6 +23,8 @@
       events: ['mousedown'],
       handler: onClose,
     }"
+    role="button"
+    aria-haspopup="menu"
   >
     <div class="dropdown__header" @click="onClick">
       <slot name="dropdown-header" />
@@ -181,7 +183,7 @@ export default {
 <style lang="scss" scoped>
 .dropdown {
   position: relative;
-  color: $black-54;
+  color: var(--fg-secondary);
   &__header {
     display: flex;
     align-items: center;
@@ -189,11 +191,11 @@ export default {
     border-radius: $border-radius;
     &:hover,
     &:focus {
-      border-color: $black-37;
-      background: palette(white);
+      border-color: var(--fg-tertiary);
+      background: var(--bg-accent-grey-2);
       transition: all 0.3s ease;
       &:after {
-        border-color: $black-54;
+        color: var(--fg-secondary);
       }
     }
   }
@@ -205,7 +207,7 @@ export default {
     transform: translate(0);
     box-shadow: $shadow;
     border-radius: $border-radius;
-    background: palette(white);
+    background: var(--bg-accent-grey-2);
   }
   &--frozen-page {
     &:before {

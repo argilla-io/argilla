@@ -12,20 +12,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Union
-from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 import argilla_server.errors.future as errors
-from argilla_server.models import Dataset, Question, User
-from argilla_server.policies import QuestionPolicyV1, authorize
-from argilla_server.schemas.v1.questions import (
+from argilla_server.api.schemas.v1.questions import (
     QuestionCreate,
     QuestionUpdate,
 )
+from argilla_server.models import Dataset, Question
 from argilla_server.validators.questions import (
     QuestionCreateValidator,
     QuestionDeleteValidator,
@@ -39,7 +34,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
             f"Question with name `{question_create.name}` already exists for dataset with id `{dataset.id}`"
         )
 
-    QuestionCreateValidator(question_create).validate_for(dataset)
+    QuestionCreateValidator.validate(question_create, dataset)
 
     return await Question.create(
         db,
@@ -53,7 +48,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
 
 
 async def update_question(db: AsyncSession, question: Question, question_update: QuestionUpdate) -> Question:
-    QuestionUpdateValidator(question_update).validate_for(question)
+    QuestionUpdateValidator.validate(question_update, question)
 
     params = question_update.dict(exclude_unset=True)
 
@@ -61,6 +56,6 @@ async def update_question(db: AsyncSession, question: Question, question_update:
 
 
 async def delete_question(db: AsyncSession, question: Question) -> Question:
-    QuestionDeleteValidator().validate_for(question.dataset)
+    QuestionDeleteValidator.validate(question.dataset)
 
     return await question.delete(db)

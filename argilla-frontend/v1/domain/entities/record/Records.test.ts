@@ -1,8 +1,9 @@
+import { createBasicRecordCriteria } from "../__mocks__/criteria/mock";
 import { PageCriteria } from "../page/PageCriteria";
 import { SimilarityCriteria } from "../similarity/SimilarityCriteria";
 import { Record } from "./Record";
 import { RecordCriteria } from "./RecordCriteria";
-import { Records } from "./Records";
+import { EmptyQueueRecords, Records } from "./Records";
 
 describe("Records", () => {
   describe("records order", () => {
@@ -17,6 +18,7 @@ describe("Records", () => {
         1,
         1,
         {},
+        "pending",
         new Date("2021-01-01"),
         new Date("2021-01-02")
       );
@@ -30,6 +32,7 @@ describe("Records", () => {
         1,
         2,
         {},
+        "pending",
         new Date("2021-01-01"),
         new Date("2021-01-02")
       );
@@ -54,6 +57,7 @@ describe("Records", () => {
           1,
           1,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -92,6 +96,7 @@ describe("Records", () => {
           1,
           1,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -120,6 +125,7 @@ describe("Records", () => {
           1,
           2,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -150,6 +156,7 @@ describe("Records", () => {
           1,
           1,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -168,6 +175,7 @@ describe("Records", () => {
           1,
           1,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         )
@@ -192,6 +200,7 @@ describe("Records", () => {
           1,
           2,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -215,6 +224,7 @@ describe("Records", () => {
         1,
         1,
         {},
+        "pending",
         new Date("2021-01-01"),
         new Date("2021-01-02")
       );
@@ -277,6 +287,7 @@ describe("Records", () => {
           1,
           1,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -290,6 +301,7 @@ describe("Records", () => {
           1,
           2,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -303,6 +315,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -316,6 +329,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -329,6 +343,7 @@ describe("Records", () => {
           1,
           5,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -342,6 +357,7 @@ describe("Records", () => {
           1,
           6,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -355,6 +371,7 @@ describe("Records", () => {
           1,
           7,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -368,6 +385,7 @@ describe("Records", () => {
           1,
           8,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -381,6 +399,7 @@ describe("Records", () => {
           1,
           9,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -394,6 +413,7 @@ describe("Records", () => {
           1,
           10,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -435,6 +455,7 @@ describe("Records", () => {
           1,
           1,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -448,6 +469,7 @@ describe("Records", () => {
           1,
           2,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -461,6 +483,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -474,6 +497,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -487,6 +511,7 @@ describe("Records", () => {
           1,
           5,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -500,6 +525,7 @@ describe("Records", () => {
           1,
           6,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -513,6 +539,7 @@ describe("Records", () => {
           1,
           7,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -526,6 +553,7 @@ describe("Records", () => {
           1,
           8,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -539,6 +567,7 @@ describe("Records", () => {
           1,
           9,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -552,6 +581,7 @@ describe("Records", () => {
           1,
           10,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -599,6 +629,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -612,6 +643,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -665,6 +697,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -678,6 +711,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -712,6 +746,7 @@ describe("Records", () => {
           1,
           1,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -725,6 +760,7 @@ describe("Records", () => {
           1,
           2,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -738,6 +774,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -751,6 +788,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -764,6 +802,7 @@ describe("Records", () => {
           1,
           5,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -777,6 +816,7 @@ describe("Records", () => {
           1,
           6,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -790,6 +830,7 @@ describe("Records", () => {
           1,
           7,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -803,6 +844,7 @@ describe("Records", () => {
           1,
           8,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -836,6 +878,7 @@ describe("Records", () => {
           1,
           5,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -871,6 +914,7 @@ describe("Records", () => {
           1,
           55,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -909,6 +953,7 @@ describe("Records", () => {
           1,
           55,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -951,6 +996,7 @@ describe("Records", () => {
           1,
           11,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -979,6 +1025,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -994,6 +1041,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -1012,6 +1060,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -1025,6 +1074,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -1044,6 +1094,7 @@ describe("Records", () => {
             1,
             4,
             {},
+            "pending",
             new Date("2021-01-01"),
             new Date("2021-01-01")
           ),
@@ -1062,6 +1113,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -1075,6 +1127,7 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -1093,6 +1146,7 @@ describe("Records", () => {
           1,
           3,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
@@ -1106,11 +1160,211 @@ describe("Records", () => {
           1,
           4,
           {},
+          "pending",
           new Date("2021-01-01"),
           new Date("2021-01-02")
         ),
       ]);
       expect(records.total).toBe(200);
+    });
+  });
+
+  describe("hasNecessaryBuffering", () => {
+    test("should return false when the buffer has at least 50% extra records loaded", () => {
+      const pageCriteria = new PageCriteria();
+      pageCriteria.client = {
+        page: 1,
+        many: 4,
+      };
+
+      const records = new Records([
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+      ]);
+
+      const shouldBuffering = records.shouldBuffering(pageCriteria);
+
+      expect(shouldBuffering).toBeFalsy();
+    });
+
+    test("should return true when the buffer no have at least 50% extra records loaded", () => {
+      const pageCriteria = new PageCriteria();
+      pageCriteria.client = {
+        page: 1,
+        many: 10,
+      };
+
+      const records = new Records([
+        new Record(
+          "1",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          1,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "2",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          2,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "3",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          3,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+        new Record(
+          "4",
+          "1",
+          [],
+          [],
+          null,
+          [],
+          1,
+          4,
+          {},
+          "pending",
+          new Date("2021-01-01"),
+          new Date("2021-01-01")
+        ),
+      ]);
+
+      const shouldBuffering = records.shouldBuffering(pageCriteria);
+
+      expect(shouldBuffering).toBeTruthy();
+    });
+
+    test("should return false when is end of the queue", () => {
+      const pageCriteria = new PageCriteria();
+      pageCriteria.client = {
+        page: 100,
+        many: 4,
+      };
+
+      const records = new Records(
+        [
+          new Record(
+            "4",
+            "1",
+            [],
+            [],
+            null,
+            [],
+            1,
+            100,
+            {},
+            "pending",
+            new Date("2021-01-01"),
+            new Date("2021-01-01")
+          ),
+        ],
+        100
+      );
+
+      const shouldBuffering = records.shouldBuffering(pageCriteria);
+
+      expect(shouldBuffering).toBeFalsy();
+    });
+  });
+});
+
+describe("EmptyQueueRecords", () => {
+  describe("hasRecordsToAnnotate", () => {
+    test("should be false always", () => {
+      const records = new EmptyQueueRecords(createBasicRecordCriteria(), []);
+
+      const hasRecordsToAnnotate = records.hasRecordsToAnnotate;
+
+      expect(hasRecordsToAnnotate).toBeFalsy();
+    });
+  });
+
+  describe("getRecordOn", () => {
+    test("always should return the record configured by record criteria", () => {
+      const recordCriteria = createBasicRecordCriteria();
+      const records = new EmptyQueueRecords(recordCriteria, []);
+
+      const hasRecordsToAnnotate = records.getRecordOn(recordCriteria.page);
+
+      expect(hasRecordsToAnnotate).toBeTruthy();
     });
   });
 });

@@ -1,71 +1,38 @@
 <template>
   <div>
     <BaseLoading v-if="isLoadingDataset" />
-    <HeaderAndTopAndOneColumn :key="refreshKey">
+    <AnnotationPage>
       <template v-slot:header>
-        <HeaderFeedbackTaskComponent
+        <HeaderFeedbackTask
           :key="datasetId"
           :datasetId="datasetId"
           :breadcrumbs="breadcrumbs"
-          :showTrainButton="true"
           :showSettingButton="true"
           :showCopyButton="true"
-          @on-click-train="showTrainModal(true)"
-        />
-        <BaseModal
-          :modal-custom="true"
-          :prevent-body-scroll="true"
-          modal-class="modal-auto"
-          modal-position="modal-top-center"
-          :modal-visible="visibleTrainModal"
-          allow-close
-          @close-modal="showTrainModal(false)"
         >
-          <DatasetTrainComponent
-            datasetTask="FeedbackTask"
-            :datasetName="dataset.name"
-            :workspaceName="dataset.workspace"
-          />
-        </BaseModal>
-      </template>
-      <template v-slot:sidebar-right>
-        <SidebarFeedbackTaskComponent
-          :datasetId="datasetId"
-          @refresh="refresh()"
-        />
+          <template slot="dialog-cta" v-if="dataset && dataset.createdFromUI">
+            <ImportData
+              :snippet="dataset.createCodeSnippetFromHub(getUser())"
+            />
+          </template>
+        </HeaderFeedbackTask>
       </template>
       <template v-slot:center>
         <PersistentStorageBanner />
-        <RecordFeedbackTaskAndQuestionnaireContent
-          :recordCriteria="recordCriteria"
-        />
+        <RecordFeedbackTaskAndQuestionnaire :recordCriteria="recordCriteria" />
       </template>
-    </HeaderAndTopAndOneColumn>
+    </AnnotationPage>
   </div>
 </template>
 
 <script>
-import HeaderAndTopAndOneColumn from "@/layouts/HeaderAndTopAndOneColumn";
+import AnnotationPage from "@/layouts/AnnotationPage";
 import { useAnnotationModeViewModel } from "./useAnnotationModeViewModel";
 
 export default {
   name: "DatasetPage",
   components: {
-    HeaderAndTopAndOneColumn,
-  },
-  data() {
-    return {
-      visibleTrainModal: false,
-      refreshKey: 0,
-    };
-  },
-  methods: {
-    showTrainModal(value) {
-      this.visibleTrainModal = value;
-    },
-    refresh() {
-      this.refreshKey += 1;
-    },
+    AnnotationPage,
   },
   watch: {
     "recordCriteria.committed"() {

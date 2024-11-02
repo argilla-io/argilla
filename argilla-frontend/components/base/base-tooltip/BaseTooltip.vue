@@ -91,7 +91,7 @@ export default {
           break;
         case "bottom":
           this.tooltipPosition = {
-            top: tooltipRect.top - tooltipRect.height + tooltipTextRect.height,
+            top: tooltipRect.top + tooltipRect.height,
             left:
               tooltipRect.left +
               tooltipRect.width / 2 -
@@ -160,7 +160,7 @@ export default {
   white-space: pre;
   line-height: 1.4;
   &--minimalist {
-    background: palette(grey, 150);
+    background: $tooltip-mini-bg;
     @include font-size(13px);
     padding: calc($base-space / 2);
   }

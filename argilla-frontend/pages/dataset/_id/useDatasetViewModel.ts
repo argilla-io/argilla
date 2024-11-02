@@ -1,13 +1,14 @@
 import { ref, useRoute } from "@nuxtjs/composition-api";
-import { Notification } from "@/models/Notifications";
 import { DATASET_API_ERRORS } from "@/v1/infrastructure/repositories/DatasetRepository";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { useTranslate } from "~/v1/infrastructure/services";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 export const useDatasetViewModel = () => {
   const isLoadingDataset = ref(false);
   const route = useRoute();
-  const t = useTranslate();
+  const notification = useNotifications();
+  const { t } = useTranslate();
   const datasetId = route.value.params.id;
 
   const handleError = (response: string) => {
@@ -24,20 +25,17 @@ export const useDatasetViewModel = () => {
           "There was an error on fetching dataset info and workspace info. Please try again";
     }
 
-    const paramsForNotification = {
+    notification.notify({
       message,
-      numberOfChars: message.length,
-      type: "error",
-    };
-
-    Notification.dispatch("notify", paramsForNotification);
+      type: "danger",
+    });
   };
 
   const createRootBreadCrumbs = (dataset: Dataset) => {
     return [
-      { link: { name: "datasets" }, name: t("breadcrumbs.home") },
+      { link: { name: "index" }, name: t("breadcrumbs.home") },
       {
-        link: { path: `/datasets?workspaces=${dataset.workspace}` },
+        link: { path: `/?workspaces=${dataset.workspace}` },
         name: dataset.workspace,
       },
       {

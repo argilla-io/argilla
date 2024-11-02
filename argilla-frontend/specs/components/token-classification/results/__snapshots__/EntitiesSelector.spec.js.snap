@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`EntitiesSelector renders properly 1`] = `<span class="entities__selector__container"><div class="entities__selector"><ul class="entities__selector__options"><li><entity-label-stub label="Arreglo" shortcut="space" color="color_14" class="entities__selector__option suggestion active"></entity-label-stub></li> <li tabindex="0"><entity-label-stub label="Arreglo" shortcut="1" color="color_14" class="entities__selector__option"></entity-label-stub></li><li tabindex="0"><entity-label-stub label="CARDINAL" shortcut="2" color="color_1" class="entities__selector__option"></entity-label-stub></li></ul></div></span>`;

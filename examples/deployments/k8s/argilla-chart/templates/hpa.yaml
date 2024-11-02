@@ -1,0 +1,22 @@
+{{- if .Values.argilla.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "argilla.fullname" . }}
+  labels:
+    {{- include "argilla.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "argilla.fullname" . }}
+  minReplicas: {{ .Values.argilla.hpa.minReplicas }}
+  maxReplicas: {{ .Values.argilla.hpa.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.argilla.hpa.targetCPUUtilizationPercentage }}
+{{- end }}

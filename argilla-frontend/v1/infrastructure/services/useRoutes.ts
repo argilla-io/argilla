@@ -9,7 +9,8 @@ type KindOfParam =
   | "sort"
   | "response"
   | "suggestion"
-  | "similarity";
+  | "similarity"
+  | "tab";
 
 type QueryParam = {
   key: KindOfParam;
@@ -18,19 +19,12 @@ type QueryParam = {
 };
 
 export const ROUTES = {
-  datasets: "datasets",
-  annotationPage: {
-    oldDataset: (workspace: string, name: string) =>
-      `/datasets/${workspace}/${name}`,
-    feedbackDataset: (datasetId: string) =>
-      `/dataset/${datasetId}/annotation-mode`,
-  },
-};
-
-const isOldTask = (task: string) => {
-  return ["TokenClassification", "TextClassification", "Text2Text"].includes(
-    task
-  );
+  index: "/",
+  signIn: "/sign-in",
+  annotationPage: (datasetId: string) =>
+    `/dataset/${datasetId}/annotation-mode`,
+  settings: (id: string) => `/dataset/${id}/settings`,
+  importDatasetFromHub: (id: string) => `/${encodeURIComponent(id)}`,
 };
 
 export const useRoutes = () => {
@@ -51,35 +45,28 @@ export const useRoutes = () => {
     return false;
   };
 
-  const getDatasetLink = ({ task, name, workspace, id }: Dataset): string => {
-    return isOldTask(task)
-      ? ROUTES.annotationPage.oldDataset(workspace, name)
-      : ROUTES.annotationPage.feedbackDataset(id);
+  const getDatasetLink = ({ id }: Dataset): string => {
+    return ROUTES.annotationPage(id);
   };
 
   const goToFeedbackTaskAnnotationPage = (datasetId: string) => {
-    router.push(ROUTES.annotationPage.feedbackDataset(datasetId));
+    router.push(ROUTES.annotationPage(datasetId));
   };
 
-  const goToSetting = ({ task, workspace, name, id }: Dataset) => {
-    if (isOldTask(task)) {
-      router.push({
-        name: "datasets-workspace-dataset-settings",
-        params: {
-          workspace,
-          dataset: name,
-        },
-      });
-    } else {
-      router.push({
-        name: "dataset-id-settings",
-        params: { id },
-      });
-    }
+  const goToSetting = (id: string) => {
+    router.push(ROUTES.settings(id));
   };
 
-  const goToDatasetsList = () => {
-    router.push({ path: `/${ROUTES.datasets}` });
+  const goToImportDatasetFromHub = (id: string) => {
+    router.push(ROUTES.importDatasetFromHub(id));
+  };
+
+  const goToHome = () => {
+    router.push(ROUTES.index);
+  };
+
+  const goToSignIn = () => {
+    router.push(ROUTES.signIn);
   };
 
   const setQueryParams = async (...params: QueryParam[]) => {
@@ -102,6 +89,24 @@ export const useRoutes = () => {
         ...newQuery,
       },
     });
+  };
+
+  const setQueryParamsVirtually = (...params: QueryParam[]) => {
+    let newQuery = {};
+
+    params.forEach(({ key, value }) => {
+      if (!value) return;
+
+      newQuery = {
+        ...newQuery,
+        [key]: encodeURIComponent(value),
+      };
+    });
+
+    const url = new URL(window.location.href);
+    url.search = new URLSearchParams(newQuery).toString();
+
+    window.history.replaceState(null, "", url.toString());
   };
 
   const getQueryParams = <T>(key: KindOfParam): T => {
@@ -144,12 +149,15 @@ export const useRoutes = () => {
   return {
     go,
     goBack,
+    goToSignIn,
     getQuery,
+    goToImportDatasetFromHub,
     goToFeedbackTaskAnnotationPage,
-    goToDatasetsList,
+    goToHome,
     goToSetting,
     getDatasetLink,
     setQueryParams,
+    setQueryParamsVirtually,
     getQueryParams,
     getParams,
     getPreviousRoute,

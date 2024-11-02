@@ -1,4 +1,4 @@
-type Options = "showShortcutsHelper";
+type Options = "showShortcutsHelper" | "layout";
 
 const STORAGE_KEY = "argilla";
 

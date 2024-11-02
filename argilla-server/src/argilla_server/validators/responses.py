@@ -12,72 +12,71 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from typing import Union
+from typing import Union, TypeAlias
 
-from argilla_server.enums import QuestionType, ResponseStatus
+from argilla_server.api.schemas.v1.responses import ResponseCreate, ResponseUpdate, ResponseUpsert
+from argilla_server.enums import ResponseStatus
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Record
-from argilla_server.schemas.v1.responses import ResponseCreate, ResponseUpdate, ResponseUpsert
 from argilla_server.validators.response_values import ResponseValueValidator
 
 
+def _is_submitted_response(response: Union[ResponseCreate, ResponseUpdate, ResponseUpsert]) -> bool:
+    return response.status == ResponseStatus.submitted
+
+
 class ResponseValidator:
-    def __init__(self, response_change: Union[ResponseCreate, ResponseUpdate, ResponseUpsert]):
-        self._response_change = response_change
+    @classmethod
+    def validate(cls, response: Union[ResponseCreate, ResponseUpdate, ResponseUpsert], record: Record) -> None:
+        cls._validate_values_are_present_when_submitted(response)
+        cls._validate_required_questions_have_values(response, record)
+        cls._validate_values_have_configured_questions(response, record)
+        cls._validate_values(response, record)
 
-    def validate_for(self, record: Record) -> None:
-        self._validate_values_are_present_when_submitted()
-        self._validate_required_questions_have_values(record)
-        self._validate_values_have_configured_questions(record)
-        self._validate_values(record)
-
-    @property
-    def _is_submitted_response(self) -> bool:
-        return self._response_change.status == ResponseStatus.submitted
-
-    def _validate_values_are_present_when_submitted(self) -> None:
-        if self._is_submitted_response and not self._response_change.values:
+    @staticmethod
+    def _validate_values_are_present_when_submitted(
+        response: Union[ResponseCreate, ResponseUpdate, ResponseUpsert],
+    ) -> None:
+        if _is_submitted_response(response) and not response.values:
             raise UnprocessableEntityError("missing response values for submitted response")
 
-    def _validate_required_questions_have_values(self, record: Record) -> None:
+    @staticmethod
+    def _validate_required_questions_have_values(
+        response: Union[ResponseCreate, ResponseUpdate, ResponseUpsert], record: Record
+    ) -> None:
         for question in record.dataset.questions:
-            if self._is_submitted_response and question.required and question.name not in self._response_change.values:
+            if _is_submitted_response(response) and question.required and question.name not in response.values:
                 raise UnprocessableEntityError(
                     f"missing response value for required question with name={question.name!r}"
                 )
 
-    def _validate_values_have_configured_questions(self, record: Record) -> None:
+    @staticmethod
+    def _validate_values_have_configured_questions(
+        response: Union[ResponseCreate, ResponseUpdate, ResponseUpsert], record: Record
+    ) -> None:
         question_names = [question.name for question in record.dataset.questions]
 
-        for value_question_name in self._response_change.values or []:
+        for value_question_name in response.values or []:
             if value_question_name not in question_names:
                 raise UnprocessableEntityError(
                     f"found response value for non configured question with name={value_question_name!r}"
                 )
 
-    def _validate_values(self, record: Record) -> None:
-        if not self._response_change.values:
+    @staticmethod
+    def _validate_values(response: Union[ResponseCreate, ResponseUpdate, ResponseUpsert], record: Record) -> None:
+        if not response.values:
             return
 
         for question in record.dataset.questions:
-            if question_response := self._response_change.values.get(question.name):
-                ResponseValueValidator(question_response.value).validate_for(
+            if question_response := response.values.get(question.name):
+                ResponseValueValidator.validate(
+                    question_response.value,
                     question.parsed_settings,
                     record,
-                    self._response_change.status,
+                    response.status,
                 )
 
 
-class ResponseCreateValidator(ResponseValidator):
-    def __init__(self, response_create: ResponseCreate):
-        self._response_change = response_create
-
-
-class ResponseUpdateValidator(ResponseValidator):
-    def __init__(self, response_update: ResponseUpdate):
-        self._response_change = response_update
-
-
-class ResponseUpsertValidator(ResponseValidator):
-    def __init__(self, response_upsert: ResponseUpsert):
-        self._response_change = response_upsert
+ResponseCreateValidator: TypeAlias = ResponseValidator
+ResponseUpdateValidator: TypeAlias = ResponseValidator
+ResponseUpsertValidator: TypeAlias = ResponseValidator

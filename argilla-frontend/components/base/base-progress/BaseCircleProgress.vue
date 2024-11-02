@@ -1,78 +1,75 @@
 <template>
-  <div
-    class="circle-progress"
-    :style="{ width: `${size}px`, height: `${size}px` }"
-  >
-    <div class="circle-progress__circle">
-      <div
-        class="circle-progress__progress"
-        :style="{
-          'background-image': `conic-gradient(${progressColor} ${
-            value * 3.6
-          }deg,#fafafa 0deg)`,
-        }"
-      ></div>
-      <div class="circle-progress__value">{{ value }}</div>
-    </div>
-  </div>
+  <div class="donut-chart" :style="pieStyles"></div>
 </template>
 
 <script>
 export default {
   props: {
-    progressColor: {
-      type: String,
-      default: "#ff675f",
-    },
-    value: {
-      type: Number,
-      required: true,
-      validator: (value) => value >= 0 && value <= 100,
-    },
     size: {
       type: Number,
-      default: 28,
+      default: 60,
+    },
+    slices: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  computed: {
+    pieStyles() {
+      let acum = 0;
+      const styles = this.slices.map(
+        (slice) => `${slice.color} 0 ${(acum += slice.percent)}%`
+      );
+
+      return {
+        background: `radial-gradient(#fafafa 40%, transparent 41%), conic-gradient( ${styles.join(
+          ","
+        )} )`,
+      };
+    },
+    sizeStyles() {
+      return `${this.size}px`;
     },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-.circle-progress {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  &__circle {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-  }
-  &__progress {
+<style scoped lang="scss">
+@property --a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+.donut-chart {
+  position: relative;
+  width: v-bind(sizeStyles);
+  height: v-bind(sizeStyles);
+  border-radius: 50%;
+  overflow: hidden;
+  &:before {
+    --a: 360deg;
+    content: "";
     position: absolute;
+    width: 102%;
+    height: 102%;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    box-sizing: border-box;
-    transform-origin: center center;
+    right: 0;
+    bottom: 0;
+    background-image: conic-gradient(
+      transparent var(--a),
+      var(--bg-accent-grey-1) 0deg
+    );
+    animation: progress 0.5s ease-in-out;
   }
-  &__value {
-    position: absolute;
-    height: calc(100% - 6px);
-    width: calc(100% - 6px);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    @include font-size(11px);
-    font-weight: 500;
-    color: $black-54;
-    background: palette(white);
-    border-radius: 50%;
+}
+
+@keyframes progress {
+  1% {
+    --a: 0deg;
+  }
+  100% {
+    --a: 360deg;
   }
 }
 </style>

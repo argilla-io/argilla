@@ -13,12 +13,14 @@
 #  limitations under the License.
 
 import pytest
+
+from argilla_server.errors.future import NotFoundError
 from argilla_server.security.authentication.oauth2 import OAuth2Settings
 
 
 class TestOAuth2Settings:
     def test_configure_unsupported_provider(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(NotFoundError):
             OAuth2Settings.from_dict({"providers": [{"name": "unsupported"}]})
 
     def test_configure_github_provider(self):

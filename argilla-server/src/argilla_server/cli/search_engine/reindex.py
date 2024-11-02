@@ -108,15 +108,15 @@ async def _reindex_dataset(db: AsyncSession, search_engine: SearchEngine, progre
         dataset = await Reindexer.reindex_dataset(db, search_engine, dataset_id)
     except NoResultFound as e:
         echo_in_panel(
-            f"Feedback dataset with id={dataset_id} not found.",
-            title="Feedback dataset not found",
+            f"Dataset with id={dataset_id} not found.",
+            title="Dataset not found",
             title_align="left",
             success=False,
         )
 
         raise typer.Exit(code=1) from e
 
-    task = progress.add_task(f"reindexing feedback dataset `{dataset.name}`...", total=1)
+    task = progress.add_task(f"reindexing dataset `{dataset.name}`...", total=1)
 
     await _reindex_dataset_records(db, search_engine, progress, dataset)
 
@@ -124,7 +124,7 @@ async def _reindex_dataset(db: AsyncSession, search_engine: SearchEngine, progre
 
 
 async def _reindex_datasets(db: AsyncSession, search_engine: SearchEngine, progress: Progress) -> None:
-    task = progress.add_task(f"reindexing feedback datasets...", total=await Reindexer.count_datasets(db))
+    task = progress.add_task("reindexing datasets...", total=await Reindexer.count_datasets(db))
 
     async for dataset in Reindexer.reindex_datasets(db, search_engine):
         await _reindex_dataset_records(db, search_engine, progress, dataset)
@@ -136,7 +136,7 @@ async def _reindex_dataset_records(
     db: AsyncSession, search_engine: SearchEngine, progress: Progress, dataset: Dataset
 ) -> None:
     task = progress.add_task(
-        f"reindexing feedback dataset `{dataset.name}` records...",
+        f"reindexing dataset `{dataset.name}` records...",
         total=await Reindexer.count_dataset_records(db, dataset),
     )
 
@@ -144,20 +144,20 @@ async def _reindex_dataset_records(
         progress.advance(task, advance=len(records))
 
 
-async def _reindex(feedback_dataset_id: Optional[UUID] = None) -> None:
+async def _reindex(dataset_id: Optional[UUID] = None) -> None:
     async with AsyncSessionLocal() as db:
         async for search_engine in get_search_engine():
             with Progress() as progress:
-                if feedback_dataset_id is not None:
-                    await _reindex_dataset(db, search_engine, progress, feedback_dataset_id)
+                if dataset_id is not None:
+                    await _reindex_dataset(db, search_engine, progress, dataset_id)
                 else:
                     await _reindex_datasets(db, search_engine, progress)
 
 
 def reindex(
-    feedback_dataset_id: Optional[UUID] = typer.Option(None, help="The id of a feedback dataset to be reindexed")
+    dataset_id: Optional[UUID] = typer.Option(None, help="The id of a dataset to be reindexed"),
 ) -> None:
-    asyncio.run(_reindex(feedback_dataset_id))
+    asyncio.run(_reindex(dataset_id))
 
 
 if __name__ == "__main__":

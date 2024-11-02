@@ -16,19 +16,21 @@
   -->
 
 <template>
-  <div lang="en">
+  <div :lang="currentLang">
     <Nuxt v-if="!$slots.default" />
     <slot />
   </div>
 </template>
 
 <script>
-import { Notification } from "@/models/Notifications";
 export default {
   name: "Index",
   computed: {
     imOffline() {
       return this.$nuxt.isOffline;
+    },
+    currentLang() {
+      return this.$i18n.locale;
     },
   },
   watch: {
@@ -44,9 +46,9 @@ export default {
   },
   methods: {
     showNotification(message) {
-      Notification.dispatch("notify", {
+      this.$notification.notify({
         message: message,
-        type: "error",
+        type: "danger",
       });
     },
   },

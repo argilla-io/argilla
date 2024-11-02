@@ -13,37 +13,20 @@
 #  limitations under the License.
 
 import pytest
+
 from argilla_server.settings import Settings
-
-from tests.pydantic_v1 import ValidationError
-
-
-@pytest.mark.parametrize("bad_namespace", ["Badns", "bad-ns", "12-bad-ns", "@bad"])
-def test_wrong_settings_namespace(monkeypatch, bad_namespace):
-    monkeypatch.setenv("ARGILLA_NAMESPACE", bad_namespace)
-    with pytest.raises(ValidationError):
-        Settings()
-
-
-def test_settings_namespace(monkeypatch):
-    monkeypatch.setenv("ARGILLA_NAMESPACE", "namespace")
-    settings = Settings()
-
-    assert settings.namespace == "namespace"
-    assert settings.dataset_index_name == "namespace.ar.datasets"
-    assert settings.dataset_records_index_name == "namespace.ar.dataset.{}"
 
 
 def test_settings_index_replicas_with_shards_defined(monkeypatch):
     monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_SHARDS", "100")
     monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_REPLICAS", "2")
 
-    settings = Settings()
-    assert settings.es_records_index_replicas == 2
+    assert Settings().es_records_index_replicas == 2
 
 
 def test_settings_default_index_replicas_with_shards_defined(monkeypatch):
     monkeypatch.setenv("ARGILLA_ES_RECORDS_INDEX_SHARDS", "100")
+
     settings = Settings()
 
     assert settings.es_records_index_shards == 100
@@ -54,6 +37,7 @@ def test_settings_default_database_url(monkeypatch):
     monkeypatch.setenv("ARGILLA_DATABASE_URL", "")
 
     settings = Settings()
+
     assert settings.database_url == f"sqlite+aiosqlite:///{settings.home_path}/argilla.db?check_same_thread=False"
 
 
@@ -68,5 +52,35 @@ def test_settings_default_database_url(monkeypatch):
 )
 def test_settings_database_url(url: str, expected_url: str, monkeypatch):
     monkeypatch.setenv("ARGILLA_DATABASE_URL", url)
-    settings = Settings()
-    assert settings.database_url == expected_url
+
+    assert Settings().database_url == expected_url
+
+
+def test_settings_default_database_sqlite_timeout():
+    assert Settings().database_sqlite_timeout == 5
+
+
+def test_settings_database_sqlite_timeout(monkeypatch):
+    monkeypatch.setenv("ARGILLA_DATABASE_SQLITE_TIMEOUT", "3")
+
+    assert Settings().database_sqlite_timeout == 3
+
+
+def test_settings_default_database_postgresql_pool_size():
+    assert Settings().database_postgresql_pool_size == 15
+
+
+def test_settings_database_postgresql_pool_size(monkeypatch):
+    monkeypatch.setenv("ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE", "42")
+
+    assert Settings().database_postgresql_pool_size == 42
+
+
+def test_settings_default_database_postgresql_max_overflow():
+    assert Settings().database_postgresql_max_overflow == 10
+
+
+def test_settings_database_postgresql_max_overflow(monkeypatch):
+    monkeypatch.setenv("ARGILLA_DATABASE_POSTGRESQL_MAX_OVERFLOW", "12")
+
+    assert Settings().database_postgresql_max_overflow == 12

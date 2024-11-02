@@ -1,4 +1,4 @@
-name: Build Argilla package
+name: Build and publish the `argilla` sdk python package
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -6,11 +6,8 @@ concurrency:
 
 on:
   workflow_dispatch:
-  workflow_call:
 
   push:
-    tags:
-      - "*"
     branches:
       - main
       - develop
@@ -19,107 +16,87 @@ on:
   pull_request:
     paths:
       - "argilla/**"
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-      - ready_for_review
 
-  release:
-    types:
-      - "published"
+permissions:
+  id-token: write
 
 jobs:
-
-  run_unit_tests:
-    name: Run unit tests
-    uses: ./.github/workflows/argilla.run-python-tests.yml
-    with:
-      coverageReport: coverage
-      runsOn: extended-runner
-      pytestArgs: tests/unit
-    secrets: inherit
-
-  run_end2end_tests:
-    strategy:
-      matrix:
-        include:
-          - searchEngineDockerImage: docker.elastic.co/elasticsearch/elasticsearch:8.8.2
-            searchEngineDockerEnv: '{"discovery.type": "single-node", "xpack.security.enabled": "false"}'
-            runsOn: extended-runner
-
-    name: Run end2end tests
-    uses: ./.github/workflows/argilla.end2end-examples.yml
-    with:
-      runsOn: ${{ matrix.runsOn }}
-      searchEngineDockerImage: ${{ matrix.searchEngineDockerImage }}
-      searchEngineDockerEnv: ${{ matrix.searchEngineDockerEnv }}
-    secrets: inherit
-
-  run_integration_tests:
-    name: Run integration tests
-    uses: ./.github/workflows/argilla.run-python-tests.yml
-    needs:
-      - run_unit_tests
-    with:
-      runsOn: extended-runner
-      coverageReport: coverage-extra
-      pytestArgs: tests/integration
-    secrets: inherit
-
-  push_coverage:
-    name: Upload code coverage
+  build:
+    services:
+      argilla-server:
+        image: argilladev/argilla-hf-spaces:pr-5572
+        ports:
+          - 6900:6900
+        env:
+          ARGILLA_ENABLE_TELEMETRY: 0
+          # Set credentials
+          USERNAME: argilla
+          PASSWORD: 12345678
+          API_KEY: argilla.apikey
     runs-on: ubuntu-latest
-
-    needs:
-      - run_unit_tests
-      - run_integration_tests
-
     defaults:
       run:
-        shell: bash -l {0}
         working-directory: argilla
-
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
-      - name: Checkout Code 🛎
-        uses: actions/checkout@v4
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
         with:
-          path: argilla/coverage-report
-
-      - name: Copy all reports
-        run: find coverage-report/ -name "*.xml" -exec mv '{}' . \;
-
-      - name: Upload Coverage reports to Codecov 📦
-        uses: codecov/codecov-action@v2
+          python-version: ${{ matrix.python-version }}
+          cache: true
+          cache-dependency-path: |
+            argilla/pdm.lock
+      - name: Install dependencies
+        run: |
+          pdm install
+      - name: Wait for argilla server to start
+        run: |
+          while ! curl -XGET http://localhost:6900/api/_status; do sleep 5; done
+      - name: Set huggingface hub credentials
+        run: |
+          echo "HF_TOKEN_ARGILLA_INTERNAL_TESTING=${{ secrets.HF_TOKEN_ARGILLA_INTERNAL_TESTING }}" >> "$GITHUB_ENV"
+          echo "Enable HF access token"
+      - name: Run unit tests
+        run: |
+          pdm run test tests/unit
+      - name: Run integration tests
+        run: |
+          pdm run test tests/integration
+      - name: Build package
+        run: |
+          pdm build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        # Upload the package to be used in the next jobs only once
+        if: ${{ matrix.python-version == '3.8' }}
         with:
-          flags: argilla
-          token: ${{ secrets.CODECOV_TOKEN }}
+          name: argilla
+          path: argilla/dist
 
-  build_python_package:
-    name: Build Argilla python package
-    uses: ./.github/workflows/argilla.build-python-package.yml
-    needs:
-      - run_unit_tests
-      - run_integration_tests
-    secrets: inherit
-
-  # This job will upload a Python Package using Twine when a release is created
-  # For more information see:
-  # https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+  # This job will publish argilla package into PyPI repository
   publish_release:
     name: Publish Release
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+
+    permissions:
+      # This permission is needed for private repositories.
+      # contents: read
+      # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
+      id-token: write
+
     needs:
-      - run_integration_tests
+      - build
+
     defaults:
       run:
         shell: bash -l {0}
         working-directory: argilla
+
     steps:
       - name: Checkout Code 🛎
         uses: actions/checkout@v4
@@ -128,20 +105,33 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: argilla
-          path: dist
+          path: argilla/dist
 
-      - name: Publish Package to TestPyPI 🥪
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
         with:
-          user: __token__
-          password: ${{ secrets.AR_TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+          cache: true
+          python-version-file: argilla/pyproject.toml
+          cache-dependency-path: |
+            argilla/pdm.lock
+
+      - name: Read package info
+        run: |
+          PACKAGE_VERSION=$(pdm show --version)
+          PACKAGE_NAME=$(pdm show --name)
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+          echo "$PACKAGE_NAME==$PACKAGE_VERSION"
+
+      - name: Publish Package to PyPI test environment 🥪
+        run: pdm publish --no-build --repository testpypi
+        continue-on-error: true
 
       - name: Test Installing 🍿
-        run: pip install --index-url https://test.pypi.org/simple --no-deps argilla==${GITHUB_REF#refs/*/v}
+        continue-on-error: true
+        run: |
+          pip3 install --index-url https://test.pypi.org/simple --no-deps  $PACKAGE_NAME==$PACKAGE_VERSION
 
       - name: Publish Package to PyPI 🥩
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.AR_PYPI_API_TOKEN }}
+        if: github.ref == 'refs/heads/main'
+        run: pdm publish --no-build

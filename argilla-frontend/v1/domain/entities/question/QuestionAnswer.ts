@@ -22,6 +22,14 @@ export abstract class QuestionAnswer {
     this.fill(this._answer);
   }
 
+  isEqual(answer: QuestionAnswer) {
+    const isEqual =
+      JSON.stringify(this.valuesAnswered) ===
+      JSON.stringify(answer.valuesAnswered);
+
+    return isEqual;
+  }
+
   protected abstract fill(answer: Answer);
   abstract clear();
   abstract get isValid(): boolean;
@@ -99,7 +107,11 @@ export class SpanQuestionAnswer extends QuestionAnswer {
   }
 
   get valuesAnswered(): SpanAnswer[] {
-    return this.values;
+    return this.values.map((value) => ({
+      start: value.start,
+      end: value.end,
+      label: value.label,
+    }));
   }
 }
 

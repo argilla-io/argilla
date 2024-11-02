@@ -121,6 +121,23 @@ describe("Question", () => {
 
       expect(question.isModified).toBeFalsy();
     });
+
+    test("isModified is false when the question was loaded with response", () => {
+      const question = createTextQuestionMocked();
+
+      question.response({ value: "positive" });
+
+      expect(question.isModified).toBeFalsy();
+    });
+
+    test("isModified is true when the question was loaded with response  and modified after initialization", () => {
+      const question = createTextQuestionMocked();
+      question.response({ value: "positive" });
+
+      question.title = "NEW TITLE";
+
+      expect(question.isModified).toBeTruthy();
+    });
   });
 
   describe("question validation should", () => {

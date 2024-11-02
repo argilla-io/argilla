@@ -3,7 +3,7 @@ title: OpenAI
 description: The ArgillaOpenAITrainer leverages the features of OpenAI to fine-tune programmatically with Argilla.
 links:
   - linkText: Argilla docs
-    linkLink: https://docs.argilla.io/en/latest/practical_guides/fine_tune.html#text-classification
+    linkLink: https://docs.v1.argilla.io/en/latest/practical_guides/fine_tune.html#text-classification
   - linkText: OpenAI docs
     linkLink: https://platform.openai.com/docs/guides/fine-tuning
 ---

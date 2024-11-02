@@ -27,49 +27,6 @@
   position: absolute;
 }
 
-// Linear gradient using $primary-color
-%primary-color-gradient {
-  background: $primary-color;
-  background: -moz-linear-gradient(
-    top,
-    $primary-color 0%,
-    $primary-lighten-color 100%
-  );
-  background: -webkit-linear-gradient(
-    top,
-    $primary-color 0%,
-    $primary-lighten-color 100%
-  );
-  background: linear-gradient(
-    to bottom,
-    $primary-color 0%,
-    $primary-lighten-color 100%
-  );
-}
-
-// Linear gradient using palette(blue, 300)
-%secondary-color-gradient {
-  background: palette(blue, 300);
-  background: -moz-linear-gradient(
-    top,
-    palette(blue, 300) 0%,
-    $secondary-darken-color 55%,
-    palette(blue, 300) 100%
-  );
-  background: -webkit-linear-gradient(
-    top,
-    palette(blue, 300) 0%,
-    $secondary-darken-color 55%,
-    palette(blue, 300) 100%
-  );
-  background: linear-gradient(
-    to bottom,
-    palette(blue, 300) 0%,
-    $secondary-darken-color 55%,
-    palette(blue, 300) 100%
-  );
-}
-
 // Align center block element
 %center {
   display: block;
@@ -107,16 +64,6 @@
 %container {
   margin: 0 auto;
   padding: 4em;
-}
-%collapsable-if-metrics {
-  padding-right: calc($sidebarMenuWidth + 56px);
-  transition: padding 0.25s linear 0.2s;
-  .--metrics & {
-    @include media(">desktop") {
-      padding-right: calc($sidebarWidth + 25px);
-      transition: padding 0.25s linear;
-    }
-  }
 }
 
 %clear {

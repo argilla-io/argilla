@@ -6,6 +6,8 @@
           v-for="(range, index) in filteredProgressRanges"
           :key="range.name"
           role="progressbar"
+          :aria-valuenow="getPercentage(range.value)"
+          :aria-label="range.name"
           :class="[
             'progress__range',
             showTooltip ? 'progress__range--with-tooltip' : null,
@@ -17,10 +19,7 @@
           @mouseenter="hoveredRange = range"
           @mouseleave="hoveredRange = null"
         >
-          <div
-            class="progress__bar"
-            :style="{ backgroundColor: range.color }"
-          ></div>
+          <div class="progress__bar" :style="{ background: range.color }"></div>
         </div>
       </div>
       <template v-if="showTooltip && !!hoveredRange">
@@ -28,13 +27,20 @@
           class="progress__tooltip__triangle"
           :style="{ left: `${getTrianglePosition(hoveredRange)}%` }"
         />
-        <div class="progress__tooltip">
-          <span
-            class="progress__tooltip__percent-info"
-            v-text="
-              `${hoveredRange.name}: ${getPercentage(hoveredRange.value)}%`
-            "
-          />
+        <div
+          class="progress__tooltip"
+          :style="{
+            left: tooltipPositionFixed
+              ? '50%'
+              : `${getTrianglePosition(hoveredRange)}%`,
+          }"
+        >
+          <span class="progress__tooltip__percent-info"
+            >{{ hoveredRange.name }}:
+            <span v-if="showPercentInTooltip"
+              >{{ getPercentage(hoveredRange.value) }}%</span
+            >
+          </span>
           {{ hoveredRange.tooltip }}
         </div>
       </template>
@@ -48,6 +54,14 @@ export default {
     showTooltip: {
       type: Boolean,
       default: false,
+    },
+    showPercentInTooltip: {
+      type: Boolean,
+      default: true,
+    },
+    tooltipPositionFixed: {
+      type: Boolean,
+      default: true,
     },
     progressMax: {
       type: Number,
@@ -70,7 +84,7 @@ export default {
   },
   methods: {
     getPercentage(value) {
-      return ((value / this.progressMax) * 100).toFixed();
+      return ((value / this.progressMax) * 100).toFixed(2);
     },
     getTrianglePosition(range) {
       if (!range) return;
@@ -89,10 +103,10 @@ export default {
 </script>
 
 <styles lang="scss" scoped>
-$progressHeight: 12px;
-$tooltipBackgroundColor: palette(grey, 600);
+$progressHeight: 14px;
+$tooltipBackgroundColor: var(--bg-solid-grey-3);
 $tooltipTriangleSize: 5px;
-$borderRadius: 10px;
+$borderRadius: 3px;
 
 .progress {
   $this: &;
@@ -106,13 +120,15 @@ $borderRadius: 10px;
     height: $progressHeight;
     border-radius: $borderRadius;
     overflow: hidden;
+    background: var(--bg-solid-grey-3);
+    box-shadow: 0 0 0 1px var(--bg-accent-grey-2);
   }
   &__bar {
     position: relative;
     height: 100%;
     border-radius: $borderRadius;
-    margin: 0 -4px;
-    box-shadow: 0 0 0 1px palette(white);
+    margin: 0 -1px;
+    box-shadow: 0 0 0 1px var(--bg-accent-grey-2);
     z-index: 1;
     &:after {
       content: "";
@@ -127,11 +143,10 @@ $borderRadius: 10px;
     white-space: nowrap;
     min-width: 180px;
     bottom: calc(100% + #{$tooltipTriangleSize} + 2px);
-    left: 50%;
     transform: translateX(-50%);
     padding: calc($base-space / 2);
     background: $tooltipBackgroundColor;
-    color: $black-54;
+    color: var(--fg-secondary);
     border-radius: $border-radius;
     transition: opacity 0.2s 0.2s;
     @include font-size(12px);
@@ -173,7 +188,7 @@ $borderRadius: 10px;
 .animate-progress-leave-to {
   .progress__range {
     max-width: 100%;
-    transition: all 0.5s $cb-slow;
+    transition: all 0.5s ease-in-out;
   }
 }
 </styles>

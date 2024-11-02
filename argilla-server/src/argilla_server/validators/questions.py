@@ -14,35 +14,35 @@
 
 from typing import List
 
-from argilla_server.enums import QuestionType
-from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.models.database import Dataset, Question
-from argilla_server.schemas.v1.questions import (
+from argilla_server.api.schemas.v1.questions import (
     QuestionCreate,
     QuestionSettings,
     QuestionSettingsUpdate,
     QuestionUpdate,
     SpanQuestionSettings,
 )
+from argilla_server.enums import QuestionType
+from argilla_server.errors.future import UnprocessableEntityError
+from argilla_server.models.database import Dataset, Question
 
 
 class QuestionCreateValidator:
-    def __init__(self, question_create: QuestionCreate):
-        self._question_create = question_create
+    @classmethod
+    def validate(cls, question_create: QuestionCreate, dataset: Dataset):
+        cls._validate_dataset_is_not_ready(dataset)
+        cls._validate_span_question_settings(question_create, dataset)
 
-    def validate_for(self, dataset: Dataset):
-        self._validate_dataset_is_not_ready(dataset)
-        self._validate_span_question_settings(dataset)
-
-    def _validate_dataset_is_not_ready(self, dataset):
+    @staticmethod
+    def _validate_dataset_is_not_ready(dataset):
         if dataset.is_ready:
             raise UnprocessableEntityError("questions cannot be created for a published dataset")
 
-    def _validate_span_question_settings(self, dataset: Dataset):
-        if self._question_create.settings.type != QuestionType.span:
+    @classmethod
+    def _validate_span_question_settings(cls, question_create: QuestionCreate, dataset: Dataset):
+        if question_create.settings.type != QuestionType.span:
             return
 
-        field = self._question_create.settings.field
+        field = question_create.settings.field
         field_names = [field.name for field in dataset.fields]
 
         if field not in field_names:
@@ -68,33 +68,35 @@ class QuestionUpdateValidator:
         QuestionType.span,
     ]
 
-    def __init__(self, question_update: QuestionUpdate):
-        self._question_update = question_update
+    @classmethod
+    def validate(cls, question_update: QuestionUpdate, question: Question):
+        cls._validate_question_settings(question_update, question.parsed_settings)
 
-    def validate_for(self, question: Question):
-        self._validate_question_settings(question.parsed_settings)
-
-    def _validate_question_settings(self, question_settings: QuestionSettings):
-        if not self._question_update.settings:
+    @classmethod
+    def _validate_question_settings(cls, question_update: QuestionUpdate, question_settings: QuestionSettings):
+        if not question_update.settings:
             return
 
-        self._validate_question_settings_type_is_the_same(question_settings, self._question_update.settings)
-        self._validate_question_settings_label_options(question_settings, self._question_update.settings)
-        self._validate_question_settings_visible_options(question_settings, self._question_update.settings)
-        self._validate_span_question_settings(question_settings, self._question_update.settings)
+        cls._validate_question_settings_type_is_the_same(question_settings, question_update.settings)
+        cls._validate_question_settings_label_options(question_settings, question_update.settings)
+        cls._validate_question_settings_visible_options(question_settings, question_update.settings)
+        cls._validate_span_question_settings(question_settings, question_update.settings)
 
+    @staticmethod
     def _validate_question_settings_type_is_the_same(
-        self, question_settings: QuestionSettings, question_settings_update: QuestionSettingsUpdate
+        question_settings: QuestionSettings, question_settings_update: QuestionSettingsUpdate
     ):
         if question_settings.type != question_settings_update.type:
             raise UnprocessableEntityError(
-                f"question type cannot be changed. expected '{question_settings.type}' but got '{question_settings_update.type}'"
+                "question type cannot be changed. "
+                f"expected '{question_settings.type}' but got '{question_settings_update.type}'"
             )
 
+    @classmethod
     def _validate_question_settings_label_options(
-        self, question_settings: QuestionSettings, question_settings_update: QuestionSettingsUpdate
+        cls, question_settings: QuestionSettings, question_settings_update: QuestionSettingsUpdate
     ):
-        if question_settings.type not in self.QUESTION_TYPES_WITH_LABEL_OPTIONS:
+        if question_settings.type not in cls.QUESTION_TYPES_WITH_LABEL_OPTIONS:
             return
 
         if question_settings_update.options is None:
@@ -102,7 +104,8 @@ class QuestionUpdateValidator:
 
         if len(question_settings.options) != len(question_settings_update.options):
             raise UnprocessableEntityError(
-                f"the number of options cannot be modified. expected {len(question_settings.options)} but got {len(question_settings_update.options)}"
+                "the number of options cannot be modified. "
+                f"expected {len(question_settings.options)} but got {len(question_settings_update.options)}"
             )
 
         sorted_options = sorted(question_settings.options, key=lambda option: option.value)
@@ -118,10 +121,11 @@ class QuestionUpdateValidator:
                 f"the option values cannot be modified. found unexpected option values: {unexpected_options!r}"
             )
 
+    @classmethod
     def _validate_question_settings_visible_options(
-        self, question_settings: QuestionSettings, question_settings_update: QuestionSettingsUpdate
+        cls, question_settings: QuestionSettings, question_settings_update: QuestionSettingsUpdate
     ):
-        if question_settings_update.type not in self.QUESTION_TYPES_WITH_VISIBLE_OPTIONS:
+        if question_settings_update.type not in cls.QUESTION_TYPES_WITH_VISIBLE_OPTIONS:
             return
 
         if question_settings_update.visible_options is None:
@@ -130,11 +134,13 @@ class QuestionUpdateValidator:
         number_of_options = len(question_settings.options)
         if question_settings_update.visible_options > number_of_options:
             raise UnprocessableEntityError(
-                f"the value for 'visible_options' must be less or equal to the number of items in 'options' ({number_of_options})"
+                "the value for 'visible_options' must be less or equal to "
+                f"the number of items in 'options' ({number_of_options})"
             )
 
+    @staticmethod
     def _validate_span_question_settings(
-        self, question_settings: SpanQuestionSettings, question_settings_update: QuestionSettingsUpdate
+        question_settings: SpanQuestionSettings, question_settings_update: QuestionSettingsUpdate
     ) -> None:
         if question_settings_update.type != QuestionType.span:
             return
@@ -146,9 +152,11 @@ class QuestionUpdateValidator:
 
 
 class QuestionDeleteValidator:
-    def validate_for(self, dataset: Dataset):
-        self._validate_dataset_is_not_ready(dataset)
+    @classmethod
+    def validate(cls, dataset: Dataset):
+        cls._validate_dataset_is_not_ready(dataset)
 
-    def _validate_dataset_is_not_ready(self, dataset):
+    @staticmethod
+    def _validate_dataset_is_not_ready(dataset):
         if dataset.is_ready:
             raise UnprocessableEntityError("questions cannot be deleted for a published dataset")
