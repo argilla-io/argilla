@@ -18,17 +18,21 @@ from argilla_server.errors.future import NotFoundError
 from argilla_server.security.authentication.oauth2.providers._base import OAuth2ClientProvider
 from argilla_server.security.authentication.oauth2.providers._github import GitHubClientProvider
 from argilla_server.security.authentication.oauth2.providers._huggingface import HuggingfaceClientProvider
+from argilla_server.security.authentication.oauth2.providers._keycloak import KeycloakClientProvider
 
 __all__ = [
     "OAuth2ClientProvider",
     "GitHubClientProvider",
     "HuggingfaceClientProvider",
+    "KeycloakClientProvider",
     "get_provider_by_name",
 ]
 
 _ALL_SUPPORTED_OAUTH2_PROVIDERS = {
     GitHubClientProvider.name: GitHubClientProvider,
     HuggingfaceClientProvider.name: HuggingfaceClientProvider,
+    KeycloakClientProvider.name: KeycloakClientProvider
+
 }
 
 

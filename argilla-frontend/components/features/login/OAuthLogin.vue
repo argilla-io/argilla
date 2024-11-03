@@ -7,6 +7,10 @@
         v-if="provider.isHuggingFace"
         @click="authorize(provider.name)"
       />
+      <KeycloakButton
+        v-if="provider.isKeycloak"
+        @click="authorize(provider.name)"
+      />
     </div>
   </div>
 </template>

@@ -115,6 +115,7 @@ export default {
     ignore_and_continue: "Ignorieren und fortfahren",
     login: "Anmelden",
     "hf-login": "Mit Hugging Face anmelden",
+    "kc-login": "Mit Keycloak anmelden",
     sign_in_with_username: "Mit Benutzername anmelden",
     cancel: "Abbrechen",
     continue: "Fortfahren",

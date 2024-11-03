@@ -113,6 +113,7 @@ export default {
     ignore_and_continue: "Ignorar y continuar",
     login: "Iniciar sesión",
     "hf-login": "Iniciar sesión con Hugging Face",
+    "hf-login": "Iniciar sesión con Keycloak",
     sign_in_with_username: "Iniciar sesión con usuario",
     cancel: "Cancelar",
     continue: "Continuar",
