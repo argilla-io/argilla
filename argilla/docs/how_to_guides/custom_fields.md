@@ -175,7 +175,7 @@ When `advanced_mode=True`, you can use the `template` argument to pass a full HT
 
 ### Usage example
 
-Let's reproduce example from the [Without advanced mode](#without-advanced-mode) section but this time we will insert the [handlebars syntax engine](https://handlebarsjs.com/) into the template ourselves.
+Let's reproduce example from the [Without advanced mode](#using-handlebars-in-your-template) section but this time we will insert the [handlebars syntax engine](https://handlebarsjs.com/) into the template ourselves.
 
 ```python
 template = """
