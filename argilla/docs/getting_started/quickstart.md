@@ -85,7 +85,7 @@ Congrats! Your Argilla server is ready to start your first project.
 
 The quickest way to start exploring the tool and create your first dataset is by importing an exiting one from the Hugging Face Hub.
 
-To do this, log in to the Argilla UI and in the Home page click on "Import from Hub". You can choose one of the sample datasets or paste a repo id in the input. This will look something like `stanfordnlp/imdb`.
+To do this, log in to the Argilla UI and in the Home page click on "Import dataset from Hugging Face". You can choose one of the sample datasets or paste a repo id in the input. This will look something like `stanfordnlp/imdb`.
 
 Argilla will automatically interpret the columns in the dataset to map them to Fields and Questions.
 
