@@ -23,6 +23,10 @@ These are the section headers that we use:
 - Added new webhook events when datasets are created, updated, deleted or published. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
 - Added new webhook events when records are created, updated, deleted or completed. ([#5489](https://github.com/argilla-io/argilla/pull/5489))
 
+### Changed
+
+- Changed default python version to 3.13. ([#5649](https://github.com/argilla-io/argilla/pull/5649))
+
 ### Fixed
 
 - Fixed error so now `_touch_dataset_last_activity_at` function is not updating dataset's `updated_at` column. ([#5656](https://github.com/argilla-io/argilla/pull/5656))
