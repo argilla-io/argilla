@@ -24,6 +24,11 @@
 import { useNewDatasetViewModel } from "./useNewDatasetViewModel";
 
 export default {
+  middleware({ route, redirect }) {
+    if (route.params.id === "datasets") {
+      redirect("/");
+    }
+  },
   mounted() {
     this.getNewDatasetByRepoIdFromUrl();
   },
