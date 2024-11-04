@@ -14,13 +14,16 @@ export class RecordStatus extends String {
   private constructor(public readonly name: Status, color: string) {
     super(name);
 
-    const resolvedColor = color.startsWith("var(") ? this.resolveCssVariable(color.slice(4, -1).trim()) : color;
+    const resolvedColor = color.startsWith("var(")
+      ? this.resolveCssVariable(color.slice(4, -1).trim())
+      : color;
     this.color = Color.from(resolvedColor);
   }
 
   private resolveCssVariable(varName) {
-      return getComputedStyle(document.documentElement).getPropertyValue(varName);
+    return getComputedStyle(document.documentElement).getPropertyValue(varName);
   }
+
   public static from(name: string): RecordStatus {
     const colorSelected = STATUS[name];
 
