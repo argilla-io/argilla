@@ -129,8 +129,10 @@ export default {
       datasetSettings: "Datensatzeinstellungen",
     },
   },
-  to_submit_complete_required: "Zum Absenden beantworten \nSie die benötigten Fragen",
-  some_records_failed_to_annotate: "Einige Einträge konnten nicht annotiert werden",
+  to_submit_complete_required:
+    "Zum Absenden beantworten \nSie die benötigten Fragen",
+  some_records_failed_to_annotate:
+    "Einige Einträge konnten nicht annotiert werden",
   changes_no_submit: "Sie haben Ihre Änderungen nicht gespeichert",
   bulkAnnotation: {
     recordsSelected: "1 Eintrag ausgewählt | {count} Einträge ausgewählt",
@@ -217,7 +219,8 @@ export default {
     error: "Falscher Benutzername oder Passwort. Versuchen Sie es erneut",
     hf: {
       title: "Willkommen bei {space}",
-      subtitle: "Helfe <strong>{user}</strong> bessere Datensätze für KI zu erstellen",
+      subtitle:
+        "Helfe <strong>{user}</strong> bessere Datensätze für KI zu erstellen",
     },
   },
   of: "von",
@@ -304,11 +307,13 @@ export default {
     select: "Auswählen",
     mapToColumn: "Einer Spalte zuordnen",
     subset: "Teilmenge",
-    selectSubset: "Sie können einen Datensatz nur aus einer Teilmenge erstellen.",
+    selectSubset:
+      "Sie können einen Datensatz nur aus einer Teilmenge erstellen.",
     preview: "Vorschau",
     importData: "Daten importieren",
     addRecords: "Einträge hinzufügen",
-    cantLoadRepository: "Datensatz auf Hugging Face nicht gefunden oder verfügbar",
+    cantLoadRepository:
+      "Datensatz auf Hugging Face nicht gefunden oder verfügbar",
     none: "Keine",
     noWorkspaces:
       "Bitte folgen Sie der <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>Anleitung</a>, um einen Workspace zu erstellen",
