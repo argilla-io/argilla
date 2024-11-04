@@ -133,7 +133,7 @@ record = rg.TextClassificationRecord(
 
 ##### Token classification
 
-Tasks of the kind of token classification are NLP tasks aimed at dividing the input text into words, or syllables, and assigning certain values to them. Think about giving each word in a sentence its grammatical category or highlight which parts of a medical report belong to a certain specialty. There are some popular ones like NER or POS-tagging.
+Tasks of the kind of token classification are NLP tasks aimed at dividing the input text into words, or syllables, and assigning certain values to them. Think about giving each word in a sentence its grammatical category or highlight which parts of a medical report belong to a certain speciality. There are some popular ones like NER or POS-tagging.
 
 ```python
 record = rg.TokenClassificationRecord(
