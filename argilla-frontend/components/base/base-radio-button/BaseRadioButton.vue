@@ -32,7 +32,7 @@ export default {
     disabled: Boolean,
     color: {
       type: String,
-      default: "#3e5cc9",
+      default: "var(--fg-status-submitted)",
     },
   },
   model: {

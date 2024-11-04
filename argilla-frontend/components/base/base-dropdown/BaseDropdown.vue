@@ -208,6 +208,7 @@ export default {
     box-shadow: $shadow;
     border-radius: $border-radius;
     background: var(--bg-accent-grey-2);
+    border: 1px solid var(--bg-opacity-1);
   }
   &--frozen-page {
     &:before {
