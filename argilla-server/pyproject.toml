@@ -79,7 +79,6 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
-ignore_package_warnings = true
 
 [tool.pdm.build]
 excludes = [".env.dev", ".env.test"]
