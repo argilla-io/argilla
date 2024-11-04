@@ -45,8 +45,8 @@ export class Subset {
               name: key,
               kindObject: value._type,
               type: value.dtype,
-              role: role,
-              content: content,
+              role,
+              content,
             };
           }),
         });
