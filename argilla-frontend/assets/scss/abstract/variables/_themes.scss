@@ -20,6 +20,7 @@
   --bg-accent-grey-2: hsl(0, 0%, 100%);
   --bg-accent-grey-3: hsl(0, 0%, 98%);
   --bg-accent-grey-4: hsl(0, 0%, 98%);
+  --bg-accent-grey-5: hsl(0, 0%, 100%);
   --bg-opacity-1: hsla(0, 0%, 0%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 0%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 0%, 0.03);
@@ -78,6 +79,8 @@
   --bg-banner-warning: hsl(47, 83%, 91%);
   --bg-banner-error: hsl(3, 100%, 92%);
   --bg-tooltip: var(--color-dark-grey);
+  --bg-config-card: hsl(227, 100%, 90%);
+  --bg-config-alert: hsl(41, 100%, 82%, 0.8);
   --fg-chat-1: #488d81;
   --fg-chat-2: #e07be0;
   --fg-chat-3: #fd926a;
@@ -96,6 +99,7 @@
   --bg-accent-grey-2: hsl(214, 12%, 16%);
   --bg-accent-grey-3: hsl(214, 12%, 14%);
   --bg-accent-grey-4: hsl(214, 12%, 16%);
+  --bg-accent-grey-5: hsl(214, 12%, 20%);
   --bg-opacity-1: hsla(0, 0%, 100%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 100%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 100%, 0.03);
@@ -148,6 +152,8 @@
   --bg-banner-warning: hsl(47, 83%, 16%);
   --bg-banner-error: hsl(3, 100%, 20%);
   --bg-tooltip: hsl(207, 9%, 32%);
+  --bg-config-card: hsla(227, 100%, 66%, 20%);
+  --bg-config-alert: hsl(41, 100%, 82%, 0.4);
   --fg-chat-1: #628e87;
   --fg-chat-2: #af6daf;
   --fg-chat-3: #cd8065;
@@ -183,6 +189,7 @@
   --bg-accent-grey-2: hsl(0, 0%, 100%);
   --bg-accent-grey-3: hsl(0, 0%, 98%);
   --bg-accent-grey-4: hsl(0, 0%, 98%);
+  --bg-accent-grey-5: hsl(0, 0%, 100%);
   --bg-opacity-1: hsla(0, 0%, 0%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 0%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 0%, 0.03);
@@ -241,6 +248,8 @@
   --bg-banner-warning: hsl(47, 83%, 91%);
   --bg-banner-error: hsl(3, 100%, 92%);
   --bg-tooltip: var(--color-dark-grey);
+  --bg-config-card: hsl(0, 0%, 100%);
+  --bg-config-alert: hsl(0, 0%, 100%);
   --fg-chat-1: #198700;
   --fg-chat-2: #933e00;
   --fg-chat-3: #ae0000;
