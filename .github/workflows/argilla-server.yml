@@ -17,6 +17,9 @@ on:
     paths:
       - "argilla-server/**"
 
+permissions:
+  id-token: write
+
 jobs:
   build:
     name: Build `argilla-server` package

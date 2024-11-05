@@ -155,7 +155,7 @@ async def get_current_user_dataset_metrics(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    result = await datasets.get_user_dataset_metrics(db, search_engine, current_user, dataset)
+    result = await datasets.get_user_dataset_metrics(search_engine, current_user, dataset)
 
     return DatasetMetrics(responses=result)
 
@@ -313,7 +313,6 @@ async def update_dataset(
     return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
 
 
-# TODO: Maybe change /import to /import-from-hub?
 @router.post("/datasets/{dataset_id}/import", status_code=status.HTTP_202_ACCEPTED, response_model=JobSchema)
 async def import_dataset_from_hub(
     *,

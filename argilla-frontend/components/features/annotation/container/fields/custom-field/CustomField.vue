@@ -52,7 +52,7 @@ export default {
     },
     sdkRecord: {
       type: Object,
-      required: true,
+      default: () => ({}),
     },
   },
   computed: {

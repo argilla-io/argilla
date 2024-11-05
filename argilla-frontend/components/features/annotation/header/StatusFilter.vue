@@ -22,6 +22,8 @@
     :options="options"
     :selected-option="selectedOption"
     @change="onChangeOption"
+    aria-label="Filter Records by Status"
+    aria-controls="dropdown-menu"
   />
 </template>
 

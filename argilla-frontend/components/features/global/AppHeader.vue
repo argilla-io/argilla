@@ -19,6 +19,8 @@
   <section id="header" ref="header" class="header">
     <base-topbar-brand>
       <base-breadcrumbs
+        role="button"
+        aria-label="Home button"
         :breadcrumbs="breadcrumbs"
         @breadcrumb-action="onBreadcrumbAction"
       />

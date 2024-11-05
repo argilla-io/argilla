@@ -100,7 +100,12 @@ CREATE_DATASET_VECTOR_SETTINGS_MAX_COUNT = 5
 
 async def _touch_dataset_last_activity_at(db: AsyncSession, dataset: Dataset) -> None:
     await db.execute(
-        sqlalchemy.update(Dataset).where(Dataset.id == dataset.id).values(last_activity_at=datetime.utcnow())
+        sqlalchemy.update(Dataset)
+        .where(Dataset.id == dataset.id)
+        .values(
+            last_activity_at=datetime.utcnow(),
+            updated_at=Dataset.__table__.c.updated_at,
+        )
     )
 
 
@@ -364,12 +369,11 @@ async def _configure_query_relationships(
 
 
 async def get_user_dataset_metrics(
-    db: AsyncSession,
     search_engine: SearchEngine,
     user: User,
     dataset: Dataset,
 ) -> dict:
-    total_records = await Record.count_by(db, dataset_id=dataset.id)
+    total_records = (await get_dataset_progress(search_engine, dataset))["total"]
     result = await search_engine.get_dataset_user_progress(dataset, user)
 
     submitted_responses = result.get("submitted", 0)

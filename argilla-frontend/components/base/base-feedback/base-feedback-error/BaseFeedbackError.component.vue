@@ -49,7 +49,7 @@ export default {
   gap: $base-space * 2;
   padding: $base-space;
   margin-right: auto;
-  background-color: rgba(255, 103, 95, 0.2);
+  background-color: var(--color-brand-secondary);
   border-radius: $border-radius;
 }
 
@@ -69,7 +69,7 @@ export default {
 
 .button {
   color: white;
-  background-color: rgba(255, 103, 95, 0.6);
+  background-color: var(--color-brand);
   border-radius: $border-radius;
   button {
     padding: 6px 12px;

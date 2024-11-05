@@ -5,6 +5,7 @@
     @submit.stop.prevent=""
     v-click-outside="onClickOutside"
     @click="focusOnFirstQuestionFromOutside"
+    aria-label="Annotation Questions"
   >
     <div class="questions-form__content">
       <QuestionsComponent
@@ -376,6 +377,7 @@ export default {
 }
 
 .button {
+  border: 1px solid var(--bg-opacity-1);
   &__shortcuts {
     display: inline-flex;
     align-items: center;

@@ -16,9 +16,21 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
+
+### Added
+
+- Added `Argilla.deploy_on_spaces` to deploy the Argilla server on Hugging Face Spaces. ([#5547](https://github.com/argilla-io/argilla/pull/5547))
+
 ### Changed
 
+- Changed `Dataset.from_hub` method to open configure URL when `settings="ui"`. ([#5622](https://github.com/argilla-io/argilla/pull/5622))
 - Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
+- Added support for `with_vectors` while fetching records along with a search query. ([#5638](https://github.com/argilla-io/argilla/pull/5638))
+
+### Removed
+
+- Removed name sanitizing for dataset settings names. This may cause issues with old server versions. Especially when working with `from_hub`. ([#5574](https://github.com/argilla-io/argilla/pull/5574))
 
 ### Removed
 
@@ -33,7 +45,7 @@ These are the section headers that we use:
 - Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
 - Added similarity search support. ([#5546](https://github.com/argilla-io/argilla/pull/5546))
 - Added filter support for `id`, `_server_id`, `inserted_at` and `updated_at` record attributes. ([#5545](https://github.com/argilla-io/argilla/pull/5545))
-- Added support to read argilla credentials from colab secrets. ([#5541](https://github.com/argilla-io/argilla/pull/5541)))
+- Added support to read argilla credentials from colab secrets. ([#5541](https://github.com/argilla-io/argilla/pull/5541))
 
 ### Changed
 

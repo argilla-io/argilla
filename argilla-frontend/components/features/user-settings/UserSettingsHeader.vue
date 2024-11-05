@@ -19,7 +19,7 @@ import { ROUTES } from "@/v1/infrastructure/services";
 export default {
   name: "TopUserSettingsContent",
   created() {
-    this.datasetsURL = ROUTES.datasets;
+    this.datasetsURL = ROUTES.index;
   },
 };
 </script>

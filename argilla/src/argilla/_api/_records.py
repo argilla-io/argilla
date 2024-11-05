@@ -111,13 +111,15 @@ class RecordsAPI(ResourceAPI[RecordModel]):
         limit: int = 100,
         with_suggestions: bool = True,
         with_responses: bool = True,
-        # TODO: Add support for `with_vectors`
+        with_vectors: Optional[Union[List, bool]] = None,
     ) -> Tuple[List[Tuple[RecordModel, float]], int]:
         include = []
         if with_suggestions:
             include.append("suggestions")
         if with_responses:
             include.append("responses")
+        if with_vectors:
+            include.append(self._represent_vectors_to_include(with_vectors))
         params = {
             "offset": offset,
             "limit": limit,

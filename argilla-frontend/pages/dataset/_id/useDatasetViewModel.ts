@@ -33,9 +33,9 @@ export const useDatasetViewModel = () => {
 
   const createRootBreadCrumbs = (dataset: Dataset) => {
     return [
-      { link: { name: "datasets" }, name: t("breadcrumbs.home") },
+      { link: { name: "index" }, name: t("breadcrumbs.home") },
       {
-        link: { path: `/datasets?workspaces=${dataset.workspace}` },
+        link: { path: `/?workspaces=${dataset.workspace}` },
         name: dataset.workspace,
       },
       {
