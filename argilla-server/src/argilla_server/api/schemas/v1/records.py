@@ -342,6 +342,8 @@ class TermsFilter(BaseModel):
     scope: FilterScope
     values: List[str] = Field(..., min_length=TERMS_FILTER_VALUES_MIN_ITEMS, max_length=TERMS_FILTER_VALUES_MAX_ITEMS)
 
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+
 
 class RangeFilter(BaseModel):
     type: Literal["range"]
