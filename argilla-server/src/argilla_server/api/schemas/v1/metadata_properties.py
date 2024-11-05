@@ -18,8 +18,7 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import MetadataPropertyType
-from argilla_server.pydantic_v1 import BaseModel, Field, constr, root_validator, validator
-from argilla_server.pydantic_v1.generics import GenericModel
+from pydantic import BaseModel, Field, constr, root_validator, validator, ConfigDict
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
@@ -43,7 +42,7 @@ class TermsMetadataMetrics(BaseModel):
         term: Any
         count: int
 
-    type: Literal[MetadataPropertyType.terms] = Field(MetadataPropertyType.terms, const=True)
+    type: Literal[MetadataPropertyType.terms] = MetadataPropertyType.terms
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -51,17 +50,17 @@ class TermsMetadataMetrics(BaseModel):
 NT = TypeVar("NT", int, float)
 
 
-class NumericMetadataMetrics(GenericModel, Generic[NT]):
-    min: Optional[NT]
-    max: Optional[NT]
+class NumericMetadataMetrics(BaseModel, Generic[NT]):
+    min: Optional[NT] = None
+    max: Optional[NT] = None
 
 
 class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
-    type: Literal[MetadataPropertyType.integer] = Field(MetadataPropertyType.integer, const=True)
+    type: Literal[MetadataPropertyType.integer] = MetadataPropertyType.integer
 
 
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
-    type: Literal[MetadataPropertyType.float] = Field(MetadataPropertyType.float, const=True)
+    type: Literal[MetadataPropertyType.float] = MetadataPropertyType.float
 
     @validator("min", "max")
     def round_result(cls, v: float):
@@ -117,7 +116,7 @@ MetadataPropertyTitle = Annotated[
 ]
 
 
-class NumericMetadataProperty(GenericModel, Generic[NT]):
+class NumericMetadataProperty(BaseModel, Generic[NT]):
     min: Optional[NT] = None
     max: Optional[NT] = None
 
@@ -135,7 +134,9 @@ class NumericMetadataProperty(GenericModel, Generic[NT]):
 class TermsMetadataPropertyCreate(BaseModel):
     type: Literal[MetadataPropertyType.terms]
     values: Optional[List[Any]] = Field(
-        None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
+        None,
+        min_length=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS,
+        max_length=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
     )
 
 
@@ -163,8 +164,7 @@ class MetadataProperty(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MetadataProperties(BaseModel):
@@ -179,7 +179,7 @@ class MetadataPropertyCreate(BaseModel):
 
 
 class MetadataPropertyUpdate(UpdateSchema):
-    title: Optional[MetadataPropertyTitle]
-    visible_for_annotators: Optional[bool]
+    title: Optional[MetadataPropertyTitle] = None
+    visible_for_annotators: Optional[bool] = None
 
     __non_nullable_fields__ = {"title", "visible_for_annotators"}

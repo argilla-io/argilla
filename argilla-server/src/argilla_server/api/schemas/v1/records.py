@@ -16,15 +16,24 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-
 from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator, ValidationError
-from argilla_server.pydantic_v1.utils import GetterDict
+from pydantic import (
+    BaseModel,
+    Field,
+    StrictStr,
+    root_validator,
+    validator,
+    ValidationError,
+    ConfigDict,
+    model_validator,
+    field_validator,
+)
+from pydantic.v1.utils import GetterDict
 from argilla_server.search_engine import TextQuery
 
 RECORDS_CREATE_MIN_ITEMS = 1
@@ -48,7 +57,7 @@ CHAT_FIELDS_MAX_MESSAGES = 500
 
 
 class RecordGetterDict(GetterDict):
-    def get(self, key: str, default: Any) -> Any:
+    def get(self, key: Any, default: Any = None) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
 
@@ -71,20 +80,39 @@ class Record(BaseModel):
     id: UUID
     status: RecordStatus
     fields: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]]
-    external_id: Optional[str]
+    metadata: Optional[Dict[str, Any]] = None
+    external_id: Optional[str] = None
     # TODO: move `responses` to `response` since contextualized endpoint will contains only the user response
     # response: Optional[Response]
-    responses: Optional[List[Response]]
-    suggestions: Optional[List[Suggestion]]
-    vectors: Optional[Dict[str, List[float]]]
+    responses: Optional[List[Response]] = None
+    suggestions: Optional[List[Suggestion]] = None
+    vectors: Optional[Dict[str, List[float]]] = None
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
-        getter_dict = RecordGetterDict
+    model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate(cls, value) -> dict:
+        getter = RecordGetterDict(value)
+
+        data = {}
+        for field in cls.model_fields:
+            data[field] = getter.get(field)
+
+        # TODO: This is a workaround to avoid sending None when the relationship is not loaded
+        if not value.is_relationship_loaded("responses"):
+            data.pop("responses")
+
+        if not value.is_relationship_loaded("suggestions"):
+            data.pop("suggestions")
+
+        if not value.is_relationship_loaded("vectors"):
+            data.pop("vectors")
+
+        return data
 
 
 FieldValueCreate = Union[StrictStr, List[ChatFieldValue], Dict[StrictStr, Any], None]
@@ -92,11 +120,14 @@ FieldValueCreate = Union[StrictStr, List[ChatFieldValue], Dict[StrictStr, Any], 
 
 class RecordCreate(BaseModel):
     fields: Dict[str, FieldValueCreate]
-    metadata: Optional[Dict[str, Any]]
-    external_id: Optional[str]
-    responses: Optional[List[UserResponseCreate]]
-    suggestions: Optional[List[SuggestionCreate]]
-    vectors: Optional[Dict[str, List[float]]]
+    metadata: Optional[Dict[str, Any]] = None
+    external_id: Optional[str] = None
+    responses: Optional[List[UserResponseCreate]] = None
+    suggestions: Optional[List[SuggestionCreate]] = None
+    vectors: Optional[Dict[str, List[float]]] = None
+
+    # This config is used to coerce numbers to strings in the fields to align with the previous behavior
+    model_config = ConfigDict(coerce_numbers_to_str=True)
 
     @validator("fields", pre=True)
     @classmethod
@@ -153,7 +184,7 @@ class RecordCreate(BaseModel):
 class RecordUpdate(UpdateSchema):
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
     suggestions: Optional[List[SuggestionCreate]] = None
-    vectors: Optional[Dict[str, List[float]]]
+    vectors: Optional[Dict[str, List[float]]] = None
 
     @property
     def metadata(self) -> Optional[Dict[str, Any]]:
@@ -179,7 +210,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 
 class RecordUpsert(RecordCreate):
-    id: Optional[UUID]
+    id: Optional[UUID] = None
     fields: Optional[Dict[str, FieldValueCreate]] = None
 
 
@@ -188,6 +219,7 @@ class RecordIncludeParam(BaseModel):
     vectors: Optional[List[str]] = Field(None, alias="vectors")
 
     @root_validator(skip_on_failure=True)
+    @classmethod
     def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         relationships = values.get("relationships")
         if not relationships:
@@ -242,12 +274,14 @@ class Records(BaseModel):
 
 
 class RecordsCreate(BaseModel):
-    items: List[RecordCreate] = Field(..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
+    items: List[RecordCreate] = Field(..., min_length=RECORDS_CREATE_MIN_ITEMS, max_length=RECORDS_CREATE_MAX_ITEMS)
 
 
 class RecordsUpdate(BaseModel):
     # TODO: review this definition and align to create model
-    items: List[RecordUpdateWithId] = Field(..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS)
+    items: List[RecordUpdateWithId] = Field(
+        ..., min_length=RECORDS_UPDATE_MIN_ITEMS, max_length=RECORDS_UPDATE_MAX_ITEMS
+    )
 
 
 class MetadataParsedQueryParam:
@@ -265,6 +299,7 @@ class VectorQuery(BaseModel):
     order: SimilarityOrder = SimilarityOrder.most_similar
 
     @root_validator(skip_on_failure=True)
+    @classmethod
     def check_required(cls, values: dict) -> dict:
         """Check that either 'record_id' or 'value' is provided"""
         record_id = values.get("record_id")
@@ -305,16 +340,17 @@ class Order(BaseModel):
 class TermsFilter(BaseModel):
     type: Literal["terms"]
     scope: FilterScope
-    values: List[str] = Field(..., min_items=TERMS_FILTER_VALUES_MIN_ITEMS, max_items=TERMS_FILTER_VALUES_MAX_ITEMS)
+    values: List[str] = Field(..., min_length=TERMS_FILTER_VALUES_MIN_ITEMS, max_length=TERMS_FILTER_VALUES_MAX_ITEMS)
 
 
 class RangeFilter(BaseModel):
     type: Literal["range"]
     scope: FilterScope
-    ge: Optional[Union[float, str]]
-    le: Optional[Union[float, str]]
+    ge: Optional[Union[float, str]] = None
+    le: Optional[Union[float, str]] = None
 
     @root_validator(skip_on_failure=True)
+    @classmethod
     def check_ge_and_le(cls, values: dict) -> dict:
         ge, le = values.get("ge"), values.get("le")
 
@@ -331,20 +367,29 @@ Filter = Annotated[Union[TermsFilter, RangeFilter], Field(..., discriminator="ty
 
 
 class Filters(BaseModel):
-    and_: List[Filter] = Field(None, alias="and", min_items=FILTERS_AND_MIN_ITEMS, max_items=FILTERS_AND_MAX_ITEMS)
+    and_: Optional[List[Filter]] = Field(
+        None,
+        alias="and",
+        min_length=FILTERS_AND_MIN_ITEMS,
+        max_length=FILTERS_AND_MAX_ITEMS,
+    )
 
 
 class SearchRecordsQuery(BaseModel):
-    query: Optional[Query]
-    filters: Optional[Filters]
+    query: Optional[Query] = None
+    filters: Optional[Filters] = None
     sort: Optional[List[Order]] = Field(
-        None, min_items=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS, max_items=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS
+        None,
+        min_length=SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS,
+        max_length=SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS,
     )
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class SearchRecord(BaseModel):
     record: Record
-    query_score: Optional[float]
+    query_score: Optional[float] = None
 
 
 class SearchRecordsResult(BaseModel):

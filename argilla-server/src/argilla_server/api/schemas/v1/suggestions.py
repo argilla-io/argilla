@@ -16,6 +16,8 @@ from datetime import datetime
 from typing import Any, List, Literal, Optional, Union
 from uuid import UUID
 
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+
 from argilla_server.api.schemas.v1.questions import QuestionName
 from argilla_server.api.schemas.v1.responses import (
     MultiLabelSelectionQuestionResponseValue,
@@ -25,9 +27,8 @@ from argilla_server.api.schemas.v1.responses import (
     TextAndLabelSelectionQuestionResponseValue,
 )
 from argilla_server.enums import SuggestionType
-from argilla_server.pydantic_v1 import BaseModel, Field
 
-AGENT_REGEX = r"^(?=.*[a-zA-Z0-9])[a-zA-Z0-9-_:\.\/\s]+$"
+AGENT_REGEX = r"^[a-zA-Z0-9-_:\.\/\s]*[a-zA-Z0-9][a-zA-Z0-9-_:\.\/\s]*$"
 AGENT_MIN_LENGTH = 1
 AGENT_MAX_LENGTH = 200
 
@@ -58,10 +59,10 @@ class SearchSuggestionsOptions(BaseModel):
 
 class BaseSuggestion(BaseModel):
     question_id: UUID
-    type: Optional[SuggestionType]
+    type: Optional[SuggestionType] = None
     value: Any
-    agent: Optional[str]
-    score: Optional[Union[float, List[float]]]
+    agent: Optional[str] = None
+    score: Optional[Union[float, List[float]]] = None
 
 
 class Suggestion(BaseSuggestion):
@@ -69,8 +70,7 @@ class Suggestion(BaseSuggestion):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Suggestions(BaseModel):
@@ -87,15 +87,26 @@ class SuggestionCreate(BaseSuggestion):
     ]
     agent: Optional[str] = Field(
         None,
-        regex=AGENT_REGEX,
+        pattern=AGENT_REGEX,
         min_length=AGENT_MIN_LENGTH,
         max_length=AGENT_MAX_LENGTH,
         description="Agent used to generate the suggestion",
     )
-    score: Optional[Union[float, List[float]]] = Field(
-        None,
-        min_items=SCORE_MIN_ITEMS,
-        ge=SCORE_GREATER_THAN_OR_EQUAL,
-        le=SCORE_LESS_THAN_OR_EQUAL,
-        description="The score assigned to the suggestion",
-    )
+    score: Optional[Union[float, List[float]]] = Field(None, description="The score assigned to the suggestion")
+
+    @field_validator("score")
+    @classmethod
+    def validate_score(cls, v):
+        if v is None:
+            return v
+
+        if isinstance(v, list):
+            if len(v) < SCORE_MIN_ITEMS:
+                raise ValueError("score must have at least one item")
+            for score in v:
+                if not (SCORE_GREATER_THAN_OR_EQUAL <= score <= SCORE_LESS_THAN_OR_EQUAL):
+                    raise ValueError("score must be between 0 and 1")
+        else:
+            if not (SCORE_GREATER_THAN_OR_EQUAL <= v <= SCORE_LESS_THAN_OR_EQUAL):
+                raise ValueError("score must be between 0 and 1")
+        return v

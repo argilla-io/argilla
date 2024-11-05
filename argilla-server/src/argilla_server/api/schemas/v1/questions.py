@@ -19,7 +19,7 @@ from uuid import UUID
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.fields import FieldName
 from argilla_server.enums import OptionsOrder, QuestionType
-from argilla_server.pydantic_v1 import BaseModel, Field, conlist, constr, root_validator
+from pydantic import BaseModel, Field, conlist, constr, root_validator, ConfigDict
 from argilla_server.settings import settings
 
 try:
@@ -61,6 +61,7 @@ SPAN_MIN_VISIBLE_OPTIONS = 3
 
 class UniqueValuesCheckerMixin(BaseModel):
     @root_validator(skip_on_failure=True)
+    @classmethod
     def check_unique_values(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         options = values.get("options", [])
         seen = set()
@@ -112,7 +113,7 @@ class TextQuestionSettingsCreate(BaseModel):
 
 class TextQuestionSettingsUpdate(UpdateSchema):
     type: Literal[QuestionType.text]
-    use_markdown: Optional[bool]
+    use_markdown: Optional[bool] = None
 
     __non_nullable_fields__ = {"use_markdown"}
 
@@ -134,8 +135,8 @@ class RatingQuestionSettings(BaseModel):
 class RatingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.rating]
     options: List[RatingQuestionSettingsOptionCreate] = Field(
-        min_items=RATING_OPTIONS_MIN_ITEMS,
-        max_items=RATING_OPTIONS_MAX_ITEMS,
+        min_length=RATING_OPTIONS_MIN_ITEMS,
+        max_length=RATING_OPTIONS_MAX_ITEMS,
     )
 
 
@@ -154,12 +155,13 @@ class LabelSelectionQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.label_selection]
     options: conlist(
         item_type=OptionSettingsCreate,
-        min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
-        max_items=settings.label_selection_options_max_items,
+        min_length=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+        max_length=settings.label_selection_options_max_items,
     )
     visible_options: Optional[int] = Field(None, ge=LABEL_SELECTION_MIN_VISIBLE_OPTIONS)
 
     @root_validator(skip_on_failure=True)
+    @classmethod
     def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         visible_options = values.get("visible_options")
         if visible_options is not None:
@@ -179,10 +181,10 @@ class LabelSelectionSettingsUpdate(UpdateSchema):
     options: Optional[
         conlist(
             item_type=OptionSettings,
-            min_items=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
-            max_items=settings.label_selection_options_max_items,
+            min_length=LABEL_SELECTION_OPTIONS_MIN_ITEMS,
+            max_length=settings.label_selection_options_max_items,
         )
-    ]
+    ] = None
 
 
 # Multi-label selection question
@@ -198,7 +200,7 @@ class MultiLabelSelectionQuestionSettingsCreate(LabelSelectionQuestionSettingsCr
 
 class MultiLabelSelectionQuestionSettingsUpdate(LabelSelectionSettingsUpdate):
     type: Literal[QuestionType.multi_label_selection]
-    options_order: Optional[OptionsOrder]
+    options_order: Optional[OptionsOrder] = None
 
     __non_nullable_fields__ = {"options_order"}
 
@@ -213,8 +215,8 @@ class RankingQuestionSettingsCreate(UniqueValuesCheckerMixin):
     type: Literal[QuestionType.ranking]
     options: conlist(
         item_type=OptionSettingsCreate,
-        min_items=RANKING_OPTIONS_MIN_ITEMS,
-        max_items=RANKING_OPTIONS_MAX_ITEMS,
+        min_length=RANKING_OPTIONS_MIN_ITEMS,
+        max_length=RANKING_OPTIONS_MAX_ITEMS,
     )
 
 
@@ -238,13 +240,14 @@ class SpanQuestionSettingsCreate(UniqueValuesCheckerMixin):
     field: FieldName
     options: conlist(
         item_type=OptionSettingsCreate,
-        min_items=SPAN_OPTIONS_MIN_ITEMS,
-        max_items=settings.span_options_max_items,
+        min_length=SPAN_OPTIONS_MIN_ITEMS,
+        max_length=settings.span_options_max_items,
     )
     visible_options: Optional[int] = Field(None, ge=SPAN_MIN_VISIBLE_OPTIONS)
     allow_overlapping: bool = False
 
     @root_validator(skip_on_failure=True)
+    @classmethod
     def check_visible_options_value(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         visible_options = values.get("visible_options")
         if visible_options is not None:
@@ -263,12 +266,12 @@ class SpanQuestionSettingsUpdate(UpdateSchema):
     options: Optional[
         conlist(
             item_type=OptionSettings,
-            min_items=SPAN_OPTIONS_MIN_ITEMS,
-            max_items=settings.span_options_max_items,
+            min_length=SPAN_OPTIONS_MIN_ITEMS,
+            max_length=settings.span_options_max_items,
         )
-    ]
+    ] = None
     visible_options: Optional[int] = Field(None, ge=SPAN_MIN_VISIBLE_OPTIONS)
-    allow_overlapping: Optional[bool]
+    allow_overlapping: Optional[bool] = None
 
 
 QuestionSettings = Annotated[
@@ -341,15 +344,14 @@ class Question(BaseModel):
     id: UUID
     name: str
     title: str
-    description: Optional[str]
+    description: Optional[str] = None
     required: bool
     settings: QuestionSettings
     dataset_id: UUID
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Questions(BaseModel):
@@ -359,14 +361,14 @@ class Questions(BaseModel):
 class QuestionCreate(BaseModel):
     name: QuestionName
     title: QuestionTitle
-    description: Optional[QuestionDescription]
-    required: Optional[bool]
+    description: Optional[QuestionDescription] = None
+    required: Optional[bool] = None
     settings: QuestionSettingsCreate
 
 
 class QuestionUpdate(UpdateSchema):
-    title: Optional[QuestionTitle]
-    description: Optional[QuestionDescription]
-    settings: Optional[QuestionSettingsUpdate]
+    title: Optional[QuestionTitle] = None
+    description: Optional[QuestionDescription] = None
+    settings: Optional[QuestionSettingsUpdate] = None
 
     __non_nullable_fields__ = {"title", "settings"}
