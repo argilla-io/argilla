@@ -131,6 +131,7 @@ export default {
   padding-inline: $base-space;
   outline: none;
   background: var(--bg-label-unselected);
+  border: 1px solid var(--bg-opacity-1);
   color: var(--fg-label);
   font-weight: 500;
   overflow: hidden;
@@ -147,6 +148,9 @@ export default {
     color: var(--color-white);
     background: var(--bg-label);
     box-shadow: none;
+    @media (forced-colors: active) {
+      outline: 5px solid;
+    }
     &:hover {
       box-shadow: inset 0 -2px 6px 0 hsl(from var(--bg-label) h s l / 80%);
       background: hsl(from var(--bg-label) h s l / 80%);
