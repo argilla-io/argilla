@@ -21,7 +21,8 @@ maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Basic dependencies
     "fastapi ~= 0.115.0",
-    "pydantic ~= 1.10.18",
+    "pydantic ~= 2.9.0",
+    "pydantic-settings ~= 2.6.0",
     "uvicorn[standard] ~= 0.32.0",
     "opensearch-py ~= 2.0.0",
     "elasticsearch8[async] ~= 8.7.0",
