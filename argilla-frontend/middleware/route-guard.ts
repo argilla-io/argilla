@@ -49,10 +49,10 @@ export default ({ $auth, route, redirect }: Context) => {
     default:
       if (!$auth.loggedIn) {
         if (route.path !== "/") {
-          route.query.redirect = route.fullPath;
+          route.query.redirectTo = route.fullPath;
         }
 
-        set("redirect", route.query.redirect);
+        set("redirectTo", route.query.redirectTo);
 
         redirect({
           name: "sign-in",

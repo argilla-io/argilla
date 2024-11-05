@@ -1,4 +1,4 @@
-type Options = "showShortcutsHelper" | "layout" | "redirect";
+type Options = "showShortcutsHelper" | "layout" | "redirectTo";
 
 const STORAGE_KEY = "argilla";
 
