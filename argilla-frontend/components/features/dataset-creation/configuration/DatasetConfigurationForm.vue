@@ -31,13 +31,11 @@
               :group="{ name: 'fields' }"
               ghost-class="config-form__ghost"
               :disabled="isFocused"
-              @start="drag = true"
-              @end="drag = false"
             >
               <transition-group
                 class="config-form__draggable-area-wrapper"
                 type="transition"
-                :name="!drag ? 'flip-list' : null"
+                :css="false"
               >
                 <DatasetConfigurationField
                   v-for="field in dataset.selectedSubset.fields.filter(
@@ -87,7 +85,7 @@
               <transition-group
                 class="config-form__draggable-area-wrapper"
                 type="transition"
-                :name="!drag ? 'flip-list' : null"
+                :css="false"
               >
                 <DatasetConfigurationQuestion
                   v-for="question in dataset.selectedSubset.questions"
@@ -139,7 +137,6 @@ export default {
     return {
       isFocused: false,
       visibleDatasetCreationDialog: false,
-      drag: false,
     };
   },
   methods: {
@@ -147,13 +144,14 @@ export default {
       this.create(this.dataset);
     },
     addQuestion(type) {
-      const questionName = `${type} ${this.dataset.selectedSubset.questions.length}`;
+      const name = this.$t(`config.questionId.${type}`);
+      const questionName = `${name}-${this.dataset.selectedSubset.questions.length}`;
+
       this.dataset.selectedSubset.addQuestion(questionName, { type });
     },
     onTypeIsChanged(name, type) {
-      this.dataset.selectedSubset.addQuestion(name, {
-        type: type.value,
-      });
+      this.dataset.selectedSubset.removeQuestion(name);
+      this.addQuestion(type.value);
     },
   },
   setup() {
@@ -223,7 +221,6 @@ export default {
   }
   &__ghost {
     opacity: 0.5;
-    background: lime;
   }
   &__selector {
     &__intro {
@@ -246,9 +243,6 @@ export default {
       width: 100%;
       justify-content: center;
     }
-  }
-  .flip-list-move {
-    transition: transform 0.3s;
   }
 }
 </style>

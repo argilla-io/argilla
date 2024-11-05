@@ -327,6 +327,14 @@ export default {
       span: "Span",
       "no mapping": "No mapping",
     },
+    questionId: {
+      text: "text",
+      rating: "rating",
+      label_selection: "label",
+      ranking: "ranking",
+      multi_label_selection: "multi-label",
+      span: "span",
+    },
   },
   persistentStorage: {
     adminOrOwner:
