@@ -100,7 +100,7 @@ class TestRecordCreate:
         ],
     )
     def test_record_create_with_wrong_chat_field(self, wrong_value: dict):
-        with pytest.raises(ValueError):
+        with pytest.raises((ValueError, TypeError)):  # noqa
             RecordCreate(fields={"field": [wrong_value]})
 
     def test_record_create_with_exceeded_chat_messages(self):

@@ -602,7 +602,7 @@ class TestCreateDatasetRecordsBulk:
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "fields"],
-                            "msg": "Error parsing chat field 'chat': [{'loc': ('content',), 'msg': 'field required', 'type': 'value_error.missing'}]",
+                            "msg": "Value error, Error parsing chat field 'chat': [{'type': 'missing', 'loc': ('content',), 'msg': 'Field required', 'input': {'role': 'user'}, 'url': 'https://errors.pydantic.dev/2.9/v/missing'}]",
                             "type": "value_error",
                         }
                     ]

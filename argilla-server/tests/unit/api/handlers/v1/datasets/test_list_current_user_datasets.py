@@ -12,15 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import uuid
 import pytest
-
 from httpx import AsyncClient
-from pydantic.schema import timedelta
+from datetime import timedelta
 
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import DatasetStatus, UserRole
-
 from tests.factories import DatasetFactory, WorkspaceUserFactory, WorkspaceFactory, UserFactory
 
 
