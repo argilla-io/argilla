@@ -103,10 +103,12 @@ class SuggestionCreate(BaseSuggestion):
         if isinstance(v, list):
             if len(v) < SCORE_MIN_ITEMS:
                 raise ValueError("score must have at least one item")
-            for score in v:
-                if not (SCORE_GREATER_THAN_OR_EQUAL <= score <= SCORE_LESS_THAN_OR_EQUAL):
-                    raise ValueError("score must be between 0 and 1")
+            scores = v
         else:
-            if not (SCORE_GREATER_THAN_OR_EQUAL <= v <= SCORE_LESS_THAN_OR_EQUAL):
+            scores = [v]
+
+        for score in scores:
+            if not (SCORE_GREATER_THAN_OR_EQUAL <= score <= SCORE_LESS_THAN_OR_EQUAL):
                 raise ValueError("score must be between 0 and 1")
+
         return v
