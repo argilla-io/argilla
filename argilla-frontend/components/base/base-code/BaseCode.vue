@@ -9,7 +9,6 @@
 <script>
 import { useTranslate } from "~/v1/infrastructure/services";
 import "assets/icons/copy";
-
 export default {
   props: {
     code: {

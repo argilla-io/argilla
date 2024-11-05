@@ -1,5 +1,5 @@
 <template>
-  <span class="span-entity__wrapper">
+  <span class="span-entity__wrapper" role="mark">
     <template v-if="allowOverlapping">
       <span
         v-for="(line, index) in lines"

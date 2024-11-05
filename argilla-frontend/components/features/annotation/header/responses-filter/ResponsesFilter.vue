@@ -27,7 +27,12 @@
         <template v-else>
           <div class="responses-filter__header" @click="selectResponse(null)">
             <span v-text="selectedResponse.name" />
-            <svgicon name="chevron-left" width="12" height="12" />
+            <svgicon
+              name="chevron-left"
+              width="12"
+              height="12"
+              aria-hidden="true"
+            />
           </div>
           <div class="responses-filter__content">
             <LabelsSelector

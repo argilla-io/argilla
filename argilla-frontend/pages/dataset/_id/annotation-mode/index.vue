@@ -9,7 +9,13 @@
           :breadcrumbs="breadcrumbs"
           :showSettingButton="true"
           :showCopyButton="true"
-        />
+        >
+          <template slot="dialog-cta" v-if="dataset && dataset.createdFromUI">
+            <ImportData
+              :snippet="dataset.createCodeSnippetFromHub(getUser())"
+            />
+          </template>
+        </HeaderFeedbackTask>
       </template>
       <template v-slot:center>
         <PersistentStorageBanner />

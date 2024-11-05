@@ -255,6 +255,77 @@ export default {
       team: "Progreso del equipo",
     },
   },
+  home: {
+    argillaDatasets: "Tus datasets",
+    none: "Sin datasets",
+    importTitle: "Importar un dataset desde Hugging Face Hub",
+    importText:
+      "Comienza con un conjunto de datos del Hub simplemente pegando el nombre del repositorio",
+    importButton: "Importar dataset",
+    importFromHub: "Importar dataset desde Hugging Face",
+    importFromPython: "Importar desde Python",
+    importFromPythonHFWarning:
+      "Si estás usando un Espacio privado, consulta la <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>documentación</a>.",
+    exampleDatasetsTitle: "¿No sabes por dónde empezar?",
+    exampleDatasetsText: "Explora estos datasets de ejemplo",
+    guidesTitle: "¿No conoce Argilla?",
+    guidesText: "Echa un vistazo a estas guías:",
+    pasteRepoIdPlaceholder: "Pega un repo id id p.ej., stanfordnlp/imdb",
+    demoLink:
+      "Entra en esta <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> para probar Argilla",
+  },
+  datasetCreation: {
+    questions: {
+      labelSelection: {
+        atLeastTwoOptions: "Se requieren al menos dos opciones",
+        optionsWithoutLabel: "No se permiten opciones vacías",
+      },
+    },
+    atLeastOneQuestion: "Se requiere al menos una pregunta.",
+    atLeastOneRequired: "Se requiere al menos una pregunta obligatoria.",
+    hasInvalidQuestions: "Algunas preguntas son inválidas",
+    createDataset: "Crea el dataset en Argilla",
+    datasetName: "Nombre del dataset",
+    name: "Nombre",
+    assignWorkspace: "Asignar un espacio de trabajo",
+    selectSplit: "Seleccionar una división",
+    recordWarning:
+      "El conjunto de datos creado incluirá las primeras 10K filas y se pueden registrar más records a través del SDK de Python.",
+    button: "Crear el dataset",
+    fields: "Campos",
+    questionsTitle: "Preguntas",
+    yourQuestions: "Tus preguntas",
+    requiredField: "Campo obligatorio",
+    requiredQuestion: "Pregunta obligatoria",
+    select: "Seleccionar",
+    mapToColumn: "Mapear a una columna",
+    subset: "Subconjunto",
+    selectSubset: "Puedes crear un dataset de un solo subconjunto.",
+    preview: "Vista previa",
+    importData: "Importar datos",
+    addRecords: "Agregar records",
+    cantLoadRepository: "Dataset no encontrado o disponible en Hugging Face",
+    none: "Ninguno",
+    noWorkspaces:
+      "Por favor, sigue <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>esta guía</a> para crear un espacio de trabajo",
+  },
+  config: {
+    field: {
+      text: "Campo de texto",
+      chat: "Campo de chat",
+      image: "Campo de imagen",
+      "no mapping": "Sin mapeo",
+    },
+    question: {
+      text: "Texto",
+      rating: "Calificación",
+      label_selection: "Etiqueta",
+      ranking: "Ranking",
+      multi_label_selection: "Multi-Etiqueta",
+      span: "Span",
+      "no mapping": "Sin mapeo",
+    },
+  },
   persistentStorage: {
     adminOrOwner:
       "El almacenamiento persistente no está habilitado. Todos los datos se perderán si este espacio se reinicia. Vaya a la configuración del espacio para habilitarlo",

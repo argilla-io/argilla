@@ -1,5 +1,5 @@
 <template>
-  <div class="input-button">
+  <div class="input-button" role="button" :aria-label="option.text">
     <input
       ref="inputRef"
       type="checkbox"
@@ -22,7 +22,7 @@
       :for="option.id"
       :title="option.text"
     >
-      <span class="key" v-text="keyboards[option.id]" />
+      <span v-if="visibleShortcuts" class="key" v-text="keyboards[option.id]" />
       <span>{{ option.text }}</span>
     </label>
   </div>
@@ -38,6 +38,10 @@ export default {
     keyboards: {
       type: Object,
       default: () => ({}),
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   computed: {
@@ -105,6 +109,9 @@ input[type="checkbox"] {
   [data-theme="dark"] & {
     background: hsl(from v-bind(optionDarkColor) h s l / 10%);
   }
+  [data-theme="high-contrast"] & {
+    color: var(--color-black);
+  }
   span {
     white-space: nowrap;
     overflow: hidden;
@@ -120,6 +127,9 @@ input[type="checkbox"] {
   &.label-active {
     background: v-bind(optionColor);
     color: var(--fg-primary);
+    @media (forced-colors: active) {
+      outline: 5px solid;
+    }
     [data-theme="dark"] & {
       background: v-bind(optionVeryDarkColor);
     }

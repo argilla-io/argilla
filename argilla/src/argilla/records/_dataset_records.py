@@ -132,6 +132,7 @@ class DatasetRecordsIterator:
             offset=self.__offset,
             with_responses=self.__with_responses,
             with_suggestions=self.__with_suggestions,
+            with_vectors=self.__with_vectors,
         )
         return [record_model for record_model, _ in search_items]
 
@@ -422,11 +423,12 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
 
+        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
+
         if HFDatasetsIO._is_hf_dataset(dataset=records):
-            records = HFDatasetsIO._record_dicts_from_datasets(hf_dataset=records)
+            records = HFDatasetsIO._record_dicts_from_datasets(hf_dataset=records, mapper=record_mapper)
 
         ingested_records = []
-        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
         for record in records:
             try:
                 if isinstance(record, dict):
