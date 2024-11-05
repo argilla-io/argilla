@@ -114,10 +114,11 @@ class Order:
     order: SortOrder
 
 
-@dataclasses.dataclass
-class TextQuery:
+class TextQuery(BaseModel):
     q: str
     field: Optional[str] = None
+
+    model_config = ConfigDict(coerce_numbers_to_str=True)
 
 
 class UserResponseStatusFilter(BaseModel):
