@@ -7,6 +7,11 @@ describe("Color", () => {
 
       expect(color).toBeInstanceOf(Color);
     });
+    test("returns a Color instance for Hex", () => {
+      const color = Color.from("#900");
+
+      expect(color).toBeInstanceOf(Color);
+    });
   });
 
   describe("generate", () => {

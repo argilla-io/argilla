@@ -1,10 +1,10 @@
 import { Color } from "../color/Color";
 
 const STATUS = {
-  pending: "hsl(35, 90%, 39%)",
-  discarded: "hsl(0, 2%, 76%)",
-  submitted: "hsl(227, 56%, 52%)",
-  draft: "hsl(188, 92%, 39%)",
+  pending: "var(--fg-status-pending)",
+  discarded: "var(--fg-status-discarded)",
+  submitted: "var(--fg-status-submitted)",
+  draft: "var(--fg-status-draft)",
 };
 
 type Status = keyof typeof STATUS;
@@ -14,7 +14,14 @@ export class RecordStatus extends String {
   private constructor(public readonly name: Status, color: string) {
     super(name);
 
-    this.color = Color.from(color);
+    const resolvedColor = color.startsWith("var(")
+      ? this.resolveCssVariable(color.slice(4, -1).trim())
+      : color;
+    this.color = Color.from(resolvedColor);
+  }
+
+  private resolveCssVariable(varName) {
+    return getComputedStyle(document.documentElement).getPropertyValue(varName);
   }
 
   public static from(name: string): RecordStatus {

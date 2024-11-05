@@ -1,6 +1,7 @@
 <template>
   <div v-if="$auth.loggedIn" v-click-outside="close" class="user">
     <a
+      v-circle
       class="user__button"
       @click.prevent="showSelector"
       role="button"
@@ -11,7 +12,7 @@
     <div v-if="visibleSelector && user" class="user__content">
       <div class="head">
         <div class="left-head">
-          <span v-circle v-text="user.avatar" />
+          <span v-circle v-text="user.avatar" class="user__content__icon" />
         </div>
         <div class="right-head">
           <div class="item">
@@ -118,10 +119,10 @@ $buttonSize: 34px;
     user-select: none;
     cursor: pointer;
     @extend %circle;
-    background: var(--color-brand);
+    background: var(--color-avatar-bg);
     transform: scale3d(1, 1, 1) translateZ(0);
     transition: all 0.2s ease-in-out;
-    color: var(--color-white);
+    color: var(--color-avatar-fg);
     will-change: auto;
     &:hover {
       transform: scale3d(1.05, 1.05, 1.05) translateZ(0);
@@ -137,6 +138,7 @@ $buttonSize: 34px;
     padding-top: $base-space * 2;
     background: var(--color-dark-grey);
     border-radius: $border-radius;
+    border: 1px solid var(--bg-opacity-1);
     @include font-size(14px);
     font-weight: 400;
     color: var(--color-white);
@@ -150,6 +152,10 @@ $buttonSize: 34px;
     }
     a {
       text-decoration: none;
+    }
+    &__icon {
+      background: var(--color-avatar-bg);
+      color: var(--color-avatar-fg);
     }
   }
   &__link {
