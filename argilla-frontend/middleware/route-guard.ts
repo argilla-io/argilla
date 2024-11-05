@@ -17,6 +17,9 @@
 
 import { Context } from "@nuxt/types";
 import { useRunningEnvironment } from "~/v1/infrastructure/services/useRunningEnvironment";
+import { useLocalStorage } from "~/v1/infrastructure/services";
+
+const { set } = useLocalStorage();
 
 export default ({ $auth, route, redirect }: Context) => {
   const { isRunningOnHuggingFace } = useRunningEnvironment();
@@ -30,7 +33,6 @@ export default ({ $auth, route, redirect }: Context) => {
       if (isRunningOnHuggingFace()) {
         return redirect({
           name: "welcome-hf-sign-in",
-          query: route.query,
         });
       }
       break;
@@ -49,6 +51,8 @@ export default ({ $auth, route, redirect }: Context) => {
         if (route.path !== "/") {
           route.query.redirect = route.fullPath;
         }
+
+        set("redirect", route.query.redirect);
 
         redirect({
           name: "sign-in",
