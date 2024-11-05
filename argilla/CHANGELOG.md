@@ -32,10 +32,6 @@ These are the section headers that we use:
 
 - Removed name sanitizing for dataset settings names. This may cause issues with old server versions. Especially when working with `from_hub`. ([#5574](https://github.com/argilla-io/argilla/pull/5574))
 
-### Removed
-
-- Removed name sanitizing for dataset settings names. This may cause issues with old server versions. Especially when working with `from_hub`. ([#5574](https://github.com/argilla-io/argilla/pull/5574))
-
 ## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0)
 
 ### Added
