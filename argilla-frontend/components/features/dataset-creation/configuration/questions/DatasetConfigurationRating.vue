@@ -5,7 +5,7 @@
       min="0"
       max="10"
       step="1"
-      :value="value.length - 1"
+      :value="value.length ? value.length - 1 : 0"
       @input="onInput($event.target.value)"
       @focus="$emit('is-focused', true)"
       @blur="$emit('is-focused', false)"
@@ -33,12 +33,12 @@ export default {
   },
   methods: {
     onInput(inputValue) {
-      const valuesArray = Array.from(
-        { length: parseInt(inputValue) + 1 },
-        (_, i) => ({
-          value: i,
-        })
-      );
+      let value = parseInt(inputValue);
+      value = Math.max(0, Math.min(value, 10));
+
+      const valuesArray = Array.from({ length: value + 1 }, (_, i) => ({
+        value: i,
+      }));
 
       this.$emit("on-value-change", valuesArray);
     },
