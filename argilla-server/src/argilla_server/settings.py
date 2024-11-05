@@ -24,6 +24,9 @@ import warnings
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from pydantic import Field, root_validator, validator
+from pydantic_settings import BaseSettings
+
 from argilla_server.constants import (
     DATABASE_POSTGRESQL,
     DATABASE_SQLITE,
@@ -35,7 +38,6 @@ from argilla_server.constants import (
     SEARCH_ENGINE_ELASTICSEARCH,
     SEARCH_ENGINE_OPENSEARCH,
 )
-from argilla_server.pydantic_v1 import BaseSettings, Field, root_validator, validator
 
 
 class Settings(BaseSettings):
@@ -73,10 +75,10 @@ class Settings(BaseSettings):
     __DATASETS_INDEX_NAME__ = "ar.datasets"
     __DATASETS_RECORDS_INDEX_NAME__ = "ar.dataset.{}"
 
-    home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
-    base_url: Optional[str] = Field(description="The default base url where server will be deployed")
+    home_path: Optional[str] = Field(None, description="The home path where argilla related files will be stored")
+    base_url: Optional[str] = Field(None, description="The default base url where server will be deployed")
 
-    database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
+    database_url: Optional[str] = Field(None, description="The database url that argilla will use as data store")
     # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.pool_size
     database_postgresql_pool_size: Optional[int] = Field(
         default=DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,

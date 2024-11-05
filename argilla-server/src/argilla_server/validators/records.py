@@ -17,19 +17,18 @@ import mimetypes
 from abc import ABC
 from typing import Dict, List, Union, Any, Optional
 from urllib.parse import urlparse, ParseResult, ParseResultBytes
-from uuid import UUID
 
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.api.schemas.v1.chat import ChatFieldValue
-from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpdate, RecordUpsert
-from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
+from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpsert
+from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 from argilla_server.contexts import records
 from argilla_server.errors.future.base_errors import UnprocessableEntityError
 from argilla_server.models import Dataset, Record
-from argilla_server.pydantic_v1 import ValidationError
 from argilla_server.validators.responses import ResponseCreateValidator
 from argilla_server.validators.suggestions import SuggestionCreateValidator
 from argilla_server.validators.vectors import VectorValidator
