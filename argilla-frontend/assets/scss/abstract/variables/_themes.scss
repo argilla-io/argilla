@@ -5,6 +5,8 @@
   --color-brand: hsl(3, 100%, 69%);
   --color-brand-secondary: hsl(19, 85%, 81%);
   --color-danger: var(--color-brand);
+  --color-avatar-fg: var(--color-white);
+  --color-avatar-bg: var(--color-brand);
   --color-warning: hsl(18, 98%, 68%);
   --color-success: hsl(88, 74%, 36%);
   --color-info: hsl(0, 0%, 90%);
@@ -18,6 +20,7 @@
   --bg-accent-grey-2: hsl(0, 0%, 100%);
   --bg-accent-grey-3: hsl(0, 0%, 98%);
   --bg-accent-grey-4: hsl(0, 0%, 98%);
+  --bg-accent-grey-5: hsl(0, 0%, 100%);
   --bg-opacity-1: hsla(0, 0%, 0%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 0%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 0%, 0.03);
@@ -76,6 +79,8 @@
   --bg-banner-warning: hsl(47, 83%, 91%);
   --bg-banner-error: hsl(3, 100%, 92%);
   --bg-tooltip: var(--color-dark-grey);
+  --bg-config-card: hsl(227, 100%, 90%);
+  --bg-config-alert: hsl(41, 100%, 82%, 0.8);
   --fg-chat-1: #488d81;
   --fg-chat-2: #e07be0;
   --fg-chat-3: #fd926a;
@@ -94,6 +99,7 @@
   --bg-accent-grey-2: hsl(214, 12%, 16%);
   --bg-accent-grey-3: hsl(214, 12%, 14%);
   --bg-accent-grey-4: hsl(214, 12%, 16%);
+  --bg-accent-grey-5: hsl(214, 12%, 20%);
   --bg-opacity-1: hsla(0, 0%, 100%, 0.01);
   --bg-opacity-2: hsla(0, 0%, 100%, 0.02);
   --bg-opacity-3: hsla(0, 0%, 100%, 0.03);
@@ -146,6 +152,8 @@
   --bg-banner-warning: hsl(47, 83%, 16%);
   --bg-banner-error: hsl(3, 100%, 20%);
   --bg-tooltip: hsl(207, 9%, 32%);
+  --bg-config-card: hsla(227, 100%, 66%, 20%);
+  --bg-config-alert: hsl(41, 100%, 82%, 0.4);
   --fg-chat-1: #628e87;
   --fg-chat-2: #af6daf;
   --fg-chat-3: #cd8065;
@@ -159,4 +167,95 @@
 
 [data-theme="dark"] {
   color-scheme: dark;
+}
+
+[data-theme="high-contrast"] {
+  --color-black: hsla(0, 0%, 0%, 100%);
+  --color-brand: hsl(3, 99%, 28%);
+  --color-brand-secondary: hsl(19, 85%, 81%);
+  --color-danger: var(--color-brand);
+  --color-avatar-fg: var(--color-black);
+  --color-avatar-bg: var(--color-white);
+  --color-warning: hsl(18, 100%, 50%);
+  --color-success: hsl(88, 100%, 31%);
+  --color-info: hsl(0, 0%, 90%);
+  --bg-action: hsl(227, 100%, 40%);
+  --bg-action-accent: hsl(227, 98%, 25%);
+  --bg-black: hsla(0, 0%, 0%, 0.87);
+  --bg-solid-grey-1: hsl(0, 0%, 98%);
+  --bg-solid-grey-2: hsl(0, 0%, 96%);
+  --bg-solid-grey-3: hsl(0, 0%, 90%);
+  --bg-accent-grey-1: hsl(0, 0%, 100%);
+  --bg-accent-grey-2: hsl(0, 0%, 100%);
+  --bg-accent-grey-3: hsl(0, 0%, 98%);
+  --bg-accent-grey-4: hsl(0, 0%, 98%);
+  --bg-accent-grey-5: hsl(0, 0%, 100%);
+  --bg-opacity-1: hsla(0, 0%, 0%, 0.01);
+  --bg-opacity-2: hsla(0, 0%, 0%, 0.02);
+  --bg-opacity-3: hsla(0, 0%, 0%, 0.03);
+  --bg-opacity-4: hsla(0, 0%, 0%, 0.04);
+  --bg-opacity-6: hsla(0, 0%, 0%, 0.06);
+  --bg-opacity-10: hsla(0, 0%, 0%, 0.1);
+  --bg-opacity-20: hsla(0, 0%, 0%, 0.2);
+  --bg-opacity-37: hsla(0, 0%, 0%, 0.87);
+  --bg-opacity-54: hsla(0, 0%, 0%, 0.87);
+  --bg-opacity-87: hsla(0, 0%, 0%, 0.87);
+  --fg-lighter: hsl(0, 0%, 100%);
+  --fg-primary: hsla(0, 0%, 0%, 0.87);
+  --fg-secondary: hsla(0, 0%, 10%, 0.87);
+  --fg-tertiary: hsla(10, 10%, 10%, 0.87);
+  --fg-cuaternary: hsl(227, 96%, 39%);
+  --fg-status-pending: hsl(0, 100%, 30%);
+  --fg-status-draft: hsl(143, 100%, 20%);
+  --bg-status-draft: hsl(125, 63%, 82%);
+  --bg-status-draft-accent: hsl(128, 63%, 84%);
+  --fg-status-discarded: rgb(0, 0, 0);
+  --bg-status-discarded: hsla(0, 5%, 87%);
+  --bg-status-discarded-accent: hsla(0, 5%, 83%);
+  --fg-status-submitted: hsl(227, 100%, 39%);
+  --bg-status-submitted: hsl(227, 100%, 85%);
+  --bg-status-submitted-accent: hsl(227, 100%, 82%);
+  --fg-filter-badge: hsl(239, 36%, 47%);
+  --fg-filter-badge-accent: hsl(239, 100%, 39%);
+  --bg-filter-badge: hsl(240, 100%, 92%);
+  --bg-filter-badge-accent: hsl(240, 100%, 90%);
+  --fg-label: var(--color-black);
+  --fg-label-2: var(--color-black);
+  --bg-label: var(--color-black);
+  --bg-label-unselected: hsl(0, 0%, 96%);
+  --bg-label-unselected-hover: hsla(0, 0%, 0%, 0.06);
+  --bg-field: linear-gradient(45deg, var(--bg-opacity-2), var(--bg-opacity-1));
+  --border-field: hsl(0, 0%, 94%);
+  --bg-bubble: linear-gradient(45deg, var(--bg-opacity-3), var(--bg-opacity-1));
+  --bg-bubble-inverse: linear-gradient(
+    45deg,
+    var(--bg-opacity-1),
+    var(--bg-opacity-3)
+  );
+  --bg-form: hsl(0, 0%, 100%);
+  --bg-form-button-area: hsl(228, 50%, 96%);
+  --fg-shortcut-key: hsla(0, 0%, 0%, 0.2);
+  --bg-similarity: hsl(2, 100%, 94%);
+  --fg-similarity: hsl(3, 100%, 50%);
+  --fg-highlight: hsl(3, 100%, 49%);
+  --bg-auth: hsl(18, 57%, 91%);
+  --bg-auth-gradient: linear-gradient(
+    178.31deg,
+    #ffe5d9 1.36%,
+    #ffd1bc 109.14%
+  );
+  --bg-banner-info: hsl(0, 0%, 90%);
+  --bg-banner-warning: hsl(47, 83%, 91%);
+  --bg-banner-error: hsl(3, 100%, 92%);
+  --bg-tooltip: var(--color-dark-grey);
+  --bg-config-card: hsl(0, 0%, 100%);
+  --bg-config-alert: hsl(0, 0%, 100%);
+  --fg-chat-1: #198700;
+  --fg-chat-2: #933e00;
+  --fg-chat-3: #ae0000;
+  --fg-chat-4: #86008d;
+  --fg-chat-5: #002dd0;
+}
+[data-theme="high-contrast"] {
+  color-scheme: high-contrast;
 }

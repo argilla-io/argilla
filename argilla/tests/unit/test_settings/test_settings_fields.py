@@ -37,21 +37,6 @@ class TestTextField:
         assert text_field.required is True
 
     @pytest.mark.parametrize(
-        "name, expected",
-        [
-            ("prompt", "prompt"),
-            ("Prompt", "prompt"),
-            ("Prompt Name", "prompt_name"),
-            ("Prompt Name 2", "prompt_name_2"),
-            ("Prompt Name 2", "prompt_name_2"),
-        ],
-    )
-    def test_name_validator(self, name, expected, mocker):
-        mock_use_markdown = True
-        text_field = rg.TextField(name=name, use_markdown=mock_use_markdown)
-        assert text_field.name == expected
-
-    @pytest.mark.parametrize(
         "title, name, expected",
         [
             (None, "prompt", "prompt"),

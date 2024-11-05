@@ -111,29 +111,28 @@ async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List
     if await get_user_by_username(db, user_attrs["username"]) is not None:
         raise NotUniqueError(f"User username `{user_attrs['username']}` is not unique")
 
-    async with db.begin_nested():
-        user = await User.create(
-            db,
-            first_name=user_attrs["first_name"],
-            last_name=user_attrs["last_name"],
-            username=user_attrs["username"],
-            role=user_attrs["role"],
-            password_hash=hash_password(user_attrs["password"]),
-            autocommit=False,
-        )
+    user = await User.create(
+        db,
+        first_name=user_attrs["first_name"],
+        last_name=user_attrs["last_name"],
+        username=user_attrs["username"],
+        role=user_attrs["role"],
+        password_hash=hash_password(user_attrs["password"]),
+        autocommit=False,
+    )
 
-        if workspaces is not None:
-            for workspace_name in workspaces:
-                workspace = await Workspace.get_by(db, name=workspace_name)
-                if not workspace:
-                    raise UnprocessableEntityError(f"Workspace '{workspace_name}' does not exist")
+    if workspaces is not None:
+        for workspace_name in workspaces:
+            workspace = await Workspace.get_by(db, name=workspace_name)
+            if not workspace:
+                raise UnprocessableEntityError(f"Workspace '{workspace_name}' does not exist")
 
-                await WorkspaceUser.create(
-                    db,
-                    workspace_id=workspace.id,
-                    user_id=user.id,
-                    autocommit=False,
-                )
+            await WorkspaceUser.create(
+                db,
+                workspace_id=workspace.id,
+                user_id=user.id,
+                autocommit=False,
+            )
 
     await db.commit()
 

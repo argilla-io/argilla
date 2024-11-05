@@ -6,8 +6,14 @@
       @visibility="onVisibility"
     >
       <template slot="dropdown-header">
-        <BaseButton class="record-menu__header">
-          <svgicon name="kebab" width="20" height="20" />
+        <BaseButton
+          class="record-menu__header"
+          :aria-label="
+            (dropdownIsVisible ? 'Collapse' : 'Expand') +
+            ' Record Dropdown for Extra Information'
+          "
+        >
+          <svgicon name="kebab" width="20" height="20" aria-hidden="true" />
         </BaseButton>
       </template>
       <template slot="dropdown-content">
@@ -78,6 +84,7 @@ export default {
     list-style: none;
     padding: $base-space;
     margin: 0;
+    border: 1px solid var(--bg-opacity-1);
     li {
       border-radius: $border-radius-s;
       transition: background-color 0.3s ease;

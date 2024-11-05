@@ -17,6 +17,7 @@
 
 <template>
   <input
+    ref="input"
     class="input"
     :type="type"
     :name="name"
@@ -45,6 +46,10 @@ export default {
       type: String,
       default: "text",
     },
+    autofocus: {
+      type: Boolean,
+      default: false,
+    },
   },
   mounted() {
     this.$nextTick(() => {
@@ -65,6 +70,9 @@ export default {
       this.setParentPlaceholder();
       this.handleMaxLength();
       this.updateValues();
+      if (this.autofocus) {
+        this.$refs.input.focus();
+      }
     });
   },
 };

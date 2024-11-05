@@ -35,9 +35,10 @@ from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
     fetch_records_by_ids_as_dict,
 )
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
 from argilla_server.search_engine import SearchEngine
-from argilla_server.validators.records import RecordsBulkCreateValidator, RecordsBulkUpsertValidator
+from argilla_server.validators.records import RecordsBulkCreateValidator, RecordUpsertValidator
 
 
 class CreateRecordsBulk:
@@ -48,26 +49,25 @@ class CreateRecordsBulk:
     async def create_records_bulk(self, dataset: Dataset, bulk_create: RecordsBulkCreate) -> RecordsBulk:
         await RecordsBulkCreateValidator.validate(self._db, bulk_create, dataset)
 
-        async with self._db.begin_nested():
-            records = [
-                Record(
-                    fields=jsonable_encoder(record_create.fields),
-                    metadata_=record_create.metadata,
-                    external_id=record_create.external_id,
-                    dataset_id=dataset.id,
-                )
-                for record_create in bulk_create.items
-            ]
+        records = [
+            Record(
+                fields=jsonable_encoder(record_create.fields),
+                metadata_=record_create.metadata,
+                external_id=record_create.external_id,
+                dataset_id=dataset.id,
+            )
+            for record_create in bulk_create.items
+        ]
 
-            self._db.add_all(records)
-            await self._db.flush(records)
-
-            await self._upsert_records_relationships(records, bulk_create.items)
-            await _preload_records_relationships_before_index(self._db, records)
-            await distribution.unsafe_update_records_status(self._db, records)
-            await self._search_engine.index_records(dataset, records)
+        self._db.add_all(records)
+        await self._db.flush(records)
+        await self._upsert_records_relationships(records, bulk_create.items)
+        await distribution.unsafe_update_records_status(self._db, records)
 
         await self._db.commit()
+
+        await _preload_records_relationships_before_index(self._db, records)
+        await self._search_engine.index_records(dataset, records)
 
         return RecordsBulk(items=records)
 
@@ -139,43 +139,52 @@ class CreateRecordsBulk:
             autocommit=False,
         )
 
-    def _metadata_is_set(self, record_create: RecordCreate) -> bool:
+    @classmethod
+    def _metadata_is_set(cls, record_create: RecordCreate) -> bool:
         return "metadata" in record_create.__fields_set__
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
-    async def upsert_records_bulk(self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert) -> RecordsBulkWithUpdateInfo:
+    async def upsert_records_bulk(
+        self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert, raise_on_error: bool = True
+    ) -> RecordsBulkWithUpdateInfo:
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
-        # found_records is passed to the validator to avoid querying the database again, but ideally, it should be
-        # computed inside the validator
-        await RecordsBulkUpsertValidator.validate(bulk_upsert, dataset, found_records)
 
         records = []
-        async with self._db.begin_nested():
-            for record_upsert in bulk_upsert.items:
-                record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
-                if not record:
-                    record = Record(
-                        fields=jsonable_encoder(record_upsert.fields),
-                        metadata_=record_upsert.metadata,
-                        external_id=record_upsert.external_id,
-                        dataset_id=dataset.id,
-                    )
-                elif self._metadata_is_set(record_upsert):
-                    record.metadata_ = record_upsert.metadata
-                    record.updated_at = datetime.utcnow()
+        for idx, record_upsert in enumerate(bulk_upsert.items):
+            record = found_records.get(record_upsert.id) or found_records.get(record_upsert.external_id)
 
-                records.append(record)
+            try:
+                await RecordUpsertValidator.validate(record_upsert, dataset, record)
+            except Exception as ex:
+                if raise_on_error:
+                    raise UnprocessableEntityError(f"Record at position {idx} is not valid because {ex}") from ex
+                else:
+                    # NOTE: Ignore the errors for this record and continue with the next one
+                    continue
 
-            self._db.add_all(records)
-            await self._db.flush(records)
+            if not record:
+                record = Record(
+                    fields=jsonable_encoder(record_upsert.fields),
+                    metadata_=record_upsert.metadata,
+                    external_id=record_upsert.external_id,
+                    dataset_id=dataset.id,
+                )
+            elif self._metadata_is_set(record_upsert):
+                record.metadata_ = record_upsert.metadata
+                record.updated_at = datetime.utcnow()
 
-            await self._upsert_records_relationships(records, bulk_upsert.items)
-            await _preload_records_relationships_before_index(self._db, records)
-            await distribution.unsafe_update_records_status(self._db, records)
-            await self._search_engine.index_records(dataset, records)
+            records.append(record)
+
+        self._db.add_all(records)
+        await self._db.flush(records)
+        await self._upsert_records_relationships(records, bulk_upsert.items)
+        await distribution.unsafe_update_records_status(self._db, records)
 
         await self._db.commit()
+
+        await _preload_records_relationships_before_index(self._db, records)
+        await self._search_engine.index_records(dataset, records)
 
         return RecordsBulkWithUpdateInfo(
             items=records,

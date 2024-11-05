@@ -6,6 +6,8 @@
           v-for="(range, index) in filteredProgressRanges"
           :key="range.name"
           role="progressbar"
+          :aria-valuenow="getPercentage(range.value)"
+          :aria-label="range.name"
           :class="[
             'progress__range',
             showTooltip ? 'progress__range--with-tooltip' : null,

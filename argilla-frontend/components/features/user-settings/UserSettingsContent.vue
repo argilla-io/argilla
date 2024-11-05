@@ -97,6 +97,10 @@ export default {
   gap: $base-space * 2;
   padding-bottom: 0;
 }
+.circle-and-role span {
+  background-color: var(--color-brand);
+  color: var(--color-white);
+}
 
 .description {
   &__title {
