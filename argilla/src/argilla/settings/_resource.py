@@ -14,7 +14,6 @@
 
 import json
 import os
-import re
 import warnings
 from functools import cached_property
 from pathlib import Path
