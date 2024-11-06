@@ -64,7 +64,7 @@ dependencies = [
 
 [project.optional-dependencies]
 postgresql = [
-    "psycopg ~= 3.2.0",
+    "psycopg2 ~= 2.9.0",
     # Async PostgreSQL
     "asyncpg ~= 0.30.0",
 ]

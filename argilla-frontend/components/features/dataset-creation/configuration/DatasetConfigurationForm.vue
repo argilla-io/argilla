@@ -229,7 +229,7 @@ export default {
     &__intro {
       display: block;
       padding: 4px;
-      background: var(--bg-congig-alert);
+      background: var(--bg-config-alert);
       @include font-size(12px);
       @include line-height(16px);
     }

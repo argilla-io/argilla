@@ -1,7 +1,7 @@
 <template>
   <div class="input-field">
     <Validation :validations="showValidations ? translatedValidations : []">
-      <label class="input-field__label" v-text="name" :for="name" />
+      <label class="input-field__label" :id="name" v-text="name" :for="name" />
       <span class="input-field__container">
         <input
           ref="input"
