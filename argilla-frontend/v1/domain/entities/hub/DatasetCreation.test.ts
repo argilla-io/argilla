@@ -29,6 +29,10 @@ const datasetInfo = {
             dtype: "string",
             _type: "Value",
           },
+          extra: {
+            dtype: "int32",
+            _type: "Value",
+          },
         },
       ],
       metadata: {
@@ -158,6 +162,35 @@ describe("DatasetCreation", () => {
       expect(chatField.name).toBe("chat_field");
       expect(chatField.type.isChatType).toBeTruthy();
       expect(chatField.required).toBeFalsy();
+    });
+
+    it("skip other list feature from chat fields", () => {
+      const builder = new DatasetCreationBuilder("FAKE", {
+        default: {
+          ...datasetInfo.default,
+          features: {
+            some_list_feature: [
+              {
+                other: {
+                  dtype: "string",
+                  _type: "Value",
+                },
+                value: {
+                  dtype: "string",
+                  _type: "Value",
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      const datasetCreation = builder.build();
+
+      expect(
+        datasetCreation.fields.filter((f) => f.type.value === "no mapping")
+          .length
+      ).toBe(1);
     });
 
     it("get no mapped feature", () => {
