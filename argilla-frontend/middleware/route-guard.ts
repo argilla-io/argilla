@@ -17,9 +17,15 @@
 
 import { Context } from "@nuxt/types";
 import { useRunningEnvironment } from "~/v1/infrastructure/services/useRunningEnvironment";
+import { useLocalStorage } from "~/v1/infrastructure/services";
+
+const { set } = useLocalStorage();
 
 export default ({ $auth, route, redirect }: Context) => {
   const { isRunningOnHuggingFace } = useRunningEnvironment();
+
+  // By-pass unknown routes. This is needed to avoid errors with API calls.
+  if (route.name == null) return;
 
   switch (route.name) {
     case "sign-in":
@@ -28,12 +34,8 @@ export default ({ $auth, route, redirect }: Context) => {
       if (route.params.omitCTA) return;
 
       if (isRunningOnHuggingFace()) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { redirect: _, ...query } = route.query;
-
         return redirect({
           name: "welcome-hf-sign-in",
-          query,
         });
       }
       break;
@@ -50,14 +52,11 @@ export default ({ $auth, route, redirect }: Context) => {
     default:
       if (!$auth.loggedIn) {
         if (route.path !== "/") {
-          route.query.redirect = route.fullPath;
+          set("redirectTo", route.path);
         }
 
         redirect({
           name: "sign-in",
-          query: {
-            ...route.query,
-          },
         });
       }
   }

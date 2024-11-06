@@ -7,6 +7,8 @@ import { QuestionCreation } from "./QuestionCreation";
 type Structure = {
   name: string;
   options?: string[];
+  role?: string;
+  content?: string;
   structure?: Structure[];
   kindObject?: "Value" | "Image" | "ClassLabel" | "Sequence";
   type?: "string" | MetadataTypes;
@@ -33,6 +35,7 @@ export class Subset {
 
     for (const [name, value] of Object.entries<Feature>(datasetInfo.features)) {
       if (Array.isArray(value)) {
+        const { role, content } = value[0];
         this.structures.push({
           name,
           structure: value.map((v) => {
@@ -42,6 +45,8 @@ export class Subset {
               name: key,
               kindObject: value._type,
               type: value.dtype,
+              role,
+              content,
             };
           }),
         });
@@ -134,8 +139,12 @@ export class Subset {
         return "text";
 
       if (structure.kindObject === "Image") return "image";
-
-      if (structure.structure?.length > 0) return "chat";
+      if (
+        structure.structure?.length > 0 &&
+        structure.structure[0].content &&
+        structure.structure[0].role
+      )
+        return "chat";
     };
 
     const field = FieldCreation.from(
