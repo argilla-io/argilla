@@ -332,7 +332,7 @@ class HubImportExportMixin(DiskImportExportMixin):
             "split": split,
         }
 
-        url = f"{client.api_url.removesuffix('/')}/new/{quote_plus(repo_id)}?{urlencode(params)}"
+        url = f"{client.api_url.removesuffix('/')}/{quote_plus(repo_id)}?{urlencode(params)}"
 
         try:
             webbrowser.open(url, new=2, autoraise=True)
