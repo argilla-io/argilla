@@ -24,6 +24,8 @@ const { set } = useLocalStorage();
 export default ({ $auth, route, redirect }: Context) => {
   const { isRunningOnHuggingFace } = useRunningEnvironment();
 
+  console.log(route);
+
   switch (route.name) {
     case "sign-in":
       if ($auth.loggedIn) return redirect("/");
@@ -54,9 +56,6 @@ export default ({ $auth, route, redirect }: Context) => {
 
         redirect({
           name: "sign-in",
-          query: {
-            ...route.query,
-          },
         });
       }
   }
