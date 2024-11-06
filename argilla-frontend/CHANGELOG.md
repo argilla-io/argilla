@@ -17,7 +17,12 @@ These are the section headers that we use:
 ## [Unreleased]()
 
 ### Added
-- Add a high-contrast theme & improvements for the forced-colors mode ([#5661](https://github.com/argilla-io/argilla/pull/5661))
+
+- Add a high-contrast theme & improvements for the forced-colors mode. ([#5661](https://github.com/argilla-io/argilla/pull/5661))
+
+### Fixed
+
+- Fixed redirection problems after users sign-in using HF OAuth. ([#5635](https://github.com/argilla-io/argilla/pull/5635))
 
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
