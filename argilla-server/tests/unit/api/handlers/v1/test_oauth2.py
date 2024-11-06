@@ -89,7 +89,7 @@ class TestOauth2:
     ):
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/authentication", headers=owner_auth_header
+                "/api/v1/oauth2/providers/huggingface/authentication?extra=params", headers=owner_auth_header
             )
             assert response.status_code == 303
 
@@ -97,6 +97,7 @@ class TestOauth2:
             assert redirect_url.scheme == b"https"
             assert redirect_url.host == b"huggingface.co"
             assert b"/oauth/authorize?response_type=code&client_id=client_id" in redirect_url.target
+            assert b"&extra=params" in redirect_url.target
 
     async def test_provider_authentication_with_oauth_disabled(
         self,
