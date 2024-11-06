@@ -64,6 +64,10 @@ export class QuestionCreation {
     this.required = true;
   }
 
+  get isRequired(): boolean {
+    return this.required;
+  }
+
   get isTextType(): boolean {
     return this.type.isTextType;
   }
