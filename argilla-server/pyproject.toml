@@ -38,7 +38,7 @@ dependencies = [
     "PyYAML >= 5.4.1,< 6.1.0",
     # security dependencies
     "python-jose[cryptography] ~= 3.3.0",
-    "passlib[bcrypt] ~= 1.7.4",
+    "bcrypt ~= 4.2.0",
     # required by fastapi
     "python-multipart ~= 0.0.16",
     # OAuth2 integration
