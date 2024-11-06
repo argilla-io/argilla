@@ -14,6 +14,7 @@
 
 import json
 import os
+import warnings
 from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
@@ -22,10 +23,10 @@ from uuid import UUID
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
-from argilla.settings._field import Field, _field_from_dict, _field_from_model
+from argilla.settings._field import Field, _field_from_dict, _field_from_model, FieldBase
 from argilla.settings._io import build_settings_from_repo_id
-from argilla.settings._metadata import MetadataType, MetadataField
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict
+from argilla.settings._metadata import MetadataType, MetadataField, MetadataPropertyBase
+from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
 from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._templates import DefaultSettingsMixin
 from argilla.settings._vector import VectorField
@@ -206,10 +207,10 @@ class Settings(DefaultSettingsMixin, Resource):
         self.validate()
 
         self._update_dataset_related_attributes()
-        self.__fields.create()
-        self.__questions.create()
-        self.__vectors.create()
-        self.__metadata.create()
+        self.__fields._create()
+        self.__questions._create()
+        self.__vectors._create()
+        self.__metadata._create()
 
         self._update_last_api_call()
         return self
@@ -218,10 +219,10 @@ class Settings(DefaultSettingsMixin, Resource):
         self.validate()
 
         self._update_dataset_related_attributes()
-        self.__fields.update()
-        self.__vectors.update()
-        self.__metadata.update()
-        # self.questions.update()
+        self.__fields._update()
+        self.__vectors._update()
+        self.__metadata._update()
+        self.__questions._update()
 
         self._update_last_api_call()
         return self
@@ -285,6 +286,43 @@ class Settings(DefaultSettingsMixin, Resource):
         if not (other and isinstance(other, Settings)):
             return False
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
+
+    def add(
+        self, property: Union[Field, VectorField, MetadataType, QuestionType], override: bool = True
+    ) -> Union[Field, VectorField, MetadataType, QuestionType]:
+        """
+        Add a property to the settings
+
+        Args:
+            property: The property to add
+            override: If True, override the existing property with the same name. Otherwise, raise an error.  Defaults to True.
+
+        Returns:
+            The added property
+
+        """
+        # review all settings properties and remove any existing property with the same name
+        for attributes in [self.fields, self.questions, self.vectors, self.metadata]:
+            for prop in attributes:
+                if prop.name == property.name:
+                    message = f"Property with name {property.name!r} already exists in settings as {prop.__class__.__name__!r}"
+                    if override:
+                        warnings.warn(message + ". Overriding the existing property.")
+                        attributes.remove(prop)
+                    else:
+                        raise SettingsError(message)
+
+        if isinstance(property, FieldBase):
+            self.fields.add(property)
+        elif isinstance(property, QuestionPropertyBase):
+            self.questions.add(property)
+        elif isinstance(property, VectorField):
+            self.vectors.add(property)
+        elif isinstance(property, MetadataPropertyBase):
+            self.metadata.add(property)
+        else:
+            raise ValueError(f"Unsupported property type: {type(property).__name__}")
+        return property
 
     #####################
     #  Repr Methods     #
@@ -444,6 +482,7 @@ class SettingsProperties(Sequence[Property]):
     def __init__(self, settings: "Settings", properties: List[Property]):
         self._properties_by_name = {}
         self._settings = settings
+        self._removed_properties = []
 
         for property in properties or []:
             if self._settings.dataset and hasattr(property, "dataset"):
@@ -461,7 +500,7 @@ class SettingsProperties(Sequence[Property]):
             return self._properties_by_name.get(key)
 
     def __iter__(self) -> Iterator[Property]:
-        return iter(self._properties_by_name.values())
+        return iter([v for v in self._properties_by_name.values()])
 
     def __len__(self):
         return len(self._properties_by_name)
@@ -478,7 +517,17 @@ class SettingsProperties(Sequence[Property]):
         setattr(self, property.name, property)
         return property
 
-    def create(self):
+    def remove(self, property: Union[str, Property]) -> None:
+        if isinstance(property, str):
+            property = self._properties_by_name.pop(property)
+        else:
+            property = self._properties_by_name.pop(property.name)
+
+        if property:
+            delattr(self, property.name)
+            self._removed_properties.append(property)
+
+    def _create(self):
         for property in self:
             try:
                 property.dataset = self._settings.dataset
@@ -486,13 +535,22 @@ class SettingsProperties(Sequence[Property]):
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to create property {property.name!r}: {e.message}") from e
 
-    def update(self):
+    def _update(self):
         for item in self:
             try:
                 item.dataset = self._settings.dataset
                 item.update() if item.id else item.create()
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to update {item.name!r}: {e.message}") from e
+
+        self._delete()
+
+    def _delete(self):
+        for item in self._removed_properties:
+            try:
+                item.delete()
+            except ArgillaAPIError as e:
+                raise SettingsError(f"Failed to delete {item.name!r}: {e.message}") from e
 
     def serialize(self) -> List[dict]:
         return [property.serialize() for property in self]
@@ -520,12 +578,18 @@ class QuestionsProperties(SettingsProperties[QuestionType]):
     Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
     """
 
-    def create(self):
+    def _create(self):
         for question in self:
             try:
                 self._create_question(question)
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to create question {question.name}") from e
+
+    def _update(self):
+        pass
+
+    def _delete(self):
+        pass
 
     def _create_question(self, question: QuestionType) -> None:
         question_model = self._settings._client.api.questions.create(
