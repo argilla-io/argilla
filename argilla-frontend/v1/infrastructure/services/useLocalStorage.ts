@@ -34,8 +34,15 @@ export const useLocalStorage = () => {
     } catch {}
   };
 
+  const pop = (key: Options) => {
+    const value = get(key);
+    set(key, null);
+    return value;
+  };
+
   return {
     get,
     set,
+    pop,
   };
 };
