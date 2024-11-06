@@ -24,6 +24,10 @@ const { set } = useLocalStorage();
 export default ({ $auth, route, redirect }: Context) => {
   const { isRunningOnHuggingFace } = useRunningEnvironment();
 
+  if (route.path.startsWith("/api/")) {
+    return;
+  }
+
   switch (route.name) {
     case "sign-in":
       if ($auth.loggedIn) return redirect("/");
@@ -50,9 +54,8 @@ export default ({ $auth, route, redirect }: Context) => {
       if (!$auth.loggedIn) {
         if (route.path !== "/") {
           route.query.redirectTo = route.fullPath;
+          set("redirectTo", route.query.redirectTo);
         }
-
-        set("redirectTo", route.query.redirectTo);
 
         redirect({
           name: "sign-in",
