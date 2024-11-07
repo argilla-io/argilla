@@ -25,7 +25,6 @@ export class HubRepository {
       return data.dataset_info;
     } catch (e) {
       throw {
-        status: e.response.status,
         response: HUB_REPOSITORY_ERRORS.NOT_EXIST,
       };
     }
