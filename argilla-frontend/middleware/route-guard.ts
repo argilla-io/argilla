@@ -52,7 +52,7 @@ export default ({ $auth, route, redirect }: Context) => {
     default:
       if (!$auth.loggedIn) {
         if (route.path !== "/") {
-          set("redirectTo", route.path);
+          set("redirectTo", route.fullPath);
         }
 
         redirect({
