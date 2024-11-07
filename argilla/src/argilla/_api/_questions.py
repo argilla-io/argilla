@@ -18,33 +18,15 @@ from uuid import UUID
 import httpx
 from argilla._api._base import ResourceAPI
 from argilla._exceptions import api_error_handler
-from argilla._models import (
-    TextQuestionModel,
-    LabelQuestionModel,
-    MultiLabelQuestionModel,
-    RankingQuestionModel,
-    RatingQuestionModel,
-    SpanQuestionModel,
-    QuestionBaseModel,
-    QuestionModel,
-)
+from argilla._models import QuestionModel
 
 __all__ = ["QuestionsAPI"]
 
 
-class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
+class QuestionsAPI(ResourceAPI[QuestionModel]):
     """Manage datasets via the API"""
 
     http_client: httpx.Client
-
-    _TYPE_TO_MODEL_CLASS = {
-        "text": TextQuestionModel,
-        "label_selection": LabelQuestionModel,
-        "multi_label_selection": MultiLabelQuestionModel,
-        "ranking": RankingQuestionModel,
-        "rating": RatingQuestionModel,
-        "span": SpanQuestionModel,
-    }
 
     ################
     # CRUD methods #
@@ -53,15 +35,14 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
     @api_error_handler
     def create(
         self,
-        dataset_id: UUID,
         question: QuestionModel,
     ) -> QuestionModel:
-        url = f"/api/v1/datasets/{dataset_id}/questions"
+        url = f"/api/v1/datasets/{question.dataset_id}/questions"
         response = self.http_client.post(url=url, json=question.model_dump())
         response.raise_for_status()
         response_json = response.json()
         question_model = self._model_from_json(response_json=response_json)
-        self._log_message(message=f"Created question {question_model.name} in dataset {dataset_id}")
+        self._log_message(message=f"Created question {question_model.name} in dataset {question.dataset_id}")
         return question_model
 
     @api_error_handler
@@ -69,24 +50,23 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
         self,
         question: QuestionModel,
     ) -> QuestionModel:
-        # TODO: Implement update method for fields with server side ID
-        raise NotImplementedError
+        url = f"/api/v1/questions/{question.id}"
+        response = self.http_client.patch(url, json=question.model_dump())
+        response.raise_for_status()
+        response_json = response.json()
+        updated_field = self._model_from_json(response_json)
+        self._log_message(message=f"Update question {updated_field.name} with id {question.id}")
+        return updated_field
 
     @api_error_handler
     def delete(self, question_id: UUID) -> None:
-        # TODO: Implement delete method for fields with server side ID
-        raise NotImplementedError
+        url = f"/api/v1/questions/{question_id}"
+        self.http_client.delete(url).raise_for_status()
+        self._log_message(message=f"Deleted question with id {question_id}")
 
     ####################
     # Utility methods #
     ####################
-
-    def create_many(self, dataset_id: UUID, questions: List[QuestionModel]) -> List[QuestionModel]:
-        response_models = []
-        for question in questions:
-            response_model = self.create(dataset_id=dataset_id, question=question)
-            response_models.append(response_model)
-        return response_models
 
     @api_error_handler
     def list(self, dataset_id: UUID) -> List[QuestionModel]:
@@ -103,21 +83,7 @@ class QuestionsAPI(ResourceAPI[QuestionBaseModel]):
     def _model_from_json(self, response_json: Dict) -> QuestionModel:
         response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
         response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
-        return self._get_model_from_response(response_json=response_json)
+        return QuestionModel(**response_json)
 
     def _model_from_jsons(self, response_jsons: List[Dict]) -> List[QuestionModel]:
         return list(map(self._model_from_json, response_jsons))
-
-    def _get_model_from_response(self, response_json: Dict) -> QuestionModel:
-        """Get the model from the response"""
-        try:
-            question_type = response_json.get("settings", {}).get("type")
-        except Exception as e:
-            raise ValueError("Invalid field type: missing 'settings.type' in response") from e
-
-        question_class = self._TYPE_TO_MODEL_CLASS.get(question_type)
-        if question_class is None:
-            self._log_message(message=f"Unknown question type: {question_type}")
-            question_class = QuestionBaseModel
-
-        return question_class(**response_json, check_fields=False)
