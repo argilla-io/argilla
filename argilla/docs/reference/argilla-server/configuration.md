@@ -84,6 +84,10 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_ELASTICSEARCH_CA_PATH`: Path to CA cert for ES host. For example: `/full/path/to/root-ca.pem` (Optional)
 
+- `ARGILLA_ES_RECORDS_INDEX_SHARDS`: This environment variable sets the default number of shards for the records index. (Default: `1`).
+
+- `ARGILLA_ES_RECORDS_INDEX_REPLICAS`: This environment variable sets the default number of replicas for the records index. (Default: `0`).
+
 ### Redis
 
 Redis is used by Argilla to store information about jobs to be processed on background. The following environment variables are useful to config how Argilla connects to Redis:
