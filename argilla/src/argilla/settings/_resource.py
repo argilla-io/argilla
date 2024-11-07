@@ -26,7 +26,7 @@ from argilla._resource import Resource
 from argilla.settings._field import Field, _field_from_dict, _field_from_model, FieldBase
 from argilla.settings._io import build_settings_from_repo_id
 from argilla.settings._metadata import MetadataType, MetadataField, MetadataPropertyBase
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
+from argilla.settings._question import QuestionType, question_from_model, _question_from_dict, QuestionBase
 from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._templates import DefaultSettingsMixin
 from argilla.settings._vector import VectorField
@@ -78,7 +78,7 @@ class Settings(DefaultSettingsMixin, Resource):
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
-        self.__questions = QuestionsProperties(self, questions)
+        self.__questions = SettingsProperties(self, questions)
         self.__fields = SettingsProperties(self, fields)
         self.__vectors = SettingsProperties(self, vectors)
         self.__metadata = SettingsProperties(self, metadata)
@@ -314,7 +314,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
         if isinstance(property, FieldBase):
             self.fields.add(property)
-        elif isinstance(property, QuestionPropertyBase):
+        elif isinstance(property, QuestionBase):
             self.questions.add(property)
         elif isinstance(property, VectorField):
             self.vectors.add(property)
@@ -349,7 +349,7 @@ class Settings(DefaultSettingsMixin, Resource):
         allow_extra_metadata = settings_dict.get("allow_extra_metadata")
         mapping = settings_dict.get("mapping")
 
-        questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
+        questions = [_question_from_dict(question) for question in settings_dict.get("questions", [])]
         fields = [_field_from_dict(field) for field in fields]
         vectors = [VectorField.from_dict(vector) for vector in vectors]
         metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
