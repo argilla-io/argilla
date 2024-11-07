@@ -24,6 +24,7 @@ const { set } = useLocalStorage();
 export default ({ $auth, route, redirect }: Context) => {
   const { isRunningOnHuggingFace } = useRunningEnvironment();
 
+  console.log(route);
   // By-pass unknown routes. This is needed to avoid errors with API calls.
   if (route.name == null) return;
 
