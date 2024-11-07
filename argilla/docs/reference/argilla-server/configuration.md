@@ -84,9 +84,9 @@ The following environment variables are useful only when PostgreSQL is used:
 
 - `ARGILLA_ELASTICSEARCH_CA_PATH`: Path to CA cert for ES host. For example: `/full/path/to/root-ca.pem` (Optional)
 
-- `ARGILLA_ES_RECORDS_INDEX_SHARDS`: This environment variable sets the default number of shards for the records index. (Default: `1`).
+- `ARGILLA_ES_RECORDS_INDEX_SHARDS`: Default number of elasticsearch/opensearch shards for each search index. (Default: `1`).
 
-- `ARGILLA_ES_RECORDS_INDEX_REPLICAS`: This environment variable sets the default number of replicas for the records index. (Default: `0`).
+- `ARGILLA_ES_RECORDS_INDEX_REPLICAS`: Default number of elasticsearch/opensearch replicas for each search index. (Default: `0`).
 
 ### Redis
 
