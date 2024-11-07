@@ -139,19 +139,47 @@ export default {
       visibleDatasetCreationDialog: false,
     };
   },
+  computed: {
+    getMaxNumberInNames() {
+      return Math.max(
+        ...this.dataset.selectedSubset.questions.map((question) => {
+          const numberInName = question.name.split("_").pop();
+          return parseInt(numberInName) || 0;
+        })
+      );
+    },
+  },
   methods: {
     createDataset() {
       this.create(this.dataset);
     },
-    addQuestion(type) {
-      const name = this.$t(`config.questionId.${type}`);
-      const questionName = `${name}-${this.dataset.selectedSubset.questions.length}`;
-
-      this.dataset.selectedSubset.addQuestion(questionName, { type });
+    generateName(type, number) {
+      const typeName = this.$t(`config.questionId.${type}`);
+      return `${typeName}_${number}`;
     },
-    onTypeIsChanged(name, type) {
-      this.dataset.selectedSubset.removeQuestion(name);
-      this.addQuestion(type.value);
+    addQuestion(type) {
+      const questionName = this.generateName(
+        type,
+        this.getMaxNumberInNames + 1
+      );
+      this.dataset.selectedSubset.addQuestion(questionName, {
+        type,
+      });
+    },
+    onTypeIsChanged(oldName, type) {
+      const numberInName = oldName.split("_")[1];
+      const index = this.dataset.selectedSubset.questions.findIndex(
+        (q) => q.name === oldName
+      );
+      this.dataset.selectedSubset.removeQuestion(oldName);
+      const newQuestionName = this.generateName(type.value, numberInName);
+      this.dataset.selectedSubset.addQuestion(
+        newQuestionName,
+        {
+          type: type.value,
+        },
+        index !== -1 ? index : undefined
+      );
     },
   },
   setup() {

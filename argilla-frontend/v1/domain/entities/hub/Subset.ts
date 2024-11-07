@@ -202,7 +202,11 @@ export class Subset {
     }
   }
 
-  public addQuestion(name: string, settings: QuestionPrototype) {
+  public addQuestion(
+    name: string,
+    settings: QuestionPrototype,
+    position?: number
+  ) {
     const { type } = settings;
     if (type === "label_selection") {
       settings.options = [
@@ -266,6 +270,10 @@ export class Subset {
       return;
     }
 
-    this.questions.push(new QuestionCreation(name, settings));
+    this.questions.splice(
+      position ?? this.questions.length,
+      0,
+      new QuestionCreation(name, settings)
+    );
   }
 }
