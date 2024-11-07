@@ -54,7 +54,6 @@ from argilla._models._settings._questions import (
 )
 from argilla._models._settings._metadata import (
     MetadataFieldModel,
-    MetadataPropertyType,
     BaseMetadataPropertySettings,
     TermsMetadataPropertySettings,
     NumericMetadataPropertySettings,
