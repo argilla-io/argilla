@@ -133,9 +133,9 @@ export const useRoutes = () => {
       } else {
         window.location.href = where;
       }
+    } else {
+      router.push(where);
     }
-
-    router.push(where);
   };
 
   const getQuery = () => {
