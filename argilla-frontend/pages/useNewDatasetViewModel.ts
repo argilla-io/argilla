@@ -13,7 +13,7 @@ export const useNewDatasetViewModel = () => {
         repositoryId
       );
     } catch (e) {
-      error({ statusCode: 404, message: e.response });
+      error({ statusCode: 404, message: "Cannot fetch the dataset" });
     }
   };
 
