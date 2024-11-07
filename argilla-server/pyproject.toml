@@ -1,4 +1,3 @@
-# Remove me
 [project]
 name = "argilla-server"
 dynamic = ["version"]
