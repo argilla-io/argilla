@@ -72,7 +72,7 @@ def test_add_records(client):
     assert dataset_records[2].fields["text"] == mock_data[2]["text"]
 
 
-def test_add_dict_records(client: Argilla):
+def test_add_dict_records(client: Argilla, dataset_name: str):
     ws_name = "new_ws"
     ws = client.workspaces(ws_name) or Workspace(name=ws_name).create()
 
@@ -80,7 +80,7 @@ def test_add_dict_records(client: Argilla):
     if ds is not None:
         ds.delete()
 
-    ds = rg.Dataset(name="new_ds", workspace=ws)
+    ds = rg.Dataset(name=dataset_name, workspace=ws)
     ds.settings = rg.Settings(
         fields=[rg.TextField(name="text")],
         questions=[rg.TextQuestion(name="label")],

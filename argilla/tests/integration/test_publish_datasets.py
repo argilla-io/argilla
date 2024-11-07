@@ -31,19 +31,18 @@ from argilla import (
 )
 
 
-def test_publish_dataset(client: "Argilla"):
+def test_publish_dataset(client: "Argilla", dataset_name: str):
     ws_name = "new_ws"
-    ds_name = "new_ds"
 
     new_ws = client.workspaces(ws_name) or Workspace(name=ws_name).create()
     assert client.api.workspaces.exists(new_ws.id), "The workspace was not created"
 
-    ds = client.datasets(ds_name, workspace=new_ws)
+    ds = client.datasets(dataset_name, workspace=new_ws)
     if ds:
         ds.delete()
         assert not client.api.datasets.exists(ds.id), "The dataset was not deleted"
 
-    ds = Dataset(name=ds_name, workspace=new_ws)
+    ds = Dataset(name=dataset_name, workspace=new_ws)
 
     ds.settings = Settings(
         guidelines="This is a test dataset",
