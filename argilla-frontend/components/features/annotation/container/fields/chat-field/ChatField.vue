@@ -5,7 +5,11 @@
       class="chat__wrapper"
       :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
     >
-      <div v-for="({ role, content: text }, index) in content" :key="index">
+      <div
+        :id="`fields-content-${name}`"
+        v-for="({ role, content: text }, index) in content"
+        :key="index"
+      >
         <span
           :class="[
             'chat__item',
