@@ -282,6 +282,9 @@ export default {
         atLeastTwoOptions: "At least two options are required",
         optionsWithoutLabel: "Empty options are not allowed",
       },
+      rating: {
+        atLeastTwoOptions: "At least two options are required",
+      },
     },
     atLeastOneQuestion: "At least one question is required.",
     atLeastOneRequired: "At least one required question is needed.",

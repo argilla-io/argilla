@@ -115,6 +115,11 @@ export class QuestionCreation {
         );
       }
     }
+    if (this.isRatingType) {
+      if (this.options.length < 2) {
+        errors.push("datasetCreation.questions.rating.atLeastTwoOptions");
+      }
+    }
 
     return errors;
   }
