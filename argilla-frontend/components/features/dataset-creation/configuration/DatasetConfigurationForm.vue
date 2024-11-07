@@ -144,7 +144,7 @@ export default {
       return Math.max(
         ...this.dataset.selectedSubset.questions.map((question) => {
           const numberInName = question.name.split("_").pop();
-          return parseInt(numberInName) || 0;
+          return parseInt(numberInName);
         })
       );
     },
@@ -155,7 +155,7 @@ export default {
     },
     generateName(type, number) {
       const typeName = this.$t(`config.questionId.${type}`);
-      return `${typeName}_${number}`;
+      return `${typeName}_${parseInt(number) || 0}`;
     },
     addQuestion(type) {
       const questionName = this.generateName(
@@ -167,7 +167,7 @@ export default {
       });
     },
     onTypeIsChanged(oldName, type) {
-      const numberInName = oldName.split("_")[1];
+      const numberInName = oldName.split("_").pop();
       const index = this.dataset.selectedSubset.questions.findIndex(
         (q) => q.name === oldName
       );
