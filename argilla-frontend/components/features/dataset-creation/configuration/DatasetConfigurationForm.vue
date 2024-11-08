@@ -74,6 +74,7 @@
             />
           </div>
           <div class="config-form__col__content --questions">
+            {{ getMaxNumberInNames }}
             <draggable
               v-if="dataset.selectedSubset.questions.length"
               class="config-form__draggable-area"
@@ -144,7 +145,7 @@ export default {
       return Math.max(
         ...this.dataset.selectedSubset.questions.map((question) => {
           const numberInName = question.name.split("_").pop();
-          return parseInt(numberInName);
+          return parseInt(numberInName) || 0;
         })
       );
     },
