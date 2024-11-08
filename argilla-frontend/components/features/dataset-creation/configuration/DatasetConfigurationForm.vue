@@ -74,7 +74,6 @@
             />
           </div>
           <div class="config-form__col__content --questions">
-            {{ getMaxNumberInNames }}
             <draggable
               v-if="dataset.selectedSubset.questions.length"
               class="config-form__draggable-area"
