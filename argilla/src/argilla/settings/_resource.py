@@ -101,7 +101,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
     @questions.setter
     def questions(self, questions: List[QuestionType]):
-        self.__questions = QuestionsProperties(self, questions)
+        self.__questions = SettingsProperties(self, questions)
 
     @property
     def vectors(self) -> "SettingsProperties":
@@ -220,6 +220,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
         self._update_dataset_related_attributes()
         self.__fields._update()
+        self.__questions._update()
         self.__vectors._update()
         self.__metadata._update()
         self.__questions._update()
@@ -566,34 +567,3 @@ class SettingsProperties(Sequence[Property]):
         """Return a string representation of the object."""
 
         return f"{repr([prop for prop in self])}"
-
-
-class QuestionsProperties(SettingsProperties[QuestionType]):
-    """
-    This class is used to align questions with the rest of the settings.
-
-    Since questions are not aligned with the Resource class definition, we use this
-    class to work with questions as we do with fields, vectors, or metadata (specially when creating questions).
-
-    Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
-    """
-
-    def _create(self):
-        for question in self:
-            try:
-                self._create_question(question)
-            except ArgillaAPIError as e:
-                raise SettingsError(f"Failed to create question {question.name}") from e
-
-    def _update(self):
-        pass
-
-    def _delete(self):
-        pass
-
-    def _create_question(self, question: QuestionType) -> None:
-        question_model = self._settings._client.api.questions.create(
-            dataset_id=self._settings.dataset.id,
-            question=question.api_model(),
-        )
-        question._model = question_model
