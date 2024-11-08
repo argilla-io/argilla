@@ -1,9 +1,5 @@
 <template>
-  <DatasetsEmpty
-    v-if="!datasets.length"
-    @on-click-card="$emit('on-click-card', $event)"
-  />
-  <div class="dataset__table" v-else>
+  <div class="dataset__table">
     <div class="interactions">
       <base-search-bar
         @input="onSearch"

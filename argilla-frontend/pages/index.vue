@@ -28,15 +28,8 @@
       <PersistentStorageBanner class="home__banner" />
     </template>
     <template v-slot:page-content>
-      <h1 class="home__title" v-text="$t('home.argillaDatasets')" />
-      <BaseLoading class="home__title" v-if="isLoadingDatasets" />
-      <DatasetsTable
-        v-else
-        class="home__table"
-        ref="table"
-        :datasets="datasets.datasets"
-        @on-click-card="cardAction"
-      />
+      <BaseLoading v-if="isLoadingDatasets" />
+      <DatasetList :datasets="datasets.datasets" @on-click-card="cardAction" />
     </template>
     <template v-slot:page-sidebar>
       <template v-if="isAdminOrOwnerRole">
@@ -106,7 +99,7 @@ export default {
   methods: {
     onBreadcrumbAction(e) {
       if (e === "clearFilters") {
-        this.$refs.table?.clearFilters();
+        this.$refs.datasetList?.clearFilters();
       }
     },
     cardAction(action) {
@@ -129,11 +122,6 @@ export default {
 
 <style lang="scss" scoped>
 .home {
-  &__title {
-    margin: 0;
-    @include font-size(20px);
-    font-weight: 500;
-  }
   &__main {
     display: flex;
     flex-direction: column;

@@ -258,6 +258,7 @@ export default {
     },
   },
   home: {
+    zeroDatasetsFound: "0 datasets found",
     argillaDatasets: "Your datasets",
     none: "None yet",
     importTitle: "Import a dataset from Hugging Face Hub",
