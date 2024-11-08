@@ -29,7 +29,7 @@
       />
       <DatasetConfigurationRating
         v-else-if="question.settings.type.isRatingType"
-        v-model="question.settings.options"
+        :question="question"
         @is-focused="$emit('is-focused', $event)"
       />
       <DatasetConfigurationRanking

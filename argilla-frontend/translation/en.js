@@ -282,6 +282,9 @@ export default {
         atLeastTwoOptions: "At least two options are required",
         optionsWithoutLabel: "Empty options are not allowed",
       },
+      rating: {
+        atLeastTwoOptions: "At least two options are required",
+      },
     },
     atLeastOneQuestion: "At least one question is required.",
     atLeastOneRequired: "At least one required question is needed.",
@@ -326,6 +329,14 @@ export default {
       multi_label_selection: "Multi-label",
       span: "Span",
       "no mapping": "No mapping",
+    },
+    questionId: {
+      text: "text",
+      rating: "rating",
+      label_selection: "label",
+      ranking: "ranking",
+      multi_label_selection: "multi-label",
+      span: "span",
     },
   },
   persistentStorage: {
