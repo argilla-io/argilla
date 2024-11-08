@@ -121,8 +121,10 @@ export const useSearchTextHighlight = (fieldId: string) => {
 
   const highlightText = (searchText: string) => {
     const fieldComponent = document.getElementById(FIELD_ID_TO_HIGHLIGHT);
-    if (!searchText || !fieldComponent) return;
-
+    if (!searchText || !fieldComponent) {
+      CSS.highlights.delete(HIGHLIGHT_CLASS);
+      return;
+    }
     const ranges = createRangesToHighlight(fieldComponent, searchText);
 
     CSS.highlights.set(HIGHLIGHT_CLASS, new Highlight(...ranges));
