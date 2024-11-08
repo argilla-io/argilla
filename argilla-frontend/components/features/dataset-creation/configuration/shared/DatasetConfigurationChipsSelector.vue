@@ -56,7 +56,7 @@ export default {
   &__options {
     display: flex;
     flex-wrap: wrap;
-    gap: $base-space;
+    gap: $base-space - 1px;
     padding: 0;
     margin: $base-space 0 0;
   }
