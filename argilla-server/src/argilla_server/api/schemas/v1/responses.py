@@ -20,7 +20,7 @@ from fastapi import Body
 
 from argilla_server.api.schemas.v1.questions import QuestionName
 from argilla_server.enums import ResponseStatus
-from pydantic import BaseModel, Field, StrictInt, StrictStr, root_validator, ConfigDict
+from pydantic import BaseModel, Field, StrictInt, StrictStr, root_validator, ConfigDict, model_validator
 
 RESPONSES_BULK_CREATE_MIN_ITEMS = 1
 RESPONSES_BULK_CREATE_MAX_ITEMS = 100
@@ -41,14 +41,15 @@ class SpanQuestionResponseValueItem(BaseModel):
     start: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_START_GREATER_THAN_OR_EQUAL)
     end: int = Field(..., ge=SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL)
 
-    @root_validator(skip_on_failure=True)
-    def check_start_and_end(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        start, end = values.get("start"), values.get("end")
+    @model_validator(mode="after")
+    @classmethod
+    def check_start_and_end(cls, instance: "SpanQuestionResponseValueItem") -> "SpanQuestionResponseValueItem":
+        start, end = instance.start, instance.end
 
         if start is not None and end is not None and end <= start:
             raise ValueError("span question response value 'end' must have a value greater than 'start'")
 
-        return values
+        return instance
 
 
 RankingQuestionResponseValue = List[RankingQuestionResponseValueItem]

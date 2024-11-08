@@ -17,7 +17,7 @@ from uuid import UUID
 from rq import Retry
 from rq.decorators import job
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from argilla_server.models import Record, Response
 from argilla_server.database import AsyncSessionLocal

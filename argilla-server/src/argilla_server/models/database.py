@@ -45,7 +45,7 @@ from argilla_server.enums import (
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
 from argilla_server.models.mixins import inserted_at_current_value
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
 __all__ = [
@@ -281,7 +281,7 @@ class Question(DatabaseModel):
 
     @property
     def parsed_settings(self) -> QuestionSettings:
-        return parse_obj_as(QuestionSettings, self.settings)
+        return TypeAdapter(QuestionSettings).validate_python(self.settings)
 
     @property
     def is_text(self) -> bool:
@@ -330,7 +330,7 @@ class MetadataProperty(DatabaseModel):
 
     @property
     def parsed_settings(self) -> MetadataPropertySettings:
-        return parse_obj_as(MetadataPropertySettings, self.settings)
+        return TypeAdapter(MetadataPropertySettings).validate_python(self.settings)
 
     @property
     def visible_for_annotators(self) -> bool:

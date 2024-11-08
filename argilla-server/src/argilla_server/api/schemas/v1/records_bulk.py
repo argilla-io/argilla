@@ -15,8 +15,9 @@
 from typing import List
 from uuid import UUID
 
+from pydantic import BaseModel, Field, field_validator
+
 from argilla_server.api.schemas.v1.records import Record, RecordCreate, RecordUpsert
-from pydantic import BaseModel, Field, validator
 
 RECORDS_BULK_CREATE_MIN_ITEMS = 1
 RECORDS_BULK_CREATE_MAX_ITEMS = 500
@@ -38,7 +39,7 @@ class RecordsBulkCreate(BaseModel):
         ..., min_length=RECORDS_BULK_CREATE_MIN_ITEMS, max_length=RECORDS_BULK_CREATE_MAX_ITEMS
     )
 
-    @validator("items")
+    @field_validator("items")
     @classmethod
     def check_unique_external_ids(cls, items: List[RecordCreate]) -> List[RecordCreate]:
         """Check that external_ids are unique"""

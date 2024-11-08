@@ -47,7 +47,7 @@ async def import_dataset_from_hub_job(name: str, subset: str, split: str, datase
         )
 
         async with SearchEngine.get_by_name(settings.search_engine) as search_engine:
-            parsed_mapping = HubDatasetMapping.parse_obj(mapping)
+            parsed_mapping = HubDatasetMapping.model_validate(mapping)
 
             await (
                 HubDataset(name, subset, split, parsed_mapping)

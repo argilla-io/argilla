@@ -13,8 +13,7 @@
 #  limitations under the License.
 import os
 from collections import OrderedDict
-from sqlite3 import Connection as SQLite3Connection
-from typing import TYPE_CHECKING, AsyncGenerator, Optional
+from typing import AsyncGenerator, Optional
 
 from sqlalchemy import event, make_url
 from sqlalchemy.engine import Engine

@@ -18,7 +18,7 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import MetadataPropertyType
-from pydantic import BaseModel, Field, constr, root_validator, validator, ConfigDict
+from pydantic import BaseModel, Field, constr, ConfigDict, field_validator, model_validator
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
@@ -62,8 +62,9 @@ class IntegerMetadataMetrics(NumericMetadataMetrics[int]):
 class FloatMetadataMetrics(NumericMetadataMetrics[float]):
     type: Literal[MetadataPropertyType.float] = MetadataPropertyType.float
 
-    @validator("min", "max")
-    def round_result(cls, v: float):
+    @field_validator("min", "max")
+    @classmethod
+    def round_result(cls, v: Optional[float]) -> Optional[float]:
         if v is not None:
             return round(v, FLOAT_METADATA_METRICS_PRECISION)
         return v
@@ -120,15 +121,16 @@ class NumericMetadataProperty(BaseModel, Generic[NT]):
     min: Optional[NT] = None
     max: Optional[NT] = None
 
-    @root_validator(skip_on_failure=True)
-    def check_bounds(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        min = values.get("min")
-        max = values.get("max")
+    @model_validator(mode="after")
+    @classmethod
+    def check_bounds(cls, instance: "NumericMetadataProperty") -> "NumericMetadataProperty":
+        min = instance.min
+        max = instance.max
 
         if min is not None and max is not None and min >= max:
             raise ValueError(f"'min' ({min}) must be lower than 'max' ({max})")
 
-        return values
+        return instance
 
 
 class TermsMetadataPropertyCreate(BaseModel):

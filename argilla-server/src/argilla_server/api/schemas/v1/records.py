@@ -11,7 +11,6 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
@@ -129,7 +128,7 @@ class RecordCreate(BaseModel):
     # This config is used to coerce numbers to strings in the fields to align with the previous behavior
     model_config = ConfigDict(coerce_numbers_to_str=True)
 
-    @validator("fields", pre=True)
+    @field_validator("fields", mode="before")
     @classmethod
     def validate_chat_field_content(cls, fields: Any):
         if not isinstance(fields, dict):
@@ -152,7 +151,7 @@ class RecordCreate(BaseModel):
 
         return fields
 
-    @validator("responses")
+    @field_validator("responses")
     @classmethod
     def check_user_id_is_unique(
         cls, responses: Optional[List[UserResponseCreate]]
@@ -168,7 +167,7 @@ class RecordCreate(BaseModel):
 
         return responses
 
-    @validator("metadata")
+    @field_validator("metadata")
     @classmethod
     def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
@@ -192,7 +191,7 @@ class RecordUpdate(UpdateSchema):
         # TODO(@frascuchon): This will be properly adapted once the bulk records refactor is completed.
         return self.metadata_
 
-    @validator("metadata_")
+    @field_validator("metadata_")
     @classmethod
     def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
@@ -218,14 +217,14 @@ class RecordIncludeParam(BaseModel):
     relationships: Optional[List[RecordInclude]] = Field(None, alias="keys")
     vectors: Optional[List[str]] = Field(None, alias="vectors")
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="after")
     @classmethod
-    def check(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        relationships = values.get("relationships")
+    def check(cls, instance: "RecordIncludeParam") -> "RecordIncludeParam":
+        relationships = instance.relationships
         if not relationships:
-            return values
+            return instance
 
-        vectors = values.get("vectors")
+        vectors = instance.vectors
         if vectors is not None and len(vectors) > 0 and RecordInclude.vectors in relationships:
             # TODO: once we have a exception handler for ValueError in v1, remove HTTPException
             # raise ValueError("Cannot include both 'vectors' and 'relationships' in the same request")
@@ -233,7 +232,7 @@ class RecordIncludeParam(BaseModel):
                 "'include' query param cannot have both 'vectors' and 'vectors:vector_settings_name_1,vectors_settings_name_2,...'",
             )
 
-        return values
+        return instance
 
     @property
     def with_responses(self) -> bool:
@@ -298,17 +297,17 @@ class VectorQuery(BaseModel):
     value: Optional[List[float]] = None
     order: SimilarityOrder = SimilarityOrder.most_similar
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="after")
     @classmethod
-    def check_required(cls, values: dict) -> dict:
+    def check_required(cls, instance: "VectorQuery") -> "VectorQuery":
         """Check that either 'record_id' or 'value' is provided"""
-        record_id = values.get("record_id")
-        value = values.get("value")
+        record_id = instance.record_id
+        value = instance.value
 
         if bool(record_id) == bool(value):
             raise ValueError("Either 'record_id' or 'value' must be provided")
 
-        return values
+        return instance
 
 
 class Query(BaseModel):
@@ -351,10 +350,10 @@ class RangeFilter(BaseModel):
     ge: Optional[Union[float, str]] = None
     le: Optional[Union[float, str]] = None
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="after")
     @classmethod
-    def check_ge_and_le(cls, values: dict) -> dict:
-        ge, le = values.get("ge"), values.get("le")
+    def check_ge_and_le(cls, instance: "RangeFilter") -> "RangeFilter":
+        ge, le = instance.ge, instance.le
 
         if ge is None and le is None:
             raise ValueError("At least one of 'ge' or 'le' must be provided")
@@ -362,7 +361,7 @@ class RangeFilter(BaseModel):
         if ge is not None and le is not None and ge > le:
             raise ValueError("'ge' must have a value less than or equal to 'le'")
 
-        return values
+        return instance
 
 
 Filter = Annotated[Union[TermsFilter, RangeFilter], Field(..., discriminator="type")]

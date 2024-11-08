@@ -34,7 +34,7 @@ from argilla_server.enums import (
     SimilarityOrder,
     SortOrder,
 )
-from argilla_server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, Vector, VectorSettings
+from argilla_server.models import Dataset, MetadataProperty, Record, Response, Suggestion, User, VectorSettings
 from pydantic import BaseModel, Field, ConfigDict
 
 __all__ = [
