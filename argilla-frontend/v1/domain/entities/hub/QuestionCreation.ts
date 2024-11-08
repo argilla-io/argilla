@@ -64,6 +64,10 @@ export class QuestionCreation {
     this.required = true;
   }
 
+  get isRequired(): boolean {
+    return this.required;
+  }
+
   get isTextType(): boolean {
     return this.type.isTextType;
   }
@@ -109,6 +113,11 @@ export class QuestionCreation {
         errors.push(
           "datasetCreation.questions.labelSelection.optionsWithoutLabel"
         );
+      }
+    }
+    if (this.isRatingType) {
+      if (this.options.length < 2) {
+        errors.push("datasetCreation.questions.rating.atLeastTwoOptions");
       }
     }
 
