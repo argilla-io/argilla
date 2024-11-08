@@ -20,7 +20,6 @@ These are the section headers that we use:
 
 ### Added
 
-- Add a high-contrast theme & improvements for the forced-colors mode. ([#5661](https://github.com/argilla-io/argilla/pull/5661))
 - Added redirect to error page when repoId is invalid ([#5670](https://github.com/argilla-io/argilla/pull/5670))
 
 ### Fixed
