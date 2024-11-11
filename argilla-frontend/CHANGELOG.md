@@ -25,7 +25,7 @@ These are the section headers that we use:
 ### Fixed
 
 - Fixed redirection problems after users sign-in using HF OAuth. ([#5635](https://github.com/argilla-io/argilla/pull/5635))
-- Fixed highlighting of the searched text in text and chat fields ([#5678](https://github.com/argilla-io/argilla/pull/5678))
+- Fixed highlighting of the searched text in text, span and chat fields ([#5678](https://github.com/argilla-io/argilla/pull/5678))
 - Fixed validation for rating question when creating a dataset ([#5670](https://github.com/argilla-io/argilla/pull/5670))
 - Fixed question name based on question type when creating a dataset ([#5670](https://github.com/argilla-io/argilla/pull/5670))
 
