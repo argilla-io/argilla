@@ -87,7 +87,6 @@ class TestUpsertDatasetRecordsBulk:
                     },
                     {
                         "id": str(record.id),
-                        "fields": {},
                     },
                 ],
             },
@@ -95,8 +94,88 @@ class TestUpsertDatasetRecordsBulk:
 
         assert response.status_code == 200
 
-        assert record.fields == {"text-field": "value"}
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 2
+        assert record.fields == {"text-field": "value"}
+
+    async def test_upsert_dataset_records_bulk_update_record_fields(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"text-field": "value"}, dataset=dataset)
+
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(record.id),
+                        "fields": {
+                            "text-field": "New value",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 200
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
+        assert record.fields == {"text-field": "New value"}
+
+    async def test_upsert_dataset_records_bulk_update_record_fields_with_empty_dict(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+
+        record = await RecordFactory.create(fields={"text-field": "value"}, dataset=dataset)
+
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(record.id),
+                        "fields": {},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Record at position 0 is not valid because fields cannot be empty"}
+
+    async def test_upsert_dataset_records_bulk_update_record_fields_with_wrong_fields(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset, required=True)
+
+        record = await RecordFactory.create(fields={"text-field": "value"}, dataset=dataset)
+
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(record.id),
+                        "fields": {"text-field": None},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": "Record at position 0 is not valid because missing required value for field: 'text-field'"
+        }
 
     async def test_upsert_dataset_records_bulk_updates_records_status(
         self, async_client: AsyncClient, owner: User, owner_auth_header: dict
