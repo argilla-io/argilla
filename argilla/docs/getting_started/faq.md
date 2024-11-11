@@ -11,11 +11,15 @@ hide: toc
 
 ??? Question "Does Argilla cost money?"
 
-    No. Argilla is an open-source project and is free to use. You can deploy Argilla on your own infrastructure or use our cloud offering.
+    No. Argilla is an open-source project and is free to use. You can deploy Argilla on the HF Spaces or your own infrastructure.
 
 ??? Question "What data types does Argilla support?"
 
-    Text data, mostly. Argilla natively supports textual data, however, we do support rich text, which means you can represent different types of data in Argilla as long as you can convert it to text. For example, you can store images, audio, video, and any other type of data as long as you can convert it to their base64 representation or render them as HTML in for example an IFrame.
+    Text and images. However, you can use a [custom field](../how_to_guides/custom_fields.md), which means you can represent different types of data in Argilla. For example, you can store audio or video, and any other type of data as long as you can convert it to their base64 representation or render them as HTML in for example an IFrame.
+
+??? Question "Does Argilla generate synthetic data?"
+
+    No. However, we provide a side library for that: [distilabel](https://github.com/argilla-io/distilabel), a framework for synthetic data and AI feedback for engineers who need fast, reliable and scalable pipelines based on verified research papers.
 
 ??? Question "Does Argilla train models?"
 
