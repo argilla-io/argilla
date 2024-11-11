@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Dict, List, Sequence, Tuple, Union
 from uuid import UUID
 
+from datetime import UTC
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,7 +37,7 @@ from argilla_server.contexts.records import (
     fetch_records_by_ids_as_dict,
 )
 from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.models import Dataset, Record, Response, Suggestion, Vector, VectorSettings
+from argilla_server.models import Dataset, Record, Response, Suggestion, Vector
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.records import RecordsBulkCreateValidator, RecordUpsertValidator
 
@@ -139,10 +140,6 @@ class CreateRecordsBulk:
             autocommit=False,
         )
 
-    @classmethod
-    def _metadata_is_set(cls, record_create: RecordCreate) -> bool:
-        return "metadata" in record_create.__fields_set__
-
 
 class UpsertRecordsBulk(CreateRecordsBulk):
     async def upsert_records_bulk(
@@ -170,9 +167,14 @@ class UpsertRecordsBulk(CreateRecordsBulk):
                     external_id=record_upsert.external_id,
                     dataset_id=dataset.id,
                 )
-            elif self._metadata_is_set(record_upsert):
-                record.metadata_ = record_upsert.metadata
-                record.updated_at = datetime.utcnow()
+            else:
+                if record_upsert.is_set("metadata"):
+                    record.metadata_ = record_upsert.metadata
+                if record_upsert.is_set("fields"):
+                    record.fields = jsonable_encoder(record_upsert.fields)
+
+                if self._db.is_modified(record):
+                    record.updated_at = datetime.now(UTC)
 
             records.append(record)
 

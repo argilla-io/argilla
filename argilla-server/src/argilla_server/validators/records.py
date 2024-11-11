@@ -257,14 +257,17 @@ class RecordUpsertValidator(RecordValidatorBase):
     @classmethod
     async def validate(cls, record_upsert: RecordUpsert, dataset: Dataset, record: Optional[Record]) -> None:
         if record is None:
-            cls._validate_fields(record_upsert.fields, dataset)
-            record = Record(fields=record_upsert.fields, dataset=dataset)
+            return await RecordCreateValidator.validate(record_upsert, dataset)
 
-        cls._validate_metadata(record_upsert.metadata, dataset)
-        cls._validate_vectors(record_upsert.vectors, dataset)
+        else:
+            if record_upsert.is_set("fields"):
+                cls._validate_fields(record_upsert.fields, dataset)
 
-        cls._validate_suggestions(record_upsert.suggestions, dataset, record=record)
-        await cls._validate_responses(record_upsert.responses, dataset, record=record)
+            cls._validate_metadata(record_upsert.metadata, dataset)
+            cls._validate_vectors(record_upsert.vectors, dataset)
+
+            cls._validate_suggestions(record_upsert.suggestions, dataset, record=record)
+            await cls._validate_responses(record_upsert.responses, dataset, record=record)
 
 
 class RecordsBulkCreateValidator:

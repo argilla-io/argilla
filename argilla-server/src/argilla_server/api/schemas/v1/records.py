@@ -182,6 +182,9 @@ class RecordUpsert(RecordCreate):
     id: Optional[UUID]
     fields: Optional[Dict[str, FieldValueCreate]] = None
 
+    def is_set(self, attribute: str) -> bool:
+        return attribute in self.__fields_set__
+
 
 class RecordIncludeParam(BaseModel):
     relationships: Optional[List[RecordInclude]] = Field(None, alias="keys")
