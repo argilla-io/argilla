@@ -54,9 +54,9 @@ class QuestionsAPI(ResourceAPI[QuestionModel]):
         response = self.http_client.patch(url, json=question.model_dump())
         response.raise_for_status()
         response_json = response.json()
-        updated_field = self._model_from_json(response_json)
-        self._log_message(message=f"Update question {updated_field.name} with id {question.id}")
-        return updated_field
+        updated_question = self._model_from_json(response_json)
+        self._log_message(message=f"Update question {updated_question.name} with id {question.id}")
+        return updated_question
 
     @api_error_handler
     def delete(self, question_id: UUID) -> None:
