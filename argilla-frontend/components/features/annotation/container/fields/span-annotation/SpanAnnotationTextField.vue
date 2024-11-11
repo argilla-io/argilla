@@ -35,7 +35,7 @@
       </BaseActionTooltip>
     </div>
     <div
-      id="fields-content"
+      :id="`fields-content-${name}`"
       class="text_field_component__area --body1"
       :aria-label="'Data entry for Field: ' + title"
     >
