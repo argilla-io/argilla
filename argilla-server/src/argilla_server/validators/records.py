@@ -55,6 +55,7 @@ class RecordValidatorBase(ABC):
         cls._validate_non_empty_fields(fields=fields)
         cls._validate_required_fields(dataset=dataset, fields=fields)
         cls._validate_extra_fields(dataset=dataset, fields=fields)
+        cls._validate_text_fields(dataset=dataset, fields=fields)
         cls._validate_image_fields(dataset=dataset, fields=fields)
         cls._validate_chat_fields(dataset=dataset, fields=fields)
         cls._validate_custom_fields(dataset=dataset, fields=fields)
@@ -100,6 +101,11 @@ class RecordValidatorBase(ABC):
                 )
 
     @classmethod
+    def _validate_text_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
+        for field in filter(lambda field: field.is_text, dataset.fields):
+            cls._validate_text_field(field.name, fields.get(field.name))
+
+    @classmethod
     def _validate_image_fields(cls, dataset: Dataset, fields: Dict[str, str]) -> None:
         for field in filter(lambda field: field.is_image, dataset.fields):
             cls._validate_image_field(field.name, fields.get(field.name))
@@ -108,6 +114,14 @@ class RecordValidatorBase(ABC):
     def _validate_chat_fields(cls, dataset: Dataset, fields: Dict[str, Any]) -> None:
         for field in filter(lambda field: field.is_chat, dataset.fields):
             cls._validate_chat_field(field.name, fields.get(field.name))
+
+    @classmethod
+    def _validate_text_field(cls, field_name: str, field_value: Any) -> None:
+        if field_value is None:
+            return
+
+        if not isinstance(field_value, str):
+            raise UnprocessableEntityError(f"text field {field_name!r} value must be a string")
 
     @classmethod
     def _validate_image_field(cls, field_name: str, field_value: Union[str, None]) -> None:

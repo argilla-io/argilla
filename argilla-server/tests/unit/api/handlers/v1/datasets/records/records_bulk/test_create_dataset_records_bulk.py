@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from typing import Any
 from uuid import UUID
 
 import pytest
@@ -673,6 +673,45 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            1,
+            1.0,
+            True,
+            ["wrong", "value"],
+            {"wrong": "value"},
+        ],
+    )
+    async def test_create_dataset_records_bulk_with_wrong_text_field_value(
+        self,
+        db: AsyncSession,
+        async_client: AsyncClient,
+        owner_auth_header: dict,
+        value: Any,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": value,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422, response.json()
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
     async def test_create_dataset_records_bulk_updates_records_status(
