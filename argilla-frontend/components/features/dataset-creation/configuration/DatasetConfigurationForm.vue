@@ -31,13 +31,11 @@
               :group="{ name: 'fields' }"
               ghost-class="config-form__ghost"
               :disabled="isFocused"
-              @start="drag = true"
-              @end="drag = false"
             >
               <transition-group
                 class="config-form__draggable-area-wrapper"
                 type="transition"
-                :name="!drag ? 'flip-list' : null"
+                :css="false"
               >
                 <DatasetConfigurationField
                   v-for="field in dataset.selectedSubset.fields.filter(
@@ -87,7 +85,7 @@
               <transition-group
                 class="config-form__draggable-area-wrapper"
                 type="transition"
-                :name="!drag ? 'flip-list' : null"
+                :css="false"
               >
                 <DatasetConfigurationQuestion
                   v-for="question in dataset.selectedSubset.questions"
@@ -139,21 +137,49 @@ export default {
     return {
       isFocused: false,
       visibleDatasetCreationDialog: false,
-      drag: false,
     };
+  },
+  computed: {
+    getMaxNumberInNames() {
+      return Math.max(
+        ...this.dataset.selectedSubset.questions.map((question) => {
+          const numberInName = question.name.split("_").pop();
+          return parseInt(numberInName) || 0;
+        })
+      );
+    },
   },
   methods: {
     createDataset() {
       this.create(this.dataset);
     },
-    addQuestion(type) {
-      const questionName = `${type} ${this.dataset.selectedSubset.questions.length}`;
-      this.dataset.selectedSubset.addQuestion(questionName, { type });
+    generateName(type, number) {
+      const typeName = this.$t(`config.questionId.${type}`);
+      return `${typeName}_${parseInt(number) || 0}`;
     },
-    onTypeIsChanged(name, type) {
-      this.dataset.selectedSubset.addQuestion(name, {
-        type: type.value,
+    addQuestion(type) {
+      const questionName = this.generateName(
+        type,
+        this.getMaxNumberInNames + 1
+      );
+      this.dataset.selectedSubset.addQuestion(questionName, {
+        type,
       });
+    },
+    onTypeIsChanged(oldName, type) {
+      const numberInName = oldName.split("_").pop();
+      const index = this.dataset.selectedSubset.questions.findIndex(
+        (q) => q.name === oldName
+      );
+      this.dataset.selectedSubset.removeQuestion(oldName);
+      const newQuestionName = this.generateName(type.value, numberInName);
+      this.dataset.selectedSubset.addQuestion(
+        newQuestionName,
+        {
+          type: type.value,
+        },
+        index !== -1 ? index : undefined
+      );
     },
   },
   setup() {
@@ -223,7 +249,6 @@ export default {
   }
   &__ghost {
     opacity: 0.5;
-    background: lime;
   }
   &__selector {
     &__intro {
@@ -246,9 +271,6 @@ export default {
       width: 100%;
       justify-content: center;
     }
-  }
-  .flip-list-move {
-    transition: transform 0.3s;
   }
 }
 </style>

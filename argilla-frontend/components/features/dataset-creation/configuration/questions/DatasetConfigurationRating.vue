@@ -1,25 +1,41 @@
 <template>
-  <div class="dataset-config-rating__input-container">
-    <input
-      type="number"
-      min="0"
-      max="10"
-      step="1"
-      :value="value.length - 1"
-      @input="onInput($event.target.value)"
-      @focus="$emit('is-focused', true)"
-      @blur="$emit('is-focused', false)"
-      :placeholder="placeholder"
-      class="dataset-config-rating__input"
-    />
+  <div>
+    <div
+      :class="{ '--error': errors.length }"
+      class="dataset-config-rating__input-container"
+    >
+      <input
+        type="number"
+        min="0"
+        max="10"
+        step="1"
+        :value="
+          question.settings.options.length
+            ? question.settings.options.length - 1
+            : 0
+        "
+        @input="onInput($event.target.value)"
+        @focus.stop="onFocus"
+        @blur="onBlur"
+        :placeholder="placeholder"
+        class="dataset-config-rating__input"
+      />
+    </div>
+    <Validation v-if="errors.length" :validations="translatedValidations" />
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      errors: [],
+      isDirty: false,
+    };
+  },
   props: {
-    value: {
-      type: Array,
+    question: {
+      type: Object,
       required: true,
     },
     placeholder: {
@@ -27,20 +43,38 @@ export default {
       default: "",
     },
   },
-  model: {
-    prop: "value",
-    event: "on-value-change",
+  computed: {
+    translatedValidations() {
+      return this.errors.map((validation) => {
+        return this.$t(validation);
+      });
+    },
   },
   methods: {
+    validateOptions() {
+      this.errors = this.question.validate();
+    },
+    onFocus() {
+      this.$emit("is-focused", true);
+    },
+    onBlur() {
+      this.isDirty = true;
+      this.validateOptions();
+      this.$emit("is-focused", false);
+    },
     onInput(inputValue) {
-      const valuesArray = Array.from(
-        { length: parseInt(inputValue) + 1 },
-        (_, i) => ({
-          value: i,
-        })
-      );
+      let value = parseInt(inputValue);
+      value = Math.max(1, Math.min(value, 10));
 
-      this.$emit("on-value-change", valuesArray);
+      const valuesArray = Array.from({ length: value + 1 }, (_, i) => ({
+        value: i,
+      }));
+
+      this.question.settings.options = valuesArray;
+
+      if (this.isDirty) {
+        this.validateOptions();
+      }
     },
   },
 };
@@ -65,6 +99,7 @@ export default {
   width: 100%;
   outline: none;
   color: var(--fg-secondary);
+  @include font-size(12px);
   @include input-placeholder {
     color: var(--fg-tertiary);
   }
