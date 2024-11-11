@@ -682,7 +682,8 @@ class TestCreateDatasetRecordsBulk:
             1.0,
             True,
             ["wrong", "value"],
-            {"wrong": "value"},
+            {"wrong": "value"},  # Valid value for custom fields wrong value for text fields
+            [{"role": "user", "content": "Hello!"}],  # Valid value for chat fields wrong value for text fields
         ],
     )
     async def test_create_dataset_records_bulk_with_wrong_text_field_value(
