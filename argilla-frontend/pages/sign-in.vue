@@ -98,18 +98,8 @@ export default {
     },
   },
   methods: {
-    nextRedirect() {
-      const redirect_url = this.$nuxt.$route.query.redirect || "/";
-      this.$router.push({
-        path: redirect_url,
-      });
-    },
     async loginUser({ username, password }) {
       await this.login(username, password);
-
-      this.$notification.clear();
-
-      this.nextRedirect();
     },
     async onLoginUser() {
       try {

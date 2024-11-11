@@ -16,6 +16,19 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
+
+### Added
+
+- Added redirect to error page when repoId is invalid ([#5670](https://github.com/argilla-io/argilla/pull/5670))
+
+### Fixed
+
+- Fixed redirection problems after users sign-in using HF OAuth. ([#5635](https://github.com/argilla-io/argilla/pull/5635))
+- Fixed highlighting of the searched text in text, span and chat fields ([#5678](https://github.com/argilla-io/argilla/pull/5678))
+- Fixed validation for rating question when creating a dataset ([#5670](https://github.com/argilla-io/argilla/pull/5670))
+- Fixed question name based on question type when creating a dataset ([#5670](https://github.com/argilla-io/argilla/pull/5670))
+
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
 ### Added
