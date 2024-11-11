@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 - Changed default python version to 3.13. ([#5649](https://github.com/argilla-io/argilla/pull/5649))
 
+### Fixed
+
+- Fixed error to prevent creating record fields including non-string values for text fields. ([#5682](https://github.com/argilla-io/argilla/pull/5682))
+
 ## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
 
 ### Fixed
