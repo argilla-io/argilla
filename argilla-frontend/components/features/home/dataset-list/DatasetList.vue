@@ -2,11 +2,20 @@
   <div>
     <div class="dataset-list__header">
       <h1 class="dataset-list__title" v-text="$t('home.argillaDatasets')" />
-      <BaseSearchBar
-        @input="onSearch"
-        :querySearch="querySearch"
-        :placeholder="$t('searchDatasets')"
-      />
+      <div class="dataset-list__filters">
+        <BaseSearchBar
+          @input="onSearch"
+          :querySearch="querySearch"
+          :placeholder="$t('searchDatasets')"
+        />
+        <DatasetsSort
+          @on-change-direction="onChangeDirection"
+          @on-change-field="onChangeField"
+          :sorted-by-field="sortedByField"
+          :sorted-order="sortedOrder"
+          :sort-options="sortOptions"
+        />
+      </div>
     </div>
     <DatasetListCards
       v-if="datasets.length"
@@ -30,6 +39,11 @@ export default {
       querySearch: "",
       sortedOrder: "desc",
       sortedByField: "updatedAt",
+      sortOptions: [
+        { value: "name", label: this.$t("home.name") },
+        { value: "updatedAt", label: this.$t("home.updatedAt") },
+        { value: "createdAt", label: this.$t("home.createdAt") },
+      ],
     };
   },
   computed: {
@@ -41,24 +55,21 @@ export default {
     sortedDatasets() {
       return this.datasets.sort((a, b) => {
         if (this.sortedOrder === "asc") {
-          return a[this.sortedByField] - b[this.sortedByField];
+          return a[this.sortedByField] > b[this.sortedByField] ? 1 : -1;
         }
-
-        return b[this.sortedByField] - a[this.sortedByField];
+        return a[this.sortedByField] < b[this.sortedByField] ? 1 : -1;
       });
-    },
-    activeWorkspace() {
-      const workspaces = this.$route.query.workspaces?.split(",") ?? [];
-      return [{ column: "workspace", values: workspaces }];
     },
   },
   methods: {
     onSearch(event) {
       this.querySearch = event;
     },
-    onSort(by, order) {
-      this.sortedByField = by;
-      this.sortedOrder = order;
+    onChangeDirection(direction) {
+      this.sortedOrder = direction;
+    },
+    onChangeField(field) {
+      this.sortedByField = field;
     },
     cardAction(action) {
       this.$emit("on-click-card", action);
@@ -79,6 +90,10 @@ export default {
     margin: 0;
     @include font-size(20px);
     font-weight: 500;
+  }
+  &__filters {
+    display: flex;
+    gap: $base-space;
   }
 }
 </style>
