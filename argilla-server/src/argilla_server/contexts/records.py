@@ -178,6 +178,7 @@ async def update_record(
                 for name, value in record_update.vectors.items()
             ],
             constraints=[Vector.record_id, Vector.vector_settings_id],
+            autocommit=False,
         )
         await db.refresh(record, attribute_names=["vectors"])
 
