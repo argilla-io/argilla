@@ -12,13 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import copy
 from collections import defaultdict
 from datetime import datetime
 from typing import (
     TYPE_CHECKING,
-    Any,
-    Dict,
     Iterable,
     List,
     Optional,
@@ -46,7 +43,6 @@ from argilla_server.api.schemas.v1.responses import (
 from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
-from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.contexts import distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole
@@ -68,7 +64,6 @@ from argilla_server.models import (
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.datasets import DatasetCreateValidator, DatasetPublishValidator, DatasetUpdateValidator
-from argilla_server.validators.records import RecordUpdateValidator
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
     ResponseUpdateValidator,
@@ -78,7 +73,6 @@ from argilla_server.validators.suggestions import SuggestionCreateValidator
 
 if TYPE_CHECKING:
     from argilla_server.api.schemas.v1.fields import FieldUpdate
-    from argilla_server.api.schemas.v1.records import RecordUpdate
     from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
     from argilla_server.api.schemas.v1.vector_settings import VectorSettingsUpdate
 
@@ -301,6 +295,7 @@ async def create_vector_settings(
     return vector_settings
 
 
+# TODO: Move this function to the records.py context
 async def get_records_by_ids(
     db: AsyncSession,
     records_ids: Iterable[UUID],
@@ -421,18 +416,6 @@ async def _load_users_from_responses(responses: Union[Response, Iterable[Respons
         await response.awaitable_attrs.user
 
 
-async def _preload_record_relationships_before_index(db: AsyncSession, record: Record) -> None:
-    await db.execute(
-        select(Record)
-        .filter_by(id=record.id)
-        .options(
-            selectinload(Record.responses).selectinload(Response.user),
-            selectinload(Record.suggestions).selectinload(Suggestion.question),
-            selectinload(Record.vectors),
-        )
-    )
-
-
 async def preload_records_relationships_before_validate(db: AsyncSession, records: List[Record]) -> None:
     await db.execute(
         select(Record)
@@ -441,81 +424,6 @@ async def preload_records_relationships_before_validate(db: AsyncSession, record
             selectinload(Record.dataset).selectinload(Dataset.questions),
         )
     )
-
-
-async def delete_records(
-    db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
-) -> None:
-    records = await Record.delete_many(
-        db=db,
-        conditions=[Record.id.in_(records_ids), Record.dataset_id == dataset.id],
-        autocommit=True,
-    )
-
-    await search_engine.delete_records(dataset=dataset, records=records)
-
-
-async def update_record(
-    db: AsyncSession, search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
-) -> Record:
-    if not record_update.has_changes():
-        return record
-
-    dataset = record.dataset
-
-    await RecordUpdateValidator.validate(record_update, dataset, record)
-
-    if record_update.is_set("metadata"):
-        record.metadata_ = record_update.metadata
-
-    if record_update.is_set("suggestions"):
-        # Delete all suggestions and replace them with the new ones
-        await Suggestion.delete_many(db, [Suggestion.record_id == record.id], autocommit=False)
-        await db.refresh(record, attribute_names=["suggestions"])
-
-        record.suggestions = [
-            Suggestion(
-                type=suggestion.type,
-                score=suggestion.score,
-                value=jsonable_encoder(suggestion.value),
-                agent=suggestion.agent,
-                question_id=suggestion.question_id,
-                record_id=record.id,
-            )
-            for suggestion in record_update.suggestions
-        ]
-
-    await record.save(db, autocommit=False)
-
-    if record_update.vectors:
-        await Vector.upsert_many(
-            db,
-            objects=[
-                VectorSchema(
-                    record_id=record.id,
-                    vector_settings_id=dataset.vector_settings_by_name(name).id,
-                    value=value,
-                )
-                for name, value in record_update.vectors.items()
-            ],
-            constraints=[Vector.record_id, Vector.vector_settings_id],
-        )
-        await db.refresh(record, attribute_names=["vectors"])
-
-    await db.commit()
-
-    await _preload_record_relationships_before_index(db, record)
-    await search_engine.index_records(record.dataset, [record])
-
-    return record
-
-
-async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record: Record) -> Record:
-    record = await record.delete(db=db, autocommit=True)
-
-    await search_engine.delete_records(dataset=record.dataset, records=[record])
-
-    return record
 
 
 async def create_response(
@@ -612,22 +520,6 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
     await search_engine.delete_record_response(response)
 
     return response
-
-
-def _validate_record_fields(dataset: Dataset, fields: Dict[str, Any]):
-    fields_copy = copy.copy(fields or {})
-    for field in dataset.fields:
-        if field.required and not (field.name in fields_copy and fields_copy.get(field.name) is not None):
-            raise UnprocessableEntityError(f"missing required value for field: {field.name!r}")
-
-        value = fields_copy.pop(field.name, None)
-        if value and not isinstance(value, str):
-            raise UnprocessableEntityError(
-                f"wrong value found for field {field.name!r}. Expected {str.__name__!r}, found {type(value).__name__!r}"
-            )
-
-    if fields_copy:
-        raise UnprocessableEntityError(f"found fields values for non configured fields: {list(fields_copy.keys())!r}")
 
 
 async def _preload_suggestion_relationships_before_index(db: AsyncSession, suggestion: Suggestion) -> None:

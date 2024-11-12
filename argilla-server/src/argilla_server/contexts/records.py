@@ -15,12 +15,17 @@
 from typing import Dict, Sequence, Union, List, Tuple, Optional
 from uuid import UUID
 
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select, and_, func, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, contains_eager
 
-from argilla_server.database import get_async_db
-from argilla_server.models import Dataset, Record, VectorSettings, Vector
+from argilla_server.api.schemas.v1.records import RecordUpdate
+from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+
+from argilla_server.models import Dataset, Record, VectorSettings, Vector, Response, Suggestion
+from argilla_server.search_engine import SearchEngine
+from argilla_server.validators.records import RecordUpdateValidator
 
 
 async def list_dataset_records(
@@ -32,7 +37,7 @@ async def list_dataset_records(
     with_suggestions: bool = False,
     with_vectors: Union[bool, List[str]] = False,
 ) -> Tuple[Sequence[Record], int]:
-    query = _record_by_dataset_id_query(
+    query = _build_list_records_query(
         dataset_id=dataset_id,
         offset=offset,
         limit=limit,
@@ -80,7 +85,7 @@ async def fetch_records_by_external_ids_as_dict(
     return {record.external_id: record for record in records_by_external_ids}
 
 
-def _record_by_dataset_id_query(
+def _build_list_records_query(
     dataset_id,
     offset: Optional[int] = None,
     limit: Optional[int] = None,
@@ -113,3 +118,90 @@ def _record_by_dataset_id_query(
         query = query.limit(limit)
 
     return query.order_by(Record.inserted_at)
+
+
+async def _preload_record_relationships_before_index(db: AsyncSession, record: Record) -> None:
+    await db.execute(
+        select(Record)
+        .filter_by(id=record.id)
+        .options(
+            selectinload(Record.responses).selectinload(Response.user),
+            selectinload(Record.suggestions).selectinload(Suggestion.question),
+            selectinload(Record.vectors),
+        )
+    )
+
+
+async def update_record(
+    db: AsyncSession, search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
+) -> Record:
+    if not record_update.has_changes():
+        return record
+
+    dataset = record.dataset
+
+    await RecordUpdateValidator.validate(record_update, dataset, record)
+
+    if record_update.is_set("metadata"):
+        record.metadata_ = record_update.metadata
+
+    if record_update.is_set("suggestions"):
+        # Delete all suggestions and replace them with the new ones
+        await Suggestion.delete_many(db, [Suggestion.record_id == record.id], autocommit=False)
+        await db.refresh(record, attribute_names=["suggestions"])
+
+        record.suggestions = [
+            Suggestion(
+                type=suggestion.type,
+                score=suggestion.score,
+                value=jsonable_encoder(suggestion.value),
+                agent=suggestion.agent,
+                question_id=suggestion.question_id,
+                record_id=record.id,
+            )
+            for suggestion in record_update.suggestions
+        ]
+
+    await record.save(db, autocommit=False)
+
+    if record_update.vectors:
+        await Vector.upsert_many(
+            db,
+            objects=[
+                VectorSchema(
+                    record_id=record.id,
+                    vector_settings_id=dataset.vector_settings_by_name(name).id,
+                    value=value,
+                )
+                for name, value in record_update.vectors.items()
+            ],
+            constraints=[Vector.record_id, Vector.vector_settings_id],
+        )
+        await db.refresh(record, attribute_names=["vectors"])
+
+    await db.commit()
+
+    await _preload_record_relationships_before_index(db, record)
+    await search_engine.index_records(record.dataset, [record])
+
+    return record
+
+
+async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record: Record) -> Record:
+    record = await record.delete(db=db, autocommit=True)
+
+    await search_engine.delete_records(dataset=record.dataset, records=[record])
+
+    return record
+
+
+async def delete_records(
+    db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
+) -> None:
+    records = await Record.delete_many(
+        db=db,
+        conditions=[Record.id.in_(records_ids), Record.dataset_id == dataset.id],
+        autocommit=True,
+    )
+
+    await search_engine.delete_records(dataset=dataset, records=records)

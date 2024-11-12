@@ -25,7 +25,7 @@ from argilla_server.api.schemas.v1.records import RecordUpdate
 from argilla_server.api.schemas.v1.responses import Response, ResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion as SuggestionSchema
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate, Suggestions
-from argilla_server.contexts import datasets
+from argilla_server.contexts import datasets, records
 from argilla_server.database import get_async_db
 from argilla_server.errors.future.base_errors import NotFoundError, UnprocessableEntityError
 from argilla_server.models import Dataset, Question, Record, Suggestion, User
@@ -87,7 +87,7 @@ async def update_record(
 
     await authorize(current_user, RecordPolicy.update(record))
 
-    return await datasets.update_record(db, search_engine, record, record_update)
+    return await records.update_record(db, search_engine, record, record_update)
 
 
 @router.post("/records/{record_id}/responses", status_code=status.HTTP_201_CREATED, response_model=Response)
@@ -237,4 +237,4 @@ async def delete_record(
 
     await authorize(current_user, RecordPolicy.delete(record))
 
-    return await datasets.delete_record(db, search_engine, record)
+    return await records.delete_record(db, search_engine, record)
