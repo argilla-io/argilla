@@ -29,7 +29,7 @@ class RecordsBulk(BaseModel):
     items: List[Record]
 
 
-class RecordsBulkWithUpdateInfo(RecordsBulk):
+class RecordsBulkWithUpdatedItemIds(RecordsBulk):
     updated_item_ids: List[UUID]
 
 

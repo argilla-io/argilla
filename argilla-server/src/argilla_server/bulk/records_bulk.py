@@ -27,7 +27,7 @@ from argilla_server.api.schemas.v1.records_bulk import (
     RecordsBulk,
     RecordsBulkCreate,
     RecordsBulkUpsert,
-    RecordsBulkWithUpdateInfo,
+    RecordsBulkWithUpdatedItemIds,
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
@@ -144,7 +144,7 @@ class CreateRecordsBulk:
 class UpsertRecordsBulk(CreateRecordsBulk):
     async def upsert_records_bulk(
         self, dataset: Dataset, bulk_upsert: RecordsBulkUpsert, raise_on_error: bool = True
-    ) -> RecordsBulkWithUpdateInfo:
+    ) -> RecordsBulkWithUpdatedItemIds:
         found_records = await self._fetch_existing_dataset_records(dataset, bulk_upsert.items)
 
         records = []
@@ -188,7 +188,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         await _preload_records_relationships_before_index(self._db, records)
         await self._search_engine.index_records(dataset, records)
 
-        return RecordsBulkWithUpdateInfo(
+        return RecordsBulkWithUpdatedItemIds(
             items=records,
             updated_item_ids=[record.id for record in found_records.values()],
         )
