@@ -253,6 +253,14 @@ class RecordCreateValidator(RecordValidatorBase):
         await cls._validate_responses(record_create.responses, dataset, record=record)
 
 
+class RecordUpdateValidator(RecordValidatorBase):
+    @classmethod
+    async def validate(cls, record_update: RecordUpdate, dataset: Dataset, record: Record) -> None:
+        cls._validate_metadata(record_update.metadata, dataset)
+        cls._validate_vectors(record_update.vectors, dataset)
+        cls._validate_suggestions(record_update.suggestions, dataset, record=record)
+
+
 class RecordUpsertValidator(RecordValidatorBase):
     @classmethod
     async def validate(cls, record_upsert: RecordUpsert, dataset: Dataset, record: Optional[Record]) -> None:

@@ -18,16 +18,11 @@ from datetime import datetime
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Dict,
     Iterable,
     List,
-    Literal,
     Optional,
     Sequence,
-    Set,
-    Tuple,
-    TypeVar,
     Union,
 )
 from uuid import UUID
@@ -41,24 +36,18 @@ from sqlalchemy.orm import contains_eager, joinedload, selectinload
 from argilla_server.api.schemas.v1.fields import FieldCreate
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyCreate, MetadataPropertyUpdate
 from argilla_server.api.schemas.v1.records import (
-    RecordCreate,
     RecordIncludeParam,
-    RecordUpdateWithId,
 )
 from argilla_server.api.schemas.v1.responses import (
     ResponseCreate,
     ResponseUpdate,
     ResponseUpsert,
-    UserResponseCreate,
-)
-from argilla_server.api.schemas.v1.vector_settings import (
-    VectorSettings as VectorSettingsSchema,
 )
 from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
-from argilla_server.contexts import accounts, distribution
+from argilla_server.contexts import distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
@@ -79,6 +68,7 @@ from argilla_server.models import (
 from argilla_server.models.suggestions import SuggestionCreateWithRecordId
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.datasets import DatasetCreateValidator, DatasetPublishValidator, DatasetUpdateValidator
+from argilla_server.validators.records import RecordUpdateValidator
 from argilla_server.validators.responses import (
     ResponseCreateValidator,
     ResponseUpdateValidator,
@@ -421,103 +411,6 @@ async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:
         return [{"username": username, **progress} for username, progress in annotators_progress.items()]
 
 
-_EXTRA_METADATA_FLAG = "extra"
-
-
-async def _validate_metadata(
-    db: AsyncSession,
-    dataset: Dataset,
-    metadata: Dict[str, Any],
-    metadata_properties: Optional[Dict[str, Union[MetadataProperty, Literal["extra"]]]] = None,
-) -> Dict[str, Union[MetadataProperty, Literal["extra"]]]:
-    if metadata_properties is None:
-        metadata_properties = {}
-
-    for name, value in metadata.items():
-        metadata_property = metadata_properties.get(name)
-
-        if metadata_property is None:
-            metadata_property = await MetadataProperty.get_by(db, name=name, dataset_id=dataset.id)
-
-            # If metadata property does not exists but extra metadata is allowed, then we set a flag value to
-            # avoid querying the database again
-            if metadata_property is None and dataset.allow_extra_metadata:
-                metadata_property = _EXTRA_METADATA_FLAG
-                metadata_properties[name] = metadata_property
-            elif metadata_property is not None:
-                metadata_properties[name] = metadata_property
-            else:
-                raise ValueError(
-                    f"'{name}' metadata property does not exists for dataset '{dataset.id}' and extra metadata is"
-                    " not allowed for this dataset"
-                )
-
-        # If metadata property is not found and extra metadata is allowed, then we skip the value validation
-        if metadata_property == _EXTRA_METADATA_FLAG:
-            continue
-
-        try:
-            if value is not None:
-                metadata_property.parsed_settings.check_metadata(value)
-        except (UnprocessableEntityError, ValueError) as e:
-            raise UnprocessableEntityError(f"'{name}' metadata property validation failed because {e}") from e
-
-    return metadata_properties
-
-
-async def validate_user_exists(db: AsyncSession, user_id: UUID, users_ids: Optional[Set[UUID]]) -> Set[UUID]:
-    if not users_ids:
-        users_ids = set()
-
-    if user_id not in users_ids:
-        if not await accounts.user_exists(db, user_id):
-            raise UnprocessableEntityError(f"user_id={str(user_id)} does not exist")
-
-        users_ids.add(user_id)
-
-    return users_ids
-
-
-async def _validate_vector(
-    db: AsyncSession,
-    dataset_id: UUID,
-    vector_name: str,
-    vector_value: List[float],
-    vectors_settings: Optional[Dict[str, VectorSettingsSchema]] = None,
-) -> Dict[str, VectorSettingsSchema]:
-    if vectors_settings is None:
-        vectors_settings = {}
-
-    vector_settings = vectors_settings.get(vector_name, None)
-    if not vector_settings:
-        vector_settings = await VectorSettings.get_by(db, name=vector_name, dataset_id=dataset_id)
-        if not vector_settings:
-            raise UnprocessableEntityError(
-                f"vector with name={str(vector_name)} does not exist for dataset_id={str(dataset_id)}"
-            )
-
-        vector_settings = VectorSettingsSchema.from_orm(vector_settings)
-        vectors_settings[vector_name] = vector_settings
-
-    vector_settings.check_vector(vector_value)
-
-    return vectors_settings
-
-
-async def _build_record(
-    db: AsyncSession, dataset: Dataset, record_create: RecordCreate, caches: Dict[str, Any]
-) -> Record:
-    _validate_record_fields(dataset, fields=record_create.fields)
-    await _validate_record_metadata(db, dataset, record_create.metadata, caches["metadata_properties_cache"])
-
-    return Record(
-        fields=jsonable_encoder(record_create.fields),
-        metadata_=record_create.metadata,
-        external_id=record_create.external_id,
-        dataset=dataset,
-    )
-
-
 async def _load_users_from_responses(responses: Union[Response, Iterable[Response]]) -> None:
     if isinstance(responses, Response):
         responses = [responses]
@@ -526,182 +419,6 @@ async def _load_users_from_responses(responses: Union[Response, Iterable[Respons
     # something similar to what we are already doing in _preload_suggestion_relationships_before_index.
     for response in responses:
         await response.awaitable_attrs.user
-
-
-async def _validate_record_metadata(
-    db: AsyncSession,
-    dataset: Dataset,
-    metadata: Optional[Dict[str, Any]] = None,
-    cache: Dict[str, Union[MetadataProperty, Literal["extra"]]] = {},
-) -> Dict[str, Union[MetadataProperty, Literal["extra"]]]:
-    """Validate metadata for a record."""
-    if not metadata:
-        return cache
-
-    try:
-        cache = await _validate_metadata(db, dataset=dataset, metadata=metadata, metadata_properties=cache)
-        return cache
-    except (UnprocessableEntityError, ValueError) as e:
-        raise UnprocessableEntityError(f"metadata is not valid: {e}") from e
-
-
-async def _build_record_responses(
-    db: AsyncSession,
-    record: Record,
-    responses_create: Optional[List[UserResponseCreate]],
-    cache: Optional[Set[UUID]] = None,
-) -> List[Response]:
-    """Create responses for a record."""
-    if not responses_create:
-        return []
-
-    responses = []
-
-    for idx, response_create in enumerate(responses_create):
-        try:
-            cache = await validate_user_exists(db, response_create.user_id, cache)
-
-            ResponseCreateValidator.validate(response_create, record)
-
-            responses.append(
-                Response(
-                    values=jsonable_encoder(response_create.values),
-                    status=response_create.status,
-                    user_id=response_create.user_id,
-                    record=record,
-                )
-            )
-        except (UnprocessableEntityError, ValueError) as e:
-            raise UnprocessableEntityError(f"response at position {idx} is not valid: {e}") from e
-
-    return responses
-
-
-async def _build_record_suggestions(
-    db: AsyncSession,
-    record: Record,
-    suggestions_create: Optional[List["SuggestionCreate"]],
-    questions_cache: Optional[Dict[UUID, Question]] = None,
-) -> List[Suggestion]:
-    """Create suggestions for a record."""
-    if not suggestions_create:
-        return []
-
-    suggestions = []
-    for suggestion_create in suggestions_create:
-        try:
-            if not questions_cache:
-                questions_cache = {}
-
-            question = questions_cache.get(suggestion_create.question_id, None)
-            if not question:
-                question = await Question.get(
-                    db, suggestion_create.question_id, options=[selectinload(Question.dataset)]
-                )
-                if not question:
-                    raise UnprocessableEntityError(f"question_id={str(suggestion_create.question_id)} does not exist")
-                questions_cache[suggestion_create.question_id] = question
-
-            SuggestionCreateValidator.validate(suggestion_create, question.parsed_settings, record)
-
-            suggestions.append(
-                Suggestion(
-                    type=suggestion_create.type,
-                    score=suggestion_create.score,
-                    value=jsonable_encoder(suggestion_create.value),
-                    agent=suggestion_create.agent,
-                    question_id=suggestion_create.question_id,
-                    record=record,
-                )
-            )
-
-        except (UnprocessableEntityError, ValueError) as e:
-            raise UnprocessableEntityError(
-                f"suggestion for question_id={suggestion_create.question_id} is not valid: {e}"
-            ) from e
-
-    return suggestions
-
-
-VectorClass = TypeVar("VectorClass")
-
-
-async def _build_record_vectors(
-    db: AsyncSession,
-    dataset: Dataset,
-    vectors_dict: Dict[str, List[float]],
-    build_vector_func: Callable[[List[float], UUID], VectorClass],
-    cache: Optional[Dict[str, VectorSettingsSchema]] = None,
-) -> List[VectorClass]:
-    """Create vectors for a record."""
-    if not vectors_dict:
-        return []
-
-    vectors = []
-    for vector_name, vector_value in vectors_dict.items():
-        try:
-            cache = await _validate_vector(db, dataset.id, vector_name, vector_value, vectors_settings=cache)
-            vectors.append(build_vector_func(vector_value, cache[vector_name].id))
-        except (UnprocessableEntityError, ValueError) as e:
-            raise UnprocessableEntityError(f"vector with name={vector_name} is not valid: {e}") from e
-
-    return vectors
-
-
-async def _exists_records_with_ids(db: AsyncSession, dataset_id: UUID, records_ids: List[UUID]) -> List[UUID]:
-    result = await db.execute(select(Record.id).filter(Record.dataset_id == dataset_id, Record.id.in_(records_ids)))
-    return result.scalars().all()
-
-
-async def _build_record_update(
-    db: AsyncSession, record: Record, record_update: "RecordUpdateWithId", caches: Optional[Dict[str, Any]] = None
-) -> Tuple[Dict[str, Any], Union[List[Suggestion], None], List[VectorSchema], bool, Dict[str, Any]]:
-    if caches is None:
-        caches = {
-            "metadata_properties": {},
-            "questions": {},
-            "vector_settings": {},
-        }
-
-    params = record_update.dict(exclude_unset=True)
-    needs_search_engine_update = False
-    suggestions = None
-    vectors = []
-
-    if "metadata_" in params:
-        metadata = params["metadata_"]
-        needs_search_engine_update = True
-        if metadata is not None:
-            caches["metadata_properties"] = await _validate_record_metadata(
-                db, record.dataset, metadata, caches["metadata_properties"]
-            )
-
-    if record_update.suggestions is not None:
-        params.pop("suggestions")
-        questions_ids = [suggestion.question_id for suggestion in record_update.suggestions]
-        if len(questions_ids) != len(set(questions_ids)):
-            raise UnprocessableEntityError("found duplicate suggestions question IDs")
-        suggestions = await _build_record_suggestions(db, record, record_update.suggestions, caches["questions"])
-
-    if record_update.vectors is not None:
-        params.pop("vectors")
-        vectors = await _build_record_vectors(
-            db,
-            record.dataset,
-            record_update.vectors,
-            build_vector_func=lambda value, vector_settings_id: VectorSchema(
-                value=value, record_id=record_update.id, vector_settings_id=vector_settings_id
-            ),
-            cache=caches["vector_settings"],
-        )
-        needs_search_engine_update = True
-
-    return params, suggestions, vectors, needs_search_engine_update, caches
-
-
-async def _preload_records_relationships_before_index(db: AsyncSession, records: List[Record]) -> None:
-    for record in records:
-        await _preload_record_relationships_before_index(db, record)
 
 
 async def _preload_record_relationships_before_index(db: AsyncSession, record: Record) -> None:
@@ -741,29 +458,54 @@ async def delete_records(
 async def update_record(
     db: AsyncSession, search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
 ) -> Record:
-    params, suggestions, vectors, needs_search_engine_update, _ = await _build_record_update(
-        db, record, RecordUpdateWithId(id=record.id, **record_update.dict(by_alias=True, exclude_unset=True))
-    )
+    if not record_update.has_changes():
+        return record
 
-    # Remove existing suggestions
-    if suggestions is not None:
-        record.suggestions = []
-        params["suggestions"] = suggestions
+    dataset = record.dataset
 
-    async with db.begin_nested():
-        record = await record.update(db, **params, replace_dict=True, autocommit=False)
+    await RecordUpdateValidator.validate(record_update, dataset, record)
 
-        if vectors:
-            await Vector.upsert_many(
-                db, objects=vectors, constraints=[Vector.record_id, Vector.vector_settings_id], autocommit=False
+    if record_update.is_set("metadata"):
+        record.metadata_ = record_update.metadata
+
+    if record_update.is_set("suggestions"):
+        # Delete all suggestions and replace them with the new ones
+        await Suggestion.delete_many(db, [Suggestion.record_id == record.id], autocommit=False)
+        await db.refresh(record, attribute_names=["suggestions"])
+
+        record.suggestions = [
+            Suggestion(
+                type=suggestion.type,
+                score=suggestion.score,
+                value=jsonable_encoder(suggestion.value),
+                agent=suggestion.agent,
+                question_id=suggestion.question_id,
+                record_id=record.id,
             )
-            await db.refresh(record, attribute_names=["vectors"])
+            for suggestion in record_update.suggestions
+        ]
+
+    await record.save(db, autocommit=False)
+
+    if record_update.vectors:
+        await Vector.upsert_many(
+            db,
+            objects=[
+                VectorSchema(
+                    record_id=record.id,
+                    vector_settings_id=dataset.vector_settings_by_name(name).id,
+                    value=value,
+                )
+                for name, value in record_update.vectors.items()
+            ],
+            constraints=[Vector.record_id, Vector.vector_settings_id],
+        )
+        await db.refresh(record, attribute_names=["vectors"])
 
     await db.commit()
 
-    if needs_search_engine_update:
-        await _preload_record_relationships_before_index(db, record)
-        await search_engine.index_records(record.dataset, [record])
+    await _preload_record_relationships_before_index(db, record)
+    await search_engine.index_records(record.dataset, [record])
 
     return record
 

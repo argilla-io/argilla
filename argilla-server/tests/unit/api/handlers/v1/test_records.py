@@ -372,7 +372,7 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
             "vectors": {},
             "dataset_id": str(dataset.id),
@@ -435,7 +435,7 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
             "vectors": {},
             "dataset_id": str(record.dataset_id),
@@ -537,7 +537,9 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid label for label selection question.\nValid labels are: ['option1', 'option2', 'option3']"
+            "detail": "record does not have valid suggestions: "
+            "'not a valid value' is not a valid label for label selection question.\n"
+            "Valid labels are: ['option1', 'option2', 'option3']"
         }
 
     async def test_update_record_with_invalid_vector(self, async_client: "AsyncClient", owner_auth_header: dict):
@@ -553,7 +555,9 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"vector with name={vector_settings.name} is not valid: vector must have 5 elements, got 6 elements"
+            "detail": "record does not have valid vectors: "
+            f"vector value for vector name={vector_settings.name} "
+            f"must have {vector_settings.dimensions} elements, got 6 elements"
         }
 
     async def test_update_record_with_suggestion_for_nonexistent_question(
@@ -576,7 +580,7 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
+            "detail": f"record does not have valid suggestions: question id={question_id} does not exists"
         }
 
     async def test_update_record_with_nonexistent_vector_settings(
@@ -593,7 +597,8 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"vector with name=i-do-not-exist is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
+            "detail": "record does not have valid vectors: vector with name=i-do-not-exist "
+            f"does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_record_with_duplicate_suggestions_question_ids(
@@ -615,7 +620,9 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "found duplicate suggestions question IDs"}
+        assert response.json() == {
+            "detail": "record does not have valid suggestions: found duplicate suggestions question IDs"
+        }
 
     async def test_update_record_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()

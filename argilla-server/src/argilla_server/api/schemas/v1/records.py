@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-
 from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
@@ -151,17 +150,11 @@ class RecordCreate(BaseModel):
 
 
 class RecordUpdate(UpdateSchema):
-    metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
+    metadata: Optional[Dict[str, Any]] = Field(None)
     suggestions: Optional[List[SuggestionCreate]] = None
     vectors: Optional[Dict[str, List[float]]]
 
-    @property
-    def metadata(self) -> Optional[Dict[str, Any]]:
-        # Align with the RecordCreate model. Both should have the same name for the metadata field.
-        # TODO(@frascuchon): This will be properly adapted once the bulk records refactor is completed.
-        return self.metadata_
-
-    @validator("metadata_")
+    @validator("metadata")
     @classmethod
     def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
@@ -173,9 +166,11 @@ class RecordUpdate(UpdateSchema):
 
         return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
 
+    def is_set(self, attribute: str) -> bool:
+        return attribute in self.__fields_set__
 
-class RecordUpdateWithId(RecordUpdate):
-    id: UUID
+    def has_changes(self) -> bool:
+        return self.dict(exclude_unset=True) != {}
 
 
 class RecordUpsert(RecordCreate):
@@ -246,11 +241,6 @@ class Records(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: List[RecordCreate] = Field(..., min_items=RECORDS_CREATE_MIN_ITEMS, max_items=RECORDS_CREATE_MAX_ITEMS)
-
-
-class RecordsUpdate(BaseModel):
-    # TODO: review this definition and align to create model
-    items: List[RecordUpdateWithId] = Field(..., min_items=RECORDS_UPDATE_MIN_ITEMS, max_items=RECORDS_UPDATE_MAX_ITEMS)
 
 
 class MetadataParsedQueryParam:
