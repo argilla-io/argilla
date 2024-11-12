@@ -48,7 +48,7 @@ export default {
   computed: {
     spanQuestionsAnswers() {
       return this.record?.questions
-        .filter((q) => q.isSpanType)
+        ?.filter((q) => q.isSpanType)
         .map((q) => ({
           id: q.id,
           answer: q.answer.values,
@@ -61,7 +61,7 @@ export default {
       handler() {
         if (
           this.record?.questions
-            .filter((q) => q.isSpanType)
+            ?.filter((q) => q.isSpanType)
             .some((q) => q.isAnswerModified)
         ) {
           this.onSelectedRecord(true);
@@ -77,12 +77,12 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  background: palette(white);
-  border: 1px solid $black-6;
+  background: var(--bg-accent-grey-1);
+  border: 1px solid var(--bg-opacity-6);
   border-radius: $border-radius-m;
   &:has(.dropdown__content),
   &:has(.checkbox.checked) {
-    border-color: $black-20;
+    border-color: var(--bg-opacity-20);
   }
   &__wrapper {
     flex: 1;

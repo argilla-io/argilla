@@ -1,40 +1,66 @@
 export default {
-  multi_label_selection: "Multi-label",
+  multi_label_selection: "Multi-Label",
   ranking: "Ranking",
   label_selection: "Label",
-  span: "Span",
+  span: "Bereich",
   text: "Text",
   image: "Bild",
   rating: "Bewertung",
   minimize: "Minimieren",
   select: "Auswählen",
   search: "Suchen",
-  searchPlaceholder: "Eingabe einer Abfrage",
-  searchDatasets: "Durchsuche Datensätze",
+  searchPlaceholder: "Suchbegriff eingeben",
+  searchDatasets: "Datensätze durchsuchen",
   expand: "Erweitern",
   copied: "Kopiert",
   copyLink: "Link kopieren",
   copyRecord: "Eintrag kopieren",
-  refresh: "Refresh",
-  typeYourText: "Type your text",
+  refresh: "Aktualisieren",
+  typeYourText: "Geben Sie Ihren Text ein",
   all: "Alle",
+  value: "Wert",
   title: "Titel",
   description: "Beschreibung",
   labels: "Labels",
+  order: "Reihenfolge",
   useMarkdown: "Verwende Markdown",
   suggestionFirst: "Vorschlag zuerst",
   visibleForAnnotators: "Sichtbar für Annotatoren",
-  allowExtraMetadata: "Erlaube extra Metadata",
-  extraMetadata: "Extra Metadata",
+  recordInfo: "Eintragsinformationen",
+  viewMetadata: "Metadaten ansehen",
+  allowExtraMetadata: "Erlaube zusätzliche Metadaten",
+  extraMetadata: "Zusätzliche Metadaten",
   dimension: "Dimension",
-  visibleLabels: "Sichtbare labels",
+  visibleLabels: "Sichtbare Labels",
   annotationGuidelines: "Annotationsrichtlinien",
   guidelines: "Richtlinien",
+  taskDistribution: "Annotationsverteilung",
+  minimumSubmittedResponses:
+    "Erforderliche Mindestanzahl an eingereichten Antworten",
+  taskDistributionTooltip:
+    "Eine Aufgabe ist abgeschlossen, wenn alle Datensätze die \nMindestanzahl an eingereichten Antworten haben.",
   noAnnotationGuidelines: "Dieser Datensatz hat keine Annotationsrichtlinien",
+  required: "Erforderlich",
+  optional: "Optional",
+  template: "Template",
+  noRecordsMessages: {
+    datasetEmptyForAnnotator:
+      "Der Datensatz ist leer. Bitten Sie einen Administrator, Daten hochzuladen, und versuchen Sie es später erneut.",
+    datasetEmptyForAdmin:
+      "Der Datensatz ist leer. Sie können Datensätze mit dem Python SDK hinzufügen. Siehe <a href='https://docs.argilla.io/latest/how_to_guides/record/'>Dokumentation</a> zum Hinzufügen von Einträgen.",
+    taskDistributionCompleted: "🎉 Die Aufgabe ist erledigt!",
+    noSubmittedRecords: "Sie haben noch keinen Datensatz eingereicht",
+    noRecordsFound:
+      "Sie haben keine {status} Datensätze, welche Ihrer Anfrage entsprechen",
+    noRecords: "Sie haben keine {status} Datensätze",
+    noPendingRecordsToAnnotate: "🎉 Die Aufgabe ist erledigt!",
+    noDraftRecordsToReview: "Sie haben keine Entwürfe zu prüfen",
+  },
+  couldNotLoadImage: "Bild konnte nicht geladen werden",
   breadcrumbs: {
-    home: "start",
-    datasetSettings: "einstellungen",
-    userSettings: "meine einstellungen",
+    home: "Start",
+    datasetSettings: "Einstellungen",
+    userSettings: "Meine Einstellungen",
   },
   datasets: {
     left: "übrig",
@@ -42,11 +68,11 @@ export default {
     pending: "Ausstehend",
   },
   recordStatus: {
-    pending: "Ausstehend",
-    draft: "Entwurf",
-    discarded: "Verworfen",
-    submitted: "Gesichert",
-    validated: "Validiert",
+    pending: "ausstehend",
+    draft: "entwurf",
+    discarded: "verworfen",
+    submitted: "gesichert",
+    validated: "validiert",
     completedTooltip:
       "Der Datensatz ist abgeschlossen, es hat die Anzahl der Antworten.",
   },
@@ -58,10 +84,11 @@ export default {
       lastName: "Nachname",
       workspaces: "Arbeitsbereiche",
     },
-    apiKey: "API key",
+    apiKey: "API-Key",
     apiKeyDescription:
-      "API key Token erlauben es die Datensätze über das Python SDK zu verwalten.",
-    copyKey: "API key kopieren",
+      "API-Keys erlauben es die Datensätze über das Python SDK zu verwalten.",
+    theme: "Theme",
+    copyKey: "API-Key kopieren",
   },
   userAvatarTooltip: {
     settings: "Meine Einstellungen",
@@ -70,7 +97,7 @@ export default {
   },
   settings: {
     title: "Datensatz-Einstellungen",
-    datasetInfo: "Datensatz Information",
+    datasetInfo: "Datensatz-Informationen",
     seeYourDataset: "Gehe zum Datensatz",
     editFields: "Felder bearbeiten",
     editQuestions: "Fragen bearbeiten",
@@ -84,6 +111,7 @@ export default {
     yesDelete: "Ja, löschen",
     write: "Bearbeiten",
     preview: "Vorschau",
+    uiPreview: "UI Vorschau",
   },
   button: {
     ignore_and_continue: "Ignorieren und fortfahren",
@@ -102,7 +130,7 @@ export default {
     },
   },
   to_submit_complete_required:
-    "Zum Absenden beantworten \nSie benötigte Fragen",
+    "Zum Absenden beantworten \nSie die benötigten Fragen",
   some_records_failed_to_annotate:
     "Einige Einträge konnten nicht annotiert werden",
   changes_no_submit: "Sie haben Ihre Änderungen nicht gespeichert",
@@ -110,7 +138,7 @@ export default {
     recordsSelected: "1 Eintrag ausgewählt | {count} Einträge ausgewählt",
     recordsViewSettings: "Anzahl der Einträge",
     fixedHeight: "Einträge zusammenklappen",
-    defaultHeight: "Einträge erweitern ",
+    defaultHeight: "Einträge erweitern",
     to_annotate_record_bulk_required: "Kein Eintrag ausgewählt",
     select_to_annotate: "Alles auswählen",
     pageSize: "Seitengröße",
@@ -123,7 +151,7 @@ export default {
     affectedAll: {
       submitted: "abgesendet",
       discarded: "verworfen",
-      draft: "Entwurf gespeichert",
+      draft: "als Entwurf gespeichert",
     },
   },
   shortcuts: {
@@ -135,11 +163,12 @@ export default {
   },
   questions_form: {
     validate: "Validieren",
-    clear: "Clear",
+    clear: "Löschen",
     reset: "Zurücksetzen",
     discard: "Verwerfen",
     submit: "Absenden",
     draft: "Entwurf speichern",
+    write: "Schreiben",
   },
   sorting: {
     label: "Sortieren",
@@ -150,12 +179,12 @@ export default {
     },
     response: "Antwortwert",
     record: "allgemein",
-    metadata: "metadaten",
+    metadata: "Metadaten",
   },
   suggestion: {
-    agent: "\nagent: {agent}",
-    score: "\nbewertung: {score}",
-    tooltip: "Diese Frage enthält einen Vorschlag{agent}{score}",
+    agent: "\nAgent: {agent}",
+    score: "\nBewertung: {score}",
+    tooltip: "Diese Frage enthält einen Vorschlag {agent} {score}",
     filter: {
       value: "Vorschlagswerte",
       score: "Bewertung",
@@ -166,7 +195,7 @@ export default {
   },
   similarity: {
     "record-number": "Eintrag-Nummer",
-    findSimilar: "Ähnliche finden",
+    findSimilar: "Ähnliche Einträge finden",
     similarTo: "Ähnlich zu",
     similarityScore: "Ähnlichkeitsbewertung",
     similarUsing: "ähnlich unter Verwendung von",
@@ -176,21 +205,22 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Halten Sie 'Shift' gedrückt, um Zeichenebene auszuwählen",
     notSupported: "Bereichsannotation wird von Ihrem Browser nicht unterstützt",
+    searchLabels: "Label finden",
   },
   login: {
     title: "Anmelden",
     username: "Benutzername",
-    usernameDescription: "Gebe Sie ihren Benutzernamen ein",
+    usernameDescription: "Geben Sie Ihren Benutzernamen ein",
     password: "Passwort",
     show: "Anzeigen",
     hide: "Ausblenden",
-    passwordDescription: "Gebe Sie ihr Passwort ein",
+    passwordDescription: "Geben Sie ihr Passwort ein",
     claim: "Gemeinsames Arbeiten an Daten.</br>Verbessern Sie Ihre Modelle.",
     error: "Falscher Benutzername oder Passwort. Versuchen Sie es erneut",
     hf: {
       title: "Willkommen bei {space}",
       subtitle:
-        "Helfe <strong>{user}</strong> um bessere Datensätze für KI zu erstellen",
+        "Helfe <strong>{user}</strong> bessere Datensätze für KI zu erstellen",
     },
   },
   of: "von",
@@ -199,6 +229,7 @@ export default {
   filterBy: "Filter nach...",
   fields: "Felder",
   questions: "Fragen",
+  general: "Übersicht",
   metadata: "Metadaten",
   vectors: "Vektoren",
   dangerZone: "Gefahrenzone",
@@ -206,6 +237,7 @@ export default {
   "reset-all": "Alle zurücksetzen",
   reset: "Zurücksetzen",
   less: "Weniger",
+  learnMore: "Erfahre mehr",
   with: "mit",
   find: "Finden",
   cancel: "Abbrechen",
@@ -217,7 +249,7 @@ export default {
   write: "Schreiben",
   preview: "Vorschau",
   datasetTable: {
-    name: "Dataset",
+    name: "Datensatz",
     workspace: "Arbeitsbereich",
     createdAt: "Erstellt am",
     lastActivityAt: "Aktualisiert am",
@@ -230,7 +262,85 @@ export default {
       team: "Fortschritte im Team",
     },
   },
-
+  home: {
+    argillaDatasets: "Argilla Datensätze",
+    none: "Bis jetzt keine",
+    importTitle: "Importiere ein Datensatz aus dem Hugging Face Hub",
+    importText:
+      "Starten Sie mit einem Datensatz aus dem Hub, indem Sie einfach den Repository-Namen einfügen",
+    importButton: "Datensatz importieren",
+    importFromHub: "Direkt vom Hub importieren",
+    importFromPython: "Mit Python importieren",
+    importFromPythonHFWarning:
+      "Wenn Sie einen privaten Space verwenden, lesen Sie die <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>Dokumentation</a>.",
+    exampleDatasetsTitle: "Sie wissen nicht, wo Sie anfangen sollen?",
+    exampleDatasetsText: "Erkunden Sie diese Beispiel-Datensätze",
+    guidesTitle: "Nicht mit Argilla vertraut?",
+    guidesText: "Nutzen Sie diese Anleitungen an:",
+    pasteRepoIdPlaceholder: "Fügen Sie eine Repo-ID ein",
+    demoLink:
+      "Melden Sie sich bei dieser <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>Demo</a> an, um Argilla auszuprobieren",
+  },
+  datasetCreation: {
+    questions: {
+      labelSelection: {
+        atLeastTwoOptions: "Mindestens zwei Optionen müssen vorhanden sein",
+        optionsWithoutLabel: "Optionen ohne Label sind nicht erlaubt",
+      },
+    },
+    atLeastOneQuestion: "Mindestens eine Frage wird benötigt",
+    atLeastOneRequired: "Mindestens eine erforderliche Frage wird benötigt",
+    hasInvalidQuestions: "Einige Fragen sind ungültig",
+    createDataset: "Datensatz in Argilla erstellen",
+    datasetName: "Name des Datensatzes",
+    name: "Name",
+    assignWorkspace: "Einem Workspace zuweisen",
+    selectSplit: "Einen Datensatz-Split auswählen",
+    recordWarning:
+      "Der erstellte Datensatz wird nur die ersten 10Tsd Zeilen enthalten, weitere Einträge können über das Python SDK hinzugefügt werden.",
+    button: "Datensatz erstellen",
+    fields: "Felder",
+    questionsTitle: "Fragen",
+    yourQuestions: "Ihre Fragen",
+    requiredField: "Pflichtfeld",
+    requiredQuestion: "Pflichtfrage",
+    select: "Auswählen",
+    mapToColumn: "Einer Spalte zuordnen",
+    subset: "Teilmenge",
+    selectSubset:
+      "Sie können einen Datensatz nur aus einer Teilmenge erstellen.",
+    preview: "Vorschau",
+    importData: "Daten importieren",
+    addRecords: "Einträge hinzufügen",
+    cantLoadRepository:
+      "Datensatz auf Hugging Face nicht gefunden oder verfügbar",
+    none: "Keine",
+    noWorkspaces:
+      "Bitte folgen Sie der <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>Anleitung</a>, um einen Workspace zu erstellen",
+  },
+  config: {
+    field: {
+      text: "Textfeld",
+      chat: "Chatfeld",
+      image: "Bildfeld",
+      "no mapping": "Keine Zuordnung",
+    },
+    question: {
+      text: "Text",
+      rating: "Numerische Bewertung",
+      label_selection: "Label",
+      ranking: "Ranking",
+      multi_label_selection: "Multi-Label",
+      span: "Bereichsannotation",
+      "no mapping": "Keine Zuordnung",
+    },
+  },
+  persistentStorage: {
+    adminOrOwner:
+      "Der persistente Speicher ist nicht aktiviert. Alle Daten gehen verloren, wenn dieser Space neu gestartet wird. Gehen Sie zu den Space-Einstellungen, um ihn zu aktivieren.",
+    annotator:
+      "Der persistente Speicher ist nicht aktiviert. Alle Daten gehen verloren, wenn dieser Space neu gestartet wird.",
+  },
   validations: {
     businessLogic: {
       missing_vector: {
@@ -238,7 +348,7 @@ export default {
       },
       update_distribution_with_existing_responses: {
         message:
-          "Die Verteilungseinstellungen können für einen Datensatz mit Benutzerantworten nicht geändert werden",
+          "Die Verteilungseinstellungen können für einen Datensatz mit Benutzerantworten nicht geändert werden", //TODO
       },
     },
     http: {

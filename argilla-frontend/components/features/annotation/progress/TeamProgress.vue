@@ -12,8 +12,12 @@
         :show-tooltip="showTooltip"
         :tooltip-position-fixed="false"
         :show-percent-in-tooltip="false"
+        role="progressbar"
+        :aria-valuenow="progress.percentage.completed"
+        aria-label="Team Annotation-Progress"
+        aria-labelledby="team-progress-percent"
       />
-      <span class="team-progress__percent"
+      <span id="team-progress-percent" class="team-progress__percent"
         >{{ progress.percentage.completed }}%</span
       >
       <span v-if="visibleProgressValues" class="team-progress__info">
@@ -46,7 +50,8 @@ export default {
         {
           id: "completed",
           name: this.$t("datasets.completed"),
-          color: "linear-gradient(90deg, #6A6A6C 0%, #252626 100%)",
+          color:
+            "linear-gradient(90deg, var(--fg-tertiary) 0%, var(--fg-primary) 100%)",
           value: this.progress.completed,
           tooltip: `${this.progress.completed}`,
         },
@@ -60,8 +65,8 @@ export default {
       ];
     },
   },
-  setup(props) {
-    return useTeamProgressViewModel(props);
+  setup() {
+    return useTeamProgressViewModel();
   },
 };
 </script>
@@ -73,7 +78,7 @@ export default {
   align-items: center;
   gap: $base-space * 2;
   width: 100%;
-  color: $black-54;
+  color: var(--fg-secondary);
   @include font-size(12px);
   z-index: 1;
   &__bar {

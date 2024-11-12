@@ -36,6 +36,10 @@
         width="16"
         height="16"
         :name="category.sort === 'asc' ? 'arrow-up' : 'arrow-down'"
+        :aria-label="
+          'Change sort direction to ' +
+          (category.sort === 'asc' ? 'up' : 'down')
+        "
       />
     </BaseButton>
     <BaseButton
@@ -96,7 +100,7 @@ export default {
       flex-direction: row;
       width: 100%;
       padding: calc($base-space / 2) $base-space;
-      border: 1px solid $black-10;
+      border: 1px solid var(--bg-opacity-10);
       border-radius: $border-radius;
       cursor: pointer;
       &__item {
@@ -106,7 +110,7 @@ export default {
       }
       &__group {
         margin-top: calc($base-space / 2 * -1);
-        color: $black-37;
+        color: var(--fg-tertiary);
         @include font-size(10px);
         text-transform: capitalize;
       }

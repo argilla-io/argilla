@@ -50,6 +50,13 @@
     <div class="form-group">
       <UserTokenComponent :userToken="user.apiKey" />
     </div>
+    <div class="form-group">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('userSettings.theme')"
+      />
+      <UserSettingsTheme />
+    </div>
   </div>
 </template>
 
@@ -72,10 +79,7 @@ export default {
 .form-group {
   padding: $base-space * 3 0;
   &:not(:first-child) {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  }
-  &:last-child {
-    padding: unset;
+    border-bottom: 1px solid var(--bg-opacity-10);
   }
 }
 
@@ -92,6 +96,10 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   padding-bottom: 0;
+}
+.circle-and-role span {
+  background-color: var(--color-brand);
+  color: var(--color-white);
 }
 
 .description {

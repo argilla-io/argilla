@@ -1,5 +1,5 @@
 <template>
-  <span class="span-entity__wrapper">
+  <span class="span-entity__wrapper" role="mark">
     <template v-if="allowOverlapping">
       <span
         v-for="(line, index) in lines"
@@ -310,6 +310,9 @@ export default {
     height: 2px;
     background: v-bind(entityColor);
     margin-top: 20px;
+    [data-theme="dark"] & {
+      background: v-bind("entityColor.palette.veryDark");
+    }
   }
   &__suggestion {
     margin-right: calc($base-space / 2);
@@ -347,15 +350,27 @@ export default {
       background: v-bind("selectedOption.color");
       width: 100%;
       transition: width 0.2s ease;
+      [data-theme="dark"] & {
+        background: v-bind("entityColor.palette.veryDark");
+      }
     }
   }
   &__close-button {
     display: none;
     padding: 1px;
     border-radius: 0;
-    background: $black-54;
+    background: var(--color-dark-grey);
     &:hover {
-      background: $black-87;
+      background: hsl(from var(--color-dark-grey) h s l / 80%);
+    }
+    [data-theme="dark"] & {
+      background: transparent;
+      :deep(*) {
+        fill: var(--color-white);
+      }
+      &:hover {
+        opacity: 0.8;
+      }
     }
   }
   &--clickable {
@@ -366,6 +381,9 @@ export default {
     @extend .span-entity;
     background: v-bind(entityColor);
     margin-top: 0;
+    [data-theme="dark"] & {
+      background: v-bind("entityColor.palette.veryDark");
+    }
   }
 }
 </style>

@@ -7,9 +7,13 @@
           @submit.prevent="onSubmit(field)"
           class="settings__edition-form__fields"
         >
-          <div class="settings__edition-form__name">
-            <h4 class="--body1 --medium" v-text="field.name" />
-            <BaseBadge class="--capitalized" :text="`${$t(field.type)}`" />
+          <div class="settings__edition-form__header">
+            <div class="settings__edition-form__name">
+              <h4 class="--body1 --medium" v-text="field.name" />
+              <BaseBadge class="--capitalized" :text="`${$t(field.type)}`" />
+            </div>
+            <p v-if="field.isRequired" v-text="$t('required')" />
+            <p v-else v-text="$t('optional')" />
           </div>
 
           <Validation
@@ -20,8 +24,15 @@
             <input type="text" id="field.id" v-model="field.title" />
           </Validation>
 
+          <div class="settings__edition-form__group" v-if="field.isCustomType">
+            <label>{{ $t("template") }}</label>
+            <div class="settings__custom-field-preview">
+              <pre><code v-highlight>{{ field.settings.template }}</code></pre>
+            </div>
+          </div>
+
           <BaseSwitch
-            v-if="field.isTextType"
+            v-if="field.isTextType || field.isChatType"
             class="settings__edition-form__switch"
             v-model="field.settings.use_markdown"
             >{{ $t("useMarkdown") }}</BaseSwitch
@@ -96,18 +107,28 @@ export default {
       gap: $base-space * 2;
     }
 
-    &__name {
+    &__header {
       display: flex;
-      flex-direction: row;
-      align-items: center;
       justify-content: space-between;
-      gap: $base-space * 2;
+
       h4 {
         margin: 0;
       }
       .badge {
         margin-inline: 0 auto;
       }
+      p {
+        height: 14px;
+        color: var(--fg-secondary);
+      }
+    }
+
+    &__name {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: $base-space * 2;
     }
 
     &__group {
@@ -119,7 +140,7 @@ export default {
       & label {
         width: fit-content;
         height: 14px;
-        color: $black-87;
+        color: var(--fg-primary);
       }
 
       & input {
@@ -129,21 +150,20 @@ export default {
         width: 100%;
         height: 24px;
         padding: 16px;
-        background: palette(white);
-        border: 1px solid $black-20;
+        background: var(--bg-accent-grey-2);
+        color: var(--fg-primary);
+        border: 1px solid var(--bg-opacity-20);
         border-radius: $border-radius;
         outline: 0;
         &:focus {
-          border: 1px solid $primary-color;
+          border: 1px solid var(--bg-action);
         }
       }
     }
 
     &__switch {
-      @include media(">desktop") {
-        :deep(label) {
-          min-width: 140px;
-        }
+      :deep(label) {
+        min-width: 140px;
       }
     }
 
@@ -153,9 +173,20 @@ export default {
       justify-content: flex-end;
       align-items: center;
       padding: $base-space * 2 0;
-      border-bottom: 1px solid $black-10;
+      border-bottom: 1px solid var(--bg-opacity-10);
       display: inline-flex;
       gap: $base-space;
+    }
+  }
+  &__custom-field-preview {
+    overflow: auto;
+    max-height: 30vh;
+    padding: $base-space * 2;
+    border: 1px solid var(--bg-opacity-10);
+    border-radius: $border-radius;
+    background: var(--bg-opacity-4);
+    pre {
+      margin: 0;
     }
   }
 }

@@ -3,9 +3,9 @@
 </template>
 
 <style scoped lang="scss">
-$progressBackgroundColor: #f2f2f2;
+$progressBackgroundColor: var(--bg-opacity-4);
+$progressBackgroundColorSecondary: var(--bg-opacity-10);
 .status-counter {
-  background: $black-3;
   border-radius: $border-radius;
   animation-duration: 0.5s;
   animation-fill-mode: forwards;
@@ -15,7 +15,7 @@ $progressBackgroundColor: #f2f2f2;
   background: linear-gradient(
     to right,
     $progressBackgroundColor 0%,
-    darken($progressBackgroundColor, 3%) 50%,
+    $progressBackgroundColorSecondary 50%,
     $progressBackgroundColor 100%
   );
   background-size: 200% 100%;

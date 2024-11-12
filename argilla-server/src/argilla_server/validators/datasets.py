@@ -16,12 +16,12 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.models import Dataset, Field, Question, Workspace
 from argilla_server.errors.future import (
     NotUniqueError,
     UnprocessableEntityError,
     UpdateDistributionWithExistingResponsesError,
 )
-from argilla_server.models import Dataset, Workspace
 
 
 class DatasetCreateValidator:
@@ -41,18 +41,30 @@ class DatasetCreateValidator:
             raise NotUniqueError(f"Dataset with name `{name}` already exists for workspace with id `{workspace_id}`")
 
 
+class DatasetPublishValidator:
+    @classmethod
+    async def validate(cls, db: AsyncSession, dataset: Dataset) -> None:
+        await cls._validate_has_not_been_published_yet(db, dataset)
+        await cls._validate_has_at_least_one_field(db, dataset)
+        await cls._validate_has_at_least_one_required_question(db, dataset)
+
+    @classmethod
+    async def _validate_has_not_been_published_yet(cls, db: AsyncSession, dataset: Dataset) -> None:
+        if dataset.is_ready:
+            raise UnprocessableEntityError("Dataset has already been published")
+
+    @classmethod
+    async def _validate_has_at_least_one_field(cls, db: AsyncSession, dataset: Dataset) -> None:
+        if await Field.count_by(db, dataset_id=dataset.id) == 0:
+            raise UnprocessableEntityError("Dataset cannot be published without fields")
+
+    @classmethod
+    async def _validate_has_at_least_one_required_question(cls, db: AsyncSession, dataset: Dataset) -> None:
+        if await Question.count_by(db, dataset_id=dataset.id, required=True) == 0:
+            raise UnprocessableEntityError("Dataset cannot be published without required questions")
+
+
 class DatasetUpdateValidator:
     @classmethod
     async def validate(cls, db: AsyncSession, dataset: Dataset, dataset_attrs: dict) -> None:
-        await cls._validate_distribution(dataset, dataset_attrs)
-
-    @classmethod
-    async def _validate_distribution(cls, dataset: Dataset, dataset_attrs: dict) -> None:
-        if (
-            dataset_attrs.get("distribution") is not None
-            and dataset.distribution != dataset_attrs.get("distribution")
-            and (await dataset.responses_count) > 0
-        ):
-            raise UpdateDistributionWithExistingResponsesError(
-                "Distribution settings can't be modified for a dataset containing user responses"
-            )
+        pass

@@ -19,11 +19,13 @@ import { AxiosError } from "axios";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 type BackendError = {
-  detail: {
-    params: {
-      detail: string;
-    };
-  };
+  detail:
+    | {
+        params: {
+          detail: string;
+        };
+      }
+    | string;
   code?: string;
   message?: string;
 };
@@ -43,7 +45,7 @@ export default ({ $axios, app }) => {
     if (handledTranslatedError !== errorHandledKey) {
       notification.notify({
         message: handledTranslatedError,
-        type: "error",
+        type: "danger",
       });
     }
 
@@ -54,9 +56,14 @@ export default ({ $axios, app }) => {
       if (handledTranslatedError !== errorHandledKey) {
         notification.notify({
           message: handledTranslatedError,
-          type: "error",
+          type: "danger",
         });
       }
+    } else if (data.detail && typeof data.detail === "string") {
+      notification.notify({
+        message: data.detail.toString(),
+        type: "danger",
+      });
     }
 
     throw error;

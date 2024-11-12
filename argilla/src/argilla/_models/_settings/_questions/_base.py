@@ -35,12 +35,6 @@ class QuestionBaseModel(BaseModel, validate_assignment=True):
     inserted_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    @field_validator("name")
-    @classmethod
-    def __name_lower(cls, name: str, info: ValidationInfo):
-        formatted_name = name.lower().replace(" ", "_")
-        return formatted_name
-
     @field_validator("title", mode="before")
     @classmethod
     def __title_default(cls, title, info: ValidationInfo):

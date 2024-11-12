@@ -18,4 +18,15 @@ export class Progress {
       completed: ((this.completed * 100) / this.total).toFixed(2),
     };
   }
+
+  get hasAtLeastTenRecord() {
+    return this.total >= 10;
+  }
+
+  get isCompleted() {
+    if (!this.hasMetrics) return false;
+    if (this.total === 0) return false;
+
+    return this.completed === this.total;
+  }
 }

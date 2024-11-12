@@ -4,7 +4,7 @@
       class="--heading5 --medium description__title"
       v-text="$t('annotationGuidelines')"
     />
-    <RenderMarkdownBaseComponent
+    <MarkdownRenderer
       class="--body1 description__text"
       :class="{ '--light': isColorLight }"
       :markdown="sanitizedDescription"
@@ -36,10 +36,10 @@ export default {
 .description {
   &__text {
     white-space: pre-wrap;
-    color: $black-87;
+    color: var(--fg-primary);
 
     &.--light {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
 }

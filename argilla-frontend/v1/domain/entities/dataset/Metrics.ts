@@ -7,6 +7,7 @@ export class Metrics {
   };
 
   public readonly hasMetrics: boolean;
+  public readonly isEmpty: boolean;
 
   constructor(
     public readonly total: number,
@@ -16,6 +17,7 @@ export class Metrics {
     public readonly pending: number
   ) {
     this.hasMetrics = total >= 0;
+    this.isEmpty = total === 0;
 
     this.percentage = {
       pending: (this.pending * 100) / this.total,

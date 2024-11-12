@@ -11,7 +11,7 @@
           ref="searchComponentRef"
           v-model="searchInput"
           :searchRef="searchRef"
-          :placeholder="placeholder"
+          :placeholder="$t('spanAnnotation.searchLabels')"
         />
       </div>
       <div class="right-header">
@@ -30,6 +30,7 @@
             width="18"
             height="18"
             :name="iconToShowInTheCollapseButton"
+            aria-hidden="true"
           />
         </button>
       </div>
@@ -41,11 +42,15 @@
       name="shuffle"
       class="inputs-area"
       v-if="filteredOptions.length"
+      role="group"
+      aria-multiselectable="multiple"
+      aria-label="Label-Options"
     >
       <EntityLabelBadge
         v-for="(option, index) in visibleOptions"
         :key="option.id"
         ref="options"
+        :visible-shortcuts="visibleShortcuts"
         :option="option"
         :keyboards="keyboards"
         v-model="option.isSelected"
@@ -74,10 +79,6 @@ export default {
       type: Array,
       required: true,
     },
-    placeholder: {
-      type: String,
-      default: () => "Search labels",
-    },
     componentId: {
       type: String,
       required: true,
@@ -89,6 +90,10 @@ export default {
     enableSpanQuestionShortcutsGlobal: {
       type: Boolean,
       default: () => false,
+    },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
     },
   },
   model: {
@@ -319,21 +324,21 @@ export default {
   gap: $base-space;
   background: none;
   border: none;
-  color: $black-37;
+  color: var(--fg-tertiary);
   font-weight: 500;
   text-decoration: none;
   .--more {
     border-radius: 20px;
-    border: 1px solid $black-10;
+    border: 1px solid var(--bg-opacity-10);
     padding: 2px 4px;
-    color: $black-54;
+    color: var(--fg-secondary);
     @include font-size(12px);
   }
   .--less {
     @include font-size(14px);
   }
   .svg-icon {
-    color: $black-37;
+    color: var(--fg-tertiary);
     border-radius: $border-radius;
   }
 }

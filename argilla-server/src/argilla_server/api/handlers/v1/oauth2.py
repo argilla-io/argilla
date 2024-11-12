@@ -89,6 +89,5 @@ async def get_access_token(
             ).dict(exclude_unset=True),
             workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
         )
-        telemetry.track_user_created(user, is_oauth=True)
 
     return Token(access_token=accounts.generate_user_token(user))

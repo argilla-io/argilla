@@ -38,6 +38,22 @@ export default {
   taskDistributionTooltip:
     "Una tarea se completa cuando todos los \nregistros tienen el número mínimo \nde respuestas entregadas",
   noAnnotationGuidelines: "Este dataset no tiene guía de anotación",
+  required: "Requerido",
+  optional: "Opcional",
+  template: "Plantilla",
+  noRecordsMessages: {
+    datasetEmptyForAnnotator:
+      "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",
+    datasetEmptyForAdmin:
+      "El dataset está vacío. Puedes agregar registros usando el SDK de Python, consulta la <a href='https://docs.argilla.io/latest/how_to_guides/record/'>documentación</a> sobre cómo agregar registros.",
+    taskDistributionCompleted: "🎉 ¡La tarea está completada!",
+    noSubmittedRecords: "Aún no has entregado ningún registro",
+    noRecordsFound:
+      "No tienes registros {status} que coincidan con tu búsqueda",
+    noRecords: "No tienes registros {status}",
+    noPendingRecordsToAnnotate: "🎉 No tienes registros pendientes para anotar",
+    noDraftRecordsToReview: "No tienes ningún borrador para revisar",
+  },
   breadcrumbs: {
     home: "Inicio",
     datasetSettings: "Configuración",
@@ -49,11 +65,11 @@ export default {
     pending: "Pendiente",
   },
   recordStatus: {
-    pending: "Pendiente",
-    draft: "Borrador",
-    discarded: "Descartado",
-    submitted: "Entregado",
-    validated: "Validado",
+    pending: "pendiente | pendientes",
+    draft: "borrador | borradores",
+    discarded: "descartado | descartados",
+    submitted: "entregado | entregados",
+    validated: "validado | validados",
     completedTooltip:
       "El registro está completo, tiene el número \nmínimo de respuestas",
   },
@@ -123,7 +139,7 @@ export default {
     select_to_annotate: "Seleccionar todo",
     pageSize: "Tamaño de página",
     selectAllResults: "Selecciona todos los registros coincidentes {total}",
-    haveSelectedRecords: "Has seleccionado todos los registros {Total}",
+    haveSelectedRecords: "Has seleccionado todos los registros {total}",
     actionConfirmation: "Confirmación de acción en bloque",
     actionConfirmationText:
       "Esta acción afectará a {total} registros, ¿Quiere continuar?",
@@ -164,7 +180,7 @@ export default {
   suggestion: {
     agent: "\nagente: {agent}",
     score: "\npuntuación: {score}",
-    tooltip: "Esta pregunta contiene una sugerencia {agente} {stork}",
+    tooltip: "Esta pregunta contiene una sugerencia {agent} {score}",
     filter: {
       value: "Valores de sugerencia",
       score: "Puntuación",
@@ -196,7 +212,7 @@ export default {
     passwordDescription: "Introduce tu contraseña",
     claim: "Trabaja en equipo con tus datos.</br>Perfecciona tus modelos.",
     hf: {
-      title: "Bienvenido a {Space}",
+      title: "Bienvenido a {space}",
       subtitle:
         "Únete a <strong>{user}</strong> para construir mejores datasets para IA",
     },
@@ -237,6 +253,80 @@ export default {
     progress: {
       my: "Mi progreso",
       team: "Progreso del equipo",
+    },
+  },
+  home: {
+    argillaDatasets: "Tus datasets",
+    none: "Sin datasets",
+    importTitle: "Importar un dataset desde Hugging Face Hub",
+    importText:
+      "Comienza con un conjunto de datos del Hub simplemente pegando el nombre del repositorio",
+    importButton: "Importar dataset",
+    importFromHub: "Importar dataset desde Hugging Face",
+    importFromPython: "Importar desde Python",
+    importFromPythonHFWarning:
+      "Si estás usando un Espacio privado, consulta la <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>documentación</a>.",
+    exampleDatasetsTitle: "¿No sabes por dónde empezar?",
+    exampleDatasetsText: "Explora estos datasets de ejemplo",
+    guidesTitle: "¿No conoce Argilla?",
+    guidesText: "Echa un vistazo a estas guías:",
+    pasteRepoIdPlaceholder: "Pega un repo id id p.ej., stanfordnlp/imdb",
+    demoLink:
+      "Entra en esta <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> para probar Argilla",
+  },
+  datasetCreation: {
+    questions: {
+      labelSelection: {
+        atLeastTwoOptions: "Se requieren al menos dos opciones",
+        optionsWithoutLabel: "No se permiten opciones vacías",
+      },
+      rating: {
+        atLeastTwoOptions: "Se requieren al menos dos opciones",
+      },
+    },
+    atLeastOneQuestion: "Se requiere al menos una pregunta.",
+    atLeastOneRequired: "Se requiere al menos una pregunta obligatoria.",
+    hasInvalidQuestions: "Algunas preguntas son inválidas",
+    createDataset: "Crea el dataset en Argilla",
+    datasetName: "Nombre del dataset",
+    name: "Nombre",
+    assignWorkspace: "Asignar un espacio de trabajo",
+    selectSplit: "Seleccionar una división",
+    recordWarning:
+      "El conjunto de datos creado incluirá las primeras 10K filas y se pueden registrar más records a través del SDK de Python.",
+    button: "Crear el dataset",
+    fields: "Campos",
+    questionsTitle: "Preguntas",
+    yourQuestions: "Tus preguntas",
+    requiredField: "Campo obligatorio",
+    requiredQuestion: "Pregunta obligatoria",
+    select: "Seleccionar",
+    mapToColumn: "Mapear a una columna",
+    subset: "Subconjunto",
+    selectSubset: "Puedes crear un dataset de un solo subconjunto.",
+    preview: "Vista previa",
+    importData: "Importar datos",
+    addRecords: "Agregar records",
+    cantLoadRepository: "Dataset no encontrado o disponible en Hugging Face",
+    none: "Ninguno",
+    noWorkspaces:
+      "Por favor, sigue <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>esta guía</a> para crear un espacio de trabajo",
+  },
+  config: {
+    field: {
+      text: "Campo de texto",
+      chat: "Campo de chat",
+      image: "Campo de imagen",
+      "no mapping": "Sin mapeo",
+    },
+    question: {
+      text: "Texto",
+      rating: "Calificación",
+      label_selection: "Etiqueta",
+      ranking: "Ranking",
+      multi_label_selection: "Multi-Etiqueta",
+      span: "Span",
+      "no mapping": "Sin mapeo",
     },
   },
   persistentStorage: {

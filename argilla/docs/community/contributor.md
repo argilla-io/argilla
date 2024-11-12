@@ -12,17 +12,17 @@ Thank you for investing your time in contributing to the project! Any contributi
     * **Discord**: You are welcome to join the [Argilla Discord community](http://hf.co/join/discord), where you can keep in touch with other users, contributors and the Argilla team. In the following [section](#first-contact-in-discord), you can find more information on how to get started in Discord.
     * **Git**: This is a very useful tool to keep track of the changes in your files. Using the command-line interface (CLI), you can make your contributions easily. For that, you need to have it [installed and updated](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) on your computer.
     * **GitHub**: It is a platform and cloud-based service that uses git and allows developers to collaborate on projects. To contribute to Argilla, you'll need to create an account. Check the [Contributor Workflow with Git and Github](#contributor-workflow-with-git-and-github) for more info.
-    * **Developer Documentation**: To collaborate, you'll need to set up an efficient environment. Check the [Server](https://github.com/argilla-io/argilla/blob/develop/argilla-server/README.md) and [Frontend](https://github.com/argilla-io/argilla/blob/develop/argilla-frontend/README.md) READMEs to know how to do it.
-    * **Schedule a meeting with our developer advocate**: If you have more questions, do not hesitate to contact our developer advocate and [schedule a meeting](https://calendly.com/david-berenstein-huggingface/30min).
+    * **Developer Documentation**: To collaborate, you'll need to set up an efficient environment. Check the [developer documentation](developer.md) to know how to do it.
 
 ## First Contact in Discord
 
 Discord is a handy tool for more casual conversations and to answer day-to-day questions. As part of Hugging Face, we have set up some Argilla channels on the server. Click [here](http://hf.co/join/discord) to join the Hugging Face Discord community effortlessly.
 
-When part of the Hugging Face Discord, you can select "Channels & roles" and select "Argilla" along with any of the other groups that are interesting to you. "Argilla" will cover anything about argilla and distilabel. You can join the following channels:
+When part of the Hugging Face Discord, you can select "Channels & roles" and select "Argilla" along with any of the other groups that are interesting to you. "Argilla" will cover anything about Argilla and Distilabel. You can join the following channels:
 
-* **#argilla-distilabel-general**: 📣 Stay up-to-date and general discussions.
-* **#argilla-distilabel-help**: 🙋‍♀️ Need assistance? We're always here to help. Select the appropriate label (argilla or distilabel) for your issue and post it.
+* **#argilla-announcements**: 📢 Important announcements and updates.
+* **#argilla-distilabel-general**: 💬 General discussions about Argilla and Distilabel.
+* **#argilla-distilabel-help**: 🙋‍♀️ Need assistance? We're always here to help. Select the appropriate label (`argilla` or `distilabel`) for your issue and post it.
 
 So now there is only one thing left to do: introduce yourself and talk to the community. You'll always be welcome! 🤗👋
 
@@ -122,6 +122,8 @@ You can have a look at the [CHANGELOG.md](https://github.com/argilla-io/argilla/
 ### Make changes and push them
 
 Make the changes you want in your local repository, and test that everything works and you are following the guidelines.
+
+> Check the [developer documentation](developer.md) to set up your environment and start working on the project.
 
 Once you have finished, you can check the status of your repository and synchronize with the upstreaming repo with the following command:
 

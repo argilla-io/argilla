@@ -17,7 +17,7 @@
 
 <template>
   <div class="breadcrumbs">
-    <ul>
+    <ul role="navigation">
       <li v-for="breadcrumb in filteredBreadcrumbs" :key="breadcrumb.name">
         <nuxt-link
           class="breadcrumbs__item"
@@ -96,7 +96,7 @@ export default {
     }
   }
   &__item {
-    color: palette(white);
+    color: var(--fg-lighter);
     text-decoration: none;
     outline: none;
     &.--action {

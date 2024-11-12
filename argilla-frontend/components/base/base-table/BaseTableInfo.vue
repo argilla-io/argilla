@@ -16,14 +16,20 @@
   -->
 <template>
   <transition appear name="fade">
-    <div class="table-info">
+    <div class="table-info" role="table">
       <div class="table-info__header">
         <slot name="columns">
-          <div class="table-info__item">
+          <div
+            class="table-info__item"
+            role="columnheader"
+            aria-label="Table Header"
+          >
             <div
               v-for="(column, key) in columns"
               :key="key"
               :class="[`table-info__item__col`, column.class]"
+              :aria-label="column.name"
+              role="cell"
             >
               <lazy-table-filtrable-column
                 :column="column"
@@ -31,14 +37,22 @@
                 :filters="filters"
                 v-if="column.filtrable"
                 @applyFilters="onApplyFilters"
+                :aria-label="'Filter column ' + column.name"
               />
               <button
                 v-else-if="column.sortable"
                 :data-title="column.tooltip"
                 :class="[sortOrder, { active: sortedBy === column.field }]"
                 @click="sort(column)"
+                :aria-label="'Sort by ' + column.name"
+                :aria-sort="sortOrder === 'asc' ? 'descending' : 'ascending'"
               >
-                <svgicon width="18" height="18" color="#4D4D4D" name="sort" />
+                <svgicon
+                  width="18"
+                  height="18"
+                  name="sort"
+                  aria-hidden="true"
+                />
                 <span>{{ column.name }}</span>
               </button>
               <button v-else :data-title="column.tooltip">
@@ -50,17 +64,28 @@
       </div>
       <results-empty v-if="tableIsEmpty" :title="emptySearchInfo.title" />
       <template v-else>
-        <div class="table-info__body" ref="table">
-          <ul>
-            <li v-for="item in filteredResults" :key="item.id" :id="item.id">
+        <div class="table-info__body" ref="table" aria-label="Table Body">
+          <ul role="rowgroup">
+            <li
+              v-for="item in filteredResults"
+              :key="item.id"
+              :id="item.id"
+              role="row"
+              :aria-label="'Row for ' + item.id"
+            >
               <nuxt-link :to="rowLink(item)" class="table-info__item">
                 <span
                   v-for="(column, idx) in columns"
                   :key="idx"
                   :class="[`table-info__item__col`, column.class]"
+                  role="cell"
                 >
                   <span :class="column.class">
-                    <span v-if="column.actions">
+                    <span
+                      v-if="column.actions"
+                      role="group"
+                      aria-label="Row actions"
+                    >
                       <div class="table-info__actions">
                         <p
                           class="table-info__main"
@@ -74,19 +99,23 @@
                             v-for="(action, idx) in column.actions"
                             :key="idx"
                             :tooltip="action.tooltip"
+                            role="button"
+                            :aria-label="action.title"
                           >
                             <base-button
                               :title="action.title"
-                              class="table-info__actions__button button-icon"
+                              class="table-info__actions__button"
                               @click.prevent="
                                 onActionClicked(action.name, item)
                               "
+                              aria-hidden="true"
                             >
                               <svgicon
                                 v-if="action.icon !== undefined"
                                 :name="action.icon"
                                 width="16"
                                 height="16"
+                                aria-hidden="true"
                               />
                             </base-button>
                           </base-action-tooltip>
@@ -104,6 +133,7 @@
                     <span v-else>{{ itemValue(item, column) }}</span>
                     <span v-if="column.component">
                       <component
+                        :aria-label="column.component.name"
                         v-if="hydrate[item.id]"
                         :is="column.component.name"
                         v-bind="{ ...column.component.props(item) }"
@@ -289,8 +319,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$headerColor: palette(grey, 700);
-$borderColor: palette(grey, 600);
+$headerColor: var(--bg-opacity-4);
+$borderColor: var(--bg-opacity-6);
 
 .table-info {
   $this: &;
@@ -299,7 +329,6 @@ $borderColor: palette(grey, 600);
   padding: 0;
   min-height: 0;
   list-style: none;
-  color: $black-54;
   ul {
     list-style: none;
     padding: 0;
@@ -307,7 +336,6 @@ $borderColor: palette(grey, 600);
   }
   &__header {
     border: 1px solid $borderColor;
-    border-bottom: 0;
     border-radius: var(--m, 10px) var(--m, 10px) 0px 0px;
     background: $headerColor;
     min-height: 49px;
@@ -315,6 +343,9 @@ $borderColor: palette(grey, 600);
     margin-top: $base-space * 2;
     .table-info:has(.empty) & {
       border-bottom: 1px solid $borderColor;
+    }
+    .svg-icon {
+      fill: var(--fg-secondary);
     }
     &__checkbox {
       margin: 0 !important;
@@ -334,6 +365,12 @@ $borderColor: palette(grey, 600);
       display: flex;
       align-items: center;
     }
+    :deep(button) {
+      color: var(--fg-primary);
+      .svg-icon {
+        fill: var(--fg-primary);
+      }
+    }
     button:not(.button) {
       cursor: pointer;
       border: 0;
@@ -341,7 +378,6 @@ $borderColor: palette(grey, 600);
       background: transparent;
       padding-left: 0;
       padding-right: 0;
-      color: $black-87;
       @include font-size(14px);
       text-align: left;
       display: flex;
@@ -365,7 +401,7 @@ $borderColor: palette(grey, 600);
     #{$this}__item {
       &:hover,
       &:focus {
-        background: #fcfcfc;
+        background: var(--bg-accent-grey-3);
       }
     }
   }
@@ -373,7 +409,8 @@ $borderColor: palette(grey, 600);
     position: relative;
     display: flex;
     align-items: center;
-    background: palette(white);
+    background: var(--bg-accent-grey-1);
+    color: var(--fg-secondary);
     list-style: none;
     padding: $base-space * 2 $base-space * 2;
     width: 100%;
@@ -399,13 +436,6 @@ $borderColor: palette(grey, 600);
         min-width: 160px;
       }
     }
-    .svg-icon {
-      margin-right: $base-space;
-      fill: $black-37;
-      &:hover {
-        fill: $black-54;
-      }
-    }
   }
   .empty {
     margin-top: 5em;
@@ -414,9 +444,9 @@ $borderColor: palette(grey, 600);
   }
   &__main {
     margin: 0;
-    color: $black-87;
+    color: var(--fg-primary);
     .table-info__item:hover & {
-      color: $primary-color;
+      color: var(--fg-cuaternary);
     }
   }
   &__actions {
@@ -429,50 +459,16 @@ $borderColor: palette(grey, 600);
     &__buttons {
       display: flex;
       flex-shrink: 0;
-
-      &__button {
-        position: relative;
-        display: inline-block;
-        .svg-icon {
-          margin: 0;
-        }
-        & + #{$this} {
-          margin-left: auto;
-        }
-      }
     }
-  }
-  &__title {
-    display: block;
-    hyphens: auto;
-    word-break: break-word;
-    .button-icon {
-      padding: $base-space;
+    &__button {
+      position: relative;
       display: inline-block;
+      padding: $base-space;
       .svg-icon {
         margin: 0;
       }
-    }
-    a {
-      text-decoration: none;
-      &:hover {
-        color: palette(black);
-      }
-    }
-  }
-  .text {
-    color: $black-54;
-    p {
-      display: inline-block;
-      background: palette(grey, 800);
-      padding: 0.5em;
-      border-radius: 10px;
-      margin-right: 0.5em;
-      margin-top: 0;
-      hyphens: auto;
-      word-break: break-word;
-      &:last-child {
-        margin-bottom: 0;
+      & + #{$this} {
+        margin-left: auto;
       }
     }
   }

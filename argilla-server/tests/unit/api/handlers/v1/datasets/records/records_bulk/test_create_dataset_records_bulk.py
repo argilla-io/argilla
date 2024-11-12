@@ -15,12 +15,19 @@
 from uuid import UUID
 
 import pytest
-from argilla_server.enums import DatasetStatus, QuestionType, ResponseStatus, SuggestionType
-from argilla_server.models.database import Record, Response, Suggestion, User
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.enums import (
+    DatasetStatus,
+    QuestionType,
+    ResponseStatus,
+    SuggestionType,
+    RecordStatus,
+    DatasetDistributionStrategy,
+)
+from argilla_server.models.database import Record, Response, Suggestion, User
 from tests.factories import (
     DatasetFactory,
     LabelSelectionQuestionFactory,
@@ -31,6 +38,9 @@ from tests.factories import (
     TextFieldFactory,
     ImageFieldFactory,
     TextQuestionFactory,
+    ChatFieldFactory,
+    CustomFieldFactory,
+    AnnotatorFactory,
 )
 
 
@@ -218,6 +228,35 @@ class TestCreateDatasetRecordsBulk:
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 6
 
+    async def test_create_dataset_records_bulk_with_empty_fields(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": "value",
+                        },
+                    },
+                    {
+                        "fields": {},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Record at position 1 is not valid because fields cannot be empty"}
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
     @pytest.mark.parametrize(
         "web_url",
         [
@@ -321,7 +360,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' has an invalid URL value",
+            "detail": f"Record at position 0 is not valid because image field 'image' has an invalid URL value",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -350,7 +389,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 2038 characters for Web URLs",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 2038 characters for Web URLs",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -379,7 +418,7 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is using an unsupported MIME type, supported MIME types are: ['image/avif', 'image/gif', 'image/ico', 'image/jpeg', 'image/jpg', 'image/png', 'image/svg', 'image/webp']",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
@@ -408,7 +447,345 @@ class TestCreateDatasetRecordsBulk:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
+            "detail": f"Record at position 0 is not valid because image field 'image' value is exceeding the maximum length of 5000000 characters for Data URLs",
         }
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                    "content": "Hello!",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
+
+    async def test_create_dataset_records_bulk_with_chat_field_with_value_exceeding_maximum_length(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                    "content": "a",
+                                }
+                            ]
+                            * 1000,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_with_non_dicts(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": "invalid",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_without_role_key(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "content": "Hello!",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_chat_field_without_content_key(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "chat": [
+                                {
+                                    "role": "user",
+                                }
+                            ],
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body", "items", 0, "fields"],
+                            "msg": "Error parsing chat field 'chat': [{'loc': ('content',), 'msg': 'field required', 'type': 'value_error.missing'}]",
+                            "type": "value_error",
+                        }
+                    ]
+                },
+            }
+        }
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_with_custom_field_values(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await CustomFieldFactory.create(name="custom", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "custom": {"a": 1, "b": 2},
+                        },
+                    },
+                    {
+                        "fields": {
+                            "custom": {"c": 1, "b": 2},
+                        },
+                    },
+                    {
+                        "fields": {
+                            "custom": {"a": 1},
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201, response.json()
+        records = (await db.execute(select(Record))).scalars().all()
+        assert len(records) == 3
+        assert records[0].fields["custom"] == {"a": 1, "b": 2}
+        assert records[1].fields["custom"] == {"c": 1, "b": 2}
+        assert records[2].fields["custom"] == {"a": 1}
+
+    async def test_create_dataset_records_bulk_with_wrong_custom_field_value(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await CustomFieldFactory.create(name="custom", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "custom": "invalid",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    async def test_create_dataset_records_bulk_updates_records_status(
+        self, db: AsyncSession, async_client: AsyncClient, owner: User, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(
+            status=DatasetStatus.ready,
+            distribution={
+                "strategy": DatasetDistributionStrategy.overlap,
+                "min_submitted": 2,
+            },
+        )
+
+        user = await AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+        await TextFieldFactory.create(name="prompt", dataset=dataset)
+        await TextFieldFactory.create(name="response", dataset=dataset)
+
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "prompt": "Does exercise help reduce stress?",
+                            "response": "Exercise can definitely help reduce stress.",
+                        },
+                        "responses": [
+                            {
+                                "user_id": str(owner.id),
+                                "status": ResponseStatus.submitted,
+                                "values": {
+                                    "text-question": {
+                                        "value": "text question response",
+                                    },
+                                },
+                            },
+                            {
+                                "user_id": str(user.id),
+                                "status": ResponseStatus.submitted,
+                                "values": {
+                                    "text-question": {
+                                        "value": "text question response",
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        "fields": {
+                            "prompt": "Does exercise help reduce stress?",
+                            "response": "Exercise can definitely help reduce stress.",
+                        },
+                        "responses": [
+                            {
+                                "user_id": str(owner.id),
+                                "status": ResponseStatus.submitted,
+                                "values": {
+                                    "text-question": {
+                                        "value": "text question response",
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        "fields": {
+                            "prompt": "Does exercise help reduce stress?",
+                            "response": "Exercise can definitely help reduce stress.",
+                        },
+                        "responses": [
+                            {
+                                "user_id": str(owner.id),
+                                "status": ResponseStatus.draft,
+                                "values": {
+                                    "text-question": {
+                                        "value": "text question response",
+                                    },
+                                },
+                            },
+                            {
+                                "user_id": str(user.id),
+                                "status": ResponseStatus.draft,
+                                "values": {
+                                    "text-question": {
+                                        "value": "text question response",
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        "fields": {
+                            "prompt": "Does exercise help reduce stress?",
+                            "response": "Exercise can definitely help reduce stress.",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201
+
+        response_items = response.json()["items"]
+        assert response_items[0]["status"] == RecordStatus.completed
+        assert response_items[1]["status"] == RecordStatus.pending
+        assert response_items[2]["status"] == RecordStatus.pending
+        assert response_items[3]["status"] == RecordStatus.pending
+
+        assert (await Record.get(db, UUID(response_items[0]["id"]))).status == RecordStatus.completed
+        assert (await Record.get(db, UUID(response_items[1]["id"]))).status == RecordStatus.pending
+        assert (await Record.get(db, UUID(response_items[2]["id"]))).status == RecordStatus.pending
+        assert (await Record.get(db, UUID(response_items[3]["id"]))).status == RecordStatus.pending

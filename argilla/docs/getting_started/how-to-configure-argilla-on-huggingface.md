@@ -10,7 +10,7 @@ This section details how to configure and deploy Argilla on Hugging Face Spaces.
 - How to configure and disable HF OAuth access
 - How to use Private Spaces
 
-!!! tip "Looking to get started easily?"
+!!! tip "Looking to get started easily or deploy Argilla with the Python SDK?"
     If you just discovered Argilla and want to get started quickly, go to the [Quickstart guide](quickstart.md).
 
 ## Persistent storage
@@ -82,10 +82,7 @@ Creating an Argilla Space within an organization is useful for several scenarios
 - **You want manage the Space together with other users** (e.g., Space settings, etc.). Note that if you just want to manage your Argilla datasets, workspaces, you can achieve this by adding other Argilla `owner` roles to your Argilla Server.
 - **More generally, you want to make available your space under an organization/community umbrella**.
 
-The steps are very similar the [Quickstart guide](quickstart.md) with two important differences:
-
-!!! tip "Setup USERNAME"
-    You need to **set up the `USERNAME` Space Secret with your Hugging Face username**. This way, the first time you enter with the `Hugging Face Sign in` button, you'll be granted the `owner` role.
+The steps are very similar the [Quickstart guide](quickstart.md) with one important difference:
 
 !!! tip "Enable Persistent Storage `SMALL`"
     Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
@@ -110,11 +107,10 @@ HF_TOKEN = "..."
 
 client = rg.Argilla(
     api_url="<api_url>",
-    api_key="<api_key>"
+    api_key="<api_key>",
     headers={"Authorization": f"Bearer {HF_TOKEN}"}
 )
 ```
-
 
 ## Space Secrets overview
 

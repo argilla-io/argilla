@@ -18,7 +18,7 @@ Whether you are working on monitoring and improving complex **generative tasks**
 
 Besides the common environment variables defined in docs, this Docker image provides a set of variables to simplify the server startup:
 
-- `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default to `$SPACE_AUTHOR_NAME`).
+- `USERNAME`: If provided, the owner username. This can be combined with HF OAuth to define the argilla server owner (Default to `$SPACE_CREATOR_USER_ID` or `$SPACE_AUTHOR_NAME`).
 
 - `PASSWORD`: If provided, the owner password. If `USERNAME` and `PASSWORD` are provided, the owner user will be created with these credentials on the server startup (Default: `""`).
 

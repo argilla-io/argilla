@@ -1,6 +1,12 @@
 <template>
   <div :class="isButtonActive ? 'filter-button--active' : 'filter-button'">
-    <svgicon v-if="iconName" :name="iconName" width="16" height="16" />
+    <svgicon
+      v-if="iconName"
+      :name="iconName"
+      width="16"
+      height="16"
+      aria-hidden="true"
+    />
     <BaseButton class="filter-button__button">{{ buttonName }}</BaseButton>
     <slot></slot>
     <svgicon
@@ -9,6 +15,7 @@
       name="chevron-down"
       width="16"
       height="8"
+      aria-hidden="true"
     />
   </div>
 </template>
@@ -38,7 +45,7 @@ export default {
 };
 </script>
 
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 .filter-button {
   display: flex;
   gap: $base-space;
@@ -51,11 +58,11 @@ export default {
   background: none;
   transition: background-color 0.2s ease;
   line-height: 1;
-  color: $black-54;
   cursor: pointer;
+  color: var(--fg-secondary);
   &:hover,
   &--active {
-    background: $black-4;
+    background: var(--bg-opacity-4);
     @extend .filter-button;
   }
   &--active {
@@ -63,7 +70,7 @@ export default {
       padding: 6px $base-space;
     }
     &:hover {
-      background: $black-6;
+      background: var(--bg-opacity-6);
     }
   }
   &__button.button {
@@ -71,9 +78,10 @@ export default {
     border-radius: 0;
     @include font-size(14px);
     line-height: 1.3;
+    color: var(--fg-secondary);
   }
   & > * {
     flex-shrink: 0;
   }
 }
-</styles>
+</style>

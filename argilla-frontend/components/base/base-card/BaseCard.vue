@@ -61,12 +61,12 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .card {
   display: flex;
   align-items: flex-end;
   padding: $base-space * 2;
-  border: 1px solid $black-10;
+  border: 1px solid var(--bg-opacity-10);
   border-radius: $border-radius;
   &__buttons {
     margin-left: auto;
@@ -76,7 +76,7 @@ export default {
   }
   &__text {
     margin-bottom: 0;
-    color: $black-37;
+    color: var(--bg-opacity-37);
   }
 }
 </style>

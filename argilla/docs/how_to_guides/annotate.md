@@ -93,7 +93,7 @@ If you agree with the suggestions, you just need to click on the `Submit` button
 This is the default view to annotate your dataset linearly, displaying one record after another.
 
 !!! tip
-    You should use this view if you have a large number of required questions or need a strong focus on the record content to be labelled. This is also the recommended view for annotating a dataset sample to avoid potential biases introduced by using filters, search, sorting and bulk labelling.
+    You should use this view if you have a large number of required questions or need a strong focus on the record content to be labeled. This is also the recommended view for annotating a dataset sample to avoid potential biases introduced by using filters, search, sorting and bulk labeling.
 
 Once you submit your first response, the next record will appear automatically. To see again your submitted response, just click on `Prev`.
 
@@ -125,9 +125,12 @@ You can track the progress of an annotation task in the progress bar shown in th
 
 You can also track your own progress in real time expanding the right-bottom panel inside the dataset page. There you can see the number of records for which you have `Pending`, `Draft`, `Submitted` and `Discarded` responses.
 
+!!! note
+    You can also explore the dataset progress from the SDK. Check the [Track your team's progress](./distribution.md#track-your-teams-progress) to know more about it.
+
 ## Use search, filters, and sort
 
-The UI offers various features designed for data exploration and understanding. Combining these features with bulk labelling can save you and your team hours of time.
+The UI offers various features designed for data exploration and understanding. Combining these features with bulk labeling can save you and your team hours of time.
 
 !!! tip
     You should use this when you are familiar with your data and have large volumes to annotate based on verified beliefs and experience.

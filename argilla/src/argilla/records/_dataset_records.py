@@ -15,6 +15,7 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
 from uuid import UUID
+from enum import Enum
 
 from tqdm import tqdm
 
@@ -32,6 +33,12 @@ if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
 
+class RecordErrorHandling(Enum):
+    RAISE = "raise"
+    WARN = "warn"
+    IGNORE = "ignore"
+
+
 class DatasetRecordsIterator:
     """This class is used to iterate over records in a dataset"""
 
@@ -45,6 +52,7 @@ class DatasetRecordsIterator:
         with_suggestions: bool = False,
         with_responses: bool = False,
         with_vectors: Optional[Union[str, List[str], bool]] = None,
+        limit: Optional[int] = None,
     ):
         self.__dataset = dataset
         self.__client = client
@@ -55,22 +63,42 @@ class DatasetRecordsIterator:
         self.__with_responses = with_responses
         self.__with_vectors = with_vectors
         self.__records_batch = []
+        self.__limit = limit
+
+        if self.__limit is not None and self.__limit <= 0:
+            warnings.warn(f"Limit {self.__limit} is invalid: must be greater than 0. Setting limit to 1.")
+            self.__limit = 1
+
+        if self.__limit is not None and self.__limit < self.__batch_size:
+            self.__batch_size = self.__limit
 
     def __iter__(self):
         return self
 
     def __next__(self) -> Record:
-        if not self._has_local_records():
+        if self._no_records():
             self._fetch_next_batch()
-            if not self._has_local_records():
-                raise StopIteration()
+
         return self._next_record()
 
-    def _next_record(self) -> Record:
-        return self.__records_batch.pop(0)
+    def _limit_reached(self) -> bool:
+        if self.__limit is None:
+            return False
+        return self.__limit <= 0
 
-    def _has_local_records(self) -> bool:
-        return len(self.__records_batch) > 0
+    def _next_record(self) -> Record:
+        if self._limit_reached() or self._no_records():
+            raise StopIteration()
+
+        record = self.__records_batch.pop(0)
+
+        if self.__limit is not None:
+            self.__limit -= 1
+
+        return record
+
+    def _no_records(self) -> bool:
+        return len(self.__records_batch) <= 0
 
     def _fetch_next_batch(self) -> None:
         self.__records_batch = list(self._list())
@@ -104,11 +132,12 @@ class DatasetRecordsIterator:
             offset=self.__offset,
             with_responses=self.__with_responses,
             with_suggestions=self.__with_suggestions,
+            with_vectors=self.__with_vectors,
         )
         return [record_model for record_model, _ in search_items]
 
     def _is_search_query(self) -> bool:
-        return bool(self.__query and (self.__query.query or self.__query.filter))
+        return self.__query.has_search()
 
     def to_list(self, flatten: bool) -> List[Dict[str, Any]]:
         return GenericIO.to_list(records=list(self), flatten=flatten)
@@ -121,7 +150,7 @@ class DatasetRecordsIterator:
         return JsonIO.to_json(records=list(self), path=path)
 
     def to_datasets(self) -> "HFDataset":
-        return HFDatasetsIO.to_datasets(records=list(self))
+        return HFDatasetsIO.to_datasets(records=list(self), dataset=self.__dataset)
 
 
 class DatasetRecords(Iterable[Record], LoggingMixin):
@@ -139,7 +168,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
     DEFAULT_BATCH_SIZE = 256
     DEFAULT_DELETE_BATCH_SIZE = 64
 
-    def __init__(self, client: "Argilla", dataset: "Dataset"):
+    def __init__(
+        self, client: "Argilla", dataset: "Dataset", mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None
+    ):
         """Initializes a DatasetRecords object with a client and a dataset.
         Args:
             client: An Argilla client object.
@@ -147,6 +178,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         """
         self.__client = client
         self.__dataset = dataset
+        self._mapping = mapping or {}
         self._api = self.__client.api.records
 
     def __iter__(self):
@@ -160,6 +192,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         with_suggestions: bool = True,
         with_responses: bool = True,
         with_vectors: Optional[Union[List, bool, str]] = None,
+        limit: Optional[int] = None,
     ) -> DatasetRecordsIterator:
         """Returns an iterator over the records in the dataset on the server.
 
@@ -172,6 +205,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             with_vectors: A list of vector names to include in the records. The default is None.
                 If a list is provided, only the specified vectors will be included.
                 If True is provided, all vectors will be included.
+            limit: The maximum number of records to fetch. The default is None.
 
         Returns:
             An iterator over the records in the dataset on the server.
@@ -192,6 +226,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
             with_suggestions=with_suggestions,
             with_responses=with_responses,
             with_vectors=with_vectors,
+            limit=limit,
         )
 
     def __repr__(self) -> str:
@@ -207,6 +242,7 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
         batch_size: int = DEFAULT_BATCH_SIZE,
+        on_error: RecordErrorHandling = RecordErrorHandling.RAISE,
     ) -> "DatasetRecords":
         """Add or update records in a dataset on the server using the provided records.
         If the record includes a known `id` field, the record will be updated.
@@ -225,7 +261,9 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         Returns:
             A list of Record objects representing the updated records.
         """
-        record_models = self._ingest_records(records=records, mapping=mapping, user_id=user_id or self.__client.me.id)
+        record_models = self._ingest_records(
+            records=records, mapping=mapping, user_id=user_id or self.__client.me.id, on_error=on_error
+        )
         batch_size = self._normalize_batch_size(
             batch_size=batch_size,
             records_length=len(record_models),
@@ -377,17 +415,20 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
         records: Union[List[Dict[str, Any]], List[Record], HFDataset],
         mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         user_id: Optional[UUID] = None,
+        on_error: RecordErrorHandling = RecordErrorHandling.RAISE,
     ) -> List[RecordModel]:
         """Ingests records from a list of dictionaries, a Hugging Face Dataset, or a list of Record objects."""
 
+        mapping = mapping or self._mapping
         if len(records) == 0:
             raise ValueError("No records provided to ingest.")
 
+        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
+
         if HFDatasetsIO._is_hf_dataset(dataset=records):
-            records = HFDatasetsIO._record_dicts_from_datasets(dataset=records)
+            records = HFDatasetsIO._record_dicts_from_datasets(hf_dataset=records, mapper=record_mapper)
 
         ingested_records = []
-        record_mapper = IngestedRecordMapper(mapping=mapping, dataset=self.__dataset, user_id=user_id)
         for record in records:
             try:
                 if isinstance(record, dict):
@@ -401,7 +442,16 @@ class DatasetRecords(Iterable[Record], LoggingMixin):
                         f"Found a record of type {type(record)}: {record}."
                     )
             except Exception as e:
-                raise RecordsIngestionError(f"Failed to ingest record from dict {record}: {e}")
+                if on_error == RecordErrorHandling.IGNORE:
+                    self._log_message(
+                        message=f"Failed to ingest record from dict {record}: {e}",
+                        level="info",
+                    )
+                    continue
+                elif on_error == RecordErrorHandling.WARN:
+                    warnings.warn(f"Failed to ingest record from dict {record}: {e}")
+                    continue
+                raise RecordsIngestionError(f"Failed to ingest record from dict {record}") from e
             ingested_records.append(record.api_model())
         return ingested_records
 

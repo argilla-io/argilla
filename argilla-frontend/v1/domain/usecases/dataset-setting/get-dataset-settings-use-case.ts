@@ -77,7 +77,6 @@ export class GetDatasetSettingsUseCase {
         datasetId,
         question.title,
         question.required,
-
         question.settings
       );
     });
@@ -89,7 +88,6 @@ export class GetDatasetSettingsUseCase {
         field.id,
         field.name,
         field.title,
-        "",
         datasetId,
         field.required,
         field.settings

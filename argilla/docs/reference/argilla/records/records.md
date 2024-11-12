@@ -23,7 +23,7 @@ dataset.records.log(
 
 1. The Argilla dataset contains a field named `text` matching the key here.
 
-To create records with image fields, pass the the remote url or data uri of the image to records object. The field names must be defined as an `rg.ImageField`in the dataset's `Settings` object to be accepted.
+To create records with image fields, pass the image to the record object as either a remote url, local path to an image file, or a PIL object. The field names must be defined as an `rg.ImageField`in the dataset's `Settings` object to be accepted. Images will be stored in the Argilla database and returned as rescaled PIL objects.
 
 ```python
 dataset.records.log(
@@ -35,8 +35,10 @@ dataset.records.log(
 )
 ```
 
-1. The image can be referenced as either a remote url or a data uri.
+1. The image can be referenced as either a remote url, a local file path, or a PIL object.
 
+!!! note
+    The image will be stored in the Argilla database and can impact the dataset's storage usage. Images should be less than 5mb in size and datasets should contain less than 10,000 images.
 
 ### Accessing Record Attributes
 

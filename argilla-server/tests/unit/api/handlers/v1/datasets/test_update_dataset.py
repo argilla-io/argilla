@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from typing import Any
 from uuid import UUID
 
 import pytest
@@ -72,97 +73,6 @@ class TestUpdateDataset:
             "min_submitted": 1,
         }
 
-    async def test_update_dataset_without_distribution_for_published_dataset(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-
-        response = await async_client.patch(
-            self.url(dataset.id),
-            headers=owner_auth_header,
-            json={"name": "Dataset updated name"},
-        )
-
-        assert response.status_code == 200
-        assert response.json()["distribution"] == {
-            "strategy": DatasetDistributionStrategy.overlap,
-            "min_submitted": 1,
-        }
-
-        assert dataset.name == "Dataset updated name"
-        assert dataset.distribution == {
-            "strategy": DatasetDistributionStrategy.overlap,
-            "min_submitted": 1,
-        }
-
-    async def test_update_dataset_distribution_for_published_dataset_without_responses(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-
-        response = await async_client.patch(
-            self.url(dataset.id),
-            headers=owner_auth_header,
-            json={
-                "distribution": {
-                    "strategy": DatasetDistributionStrategy.overlap,
-                    "min_submitted": 4,
-                },
-            },
-        )
-
-        assert response.status_code == 200
-
-        assert dataset.distribution == {
-            "strategy": DatasetDistributionStrategy.overlap,
-            "min_submitted": 4,
-        }
-
-    async def test_update_dataset_distribution_for_dataset_with_responses(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        records = await RecordFactory.create_batch(10, dataset=dataset)
-
-        for record in records:
-            await ResponseFactory.create(record=record)
-
-        response = await async_client.patch(
-            self.url(dataset.id),
-            headers=owner_auth_header,
-            json={
-                "distribution": {
-                    "strategy": DatasetDistributionStrategy.overlap,
-                    "min_submitted": 4,
-                },
-            },
-        )
-
-        assert response.status_code == 422
-
-        assert response.json() == {
-            "code": "update_distribution_with_existing_responses",
-            "message": "Distribution settings can't be modified for a dataset containing user responses",
-        }
-
-    async def test_update_dataset_distribution_with_the_same_value_for_dataset_with_responses(
-        self, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
-        records = await RecordFactory.create_batch(10, dataset=dataset)
-
-        for record in records:
-            await ResponseFactory.create(record=record)
-
-        response = await async_client.patch(
-            self.url(dataset.id),
-            headers=owner_auth_header,
-            json={"distribution": dataset.distribution},
-        )
-
-        assert response.status_code == 200
-        assert response.json()["distribution"] == dataset.distribution
-
     async def test_update_dataset_distribution_with_invalid_strategy(
         self, async_client: AsyncClient, owner_auth_header: dict
     ):
@@ -220,3 +130,81 @@ class TestUpdateDataset:
             "strategy": DatasetDistributionStrategy.overlap,
             "min_submitted": 1,
         }
+
+    async def test_update_dataset_metadata(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create(metadata_={"key-a": "value-a", "key-b": "value-b"})
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "metadata": {
+                    "key-a": "value-a-updated",
+                    "key-c": "value-c",
+                },
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["metadata"] == {
+            "key-a": "value-a-updated",
+            "key-b": "value-b",
+            "key-c": "value-c",
+        }
+
+        assert dataset.metadata_ == {
+            "key-a": "value-a-updated",
+            "key-b": "value-b",
+            "key-c": "value-c",
+        }
+
+    async def test_update_dataset_without_metadata(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create(metadata_={"key": "value"})
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"name": "Dataset updated name"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["metadata"] == {"key": "value"}
+
+        assert dataset.name == "Dataset updated name"
+        assert dataset.metadata_ == {"key": "value"}
+
+    async def test_update_dataset_with_invalid_metadata(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create(metadata_={"key": "value"})
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"metadata": "invalid_metadata"},
+        )
+
+        assert response.status_code == 422
+        assert dataset.metadata_ == {"key": "value"}
+
+    async def test_update_dataset_metadata_as_empty_dict(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create(metadata_={"key": "value"})
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"metadata": {}},
+        )
+
+        assert response.status_code == 200
+        assert dataset.metadata_ == {"key": "value"}
+
+    async def test_update_dataset_metadata_as_none(self, async_client: AsyncClient, owner_auth_header: dict):
+        dataset = await DatasetFactory.create(metadata_={"key": "value"})
+
+        response = await async_client.patch(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={"metadata": None},
+        )
+
+        assert response.status_code == 200
+        assert dataset.metadata_ == None

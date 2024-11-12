@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <RenderMarkdownBaseComponent
+    <MarkdownRenderer
       class="textarea--markdown"
       :markdown="question.suggestion?.value"
     />
@@ -30,10 +30,10 @@ export default {
   position: relative;
   display: flex;
   padding: $base-space * 2;
-  border: 1px solid $black-20;
+  border: 1px solid var(--bg-opacity-20);
   border-radius: $border-radius-s;
-  min-height: 10em;
-  background: palette(white);
+  background: var(--bg-accent-grey-2);
+  min-height: 5em;
   &:hover {
     .button-copy {
       display: block;
@@ -49,7 +49,7 @@ export default {
     padding: 0;
   }
   .svg-icon {
-    color: $black-37;
+    color: var(--fg-tertiary);
   }
 }
 </style>

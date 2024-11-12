@@ -20,6 +20,7 @@ from string import ascii_lowercase
 from tempfile import TemporaryDirectory
 
 import pytest
+from PIL import Image
 from datasets import Dataset as HFDataset
 
 import argilla as rg
@@ -32,6 +33,8 @@ def dataset(client) -> rg.Dataset:
     settings = rg.Settings(
         fields=[
             rg.TextField(name="text"),
+            rg.ChatField(name="chat"),
+            rg.ImageField(name="image"),
         ],
         questions=[
             rg.TextQuestion(name="label", use_markdown=False),
@@ -47,24 +50,49 @@ def dataset(client) -> rg.Dataset:
     dataset.delete()
 
 
-def test_export_records_dict_flattened(client: Argilla, dataset: rg.Dataset):
-    mock_data = [
+@pytest.fixture
+def mock_data():
+    return [
         {
             "text": "Hello World, how are you?",
             "label": "positive",
-            "id": uuid.uuid4(),
+            "id": uuid.uuid4().hex,
+            "image": Image.new("RGB", (100, 100)),
+            "chat": [
+                {
+                    "role": "user",
+                    "content": "Hello World, how are you?",
+                }
+            ],
         },
         {
             "text": "Hello World, how are you?",
             "label": "negative",
-            "id": uuid.uuid4(),
+            "id": uuid.uuid4().hex,
+            "image": Image.new("RGB", (100, 100)),
+            "chat": [
+                {
+                    "role": "user",
+                    "content": "Hello World, how are you?",
+                }
+            ],
         },
         {
             "text": "Hello World, how are you?",
             "label": "positive",
-            "id": uuid.uuid4(),
+            "id": uuid.uuid4().hex,
+            "image": Image.new("RGB", (100, 100)),
+            "chat": [
+                {
+                    "role": "user",
+                    "content": "Hello World, how are you?",
+                }
+            ],
         },
     ]
+
+
+def test_export_records_dict_flattened(client: Argilla, dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_dict(flatten=True)
     assert isinstance(exported_records, dict)
@@ -74,24 +102,7 @@ def test_export_records_dict_flattened(client: Argilla, dataset: rg.Dataset):
     assert exported_records["text"] == ["Hello World, how are you?"] * 3
 
 
-def test_export_records_list_flattened(client: Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
+def test_export_records_list_flattened(client: Argilla, dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_list(flatten=True)
     assert len(exported_records) == len(mock_data)
@@ -105,24 +116,7 @@ def test_export_records_list_flattened(client: Argilla, dataset: rg.Dataset):
     assert exported_records[0]["label.suggestion.score"] is None
 
 
-def test_export_record_list_with_filtered_records(client: Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
+def test_export_record_list_with_filtered_records(client: Argilla, dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
     exported_records = dataset.records(query=rg.Query(query="hello")).to_list(flatten=True)
     assert len(exported_records) == len(mock_data)
@@ -136,24 +130,7 @@ def test_export_record_list_with_filtered_records(client: Argilla, dataset: rg.D
     assert exported_records[0]["label.suggestion.score"] is None
 
 
-def test_export_records_list_nested(client: Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
+def test_export_records_list_nested(client: Argilla, dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_list(flatten=False)
     assert len(exported_records) == len(mock_data)
@@ -162,25 +139,7 @@ def test_export_records_list_nested(client: Argilla, dataset: rg.Dataset):
     assert exported_records[0]["suggestions"]["label"]["score"] is None
 
 
-def test_export_records_dict_nested(client: Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
-
+def test_export_records_dict_nested(client: Argilla, dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_dict(flatten=False)
     assert isinstance(exported_records, dict)
@@ -188,24 +147,7 @@ def test_export_records_dict_nested(client: Argilla, dataset: rg.Dataset):
     assert exported_records["suggestions"][0]["label"]["value"] == "positive"
 
 
-def test_export_records_dict_nested_orient_index(client: Argilla, dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
+def test_export_records_dict_nested_orient_index(client: Argilla, dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
     exported_records = dataset.records.to_dict(flatten=False, orient="index")
     assert isinstance(exported_records, dict)
@@ -216,24 +158,7 @@ def test_export_records_dict_nested_orient_index(client: Argilla, dataset: rg.Da
         assert exported_record["id"] == str(mock_record["id"])
 
 
-def test_export_records_to_json(dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
+def test_export_records_to_json(dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
 
     with TemporaryDirectory() as temp_dir:
@@ -246,24 +171,7 @@ def test_export_records_to_json(dataset: rg.Dataset):
     assert exported_records[0]["suggestions"]["label"]["value"] == "positive"
 
 
-def test_export_records_from_json(dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
+def test_export_records_from_json(dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
 
     with TemporaryDirectory() as temp_dir:
@@ -277,24 +185,7 @@ def test_export_records_from_json(dataset: rg.Dataset):
         assert record.id == str(mock_data[i]["id"])
 
 
-def test_export_records_to_hf_datasets(dataset: rg.Dataset):
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": uuid.uuid4(),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": uuid.uuid4(),
-        },
-    ]
+def test_export_records_to_hf_datasets(dataset: rg.Dataset, mock_data):
     dataset.records.log(records=mock_data)
     hf_dataset = dataset.records.to_datasets()
 
@@ -305,29 +196,27 @@ def test_export_records_to_hf_datasets(dataset: rg.Dataset):
     assert hf_dataset["text"][0] == "Hello World, how are you?"
     assert hf_dataset["id"][0] == str(mock_data[0]["id"])
 
+    assert "image" in hf_dataset.column_names
+    for i, image in enumerate(hf_dataset["image"]):
+        assert isinstance(image, Image.Image)
 
-def test_import_records_from_hf_dataset(dataset: rg.Dataset) -> None:
-    mock_data = [
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": str(uuid.uuid4()),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "negative",
-            "id": str(uuid.uuid4()),
-        },
-        {
-            "text": "Hello World, how are you?",
-            "label": "positive",
-            "id": str(uuid.uuid4()),
-        },
-    ]
+    assert "chat" in hf_dataset.column_names
+    for i, chat in enumerate(hf_dataset["chat"]):
+        assert isinstance(chat, list)
+        assert isinstance(chat[0], dict)
+        assert chat[0]["role"] == "user"
+        assert chat[0]["content"] == "Hello World, how are you?"
+
+
+def test_import_records_from_hf_dataset(dataset: rg.Dataset, mock_data) -> None:
     mock_hf_dataset = HFDataset.from_list(mock_data)
     dataset.records.log(records=mock_hf_dataset)
 
     for i, record in enumerate(dataset.records(with_suggestions=True)):
         assert record.fields["text"] == mock_data[i]["text"]
+        assert record.fields["image"].size == mock_data[i]["image"].size
+        assert record.fields["image"].mode == mock_data[i]["image"].mode
+        assert record.fields["chat"][0].role == "user"
+        assert record.fields["chat"][0].content == "Hello World, how are you?"
         assert record.suggestions["label"].value == mock_data[i]["label"]
         assert record.id == str(mock_data[i]["id"])

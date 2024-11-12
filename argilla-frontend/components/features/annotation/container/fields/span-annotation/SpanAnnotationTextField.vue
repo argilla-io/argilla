@@ -4,9 +4,14 @@
     :key="name"
     @mouseenter.stop="mouseEnter = true"
     @mouseleave.stop="mouseEnter = false"
+    aria-label="Data Record Field"
   >
     <div class="title-area --body2">
-      <span class="text_field_component__title-content" v-text="title" />
+      <span
+        class="text_field_component__title-content"
+        v-text="title"
+        :aria-label="'Field Name: ' + title"
+      />
       <BaseActionTooltip
         class="text_field_component__tooltip"
         :tooltip="$t('copied')"
@@ -14,14 +19,26 @@
       >
         <BaseButton
           :title="$t('button.tooltip.copyToClipboard')"
+          :aria-label="$t('button.tooltip.copyToClipboard')"
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
+          role="button"
         >
-          <svgicon color="#acacac" name="copy" width="18" height="18" />
+          <svgicon
+            color="#acacac"
+            name="copy"
+            width="18"
+            height="18"
+            aria-hidden="true"
+          />
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div id="fields-content" class="text_field_component__area --body1">
+    <div
+      :id="`fields-content-${name}`"
+      class="text_field_component__area --body1"
+      :aria-label="'Data entry for Field: ' + title"
+    >
       <p
         :class="[
           allowOverlapping
@@ -49,23 +66,36 @@
       <template>
         <template v-for="{ id, color } in spanQuestion.answer.options">
           <style :key="id" scoped>
-            .span-annotation__field::highlight(hl-{{id}}) {
+            .span-annotation__field::highlight(hl-{{id}}), .span-annotation__field::highlight(hl-{{id}}-selection) {
               background-color: {{color}};
             }
-            .span-annotation__field::highlight(hl-{{id}}-selection) {
-              background-color: {{color}};
+            [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}), [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-selection) {
+              background-color: {{color.palette.veryDark}};
             }
             .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
               background: {{color.palette.light}};
             }
+            [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
+              background: {{color.palette.dark}};
+            }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
               background: {{color}};
             }
+            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
+              background: {{color.palette.veryDark}};
+            }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
               background: {{color.palette.light}};
+              color: inherit;
+            }
+            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
+              background: {{color.palette.dark}};
             }
             .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
               background: {{color}};
+            }
+            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+              background: {{color.palette.veryDark}};
             }
             ::highlight(search-text-highlight-{{name}}) {
               color: #ff675f;
@@ -213,8 +243,9 @@ export default {
   flex-direction: column;
   gap: $base-space;
   padding: 2 * $base-space;
-  background: palette(grey, 800);
+  background: var(--bg-field);
   border-radius: $border-radius-m;
+  border: 1px solid var(--border-field);
   &:hover {
     #{$this}__copy-button {
       opacity: 1;
@@ -225,7 +256,7 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: $base-space;
-    color: $black-87;
+    color: var(--fg-primary);
   }
   &__area {
     position: relative;
@@ -236,6 +267,7 @@ export default {
   &__title-content {
     word-break: break-word;
     width: calc(100% - 30px);
+    color: var(--fg-secondary);
   }
   &__tooltip {
     display: flex;
@@ -285,6 +317,6 @@ export default {
   left: 0;
 }
 ::highlight(search-text-highlight) {
-  color: $highlight;
+  color: var(--fg-highlight);
 }
 </style>

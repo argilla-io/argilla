@@ -23,7 +23,6 @@ from argilla_server.pydantic_v1.generics import GenericModel
 
 FLOAT_METADATA_METRICS_PRECISION = 5
 
-METADATA_PROPERTY_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH = 1
 METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH = 200
 
@@ -41,7 +40,7 @@ except ImportError:
 
 class TermsMetadataMetrics(BaseModel):
     class TermCount(BaseModel):
-        term: str
+        term: Any
         count: int
 
     type: Literal[MetadataPropertyType.terms] = Field(MetadataPropertyType.terms, const=True)
@@ -72,13 +71,18 @@ class FloatMetadataMetrics(NumericMetadataMetrics[float]):
 
 
 MetadataMetrics = Annotated[
-    Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics], Field(..., discriminator="type")
+    Union[
+        TermsMetadataMetrics,
+        IntegerMetadataMetrics,
+        FloatMetadataMetrics,
+    ],
+    Field(..., discriminator="type"),
 ]
 
 
 class TermsMetadataProperty(BaseModel):
     type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = None
+    values: Optional[List[Any]] = None
 
 
 class IntegerMetadataProperty(BaseModel):
@@ -98,17 +102,14 @@ MetadataPropertySettings = Annotated[
     Field(..., discriminator="type"),
 ]
 
-
 MetadataPropertyName = Annotated[
     str,
     Field(
         ...,
-        regex=METADATA_PROPERTY_CREATE_NAME_REGEX,
         min_length=METADATA_PROPERTY_CREATE_NAME_MIN_LENGTH,
         max_length=METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
     ),
 ]
-
 
 MetadataPropertyTitle = Annotated[
     constr(min_length=METADATA_PROPERTY_CREATE_TITLE_MIN_LENGTH, max_length=METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH),
@@ -133,7 +134,7 @@ class NumericMetadataProperty(GenericModel, Generic[NT]):
 
 class TermsMetadataPropertyCreate(BaseModel):
     type: Literal[MetadataPropertyType.terms]
-    values: Optional[List[str]] = Field(
+    values: Optional[List[Any]] = Field(
         None, min_items=TERMS_METADATA_PROPERTY_VALUES_MIN_ITEMS, max_items=TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS
     )
 

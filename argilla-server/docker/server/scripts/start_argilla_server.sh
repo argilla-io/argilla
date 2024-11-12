@@ -6,20 +6,19 @@ python -m argilla_server database migrate
 
 if [ -n "$USERNAME" ] && [ -n "$PASSWORD" ]; then
   echo "Creating owner user with username ${USERNAME}"
+
+  cmd_args="--first-name $USERNAME --username $USERNAME --password $PASSWORD --role owner"
+
   if [ -n "$API_KEY" ]; then
-    python -m argilla_server database users create \
-    --first-name "$USERNAME" \
-    --username "$USERNAME" \
-    --password "$PASSWORD" \
-    --api-key "$API_KEY" \
-    --role owner
-  else
-    python -m argilla_server database users create \
-    --first-name "$USERNAME" \
-    --username "$USERNAME" \
-    --password "$PASSWORD" \
-    --role owner
+    cmd_args="$cmd_args --api-key $API_KEY"
   fi
+
+  if [ -n "$WORKSPACE" ]; then
+    cmd_args="$cmd_args --workspace $WORKSPACE"
+  fi
+
+  python -m argilla_server database users create $cmd_args
+
 else
   echo "No username and password was provided. Skipping user creation"
 fi
@@ -37,4 +36,5 @@ fi
 #   with the prefix UVICORN_. For example, in case you want to
 #   run the app on port 5000, just set the environment variable
 #   UVICORN_PORT to 5000.
-python -m uvicorn argilla_server:app --host "0.0.0.0"
+
+python -m uvicorn $UVICORN_APP --host "0.0.0.0"

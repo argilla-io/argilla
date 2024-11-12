@@ -1,5 +1,5 @@
 <template>
-  <div class="input-button">
+  <div class="input-button" role="button" :aria-label="option.text">
     <input
       ref="inputRef"
       type="checkbox"
@@ -22,7 +22,7 @@
       :for="option.id"
       :title="option.text"
     >
-      <span class="key" v-text="keyboards[option.id]" />
+      <span v-if="visibleShortcuts" class="key" v-text="keyboards[option.id]" />
       <span>{{ option.text }}</span>
     </label>
   </div>
@@ -39,10 +39,17 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
+    },
   },
   computed: {
     optionColor() {
       return this.option.color;
+    },
+    optionVeryDarkColor() {
+      return this.optionColor.palette.veryDark;
     },
     optionDarkColor() {
       return this.optionColor.palette.dark;
@@ -58,7 +65,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$label-color: palette(grey, 700);
+$label-color: var(--bg-solid-grey-2);
 
 input[type="checkbox"] {
   @extend %visuallyhidden;
@@ -99,6 +106,12 @@ input[type="checkbox"] {
   border-radius: $border-radius;
   cursor: pointer;
   user-select: none;
+  [data-theme="dark"] & {
+    background: hsl(from v-bind(optionDarkColor) h s l / 10%);
+  }
+  [data-theme="high-contrast"] & {
+    color: var(--color-black);
+  }
   span {
     white-space: nowrap;
     overflow: hidden;
@@ -107,10 +120,19 @@ input[type="checkbox"] {
   }
   &:not(.label-active):hover {
     background: v-bind(optionLightColor);
+    [data-theme="dark"] & {
+      background: hsl(from v-bind(optionDarkColor) h s l / 22%);
+    }
   }
   &.label-active {
     background: v-bind(optionColor);
-    color: $black-87;
+    color: var(--fg-primary);
+    @media (forced-colors: active) {
+      outline: 5px solid;
+    }
+    [data-theme="dark"] & {
+      background: v-bind(optionVeryDarkColor);
+    }
   }
 }
 
@@ -123,11 +145,11 @@ input[type="checkbox"] {
   aspect-ratio: 1;
   border-radius: $border-radius;
   border-width: 1px 1px 3px 1px;
-  border-color: $black-20;
+  border-color: var(--bg-opacity-20);
   border-style: solid;
   box-sizing: content-box;
-  color: $black-87;
-  background: palette(grey, 700);
+  color: var(--fg-primary);
+  background: var(--bg-solid-grey-2);
   @include font-size(11px);
   font-family: monospace, monospace;
 }

@@ -25,7 +25,12 @@
           :data-title="$t('status')"
         >
           {{ currentOptionName }}
-          <svgicon name="chevron-down" width="8" height="8" />
+          <svgicon
+            name="chevron-down"
+            width="8"
+            height="8"
+            aria-hidden="true"
+          />
         </BaseButton>
       </span>
       <span slot="dropdown-content">
@@ -115,6 +120,7 @@ $selector-width: 140px;
   list-style: none;
 }
 .option {
+  text-transform: capitalize;
   padding: $base-space;
   border-radius: $border-radius;
   &:focus {
@@ -123,25 +129,25 @@ $selector-width: 140px;
   &.discarded {
     &:hover,
     &:focus-within {
-      background: lighten($discarded-color, 30%);
+      background: hsl(from var(--fg-status-discarded) h s l / 10%);
     }
   }
   &.submitted {
     &:hover,
     &:focus-within {
-      background: lighten($submitted-color, 44%);
+      background: hsl(from var(--fg-status-submitted) h s l / 10%);
     }
   }
   &.pending {
     &:hover,
     &:focus-within {
-      background: lighten($pending-color, 54%);
+      background: hsl(from var(--fg-status-pending) h s l / 10%);
     }
   }
   &.draft {
     &:hover,
     &:focus-within {
-      background: lighten($draft-color, 56%);
+      background: hsl(from var(--fg-status-draft) h s l / 10%);
     }
   }
   &__radio {
@@ -156,34 +162,35 @@ $selector-width: 140px;
   align-items: center;
   gap: $base-space;
   padding: $base-space;
-  background: palette(white);
+  background: var(--bg-accent-grey-1);
   @include font-size(14px);
+  text-transform: capitalize;
   &.discarded {
-    color: $black-54;
-    border: 1px solid $discarded-color;
+    color: var(--fg-secondary);
+    border: 1px solid var(--fg-status-discarded);
     &:before {
-      background: $discarded-color;
+      background: var(--fg-status-discarded);
     }
   }
   &.submitted {
-    color: $submitted-color;
-    border: 1px solid $submitted-color;
+    color: var(--fg-status-submitted);
+    border: 1px solid var(--fg-status-submitted);
     &:before {
-      background: $submitted-color;
+      background: var(--fg-status-submitted);
     }
   }
   &.pending {
-    color: $pending-color;
-    border: 1px solid $pending-color;
+    color: var(--fg-status-pending);
+    border: 1px solid var(--fg-status-pending);
     &:before {
-      background: $pending-color;
+      background: var(--fg-status-pending);
     }
   }
   &.draft {
-    color: $draft-color;
-    border: 1px solid $draft-color;
+    color: var(--fg-status-draft);
+    border: 1px solid var(--fg-status-draft);
     &:before {
-      background: $draft-color;
+      background: var(--fg-status-draft);
     }
   }
   .svg-icon {

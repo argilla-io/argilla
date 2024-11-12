@@ -14,18 +14,21 @@
 
 import json
 import os
+import warnings
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence
+from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
 from uuid import UUID
 
 from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
-from argilla.settings._field import Field, _field_from_dict, _field_from_model
-from argilla.settings._metadata import MetadataType, MetadataField
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict
+from argilla.settings._field import Field, _field_from_dict, _field_from_model, FieldBase
+from argilla.settings._io import build_settings_from_repo_id
+from argilla.settings._metadata import MetadataType, MetadataField, MetadataPropertyBase
+from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
 from argilla.settings._task_distribution import TaskDistribution
+from argilla.settings._templates import DefaultSettingsMixin
 from argilla.settings._vector import VectorField
 
 if TYPE_CHECKING:
@@ -34,7 +37,7 @@ if TYPE_CHECKING:
 __all__ = ["Settings"]
 
 
-class Settings(Resource):
+class Settings(DefaultSettingsMixin, Resource):
     """
     Settings class for Argilla Datasets.
 
@@ -50,6 +53,7 @@ class Settings(Resource):
         guidelines: Optional[str] = None,
         allow_extra_metadata: bool = False,
         distribution: Optional[TaskDistribution] = None,
+        mapping: Optional[Dict[str, Union[str, Sequence[str]]]] = None,
         _dataset: Optional["Dataset"] = None,
     ) -> None:
         """
@@ -64,11 +68,13 @@ class Settings(Resource):
                 Dataset. Defaults to False.
             distribution (TaskDistribution): The annotation task distribution configuration.
                 Default to DEFAULT_TASK_DISTRIBUTION
+            mapping (Dict[str, Union[str, Sequence[str]]]): A dictionary that maps incoming data names to Argilla dataset attributes in DatasetRecords.
         """
         super().__init__(client=_dataset._client if _dataset else None)
 
         self._dataset = _dataset
         self._distribution = distribution
+        self._mapping = mapping
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
@@ -138,6 +144,14 @@ class Settings(Resource):
         self._distribution = value
 
     @property
+    def mapping(self) -> Dict[str, Union[str, Sequence[str]]]:
+        return self._mapping
+
+    @mapping.setter
+    def mapping(self, value: Dict[str, Union[str, Sequence[str]]]):
+        self._mapping = value
+
+    @property
     def dataset(self) -> "Dataset":
         return self._dataset
 
@@ -172,6 +186,9 @@ class Settings(Resource):
         self._validate_empty_settings()
         self._validate_duplicate_names()
 
+        for field in self.fields:
+            field.validate()
+
     #####################
     #  Public methods   #
     #####################
@@ -190,10 +207,10 @@ class Settings(Resource):
         self.validate()
 
         self._update_dataset_related_attributes()
-        self.__fields.create()
-        self.__questions.create()
-        self.__vectors.create()
-        self.__metadata.create()
+        self.__fields._create()
+        self.__questions._create()
+        self.__vectors._create()
+        self.__metadata._create()
 
         self._update_last_api_call()
         return self
@@ -202,10 +219,10 @@ class Settings(Resource):
         self.validate()
 
         self._update_dataset_related_attributes()
-        self.__fields.update()
-        self.__vectors.update()
-        self.__metadata.update()
-        # self.questions.update()
+        self.__fields._update()
+        self.__vectors._update()
+        self.__metadata._update()
+        self.__questions._update()
 
         self._update_last_api_call()
         return self
@@ -220,6 +237,7 @@ class Settings(Resource):
                 "metadata": self.metadata.serialize(),
                 "allow_extra_metadata": self.allow_extra_metadata,
                 "distribution": self.distribution.to_dict(),
+                "mapping": self.mapping,
             }
         except Exception as e:
             raise ArgillaSerializeError(f"Failed to serialize the settings. {e.__class__.__name__}") from e
@@ -245,8 +263,66 @@ class Settings(Resource):
             settings_dict = json.load(file)
             return cls._from_dict(settings_dict)
 
+    @classmethod
+    def from_hub(
+        cls,
+        repo_id: str,
+        subset: Optional[str] = None,
+        feature_mapping: Optional[Dict[str, Literal["question", "field", "metadata"]]] = None,
+        **kwargs,
+    ) -> "Settings":
+        """Load the settings from the Hub
+
+        Parameters:
+            repo_id (str): The ID of the repository to load the settings from on the Hub.
+            subset (Optional[str]): The subset of the repository to load the settings from.
+            feature_mapping (Dict[str, Literal["question", "field", "metadata"]]): A dictionary that maps incoming column names to Argilla attributes.
+        """
+
+        settings = build_settings_from_repo_id(repo_id=repo_id, feature_mapping=feature_mapping, subset=subset)
+        return settings
+
     def __eq__(self, other: "Settings") -> bool:
+        if not (other and isinstance(other, Settings)):
+            return False
         return self.serialize() == other.serialize()  # TODO: Create proper __eq__ methods for fields and questions
+
+    def add(
+        self, property: Union[Field, VectorField, MetadataType, QuestionType], override: bool = True
+    ) -> Union[Field, VectorField, MetadataType, QuestionType]:
+        """
+        Add a property to the settings
+
+        Args:
+            property: The property to add
+            override: If True, override the existing property with the same name. Otherwise, raise an error.  Defaults to True.
+
+        Returns:
+            The added property
+
+        """
+        # review all settings properties and remove any existing property with the same name
+        for attributes in [self.fields, self.questions, self.vectors, self.metadata]:
+            for prop in attributes:
+                if prop.name == property.name:
+                    message = f"Property with name {property.name!r} already exists in settings as {prop.__class__.__name__!r}"
+                    if override:
+                        warnings.warn(message + ". Overriding the existing property.")
+                        attributes.remove(prop)
+                    else:
+                        raise SettingsError(message)
+
+        if isinstance(property, FieldBase):
+            self.fields.add(property)
+        elif isinstance(property, QuestionPropertyBase):
+            self.questions.add(property)
+        elif isinstance(property, VectorField):
+            self.vectors.add(property)
+        elif isinstance(property, MetadataPropertyBase):
+            self.metadata.add(property)
+        else:
+            raise ValueError(f"Unsupported property type: {type(property).__name__}")
+        return property
 
     #####################
     #  Repr Methods     #
@@ -271,6 +347,7 @@ class Settings(Resource):
         guidelines = settings_dict.get("guidelines")
         distribution = settings_dict.get("distribution")
         allow_extra_metadata = settings_dict.get("allow_extra_metadata")
+        mapping = settings_dict.get("mapping")
 
         questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
         fields = [_field_from_dict(field) for field in fields]
@@ -280,6 +357,9 @@ class Settings(Resource):
         if distribution:
             distribution = TaskDistribution.from_dict(distribution)
 
+        if mapping:
+            mapping = cls._validate_mapping(mapping)
+
         return cls(
             questions=questions,
             fields=fields,
@@ -288,6 +368,7 @@ class Settings(Resource):
             guidelines=guidelines,
             allow_extra_metadata=allow_extra_metadata,
             distribution=distribution,
+            mapping=mapping,
         )
 
     def _copy(self) -> "Settings":
@@ -362,6 +443,19 @@ class Settings(Resource):
                     )
                 dataset_properties_by_name[property.name] = property
 
+    @classmethod
+    def _validate_mapping(cls, mapping: Dict[str, Union[str, Sequence[str]]]) -> dict:
+        validate_mapping = {}
+        for key, value in mapping.items():
+            if isinstance(value, str):
+                validate_mapping[key] = value
+            elif isinstance(value, list) or isinstance(value, tuple):
+                validate_mapping[key] = tuple(value)
+            else:
+                raise SettingsError(f"Invalid mapping value for key {key!r}: {value}")
+
+        return validate_mapping
+
     def __process_guidelines(self, guidelines):
         if guidelines is None:
             return guidelines
@@ -388,6 +482,7 @@ class SettingsProperties(Sequence[Property]):
     def __init__(self, settings: "Settings", properties: List[Property]):
         self._properties_by_name = {}
         self._settings = settings
+        self._removed_properties = []
 
         for property in properties or []:
             if self._settings.dataset and hasattr(property, "dataset"):
@@ -405,7 +500,7 @@ class SettingsProperties(Sequence[Property]):
             return self._properties_by_name.get(key)
 
     def __iter__(self) -> Iterator[Property]:
-        return iter(self._properties_by_name.values())
+        return iter([v for v in self._properties_by_name.values()])
 
     def __len__(self):
         return len(self._properties_by_name)
@@ -422,7 +517,17 @@ class SettingsProperties(Sequence[Property]):
         setattr(self, property.name, property)
         return property
 
-    def create(self):
+    def remove(self, property: Union[str, Property]) -> None:
+        if isinstance(property, str):
+            property = self._properties_by_name.pop(property)
+        else:
+            property = self._properties_by_name.pop(property.name)
+
+        if property:
+            delattr(self, property.name)
+            self._removed_properties.append(property)
+
+    def _create(self):
         for property in self:
             try:
                 property.dataset = self._settings.dataset
@@ -430,13 +535,22 @@ class SettingsProperties(Sequence[Property]):
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to create property {property.name!r}: {e.message}") from e
 
-    def update(self):
+    def _update(self):
         for item in self:
             try:
                 item.dataset = self._settings.dataset
                 item.update() if item.id else item.create()
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to update {item.name!r}: {e.message}") from e
+
+        self._delete()
+
+    def _delete(self):
+        for item in self._removed_properties:
+            try:
+                item.delete()
+            except ArgillaAPIError as e:
+                raise SettingsError(f"Failed to delete {item.name!r}: {e.message}") from e
 
     def serialize(self) -> List[dict]:
         return [property.serialize() for property in self]
@@ -447,6 +561,11 @@ class SettingsProperties(Sequence[Property]):
 
         if property.name in dir(self):
             raise ValueError(f"Property with name {property.name!r} conflicts with an existing attribute")
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+
+        return f"{repr([prop for prop in self])}"
 
 
 class QuestionsProperties(SettingsProperties[QuestionType]):
@@ -459,12 +578,18 @@ class QuestionsProperties(SettingsProperties[QuestionType]):
     Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
     """
 
-    def create(self):
+    def _create(self):
         for question in self:
             try:
                 self._create_question(question)
             except ArgillaAPIError as e:
                 raise SettingsError(f"Failed to create question {question.name}") from e
+
+    def _update(self):
+        pass
+
+    def _delete(self):
+        pass
 
     def _create_question(self, question: QuestionType) -> None:
         question_model = self._settings._client.api.questions.create(

@@ -9,9 +9,10 @@
         <HorizontalResizable
           :id="`${recordCriteria.datasetId}-r-h-rz`"
           class="wrapper__left"
+          collapsable
         >
           <template #up>
-            <section class="wrapper__records">
+            <section class="wrapper__records" aria-label="Bulk Annotation View">
               <DatasetFilters :recordCriteria="recordCriteria">
                 <ToggleAnnotationType
                   v-if="
@@ -86,11 +87,10 @@
                 />
                 <PaginationFeedbackTask :recordCriteria="recordCriteria" />
               </div>
-              <div
-                ref="bulkScrollableArea"
-                class="bulk__records snap"
-                v-if="records.hasRecordsToAnnotate"
-              >
+              <div v-if="recordsMessage" class="wrapper--empty">
+                <p class="wrapper__text --heading3" v-html="recordsMessage" />
+              </div>
+              <div ref="bulkScrollableArea" class="bulk__records snap" v-else>
                 <Record
                   class="snap-child"
                   :class="{
@@ -106,9 +106,6 @@
                   @on-select-record="onSelectRecord"
                 />
               </div>
-              <div v-else class="wrapper--empty">
-                <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-              </div>
             </section>
           </template>
           <template #downHeader>
@@ -123,6 +120,7 @@
         <HorizontalResizable
           :id="`${recordCriteria.datasetId}-q-h-rz}`"
           class="wrapper__right"
+          collapsable
         >
           <template #up>
             <QuestionsForm
@@ -166,6 +164,7 @@
       <BaseCollapsablePanel
         hideOnDesktop
         :isExpanded="expandedGuidelines"
+        :aria-expanded="expandedGuidelines"
         @toggle-expand="expandedGuidelines = !expandedGuidelines"
       >
         <template #panelHeader>
@@ -220,9 +219,8 @@ export default {
     record: {
       type: Object,
     },
-    noRecordsMessage: {
+    recordsMessage: {
       type: String,
-      required: true,
     },
     statusClass: {
       type: String,
@@ -450,7 +448,7 @@ export default {
   }
   &__left {
     @include media("<desktop") {
-      :deep(.resizable__down) {
+      :deep(.resizable-h__down) {
         display: none;
       }
     }
@@ -474,12 +472,12 @@ export default {
       padding: 0 0 0 $base-space * 2;
       &__selection-text {
         user-select: none;
-        color: $black-54;
+        color: var(--fg-secondary);
         @include font-size(13px);
       }
       &__checkbox {
         :deep(.checkbox__container) {
-          border-color: $black-54;
+          border-color: var(--fg-secondary);
         }
       }
       &--left {
@@ -492,10 +490,12 @@ export default {
     }
   }
   &__text {
-    color: $black-54;
+    color: var(--fg-secondary);
+    max-width: 80%;
   }
   &--empty {
     width: 100%;
+    text-align: center;
     height: 80vh;
     display: flex;
     align-items: center;
@@ -525,6 +525,7 @@ export default {
     .record__wrapper {
       min-height: auto;
       height: auto;
+      flex: 0;
       &--fixed-height {
         max-height: 80%;
         height: 100%;

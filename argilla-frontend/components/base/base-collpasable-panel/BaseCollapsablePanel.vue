@@ -6,7 +6,12 @@
       hideOnDesktop ? '--mobile' : undefined,
     ]"
   >
-    <BaseButton class="panel__header" @click="toggleExpand(isExpanded)">
+    <BaseButton
+      class="panel__header"
+      @click="toggleExpand(isExpanded)"
+      :aria-expanded="isExpanded ? 'true' : 'false'"
+      :aria-label="isExpanded ? 'Collapse Panel' : 'Expand Panel'"
+    >
       <div class="panel__header__container">
         <slot v-if="!isExpanded" name="panelHeader" />
         <div v-else style="width: 100%; text-align: left">
@@ -17,6 +22,7 @@
           :name="isExpanded ? 'chevron-down' : 'chevron-right'"
           width="12"
           height="12"
+          aria-hidden="true"
         />
       </div>
     </BaseButton>
@@ -55,10 +61,12 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-top: 1px solid $black-10;
+  border-top: 1px solid var(--bg-opacity-10);
 
   &__header {
     overflow: visible;
+    color: var(--fg-secondary);
+
     &__container {
       width: 100%;
       display: flex;
@@ -86,7 +94,8 @@ export default {
     &:hover {
       :deep(p),
       :deep(svg) {
-        color: darken(palette(grey, 300), 10%);
+        color: var(--fg-primary);
+        opacity: 0.7;
       }
     }
   }

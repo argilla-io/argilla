@@ -25,13 +25,14 @@
       class="search-area__icon --search"
       :data-title="$t('search')"
     >
-      <svgicon name="search" width="16" height="16" />
+      <svgicon name="search" width="16" height="16" aria-hidden="true" />
     </BaseButton>
     <input
       ref="searchRef"
       class="search-area__input"
       type="text"
       v-model.trim="searchValue"
+      role="search"
       :placeholder="$t('searchPlaceholder')"
       :aria-description="$t('searchPlaceholder')"
       autocomplete="off"
@@ -43,7 +44,7 @@
       v-if="showDelete"
       class="search-area__icon --close"
     >
-      <svgicon name="close" width="12" height="12" />
+      <svgicon name="close" width="12" height="12" aria-hidden="true" />
     </BaseButton>
 
     <BaseDropdown
@@ -57,7 +58,7 @@
           <span class="search-area__fields__header__text">{{
             selectedField.title
           }}</span>
-          <svgicon name="chevron-down" height="8" />
+          <svgicon name="chevron-down" height="8" aria-hidden="true" />
         </span>
       </template>
       <template slot="dropdown-content">
@@ -189,11 +190,11 @@ $searchBarSize: $base-space * 4;
   border: 1px solid transparent;
   &.active,
   &.expanded {
-    background: palette(white);
-    border: 1px solid $black-10;
+    background: var(--bg-accent-grey-2);
+    border: 1px solid var(--bg-opacity-10);
     transition: all 0.3s ease;
     .button.--search {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
   &.active,
@@ -205,18 +206,18 @@ $searchBarSize: $base-space * 4;
   }
   &.expanded:focus-within,
   &.active {
-    border: 1px solid $primary-color;
+    border: 1px solid var(--fg-cuaternary);
   }
   &__icon.button {
     display: flex;
     flex-shrink: 0;
     padding: $base-space;
-    color: $black-54;
+    color: var(--fg-secondary);
     &.--search {
       border-radius: $border-radius-l;
       &:hover {
-        background: $black-4;
-        color: $black-54;
+        background: var(--bg-opacity-4);
+        color: var(--fg-secondary);
         transition: all 0.3s ease;
       }
     }
@@ -228,14 +229,15 @@ $searchBarSize: $base-space * 4;
     outline: 0;
     background: none;
     line-height: 1.4;
+    color: var(--fg-primary);
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
     }
   }
   &__fields {
     display: none;
     max-width: 30%;
-    border-left: 1px solid $black-37;
+    border-left: 1px solid var(--fg-tertiary);
     flex-shrink: 0;
     &__header {
       display: flex;
@@ -250,7 +252,7 @@ $searchBarSize: $base-space * 4;
       }
       &:hover {
         cursor: pointer;
-        color: $black-87;
+        color: var(--fg-primary);
       }
       .svg-icon {
         flex-shrink: 0;
@@ -265,7 +267,7 @@ $searchBarSize: $base-space * 4;
         border-radius: $border-radius-s;
         transition: background-color 0.3s ease;
         &:hover {
-          background: $black-4;
+          background: var(--bg-opacity-4);
           cursor: pointer;
           transition: background-color 0.3s ease;
         }
@@ -276,6 +278,7 @@ $searchBarSize: $base-space * 4;
         text-align: left;
         padding: 0;
         font-weight: normal;
+        line-height: 1.2em;
         @include truncate;
       }
     }

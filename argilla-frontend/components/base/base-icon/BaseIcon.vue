@@ -4,6 +4,7 @@
     :width="iconWidth"
     :height="iconHeight"
     :color="iconColor"
+    aria-hidden="true"
   />
 </template>
 

@@ -16,9 +16,78 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
+
+### Added
+
+- Added `Argilla.deploy_on_spaces` to deploy the Argilla server on Hugging Face Spaces. ([#5547](https://github.com/argilla-io/argilla/pull/5547))
+
+### Changed
+
+- Changed `Dataset.from_hub` method to open configure URL when `settings="ui"`. ([#5622](https://github.com/argilla-io/argilla/pull/5622))
+- Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
+- Added support for `with_vectors` while fetching records along with a search query. ([#5638](https://github.com/argilla-io/argilla/pull/5638))
+
+### Removed
+
+- Removed name sanitizing for dataset settings names. This may cause issues with old server versions. Especially when working with `from_hub`. ([#5574](https://github.com/argilla-io/argilla/pull/5574))
+
+## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.2...v2.3.0)
+
+### Added
+
+- Added support for `CustomField`. ([#5422](https://github.com/argilla-io/argilla/pull/5422))
+- Added `inserted_at` and `updated_at` to `Resource` model as properties. ([#5540](https://github.com/argilla-io/argilla/pull/5540))
+- Added `limit` argument when fetching records. ([#5525](https://github.com/argilla-io/argilla/pull/5525)
+- Added similarity search support. ([#5546](https://github.com/argilla-io/argilla/pull/5546))
+- Added filter support for `id`, `_server_id`, `inserted_at` and `updated_at` record attributes. ([#5545](https://github.com/argilla-io/argilla/pull/5545))
+- Added support to read argilla credentials from colab secrets. ([#5541](https://github.com/argilla-io/argilla/pull/5541))
+
+### Changed
+
+- Changed the __repr__ method for `SettingsProperties` to display the details of all the properties in `Setting` object. ([#5380](https://github.com/argilla-io/argilla/issues/5380))
+- Changed error messages when creating datasets with insufficient permissions. ([#5540](https://github.com/argilla-io/argilla/pull/5554))
+
+### Fixed
+
+- Fixed serialization of `ChatField` when collecting records from the hub and exporting to `datasets`. ([#5554](https://github.com/argilla-io/argilla/pull/5553))
+
+## [2.2.2](https://github.com/argilla-io/argilla/compare/v2.2.1...v2.2.2)
+
+### Fixed
+
+- Fixed `from_hub` with unsupported column names. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+- Fixed `from_hub` with missing dataset `subset` configuration value. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+
+### Changed
+
+- Changed `from_hub` to only generate fields not questions for strings in dataset. ([#5524](https://github.com/argilla-io/argilla/pull/5524))
+
+## [2.2.1](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.2.1)
+
+### Fixed
+
+- Fixed `from_hub` errors when columns names contain uppercase letters. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+- Fixed `from_hub` errors when class feature values contains unlabelled values. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+- Fixed `from_hub` errors when loading cached datasets. ([#5523](https://github.com/argilla-io/argilla/pull/5523))
+
+## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
+
+- Added new `ChatField` supporting chat messages. ([#5376](https://github.com/argilla-io/argilla/pull/5376))
+- Added template settings to `rg.Settings` for classification, rating, and ranking questions. ([#5426](https://github.com/argilla-io/argilla/pull/5426))
+- Added `rg.Settings` definition based on `datasets.Features` within `rg.Dataset.from_hub`. ([#5426](https://github.com/argilla-io/argilla/pull/5472))
+- Added persistent record mapping to `rg.Settings` to be used in `rg.Dataset.records.log`. ([#5466](https://github.com/argilla-io/argilla/pull/5466))
+- Added multiple error handling methods to the `rg.Dataset.records.log` method to warn, ignore, or raise errors. ([#5466](https://github.com/argilla-io/argilla/pull/5463))
+- Changed dataset import and export of `rg.LabelQuestion` to use `datasets.ClassLabel` not `datasets.Value`. ([#5474](https://github.com/argilla-io/argilla/pull/5474))
+
+
+## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0)
+
 ### Added
 
 - Added new `ImageField` supporting URLs and Data URLs. ([#5279](https://github.com/argilla-io/argilla/pull/5279))
+- Added dark mode ([#5412](https://github.com/argilla-io/argilla/pull/5412))
+- Added settings parameter to `rg.Dataset.from_hub` to define the dataset settings before ingesting a dataset from the hub. ([#5418](https://github.com/argilla-io/argilla/pull/5418))
 
 ## [2.0.1](https://github.com/argilla-io/argilla/compare/v2.0.0...releases/2.0.1)
 

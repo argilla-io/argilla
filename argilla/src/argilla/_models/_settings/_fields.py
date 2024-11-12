@@ -31,11 +31,19 @@ class ImageFieldSettings(BaseModel):
     type: Literal["image"] = "image"
 
 
+class ChatFieldSettings(BaseModel):
+    type: Literal["chat"] = "chat"
+    use_markdown: Optional[bool] = True
+
+
+class CustomFieldSettings(BaseModel):
+    type: Literal["custom"] = "custom"
+    template: str
+    advanced_mode: Optional[bool] = False
+
+
 FieldSettings = Annotated[
-    Union[
-        TextFieldSettings,
-        ImageFieldSettings,
-    ],
+    Union[TextFieldSettings, ImageFieldSettings, ChatFieldSettings, CustomFieldSettings],
     Field(..., discriminator="type"),
 ]
 
@@ -47,12 +55,6 @@ class FieldModel(ResourceModel):
     required: bool = True
     description: Optional[str] = None
     dataset_id: Optional[UUID] = None
-
-    @field_validator("name")
-    @classmethod
-    def __name_lower(cls, name):
-        formatted_name = name.lower().replace(" ", "_")
-        return formatted_name
 
     @field_validator("title")
     @classmethod

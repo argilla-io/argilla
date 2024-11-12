@@ -12,8 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import re
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Security, status
@@ -35,6 +34,7 @@ from argilla_server.api.schemas.v1.records import (
     SearchRecordsQuery,
     SearchRecordsResult,
     TermsFilter,
+    SEARCH_MAX_SIMILARITY_SEARCH_RESULT,
 )
 from argilla_server.api.schemas.v1.records import Record as RecordSchema
 from argilla_server.api.schemas.v1.responses import ResponseFilterScope
@@ -44,9 +44,9 @@ from argilla_server.api.schemas.v1.suggestions import (
     SearchSuggestionsOptions,
     SuggestionFilterScope,
 )
-from argilla_server.contexts import datasets, search
+from argilla_server.contexts import datasets, search, records
 from argilla_server.database import get_async_db
-from argilla_server.enums import RecordSortField, ResponseStatusFilter, SortOrder
+from argilla_server.enums import RecordSortField
 from argilla_server.errors.future import MissingVectorError, NotFoundError, UnprocessableEntityError
 from argilla_server.errors.future.base_errors import MISSING_VECTOR_ERROR_CODE
 from argilla_server.models import Dataset, Field, Record, User, VectorSettings
@@ -54,7 +54,6 @@ from argilla_server.search_engine import (
     AndFilter,
     SearchEngine,
     SearchResponses,
-    UserResponseStatusFilter,
     get_search_engine,
 )
 from argilla_server.security import auth
@@ -73,42 +72,13 @@ parse_record_include_param = parse_query_param(
 router = APIRouter()
 
 
-async def _filter_records_using_search_engine(
-    db: "AsyncSession",
-    search_engine: "SearchEngine",
-    dataset: Dataset,
-    limit: int,
-    offset: int,
-    user: Optional[User] = None,
-    include: Optional[RecordIncludeParam] = None,
-) -> Tuple[List[Record], int]:
-    search_responses = await _get_search_responses(
-        db=db,
-        search_engine=search_engine,
-        dataset=dataset,
-        limit=limit,
-        offset=offset,
-        user=user,
-    )
-
-    record_ids = [response.record_id for response in search_responses.items]
-    user_id = user.id if user else None
-
-    return (
-        await datasets.get_records_by_ids(
-            db=db, dataset_id=dataset.id, user_id=user_id, records_ids=record_ids, include=include
-        ),
-        search_responses.total,
-    )
-
-
 def _to_search_engine_filter_scope(scope: FilterScope, user: Optional[User]) -> search_engine.FilterScope:
     if isinstance(scope, RecordFilterScope):
         return search_engine.RecordFilterScope(property=scope.property)
     elif isinstance(scope, MetadataFilterScope):
         return search_engine.MetadataFilterScope(metadata_property=scope.metadata_property)
     elif isinstance(scope, SuggestionFilterScope):
-        return search_engine.SuggestionFilterScope(question=scope.question, property=scope.property)
+        return search_engine.SuggestionFilterScope(question=scope.question, property=str(scope.property))
     elif isinstance(scope, ResponseFilterScope):
         return search_engine.ResponseFilterScope(question=scope.question, property=scope.property, user=user)
     else:
@@ -198,13 +168,20 @@ async def _get_search_responses(
             "record": record,
             "query": text_query,
             "order": vector_query.order,
-            "max_results": limit,
+            "max_results": min(limit + offset, SEARCH_MAX_SIMILARITY_SEARCH_RESULT),
         }
 
         if filters:
             similarity_search_params["filter"] = _to_search_engine_filter(filters, user=user)
 
-        return await search_engine.similarity_search(**similarity_search_params)
+        if offset >= similarity_search_params["max_results"]:
+            return SearchResponses(items=[], total=0)
+
+        responses = await search_engine.similarity_search(**similarity_search_params)
+        responses.items = responses.items[offset:]
+
+        return responses
+
     else:
         search_params = {
             "dataset": dataset,
@@ -224,18 +201,6 @@ async def _get_search_responses(
         return await search_engine.search(**search_params)
 
 
-async def _build_response_status_filter_for_search(
-    response_statuses: Optional[List[ResponseStatusFilter]] = None, user: Optional[User] = None
-) -> Optional[UserResponseStatusFilter]:
-    user_response_status_filter = None
-
-    if response_statuses:
-        # TODO(@frascuchon): user response and status responses should be split into different filter types
-        user_response_status_filter = UserResponseStatusFilter(user=user, statuses=response_statuses)
-
-    return user_response_status_filter
-
-
 async def _validate_search_records_query(db: "AsyncSession", query: SearchRecordsQuery, dataset: Dataset):
     try:
         await search.validate_search_records_query(db, query, dataset)
@@ -247,7 +212,6 @@ async def _validate_search_records_query(db: "AsyncSession", query: SearchRecord
 async def list_dataset_records(
     *,
     db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
     dataset_id: UUID,
     include: Optional[RecordIncludeParam] = Depends(parse_record_include_param),
     offset: int = 0,
@@ -255,19 +219,27 @@ async def list_dataset_records(
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
-
     await authorize(current_user, DatasetPolicy.list_records_with_all_responses(dataset))
 
-    records, total = await _filter_records_using_search_engine(
-        db,
-        search_engine,
-        dataset=dataset,
-        limit=limit,
-        offset=offset,
-        include=include,
+    include_args = (
+        dict(
+            with_responses=include.with_responses,
+            with_suggestions=include.with_suggestions,
+            with_vectors=include.with_all_vectors or include.vectors,
+        )
+        if include
+        else {}
     )
 
-    return Records(items=records, total=total)
+    dataset_records, total = await records.list_dataset_records(
+        db=db,
+        dataset_id=dataset.id,
+        offset=offset,
+        limit=limit,
+        **include_args,
+    )
+
+    return Records(items=dataset_records, total=total)
 
 
 @router.delete("/datasets/{dataset_id}/records", status_code=status.HTTP_204_NO_CONTENT)

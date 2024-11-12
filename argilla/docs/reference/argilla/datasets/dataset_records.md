@@ -131,7 +131,7 @@ Records can also be updated using the `log` method with records that contain an 
             metadata={"department": "toys"},
             id="2" # (1)
         ),
-    ] # (1)
+    ]
 
     dataset.records.log(records)
     ```
@@ -149,7 +149,7 @@ Records can also be updated using the `log` method with records that contain an 
             "metadata": {"department": "toys"},
             "id": "2" # (1)
         },
-    ] # (1)
+    ]
 
     dataset.records.log(data)
     ```
@@ -175,6 +175,7 @@ Records can also be updated using the `log` method with records that contain an 
     )
 
     ```
+
     1. The `id` field is required to identify the record to be updated. The `id` field must be unique for each record in the dataset. If the `id` field is not provided, the record will be added as a new record.
     2. Let's say that your data structure has keys `my_id` instead of `id`. You can use the `mapping` parameter to map the keys in the data structure to the fields in the dataset.
 
@@ -192,6 +193,74 @@ Records can also be updated using the `log` method with records that contain an 
 
     1. In this example, the Hugging Face dataset matches the Argilla dataset schema.
     2. The `uuid` key in the Hugging Face dataset corresponds to the `id` field in the Argilla dataset.
+
+### Adding and updating records with images
+
+Argilla datasets can contain image fields. You can add images to a dataset by passing the image to the record object as either a remote URL, a local path to an image file, or a PIL object. The field names must be defined as an `rg.ImageField` in the dataset's `Settings` object to be accepted. Images will be stored in the Argilla database and returned using the data URI schema.
+
+!!! note "As PIL objects"
+    To retrieve the images as rescaled PIL objects, you can use the `to_datasets` method when exporting the records, as shown in this [how-to guide](../../../how_to_guides/import_export.md).
+
+
+=== "From a data structure with remote URLs"
+
+    ```python
+    data = [
+        {
+            "image": "https://example.com/image1.jpg",
+        },
+        {
+            "image": "https://example.com/image2.jpg",
+        },
+    ]
+
+    dataset.records.log(data)
+    ```
+
+=== "From a data structure with local files or PIL objects"
+
+    ```python
+    import os
+    from PIL import Image
+
+    image_dir = "path/to/images"
+
+    data = [
+        {
+            "image": os.path.join(image_dir, "image1.jpg"), # (1)
+        },
+        {
+            "image": Image.open(os.path.join(image_dir, "image2.jpg")), # (2)
+        },
+    ]
+
+    dataset.records.log(data)
+    ```
+
+    1. The image is a local file path.
+    2. The image is a PIL object.
+
+=== "From a Hugging Face dataset"
+
+    Hugging Face datasets can be passed directly to the `log` method. The image field must be defined as an `Image` in the dataset's features.
+
+    ```python
+    hf_dataset = load_dataset("ylecun/mnist", split="train[:100]")
+    dataset.records.log(records=hf_dataset)
+    ```
+
+    If the image field is not defined as an `Image` in the dataset's features, you can cast the dataset to the correct schema before adding it to the Argilla dataset. This is only necessary if the image field is not defined as an `Image` in the dataset's features, and is not one of the supported image types by Argilla (URL, local path, or PIL object).
+
+    ```python
+    hf_dataset = load_dataset("<my_custom_dataset>") # (1)
+    hf_dataset = hf_dataset.cast(
+        features=Features({"image": Image(), "label": Value("string")}),
+    )
+    dataset.records.log(records=hf_dataset)
+    ```
+
+    1. In this example, the Hugging Face dataset matches the Argilla dataset schema but the image field is not defined as an `Image` in the dataset's features.
+
 
 ### Iterating over records in a dataset
 

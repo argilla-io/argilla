@@ -1,10 +1,20 @@
 <template>
   <div>
-    <p v-if="legend" class="questions__title --body3 --light" v-text="legend" />
-    <div class="questions">
+    <p
+      v-if="legend"
+      class="questions__title --body3 --light"
+      v-text="legend"
+      :aria-label="legend"
+    />
+    <div
+      class="questions"
+      role="list"
+      aria-label="List of annotation questions"
+    >
       <div
         v-for="(question, index) in questions"
         :key="question.id"
+        :aria-label="'Question: ' + question.name"
         @keydown.arrow-up.prevent="
           updateQuestionAutofocus(autofocusPosition - 1)
         "
@@ -22,6 +32,7 @@
         <SingleLabelComponent
           v-if="question.isSingleLabelType"
           ref="singleLabel"
+          :visible-shortcuts="visibleShortcuts"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
@@ -29,8 +40,9 @@
         />
 
         <MultiLabelComponent
-          ref="multiLabel"
           v-if="question.isMultiLabelType"
+          ref="multiLabel"
+          :visible-shortcuts="visibleShortcuts"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           @on-focus="updateQuestionAutofocus(index)"
@@ -56,6 +68,7 @@
         <SpanComponent
           v-if="question.isSpanType"
           ref="span"
+          :visible-shortcuts="visibleShortcuts"
           :question="question"
           :isFocused="checkIfQuestionIsFocused(index)"
           :enableSpanQuestionShortcutsGlobal="enableSpanQuestionShortcutsGlobal"
@@ -85,6 +98,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    visibleShortcuts: {
+      type: Boolean,
+      default: true,
+    },
   },
   computed: {
     questionsWithLoopMovement() {
@@ -107,6 +124,7 @@ export default {
     });
   },
   methods: {
+    // This is terrible
     handleKeyboardToMoveLoop(parent) {
       return (e) => {
         if (e.key !== "Tab") return;
@@ -172,7 +190,7 @@ export default {
   flex-direction: column;
   gap: $base-space * 4;
   &__title {
-    color: $black-37;
+    color: var(--fg-tertiary);
     margin-top: 0;
     margin-bottom: $base-space * 3;
   }

@@ -14,14 +14,26 @@
 
 from uuid import uuid4
 
-from datasets import Value, Sequence
+from datasets import Value, Sequence, load_dataset
 
 import argilla as rg
 from argilla.records._io import HFDatasetsIO
+from argilla.records._mapping import IngestedRecordMapper
 
 
 class TestHFDatasetsIO:
     def test_to_datasets_with_partial_values_in_records(self):
+        mock_dataset = rg.Dataset(
+            name="test",
+            settings=rg.Settings(
+                fields=[
+                    rg.TextField(name="field"),
+                ],
+                questions=[
+                    rg.TextQuestion(name="question"),
+                ],
+            ),
+        )
         records = [
             rg.Record(fields={"field": "The field"}, metadata={"a": "a"}),
             rg.Record(fields={"field": "Other field", "other": "Field"}, metadata={"b": "b"}),
@@ -44,7 +56,7 @@ class TestHFDatasetsIO:
             ),
         ]
 
-        ds = HFDatasetsIO.to_datasets(records)
+        ds = HFDatasetsIO.to_datasets(records, dataset=mock_dataset)
         assert ds.features == {
             "status": Value(dtype="string", id=None),
             "_server_id": Value(dtype="null", id=None),
@@ -94,3 +106,39 @@ class TestHFDatasetsIO:
             "spans.suggestion.agent": Value(dtype="null", id=None),
             "spans.suggestion.score": Value(dtype="null", id=None),
         }
+
+    def test_to_argilla_with_sequence_of_class_labels(self):
+        dataset = rg.Dataset(name="test", settings=rg.Settings(fields=[rg.TextField(name="text")]))
+        mapper = IngestedRecordMapper(dataset, uuid4())
+
+        hf_ds = load_dataset("google-research-datasets/go_emotions", name="simplified", split="train[:5]")
+
+        hf_ds = HFDatasetsIO.to_argilla(hf_ds, mapper)
+
+        assert hf_ds.to_list() == [
+            {
+                "text": "My favourite food is anything I didn't have to cook myself.",
+                "labels": ["neutral"],
+                "id": "eebbqej",
+            },
+            {
+                "text": "Now if he does off himself, everyone will think hes having a laugh screwing with people instead of actually dead",
+                "labels": ["neutral"],
+                "id": "ed00q6i",
+            },
+            {
+                "text": "WHY THE FUCK IS BAYLESS ISOING",
+                "labels": ["anger"],
+                "id": "eezlygj",
+            },
+            {
+                "text": "To make her feel threatened",
+                "labels": ["fear"],
+                "id": "ed7ypvh",
+            },
+            {
+                "text": "Dirty Southern Wankers",
+                "labels": ["annoyance"],
+                "id": "ed0bdzj",
+            },
+        ]

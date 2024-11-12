@@ -17,7 +17,7 @@ from argilla_server.api.schemas.v1.records import RecordCreate, RecordUpsert
 from argilla_server.api.schemas.v1.records_bulk import RecordsBulkCreate, RecordsBulkUpsert
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset
-from argilla_server.validators.records import RecordsBulkCreateValidator, RecordsBulkUpsertValidator
+from argilla_server.validators.records import RecordsBulkCreateValidator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import DatasetFactory, RecordFactory, TextFieldFactory
@@ -92,47 +92,6 @@ class TestRecordsBulkValidators:
 
         with pytest.raises(
             UnprocessableEntityError,
-            match="record at position 1 is not valid because",
+            match="Record at position 1 is not valid because",
         ):
             await RecordsBulkCreateValidator.validate(db, records_create, dataset)
-
-    async def test_records_bulk_upsert_validator(self, db: AsyncSession):
-        dataset = await self.configure_dataset()
-
-        records_upsert = RecordsBulkUpsert(
-            items=[
-                RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
-            ]
-        )
-
-        RecordsBulkUpsertValidator.validate(records_upsert, dataset)
-
-    async def test_records_bulk_upsert_validator_with_draft_dataset(self, db: AsyncSession):
-        dataset = await DatasetFactory.create(status="draft")
-
-        with pytest.raises(
-            UnprocessableEntityError, match="records cannot be created or updated for a non published dataset"
-        ):
-            records_upsert = RecordsBulkUpsert(
-                items=[
-                    RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
-                ]
-            )
-
-            RecordsBulkUpsertValidator.validate(records_upsert, dataset)
-
-    async def test_records_bulk_upsert_validator_with_record_error(self, db: AsyncSession):
-        dataset = await self.configure_dataset()
-        records_upsert = RecordsBulkUpsert(
-            items=[
-                RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
-                RecordUpsert(fields={"text": "hello world"}, metadata={"source": "test"}),
-                RecordUpsert(fields={"wrong-field": "hello world"}),
-            ]
-        )
-
-        with pytest.raises(
-            UnprocessableEntityError,
-            match="record at position 2 is not valid because",
-        ):
-            RecordsBulkUpsertValidator.validate(records_upsert, dataset)

@@ -16,7 +16,7 @@
   -->
 
 <template>
-  <div lang="en">
+  <div :lang="currentLang">
     <Nuxt v-if="!$slots.default" />
     <slot />
   </div>
@@ -28,6 +28,9 @@ export default {
   computed: {
     imOffline() {
       return this.$nuxt.isOffline;
+    },
+    currentLang() {
+      return this.$i18n.locale;
     },
   },
   watch: {
@@ -45,7 +48,7 @@ export default {
     showNotification(message) {
       this.$notification.notify({
         message: message,
-        type: "error",
+        type: "danger",
       });
     },
   },

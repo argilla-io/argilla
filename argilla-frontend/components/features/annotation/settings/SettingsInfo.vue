@@ -162,7 +162,7 @@ export default {
   &__area {
     max-width: 800px;
     padding-bottom: $base-space * 3;
-    border-bottom: 1px solid $black-10;
+    border-bottom: 1px solid var(--bg-opacity-10);
   }
 
   &__row {
@@ -202,7 +202,7 @@ export default {
   gap: $base-space;
 
   & > label {
-    color: $black-87;
+    color: var(--fg-primary);
   }
 
   & input,
@@ -213,24 +213,25 @@ export default {
     width: 80px;
     height: 24px;
     padding: $base-space * 2;
-    background: palette(white);
-    border: 1px solid $black-20;
+    background: var(--bg-accent-grey-2);
+    color: var(--fg-primary);
+    border: 1px solid var(--bg-opacity-20);
     border-radius: $border-radius;
     outline: 0;
     &:focus {
-      border: 1px solid $primary-color;
+      border: 1px solid var(--bg-action);
     }
   }
   &__input {
     &--read-only {
-      background: $black-4;
-      border: 1px solid $black-20;
+      background: var(--bg-opacity-4);
+      border: 1px solid var(--bg-opacity-20);
       opacity: 0.6;
     }
   }
 }
 .info-icon {
-  color: $black-37;
+  color: var(--fg-tertiary);
   margin-right: $base-space * 2;
   &[data-title] {
     position: relative;

@@ -6,12 +6,12 @@
       v-model="recordCriteria.page.client.many"
     />
     <span class="pagination__info">
-      <span>{{ currentPage }}</span>
+      <span aria-label="Current Record">{{ currentPage }}</span>
       <span class="pagination__info--bulk" v-if="isBulkMode">
         -
         {{ currentPageEnd }}</span
       >
-      <span>of {{ records.total }}</span>
+      <span aria-label="Total Records">of {{ records.total }}</span>
     </span>
     <Pagination :recordCriteria="recordCriteria" :total="records.total" />
   </div>
@@ -64,7 +64,7 @@ export default {
     display: flex;
     align-items: center;
     flex-direction: row;
-    color: $black-37;
+    color: var(--fg-tertiary);
 
     &--bulk {
       align-items: center;

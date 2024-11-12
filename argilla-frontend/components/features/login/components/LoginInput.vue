@@ -1,9 +1,10 @@
 <template>
   <div class="input-field">
     <Validation :validations="showValidations ? translatedValidations : []">
-      <label class="input-field__label" v-text="name" :for="name" />
+      <label class="input-field__label" :id="name" v-text="name" :for="name" />
       <span class="input-field__container">
         <input
+          ref="input"
           :aria-labelledby="name"
           v-model="inputValue"
           class="input-field__input"
@@ -73,6 +74,7 @@ export default {
       isTouched: false,
       isBlurred: false,
       isPasswordVisible: false,
+      isAutoFilled: false,
     };
   },
   model: {
@@ -80,6 +82,11 @@ export default {
     event: "input",
   },
   watch: {
+    isAutoFilled(newValue) {
+      if (newValue) {
+        this.value = `${this.value} `;
+      }
+    },
     inputValue(newValue) {
       this.$emit("input", newValue);
     },
@@ -108,7 +115,21 @@ export default {
         : this.type;
     },
   },
+  async mounted() {
+    this.isAutoFilled = await this.detectAutofill(this.$refs.input);
+  },
   methods: {
+    detectAutofill(element) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(
+            window
+              .getComputedStyle(element, null)
+              .getPropertyValue("appearance") === "menulist-button"
+          );
+        }, 200);
+      });
+    },
     toggleVisibility() {
       this.isPasswordVisible = !this.isPasswordVisible;
     },
@@ -129,7 +150,7 @@ export default {
   &__label {
     display: block;
     margin-bottom: calc($base-space / 2);
-    color: $black-87;
+    color: var(--fg-primary);
     font-weight: 500;
   }
   &__input {
@@ -139,17 +160,18 @@ export default {
     width: 100%;
     height: $base-space * 5.5;
     padding: $base-space * 2;
-    background: palette(white);
-    border: 1px solid $black-20;
+    background: var(--bg-accent-grey-2);
+    color: var(--fg-primary);
+    border: 1px solid var(--bg-opacity-20);
     border-radius: $border-radius;
     outline: 0;
     @include font-size(16px);
     @include input-placeholder {
-      color: $black-37;
+      color: var(--fg-tertiary);
       @include font-size(16px);
     }
     &:focus {
-      border: 1px solid $primary-color;
+      border: 1px solid var(--fg-cuaternary);
     }
   }
   &__toggle-visibility.button {
@@ -158,14 +180,14 @@ export default {
     top: 50%;
     transform: translateY(-50%);
     padding: $base-space $base-space * 2;
-    color: $primary-color;
+    color: var(--fg-cuaternary);
     @include font-size(12px);
   }
 }
 .--has-error input {
-  border-color: $black-20;
+  border-color: var(--bg-opacity-20);
   &:focus {
-    border-color: $primary-color;
+    border-color: var(--fg-cuaternary);
   }
 }
 
@@ -176,9 +198,9 @@ select {
     &,
     &:hover,
     &:focus {
-      -webkit-text-fill-color: $black-87;
-      -webkit-box-shadow: 0 0 0px 1000px palette(white) inset;
-      box-shadow: 0 0 0px 1000px palette(white) inset;
+      -webkit-text-fill-color: var(--fg-primary);
+      -webkit-box-shadow: 0 0 0px 1000px var(--bg-accent-grey-2) inset;
+      box-shadow: 0 0 0px 1000px var(--bg-accent-grey-2) inset;
       transition: background-color 5000s ease-in-out 0s;
     }
   }

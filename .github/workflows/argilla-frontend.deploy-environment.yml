@@ -1,7 +1,6 @@
 name: Deploy Argilla environment
 
 on:
-
   workflow_dispatch:
     inputs:
       image-name:
@@ -63,7 +62,7 @@ jobs:
             ADMIN_API_KEY=${{ steps.credentials.outputs.admin }}
             ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}
             ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
-            ARGILLA_ENABLE_TELEMETRY=0
+            HF_HUB_DISABLE_TELEMETRY=1
             API_BASE_URL=https://dev.argilla.io/
 
       - name: Post credentials in Slack

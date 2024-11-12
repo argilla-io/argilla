@@ -8,7 +8,7 @@ export const useDatasetViewModel = () => {
   const isLoadingDataset = ref(false);
   const route = useRoute();
   const notification = useNotifications();
-  const t = useTranslate();
+  const { t } = useTranslate();
   const datasetId = route.value.params.id;
 
   const handleError = (response: string) => {
@@ -27,15 +27,15 @@ export const useDatasetViewModel = () => {
 
     notification.notify({
       message,
-      type: "error",
+      type: "danger",
     });
   };
 
   const createRootBreadCrumbs = (dataset: Dataset) => {
     return [
-      { link: { name: "datasets" }, name: t("breadcrumbs.home") },
+      { link: { name: "index" }, name: t("breadcrumbs.home") },
       {
-        link: { path: `/datasets?workspaces=${dataset.workspace}` },
+        link: { path: `/?workspaces=${dataset.workspace}` },
         name: dataset.workspace,
       },
       {

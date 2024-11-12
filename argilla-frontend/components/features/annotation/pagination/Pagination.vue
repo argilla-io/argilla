@@ -4,20 +4,26 @@
       ref="prevButton"
       class="pagination__button"
       :disabled="isFirstPage"
+      :aria-label="$t('shortcuts.pagination.go_to_previous_record')"
       :data-title="$t('shortcuts.pagination.go_to_previous_record')"
+      aria-controls="pagination"
+      :aria-disabled="isFirstPage"
       @click="goToPrevPage"
     >
-      <svgicon name="chevron-left" width="12" height="12" />
+      <svgicon name="chevron-left" width="12" height="12" aria-hidden="true" />
     </BaseButton>
 
     <BaseButton
       ref="nextButton"
       class="pagination__button"
       :disabled="isLastPage"
+      :aria-label="$t('shortcuts.pagination.go_to_next_record')"
       :data-title="$t('shortcuts.pagination.go_to_next_record')"
+      aria-controls="pagination"
+      :aria-disabled="isLastPage"
       @click="goToNextPage"
     >
-      <svgicon name="chevron-right" width="12" height="12" />
+      <svgicon name="chevron-right" width="12" height="12" aria-hidden="true" />
     </BaseButton>
   </div>
 </template>
@@ -110,7 +116,7 @@ export default {
     justify-content: center;
     padding: $base-space;
     &:hover:not([disabled]) {
-      background: $black-4;
+      background: var(--bg-opacity-4);
     }
   }
 }

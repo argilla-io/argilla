@@ -201,23 +201,6 @@ class TestCreateUser:
 
         assert (await db.execute(select(func.count(User.id)))).scalar() == 2
 
-    async def test_create_user_with_invalid_username(
-        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
-    ):
-        response = await async_client.post(
-            self.url(),
-            headers=owner_auth_header,
-            json={
-                "first_name": "First name",
-                "last_name": "Last name",
-                "username": "invalid username",
-                "password": "12345678",
-            },
-        )
-
-        assert response.status_code == 422
-        assert (await db.execute(select(func.count(User.id)))).scalar() == 1
-
     async def test_create_user_with_invalid_min_length_first_name(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):

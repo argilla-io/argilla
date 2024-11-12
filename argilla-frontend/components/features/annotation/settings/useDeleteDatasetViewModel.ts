@@ -24,13 +24,13 @@ export const useDeleteDatasetViewModel = () => {
         type: "success",
       });
 
-      routes.goToDatasetsList();
+      routes.goToHome();
     } catch {
       toggleDeleteModal(false);
 
       notification.notify({
         message: `It is not possible to delete ${dataset.name}`,
-        type: "error",
+        type: "danger",
       });
     }
   };

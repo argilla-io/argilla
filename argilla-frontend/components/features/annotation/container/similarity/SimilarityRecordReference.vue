@@ -71,8 +71,8 @@ export default {
 .record-reference {
   max-height: 30vh;
   overflow: auto;
-  border: 1px solid $similarity-color;
-  background: palette(white);
+  border: 1px solid var(--fg-similarity);
+  background: var(--bg-accent-grey-1);
   border-radius: $border-radius-m;
   padding: $base-space * 2;
   &__wrapper {

@@ -4,17 +4,21 @@
       class="switch"
       :class="{ active: recordCriteria.page.isFocusMode }"
       @click="switchFocusMode()"
+      aria-label="Switch to Focus Mode"
       :data-title="$t('focus_mode')"
+      :aria-selected="recordCriteria.page.isFocusMode"
     >
-      <svgicon name="focus-mode" width="18" />
+      <svgicon name="focus-mode" width="18" aria-hidden="true" />
     </button>
     <button
       class="switch"
+      aria-label="Switch to Bulk Mode"
       :class="{ active: recordCriteria.page.isBulkMode }"
       @click="switchBulkMode()"
       :data-title="$t('bulk_mode')"
+      :aria-selected="recordCriteria.page.isBulkMode"
     >
-      <svgicon name="bulk-mode" width="18" />
+      <svgicon name="bulk-mode" width="18" aria-hidden="true" />
     </button>
   </div>
 </template>
@@ -52,7 +56,7 @@ $gutter: 2px;
   align-items: center;
   padding: $gutter;
   border-radius: $border-radius;
-  background: $black-4;
+  background: var(--bg-opacity-4);
 }
 
 .switch {
@@ -60,20 +64,20 @@ $gutter: 2px;
   display: inline-block;
   min-height: $button-height - $gutter * 2;
   border: none;
-  color: $black-54;
+  color: var(--fg-secondary);
   background-color: transparent;
   border-radius: $border-radius - $gutter;
   cursor: pointer;
   outline: none;
   transition: background-color 0.4s;
   .svg-icon {
-    fill: $black-37;
+    fill: var(--bg-opacity-20);
   }
   &:hover,
   &.active:not(:hover) {
-    background-color: palette(white);
+    background-color: var(--bg-accent-grey-2);
     .svg-icon {
-      fill: $black-54;
+      fill: var(--bg-opacity-54);
     }
   }
   &.active:not(:hover) {

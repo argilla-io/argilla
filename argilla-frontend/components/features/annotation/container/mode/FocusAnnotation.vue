@@ -4,9 +4,10 @@
       <HorizontalResizable
         :id="`${recordCriteria.datasetId}-r-h-rz`"
         class="wrapper__left"
+        collapsable
       >
         <template #up>
-          <section class="wrapper__records">
+          <section class="wrapper__records" aria-label="Focus Annotation View">
             <DatasetFilters :recordCriteria="recordCriteria">
               <ToggleAnnotationType
                 v-if="
@@ -25,15 +26,15 @@
             <div class="wrapper__records__header">
               <PaginationFeedbackTask :recordCriteria="recordCriteria" />
             </div>
+            <div v-if="recordsMessage" class="wrapper--empty">
+              <p class="wrapper__text --heading3" v-html="recordsMessage" />
+            </div>
             <Record
-              v-if="records.hasRecordsToAnnotate"
+              v-else
               :datasetVectors="datasetVectors"
               :recordCriteria="recordCriteria"
               :record="record"
             />
-            <div v-else class="wrapper--empty">
-              <p class="wrapper__text --heading3" v-text="noRecordsMessage" />
-            </div>
           </section>
         </template>
         <template #downHeader>
@@ -52,6 +53,7 @@
       <HorizontalResizable
         :id="`${recordCriteria.datasetId}-q-h-rz}`"
         class="wrapper__right"
+        collapsable
       >
         <template #up>
           <QuestionsForm
@@ -119,9 +121,8 @@ export default {
     record: {
       type: Object,
     },
-    noRecordsMessage: {
+    recordsMessage: {
       type: String,
-      required: true,
     },
     statusClass: {
       type: String,
@@ -177,7 +178,7 @@ export default {
   }
   &__left {
     @include media("<desktop") {
-      :deep(.resizable__down) {
+      :deep(.resizable-h__down) {
         display: none;
       }
     }
@@ -201,10 +202,12 @@ export default {
     }
   }
   &__text {
-    color: $black-54;
+    color: var(--fg-secondary);
+    max-width: 80%;
   }
   &--empty {
     width: 100%;
+    text-align: center;
     height: 80vh;
     display: flex;
     align-items: center;

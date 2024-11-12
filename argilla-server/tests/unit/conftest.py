@@ -22,7 +22,7 @@ from httpx import AsyncClient
 from opensearchpy import OpenSearch
 
 from argilla_server import telemetry
-from argilla_server.contexts import distribution, datasets
+from argilla_server.contexts import distribution, datasets, records
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.database import get_async_db
@@ -34,8 +34,6 @@ from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
 if TYPE_CHECKING:
-    from unittest.mock import MagicMock
-
     from pytest_mock import MockerFixture
 
 
@@ -93,6 +91,7 @@ async def async_client(
 
     mocker.patch.object(distribution, "_get_async_db", override_get_async_db)
     mocker.patch.object(datasets, "get_async_db", override_get_async_db)
+    mocker.patch.object(records, "get_async_db", override_get_async_db)
 
     api_v1.dependency_overrides.update(
         {
@@ -108,12 +107,21 @@ async def async_client(
 
 
 @pytest.fixture(autouse=True)
-def test_telemetry(mocker: "MockerFixture") -> "MagicMock":
-    mock_telemetry = mocker.Mock(TelemetryClient)
-    mock_telemetry.server_id = uuid.uuid4()
+def test_telemetry(mocker: "MockerFixture") -> "TelemetryClient":
+    # Create a real instance TelemetryClient
+    real_telemetry = TelemetryClient()
 
-    telemetry._CLIENT = mock_telemetry
-    return telemetry._CLIENT
+    # Create a wrapper to track calls to other methods
+    for attr_name in dir(real_telemetry):
+        attr = getattr(real_telemetry, attr_name)
+        if callable(attr) and not attr_name.startswith("__"):
+            wrapped = mocker.Mock(wraps=attr)
+            setattr(real_telemetry, attr_name, wrapped)
+
+    # Patch the _TELEMETRY_CLIENT to use the real_telemetry
+    mocker.patch("argilla_server.telemetry._client._TELEMETRY_CLIENT", new=real_telemetry)
+
+    return real_telemetry
 
 
 @pytest_asyncio.fixture(scope="function")

@@ -111,20 +111,25 @@ class RecordsAPI(ResourceAPI[RecordModel]):
         limit: int = 100,
         with_suggestions: bool = True,
         with_responses: bool = True,
-        # TODO: Add support for `with_vectors`
+        with_vectors: Optional[Union[List, bool]] = None,
     ) -> Tuple[List[Tuple[RecordModel, float]], int]:
         include = []
         if with_suggestions:
             include.append("suggestions")
         if with_responses:
             include.append("responses")
+        if with_vectors:
+            include.append(self._represent_vectors_to_include(with_vectors))
         params = {
             "offset": offset,
             "limit": limit,
             "include": include,
         }
+
         response = self.http_client.post(
-            f"/api/v1/datasets/{dataset_id}/records/search", json=query.model_dump(by_alias=True), params=params
+            f"/api/v1/datasets/{dataset_id}/records/search",
+            json=query.model_dump(by_alias=True),
+            params=params,
         )
         response.raise_for_status()
         response_json = response.json()

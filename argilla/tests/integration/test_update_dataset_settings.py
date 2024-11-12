@@ -12,11 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import uuid
-
 import pytest
 
-from argilla import Dataset, Settings, TextField, LabelQuestion, Argilla, VectorField, FloatMetadataProperty
+from argilla import (
+    Dataset,
+    Settings,
+    TextField,
+    ChatField,
+    LabelQuestion,
+    Argilla,
+    VectorField,
+    FloatMetadataProperty,
+    TermsMetadataProperty,
+)
 
 
 @pytest.fixture
@@ -24,7 +32,10 @@ def dataset(dataset_name: str):
     return Dataset(
         name=dataset_name,
         settings=Settings(
-            fields=[TextField(name="text", use_markdown=False)],
+            fields=[
+                TextField(name="text", use_markdown=False),
+                ChatField(name="chat", use_markdown=True),
+            ],
             questions=[LabelQuestion(name="label", labels=["a", "b", "c"])],
         ),
     ).create()
@@ -35,6 +46,7 @@ class TestUpdateDatasetSettings:
         settings = dataset.settings
 
         settings.fields["text"].use_markdown = True
+        settings.fields["chat"].use_markdown = False
         dataset.settings.vectors.add(VectorField(name="vector", dimensions=10))
         dataset.settings.metadata.add(FloatMetadataProperty(name="metadata"))
         dataset.settings.update()
@@ -42,6 +54,7 @@ class TestUpdateDatasetSettings:
         dataset = client.datasets(dataset.name)
         settings = dataset.settings
         assert settings.fields["text"].use_markdown is True
+        assert settings.fields["chat"].use_markdown is False
         assert settings.vectors["vector"].dimensions == 10
         assert isinstance(settings.metadata["metadata"], FloatMetadataProperty)
 
@@ -57,3 +70,19 @@ class TestUpdateDatasetSettings:
 
         dataset = client.datasets(dataset.name)
         assert dataset.settings.distribution.min_submitted == 100
+
+    def test_remove_settings_property(self, client: Argilla, dataset: Dataset):
+        dataset.settings.metadata.add(TermsMetadataProperty(name="metadata"))
+        dataset.settings.vectors.add(VectorField(name="vector", dimensions=10))
+        dataset.update()
+
+        assert isinstance(dataset.settings.metadata["metadata"], TermsMetadataProperty)
+        assert isinstance(dataset.settings.vectors["vector"], VectorField)
+
+        dataset.settings.metadata.remove("metadata")
+        dataset.settings.vectors.remove("vector")
+
+        dataset.update()
+
+        assert dataset.settings.metadata["metadata"] is None
+        assert dataset.settings.vectors["vector"] is None

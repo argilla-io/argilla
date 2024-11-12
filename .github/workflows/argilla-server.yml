@@ -17,6 +17,9 @@ on:
     paths:
       - "argilla-server/**"
 
+permissions:
+  id-token: write
+
 jobs:
   build:
     name: Build `argilla-server` package
@@ -51,8 +54,18 @@ jobs:
         ports:
           - 5432:5432
 
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     env:
-      ARGILLA_ENABLE_TELEMETRY: 0
+      HF_HUB_DISABLE_TELEMETRY: 1
 
     steps:
       - name: Checkout Code 🛎
