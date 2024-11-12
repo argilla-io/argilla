@@ -1,5 +1,3 @@
-import { create } from "~/v1/store/non-reactive";
-
 export default {
   multi_label_selection: "Multi-label",
   ranking: "Ranking",
@@ -245,13 +243,6 @@ export default {
   youAreOffline: "You are offline",
   write: "Write",
   preview: "Preview",
-  datasetTable: {
-    name: "Dataset",
-    workspace: "Workspace",
-    createdAt: "Created",
-    lastActivityAt: "Updated",
-    progress: "Team progress",
-  },
   metrics: {
     total: "Total",
     progress: {

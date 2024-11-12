@@ -241,13 +241,6 @@ export default {
   youAreOffline: "Estás fuera de línea",
   write: "Texto",
   preview: "Vista previa",
-  datasetTable: {
-    name: "Dataset",
-    workspace: "Espacio de trabajo",
-    createdAt: "Creado",
-    lastActivityAt: "Actualizado",
-    progress: "Progreso del equipo",
-  },
   metrics: {
     total: "total",
     progress: {
