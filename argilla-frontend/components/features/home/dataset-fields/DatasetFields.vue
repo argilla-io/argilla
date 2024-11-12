@@ -1,7 +1,12 @@
 <template>
   <BaseBadgeSkeleton v-if="isFieldsLoading" :quantity="3" />
   <div class="fields" v-else>
-    <BaseBadge v-for="field in fields" :key="field.id" :text="$t(field.type)" />
+    <DatasetBadge
+      v-for="field in fields"
+      :key="field.id"
+      :text="$t(field.type)"
+      color="hsl(50, 40%, 53%)"
+    />
   </div>
 </template>
 <script>

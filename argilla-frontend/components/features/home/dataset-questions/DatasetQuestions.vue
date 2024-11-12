@@ -1,10 +1,11 @@
 <template>
   <BaseBadgeSkeleton v-if="isQuestionsLoading" :quantity="3" />
   <div class="questions" v-else>
-    <BaseBadge
+    <DatasetBadge
       v-for="question in questions"
       :key="question.id"
       :text="$t(question.type)"
+      color="hsl(220, 40%, 53%)"
     />
   </div>
 </template>
