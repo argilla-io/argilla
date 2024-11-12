@@ -166,9 +166,6 @@ async def update_record(
             for suggestion in record_update.suggestions
         ]
 
-    record.updated_at = datetime.utcnow()
-    await record.save(db, autocommit=False)
-
     if record_update.vectors:
         await Vector.upsert_many(
             db,
@@ -184,7 +181,8 @@ async def update_record(
         )
         await db.refresh(record, attribute_names=["vectors"])
 
-    await db.commit()
+    record.updated_at = datetime.utcnow()
+    await record.save(db, autocommit=True)
 
     await _preload_record_relationships_before_index(db, record)
     await search_engine.index_records(record.dataset, [record])
