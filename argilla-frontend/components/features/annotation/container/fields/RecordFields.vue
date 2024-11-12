@@ -7,8 +7,10 @@
         title,
         content,
         settings,
+        sdkRecord,
         isTextType,
         isImageType,
+        isChatType,
       } in fields"
       :class="[isImageType ? 'fields__container--image' : '']"
       :key="id"
@@ -29,8 +31,30 @@
         :fieldText="content"
         :useMarkdown="settings.use_markdown"
         :searchText="recordCriteria.committed.searchText.value.text"
+        :record="record"
       />
-      <ImageField v-else :name="name" :title="title" :content="content" />
+      <ChatField
+        v-else-if="isChatType"
+        :name="name"
+        :title="title"
+        :useMarkdown="settings.use_markdown"
+        :content="content"
+        :searchText="recordCriteria.committed.searchText.value.text"
+      />
+      <ImageField
+        v-else-if="isImageType"
+        :name="name"
+        :title="title"
+        :content="content"
+      />
+      <CustomField
+        v-else
+        :name="name"
+        :title="title"
+        :content="content"
+        :sdkRecord="sdkRecord"
+        :settings="settings"
+      />
     </div>
   </div>
 </template>
@@ -59,7 +83,7 @@ export default {
   },
   computed: {
     spanQuestions() {
-      return this.record?.questions.filter((q) => q.isSpanType);
+      return this.record?.questions?.filter((q) => q.isSpanType);
     },
   },
 };
@@ -71,7 +95,5 @@ export default {
   flex-direction: column;
   gap: $base-space;
   min-width: 0;
-  height: 100%;
-  min-height: 0;
 }
 </style>

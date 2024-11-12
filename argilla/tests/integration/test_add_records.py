@@ -569,6 +569,60 @@ def test_add_record_resources(client):
     assert dataset_records[2].suggestions["topics"].score == [0.9, 0.8]
 
 
+def test_add_record_with_chat_field(client):
+    user_id = client.users[0].id
+    mock_dataset_name = f"test_add_record_with_chat_field{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    mock_resources = [
+        rg.Record(
+            fields={
+                "chat": [
+                    {
+                        "role": "user",
+                        "content": "Hello World, how are you?",
+                    },
+                    {
+                        "role": "bot",
+                        "content": "I'm doing great, thank you!",
+                    },
+                ]
+            },
+        ),
+        rg.Record(
+            fields={
+                "chat": [
+                    {
+                        "role": "user",
+                        "content": "Hello World, how are you?",
+                    },
+                    {
+                        "role": "bot",
+                        "content": "I'm doing great, thank you!",
+                    },
+                ]
+            },
+        ),
+    ]
+    settings = rg.Settings(
+        fields=[
+            rg.ChatField(name="chat", required=True),
+        ],
+        questions=[
+            rg.TextQuestion(name="comment", use_markdown=False),
+        ],
+    )
+    dataset = rg.Dataset(
+        name=mock_dataset_name,
+        settings=settings,
+        client=client,
+    )
+    dataset.create()
+    dataset.records.log(records=mock_resources)
+
+    dataset_records = list(dataset.records)
+
+    assert dataset.name == mock_dataset_name
+
+
 def test_add_records_with_responses_and_same_schema_name(client: Argilla, username: str):
     mock_dataset_name = f"test_modify_record_responses_locally {uuid.uuid4()}"
     mock_data = [
@@ -689,3 +743,29 @@ def test_add_records_objects_with_responses(client: Argilla, username: str):
     assert dataset_records[3].id == records[3].id
     assert dataset_records[3].responses["comment"][0].value == "The comment"
     assert dataset_records[3].responses["comment"][0].status == "draft"
+
+
+def test_add_records_with_boolean_metadata(client: Argilla, dataset_name: str):
+    settings = rg.Settings(
+        fields=[rg.TextField(name="text")],
+        metadata=[rg.TermsMetadataProperty(name="boolean", options=[True, False])],
+        questions=[rg.TextQuestion(name="comment", use_markdown=False)],
+    )
+    dataset = rg.Dataset(
+        name=dataset_name,
+        settings=settings,
+        client=client,
+    ).create()
+
+    dataset.records.log(
+        [
+            {"id": 0, "text": "Hello World, how are you?", "boolean": True},
+            {"id": 1, "text": "Hello World, how are you?", "boolean": False},
+            {"id": 2, "text": "Hello World, how are you?"},
+        ]
+    )
+
+    dataset_records = list(dataset.records())
+    assert dataset_records[0].metadata["boolean"] is True
+    assert dataset_records[1].metadata["boolean"] is False
+    assert "boolean" not in dataset_records[2].metadata

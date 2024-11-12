@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <div class="topbar">
-    <brand-icon class="brand-icon" color="white" />
+  <div class="topbar" role="banner" aria-label="Top navigation bar">
+    <brand-icon class="brand-icon" color="white" aria-label="Argilla icon" />
     <slot />
   </div>
 </template>
@@ -41,6 +41,7 @@ export default {
   padding-bottom: 0;
   padding-right: 1.2em;
   padding-left: $base-space * 2;
+  border: 1px solid var(--bg-opacity-1);
   a {
     text-decoration: none;
     @include media("<=tablet") {

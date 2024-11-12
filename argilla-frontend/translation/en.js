@@ -39,6 +39,9 @@ export default {
   taskDistributionTooltip:
     "A task is complete when all records have the \nminimum number of submitted responses",
   noAnnotationGuidelines: "This dataset has no annotation guidelines",
+  required: "Required",
+  optional: "Optional",
+  template: "Template",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",
@@ -106,6 +109,7 @@ export default {
     yesDelete: "Yes, delete",
     write: "Write",
     preview: "Preview",
+    uiPreview: "UI Preview",
   },
   button: {
     ignore_and_continue: "Ignore and continue",
@@ -197,6 +201,7 @@ export default {
   spanAnnotation: {
     shortcutHelper: "Hold 'Shift' to select character level",
     notSupported: "Span annotation is not supported for your browser",
+    searchLabels: "Search labels",
   },
   login: {
     title: "Sign in",
@@ -219,6 +224,7 @@ export default {
   filterBy: "Filter by...",
   fields: "Fields",
   questions: "Questions",
+  general: "General",
   metadata: "Metadata",
   vectors: "Vectors",
   dangerZone: "Danger zone",
@@ -249,6 +255,88 @@ export default {
     progress: {
       my: "My Progress",
       team: "Team progress",
+    },
+  },
+  home: {
+    argillaDatasets: "Your datasets",
+    none: "None yet",
+    importTitle: "Import a dataset from Hugging Face Hub",
+    importText:
+      "Start with a dataset from the Hub by simply pasting the repository name",
+    importButton: "Import dataset",
+    importFromHub: "Import dataset from Hugging Face",
+    importFromPython: "Import from Python",
+    importFromPythonHFWarning:
+      "If you're using a private Space, check the <a target='_blank' href='https://docs.argilla.io/latest/getting_started/how-to-configure-argilla-on-huggingface/#how-to-use-private-spaces'>docs</a>.",
+    exampleDatasetsTitle: "Don’t know where to start?",
+    exampleDatasetsText: "Explore these example datasets",
+    guidesTitle: "Not familiar with Argilla?",
+    guidesText: "Take a look at these guides:",
+    pasteRepoIdPlaceholder: "Paste a repo id e.g., stanfordnlp/imdb",
+    demoLink:
+      "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
+  },
+  datasetCreation: {
+    questions: {
+      labelSelection: {
+        atLeastTwoOptions: "At least two options are required",
+        optionsWithoutLabel: "Empty options are not allowed",
+      },
+      rating: {
+        atLeastTwoOptions: "At least two options are required",
+      },
+    },
+    atLeastOneQuestion: "At least one question is required.",
+    atLeastOneRequired: "At least one required question is needed.",
+    hasInvalidQuestions: "Some questions are invalid",
+    createDataset: "Create the dataset in Argilla",
+    datasetName: "Dataset name",
+    name: "Name",
+    assignWorkspace: "Assign a workspace",
+    selectSplit: "Select a split",
+    recordWarning:
+      "The created dataset will include the first 10K rows and further records can be logged via the python SDK.",
+    button: "Create dataset",
+    fields: "Fields",
+    questionsTitle: "Questions",
+    yourQuestions: "Your questions",
+    requiredField: "Required field",
+    requiredQuestion: "Required question",
+    select: "Select",
+    mapToColumn: "Map to column",
+    subset: "Subset",
+    selectSubset: "Your can create a dataset from only one subset.",
+    preview: "Preview",
+    importData: "Import data",
+    addRecords: "Add records",
+    cantLoadRepository: "Dataset not found or available on Hugging Face",
+    none: "None",
+    noWorkspaces:
+      "Please, follow this <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>guide</a> to create a workspace",
+  },
+  config: {
+    field: {
+      text: "Text field",
+      chat: "Chat field",
+      image: "Image field",
+      "no mapping": "No mapping",
+    },
+    question: {
+      text: "Text",
+      rating: "Rating",
+      label_selection: "Label",
+      ranking: "Ranking",
+      multi_label_selection: "Multi-label",
+      span: "Span",
+      "no mapping": "No mapping",
+    },
+    questionId: {
+      text: "text",
+      rating: "rating",
+      label_selection: "label",
+      ranking: "ranking",
+      multi_label_selection: "multi-label",
+      span: "span",
     },
   },
   persistentStorage: {

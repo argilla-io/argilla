@@ -21,23 +21,19 @@ from argilla_server.enums import FieldType
 from argilla_server.pydantic_v1 import BaseModel, constr
 from argilla_server.pydantic_v1 import Field as PydanticField
 
-FIELD_CREATE_NAME_REGEX = r"^(?=.*[a-z0-9])[a-z0-9_-]+$"
 FIELD_CREATE_NAME_MIN_LENGTH = 1
 FIELD_CREATE_NAME_MAX_LENGTH = 200
 
 FIELD_CREATE_TITLE_MIN_LENGTH = 1
 FIELD_CREATE_TITLE_MAX_LENGTH = 500
 
-
 FieldName = Annotated[
     constr(
-        regex=FIELD_CREATE_NAME_REGEX,
         min_length=FIELD_CREATE_NAME_MIN_LENGTH,
         max_length=FIELD_CREATE_NAME_MAX_LENGTH,
     ),
     PydanticField(..., description="The name of the field"),
 ]
-
 
 FieldTitle = Annotated[
     constr(
@@ -75,28 +71,65 @@ class ImageFieldSettingsUpdate(BaseModel):
     type: Literal[FieldType.image]
 
 
+class ChatFieldSettings(BaseModel):
+    type: Literal[FieldType.chat]
+    use_markdown: bool
+
+
+class ChatFieldSettingsCreate(BaseModel):
+    type: Literal[FieldType.chat]
+    use_markdown: bool = True
+
+
+class ChatFieldSettingsUpdate(BaseModel):
+    type: Literal[FieldType.chat]
+    use_markdown: bool
+
+
+class CustomFieldSettings(BaseModel):
+    type: Literal[FieldType.custom]
+    template: str
+    advanced_mode: bool
+
+
+class CustomFieldSettingsCreate(BaseModel):
+    type: Literal[FieldType.custom]
+    template: str
+    advanced_mode: bool = False
+
+
+class CustomFieldSettingsUpdate(BaseModel):
+    type: Literal[FieldType.custom]
+    template: str
+    advanced_mode: bool
+
+
 FieldSettings = Annotated[
     Union[
         TextFieldSettings,
         ImageFieldSettings,
+        ChatFieldSettings,
+        CustomFieldSettings,
     ],
     PydanticField(..., discriminator="type"),
 ]
-
 
 FieldSettingsCreate = Annotated[
     Union[
         TextFieldSettingsCreate,
         ImageFieldSettingsCreate,
+        ChatFieldSettingsCreate,
+        CustomFieldSettingsCreate,
     ],
     PydanticField(..., discriminator="type"),
 ]
-
 
 FieldSettingsUpdate = Annotated[
     Union[
         TextFieldSettingsUpdate,
         ImageFieldSettingsUpdate,
+        ChatFieldSettingsUpdate,
+        CustomFieldSettingsUpdate,
     ],
     PydanticField(..., discriminator="type"),
 ]

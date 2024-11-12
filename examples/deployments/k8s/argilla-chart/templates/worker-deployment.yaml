@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "argilla.fullname" . }}-worker
+  labels:
+    {{- include "worker.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "worker.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "worker.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-worker
+          image: "{{ .Values.argilla.image.repository }}:{{ .Values.argilla.image.tag }}"
+          env:
+            - name: ARGILLA_ELASTICSEARCH
+              value: {{if .Values.elasticsearch.useOperator}}"http://{{ include "argilla.fullname" . }}-es-http:9200"{{else}}"{{ .Values.externalElasticsearch.host }}:{{ .Values.externalElasticsearch.port }}"{{end}}
+            - name: ARGILLA_REDIS_URL
+              value: redis://{{ .Release.Name }}-redis-master:6379/0
+            - name: BACKGROUND_NUM_WORKERS
+              value: "{{ .Values.worker.numWorkers | default 2 }}"
+            {{- if .Values.argilla.persistence.enabled }}
+            - name: ARGILLA_HOME_PATH
+              value: {{ .Values.argilla.persistence.mountPath | quote }}
+            {{- end }}
+          command: ["sh", "-c", "python -m argilla_server worker --num-workers ${BACKGROUND_NUM_WORKERS}"]
+          {{- if .Values.argilla.persistence.enabled }}
+          volumeMounts:
+            - name: argilla-data
+              mountPath: {{ .Values.argilla.persistence.mountPath}}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+      {{- if .Values.argilla.persistence.enabled }}
+      volumes:
+        - name: argilla-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+      {{- end }}

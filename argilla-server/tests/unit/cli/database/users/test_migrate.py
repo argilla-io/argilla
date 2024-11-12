@@ -96,30 +96,6 @@ def test_migrate_with_one_user_file(monkeypatch, sync_db: "Session", cli_runner:
         assert [ws.name for ws in user.workspaces] == ["john", "argilla", "team"]
 
 
-def test_migrate_with_invalid_user(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    mock_users_file = os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_user.yml")
-
-    with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}):
-        result = cli_runner.invoke(cli, "database users migrate")
-
-        assert result.exit_code == 1
-        assert sync_db.query(User).count() == 0
-        assert sync_db.query(Workspace).count() == 0
-        assert sync_db.query(WorkspaceUser).count() == 0
-
-
-def test_migrate_with_invalid_workspace(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
-    mock_users_file = os.path.join(os.path.dirname(__file__), "test_user_files", "users_invalid_workspace.yml")
-
-    with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": mock_users_file}):
-        result = cli_runner.invoke(cli, "database users migrate")
-
-        assert result.exit_code == 1
-        assert sync_db.query(User).count() == 0
-        assert sync_db.query(Workspace).count() == 0
-        assert sync_db.query(WorkspaceUser).count() == 0
-
-
 def test_migrate_with_nonexistent_file(monkeypatch, sync_db: "Session", cli_runner: CliRunner, cli: Typer):
     with mock.patch.dict(os.environ, {"ARGILLA_LOCAL_AUTH_USERS_DB_FILE": "nonexistent.yml"}):
         result = cli_runner.invoke(cli, "database users migrate")

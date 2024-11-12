@@ -13,6 +13,7 @@
 # limitations under the License.
 import copy
 import uuid
+from typing import Any
 
 import pytest
 from pytest_mock import MockerFixture
@@ -73,16 +74,25 @@ class TestSettings:
         settings = rg.Settings(
             fields=[
                 rg.TextField(name="text", title="text"),
+                rg.ImageField(name="image", title="image"),
             ],
             metadata=[
                 rg.FloatMetadataProperty("source"),
             ],
             questions=[
                 rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"]),
+                rg.RatingQuestion(name="rating", title="text", values=[1, 2, 3, 4, 5]),
+                rg.TextQuestion(name="text", title="text"),
+                rg.SpanQuestion(
+                    name="span",
+                    title="text",
+                    field="text",
+                    labels=["Apparatus", "Method", "Machine", "Manufacture", "Design"],
+                    visible_labels=3,
+                ),
             ],
             vectors=[rg.VectorField(name="text", dimensions=3)],
         )
-
         assert (
             settings.__repr__() == f"Settings(guidelines=None, allow_extra_metadata=False, "
             "distribution=OverlapTaskDistribution(min_submitted=1), "
@@ -166,6 +176,15 @@ class TestSettings:
         other_settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
         assert other_settings.distribution == TaskDistribution(min_submitted=1)
 
+    def test_compare_equal_settings(self):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+        assert settings == settings
+
+    @pytest.mark.parametrize("other_settings", [None, "value", 100, rg.Settings()])
+    def test_compare_different_settings(self, other_settings: Any):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+        assert settings != other_settings
+
     def test_read_settings_without_distribution(self, mocker: "MockerFixture"):
         settings = rg.Settings(
             fields=[rg.TextField(name="text", title="title")],
@@ -186,14 +205,58 @@ class TestSettings:
         settings.get()
         assert settings.distribution == TaskDistribution.default()
 
-    class TestSettingsSerialization:
-        def test_serialize(self):
-            settings = rg.Settings(
-                guidelines="This is a guideline",
-                fields=[rg.TextField(name="prompt", use_markdown=True)],
-                questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
-            )
-            settings_serialized = settings.serialize()
-            assert settings_serialized["guidelines"] == "This is a guideline"
-            assert settings_serialized["fields"][0]["name"] == "prompt"
-            assert settings_serialized["fields"][0]["settings"]["use_markdown"] is True
+    def test_serialize(self):
+        settings = rg.Settings(
+            guidelines="This is a guideline",
+            fields=[rg.TextField(name="prompt", use_markdown=True)],
+            questions=[rg.LabelQuestion(name="sentiment", labels=["positive", "negative"])],
+        )
+        settings_serialized = settings.serialize()
+        assert settings_serialized["guidelines"] == "This is a guideline"
+        assert settings_serialized["fields"][0]["name"] == "prompt"
+        assert settings_serialized["fields"][0]["settings"]["use_markdown"] is True
+
+    def test_remove_property_from_settings(self):
+        settings = rg.Settings(
+            fields=[rg.TextField(name="text", title="text")],
+            questions=[rg.LabelQuestion(name="label", title="text", labels=["positive", "negative"])],
+            metadata=[rg.FloatMetadataProperty("source")],
+            vectors=[rg.VectorField(name="vector", dimensions=3)],
+        )
+
+        settings.fields.remove("text")
+        assert len(settings.fields) == 0
+
+        settings.questions.remove("label")
+        assert len(settings.questions) == 0
+
+        settings.metadata.remove("source")
+        assert len(settings.metadata) == 0
+
+        settings.vectors.remove("vector")
+        assert len(settings.vectors) == 0
+
+    def test_adding_properties_with_override_enabled(self):
+        settings = rg.Settings()
+
+        settings.add(rg.TextField(name="text", title="text"))
+        assert len(settings.fields) == 1
+
+        settings.add(rg.TextQuestion(name="question", title="question"))
+        assert len(settings.questions) == 1
+
+        settings.add(rg.FloatMetadataProperty(name="text"), override=True)
+        assert len(settings.metadata) == 1
+        assert len(settings.fields) == 0
+
+    def test_adding_properties_with_disabled_override(self):
+        settings = rg.Settings()
+
+        settings.add(rg.TextField(name="text", title="text"))
+        assert len(settings.fields) == 1
+
+        settings.add(rg.TextQuestion(name="question", title="question"))
+        assert len(settings.questions) == 1
+
+        with pytest.raises(SettingsError, match="Property with name 'text' already exists"):
+            settings.add(rg.FloatMetadataProperty(name="text"), override=False)

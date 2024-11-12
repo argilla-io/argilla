@@ -76,6 +76,7 @@ const config: NuxtConfig = {
     { src: "~/plugins/plugins/platform.ts" },
     { src: "~/plugins/plugins/language.ts" },
     { src: "~/plugins/plugins/color-schema" },
+    { src: "~/plugins/plugins/color-generator.ts" },
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -101,7 +102,12 @@ const config: NuxtConfig = {
     "@nuxtjs/style-resources",
     "@nuxtjs/axios",
     "@nuxtjs/auth-next",
-    "nuxt-highlightjs",
+    [
+      "nuxt-highlightjs",
+      {
+        style: "obsidian",
+      },
+    ],
     "@nuxtjs/i18n",
   ],
 

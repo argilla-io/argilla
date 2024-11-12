@@ -17,6 +17,9 @@ on:
     paths:
       - "argilla/**"
 
+permissions:
+  id-token: write
+
 jobs:
   build:
     services:
@@ -37,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup PDM
@@ -69,7 +72,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         # Upload the package to be used in the next jobs only once
-        if: ${{ matrix.python-version == '3.8' }}
+        if: ${{ matrix.python-version == '3.9' }}
         with:
           name: argilla
           path: argilla/dist
@@ -85,8 +88,6 @@ jobs:
       # contents: read
       # IMPORTANT: this permission is mandatory for trusted publishing on PyPI
       id-token: write
-      # This permission is needed for creating tags
-      contents: write
 
     needs:
       - build

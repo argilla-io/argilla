@@ -4,9 +4,14 @@
     :key="name"
     @mouseenter.stop="mouseEnter = true"
     @mouseleave.stop="mouseEnter = false"
+    aria-label="Data Record Field"
   >
     <div class="title-area --body2">
-      <span class="text_field_component__title-content" v-text="title" />
+      <span
+        class="text_field_component__title-content"
+        v-text="title"
+        :aria-label="'Field Name: ' + title"
+      />
       <BaseActionTooltip
         class="text_field_component__tooltip"
         :tooltip="$t('copied')"
@@ -14,14 +19,26 @@
       >
         <BaseButton
           :title="$t('button.tooltip.copyToClipboard')"
+          :aria-label="$t('button.tooltip.copyToClipboard')"
           class="text_field_component__copy-button"
           @click.prevent="$copyToClipboard(fieldText)"
+          role="button"
         >
-          <svgicon color="#acacac" name="copy" width="18" height="18" />
+          <svgicon
+            color="#acacac"
+            name="copy"
+            width="18"
+            height="18"
+            aria-hidden="true"
+          />
         </BaseButton>
       </BaseActionTooltip>
     </div>
-    <div id="fields-content" class="text_field_component__area --body1">
+    <div
+      :id="`fields-content-${name}`"
+      class="text_field_component__area --body1"
+      :aria-label="'Data entry for Field: ' + title"
+    >
       <p
         :class="[
           allowOverlapping
@@ -228,7 +245,7 @@ export default {
   padding: 2 * $base-space;
   background: var(--bg-field);
   border-radius: $border-radius-m;
-  border: 1px solid var(--bg-opacity-2);
+  border: 1px solid var(--border-field);
   &:hover {
     #{$this}__copy-button {
       opacity: 1;
@@ -250,6 +267,7 @@ export default {
   &__title-content {
     word-break: break-word;
     width: calc(100% - 30px);
+    color: var(--fg-secondary);
   }
   &__tooltip {
     display: flex;

@@ -1,9 +1,10 @@
 <template>
   <div class="input-field">
     <Validation :validations="showValidations ? translatedValidations : []">
-      <label class="input-field__label" v-text="name" :for="name" />
+      <label class="input-field__label" :id="name" v-text="name" :for="name" />
       <span class="input-field__container">
         <input
+          ref="input"
           :aria-labelledby="name"
           v-model="inputValue"
           class="input-field__input"
@@ -73,6 +74,7 @@ export default {
       isTouched: false,
       isBlurred: false,
       isPasswordVisible: false,
+      isAutoFilled: false,
     };
   },
   model: {
@@ -80,6 +82,11 @@ export default {
     event: "input",
   },
   watch: {
+    isAutoFilled(newValue) {
+      if (newValue) {
+        this.value = `${this.value} `;
+      }
+    },
     inputValue(newValue) {
       this.$emit("input", newValue);
     },
@@ -108,7 +115,21 @@ export default {
         : this.type;
     },
   },
+  async mounted() {
+    this.isAutoFilled = await this.detectAutofill(this.$refs.input);
+  },
   methods: {
+    detectAutofill(element) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(
+            window
+              .getComputedStyle(element, null)
+              .getPropertyValue("appearance") === "menulist-button"
+          );
+        }, 200);
+      });
+    },
     toggleVisibility() {
       this.isPasswordVisible = !this.isPasswordVisible;
     },

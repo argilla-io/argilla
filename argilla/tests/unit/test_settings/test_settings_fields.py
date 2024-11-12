@@ -37,21 +37,6 @@ class TestTextField:
         assert text_field.required is True
 
     @pytest.mark.parametrize(
-        "name, expected",
-        [
-            ("prompt", "prompt"),
-            ("Prompt", "prompt"),
-            ("Prompt Name", "prompt_name"),
-            ("Prompt Name 2", "prompt_name_2"),
-            ("Prompt Name 2", "prompt_name_2"),
-        ],
-    )
-    def test_name_validator(self, name, expected, mocker):
-        mock_use_markdown = True
-        text_field = rg.TextField(name=name, use_markdown=mock_use_markdown)
-        assert text_field.name == expected
-
-    @pytest.mark.parametrize(
         "title, name, expected",
         [
             (None, "prompt", "prompt"),
@@ -63,3 +48,39 @@ class TestTextField:
         mock_use_markdown = True
         text_field = rg.TextField(name=name, use_markdown=mock_use_markdown, title=title)
         assert text_field.title == expected
+
+
+class TestChatField:
+    def test_create_chat_field(self):
+        field = rg.ChatField(name="chat")
+
+        assert field.name == "chat"
+        assert field.use_markdown is True
+
+    def test_create_chat_field_with_use_markdown(self):
+        field = rg.ChatField(name="chat", use_markdown=False)
+
+        assert field.name == "chat"
+        assert field.use_markdown is False
+
+    def test_update_chat_field_use_markdown(self):
+        field = rg.ChatField(name="chat", use_markdown=True)
+        field.use_markdown = False
+
+        assert field.use_markdown is False
+
+
+class TestCustomField:
+    def test_create_custom_field(self):
+        field = rg.CustomField(name="custom", template="<p>{{ custom }}</p>")
+
+        assert field.name == "custom"
+        assert field.template == "<p>{{ custom }}</p>"
+        assert field.advanced_mode is False
+
+    def test_create_custom_field_with_advanced_mode(self):
+        field = rg.CustomField(name="custom", template="<p></p>", advanced_mode=True)
+
+        assert field.name == "custom"
+        assert field.template == "<p></p>"
+        assert field.advanced_mode is True

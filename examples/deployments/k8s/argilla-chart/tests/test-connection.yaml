@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "argilla.fullname" . }}-test-connection"
+  labels:
+    {{- include "argilla.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['http://{{ .Values.argilla.ingress.host }}']
+  restartPolicy: Never

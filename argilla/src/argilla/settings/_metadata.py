@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, Union, List, TYPE_CHECKING
+from typing import Optional, Union, List, TYPE_CHECKING, Any
 
 from argilla._api._metadata import MetadataAPI
 from argilla._exceptions import MetadataError
@@ -103,7 +103,7 @@ class TermsMetadataProperty(MetadataPropertyBase):
     def __init__(
         self,
         name: str,
-        options: Optional[List[str]] = None,
+        options: Optional[List[Any]] = None,
         title: Optional[str] = None,
         visible_for_annotators: Optional[bool] = True,
         client: Optional[Argilla] = None,
@@ -112,7 +112,7 @@ class TermsMetadataProperty(MetadataPropertyBase):
 
         Parameters:
             name (str): The name of the metadata field
-            options (Optional[List[str]]): The list of options
+            options (Optional[List[Any]]): The list of options
             title (Optional[str]): The title of the metadata to be shown in the UI
             visible_for_annotators (Optional[bool]): Whether the metadata field is visible for annotators.
 

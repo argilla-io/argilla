@@ -168,7 +168,7 @@ class TestDatasetRecordsBulk:
         for record in updated_records:
             assert record.metadata_ == new_metadata
 
-    async def test_update_record_for_other_dataset(
+    async def test_upsert_record_for_other_dataset(
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
     ):
         dataset = await self.test_dataset()
@@ -186,7 +186,9 @@ class TestDatasetRecordsBulk:
             },
         )
 
-        assert response.status_code == 422, response.json()
+        assert response.status_code == 422
+        assert response.json() == {"detail": "Record at position 0 is not valid because fields cannot be empty"}
+
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(Record))).scalar_one().metadata_ is None
 
@@ -208,8 +210,9 @@ class TestDatasetRecordsBulk:
 
         await dataset.awaitable_attrs.metadata_properties
 
-    async def _configure_dataset_fields(self, dataset):
-        await TextFieldFactory.create(name="prompt", dataset=dataset)
-        await TextFieldFactory.create(name="response", dataset=dataset)
+    @classmethod
+    async def _configure_dataset_fields(cls, dataset):
+        await TextFieldFactory.create(name="prompt", dataset=dataset, required=True)
+        await TextFieldFactory.create(name="response", dataset=dataset, required=False)
 
         await dataset.awaitable_attrs.fields

@@ -16,10 +16,63 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Changed
+
+- Changed default python version to 3.13. ([#5649](https://github.com/argilla-io/argilla/pull/5649))
+
+## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
+
+### Fixed
+
+- Fixed error so now `_touch_dataset_last_activity_at` function is not updating dataset's `updated_at` column. ([#5656](https://github.com/argilla-io/argilla/pull/5656))
+
+## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.1...v2.4.0)
+
 ### Added
 
+- Added new `POST /api/v1/datasets/:dataset_id/import` to import datasets from Hugging Face as a background job. ([#5572](https://github.com/argilla-io/argilla/pull/5572))
+- Added new `metadata` attribute for endpoints getting, creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
+- Added new validation to avoid the creation of records with empty `fields` attributes. ([#5639](https://github.com/argilla-io/argilla/pull/5639))
+
+### Changed
+
+- Now it is possible to publish a dataset without required fields. Allowing being published with at least one field (required or not). ([#5569](https://github.com/argilla-io/argilla/pull/5569))
+- Changed supported values for terms metadata options to accept other than strings values. ([#5589](https://github.com/argilla-io/argilla/pull/5589))
+- Changed Helm chart to allow the use of a default storage class when none is explicitly specified. This ensures compatibility with environments like k3d that do not have a 'standard' storage class by default.
+
+### Removed
+
+- Removed name pattern restrictions for Fields, Questions, Metadata Properties and Vector Settings. ([#5573](https://github.com/argilla-io/argilla/pull/5573))
+- Removed name pattern validation for Datasets, Workspaces and Users. ([#5575](https://github.com/argilla-io/argilla/pull/5575))
+
+### Fixed
+
+- Fixed wrong field content conversion for empty text and partial chat fields. ([#5600](https://github.com/argilla-io/argilla/pull/5600))
+
+## [2.3.1](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.3.1)
+
+### Fixed
+
+- Fixed error listing current user datasets and not filtering by current user id. ([#5583](https://github.com/argilla-io/argilla/pull/5583))
+
+## [2.3.0](https://github.com/argilla-io/argilla/compare/v2.2.0...v2.3.0)
+
+### Added
+
+- Added support for `CustomField`. ([#5422](https://github.com/argilla-io/argilla/pull/5422))
+- Added helm chart for argilla. ([#5512](https://github.com/argilla-io/argilla/pull/5512))
+
+### Fixed
+
+- Fixed error when creating default user with existing default workspace. ([#5558](https://github.com/argilla-io/argilla/pull/5558))
+- Fixed the deployment yaml used to create a new Argilla server in K8s. Added `USERNAME` and `PASSWORD` to the environment variables of pod template. ([#5434](https://github.com/argilla-io/argilla/issues/5434))
+
+## [2.2.0](https://github.com/argilla-io/argilla/compare/v2.1.0...v2.2.0)
+
+- Added filtering by `name`, and `status` support to endpoint `GET /api/v1/me/datasets`. ([#5374](https://github.com/argilla-io/argilla/pull/5374))
 - Added [`rq`](https://python-rq.org) library to process background jobs using [Redis](https://redis.io) as a dependency. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
 - Added a new background job to update records status when a dataset distribution strategy is updated. ([#5432](https://github.com/argilla-io/argilla/pull/5432))
+- Added new `chat` type dataset field supporting chat-like conversations. ([#5376](https://github.com/argilla-io/argilla/pull/5376))
 
 ### Fixed
 

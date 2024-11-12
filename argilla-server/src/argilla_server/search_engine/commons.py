@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import dataclasses
+import logging
 from abc import abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 from uuid import UUID
@@ -20,7 +21,7 @@ from uuid import UUID
 from elasticsearch8 import AsyncElasticsearch
 from opensearchpy import AsyncOpenSearch
 
-from argilla_server.enums import FieldType, MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
+from argilla_server.enums import MetadataPropertyType, RecordSortField, ResponseStatusFilter, SimilarityOrder
 from argilla_server.models import (
     Dataset,
     Field,
@@ -32,6 +33,7 @@ from argilla_server.models import (
     Suggestion,
     Vector,
     VectorSettings,
+    User,
 )
 from argilla_server.search_engine.base import (
     AndFilter,
@@ -50,7 +52,7 @@ from argilla_server.search_engine.base import (
     SearchResponses,
     SuggestionFilterScope,
     TermsFilter,
-    TermsMetadataMetrics,
+    TermsMetrics,
     TextQuery,
 )
 
@@ -153,7 +155,7 @@ def es_field_for_metadata_property(metadata_property: Union[str, MetadataPropert
 
 
 def es_field_for_record_field(field_name: str) -> str:
-    return f"fields.{field_name or '*'}"
+    return f"fields.{field_name}"
 
 
 def es_field_for_response_property(property: str) -> str:
@@ -165,6 +167,21 @@ def es_mapping_for_field(field: Field) -> dict:
 
     if field.is_text:
         return {es_field_for_record_field(field.name): {"type": "text"}}
+    elif field.is_chat:
+        es_field = {
+            "type": "object",
+            "properties": {
+                "content": {"type": "text"},
+                "role": {"type": "keyword"},
+            },
+        }
+        return {es_field_for_record_field(field.name): es_field}
+    elif field.is_custom:
+        return {
+            es_field_for_record_field(field.name): {
+                "type": "text",
+            }
+        }
     elif field.is_image:
         return {
             es_field_for_record_field(field.name): {
@@ -253,6 +270,8 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     default_total_fields_limit: int = 2000
 
     client: Union[AsyncElasticsearch, AsyncOpenSearch] = dataclasses.field(init=False)
+
+    _LOGGER = logging.getLogger(__name__)
 
     async def create_index(self, dataset: Dataset):
         settings = self._configure_index_settings()
@@ -375,6 +394,32 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             body={"script": f'ctx._source["suggestions"].remove("{suggestion.question.name}")'},
         )
 
+    async def get_dataset_progress(self, dataset: Dataset) -> dict:
+        if dataset.is_draft:
+            return {}
+
+        index_name = es_index_name_for_dataset(dataset)
+
+        metrics = await self._compute_terms_metrics_for(index_name, "status")
+
+        return {"total": metrics.total, **{metric.term: metric.count for metric in metrics.values}}
+
+    async def get_dataset_user_progress(self, dataset: Dataset, user: User) -> dict:
+        if dataset.is_draft:
+            return {}
+
+        index_name = es_index_name_for_dataset(dataset)
+
+        result = await self._compute_terms_metrics_for(
+            index_name,
+            field_name=es_field_for_response_property("status"),
+            query=es_nested_query(
+                path="responses",
+                query=es_term_query(es_field_for_response_property("user_id"), str(user.id)),
+            ),
+        )
+        return {"total": result.total, **{metric.term: metric.count for metric in result.values}}
+
     async def search(
         self,
         dataset: Dataset,
@@ -410,7 +455,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         es_sort = self.build_elasticsearch_sort(sort) if sort else None
         response = await self._index_search_request(index, query=es_query, size=limit, from_=offset, sort=es_sort)
 
-        return await self._process_search_response(response)
+        return self._process_search_response(response)
 
     async def similarity_search(
         self,
@@ -457,7 +502,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             query_filters=query_filters,
         )
 
-        return await self._process_search_response(response, threshold)
+        return self._process_search_response(response, threshold)
 
     async def compute_metrics_for(self, metadata_property: MetadataProperty) -> MetadataMetrics:
         index_name = es_index_name_for_dataset(metadata_property.dataset)
@@ -515,16 +560,19 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         return [vector_value[i] * -1 for i in range(0, len(vector_value))]
 
     def _map_record_to_es_document(self, record: Record) -> Dict[str, Any]:
+        dataset = record.dataset
+
         document = {
             "id": str(record.id),
-            "fields": record.fields,
+            "external_id": record.external_id,
+            "fields": self._map_record_fields_to_es(record.fields, dataset.fields),
             "status": record.status,
             "inserted_at": record.inserted_at,
             "updated_at": record.updated_at,
         }
 
         if record.metadata_:
-            document["metadata"] = self._map_record_metadata_to_es(record.metadata_, record.dataset.metadata_properties)
+            document["metadata"] = self._map_record_metadata_to_es(record.metadata_, dataset.metadata_properties)
         if record.responses:
             document["responses"] = self._map_record_responses_to_es(record.responses)
         if record.suggestions:
@@ -580,21 +628,27 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
 
         return metrics_class(min=stats["min"], max=stats["max"])
 
-    async def _metrics_for_terms_property(
-        self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
-    ) -> TermsMetadataMetrics:
-        field_name = es_field_for_metadata_property(metadata_property)
+    async def _compute_terms_metrics_for(
+        self, index_name: str, field_name: str, query: Optional[dict] = None
+    ) -> TermsMetrics:
         query = query or {"match_all": {}}
 
         total_terms = await self.__value_count_aggregation(index_name, field_name=field_name, query=query)
         if total_terms == 0:
-            return TermsMetadataMetrics(total=total_terms)
+            return TermsMetrics(total=total_terms)
 
-        terms_buckets = await self.__terms_aggregation(index_name, field_name=field_name, query=query, size=total_terms)
+        terms_buckets = await self._terms_aggregation(index_name, field_name=field_name, query=query, size=total_terms)
         terms_values = [
-            TermsMetadataMetrics.TermCount(term=bucket["key"], count=bucket["doc_count"]) for bucket in terms_buckets
+            TermsMetrics.TermCount(term=bucket["key"], count=bucket["doc_count"]) for bucket in terms_buckets
         ]
-        return TermsMetadataMetrics(total=total_terms, values=terms_values)
+
+        return TermsMetrics(total=total_terms, values=terms_values)
+
+    async def _metrics_for_terms_property(
+        self, index_name: str, metadata_property: MetadataProperty, query: Optional[dict] = None
+    ) -> TermsMetrics:
+        field_name = es_field_for_metadata_property(metadata_property)
+        return await self._compute_terms_metrics_for(index_name, field_name, query)
 
     def _configure_index_mappings(self, dataset: Dataset) -> dict:
         return {
@@ -607,6 +661,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             "properties": {
                 # See https://www.elastic.co/guide/en/elasticsearch/reference/current/explicit-mapping.html
                 "id": {"type": "keyword"},
+                "external_id": {"type": "keyword"},
                 "status": {"type": "keyword"},
                 RecordSortField.inserted_at.value: {"type": "date_nanos"},
                 RecordSortField.updated_at.value: {"type": "date_nanos"},
@@ -619,7 +674,7 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         }
 
     @staticmethod
-    async def _process_search_response(response: dict, score_threshold: Optional[float] = None) -> SearchResponses:
+    def _process_search_response(response: dict, score_threshold: Optional[float] = None) -> SearchResponses:
         hits = response["hits"]["hits"]
 
         if score_threshold is not None:
@@ -638,7 +693,19 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
         if isinstance(text, str):
             text = TextQuery(q=text)
 
-        return es_simple_query_string(es_field_for_record_field(text.field), query=text.q)
+        if text.field:
+            field = dataset.field_by_name(text.field)
+            if field is None:
+                raise Exception(f"Field {text.field} not found in dataset {dataset.id}")
+
+            if field.is_chat:
+                field_name = f"{text.field}.*"
+            else:
+                field_name = text.field
+        else:
+            field_name = "*"
+
+        return es_simple_query_string(es_field_for_record_field(field_name), query=text.q)
 
     @staticmethod
     def _mapping_for_fields(fields: List[Field]) -> dict:
@@ -802,7 +869,19 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             },
         }
 
-    async def __terms_aggregation(self, index_name: str, field_name: str, query: dict, size: int) -> List[dict]:
+    @classmethod
+    def _map_record_fields_to_es(cls, fields: dict, dataset_fields: List[Field]) -> dict:
+        for field in dataset_fields:
+            if field.is_image:
+                fields[field.name] = None
+            elif field.is_custom:
+                fields[field.name] = str(fields.get(field.name, ""))
+            else:
+                fields[field.name] = fields.get(field.name, "")
+
+        return fields
+
+    async def _terms_aggregation(self, index_name: str, field_name: str, query: dict, size: int) -> List[dict]:
         aggregation_name = "terms_agg"
 
         terms_agg = {aggregation_name: {"terms": {"field": field_name, "size": min(size, self.max_terms_size)}}}
@@ -889,8 +968,4 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     @abstractmethod
     async def _bulk_op_request(self, actions: List[Dict[str, Any]]):
         """Executes request for bulk operations"""
-        pass
-
-    @abstractmethod
-    async def _refresh_index_request(self, index_name: str):
         pass

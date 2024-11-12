@@ -140,9 +140,12 @@ new_dataset.create()
 
 ## Define dataset settings
 
+!!! tip
+    Instead of defining your own custom settings, you can use some of our pre-built templates for text classification, ranking and rating. Learn more [here](../reference/argilla/settings/settings.md#creating-settings-using-built-in-templates).
+
 ### Fields
 
-The fields in a dataset consist of one or more data items requiring annotation. Currently, Argilla supports plain text and markdown through the `TextField` and images through the `ImageField`, though we plan to introduce additional field types in future updates.
+The fields in a dataset consist of one or more data items requiring annotation. Currently, Argilla supports plain text and markdown through the `TextField`, images through the `ImageField`, chat formatted data through the `ChatField` and full custom templates through our `CustomField`.
 
 !!! note
     The order of the fields in the UI follows the order in which these are added to the fields attribute in the Python SDK.
@@ -160,7 +163,7 @@ The fields in a dataset consist of one or more data items requiring annotation. 
         description="Field description",
     )
     ```
-    ![TextField](../assets/images/how_to_guides/dataset/fields.png)
+    ![TextField](../assets/images/how_to_guides/dataset/text_field.png)
 
 === "Image"
 
@@ -172,6 +175,39 @@ The fields in a dataset consist of one or more data items requiring annotation. 
         description="Field description",
     )
     ```
+    ![ImageField](../assets/images/how_to_guides/dataset/image_field.png)
+
+=== "Chat"
+
+    ```python
+    rg.ChatField(
+        name="chat",
+        title="Chat",
+        use_markdown=True,
+        required=True,
+        description="Field description",
+    )
+    ```
+    ![ChatField](../assets/images/how_to_guides/dataset/chat_field.png)
+
+=== "Custom"
+    A `CustomField` allows you to use a custom template for the field. This is useful if you want to use a custom UI for the field. You can use the `template` argument to pass a string that will be rendered as the field's UI.
+
+    By default, `advanced_mode=False`, which will use a brackets syntax engine for the templates. This engine converts `{{record.fields.field.key}}` to the values of record's field's object. You can also use `advanced_mode=True`, which deactivates the above brackets syntax engine and allows you to add custom javascript to your template to render the field.
+
+    ```python
+    rg.CustomField(
+        name="custom",
+        title="Custom",
+        template="<div>{{record.fields.custom.key}}</div>",
+        advanced_mode=False,
+        required=True,
+        description="Field description",
+    )
+    ```
+
+    !!! tip
+        To learn more about how to create custom fields with HTML and CSS templates, check this [how-to guide](custom_fields.md).
 
 ### Questions
 
@@ -243,7 +279,7 @@ To collect feedback for your dataset, you need to formulate questions that annot
     ```python
     rg.RatingQuestion(
         name="rating",
-        values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        values=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         title="How satisfied are you with the response?",
         description="1 = very unsatisfied, 10 = very satisfied",
         required=True,
@@ -302,7 +338,7 @@ Metadata properties allow you to configure the use of metadata information for t
     ```python
     rg.TermsMetadataProperty(
         name="terms",
-        options=["group-a", "group-b", "group-c"]
+        options=["group-a", "group-b", "group-c"],
         title="Annotation groups",
         visible_for_annotators=True,
     )
@@ -470,58 +506,58 @@ Once a dataset is published, there are limited things you can update. Here is a 
 
 === "Fields"
     | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|✅|✅|
-    |Required|❌|❌|
-    |Use markdown|✅|✅|
+    | ---------- | -------- | ------- |
+    |Name        |❌        |❌        |
+    |Title       |✅        |✅        |
+    |Required    |❌        |❌        |
+    |Use markdown|✅        |✅        |
+    |Template    |✅        |❌        |
 
 === "Questions"
-    | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|❌|✅|
-    |Description|❌|✅|
-    |Required|❌|❌|
-    |Labels|❌|❌|
-    |Values|❌|❌|
-    |Label order|❌|✅|
-    |Suggestions first|❌|✅|
-    |Visible labels|❌|✅|
-    |Field|❌|❌|
-    |Allow overlapping|❌|❌|
-    |Use markdown|❌|✅|
+    | Attributes      | From SDK | From UI |
+    | --------------- | -------- | ------- |
+    |Name             |❌        |❌        |
+    |Title            |❌        |✅        |
+    |Description      |❌        |✅        |
+    |Required         |❌        |❌        |
+    |Labels           |❌        |❌        |
+    |Values           |❌        |❌        |
+    |Label order      |❌        |✅        |
+    |Suggestions first|❌        |✅        |
+    |Visible labels   |❌        |✅        |
+    |Field            |❌        |❌        |
+    |Allow overlapping|❌        |❌        |
+    |Use markdown     |❌        |✅        |
 
 === "Metadata"
-    | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|✅|✅|
-    |Options|❌|❌|
-    |Minimum value|❌|❌|
-    |Maximum value|❌|❌|
-    |Visible for annotators|✅|✅|
-    |Allow extra metadata|✅|✅|
+    | Attributes           | From SDK | From UI |
+    | -------------------- | -------- | ------- |
+    |Name                  |❌        |❌        |
+    |Title                 |✅        |✅        |
+    |Options               |❌        |❌        |
+    |Minimum value         |❌        |❌        |
+    |Maximum value         |❌        |❌        |
+    |Visible for annotators|✅        |✅        |
+    |Allow extra metadata  |✅        |✅        |
 
 
 === "Vectors"
     | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Name|❌|❌|
-    |Title|✅|✅|
-    |Dimensions|❌|❌|
+    | ---------- | -------- | ------- |
+    |Name        |❌        |❌        |
+    |Title       |✅        |✅        |
+    |Dimensions  |❌        |❌        |
 
 === "Guidelines"
     | From SDK | From UI |
-    | ----- | -------------- |
-    |✅|✅|
+    | -------- | ------- |
+    |✅        |✅        |
 
 === "Distribution"
-    | Attributes | From SDK | From UI |
-    | ---- | ----- | -------------- |
-    |Minimum submitted|✅*|✅*|
+    | Attributes      | From SDK | From UI |
+    | --------------- | -------- | ------- |
+    |Minimum submitted|✅        |✅        |
 
-    > \* Can be changed as long as the dataset doesn't have any responses.
 
 To modify these attributes, you can simply set the new value of the attributes you wish to change and call the `update` method on the `Dataset` object.
 
@@ -538,7 +574,7 @@ dataset.settings.metadata["my_metadata"].visible_for_annotators = False
 dataset.update()
 ```
 
-You can also add and delete metadata properties and vector fields using the `add` and `delete` methods.
+You can also **add and delete metadata properties and vector fields** using the `add` and `delete` methods.
 
 === "Add"
 

@@ -41,8 +41,8 @@ dataset = client.datasets("my_dataset")
 
 ::: src.argilla.datasets._resource.Dataset
 
-::: src.argilla.datasets._export._disk.DiskImportExportMixin
+::: src.argilla.datasets._io._disk.DiskImportExportMixin
 
-::: src.argilla.datasets._export._hub.HubImportExportMixin
+::: src.argilla.datasets._io._hub.HubImportExportMixin
 
 

@@ -22,6 +22,7 @@ from typing import (
     Optional,
     Union,
     TypeVar,
+    Literal,
 )
 from uuid import UUID
 
@@ -45,7 +46,7 @@ __all__ = [
     "SearchResponses",
     "SortBy",
     "MetadataMetrics",
-    "TermsMetadataMetrics",
+    "TermsMetrics",
     "IntegerMetadataMetrics",
     "FloatMetadataMetrics",
     "SuggestionFilterScope",
@@ -149,12 +150,12 @@ class SortBy(BaseModel):
         arbitrary_types_allowed = True
 
 
-class TermsMetadataMetrics(BaseModel):
+class TermsMetrics(BaseModel):
     class TermCount(BaseModel):
         term: str
         count: int
 
-    type: MetadataPropertyType = Field(MetadataPropertyType.terms)
+    type: Literal["terms"] = "terms"
     total: int
     values: List[TermCount] = Field(default_factory=list)
 
@@ -175,7 +176,7 @@ class FloatMetadataMetrics(NumericMetadataMetrics[float]):
     type: MetadataPropertyType = Field(MetadataPropertyType.float)
 
 
-MetadataMetrics = Union[TermsMetadataMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]
+MetadataMetrics = Union[TermsMetrics, IntegerMetadataMetrics, FloatMetadataMetrics]
 
 
 class SearchEngine(metaclass=ABCMeta):
@@ -265,6 +266,14 @@ class SearchEngine(metaclass=ABCMeta):
 
     @abstractmethod
     async def delete_record_suggestion(self, suggestion: Suggestion):
+        pass
+
+    @abstractmethod
+    async def get_dataset_progress(self, dataset: Dataset) -> dict:
+        pass
+
+    @abstractmethod
+    async def get_dataset_user_progress(self, dataset: Dataset, user: User) -> dict:
         pass
 
     @abstractmethod

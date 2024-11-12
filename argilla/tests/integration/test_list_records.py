@@ -21,8 +21,7 @@ from argilla import Argilla, Dataset, Settings, TextField, TextQuestion, Workspa
 
 
 @pytest.fixture
-def dataset(client: Argilla, workspace: Workspace) -> Dataset:
-    name = "".join(random.choices(ascii_lowercase, k=16))
+def dataset(client: Argilla, workspace: Workspace, dataset_name: str) -> Dataset:
     settings = Settings(
         fields=[TextField(name="text")],
         questions=[
@@ -31,7 +30,7 @@ def dataset(client: Argilla, workspace: Workspace) -> Dataset:
         ],
     )
     dataset = Dataset(
-        name=name,
+        name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
@@ -66,6 +65,113 @@ def test_list_records_with_start_offset(client: Argilla, dataset: Dataset):
     ]
 
 
+def test_list_records_with_limit(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+
+    records = list(dataset.records(limit=2))
+    assert len(records) == 2
+
+    assert [record.to_dict() for record in records] == [
+        {
+            "_server_id": str(records[0]._server_id),
+            "fields": {"text": "The record text field"},
+            "id": "1",
+            "status": "pending",
+            "metadata": {},
+            "responses": {},
+            "suggestions": {},
+            "vectors": {},
+        },
+        {
+            "_server_id": str(records[1]._server_id),
+            "fields": {"text": "The record text field"},
+            "id": "2",
+            "status": "pending",
+            "metadata": {},
+            "responses": {},
+            "suggestions": {},
+            "vectors": {},
+        },
+    ]
+
+
+def test_list_records_with_limit_greater_than_batch_size(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+
+    records = list(dataset.records(limit=2, batch_size=1))
+
+    assert len(records) == 2
+    assert records[0].id == "1"
+    assert records[1].id == "2"
+
+
+@pytest.mark.parametrize("limit", [0, -1, -10])
+def test_list_records_with_invalid_limit(client: Argilla, dataset: Dataset, limit: int):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+    with pytest.warns(UserWarning, match=f"Limit {limit} is invalid: must be greater than 0. Setting limit to 1."):
+        records = list(dataset.records(limit=limit))
+        assert len(records) == 1
+
+
+def test_list_records_with_limit_greater_than_total(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+            {"text": "The record text field", "id": 3},
+            {"text": "The record text field", "id": 4},
+            {"text": "The record text field", "id": 5},
+        ]
+    )
+
+    records = list(dataset.records(limit=10))
+    assert len(records) == 5
+
+
+def test_get_record_by_id(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1, "comment": "The comment", "sentiment": "positive"},
+            {"text": "The record text field", "id": 2, "comment": "The comment", "sentiment": "negative"},
+        ],
+        mapping={
+            "comment": "comment.response",
+            "sentiment": "sentiment.response",
+        },
+    )
+
+    record = list(dataset.records(with_responses=False))[0]
+    assert not record.responses
+
+    record.get()
+    assert record.responses["comment"][0].value == "The comment"
+    assert record.responses["sentiment"][0].value == "positive"
+
+
 def test_list_records_with_responses(client: Argilla, dataset: Dataset):
     dataset.records.log(
         [
@@ -86,3 +192,21 @@ def test_list_records_with_responses(client: Argilla, dataset: Dataset):
 
     assert records[1].responses["comment"][0].value == "The comment"
     assert records[1].responses["sentiment"][0].value == "negative"
+
+
+def test_list_records_with_updated_at_and_inserted_at(client: Argilla, dataset: Dataset):
+    dataset.records.log(
+        [
+            {"text": "The record text field", "id": 1},
+            {"text": "The record text field", "id": 2},
+        ]
+    )
+
+    records = list(dataset.records(with_responses=True))
+    assert len(records) == 2
+
+    assert records[0].inserted_at
+    assert records[0].updated_at
+
+    assert records[1].inserted_at
+    assert records[1].updated_at

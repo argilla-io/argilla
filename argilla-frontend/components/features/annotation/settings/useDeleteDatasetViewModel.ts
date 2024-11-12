@@ -24,7 +24,7 @@ export const useDeleteDatasetViewModel = () => {
         type: "success",
       });
 
-      routes.goToDatasetsList();
+      routes.goToHome();
     } catch {
       toggleDeleteModal(false);
 

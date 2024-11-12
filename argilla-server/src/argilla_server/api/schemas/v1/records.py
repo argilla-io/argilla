@@ -16,12 +16,14 @@ from datetime import datetime
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
+
+from argilla_server.api.schemas.v1.chat import ChatFieldValue
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.api.schemas.v1.metadata_properties import MetadataPropertyName
 from argilla_server.api.schemas.v1.responses import Response, ResponseFilterScope, UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import Suggestion, SuggestionCreate, SuggestionFilterScope
 from argilla_server.enums import RecordInclude, RecordSortField, SimilarityOrder, SortOrder, RecordStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator
+from argilla_server.pydantic_v1 import BaseModel, Field, StrictStr, root_validator, validator, ValidationError
 from argilla_server.pydantic_v1.utils import GetterDict
 from argilla_server.search_engine import TextQuery
 
@@ -39,6 +41,10 @@ TERMS_FILTER_VALUES_MAX_ITEMS = 250
 
 SEARCH_RECORDS_QUERY_SORT_MIN_ITEMS = 1
 SEARCH_RECORDS_QUERY_SORT_MAX_ITEMS = 10
+
+SEARCH_MAX_SIMILARITY_SEARCH_RESULT = 1000
+
+CHAT_FIELDS_MAX_MESSAGES = 500
 
 
 class RecordGetterDict(GetterDict):
@@ -81,13 +87,39 @@ class Record(BaseModel):
         getter_dict = RecordGetterDict
 
 
+FieldValueCreate = Union[StrictStr, List[ChatFieldValue], Dict[StrictStr, Any], None]
+
+
 class RecordCreate(BaseModel):
-    fields: Dict[str, Union[StrictStr, None]]
+    fields: Dict[str, FieldValueCreate]
     metadata: Optional[Dict[str, Any]]
     external_id: Optional[str]
     responses: Optional[List[UserResponseCreate]]
     suggestions: Optional[List[SuggestionCreate]]
     vectors: Optional[Dict[str, List[float]]]
+
+    @validator("fields", pre=True)
+    @classmethod
+    def validate_chat_field_content(cls, fields: Any):
+        if not isinstance(fields, dict):
+            return fields
+
+        for key, value in fields.items():
+            if isinstance(value, list):
+                try:
+                    fields[key] = [
+                        item if isinstance(item, ChatFieldValue) else ChatFieldValue(**item) for item in value
+                    ]
+                except ValidationError as e:
+                    raise ValueError(f"Error parsing chat field '{key}': {e.errors()}")
+
+                if len(value) > CHAT_FIELDS_MAX_MESSAGES:
+                    raise ValueError(
+                        f"Number of chat messages in field '{key}' exceeds the maximum "
+                        f"allowed value of {CHAT_FIELDS_MAX_MESSAGES}"
+                    )
+
+        return fields
 
     @validator("responses")
     @classmethod
@@ -148,7 +180,7 @@ class RecordUpdateWithId(RecordUpdate):
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID]
-    fields: Optional[Dict[str, Union[StrictStr, None]]]
+    fields: Optional[Dict[str, FieldValueCreate]] = None
 
 
 class RecordIncludeParam(BaseModel):
@@ -194,7 +226,13 @@ class RecordIncludeParam(BaseModel):
 
 class RecordFilterScope(BaseModel):
     entity: Literal["record"]
-    property: Union[Literal[RecordSortField.inserted_at], Literal[RecordSortField.updated_at], Literal["status"]]
+    property: Literal[
+        RecordSortField.id,
+        RecordSortField.external_id,
+        RecordSortField.inserted_at,
+        RecordSortField.updated_at,
+        RecordSortField.status,
+    ]
 
 
 class Records(BaseModel):
@@ -240,7 +278,12 @@ class VectorQuery(BaseModel):
 
 class Query(BaseModel):
     text: Optional[TextQuery] = None
-    vector: Optional[VectorQuery] = None
+    vector: Optional[VectorQuery] = Field(
+        None,
+        description="Query by vector similarity."
+        " Either 'record_id' or 'value' must be provided. "
+        f"Max number of records to return is limited to {SEARCH_MAX_SIMILARITY_SEARCH_RESULT}.",
+    )
 
 
 class MetadataFilterScope(BaseModel):
@@ -268,8 +311,8 @@ class TermsFilter(BaseModel):
 class RangeFilter(BaseModel):
     type: Literal["range"]
     scope: FilterScope
-    ge: Optional[float]
-    le: Optional[float]
+    ge: Optional[Union[float, str]]
+    le: Optional[Union[float, str]]
 
     @root_validator(skip_on_failure=True)
     def check_ge_and_le(cls, values: dict) -> dict:

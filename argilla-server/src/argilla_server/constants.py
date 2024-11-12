@@ -39,6 +39,4 @@ DEFAULT_SPAN_OPTIONS_MAX_ITEMS = 500
 # The metadata field name prefix defined for protected (non-searchable) values
 PROTECTED_METADATA_FIELD_PREFIX = "_"
 
-ES_INDEX_REGEX_PATTERN = r"^(?!-|_)[a-z0-9-_]+$"
-
 JS_MAX_SAFE_INTEGER = 9007199254740991

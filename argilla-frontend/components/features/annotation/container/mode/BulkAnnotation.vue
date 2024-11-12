@@ -9,9 +9,10 @@
         <HorizontalResizable
           :id="`${recordCriteria.datasetId}-r-h-rz`"
           class="wrapper__left"
+          collapsable
         >
           <template #up>
-            <section class="wrapper__records">
+            <section class="wrapper__records" aria-label="Bulk Annotation View">
               <DatasetFilters :recordCriteria="recordCriteria">
                 <ToggleAnnotationType
                   v-if="
@@ -119,6 +120,7 @@
         <HorizontalResizable
           :id="`${recordCriteria.datasetId}-q-h-rz}`"
           class="wrapper__right"
+          collapsable
         >
           <template #up>
             <QuestionsForm
@@ -162,6 +164,7 @@
       <BaseCollapsablePanel
         hideOnDesktop
         :isExpanded="expandedGuidelines"
+        :aria-expanded="expandedGuidelines"
         @toggle-expand="expandedGuidelines = !expandedGuidelines"
       >
         <template #panelHeader>
@@ -445,7 +448,7 @@ export default {
   }
   &__left {
     @include media("<desktop") {
-      :deep(.resizable__down) {
+      :deep(.resizable-h__down) {
         display: none;
       }
     }
@@ -522,6 +525,7 @@ export default {
     .record__wrapper {
       min-height: auto;
       height: auto;
+      flex: 0;
       &--fixed-height {
         max-height: 80%;
         height: 100%;
