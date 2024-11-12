@@ -256,6 +256,9 @@ class RecordCreateValidator(RecordValidatorBase):
 class RecordUpdateValidator(RecordValidatorBase):
     @classmethod
     async def validate(cls, record_update: RecordUpdate, dataset: Dataset, record: Record) -> None:
+        if record_update.is_set("fields"):
+            cls._validate_fields(record_update.fields, dataset)
+
         cls._validate_metadata(record_update.metadata, dataset)
         cls._validate_vectors(record_update.vectors, dataset)
         cls._validate_suggestions(record_update.suggestions, dataset, record=record)
@@ -273,8 +276,8 @@ class RecordUpsertValidator(RecordValidatorBase):
 
             cls._validate_metadata(record_upsert.metadata, dataset)
             cls._validate_vectors(record_upsert.vectors, dataset)
-
             cls._validate_suggestions(record_upsert.suggestions, dataset, record=record)
+
             await cls._validate_responses(record_upsert.responses, dataset, record=record)
 
 

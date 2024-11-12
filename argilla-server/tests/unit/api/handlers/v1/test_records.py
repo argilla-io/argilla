@@ -18,6 +18,7 @@ from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
+
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.models import Dataset, Record, Response, Suggestion, User, UserRole
@@ -44,6 +45,7 @@ from tests.factories import (
     VectorFactory,
     VectorSettingsFactory,
     WorkspaceFactory,
+    TextFieldFactory,
 )
 
 if TYPE_CHECKING:
@@ -318,6 +320,82 @@ class TestSuiteRecords:
         }
 
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
+    async def test_update_record_fields(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status="ready")
+        await TextFieldFactory.create(dataset=dataset, name="text", required=True)
+        await TextFieldFactory.create(dataset=dataset, name="sentiment", required=False)
+        record = await RecordFactory.create(dataset=dataset, fields={"text": "This is a text"})
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"fields": {"text": "Updated text", "sentiment": "positive"}},
+        )
+
+        assert response.status_code == 200, response.json()
+        assert response.json() == {
+            "id": str(record.id),
+            "status": RecordStatus.pending,
+            "fields": {"text": "Updated text", "sentiment": "positive"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [],
+            "vectors": {},
+            "dataset_id": str(dataset.id),
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
+    async def test_update_record_fields_with_less_fields(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(dataset=dataset, name="text", required=True)
+        await TextFieldFactory.create(dataset=dataset, name="sentiment", required=False)
+        record = await RecordFactory.create(dataset=dataset, fields={"text": "This is a text", "sentiment": "neutral"})
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"fields": {"text": "Updated text"}},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "status": RecordStatus.pending,
+            "fields": {"text": "Updated text"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [],
+            "vectors": {},
+            "dataset_id": str(dataset.id),
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
+    async def test_update_record_fields_with_empty_fields(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"fields": {}},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "fields cannot be empty"}
+        mock_search_engine.index_records.assert_not_called()
 
     async def test_update_record_with_null_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict

@@ -142,6 +142,9 @@ async def update_record(
 
     await RecordUpdateValidator.validate(record_update, dataset, record)
 
+    if record_update.is_set("fields"):
+        record.fields = record_update.fields
+
     if record_update.is_set("metadata"):
         record.metadata_ = record_update.metadata
 

@@ -150,7 +150,8 @@ class RecordCreate(BaseModel):
 
 
 class RecordUpdate(UpdateSchema):
-    metadata: Optional[Dict[str, Any]] = Field(None)
+    fields: Optional[Dict[str, FieldValueCreate]] = None
+    metadata: Optional[Dict[str, Any]] = None
     suggestions: Optional[List[SuggestionCreate]] = None
     vectors: Optional[Dict[str, List[float]]]
 
