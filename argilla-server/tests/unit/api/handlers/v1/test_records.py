@@ -318,11 +318,12 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
 
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_fields(
-        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create(status="ready")
         await TextFieldFactory.create(dataset=dataset, name="text", required=True)
@@ -349,6 +350,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_fields_with_less_fields(
@@ -379,6 +381,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_fields_with_empty_fields(
@@ -395,6 +398,7 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {"detail": "fields cannot be empty"}
+        assert record.updated_at == record.inserted_at
         mock_search_engine.index_records.assert_not_called()
 
     async def test_update_record_with_null_metadata(
@@ -429,6 +433,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_metadata(
@@ -457,6 +462,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at == record.inserted_at
         mock_search_engine.index_records.assert_not_called()
 
     async def test_update_record_with_list_terms_metadata(
@@ -492,6 +498,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_suggestions(
@@ -520,6 +527,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         assert (await db.execute(select(Suggestion).where(Suggestion.id == suggestion.id))).scalar_one_or_none() is None
 
     @pytest.mark.parametrize(

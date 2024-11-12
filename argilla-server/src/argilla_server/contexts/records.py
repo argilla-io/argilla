@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from datetime import datetime
 from typing import Dict, Sequence, Union, List, Tuple, Optional
 from uuid import UUID
 
@@ -165,6 +166,7 @@ async def update_record(
             for suggestion in record_update.suggestions
         ]
 
+    record.updated_at = datetime.utcnow()
     await record.save(db, autocommit=False)
 
     if record_update.vectors:
