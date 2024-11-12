@@ -31,7 +31,7 @@ export const useDatasetProgressViewModel = ({
       {
         id: "pending",
         name: t("datasets.left"),
-        color: "var(--bg-solid-grey-3)",
+        color: "var(--bg-solid-grey-4)",
         value: progress.value.pending,
         tooltip: `${progress.value.pending}/${progress.value.total}`,
       },
