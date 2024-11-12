@@ -1,3 +1,5 @@
+import { create } from "~/v1/store/non-reactive";
+
 export default {
   multi_label_selection: "Multi-label",
   ranking: "Ranking",
@@ -276,6 +278,9 @@ export default {
     pasteRepoIdPlaceholder: "Paste a repo id e.g., stanfordnlp/imdb",
     demoLink:
       "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
+    name: "Dataset name",
+    updatedAt: "Updated",
+    createdAt: "Created",
   },
   datasetCreation: {
     questions: {

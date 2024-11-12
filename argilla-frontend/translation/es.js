@@ -273,6 +273,9 @@ export default {
     pasteRepoIdPlaceholder: "Pega un repo id id p.ej., stanfordnlp/imdb",
     demoLink:
       "Entra en esta <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> para probar Argilla",
+    name: "Nombre del dataset",
+    updatedAt: "Actualizado",
+    createdAt: "Creado",
   },
   datasetCreation: {
     questions: {
