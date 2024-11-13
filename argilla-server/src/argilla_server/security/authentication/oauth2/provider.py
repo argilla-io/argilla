@@ -22,6 +22,7 @@ from urllib.parse import urljoin
 
 import httpx
 from oauthlib.oauth2 import WebApplicationClient
+from social_core.backends.discord import DiscordOAuth2
 from social_core.backends.github import GithubOAuth2, GithubOrganizationOAuth2, GithubTeamOAuth2
 from social_core.backends.github_enterprise import (
     GithubEnterpriseOAuth2,
@@ -227,6 +228,7 @@ _BACKENDS = [
     GithubEnterpriseTeamOAuth2,
     GithubOrganizationOAuth2,
     GithubEnterpriseOrganizationOAuth2,
+    DiscordOAuth2,
 ]
 
 SUPPORTED_BACKENDS = {backend.name: backend for backend in _BACKENDS}
