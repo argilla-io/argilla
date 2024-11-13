@@ -42,21 +42,16 @@ class UserOAuthCreate(UserCreate):
 
 
 def get_provider_by_name_or_raise(provider: str = Path()) -> OAuth2ClientProvider:
-    if not settings.oauth.enabled:
-        raise NotFoundError(message="OAuth2 is not enabled")
-
-    if provider in settings.oauth.providers:
+    try:
         return settings.oauth.providers[provider]
-
-    raise NotFoundError(message=f"OAuth Provider '{provider}' not found")
+    except KeyError:
+        raise NotFoundError(message=f"OAuth Provider '{provider}' not found")
 
 
 @router.get("/providers", response_model=Providers)
 def list_providers() -> Providers:
-    if not settings.oauth.enabled:
-        return Providers(items=[])
-
-    return Providers(items=[Provider(name=provider_name) for provider_name in settings.oauth.providers])
+    providers = [Provider(name=provider_name) for provider_name in settings.oauth.providers]
+    return Providers(items=providers)
 
 
 @router.get("/providers/{provider}/authentication")
@@ -73,7 +68,8 @@ async def get_access_token(
     provider: OAuth2ClientProvider = Depends(get_provider_by_name_or_raise),
     db: AsyncSession = Depends(get_async_db),
 ) -> Token:
-    userinfo = UserInfo(await provider.get_user_data(request)).use_claims(provider.claims)
+    user_data = await provider.get_user_data(request)
+    userinfo = UserInfo(user_data).use_claims(provider.claims)
 
     if not userinfo.username:
         raise RuntimeError("OAuth error: Missing username")

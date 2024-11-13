@@ -31,8 +31,6 @@ class OAuth2Settings:
     OAuth2 settings model.
 
     Args:
-        enabled:
-            Whether OAuth2 authentication is enabled or not.
         allow_http_redirect:
             Whether to allow HTTP scheme on redirect urls (for tests purposes).
         providers:
@@ -46,12 +44,11 @@ class OAuth2Settings:
 
     def __init__(
         self,
-        enabled: bool = True,
         allow_http_redirect: bool = False,
         providers: List[OAuth2ClientProvider] = None,
         allowed_workspaces: List[AllowedWorkspace] = None,
+        **kwargs,  # Ignore any other key
     ):
-        self.enabled = enabled
         self.allow_http_redirect = allow_http_redirect
         self.allowed_workspaces = allowed_workspaces or []
         self._providers = providers or []

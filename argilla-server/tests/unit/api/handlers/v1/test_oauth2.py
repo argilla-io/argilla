@@ -29,15 +29,9 @@ from tests.factories import AdminFactory, AnnotatorFactory
 
 
 @pytest.fixture
-def disabled_oauth_settings() -> OAuth2Settings:
-    return OAuth2Settings(enabled=False)
-
-
-@pytest.fixture
 def default_oauth_settings() -> OAuth2Settings:
     return OAuth2Settings.from_dict(
         {
-            "enabled": True,
             "providers": [
                 {
                     "name": "huggingface",
@@ -56,25 +50,6 @@ class TestOauth2:
 
         assert response.status_code == 200
         assert response.json() == {"items": []}
-
-    async def test_list_providers_with_oauth_disabled(
-        self, async_client: AsyncClient, owner_auth_header: dict, disabled_oauth_settings: OAuth2Settings
-    ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: disabled_oauth_settings
-        ):
-            response = await async_client.get("/api/v1/oauth2/providers", headers=owner_auth_header)
-            assert response.status_code == 200
-            assert response.json() == {"items": []}
-
-    async def test_list_provider_with_oauth_disabled_from_settings(
-        self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
-    ):
-        default_oauth_settings.enabled = False
-        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
-            response = await async_client.get("/api/v1/oauth2/providers", headers=owner_auth_header)
-            assert response.status_code == 200
-            assert response.json() == {"items": []}
 
     async def test_list_providers(
         self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
@@ -98,33 +73,6 @@ class TestOauth2:
             assert redirect_url.host == b"huggingface.co"
             assert b"/oauth/authorize?response_type=code&client_id=client_id" in redirect_url.target
             assert b"&extra=params" in redirect_url.target
-
-    async def test_provider_authentication_with_oauth_disabled(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        disabled_oauth_settings: OAuth2Settings,
-    ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: disabled_oauth_settings
-        ):
-            response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/authentication", headers=owner_auth_header
-            )
-            assert response.status_code == 404
-
-    async def test_provider_authentication_with_oauth_disabled_and_provider_defined(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        default_oauth_settings: OAuth2Settings,
-    ):
-        default_oauth_settings.enabled = False
-        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
-            response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/authentication", headers=owner_auth_header
-            )
-            assert response.status_code == 404
 
     async def test_provider_authentication_with_invalid_provider(
         self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings
@@ -214,20 +162,6 @@ class TestOauth2:
                 assert user is not None
                 assert user.role == UserRole.annotator
                 assert user.first_name == "username"
-
-    async def test_provider_access_token_with_oauth_disabled(
-        self,
-        async_client: AsyncClient,
-        owner_auth_header: dict,
-        disabled_oauth_settings: OAuth2Settings,
-    ):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: disabled_oauth_settings
-        ):
-            response = await async_client.get(
-                "/api/v1/oauth2/providers/huggingface/access-token", headers=owner_auth_header
-            )
-            assert response.status_code == 404
 
     async def test_provider_access_token_with_invalid_provider(
         self, async_client: AsyncClient, owner_auth_header: dict, default_oauth_settings: OAuth2Settings

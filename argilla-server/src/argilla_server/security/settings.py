@@ -63,7 +63,7 @@ class Settings(BaseSettings):
         if not self._oauth_settings and os.path.exists(self.oauth_cfg):
             self._oauth_settings = OAuth2Settings.from_yaml(self.oauth_cfg)
         else:
-            self._oauth_settings = OAuth2Settings(enabled=False)
+            self._oauth_settings = OAuth2Settings()
 
         return self._oauth_settings
 
