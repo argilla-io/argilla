@@ -103,7 +103,7 @@ class OAuth2ClientProvider:
         response = RedirectResponse(url, 303)
 
         response.set_cookie(
-            self.OAUTH_STATE_COOKIE_NAME,
+            self._get_state_cookie_name(),
             value=state,
             secure=True,
             httponly=True,
@@ -112,6 +112,9 @@ class OAuth2ClientProvider:
         )
 
         return response
+
+    def _get_state_cookie_name(self) -> str:
+        return f"{self.name}_{self.OAUTH_STATE_COOKIE_NAME}"
 
     async def get_user_data(self, request: Request) -> dict:
         self._check_request_params(request)
@@ -131,7 +134,7 @@ class OAuth2ClientProvider:
         if "state" not in request.query_params:
             raise ValueError("'state' parameter was not found in callback request")
 
-        state = request.cookies.get(self.OAUTH_STATE_COOKIE_NAME)
+        state = request.cookies.get(self._get_state_cookie_name())
         if request.query_params.get("state") != state:
             raise ValueError("'state' parameter does not match")
 

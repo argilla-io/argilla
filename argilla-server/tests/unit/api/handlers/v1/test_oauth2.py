@@ -99,7 +99,7 @@ class TestOauth2:
                     "/api/v1/oauth2/providers/huggingface/access-token",
                     params={"code": "code", "state": "valid"},
                     headers=owner_auth_header,
-                    cookies={"oauth2_state": "valid"},
+                    cookies={"huggingface_oauth2_state": "valid"},
                 )
 
                 assert response.status_code == 200
@@ -128,7 +128,7 @@ class TestOauth2:
                     "/api/v1/oauth2/providers/huggingface/access-token",
                     params={"code": "code", "state": "valid"},
                     headers=owner_auth_header,
-                    cookies={"oauth2_state": "valid"},
+                    cookies={"huggingface_oauth2_state": "valid"},
                 )
 
                 assert response.status_code == 500
@@ -149,7 +149,7 @@ class TestOauth2:
                     "/api/v1/oauth2/providers/huggingface/access-token",
                     params={"code": "code", "state": "valid"},
                     headers=owner_auth_header,
-                    cookies={"oauth2_state": "valid"},
+                    cookies={"huggingface_oauth2_state": "valid"},
                 )
 
                 assert response.status_code == 200
@@ -200,7 +200,7 @@ class TestOauth2:
                 "/api/v1/oauth2/providers/huggingface/access-token",
                 params={"code": "code", "state": "invalid"},
                 headers=owner_auth_header,
-                cookies={"oauth2_state": "valid"},
+                cookies={"huggingface_oauth2_state": "valid"},
             )
             assert response.status_code == 422
             assert response.json() == {"detail": "'state' parameter does not match"}
@@ -217,7 +217,7 @@ class TestOauth2:
                     "/api/v1/oauth2/providers/huggingface/access-token",
                     params={"code": "code", "state": "valid"},
                     headers=owner_auth_header,
-                    cookies={"oauth2_state": "valid"},
+                    cookies={"huggingface_oauth2_state": "valid"},
                 )
                 assert response.status_code == 401
                 assert response.json() == {"detail": "error"}
@@ -240,7 +240,7 @@ class TestOauth2:
                     "/api/v1/oauth2/providers/huggingface/access-token",
                     params={"code": "code", "state": "valid"},
                     headers=owner_auth_header,
-                    cookies={"oauth2_state": "valid"},
+                    cookies={"huggingface_oauth2_state": "valid"},
                 )
                 assert response.status_code == 200
 
@@ -266,7 +266,7 @@ class TestOauth2:
                     "/api/v1/oauth2/providers/huggingface/access-token",
                     params={"code": "code", "state": "valid"},
                     headers=owner_auth_header,
-                    cookies={"oauth2_state": "valid"},
+                    cookies={"huggingface_oauth2_state": "valid"},
                 )
                 # This will throw an error once we detect users created by OAuth2
                 assert response.status_code == 200
