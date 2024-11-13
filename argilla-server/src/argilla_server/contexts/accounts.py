@@ -26,6 +26,7 @@ from argilla_server.errors.future import NotUniqueError, UnprocessableEntityErro
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.userinfo import UserInfo
+from argilla_server.validators.users import UserCreateValidator
 
 _CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -54,7 +55,7 @@ async def list_workspaces(db: AsyncSession) -> List[Workspace]:
     return result.scalars().all()
 
 
-async def list_workspaces_by_user_id(db: AsyncSession, user_id: UUID) -> List[Workspace]:
+async def list_workspaces_by_user_id(db: AsyncSession, user_id: UUID) -> Sequence[Workspace]:
     result = await db.execute(
         select(Workspace)
         .join(WorkspaceUser)
@@ -104,22 +105,22 @@ async def list_users_by_ids(db: AsyncSession, ids: Iterable[UUID]) -> Sequence[U
     return result.scalars().all()
 
 
-# TODO: After removing API v0 implementation we can remove the workspaces attribute.
-# With API v1 the workspaces will be created doing additional requests to other endpoints for it.
-async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List[str], None] = None) -> User:
-    if await get_user_by_username(db, user_attrs["username"]) is not None:
-        raise NotUniqueError(f"User username `{user_attrs['username']}` is not unique")
-
-    user = await User.create(
-        db,
+async def create_user(
+    db: AsyncSession,
+    user_attrs: dict,
+    workspaces: Union[List[str], None] = None,
+) -> User:
+    new_user = User(
         first_name=user_attrs["first_name"],
         last_name=user_attrs["last_name"],
         username=user_attrs["username"],
         role=user_attrs["role"],
         password_hash=hash_password(user_attrs["password"]),
-        autocommit=False,
     )
 
+    await UserCreateValidator.validate(db, user=new_user)
+
+    await new_user.save(db, autocommit=False)
     if workspaces is not None:
         for workspace_name in workspaces:
             workspace = await Workspace.get_by(db, name=workspace_name)
@@ -128,14 +129,14 @@ async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List
 
             await WorkspaceUser.create(
                 db,
-                workspace_id=workspace.id,
-                user_id=user.id,
+                workspace=workspace,
+                user=new_user,
                 autocommit=False,
             )
 
     await db.commit()
 
-    return user
+    return new_user
 
 
 async def create_user_with_random_password(
