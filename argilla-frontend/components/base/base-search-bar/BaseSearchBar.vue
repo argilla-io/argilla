@@ -16,31 +16,38 @@
   -->
 
 <template>
-  <base-input-container class="search-area" :class="filter ? 'active' : null">
-    <svgicon
-      name="search"
-      width="20"
-      height="20"
-      color="#acacac"
-      aria-hidden="true"
-    />
-    <base-input
+  <BaseInputContainer
+    class="search-area"
+    :class="[filter ? 'active' : null, isCollapsed ? '--collapsed' : null]"
+    ><BaseButton class="search-area__button__search" @click="toggleSearchBar">
+      <svgicon
+        name="search"
+        width="20"
+        height="20"
+        color="#acacac"
+        aria-hidden="true"
+      />
+    </BaseButton>
+    <BaseInput
+      v-show="!isCollapsed"
+      :autofocus="!isCollapsed"
       class="search-area__input"
       role="search"
       v-model="filter"
       :placeholder="placeholder"
     />
-    <svgicon
-      v-if="filter"
-      class="search-area__icon --close"
-      name="close"
-      color="#acacac"
-      width="14"
-      height="14"
-      @click="filter = undefined"
-      aria-hidden="true"
-    />
-  </base-input-container>
+    <BaseButton class="search-area__button__close" @click="removeFilter">
+      <svgicon
+        v-if="filter || !isCollapsed"
+        class="search-area__icon --close"
+        name="close"
+        color="#acacac"
+        width="14"
+        height="14"
+        aria-hidden="true"
+      />
+    </BaseButton>
+  </BaseInputContainer>
 </template>
 <script>
 import "assets/icons/search";
@@ -56,10 +63,15 @@ export default {
       type: String,
       default: "Search",
     },
+    collapsed: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
       filter: this.value,
+      isCollapsed: this.collapsed,
     };
   },
   watch: {
@@ -68,6 +80,15 @@ export default {
     },
     filter(val) {
       this.$emit("input", val);
+    },
+  },
+  methods: {
+    toggleSearchBar() {
+      this.isCollapsed = !this.isCollapsed;
+    },
+    removeFilter() {
+      this.filter = "";
+      this.isCollapsed = true;
     },
   },
 };
@@ -86,10 +107,26 @@ $searchBarSize: $base-space * 4;
   border-radius: $border-radius-l;
   background: var(--bg-accent-grey-1);
   transition: all 0.2s ease;
+  &.--collapsed {
+    max-width: 20px;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    border: none;
+  }
 
   &.active,
   &.re-input-focused {
     border: 1px solid var(--fg-cuaternary);
+  }
+  &__button {
+    &__search {
+      padding: 0;
+      min-width: 20px;
+    }
+    &__close {
+      padding: 0;
+    }
   }
   &__icon {
     display: flex;
