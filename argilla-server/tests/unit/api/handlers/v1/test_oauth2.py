@@ -92,8 +92,8 @@ class TestOauth2:
     ):
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
-                return_value={"preferred_username": "username", "name": "name"},
+                "argilla_server.security.authentication.oauth2.provider.OAuth2ClientProvider._fetch_user_data",
+                return_value={"username": "username", "name": "name"},
             ):
                 response = await async_client.get(
                     "/api/v1/oauth2/providers/huggingface/access-token",
@@ -121,7 +121,7 @@ class TestOauth2:
     ):
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
+                "argilla_server.security.authentication.oauth2.provider.OAuth2ClientProvider._fetch_user_data",
                 return_value={"name": "name"},
             ):
                 response = await async_client.get(
@@ -142,8 +142,8 @@ class TestOauth2:
     ):
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
-                return_value={"preferred_username": "username"},
+                "argilla_server.security.authentication.oauth2.provider.OAuth2ClientProvider._fetch_user_data",
+                return_value={"username": "username"},
             ):
                 response = await async_client.get(
                     "/api/v1/oauth2/providers/huggingface/access-token",
@@ -210,7 +210,7 @@ class TestOauth2:
     ):
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
+                "argilla_server.security.authentication.oauth2.provider.OAuth2ClientProvider._fetch_user_data",
                 side_effect=AuthenticationError("error"),
             ):
                 response = await async_client.get(
@@ -233,8 +233,8 @@ class TestOauth2:
 
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
-                return_value={"preferred_username": admin.username, "name": admin.first_name},
+                "argilla_server.security.authentication.oauth2.provider.OAuth2ClientProvider._fetch_user_data",
+                return_value={"username": admin.username, "name": admin.first_name},
             ):
                 response = await async_client.get(
                     "/api/v1/oauth2/providers/huggingface/access-token",
@@ -259,8 +259,8 @@ class TestOauth2:
 
         with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
             with mock.patch(
-                "argilla_server.security.authentication.oauth2.providers.OAuth2ClientProvider._fetch_user_data",
-                return_value={"preferred_username": user.username, "name": user.first_name},
+                "argilla_server.security.authentication.oauth2.provider.OAuth2ClientProvider._fetch_user_data",
+                return_value={"username": user.username, "name": user.first_name},
             ):
                 response = await async_client.get(
                     "/api/v1/oauth2/providers/huggingface/access-token",
