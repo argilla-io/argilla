@@ -16,7 +16,7 @@ from typing import List
 
 import yaml
 
-from argilla_server.security.authentication.oauth2.providers import get_provider_by_name, OAuth2ClientProvider
+from argilla_server.security.authentication.oauth2.provider import OAuth2ClientProvider, get_supported_backend_by_name
 
 __all__ = ["OAuth2Settings"]
 
@@ -88,8 +88,8 @@ class OAuth2Settings:
 
         for provider in settings.pop("providers", []):
             name = provider.pop("name")
-            provider_class = get_provider_by_name(name)
 
-            providers.append(provider_class.from_dict(provider))
+            backend_class = get_supported_backend_by_name(name)
+            providers.append(OAuth2ClientProvider.from_dict(provider, backend_class))
 
         return providers
