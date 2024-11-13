@@ -22,8 +22,14 @@ from urllib.parse import urljoin
 
 import httpx
 from oauthlib.oauth2 import WebApplicationClient
-from social_core.backends.github import GithubOAuth2
+from social_core.backends.github import GithubOAuth2, GithubOrganizationOAuth2, GithubTeamOAuth2
+from social_core.backends.github_enterprise import (
+    GithubEnterpriseOAuth2,
+    GithubEnterpriseOrganizationOAuth2,
+    GithubEnterpriseTeamOAuth2,
+)
 from social_core.backends.google import GoogleOAuth2
+from social_core.backends.google_openidconnect import GoogleOpenIdConnect
 from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 from social_core.exceptions import AuthException
@@ -210,15 +216,25 @@ class HuggingfaceOpenId(OpenIdConnectAuth):
     OIDC_ENDPOINT = "https://huggingface.co"
 
 
-SUPPORTED_BACKENDS = {
-    GithubOAuth2.name: GithubOAuth2,
-    HuggingfaceOpenId.name: HuggingfaceOpenId,
-    GoogleOAuth2.name: GoogleOAuth2,
-}
+_BACKENDS = [
+    HuggingfaceOpenId,
+    GoogleOAuth2,
+    GoogleOpenIdConnect,
+    GithubOAuth2,
+    GithubEnterpriseOAuth2,
+    GithubTeamOAuth2,
+    GithubEnterpriseTeamOAuth2,
+    GithubEnterpriseTeamOAuth2,
+    GithubOrganizationOAuth2,
+    GithubEnterpriseOrganizationOAuth2,
+]
+
+SUPPORTED_BACKENDS = {backend.name: backend for backend in _BACKENDS}
 
 
 def get_supported_backend_by_name(name: str) -> Type[BaseOAuth2]:
     """Get a registered oauth provider by name. Raise a ValueError if provided not found."""
+
     if provider := SUPPORTED_BACKENDS.get(name):
         return provider
     else:
