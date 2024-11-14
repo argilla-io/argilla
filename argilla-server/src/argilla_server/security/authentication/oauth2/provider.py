@@ -74,23 +74,25 @@ class OAuth2ClientProvider:
 
         self._authorization_endpoint = self._backend.authorization_url()
         self._token_endpoint = self._backend.access_token_url()
+
         # Social Core uses the key and secret names for the client_id and client_secret
         # These lines allow the use of the same environment variables as the social_core library.
         # See https://python-social-auth.readthedocs.io/en/latest/configuration/settings.html for more information.
-        client_id = client_id or self.backend_strategy.setting("key", default=None, backend=self._backend)
-        client_secret = client_secret or self.backend_strategy.setting("secret", default=None, backend=self._backend)
-        scope = scope or self.backend_strategy.setting(
+        self.client_id = (
+            client_id or self._environment_variable_for_property("client_id")
+        ) or self._backend.strategy.setting("key")
+
+        self.client_secret = (
+            client_secret or self._environment_variable_for_property("client_secret")
+        ) or self._backend.strategy.setting("secret")
+
+        self.scope = (scope or self._environment_variable_for_property("scope")) or self.backend_strategy.setting(
             "scope",
             default=self._backend.get_scope(),
             backend=self._backend,
         )
-
-        self.client_id = client_id or self._environment_variable_for_property("client_id")
-        self.client_secret = client_secret or self._environment_variable_for_property("client_secret")
-        self.scope = scope or self._environment_variable_for_property("scope", "")
         if isinstance(self.scope, str):
             self.scope = self.scope.split(" ")
-        self.scope = self.scope or []
 
         self.redirect_uri = redirect_uri or f"/oauth/{self.name}/callback"
 
