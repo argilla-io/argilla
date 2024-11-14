@@ -31,6 +31,7 @@ from social_core.backends.github_enterprise import (
 )
 from social_core.backends.google import GoogleOAuth2
 from social_core.backends.google_openidconnect import GoogleOpenIdConnect
+from social_core.backends.lastfm import LastFmAuth
 from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
 from social_core.exceptions import AuthException
@@ -231,7 +232,7 @@ _BACKENDS = [
     GithubEnterpriseTeamOAuth2,
     GithubOrganizationOAuth2,
     GithubEnterpriseOrganizationOAuth2,
-    DiscordOAuth2,
+    LastFmAuth,
 ]
 
 SUPPORTED_BACKENDS = {backend.name: backend for backend in _BACKENDS}
