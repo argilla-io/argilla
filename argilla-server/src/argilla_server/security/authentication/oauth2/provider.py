@@ -78,18 +78,17 @@ class OAuth2ClientProvider:
         # Social Core uses the key and secret names for the client_id and client_secret
         # These lines allow the use of the same environment variables as the social_core library.
         # See https://python-social-auth.readthedocs.io/en/latest/configuration/settings.html for more information.
-        self.client_id = (
-            client_id or self._environment_variable_for_property("client_id")
-        ) or self._backend.strategy.setting("key")
+        self.client_id = (client_id or self._environment_variable_for_property("client_id")) or self._backend.setting(
+            "key"
+        )
 
         self.client_secret = (
             client_secret or self._environment_variable_for_property("client_secret")
-        ) or self._backend.strategy.setting("secret")
+        ) or self._backend.setting("secret")
 
-        self.scope = (scope or self._environment_variable_for_property("scope")) or self.backend_strategy.setting(
+        self.scope = (scope or self._environment_variable_for_property("scope")) or self._backend.setting(
             "scope",
             default=self._backend.get_scope(),
-            backend=self._backend,
         )
         if isinstance(self.scope, str):
             self.scope = self.scope.split(" ")
