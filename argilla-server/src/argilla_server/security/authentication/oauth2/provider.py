@@ -218,6 +218,8 @@ class HuggingfaceOpenId(OpenIdConnectAuth):
     # OIDC configuration
     OIDC_ENDPOINT = "https://huggingface.co"
 
+    DEFAULT_SCOPE = ["openid", "profile"]
+
 
 _BACKENDS = [
     HuggingfaceOpenId,
