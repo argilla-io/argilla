@@ -86,6 +86,7 @@ export default {
     apiKeyDescription:
       "API key tokens allow you to manage datasets using the Python SDK.",
     theme: "Theme",
+    language: "Language",
     copyKey: "Copy key",
   },
   userAvatarTooltip: {

@@ -57,6 +57,13 @@
       />
       <UserSettingsTheme />
     </div>
+    <div class="form-group">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('userSettings.language')"
+      />
+      <UserSettingsLanguage />
+    </div>
   </div>
 </template>
 

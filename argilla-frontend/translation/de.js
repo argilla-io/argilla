@@ -88,6 +88,7 @@ export default {
     apiKeyDescription:
       "API-Keys erlauben es die Datensätze über das Python SDK zu verwalten.",
     theme: "Theme",
+    language: "Sprache",
     copyKey: "API-Key kopieren",
   },
   userAvatarTooltip: {
