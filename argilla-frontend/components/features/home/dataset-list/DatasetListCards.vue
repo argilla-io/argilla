@@ -58,6 +58,7 @@ export default {
     grid-auto-rows: auto;
     list-style: none;
     padding: 0;
+    margin-bottom: $base-space * 4;
   }
   &__link {
     text-decoration: none;

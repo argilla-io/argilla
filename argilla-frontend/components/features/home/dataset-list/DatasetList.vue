@@ -17,11 +17,7 @@
         />
       </div>
     </div>
-    <DatasetListCards
-      v-if="datasets.length"
-      ref="datasetList"
-      :datasets="filteredDatasets"
-    />
+    <DatasetListCards v-if="datasets.length" :datasets="filteredDatasets" />
     <DatasetsEmpty v-else @on-click-card="cardAction" />
   </div>
 </template>
