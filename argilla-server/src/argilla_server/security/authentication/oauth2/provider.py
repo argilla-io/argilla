@@ -22,36 +22,15 @@ from urllib.parse import urljoin
 
 import httpx
 from oauthlib.oauth2 import WebApplicationClient
-from social_core.backends.discord import DiscordOAuth2
-from social_core.backends.github import GithubOAuth2, GithubOrganizationOAuth2, GithubTeamOAuth2
-from social_core.backends.github_enterprise import (
-    GithubEnterpriseOAuth2,
-    GithubEnterpriseOrganizationOAuth2,
-    GithubEnterpriseTeamOAuth2,
-)
-from social_core.backends.google import GoogleOAuth2
-from social_core.backends.google_openidconnect import GoogleOpenIdConnect
-from social_core.backends.lastfm import LastFmAuth
 from social_core.backends.oauth import BaseOAuth2
-from social_core.backends.open_id_connect import OpenIdConnectAuth
 from social_core.exceptions import AuthException
 from social_core.strategy import BaseStrategy
 from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 
 from argilla_server.errors import future
+from argilla_server.security.authentication.oauth2._backends import Strategy
 from argilla_server.security.settings import settings
-
-
-class Strategy(BaseStrategy):
-    def request_data(self, merge=True) -> Dict[str, Any]:
-        return {}
-
-    def absolute_uri(self, path=None) -> str:
-        return path
-
-    def get_setting(self, name):
-        return os.environ[name]
 
 
 class OAuth2ClientProvider:
@@ -205,43 +184,3 @@ class OAuth2ClientProvider:
         env_var_name = f"OAUTH2_{self.name.upper()}_{property_name.upper()}"
 
         return os.getenv(env_var_name, default)
-
-
-class HuggingfaceOpenId(OpenIdConnectAuth):
-    """Huggingface OpenID Connect authentication backend."""
-
-    name = "huggingface"
-
-    AUTHORIZATION_URL = "https://huggingface.co/oauth/authorize"
-    ACCESS_TOKEN_URL = "https://huggingface.co/oauth/token"
-
-    # OIDC configuration
-    OIDC_ENDPOINT = "https://huggingface.co"
-
-    DEFAULT_SCOPE = ["openid", "profile"]
-
-
-_BACKENDS = [
-    HuggingfaceOpenId,
-    GoogleOAuth2,
-    GoogleOpenIdConnect,
-    GithubOAuth2,
-    GithubEnterpriseOAuth2,
-    GithubTeamOAuth2,
-    GithubEnterpriseTeamOAuth2,
-    GithubEnterpriseTeamOAuth2,
-    GithubOrganizationOAuth2,
-    GithubEnterpriseOrganizationOAuth2,
-    LastFmAuth,
-]
-
-SUPPORTED_BACKENDS = {backend.name: backend for backend in _BACKENDS}
-
-
-def get_supported_backend_by_name(name: str) -> Type[BaseOAuth2]:
-    """Get a registered oauth provider by name. Raise a ValueError if provided not found."""
-
-    if provider := SUPPORTED_BACKENDS.get(name):
-        return provider
-    else:
-        raise future.NotFoundError(f"Unsupported provider {name}. Supported providers are {SUPPORTED_BACKENDS.keys()}")

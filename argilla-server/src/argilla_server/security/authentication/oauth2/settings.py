@@ -16,7 +16,8 @@ from typing import List
 
 import yaml
 
-from argilla_server.security.authentication.oauth2.provider import OAuth2ClientProvider, get_supported_backend_by_name
+from argilla_server.security.authentication.oauth2._backends import get_supported_backend_by_name
+from argilla_server.security.authentication.oauth2.provider import OAuth2ClientProvider
 
 __all__ = ["OAuth2Settings"]
 
