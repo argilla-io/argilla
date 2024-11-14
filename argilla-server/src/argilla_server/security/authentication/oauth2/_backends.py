@@ -48,7 +48,12 @@ class HuggingfaceOpenId(OpenIdConnectAuth):
     DEFAULT_SCOPE = ["openid", "profile"]
 
 
-def _load_backends():
+_SUPPORTED_BACKENDS = {}
+
+
+def load_supported_backends(extra_backends: list = None) -> Dict[str, Type[BaseOAuth2]]:
+    global _SUPPORTED_BACKENDS
+
     backends = [
         "argilla_server.security.authentication.oauth2._backends.HuggingfaceOpenId",
         "social_core.backends.github.GithubOAuth2",
@@ -60,14 +65,20 @@ def _load_backends():
         "social_core.backends.google.GoogleOAuth2",
         "social_core.backends.google_openidconnect.GoogleOpenIdConnect",
     ]
-    return load_backends(backends, force_load=True)
 
+    if extra_backends:
+        backends.extend(extra_backends)
 
-_SUPPORTED_BACKENDS = _load_backends()
+    _SUPPORTED_BACKENDS = load_backends(backends, force_load=True)
+    return _SUPPORTED_BACKENDS
 
 
 def get_supported_backend_by_name(name: str) -> Type[BaseOAuth2]:
     """Get a registered oauth provider by name. Raise a ValueError if provided not found."""
+    global _SUPPORTED_BACKENDS
+
+    if not _SUPPORTED_BACKENDS:
+        _SUPPORTED_BACKENDS = load_supported_backends()
 
     if provider := _SUPPORTED_BACKENDS.get(name):
         return provider

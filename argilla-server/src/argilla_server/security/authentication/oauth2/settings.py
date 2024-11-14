@@ -16,7 +16,10 @@ from typing import List
 
 import yaml
 
-from argilla_server.security.authentication.oauth2._backends import get_supported_backend_by_name
+from argilla_server.security.authentication.oauth2._backends import (
+    get_supported_backend_by_name,
+    load_supported_backends,
+)
 from argilla_server.security.authentication.oauth2.provider import OAuth2ClientProvider
 
 __all__ = ["OAuth2Settings"]
@@ -47,11 +50,13 @@ class OAuth2Settings:
     def __init__(
         self,
         allow_http_redirect: bool = False,
+        extra_backends: List[str] = None,
         **settings,
     ):
         self.allow_http_redirect = allow_http_redirect
+        self.extra_backends = extra_backends or []
         self.allowed_workspaces = self._build_workspaces(settings) or []
-        self._providers = self._build_providers(settings) or []
+        self._providers = self._build_providers(settings, extra_backends) or []
 
         if self.allow_http_redirect:
             # See https://stackoverflow.com/questions/27785375/testing-flask-oauthlib-locally-without-https
@@ -74,8 +79,10 @@ class OAuth2Settings:
         return [AllowedWorkspace(**workspace) for workspace in allowed_workspaces]
 
     @classmethod
-    def _build_providers(cls, settings: dict) -> List["OAuth2ClientProvider"]:
+    def _build_providers(cls, settings: dict, extra_backends) -> List["OAuth2ClientProvider"]:
         providers = []
+
+        load_supported_backends(extra_backends=extra_backends)
 
         for provider in settings.pop("providers", []):
             name = provider.pop("name")
