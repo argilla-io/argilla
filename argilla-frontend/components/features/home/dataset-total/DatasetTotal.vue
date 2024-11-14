@@ -4,9 +4,10 @@
       name="records"
       height="12"
       width="12"
-      color="var(--fg-seconadary)"
+      color="var(--fg-tertiary)"
+      aria-hidden="true"
     />
-    <span v-text="totalRecords" />
+    <span v-text="totalRecords" title="Records" />
   </div>
 </template>
 
@@ -33,7 +34,7 @@ export default {
   display: flex;
   align-items: center;
   gap: calc($base-space / 2);
-  color: var(--fg-secondary);
+  color: var(--fg-tertiary);
   @include font-size(12px);
 }
 </style>
