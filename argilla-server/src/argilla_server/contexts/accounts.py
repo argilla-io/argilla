@@ -129,8 +129,8 @@ async def create_user(
 
             await WorkspaceUser.create(
                 db,
-                workspace=workspace,
-                user=new_user,
+                workspace_id=workspace.id,
+                user_id=new_user.id,
                 autocommit=False,
             )
 
