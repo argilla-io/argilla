@@ -42,17 +42,16 @@ class OAuth2Settings:
 
     ALLOWED_WORKSPACES_KEY = "allowed_workspaces"
     PROVIDERS_KEY = "providers"
+    EXTRA_BACKENDS_KEY = "extra_backends"
 
     def __init__(
         self,
         allow_http_redirect: bool = False,
-        providers: List[OAuth2ClientProvider] = None,
-        allowed_workspaces: List[AllowedWorkspace] = None,
-        **kwargs,  # Ignore any other key
+        **settings,
     ):
         self.allow_http_redirect = allow_http_redirect
-        self.allowed_workspaces = allowed_workspaces or []
-        self._providers = providers or []
+        self.allowed_workspaces = self._build_workspaces(settings) or []
+        self._providers = self._build_providers(settings) or []
 
         if self.allow_http_redirect:
             # See https://stackoverflow.com/questions/27785375/testing-flask-oauthlib-locally-without-https
@@ -67,16 +66,7 @@ class OAuth2Settings:
         """Creates an instance of OAuth2Settings from a YAML file."""
 
         with open(yaml_file) as f:
-            return cls.from_dict(yaml.safe_load(f))
-
-    @classmethod
-    def from_dict(cls, settings: dict) -> "OAuth2Settings":
-        """Creates an instance of OAuth2Settings from a dictionary."""
-
-        settings[cls.PROVIDERS_KEY] = cls._build_providers(settings)
-        settings[cls.ALLOWED_WORKSPACES_KEY] = cls._build_workspaces(settings)
-
-        return cls(**settings)
+            return cls(**yaml.safe_load(f))
 
     @classmethod
     def _build_workspaces(cls, settings: dict) -> List[AllowedWorkspace]:

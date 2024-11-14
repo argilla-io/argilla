@@ -78,11 +78,7 @@ class TestApp:
     async def test_create_allowed_workspaces(self, db: AsyncSession):
         with mock.patch(
             "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: OAuth2Settings.from_dict(
-                {
-                    "allowed_workspaces": [{"name": "ws1"}, {"name": "ws2"}],
-                }
-            ),
+            new_callable=lambda: OAuth2Settings(allowed_workspaces=[{"name": "ws1"}, {"name": "ws2"}]),
         ):
             await _create_oauth_allowed_workspaces(db)
 
@@ -102,7 +98,7 @@ class TestApp:
 
         with mock.patch(
             "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: OAuth2Settings(allowed_workspaces=[AllowedWorkspace(name=ws.name)]),
+            new_callable=lambda: OAuth2Settings(allowed_workspaces=[{"name": ws.name}]),
         ):
             await _create_oauth_allowed_workspaces(db)
 

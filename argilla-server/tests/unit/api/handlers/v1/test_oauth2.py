@@ -30,16 +30,14 @@ from tests.factories import AdminFactory, AnnotatorFactory
 
 @pytest.fixture
 def default_oauth_settings() -> OAuth2Settings:
-    return OAuth2Settings.from_dict(
-        {
-            "providers": [
-                {
-                    "name": "huggingface",
-                    "client_id": "client_id",
-                    "client_secret": "client_secret",
-                }
-            ],
-        }
+    return OAuth2Settings(
+        providers=[
+            {
+                "name": "huggingface",
+                "client_id": "client_id",
+                "client_secret": "client_secret",
+            }
+        ]
     )
 
 
