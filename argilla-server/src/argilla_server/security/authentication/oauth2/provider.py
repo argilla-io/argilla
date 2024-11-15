@@ -162,14 +162,21 @@ class OAuth2ClientProvider:
 
     async def _fetch_user_data(self, authorization_response: str, **oauth_query_params) -> dict:
         oauth_client = self.new_oauth_client()
+        token_request_params = {**oauth_query_params}
+
+        auth = None
+        if self._backend.use_basic_auth():
+            auth = httpx.BasicAuth(self.client_id, self.client_secret)
+        else:
+            token_request_params["client_secret"] = self.client_secret
+
         token_url, headers, content = oauth_client.prepare_token_request(
             self._token_endpoint,
             authorization_response=authorization_response,
-            **oauth_query_params,
+            **token_request_params,
         )
 
         headers.update({"Accept": "application/json"})
-        auth = httpx.BasicAuth(self.client_id, self.client_secret)
         async with httpx.AsyncClient(auth=auth) as session:
             try:
                 response = await session.post(token_url, headers=headers, content=content)
