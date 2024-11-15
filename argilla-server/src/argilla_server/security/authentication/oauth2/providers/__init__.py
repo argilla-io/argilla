@@ -31,8 +31,7 @@ __all__ = [
 _ALL_SUPPORTED_OAUTH2_PROVIDERS = {
     GitHubClientProvider.name: GitHubClientProvider,
     HuggingfaceClientProvider.name: HuggingfaceClientProvider,
-    KeycloakClientProvider.name: KeycloakClientProvider
-
+    KeycloakClientProvider.name: KeycloakClientProvider,
 }
 
 

@@ -24,6 +24,7 @@ from argilla_server.security.authentication.oauth2.providers._base import OAuth2
 
 _LOGGER = logging.getLogger("argilla.security.oauth2.providers.keycloak")
 
+
 class KeycloakOpenId(OpenIdConnectAuth):
     """Huggingface OpenID Connect authentication backend."""
 
@@ -31,12 +32,12 @@ class KeycloakOpenId(OpenIdConnectAuth):
 
     @staticmethod
     def from_oidc_endpoint(oidc_endpoint: str):
-        KeycloakOpenId.OIDC_ENDPOINT = oidc_endpoint.rstrip('/')
+        KeycloakOpenId.OIDC_ENDPOINT = oidc_endpoint.rstrip("/")
         KeycloakOpenId.AUTHORIZATION_URL = f"{oidc_endpoint}/protocol/openid-connect/auth"
         KeycloakOpenId.ACCESS_TOKEN_URL = f"{oidc_endpoint}/protocol/openid-connect/token"
 
         return KeycloakOpenId
-    
+
     def oidc_endpoint(self) -> str:
         return self.OIDC_ENDPOINT
 
@@ -51,16 +52,16 @@ class KeycloakClientProvider(OAuth2ClientProvider, LoggingMixin):
         oidc_endpoint: str = None,
     ):
         if oidc_endpoint is None:
-            raise ValueError('oidc_endpoint needs to be set in the Keycloak configuration')
-        
+            raise ValueError("oidc_endpoint needs to be set in the Keycloak configuration")
+
         self.oidc_endpoint = oidc_endpoint
         self.backend_class = KeycloakOpenId.from_oidc_endpoint(self.oidc_endpoint)
         print(self.backend_class.__dict__)
         super().__init__(
-            client_id = client_id,
+            client_id=client_id,
             client_secret=client_secret,
-            scope = scope,
-            redirect_uri= redirect_uri,
+            scope=scope,
+            redirect_uri=redirect_uri,
         )
 
     claims = Claims(

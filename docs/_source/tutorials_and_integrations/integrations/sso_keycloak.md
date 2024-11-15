@@ -1,12 +1,12 @@
 # SSO Integration Keycloak
 
-To test this run a test version of Keycloak in Docker: 
+To test this run a test version of Keycloak in Docker:
 
 ```bash
 docker run -p 8080:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.0.5 start-dev
 ```
 
-After that you might want to create a new realm and a client for Argilla to use. The client should expose the client audience via userinfo. And then add a user. 
+After that you might want to create a new realm and a client for Argilla to use. The client should expose the client audience via userinfo. And then add a user.
 The script below should do all of that for you to test.
 
 ```python
@@ -125,7 +125,7 @@ providers:
 
 # Allowed workspaces must exists
 allowed_workspaces:
-  - name: default 
+  - name: default
 ```
 
 And you are good to go
