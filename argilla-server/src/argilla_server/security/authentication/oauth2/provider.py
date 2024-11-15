@@ -90,8 +90,12 @@ class OAuth2ClientProvider:
         redirect_uri = self.get_redirect_uri(request)
         state = "".join([random.choice(string.ascii_letters) for _ in range(32)])
 
-        oauth2_query_params = dict(state=state, scope=self.scope, redirect_uri=redirect_uri)
-        oauth2_query_params.update(request.query_params)
+        oauth2_query_params = {
+            "state": state,
+            "scope": self.scope,
+            "redirect_uri": redirect_uri,
+            **request.query_params,
+        }
 
         authorization_url = str(
             self.new_oauth_client().prepare_request_uri(self._authorization_endpoint, **oauth2_query_params)
