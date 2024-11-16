@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Annotated, List, Optional
 from uuid import UUID
 
 from argilla_server.enums import UserRole
@@ -21,6 +21,25 @@ from argilla_server.pydantic_v1 import BaseModel, Field, constr
 
 USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
+
+UserFirstName = Annotated[
+    constr(min_length=1, strip_whitespace=True),
+    Field(..., description="The first name for the user")
+]
+UserLastName = Annotated[
+    constr(min_length=1, strip_whitespace=True),
+    Field(..., description="The last name for the user")
+]
+UserUsername = Annotated[
+    str,
+    Field(..., min_length=1, description="The username for the user")
+]
+
+UserPassword = Annotated[
+    str,
+    Field(...,
+          min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH, description="The password for the user")
+]
 
 
 class User(BaseModel):
@@ -40,19 +59,19 @@ class User(BaseModel):
 
 
 class UserCreate(BaseModel):
-    first_name: constr(min_length=1, strip_whitespace=True)
-    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
-    username: str = Field(..., min_length=1)
+    first_name: UserFirstName
+    last_name: Optional[UserLastName]
+    username: UserUsername
     role: Optional[UserRole]
-    password: str = Field(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
+    password: UserPassword
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[constr(min_length=1, strip_whitespace=True)]
-    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
-    username: Optional[str]
+    first_name: Optional[UserFirstName]
+    last_name: Optional[UserLastName]
+    username: Optional[UserUsername]
     role: Optional[UserRole]
-    password: Optional[str]
+    password: Optional[UserPassword]
 
 
 class Users(BaseModel):
