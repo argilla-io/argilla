@@ -23,22 +23,21 @@ USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
 
 UserFirstName = Annotated[
-    constr(min_length=1, strip_whitespace=True),
-    Field(..., description="The first name for the user")
+    constr(min_length=1, strip_whitespace=True), Field(..., description="The first name for the user")
 ]
 UserLastName = Annotated[
-    constr(min_length=1, strip_whitespace=True),
-    Field(..., description="The last name for the user")
+    constr(min_length=1, strip_whitespace=True), Field(..., description="The last name for the user")
 ]
-UserUsername = Annotated[
-    str,
-    Field(..., min_length=1, description="The username for the user")
-]
+UserUsername = Annotated[str, Field(..., min_length=1, description="The username for the user")]
 
 UserPassword = Annotated[
     str,
-    Field(...,
-          min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH, description="The password for the user")
+    Field(
+        ...,
+        min_length=USER_PASSWORD_MIN_LENGTH,
+        max_length=USER_PASSWORD_MAX_LENGTH,
+        description="The password for the user",
+    ),
 ]
 
 
