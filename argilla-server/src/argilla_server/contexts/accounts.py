@@ -194,12 +194,12 @@ def generate_user_token(user: User) -> str:
     )
 
 
-_dummy_secret = "dummy_secret"
-_dummy_hash = hash_password(_dummy_secret)
+_DUMMY_SECRET = "dummy_secret"
+_DUMMY_HASH = hash_password(_DUMMY_SECRET)
 
 
 def _dummy_verify():
-    verify_password(_dummy_secret, _dummy_hash)
+    verify_password(_DUMMY_SECRET, _DUMMY_HASH)
 
 
 def _generate_random_password() -> str:
