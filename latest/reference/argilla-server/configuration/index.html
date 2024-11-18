@@ -2673,6 +2673,12 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 <li>
 <p><code>ARGILLA_ELASTICSEARCH_CA_PATH</code>: Path to CA cert for ES host. For example: <code>/full/path/to/root-ca.pem</code> (Optional)</p>
 </li>
+<li>
+<p><code>ARGILLA_ES_RECORDS_INDEX_SHARDS</code>: Default number of elasticsearch/opensearch shards for each search index. (Default: <code>1</code>).</p>
+</li>
+<li>
+<p><code>ARGILLA_ES_RECORDS_INDEX_REPLICAS</code>: Default number of elasticsearch/opensearch replicas for each search index. (Default: <code>0</code>).</p>
+</li>
 </ul>
 <h3 id="redis">Redis<a class="headerlink" href="#redis" title="Permanent link">&para;</a></h3>
 <p>Redis is used by Argilla to store information about jobs to be processed on background. The following environment variables are useful to config how Argilla connects to Redis:</p>
