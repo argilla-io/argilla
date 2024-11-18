@@ -5,6 +5,7 @@
       v-for="question in questions"
       :key="question.id"
       :text="$t(question.type)"
+      font-size="12px"
       color="hsl(220, 40%, 53%)"
     />
   </div>

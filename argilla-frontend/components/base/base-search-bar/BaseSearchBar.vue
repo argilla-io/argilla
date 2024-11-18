@@ -24,7 +24,7 @@
         name="search"
         width="20"
         height="20"
-        color="#acacac"
+        color="var(--fg-secondary)"
         aria-hidden="true"
       />
     </BaseButton>
@@ -41,7 +41,7 @@
         v-if="filter || !isCollapsed"
         class="search-area__icon --close"
         name="close"
-        color="#acacac"
+        color="var(--fg-secondary)"
         width="14"
         height="14"
         aria-hidden="true"

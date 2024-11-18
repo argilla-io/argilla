@@ -23,6 +23,10 @@ export default {
     color: {
       type: String,
     },
+    fontSize: {
+      type: String,
+      default: "14px",
+    },
   },
 };
 </script>
@@ -30,10 +34,10 @@ export default {
 .dataset-badge {
   display: flex;
   align-items: center;
-  height: 26px;
+  height: calc(v-bind(fontSize) * 2);
   border: 1px solid var(--bg-opacity-10);
   border-radius: $border-radius-l;
-  @include font-size(13px);
+  font-size: v-bind(fontSize);
   background: linear-gradient(
     90deg,
     hsl(from v-bind(color) h s l / 10%) 0%,

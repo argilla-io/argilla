@@ -5,6 +5,7 @@
       v-for="field in fields"
       :key="field.id"
       :text="$t(field.type)"
+      font-size="12px"
       color="hsl(50, 40%, 53%)"
     />
   </div>
