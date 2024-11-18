@@ -13,6 +13,14 @@
     }
   },
   {
+    "version": "docs_deploy_on_spaces",
+    "title": "docs_deploy_on_spaces",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_add-missing-env-vars",
     "title": "docs_add-missing-env-vars",
     "aliases": [],
