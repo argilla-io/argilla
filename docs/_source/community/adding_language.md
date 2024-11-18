@@ -162,4 +162,4 @@ def fix_record():
 new_records = [fix_record() for _ in range(10)]
 new_dataset.records.log(new_records)
 ```
-4. Test if your translation also works with the dataset & in the dataset settings
+4. Test if your translation also works with the dataset and in the dataset settings.
