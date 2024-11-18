@@ -1,19 +1,21 @@
 <template>
   <div class="language-switch">
-    <div
+    <BaseTooltip
       class="language-switch__item"
-      v-for="(language, index) in languages"
-      :key="index"
+      v-for="{ code, name } in languages"
+      :key="code"
+      :text="name"
+      :minimalist="false"
     >
       <input
         type="radio"
-        :id="language"
-        :value="language"
+        :id="code"
+        :value="code"
         v-model="$i18n.locale"
-        @input="setLocale(language)"
+        @input="setLocale(code)"
       />
-      <label :for="language"> {{ language }}</label>
-    </div>
+      <label :for="code"> {{ code }}</label>
+    </BaseTooltip>
   </div>
 </template>
 
@@ -21,7 +23,9 @@
 export default {
   data() {
     return {
-      languages: this.$i18n.locales.map((l) => l.code).sort(),
+      languages: this.$i18n.locales.sort((a, b) =>
+        a.code.localeCompare(b.code)
+      ),
     };
   },
   methods: {
