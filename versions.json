@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_oauth2-configuration",
+    "title": "docs_oauth2-configuration",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "docs_add-missing-env-vars",
     "title": "docs_add-missing-env-vars",
     "aliases": [],
