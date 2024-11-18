@@ -21,7 +21,7 @@
 export default {
   data() {
     return {
-      languages: ["en", "es", "de"],
+      languages: this.$i18n.locales.map((l) => l.code).sort(),
     };
   },
   methods: {
