@@ -1,12 +1,13 @@
 # OAuth2 configuration
 
-Argilla supports OAuth2 authentication for users. This allows users to authenticate using other services like Google, GitHub, or Hugging Face.
-Next sections will guide you through the configuration of the OAuth2 authentication.
+Argilla supports OAuth2 authentication for users. This allows users to authenticate using other services like Google,
+GitHub, or Hugging Face. Next sections will guide you through the configuration of the OAuth2 authentication.
 
 ## The OAuth2 configuration file
 
-The OAuth2 configuration file is a YAML file that contains the configuration for the OAuth2 providers that you want to enable.
-The default file name is `.oauth.yml` and it should be placed in the root directory of the Argilla server. You can also specify a different file name using the `ARGILLA_OAUTH_CONFIG_FILE` environment variable.
+The OAuth2 configuration file is a YAML file that contains the configuration for the OAuth2 providers that you want to
+enable. The default file name is `.oauth.yml` and it should be placed in the root directory of the Argilla server. You
+can also specify a different file name using the `ARGILLA_AUTH_OAUTH_CFG` environment variable.
 
 The file should have the following structure:
 
