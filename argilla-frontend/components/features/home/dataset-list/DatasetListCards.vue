@@ -17,9 +17,11 @@
     </li>
   </TransitionGroup>
 
-  <p v-else>
-    {{ $t("home.zeroDatasetsFound") }}
-  </p>
+  <p
+    class="dataset-list__empty-message --heading3"
+    v-else
+    v-text="$t('home.zeroDatasetsFound')"
+  />
 </template>
 
 <script>
@@ -62,6 +64,12 @@ export default {
   }
   &__link {
     text-decoration: none;
+  }
+  &__empty-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
   }
 }
 .list-move,
