@@ -64,6 +64,14 @@ def load_supported_backends(extra_backends: list = None) -> Dict[str, Type[BaseO
         backends.extend(extra_backends)
 
     _SUPPORTED_BACKENDS = load_backends(backends, force_load=True)
+
+    for backend in _SUPPORTED_BACKENDS.values():
+        if not issubclass(backend, BaseOAuth2):
+            raise ValueError(
+                f"Backend {backend} is not a supported OAuth2 backend. "
+                "Please, make sure it is a subclass of BaseOAuth2."
+            )
+
     return _SUPPORTED_BACKENDS
 
 

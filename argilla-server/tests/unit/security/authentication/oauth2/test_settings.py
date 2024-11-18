@@ -80,3 +80,16 @@ class TestOAuth2Settings:
         assert extra_provider.name == provider_name
         assert extra_provider.client_id == "microsoft_client_id"
         assert extra_provider.client_secret == "microsoft_client_secret"
+
+    def test_configure_non_supported_extra_backends(self):
+        with pytest.raises(ValueError):
+            OAuth2Settings(
+                extra_backends=["social_core.backends.twitter.TwitterOAuth"],
+                providers=[
+                    {
+                        "name": "github",
+                        "client_id": "github_client_id",
+                        "client_secret": "github_client_secret",
+                    }
+                ],
+            )
