@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Changed
+
+- Changed default python version to 3.13. ([#5649](https://github.com/argilla-io/argilla/pull/5649))
+
+## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
+
 ### Fixed
 
 - Fixed error so now `_touch_dataset_last_activity_at` function is not updating dataset's `updated_at` column. ([#5656](https://github.com/argilla-io/argilla/pull/5656))

@@ -24,11 +24,12 @@
 import "assets/icons/light-theme";
 import "assets/icons/dark-theme";
 import "assets/icons/system-theme";
+import "assets/icons/high-contrast-theme";
 export default {
   name: "ThemeSwitch",
   data() {
     return {
-      themes: ["system", "dark", "light"],
+      themes: ["system", "dark", "light", "high-contrast"],
       currentTheme: this.$colorSchema.currentTheme,
     };
   },

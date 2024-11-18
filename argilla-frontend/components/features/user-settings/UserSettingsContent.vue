@@ -66,7 +66,7 @@ import { useUserInfoViewModel } from "./useUserInfoViewModel";
 export default {
   methods: {
     goToWorkspace(workspace) {
-      this.$router.push(`/?workspaces=${workspace}`);
+      this.$router.push(`/datasets?workspaces=${workspace}`);
     },
   },
   setup() {
@@ -96,6 +96,10 @@ export default {
   flex-wrap: wrap;
   gap: $base-space * 2;
   padding-bottom: 0;
+}
+.circle-and-role span {
+  background-color: var(--color-brand);
+  color: var(--color-white);
 }
 
 .description {
