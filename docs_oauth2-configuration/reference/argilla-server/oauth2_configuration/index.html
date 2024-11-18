@@ -2466,11 +2466,12 @@
 
 
 <h1 id="oauth2-configuration">OAuth2 configuration<a class="headerlink" href="#oauth2-configuration" title="Permanent link">&para;</a></h1>
-<p>Argilla supports OAuth2 authentication for users. This allows users to authenticate using other services like Google, GitHub, or Hugging Face.
-Next sections will guide you through the configuration of the OAuth2 authentication.</p>
+<p>Argilla supports OAuth2 authentication for users. This allows users to authenticate using other services like Google,
+GitHub, or Hugging Face. Next sections will guide you through the configuration of the OAuth2 authentication.</p>
 <h2 id="the-oauth2-configuration-file">The OAuth2 configuration file<a class="headerlink" href="#the-oauth2-configuration-file" title="Permanent link">&para;</a></h2>
-<p>The OAuth2 configuration file is a YAML file that contains the configuration for the OAuth2 providers that you want to enable.
-The default file name is <code>.oauth.yml</code> and it should be placed in the root directory of the Argilla server. You can also specify a different file name using the <code>ARGILLA_OAUTH_CONFIG_FILE</code> environment variable.</p>
+<p>The OAuth2 configuration file is a YAML file that contains the configuration for the OAuth2 providers that you want to
+enable. The default file name is <code>.oauth.yml</code> and it should be placed in the root directory of the Argilla server. You
+can also specify a different file name using the <code>ARGILLA_AUTH_OAUTH_CFG</code> environment variable.</p>
 <p>The file should have the following structure:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">providers</span><span class="p">:</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">huggingface</span>
@@ -2493,39 +2494,59 @@ The default file name is <code>.oauth.yml</code> and it should be placed in the 
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="nt">allow_http_redirect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </span></code></pre></div>
 <h3 id="providers">Providers<a class="headerlink" href="#providers" title="Permanent link">&para;</a></h3>
-<p>The <code>providers</code> key is a list of dictionaries, each dictionary represents a provider configuration, including the following fields:</p>
+<p>The <code>providers</code> key is a list of dictionaries, each dictionary represents a provider configuration, including the
+following fields:</p>
 <ul>
-<li><code>name</code>: The name of the provider. The available options by default are <code>huggingface</code>, <code>github</code> and <code>google-oauth2</code>. We will see later how to add more providers not supported by default.</li>
-<li><code>client_id</code>: The client ID provided by the OAuth2 provider. You can get this value by creating an application in the provider's developer console. This is a required field, but you can also use the <code>ARGILLA_OAUTH2_&lt;PROVIDER_NAME&gt;_CLIENT_ID</code> environment variable to set the value.</li>
-<li><code>client_secret</code>: The client secret provided by the OAuth2 provider. You can get this value by creating an application in the provider's developer console. This is a required field, but you can also use the <code>ARGILLA_OAUTH2_&lt;PROVIDER_NAME&gt;_CLIENT_SECRET</code> environment variable to set the value.</li>
-<li><code>scope</code>: The scope of the OAuth2 provider. This is an optional field, and normally you don't need to set it, but you can use it to request specific permissions from the user access.</li>
+<li><code>name</code>: The name of the provider. The available options by default are <code>huggingface</code>, <code>github</code> and <code>google-oauth2</code>.
+We will see later how to add more providers not supported by default.</li>
+<li><code>client_id</code>: The client ID provided by the OAuth2 provider. You can get this value by creating an application in the
+provider's developer console. This is a required field, but you can also use the
+<code>ARGILLA_OAUTH2_&lt;PROVIDER_NAME&gt;_CLIENT_ID</code> environment variable to set the value.</li>
+<li><code>client_secret</code>: The client secret provided by the OAuth2 provider. You can get this value by creating an application
+in the provider's developer console. This is a required field, but you can also use
+the <code>ARGILLA_OAUTH2_&lt;PROVIDER_NAME&gt;_CLIENT_SECRET</code> environment variable to set the value.</li>
+<li><code>scope</code>: The scope of the OAuth2 provider. This is an optional field, and normally you don't need to set it, but
+you can use it to request specific permissions from the user access.</li>
 </ul>
 <h3 id="allowed-workspaces">Allowed Workspaces<a class="headerlink" href="#allowed-workspaces" title="Permanent link">&para;</a></h3>
-<p>The <code>allowed_workspaces</code> key is a list of dictionaries, each dictionary represents a workspace configuration. For now, only the <code>name</code> field is defined, and it should be the name of the workspace that the user will be assigned to when logging in.
-If the workspace doesn't exist, it will be created automatically on the first server startup.</p>
+<p>The <code>allowed_workspaces</code> key defines the available workspaces when users log in using the OAuth2 provider. This is
+a list of <code>name</code> fields that should match the workspace name in the Argilla server. By default, the <code>argilla</code> workspace
+is allowed to authenticate using the OAuth2 provider.</p>
+<p>If the workspace doesn't exist, it will be created automatically on the first server startup.</p>
 <h3 id="allow-http-redirect">Allow HTTP Redirect<a class="headerlink" href="#allow-http-redirect" title="Permanent link">&para;</a></h3>
-<p>The <code>allow_http_redirect</code> key is a boolean value that allows the OAuth2 provider to redirect the user to an HTTP URL. By default, this value is set to <code>false</code>, and you should set it to <code>true</code> only if you are running the Argilla server behind a proxy that doesn't support HTTPS or if you are running the server locally.
-Enabling this option is not recommended for production environments and should be used only for development purposes.</p>
+<p>The <code>allow_http_redirect</code> key is a boolean value that allows the OAuth2 provider to redirect the user to an HTTP URL.
+By default, this value is set to <code>false</code>, and you should set it to <code>true</code> only if you are running the Argilla server
+behind a proxy that doesn't support HTTPS or if you are running the server locally.</p>
+<p>Enabling this option is not recommended for production environments and should be used only for development purposes.</p>
 <h2 id="supported-oauth2-providers-configuration">Supported OAuth2 providers configuration<a class="headerlink" href="#supported-oauth2-providers-configuration" title="Permanent link">&para;</a></h2>
-<p>The following sections will guide you through the configuration of the supported OAuth2 providers. Before diving into the configuration, you should create an application in the provider's developer console to get the client ID and client secret.</p>
-<p>A common step when creating an application in the provider's developer console is to set the redirect URI. The redirect URI is the URL where the OAuth2 provider will redirect the user after the authentication process.
-The redirect URI should be set to the Argilla server URL, followed by <code>/oauth/&lt;provider_name&gt;/callback</code>. For example, if the Argilla server is running on <code>http://localhost:8000</code>, the redirect URI for provider application should be <code>http://localhost:8000/oauth/huggingface/callback</code>.</p>
+<p>The following sections will guide you through the configuration of the supported OAuth2 providers. Before diving into
+the configuration, you should create an application in the provider's developer console to get the client ID and client
+secret.</p>
+<p>A common step when creating an application in the provider's developer console is to set the redirect URI. The
+redirect URI is the URL where the OAuth2 provider will redirect the user after the authentication process.</p>
+<p>The redirect URI should be set to the Argilla server URL, followed by <code>/oauth/&lt;provider_name&gt;/callback</code>. For example,
+if the Argilla server is running on <code>http://localhost:8000</code>, the redirect URI for provider application should
+be <code>http://localhost:8000/oauth/huggingface/callback</code>.</p>
 <h2 id="hugging-face-oauth2-configuration">Hugging Face OAuth2 configuration<a class="headerlink" href="#hugging-face-oauth2-configuration" title="Permanent link">&para;</a></h2>
-<p>Argilla supports Hugging Face OAuth2 authentication out of the box, and is already configured when running Argilla on Hugging Face Spaces (See the <a href="../../../getting_started/how-to-configure-argilla-on-huggingface/">Hugging Face Spaces settings</a> for more information).</p>
-<p>But, if you want to manually configure the Hugging Face OAuth2 provider, you should define the following fields in the <code>.oauth.yml</code> file:</p>
+<p>Argilla supports Hugging Face OAuth2 authentication out of the box, and is already configured when running Argilla
+on Hugging Face Spaces (See the <a href="../../../getting_started/how-to-configure-argilla-on-huggingface/">Hugging Face Spaces settings</a> for more information).</p>
+<p>But, if you want to manually configure the Hugging Face OAuth2 provider, you should define the following
+fields in the <code>.oauth.yml</code> file:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">providers</span><span class="p">:</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">huggingface</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;client_id&gt;&quot;</span><span class="w"> </span><span class="c1"># You can use the ARGILLA_OAUTH2_HUGGINGFACE_CLIENT_ID environment variable</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;client_secret&gt;&quot;</span><span class="w"> </span><span class="c1"># You can use the ARGILLA_OAUTH2_HUGGINGFACE_CLIENT_SECRET environment variable</span>
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;openid</span><span class="nv"> </span><span class="s">profile&quot;</span><span class="w"> </span><span class="c1"># This field is optional. But this value must be aligned your OAuth2 application created in Hugging Face.</span>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nt">allowed_workspaces</span><span class="p">:</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argilla</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nn">...</span>
 </span></code></pre></div>
-<p>To get your client ID and client secret, you need to create an <a href="https://huggingface.co/settings/applications/new">OAuth2 application</a> in the Hugging Face settings page.</p>
-<p>The minimal scope required for the Hugging Face OAuth2 provider is <code>openid profile</code>, so you don't need to change the <code>scope</code> when creating the application.</p>
+<p>To get your client ID and client secret, you need to create an <a href="https://huggingface.co/settings/applications/new">OAuth2 application</a> in the Hugging Face
+settings page.</p>
+<p>The minimal scope required for the Hugging Face OAuth2 provider is <code>openid profile</code>, so you don't need to
+change the <code>scope</code> when creating the application.</p>
 <h2 id="github-oauth2-configuration">GitHub OAuth2 configuration<a class="headerlink" href="#github-oauth2-configuration" title="Permanent link">&para;</a></h2>
-<p>Argilla also supports GitHub OAuth2 authentication out of the box. To configure the GitHub OAuth2 provider, you should define the following fields in the <code>.oauth.yml</code> file:</p>
+<p>Argilla also supports GitHub OAuth2 authentication out of the box. To configure the GitHub OAuth2 provider, you should
+define the following fields in the <code>.oauth.yml</code> file:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">providers</span><span class="p">:</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;client_id&gt;&quot;</span><span class="w"> </span><span class="c1"># You can use the ARGILLA_OAUTH2_GITHUB_CLIENT_ID environment variable</span>
@@ -2535,7 +2556,8 @@ The redirect URI should be set to the Argilla server URL, followed by <code>/oau
 </span></code></pre></div>
 <p>To get your client ID and client secret, you need to register a new <a href="https://github.com/settings/applications/new">OAuth application</a> in the GitHub settings page.</p>
 <h2 id="google-oauth2-configuration">Google OAuth2 configuration<a class="headerlink" href="#google-oauth2-configuration" title="Permanent link">&para;</a></h2>
-<p>Argilla also supports Google OAuth2 authentication out of the box. To configure the Google OAuth2 provider, you should define the following fields in the <code>.oauth.yml</code> file:</p>
+<p>Argilla also supports Google OAuth2 authentication out of the box. To configure the Google OAuth2 provider, you
+should define the following fields in the <code>.oauth.yml</code> file:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">providers</span><span class="p">:</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google-oauth2</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;client_id&gt;&quot;</span><span class="w"> </span><span class="c1"># You can use the ARGILLA_OAUTH2_GOOGLE_OAUTH2_CLIENT_ID environment variable</span>
@@ -2545,10 +2567,13 @@ The redirect URI should be set to the Argilla server URL, followed by <code>/oau
 </span></code></pre></div>
 <p>To get your client ID and client secret, you need to create a new <a href="https://console.cloud.google.com/apis/credentials/oauthclient">OAuth2 client</a> in the Google Cloud Console.</p>
 <h2 id="adding-more-oauth2-providers">Adding more OAuth2 providers<a class="headerlink" href="#adding-more-oauth2-providers" title="Permanent link">&para;</a></h2>
-<p>If you want to add more OAuth2 providers that are not supported by default, you can do so by adding a new provider configuration to the <code>.oauth.yml</code> file.
-The Argilla server uses the <a href="https://python-social-auth.readthedocs.io/en/latest/backends/index.html">Social Auth backends</a> component to define the provider configuration. You only need to register the provider backend using the <code>extra_backends</code> key in the <code>.oauth.yml</code> file.</p>
-<p>For example, to configure the <a href="https://python-social-auth.readthedocs.io/en/latest/backends/apple.html">Apple OAuth2 provider</a>, you should add the following configuration to the <code>.oauth.yml</code> file:</p>
-<p><div class="language-yaml highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">providers</span><span class="p">:</span>
+<p>If you want to add more OAuth2 providers that are not supported by default, you can do so by adding a new provider
+configuration to the <code>.oauth.yml</code> file. The Argilla server uses the <a href="https://python-social-auth.readthedocs.io/en/latest/backends/index.html">Social Auth backends</a> component to define
+the provider configuration. You only need to register the provider backend using the <code>extra_backends</code> key in
+the <code>.oauth.yml</code> file.</p>
+<p>For example, to configure the <a href="https://python-social-auth.readthedocs.io/en/latest/backends/apple.html">Apple OAuth2 provider</a>, you should add the following configuration to
+the <code>.oauth.yml</code> file:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">providers</span><span class="p">:</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apple-id</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;client_id&gt;&quot;</span><span class="w"> </span><span class="c1"># You can use the ARGILLA_OAUTH2_APPLE_ID_CLIENT_ID environment variable</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;client_secret&gt;&quot;</span><span class="w"> </span><span class="c1"># You can use the ARGILLA_OAUTH2_APPLE_ID_CLIENT_SECRET environment variable</span>
@@ -2556,7 +2581,8 @@ The Argilla server uses the <a href="https://python-social-auth.readthedocs.io/e
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nt">extra_backends</span><span class="p">:</span>
 </span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">social_core.backends.apple.AppleIdAuth</span><span class="w"> </span><span class="c1"># Register the Apple OAuth2 provider backend</span>
 </span></code></pre></div>
-All the `SOCIAL_AUTH_* environment variables are supported by the Argilla server, so you can customize the provider configuration using these environment variables.</p>
+<p>All the <code>SOCIAL_AUTH_*</code> environment variables are supported by the Argilla server, so you can customize the provider
+configuration using these environment variables.</p>
 
 
 

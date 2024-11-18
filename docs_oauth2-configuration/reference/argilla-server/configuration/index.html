@@ -2656,9 +2656,10 @@ Argilla server with <code>ARGILLA_BASE_URL=/custom-path-for-argilla</code>.</p>
 </ul>
 <h4 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h4>
 <ul>
-<li><code>ARGILLA_AUTH_SECRET_KEY</code>: The secret key used to sign the API token data. You can use <code>openssl rand -hex 32</code> to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.</li>
 <li><code>USERNAME</code>: If provided, the owner username (Default: <code>None</code>).</li>
 <li><code>PASSWORD</code>: If provided, the owner password (Default: <code>None</code>).</li>
+<li><code>ARGILLA_AUTH_SECRET_KEY</code>: The secret key used to sign the API token data. You can use <code>openssl rand -hex 32</code> to generate a 32 character string to use with this environment variable. By default a random value is generated, so if you are using more than one server worker (or more than one Argilla server) you will need to set the same value for all of them.</li>
+<li><code>ARGILLA_AUTH_OAUTH_CFG</code>: Path to the OAuth2 configuration file (Default: <code>$PWD/.oauth.yml</code>).</li>
 </ul>
 <p>If <code>USERNAME</code> and <code>PASSWORD</code> are provided, the owner user will be created with these credentials on the server startup.</p>
 <h4 id="database">Database<a class="headerlink" href="#database" title="Permanent link">&para;</a></h4>
