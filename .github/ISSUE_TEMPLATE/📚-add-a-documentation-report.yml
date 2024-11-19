@@ -1,0 +1,18 @@
+name: "\U0001F4DA Add a documentation report"
+description: "Have you spotted a typo or mistake in our docs?"
+title: "[DOCS]"
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for reporting the documentation mistake! Please fill out the section below."
+
+  - type: textarea
+    id: doc_report
+    attributes:
+      label: "Which page or section is this issue related to?"
+      description: "Please include the URL and/or source."
+    validations:
+          required: false
