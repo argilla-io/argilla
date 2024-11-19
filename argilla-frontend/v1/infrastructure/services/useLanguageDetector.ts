@@ -31,6 +31,12 @@ export const useLanguageDetector = (context: Context) => {
       return change(language);
     }
 
+    const languageCode = language.split("-")[0];
+
+    if (exists(languageCode)) {
+      return change(languageCode);
+    }
+
     change("en");
   };
 
