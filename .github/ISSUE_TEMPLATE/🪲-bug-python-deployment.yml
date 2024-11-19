@@ -1,0 +1,61 @@
+name: "\U0001FAB2 Bug report: Python/Deployment"
+description: "Report Python or Deployment bugs and unexpected behavior."
+title: "[BUG-python/deployment]"
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for reporting a bug! Please fill out the sections below."
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: "Describe the bug"
+      description: "A clear and concise description of the bug."
+    validations:
+          required: false
+
+  - type: textarea
+    id: stacktrace
+    attributes:
+      label: "Stacktrace and code to create the bug"
+      description: "The code to reproduce the behavior."
+      placeholder: |
+        ```python
+        my_python_code
+        ```
+        ```bash
+        my_bash_code
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected behavior"
+      description: "A clear and concise description of what you expected to happen."
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "Since version 1.16.0 you can use `python -m argilla info` command to easily get the used versions."
+      value: |
+        - Argilla Version [e.g. 1.0.0]:
+        - ElasticSearch Version [e.g. 7.10.2]:
+        - Docker Image (optional) [e.g. argilla:v1.0.0]:
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional context"
+      description: "Add any other relevant information."
+    validations:
+      required: false
