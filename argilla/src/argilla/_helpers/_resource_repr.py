@@ -28,6 +28,7 @@ RESOURCE_REPR_CONFIG = {
         # "len_column": "datasets",
     },
     "User": {"columns": ["username", "id", "role", "updated_at"], "table_name": "Users"},
+    "Webhook": {"columns": ["url", "id", "events", "enabled", "updated_at"], "table_name": "Webhooks"},
 }
 
 

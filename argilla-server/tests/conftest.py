@@ -12,17 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import asyncio
-from typing import TYPE_CHECKING, AsyncGenerator, Generator
-
 import httpx
+import asyncio
 import pytest
 import pytest_asyncio
-from argilla_server.cli.database.migrate import migrate_db
-from argilla_server.database import database_url_sync
-from argilla_server.settings import settings
+
+from rq import Queue
+from typing import TYPE_CHECKING, AsyncGenerator, Generator
 from sqlalchemy import NullPool, create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
+from argilla_server.cli.database.migrate import migrate_db
+from argilla_server.database import database_url_sync
+from argilla_server.jobs.queues import REDIS_CONNECTION
+from argilla_server.settings import settings
 
 from tests.database import SyncTestSession, TestSession, set_task
 
@@ -95,6 +98,16 @@ def sync_db(sync_connection: "Connection") -> Generator["Session", None, None]:
     session.close()
     SyncTestSession.remove()
     sync_connection.rollback()
+
+
+@pytest.fixture(autouse=True)
+def empty_job_queues():
+    queues = Queue.all(connection=REDIS_CONNECTION)
+
+    for queue in queues:
+        queue.empty()
+
+    yield
 
 
 @pytest.fixture

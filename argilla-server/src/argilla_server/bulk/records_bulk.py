@@ -30,6 +30,8 @@ from argilla_server.api.schemas.v1.records_bulk import (
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
 from argilla_server.contexts import distribution
 from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
@@ -68,6 +70,9 @@ class CreateRecordsBulk:
 
         await _preload_records_relationships_before_index(self._db, records)
         await self._search_engine.index_records(dataset, records)
+
+        for record in records:
+            await notify_record_event_v1(self._db, RecordEvent.created, record)
 
         return RecordsBulk(items=records)
 
@@ -186,6 +191,8 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         await _preload_records_relationships_before_index(self._db, records)
         await self._search_engine.index_records(dataset, records)
 
+        await self._notify_upsert_record_events(records)
+
         return RecordsBulkWithUpdateInfo(
             items=records,
             updated_item_ids=[record.id for record in found_records.values()],
@@ -204,6 +211,13 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         )
 
         return {**records_by_external_id, **records_by_id}
+
+    async def _notify_upsert_record_events(self, records: List[Record]) -> None:
+        for record in records:
+            if record.inserted_at == record.updated_at:
+                await notify_record_event_v1(self._db, RecordEvent.created, record)
+            else:
+                await notify_record_event_v1(self._db, RecordEvent.updated, record)
 
 
 async def _preload_records_relationships_before_index(db: "AsyncSession", records: Sequence[Record]) -> None:
