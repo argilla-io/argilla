@@ -1,10 +1,14 @@
 import { useLanguageDetector } from "./useLanguageDetector";
+import { useLocalStorage } from "./useLocalStorage";
+
+jest.mock("./useLocalStorage");
+const useLocalStorageMock = jest.mocked(useLocalStorage);
 
 describe("useLanguageDetector", () => {
   const context = {
     app: {
       i18n: {
-        locales: [{ code: "en" }, { code: "es" }, { code: "fr-CA" }],
+        locales: [{ code: "en" }, { code: "es" }, { code: "fr" }],
         setLocale: jest.fn(),
       },
     },
@@ -15,23 +19,15 @@ describe("useLanguageDetector", () => {
   });
 
   describe("initialize should", () => {
-    test("change to the detected language when it exists", () => {
+    test("set the browser language if the user does not have the language saved and the browser language is supported", () => {
       Object.defineProperty(window.navigator, "language", {
-        value: "fr-CA",
+        value: "es",
         configurable: true,
       });
-
-      const { initialize } = useLanguageDetector(context);
-
-      initialize();
-
-      expect(context.app.i18n.setLocale).toHaveBeenCalledWith("fr-CA");
-    });
-
-    test("change to base language code if not exist the complete code into locales", () => {
-      Object.defineProperty(window.navigator, "language", {
-        value: "es-AR",
-        configurable: true,
+      useLocalStorageMock.mockReturnValue({
+        get: jest.fn().mockReturnValue(null),
+        pop: jest.fn(),
+        set: jest.fn(),
       });
 
       const { initialize } = useLanguageDetector(context);
@@ -41,17 +37,54 @@ describe("useLanguageDetector", () => {
       expect(context.app.i18n.setLocale).toHaveBeenCalledWith("es");
     });
 
-    test("not change to the language code when the detected language does not exist", () => {
+    test("set the browser language if the user does not have the language saved and the browser language is supported", () => {
       Object.defineProperty(window.navigator, "language", {
-        value: "de",
+        value: "es-AR",
         configurable: true,
+      });
+      useLocalStorageMock.mockReturnValue({
+        get: jest.fn().mockReturnValue(null),
+        pop: jest.fn(),
+        set: jest.fn(),
       });
 
       const { initialize } = useLanguageDetector(context);
 
       initialize();
 
-      expect(context.app.i18n.setLocale).toHaveBeenCalledTimes(0);
+      expect(context.app.i18n.setLocale).toHaveBeenCalledWith("es");
+    });
+
+    test("set English if the user does not have the language saved and the browser language is not supported", () => {
+      Object.defineProperty(window.navigator, "language", {
+        value: "de",
+        configurable: true,
+      });
+      useLocalStorageMock.mockReturnValue({
+        get: jest.fn().mockReturnValue(null),
+        pop: jest.fn(),
+        set: jest.fn(),
+      });
+
+      const { initialize } = useLanguageDetector(context);
+
+      initialize();
+
+      expect(context.app.i18n.setLocale).toHaveBeenCalledWith("en");
+    });
+
+    test("set the language saved by the user", () => {
+      useLocalStorageMock.mockReturnValue({
+        get: () => "fr",
+        pop: jest.fn(),
+        set: jest.fn(),
+      });
+
+      const { initialize } = useLanguageDetector(context);
+
+      initialize();
+
+      expect(context.app.i18n.setLocale).toHaveBeenCalledWith("fr");
     });
   });
 });
