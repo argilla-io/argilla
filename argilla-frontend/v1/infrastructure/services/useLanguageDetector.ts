@@ -1,4 +1,5 @@
 import { NuxtI18nInstance } from "@nuxtjs/i18n";
+import { useLocalStorage } from "./useLocalStorage";
 
 type Context = {
   app: {
@@ -10,14 +11,13 @@ type Context = {
 };
 
 export const useLanguageDetector = (context: Context) => {
+  const { change } = useLanguageChanger(context);
+  const { get } = useLocalStorage();
+
   const { i18n } = context.app;
 
-  const change = (language: string) => {
-    i18n.setLocale(language);
-  };
-
   const detect = () => {
-    return navigator.language;
+    return get("language") || navigator.language;
   };
 
   const exists = (language: string) => {
@@ -36,9 +36,28 @@ export const useLanguageDetector = (context: Context) => {
     if (exists(languageCode)) {
       return change(languageCode);
     }
+
+    change("en");
   };
 
   return {
     initialize,
+  };
+};
+
+export const useLanguageChanger = (context: Context) => {
+  const { i18n } = context.app;
+
+  const { set } = useLocalStorage();
+
+  const change = (language: string) => {
+    i18n.setLocale(language);
+
+    set("language", language);
+  };
+
+  return {
+    change,
+    languages: i18n.locales.sort((a, b) => a.code.localeCompare(b.code)),
   };
 };

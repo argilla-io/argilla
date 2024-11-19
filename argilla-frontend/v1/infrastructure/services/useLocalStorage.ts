@@ -1,4 +1,9 @@
-type Options = "showShortcutsHelper" | "layout" | "redirectTo";
+type Options =
+  | "showShortcutsHelper"
+  | "layout"
+  | "redirectTo"
+  | "language"
+  | "theme";
 
 const STORAGE_KEY = "argilla";
 
