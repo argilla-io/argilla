@@ -2,7 +2,7 @@
   <div>
     <div class="dataset-list__header">
       <h1 class="dataset-list__title" v-text="$t('home.argillaDatasets')" />
-      <div class="dataset-list__filters">
+      <div class="dataset-list__filters" v-if="datasets.length">
         <BaseSearchBar
           @input="onSearch"
           :querySearch="querySearch"
