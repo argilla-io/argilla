@@ -25,8 +25,10 @@ export default (_, inject) => {
     try {
       document.execCommand("copy");
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Unable to copy to clipboard", err);
     }
+
     document.body.removeChild(textArea);
   };
 

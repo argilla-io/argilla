@@ -2,10 +2,10 @@ import Vue from "vue";
 
 // NOTE - to use this directive, add to your html text element where to put a asterisk :
 //  v-required-field="{ show: true, color: 'blue'}"
-//    => color (String) the color of the asterisk : black by default
+//  => color (String) the color of the asterisk : black by default
 
 Vue.directive("required-field", {
-  bind(element, binding) {
+  bind(element, binding: { value: { show: boolean; color: string } }) {
     const span = document.createElement("span");
     span.textContent = " *";
     span.style.color = binding.value.color;
