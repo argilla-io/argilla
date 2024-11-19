@@ -18,7 +18,9 @@
     <label
       v-else
       class="dataset-config-label__label"
-      v-text="`Use coma to separate labels`"
+      v-text="
+        $t('datasetCreation.questions.labelSelection.optionsSeparatedByComma')
+      "
     />
   </div>
 </template>
