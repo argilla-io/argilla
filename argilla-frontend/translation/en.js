@@ -58,7 +58,7 @@ export default {
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",
-    userSettings: "my settings",
+    userSettings: "My settings",
   },
   datasets: {
     left: "left",
@@ -86,6 +86,7 @@ export default {
     apiKeyDescription:
       "API key tokens allow you to manage datasets using the Python SDK.",
     theme: "Theme",
+    language: "Language",
     copyKey: "Copy key",
   },
   userAvatarTooltip: {
@@ -344,6 +345,12 @@ export default {
       "Persistent storage is not enabled. All data will be lost if this space restarts. Go to the space settings to enable it.",
     annotator:
       "Persistent storage is not enabled. All data will be lost if this space restarts.",
+  },
+  colorSchema: {
+    system: "System",
+    light: "Light",
+    dark: "Dark",
+    "high-contrast": "High contrast",
   },
   validations: {
     businessLogic: {

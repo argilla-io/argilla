@@ -48,14 +48,21 @@
       <p v-else class="--body1 description__text">-</p>
     </div>
     <div class="form-group">
-      <UserTokenComponent :userToken="user.apiKey" />
-    </div>
-    <div class="form-group">
       <h2
         class="--heading5 --medium description__title"
         v-text="$t('userSettings.theme')"
       />
       <UserSettingsTheme />
+    </div>
+    <div class="form-group">
+      <h2
+        class="--heading5 --medium description__title"
+        v-text="$t('userSettings.language')"
+      />
+      <UserSettingsLanguage />
+    </div>
+    <div class="form-group">
+      <UserTokenComponent :userToken="user.apiKey" />
     </div>
   </div>
 </template>

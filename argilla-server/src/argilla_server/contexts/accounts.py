@@ -15,7 +15,7 @@ import secrets
 from typing import Iterable, List, Sequence, Union
 from uuid import UUID
 
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -27,8 +27,6 @@ from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.userinfo import UserInfo
 from argilla_server.validators.users import UserCreateValidator
-
-_CRYPT_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 async def create_workspace_user(db: AsyncSession, workspace_user_attrs: dict) -> WorkspaceUser:
@@ -169,19 +167,21 @@ async def authenticate_user(db: AsyncSession, username: str, password: str):
     elif user:
         return
     else:
-        _CRYPT_CONTEXT.dummy_verify()
+        _dummy_verify()
 
 
 def hash_password(password: str) -> str:
-    return _CRYPT_CONTEXT.hash(password)
+    return bcrypt.hashpw(
+        bytes(password, encoding="utf-8"),
+        bcrypt.gensalt(),
+    ).decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return _CRYPT_CONTEXT.verify(password, password_hash)
-
-
-def _generate_random_password() -> str:
-    return secrets.token_urlsafe()
+    return bcrypt.checkpw(
+        bytes(password, encoding="utf-8"),
+        bytes(password_hash, encoding="utf-8"),
+    )
 
 
 def generate_user_token(user: User) -> str:
@@ -193,3 +193,15 @@ def generate_user_token(user: User) -> str:
             role=user.role,
         ),
     )
+
+
+_DUMMY_SECRET = "dummy_secret"
+_DUMMY_HASH = hash_password(_DUMMY_SECRET)
+
+
+def _dummy_verify():
+    verify_password(_DUMMY_SECRET, _DUMMY_HASH)
+
+
+def _generate_random_password() -> str:
+    return secrets.token_urlsafe()

@@ -58,6 +58,19 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.webhooks.v1.enums import DatasetEvent, ResponseEvent, RecordEvent
+from argilla_server.webhooks.v1.records import (
+    build_record_event as build_record_event_v1,
+    notify_record_event as notify_record_event_v1,
+)
+from argilla_server.webhooks.v1.responses import (
+    build_response_event as build_response_event_v1,
+    notify_response_event as notify_response_event_v1,
+)
+from argilla_server.webhooks.v1.datasets import (
+    build_dataset_event as build_dataset_event_v1,
+    notify_dataset_event as notify_dataset_event_v1,
+)
 from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole
@@ -150,7 +163,11 @@ async def create_dataset(db: AsyncSession, dataset_attrs: dict) -> Dataset:
 
     await DatasetCreateValidator.validate(db, dataset)
 
-    return await dataset.save(db)
+    await dataset.save(db)
+
+    await notify_dataset_event_v1(db, DatasetEvent.created, dataset)
+
+    return dataset
 
 
 def _allowed_roles_for_metadata_property_create(metadata_property_create: MetadataPropertyCreate) -> List[UserRole]:
@@ -163,9 +180,11 @@ def _allowed_roles_for_metadata_property_create(metadata_property_create: Metada
 async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     await DatasetPublishValidator.validate(db, dataset)
 
-    dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=True)
+    dataset = await dataset.update(db, status=DatasetStatus.ready)
 
     await search_engine.create_index(dataset)
+
+    await notify_dataset_event_v1(db, DatasetEvent.published, dataset)
 
     return dataset
 
@@ -177,13 +196,18 @@ async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict
 
     dataset_jobs.update_dataset_records_status_job.delay(dataset.id)
 
+    await notify_dataset_event_v1(db, DatasetEvent.updated, dataset)
+
     return dataset
 
 
 async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
-    dataset = await dataset.delete(db, autocommit=True)
+    deleted_dataset_event_v1 = await build_dataset_event_v1(db, DatasetEvent.deleted, dataset)
+
+    dataset = await dataset.delete(db)
 
     await search_engine.delete_index(dataset)
+    await deleted_dataset_event_v1.notify(db)
 
     return dataset
 
@@ -245,7 +269,6 @@ async def create_metadata_property(
         settings=metadata_property_create.settings.dict(),
         allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
         dataset_id=dataset.id,
-        autocommit=True,
     )
 
     if dataset.is_ready:
@@ -302,7 +325,6 @@ async def create_vector_settings(
         title=vector_settings_create.title,
         dimensions=vector_settings_create.dimensions,
         dataset_id=dataset.id,
-        autocommit=True,
     )
 
     if dataset.is_ready:
@@ -729,13 +751,22 @@ async def preload_records_relationships_before_validate(db: AsyncSession, record
 async def delete_records(
     db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
 ) -> None:
-    records = await Record.delete_many(
-        db=db,
-        conditions=[Record.id.in_(records_ids), Record.dataset_id == dataset.id],
-        autocommit=True,
-    )
+    params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+
+    records = (await db.execute(select(Record).filter(*params).order_by(Record.inserted_at.asc()))).scalars().all()
+
+    deleted_record_events_v1 = []
+    for record in records:
+        deleted_record_events_v1.append(
+            await build_record_event_v1(db, RecordEvent.deleted, record),
+        )
+
+    records = await Record.delete_many(db, conditions=params)
 
     await search_engine.delete_records(dataset=dataset, records=records)
+
+    for deleted_record_event_v1 in deleted_record_events_v1:
+        await deleted_record_event_v1.notify(db)
 
 
 async def update_record(
@@ -765,13 +796,18 @@ async def update_record(
         await _preload_record_relationships_before_index(db, record)
         await search_engine.index_records(record.dataset, [record])
 
+    await notify_record_event_v1(db, RecordEvent.updated, record)
+
     return record
 
 
 async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record: Record) -> Record:
-    record = await record.delete(db=db, autocommit=True)
+    deleted_record_event_v1 = await build_record_event_v1(db, RecordEvent.deleted, record)
+
+    record = await record.delete(db)
 
     await search_engine.delete_records(dataset=record.dataset, records=[record])
+    await deleted_record_event_v1.notify(db)
 
     return record
 
@@ -794,6 +830,7 @@ async def create_response(
         user_id=user.id,
         autocommit=False,
     )
+
     await _touch_dataset_last_activity_at(db, record.dataset)
 
     await db.commit()
@@ -802,6 +839,8 @@ async def create_response(
 
     await _load_users_from_responses([response])
     await search_engine.update_record_response(response)
+
+    await notify_response_event_v1(db, ResponseEvent.created, response)
 
     return response
 
@@ -826,6 +865,8 @@ async def update_response(
 
     await _load_users_from_responses(response)
     await search_engine.update_record_response(response)
+
+    await notify_response_event_v1(db, ResponseEvent.updated, response)
 
     return response
 
@@ -855,10 +896,17 @@ async def upsert_response(
     await _load_users_from_responses(response)
     await search_engine.update_record_response(response)
 
+    if response.inserted_at == response.updated_at:
+        await notify_response_event_v1(db, ResponseEvent.created, response)
+    else:
+        await notify_response_event_v1(db, ResponseEvent.updated, response)
+
     return response
 
 
 async def delete_response(db: AsyncSession, search_engine: SearchEngine, response: Response) -> Response:
+    deleted_response_event_v1 = await build_response_event_v1(db, ResponseEvent.deleted, response)
+
     response = await response.delete(db, autocommit=False)
     await _touch_dataset_last_activity_at(db, response.record.dataset)
 
@@ -868,6 +916,8 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
 
     await _load_users_from_responses(response)
     await search_engine.delete_record_response(response)
+
+    await deleted_response_event_v1.notify(db)
 
     return response
 
@@ -912,7 +962,6 @@ async def upsert_suggestion(
         db,
         schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
         constraints=[Suggestion.record_id, Suggestion.question_id],
-        autocommit=True,
     )
 
     await _preload_suggestion_relationships_before_index(db, suggestion)
@@ -929,7 +978,6 @@ async def delete_suggestions(
     await Suggestion.delete_many(
         db=db,
         conditions=[Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id],
-        autocommit=True,
     )
 
     for suggestion in suggestions:
@@ -952,7 +1000,7 @@ async def list_suggestions_by_id_and_record_id(
 
 
 async def delete_suggestion(db: AsyncSession, search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:
-    suggestion = await suggestion.delete(db, autocommit=True)
+    suggestion = await suggestion.delete(db)
 
     await search_engine.delete_record_suggestion(suggestion)
 
