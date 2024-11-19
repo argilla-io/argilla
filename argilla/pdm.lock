@@ -8,7 +8,7 @@ lock_version = "4.5.0"
 content_hash = "sha256:154336258f112fb111f039e0099a194a54ee424d267a3d70290e115acda22154"
 
 [[metadata.targets]]
-requires_python = ">=3.9,<3.13"
+requires_python = ">=3.9"
 
 [[package]]
 name = "aiohappyeyeballs"

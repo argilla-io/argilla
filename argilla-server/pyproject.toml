@@ -1,5 +1,4 @@
 [project]
-# Remove me
 name = "argilla-server"
 dynamic = ["version"]
 description = "Open-source tool for exploring, labeling, and monitoring data for NLP projects."
