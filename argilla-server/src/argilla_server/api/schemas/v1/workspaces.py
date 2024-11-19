@@ -17,7 +17,6 @@ from typing import List
 from uuid import UUID
 
 from pydantic import BaseModel, Field, ConfigDict
-from starlette.config import Config
 
 
 class Workspace(BaseModel):
