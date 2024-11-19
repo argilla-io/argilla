@@ -67,9 +67,6 @@ export default {
       return this.$language.isRTL(this.markdown) ? "--rtl" : "--ltr";
     },
     markdownToHtml() {
-      this.markdown += "\n\n";
-      this.markdown = "```js hello world\n" + this.markdown + "```";
-
       return marked.parse(this.markdown, {
         headerIds: false,
         mangle: false,
