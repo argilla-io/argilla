@@ -12,10 +12,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from enum import Enum
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        """Custom StrEnum class for Python <3.11 compatibility."""
+
+        def __str__(self):
+            return str(self.value)
 
 
-class WebhookEvent(str, Enum):
+class WebhookEvent(StrEnum):
     dataset_created = "dataset.created"
     dataset_updated = "dataset.updated"
     dataset_deleted = "dataset.deleted"
@@ -30,34 +39,22 @@ class WebhookEvent(str, Enum):
     response_updated = "response.updated"
     response_deleted = "response.deleted"
 
-    def __str__(self):
-        return str(self.value)
 
-
-class DatasetEvent(str, Enum):
+class DatasetEvent(StrEnum):
     created = WebhookEvent.dataset_created.value
     updated = WebhookEvent.dataset_updated.value
     deleted = WebhookEvent.dataset_deleted.value
     published = WebhookEvent.dataset_published.value
 
-    def __str__(self):
-        return str(self.value)
 
-
-class RecordEvent(str, Enum):
+class RecordEvent(StrEnum):
     created = WebhookEvent.record_created.value
     updated = WebhookEvent.record_updated.value
     deleted = WebhookEvent.record_deleted.value
     completed = WebhookEvent.record_completed.value
 
-    def __str__(self):
-        return str(self.value)
 
-
-class ResponseEvent(str, Enum):
+class ResponseEvent(StrEnum):
     created = WebhookEvent.response_created.value
     updated = WebhookEvent.response_updated.value
     deleted = WebhookEvent.response_deleted.value
-
-    def __str__(self):
-        return str(self.value)
