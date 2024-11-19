@@ -70,6 +70,7 @@ export default {
     align-items: center;
     justify-content: center;
     min-height: 50vh;
+    color: var(--fg-tertiary);
   }
 }
 .list-move,
