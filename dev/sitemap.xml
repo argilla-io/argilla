@@ -111,6 +111,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.argilla.io/dev/how_to_guides/webhooks/</loc>
+         <lastmod>2024-11-19</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.argilla.io/dev/how_to_guides/webhooks_internals/</loc>
+         <lastmod>2024-11-19</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.argilla.io/dev/how_to_guides/workspace/</loc>
          <lastmod>2024-11-19</lastmod>
          <changefreq>daily</changefreq>
@@ -137,6 +147,11 @@
     </url>
     <url>
          <loc>https://docs.argilla.io/dev/reference/argilla/users/</loc>
+         <lastmod>2024-11-19</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://docs.argilla.io/dev/reference/argilla/webhooks/</loc>
          <lastmod>2024-11-19</lastmod>
          <changefreq>daily</changefreq>
     </url>
