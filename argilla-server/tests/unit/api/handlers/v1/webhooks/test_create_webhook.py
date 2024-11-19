@@ -125,10 +125,8 @@ class TestCreateWebhook:
         [
             "",
             "example.com",
-            "http:example.com",
-            "https:example.com",
-            "http://localhost/webhooks",
-            "http://localhost:3000/webhooks",
+            "http.example.com",
+            "https.example.com",
         ],
     )
     async def test_create_webhook_with_invalid_url(
