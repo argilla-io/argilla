@@ -84,6 +84,8 @@ export default {
     apiKey: "Clave de API",
     apiKeyDescription:
       "Los tokens de clave API permiten administrar datasets utilizando el SDK de Python",
+    theme: "Tema",
+    language: "Idioma",
     copyKey: "Copiar clave",
   },
   userAvatarTooltip: {
@@ -334,6 +336,12 @@ export default {
       "El almacenamiento persistente no está habilitado. Todos los datos se perderán si este espacio se reinicia. Vaya a la configuración del espacio para habilitarlo",
     annotator:
       "El almacenamiento persistente no está habilitado. Todos los datos se perderán si este espacio se reinicia",
+  },
+  colorSchema: {
+    system: "Sistema",
+    light: "Claro",
+    dark: "Oscuro",
+    "high-contrast": "Alto contraste",
   },
   validations: {
     businessLogic: {
