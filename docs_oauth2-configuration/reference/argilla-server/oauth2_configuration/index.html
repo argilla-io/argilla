@@ -1919,9 +1919,10 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="Supported OAuth2 providers configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#hugging-face-oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Hugging Face OAuth2 configuration
@@ -1929,8 +1930,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#github-oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       GitHub OAuth2 configuration
@@ -1938,8 +1939,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#google-oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Google OAuth2 configuration
@@ -1947,13 +1948,18 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#adding-more-oauth2-providers" class="md-nav__link">
     <span class="md-ellipsis">
       Adding more OAuth2 providers
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2404,9 +2410,10 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="Supported OAuth2 providers configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#hugging-face-oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Hugging Face OAuth2 configuration
@@ -2414,8 +2421,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#github-oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       GitHub OAuth2 configuration
@@ -2423,8 +2430,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#google-oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Google OAuth2 configuration
@@ -2432,13 +2439,18 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#adding-more-oauth2-providers" class="md-nav__link">
     <span class="md-ellipsis">
       Adding more OAuth2 providers
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2527,7 +2539,7 @@ redirect URI is the URL where the OAuth2 provider will redirect the user after t
 <p>The redirect URI should be set to the Argilla server URL, followed by <code>/oauth/&lt;provider_name&gt;/callback</code>. For example,
 if the Argilla server is running on <code>http://localhost:8000</code>, the redirect URI for provider application should
 be <code>http://localhost:8000/oauth/huggingface/callback</code>.</p>
-<h2 id="hugging-face-oauth2-configuration">Hugging Face OAuth2 configuration<a class="headerlink" href="#hugging-face-oauth2-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="hugging-face-oauth2-configuration">Hugging Face OAuth2 configuration<a class="headerlink" href="#hugging-face-oauth2-configuration" title="Permanent link">&para;</a></h3>
 <p>Argilla supports Hugging Face OAuth2 authentication out of the box, and is already configured when running Argilla
 on Hugging Face Spaces (See the <a href="../../../getting_started/how-to-configure-argilla-on-huggingface/">Hugging Face Spaces settings</a> for more information).</p>
 <p>But, if you want to manually configure the Hugging Face OAuth2 provider, you should define the following
@@ -2544,7 +2556,7 @@ fields in the <code>.oauth.yml</code> file:</p>
 settings page.</p>
 <p>The minimal scope required for the Hugging Face OAuth2 provider is <code>openid profile</code>, so you don't need to
 change the <code>scope</code> when creating the application.</p>
-<h2 id="github-oauth2-configuration">GitHub OAuth2 configuration<a class="headerlink" href="#github-oauth2-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="github-oauth2-configuration">GitHub OAuth2 configuration<a class="headerlink" href="#github-oauth2-configuration" title="Permanent link">&para;</a></h3>
 <p>Argilla also supports GitHub OAuth2 authentication out of the box. To configure the GitHub OAuth2 provider, you should
 define the following fields in the <code>.oauth.yml</code> file:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">providers</span><span class="p">:</span>
@@ -2555,7 +2567,7 @@ define the following fields in the <code>.oauth.yml</code> file:</p>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nn">...</span>
 </span></code></pre></div>
 <p>To get your client ID and client secret, you need to register a new <a href="https://github.com/settings/applications/new">OAuth application</a> in the GitHub settings page.</p>
-<h2 id="google-oauth2-configuration">Google OAuth2 configuration<a class="headerlink" href="#google-oauth2-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="google-oauth2-configuration">Google OAuth2 configuration<a class="headerlink" href="#google-oauth2-configuration" title="Permanent link">&para;</a></h3>
 <p>Argilla also supports Google OAuth2 authentication out of the box. To configure the Google OAuth2 provider, you
 should define the following fields in the <code>.oauth.yml</code> file:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">providers</span><span class="p">:</span>
@@ -2566,7 +2578,7 @@ should define the following fields in the <code>.oauth.yml</code> file:</p>
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nn">...</span>
 </span></code></pre></div>
 <p>To get your client ID and client secret, you need to create a new <a href="https://console.cloud.google.com/apis/credentials/oauthclient">OAuth2 client</a> in the Google Cloud Console.</p>
-<h2 id="adding-more-oauth2-providers">Adding more OAuth2 providers<a class="headerlink" href="#adding-more-oauth2-providers" title="Permanent link">&para;</a></h2>
+<h3 id="adding-more-oauth2-providers">Adding more OAuth2 providers<a class="headerlink" href="#adding-more-oauth2-providers" title="Permanent link">&para;</a></h3>
 <p>If you want to add more OAuth2 providers that are not supported by default, you can do so by adding a new provider
 configuration to the <code>.oauth.yml</code> file. The Argilla server uses the <a href="https://python-social-auth.readthedocs.io/en/latest/backends/index.html">Social Auth backends</a> component to define
 the provider configuration. You only need to register the provider backend using the <code>extra_backends</code> key in
