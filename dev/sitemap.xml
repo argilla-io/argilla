@@ -11,6 +11,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://docs.argilla.io/dev/community/adding_language/</loc>
+         <lastmod>2024-11-19</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://docs.argilla.io/dev/community/changelog/</loc>
          <lastmod>2024-11-19</lastmod>
          <changefreq>daily</changefreq>
