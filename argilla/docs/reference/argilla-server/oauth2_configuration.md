@@ -78,7 +78,7 @@ The redirect URI should be set to the Argilla server URL, followed by `/oauth/<p
 if the Argilla server is running on `http://localhost:8000`, the redirect URI for provider application should
 be `http://localhost:8000/oauth/huggingface/callback`.
 
-##  Hugging Face OAuth2 configuration
+###  Hugging Face OAuth2 configuration
 
 Argilla supports Hugging Face OAuth2 authentication out of the box, and is already configured when running Argilla
 on Hugging Face Spaces (See the [Hugging Face Spaces settings](../../getting_started/how-to-configure-argilla-on-huggingface.md) for more information).
@@ -103,7 +103,7 @@ settings page.
 The minimal scope required for the Hugging Face OAuth2 provider is `openid profile`, so you don't need to
 change the `scope` when creating the application.
 
-## GitHub OAuth2 configuration
+### GitHub OAuth2 configuration
 
 Argilla also supports GitHub OAuth2 authentication out of the box. To configure the GitHub OAuth2 provider, you should
 define the following fields in the `.oauth.yml` file:
@@ -120,7 +120,7 @@ providers:
 
 To get your client ID and client secret, you need to register a new [OAuth application](https://github.com/settings/applications/new) in the GitHub settings page.
 
-## Google OAuth2 configuration
+### Google OAuth2 configuration
 
 Argilla also supports Google OAuth2 authentication out of the box. To configure the Google OAuth2 provider, you
 should define the following fields in the `.oauth.yml` file:
@@ -137,7 +137,7 @@ providers:
 
 To get your client ID and client secret, you need to create a new [OAuth2 client](https://console.cloud.google.com/apis/credentials/oauthclient) in the Google Cloud Console.
 
-## Adding more OAuth2 providers
+### Adding more OAuth2 providers
 
 If you want to add more OAuth2 providers that are not supported by default, you can do so by adding a new provider
 configuration to the `.oauth.yml` file. The Argilla server uses the [Social Auth backends](https://python-social-auth.readthedocs.io/en/latest/backends/index.html) component to define
@@ -161,4 +161,3 @@ extra_backends:
 
 All the `SOCIAL_AUTH_*` environment variables are supported by the Argilla server, so you can customize the provider
 configuration using these environment variables.
-
