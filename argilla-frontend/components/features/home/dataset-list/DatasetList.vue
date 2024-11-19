@@ -79,7 +79,7 @@ export default {
   &__header {
     display: flex;
     justify-content: space-between;
-    gap: $base-space * 2;
+    gap: $base-space;
     margin-bottom: $base-space * 2;
   }
   &__title {
