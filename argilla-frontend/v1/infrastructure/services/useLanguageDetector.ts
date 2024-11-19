@@ -1,5 +1,4 @@
 import { NuxtI18nInstance } from "@nuxtjs/i18n";
-import { set } from "vue";
 import { useLocalStorage } from "./useLocalStorage";
 
 type Context = {
