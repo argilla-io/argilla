@@ -16,19 +16,25 @@ import pytest
 
 from uuid import UUID
 from httpx import AsyncClient
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.models import User, Record
+from argilla_server.jobs.queues import HIGH_QUEUE
+from argilla_server.models import User, Record
 from argilla_server.enums import DatasetDistributionStrategy, ResponseStatus, DatasetStatus, RecordStatus
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import build_record_event
 
 from tests.factories import (
     DatasetFactory,
     RecordFactory,
     TextFieldFactory,
     TextQuestionFactory,
-    ResponseFactory,
     AnnotatorFactory,
+    WebhookFactory,
+    ResponseFactory,
 )
 
 
@@ -221,3 +227,95 @@ class TestUpsertDatasetRecordsBulk:
         assert record_b.status == RecordStatus.pending
         assert record_c.status == RecordStatus.pending
         assert record_d.status == RecordStatus.pending
+
+    async def test_upsert_dataset_records_bulk_enqueue_webhook_record_created_events(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="prompt", dataset=dataset)
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        webhook = await WebhookFactory.create(events=[RecordEvent.created, RecordEvent.updated])
+
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "prompt": "Does exercise help reduce stress?",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "prompt": "What is the best way to reduce stress?",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 200
+
+        records = (await db.execute(select(Record).order_by(Record.inserted_at.asc()))).scalars().all()
+
+        event_a = await build_record_event(db, RecordEvent.created, records[0])
+        event_b = await build_record_event(db, RecordEvent.created, records[1])
+
+        assert HIGH_QUEUE.count == 2
+
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.created
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event_a.data)
+
+        assert HIGH_QUEUE.jobs[1].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[1].args[1] == RecordEvent.created
+        assert HIGH_QUEUE.jobs[1].args[3] == jsonable_encoder(event_b.data)
+
+    async def test_upsert_dataset_records_bulk_enqueue_webhook_record_updated_events(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="prompt", dataset=dataset)
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        records = await RecordFactory.create_batch(2, dataset=dataset)
+
+        webhook = await WebhookFactory.create(events=[RecordEvent.created, RecordEvent.updated])
+
+        response = await async_client.put(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "id": str(records[0].id),
+                        "metadata": {
+                            "metadata-key": "metadata-value",
+                        },
+                    },
+                    {
+                        "id": str(records[1].id),
+                        "metadata": {
+                            "metadata-key": "metadata-value",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 200
+
+        event_a = await build_record_event(db, RecordEvent.updated, records[0])
+        event_b = await build_record_event(db, RecordEvent.updated, records[1])
+
+        assert HIGH_QUEUE.count == 2
+
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.updated
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event_a.data)
+
+        assert HIGH_QUEUE.jobs[1].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[1].args[1] == RecordEvent.updated
+        assert HIGH_QUEUE.jobs[1].args[3] == jsonable_encoder(event_b.data)

@@ -26,7 +26,6 @@ from argilla_server.database import get_async_db
 from argilla_server.models import Dataset, User
 from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter()
 
@@ -43,7 +42,6 @@ async def create_dataset_records_bulk(
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     dataset = await Dataset.get_or_raise(
         db,
@@ -58,9 +56,7 @@ async def create_dataset_records_bulk(
 
     await authorize(current_user, DatasetPolicy.create_records(dataset))
 
-    records_bulk = await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, records_bulk_create)
-
-    return records_bulk
+    return await CreateRecordsBulk(db, search_engine).create_records_bulk(dataset, records_bulk_create)
 
 
 @router.put("/datasets/{dataset_id}/records/bulk", response_model=RecordsBulk)
@@ -71,7 +67,6 @@ async def upsert_dataset_records_bulk(
     db: AsyncSession = Depends(get_async_db),
     search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
-    telemetry_client: TelemetryClient = Depends(get_telemetry_client),
 ):
     dataset = await Dataset.get_or_raise(
         db,
@@ -86,9 +81,4 @@ async def upsert_dataset_records_bulk(
 
     await authorize(current_user, DatasetPolicy.upsert_records(dataset))
 
-    records_bulk = await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_upsert)
-
-    updated = len(records_bulk.updated_item_ids)
-    created = len(records_bulk.items) - updated
-
-    return records_bulk
+    return await UpsertRecordsBulk(db, search_engine).upsert_records_bulk(dataset, records_bulk_upsert)
