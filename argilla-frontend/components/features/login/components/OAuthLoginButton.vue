@@ -1,6 +1,5 @@
 <template>
   <BaseButton class="sign-in-button" @click="$emit('click')">
-    <BlankLogo />
     {{ signinText }}
   </BaseButton>
 </template>
@@ -32,6 +31,7 @@ export default {
   background: var(--color-black);
   color: var(--color-white);
   width: 100%;
+  min-height: $base-space * 6;
   padding: calc($base-space / 2) $base-space * 4;
   justify-content: center;
   &:hover {
