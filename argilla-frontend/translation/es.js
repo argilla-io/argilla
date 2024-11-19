@@ -337,6 +337,12 @@ export default {
     annotator:
       "El almacenamiento persistente no está habilitado. Todos los datos se perderán si este espacio se reinicia",
   },
+  colorSchema: {
+    system: "Sistema",
+    light: "Claro",
+    dark: "Oscuro",
+    "high-contrast": "Alto contraste",
+  },
   validations: {
     businessLogic: {
       missing_vector: {

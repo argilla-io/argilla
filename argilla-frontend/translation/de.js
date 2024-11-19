@@ -342,6 +342,12 @@ export default {
     annotator:
       "Der persistente Speicher ist nicht aktiviert. Alle Daten gehen verloren, wenn dieser Space neu gestartet wird.",
   },
+  colorSchema: {
+    system: "System",
+    light: "Licht",
+    dark: "Dunkel",
+    "high-contrast": "Hoher Kontrast",
+  },
   validations: {
     businessLogic: {
       missing_vector: {

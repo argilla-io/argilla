@@ -12,7 +12,7 @@
         :id="code"
         :value="code"
         v-model="$i18n.locale"
-        @input="setLocale(code)"
+        @input="change(code)"
       />
       <label :for="code"> {{ code }}</label>
     </BaseTooltip>
@@ -20,18 +20,11 @@
 </template>
 
 <script>
+import { useUserSettingsLanguageViewModel } from "./useUserSettingsLanguageViewModel";
+
 export default {
-  data() {
-    return {
-      languages: this.$i18n.locales.sort((a, b) =>
-        a.code.localeCompare(b.code)
-      ),
-    };
-  },
-  methods: {
-    setLocale(locale) {
-      this.$i18n.setLocale(locale);
-    },
+  setup() {
+    return useUserSettingsLanguageViewModel();
   },
 };
 </script>
