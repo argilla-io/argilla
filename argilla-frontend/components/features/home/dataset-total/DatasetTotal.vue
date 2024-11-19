@@ -35,6 +35,7 @@ export default {
   align-items: center;
   gap: calc($base-space / 2);
   color: var(--fg-tertiary);
+  font-weight: 200;
   @include font-size(12px);
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="dataset-list__wrapper">
     <div class="dataset-list__header">
       <h1 class="dataset-list__title" v-text="$t('home.argillaDatasets')" />
       <div class="dataset-list__filters" v-if="datasets.length">
@@ -17,8 +17,10 @@
         />
       </div>
     </div>
-    <DatasetListCards v-if="datasets.length" :datasets="filteredDatasets" />
-    <DatasetsEmpty v-else @on-click-card="cardAction" />
+    <div class="dataset-list__content">
+      <DatasetListCards v-if="datasets.length" :datasets="filteredDatasets" />
+      <DatasetsEmpty v-else @on-click-card="cardAction" />
+    </div>
   </div>
 </template>
 
@@ -90,6 +92,16 @@ export default {
   &__filters {
     display: flex;
     gap: $base-space;
+  }
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  &__content {
+    @include media(">tablet") {
+      overflow: auto;
+    }
   }
 }
 </style>

@@ -166,6 +166,7 @@ export default {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
+      margin-bottom: $base-space;
     }
     &__link {
       margin-top: $base-space * 4;

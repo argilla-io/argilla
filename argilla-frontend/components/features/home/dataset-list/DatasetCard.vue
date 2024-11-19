@@ -1,15 +1,12 @@
 <template>
   <div class="dataset-card">
-    <div class="dataset-card__header">
+    <div>
+      <div class="dataset-card__date">
+        <span v-text="$t('home.updatedAt')" />
+        <BaseDate format="date-relative-now" :date="dataset.updatedAt" />
+      </div>
       <p class="dataset-card__workspace">{{ dataset.workspaceName }}</p>
-      <div class="dataset-card__actions">
-        <BaseActionTooltip :tooltip="$t('copied')" tooltip-position="bottom">
-          <BaseButton
-            class="dataset-card__action"
-            @click.prevent="$emit('copy-name')"
-            ><svgicon name="copy"
-          /></BaseButton>
-        </BaseActionTooltip>
+      <!-- <div class="dataset-card__actions">
         <BaseActionTooltip :tooltip="$t('copied')" tooltip-position="bottom">
           <BaseButton
             class="dataset-card__action"
@@ -22,29 +19,19 @@
           @click.prevent="$emit('go-to-settings')"
           ><svgicon name="settings"
         /></BaseButton>
+      </div> -->
+
+      <div class="dataset-card__content">
+        <h1 class="dataset-card__title">{{ dataset.name }}</h1>
+        <DatasetFields :dataset="dataset" />
+        <DatasetQuestions :dataset="dataset" />
       </div>
     </div>
-    <div class="dataset-card__content">
+    <div class="dataset-card__footer">
       <span class="dataset-card__row">
-        <h1 class="dataset-card__title">{{ dataset.name }}</h1>
+        <DatasetProgress :datasetId="dataset.id" />
         <DatasetTotal :datasetId="dataset.id" />
       </span>
-      <DatasetProgress :datasetId="dataset.id" />
-      <DatasetFields :dataset="dataset" />
-      <DatasetQuestions :dataset="dataset" />
-    </div>
-    <div class="dataset-card__footer">
-      <svgicon
-        name="update"
-        height="14"
-        width="14"
-        color="var(--fg-tertiary)"
-      />
-      <BaseDate
-        class="dataset-card__date"
-        format="date-relative-now"
-        :date="dataset.updatedAt"
-      />
     </div>
   </div>
 </template>
@@ -68,18 +55,25 @@ export default {
 .dataset-card {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   text-align: center;
   gap: $base-space * 2;
   height: 100%;
   padding: $base-space * 2;
   text-align: left;
-  background: var(--bg-accent-grey-2);
-  border: 1px solid var(--bg-opacity-10);
+  background: var(--bg-accent-grey-3);
+  border: 1px solid var(--bg-opacity-6);
   border-radius: $border-radius-m;
+  box-shadow: 0 0 0 0 var(--bg-opacity-4);
+  transition: all 0.2s ease;
+  &:hover {
+    border-color: var(--bg-opacity-10);
+    box-shadow: 0 2px 1px 1px var(--bg-opacity-4);
+  }
   &__row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: $base-space;
   }
   &__header {
@@ -88,7 +82,6 @@ export default {
     align-items: center;
     gap: $base-space;
     padding-bottom: $base-space;
-    border-bottom: 1px solid var(--bg-opacity-10);
   }
   &__content {
     display: flex;
@@ -97,10 +90,10 @@ export default {
     height: 100%;
   }
   &__title {
-    margin: 0;
+    margin: 0 0 $base-space 0;
     color: var(--fg-primary);
     font-weight: 500;
-    @include font-size(14px);
+    @include font-size(16px);
   }
   &__workspace {
     margin: 0;
@@ -110,25 +103,27 @@ export default {
   &__date {
     margin: 0;
     color: var(--fg-tertiary);
-    @include font-size(12px);
+    text-align: right;
+    font-weight: 200;
+    @include font-size(11px);
   }
   &__footer {
     padding-top: $base-space;
-    border-top: 1px solid var(--bg-opacity-10);
+    border-top: 1px solid var(--bg-opacity-6);
   }
   &__actions {
     display: flex;
     justify-content: flex-end;
     gap: $base-space;
   }
-  &__action {
-    &.button {
-      padding: $base-space;
-      color: var(--fg-secondary);
-      &:hover {
-        color: var(--fg-tertiary);
-      }
-    }
-  }
+  // &__action {
+  //   &.button {
+  //     padding: $base-space;
+  //     color: var(--fg-secondary);
+  //     &:hover {
+  //       color: var(--fg-tertiary);
+  //     }
+  //   }
+  // }
 }
 </style>

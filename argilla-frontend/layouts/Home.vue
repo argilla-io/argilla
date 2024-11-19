@@ -42,11 +42,9 @@ export default {
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: 100%;
     padding: $base-space * 4;
     background: var(--bg-accent-grey-1);
     @include media(">tablet") {
-      overflow: auto;
       padding: $base-space * 4 $base-space * 4 0 $base-space * 4;
     }
   }

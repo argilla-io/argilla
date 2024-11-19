@@ -1,15 +1,10 @@
 <template>
-  <BaseLinearProgressSkeleton v-if="!isLoaded" class="dataset-progress__bar" />
-  <transition v-else-if="!!progress" name="fade" appear>
-    <div class="dataset-progress">
-      <BaseLinearProgress
-        class="dataset-progress__bar"
-        :progress-ranges="progressRanges"
-        :progress-max="progress.total"
-        :show-tooltip="true"
-      />
-    </div>
-  </transition>
+  <div class="dataset-progress">
+    <p class="dataset-progress__title">{{ $t("metrics.progress.team") }}</p>
+    <p class="dataset-progress__percent">
+      {{ !!progress ? progress.percentage.completed : "-" }}%
+    </p>
+  </div>
 </template>
 
 <script>
@@ -37,9 +32,15 @@ export default {
   gap: calc($base-space / 2);
   max-width: 160px;
   z-index: 0;
-  &__bar {
-    width: 100%;
-    max-width: 160px;
+  &__title {
+    margin: 0;
+    @include font-size(12px);
+  }
+  &__percent {
+    margin: 0;
+    font-weight: 500;
+    color: var(--fg-primary);
+    @include font-size(18px);
   }
 }
 </style>

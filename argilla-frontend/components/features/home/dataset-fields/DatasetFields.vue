@@ -1,11 +1,12 @@
 <template>
   <BaseBadgeSkeleton v-if="isFieldsLoading" :quantity="3" />
   <div class="fields" v-else>
+    <span class="fields__title">{{ $t("fields") }}</span>
     <DatasetBadge
       v-for="field in fields"
       :key="field.id"
       :text="$t(field.type)"
-      font-size="12px"
+      font-size="11px"
       color="hsl(50, 40%, 53%)"
     />
   </div>
@@ -26,10 +27,15 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .fields {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  &__title {
+    @include font-size(12px);
+    color: var(--fg-tertiary);
+    font-weight: 200;
+  }
 }
 </style>

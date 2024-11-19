@@ -44,6 +44,7 @@ export default {
   flex-direction: column;
   text-align: center;
   gap: $base-space * 2;
+  background: var(--bg-accent-grey-3);
   border: 1px dashed var(--bg-opacity-10);
   border-radius: $border-radius-m;
   padding: $base-space * 2;
