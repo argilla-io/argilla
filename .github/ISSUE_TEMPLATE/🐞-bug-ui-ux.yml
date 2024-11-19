@@ -1,0 +1,69 @@
+name: "\U0001F41E Bug report: UI/UX"
+description: "Report UI or UX bugs and unexpected behavior."
+title: "[BUG-UI/UX]"
+labels: []
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for reporting a bug! Please fill out the sections below."
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: "Describe the bug"
+      description: "A clear and concise description of the bug."
+    validations:
+          required: false
+
+  - type: textarea
+    id: to_reproduce
+    attributes:
+      label: "To reproduce"
+      description: "The steps to reproduce the behavior."
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected behavior"
+      description: "A clear and concise description of what you expected to happen."
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots"
+      description: "If applicable, add screenshots to help explain your problem."
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "Since version 1.16.0 you can use `python -m argilla info` command to easily get the used versions."
+      value: |
+        - OS [e.g. iOS]:
+        - Browser [e.g. chrome, safari]:
+        - Argilla Version [e.g. 1.0.0]:
+        - ElasticSearch Version [e.g. 7.10.2]:
+        - Docker Image (optional) [e.g. argilla:v1.0.0]:
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional context"
+      description: "Add any other relevant information."
+    validations:
+      required: false
