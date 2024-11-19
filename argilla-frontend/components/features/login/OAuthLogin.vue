@@ -7,6 +7,11 @@
         v-if="provider.isHuggingFace"
         @click="authorize(provider.name)"
       />
+      <OAuthLoginButton
+        v-else
+        :provider="provider.name"
+        @click="authorize(provider.name)"
+      />
     </div>
   </div>
 </template>
