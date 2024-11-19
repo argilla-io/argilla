@@ -44,26 +44,25 @@ class SpacesDeploymentMixin(LoggingMixin):
         private: Optional[Union[bool, None]] = False,
     ) -> "Argilla":
         """
-                Deploys Argilla on Hugging Face Spaces.
+        Deploys Argilla on Hugging Face Spaces.
 
-                Args:
-                    api_key (str): The Argilla API key to be defined for the owner user and creator of the Space.
-                    repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
-                    org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
-                    hf_token (Optional[Union[str, None]]): The Hugging Face authentication token. Defaults to None.
-                    space_storage (Optional[Union[str, SpaceStorage]]): The persistant storage size for the space. Defaults to None without persistant storage.
-                    space_hardware (Optional[Union[str, SpaceHardware]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
-                    private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
+        Args:
+            api_key (str): The Argilla API key to be defined for the owner user and creator of the Space.
+            repo_name (Optional[str]): The ID of the repository where Argilla will be deployed. Defaults to "argilla".
+            org_name (Optional[str]): The name of the organization where Argilla will be deployed. Defaults to None.
+            hf_token (Optional[Union[str, None]]): The Hugging Face authentication token. Defaults to None.
+            space_storage (Optional[Union[str, SpaceStorage]]): The persistent storage size for the space. Defaults to None without persistent storage.
+            space_hardware (Optional[Union[str, SpaceHardware]]): The hardware configuration for the space. Defaults to "cpu-basic" with downtime after 48 hours of inactivity.
+            private (Optional[Union[bool, None]]): Whether the space should be private. Defaults to False.
 
-                Returns:
-                    Argilla: The Argilla client.
+        Returns:
+            Argilla: The Argilla client.
 
-                Example:
-                    ```Python
-                    import argilla as rg
-        api
-                    client = rg.Argilla.deploy_on_spaces(api_key="12345678")
-                    ```
+        Example:
+            ```Python
+            import argilla as rg
+            client = rg.Argilla.deploy_on_spaces(api_key="12345678")
+            ```
         """
         hf_token = cls._acquire_hf_token(ht_token=hf_token)
         hf_api = HfApi(token=hf_token)
@@ -126,7 +125,7 @@ class SpacesDeploymentMixin(LoggingMixin):
     @staticmethod
     def _space_storage_warning() -> None:
         warnings.warn(
-            "No storage provided. The space will not have persistant storage so every 48 hours your data will be reset."
+            "No storage provided. The space will not have persistent storage so every 48 hours your data will be reset."
         )
 
     @classmethod
