@@ -49,7 +49,6 @@ from argilla_server.api.schemas.v1.responses import (
     ResponseCreate,
     ResponseUpdate,
     ResponseUpsert,
-    UserResponseCreate,
 )
 from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettings as VectorSettingsSchema,
@@ -58,6 +57,7 @@ from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
 from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.models.database import DatasetUser
 from argilla_server.webhooks.v1.enums import DatasetEvent, ResponseEvent, RecordEvent
 from argilla_server.webhooks.v1.records import (
     build_record_event as build_record_event_v1,
@@ -391,11 +391,12 @@ async def _configure_query_relationships(
 
 
 async def get_user_dataset_metrics(
+    db: AsyncSession,
     search_engine: SearchEngine,
     user: User,
     dataset: Dataset,
 ) -> dict:
-    total_records = (await get_dataset_progress(search_engine, dataset))["total"]
+    total_records = (await get_dataset_progress(db, search_engine, dataset))["total"]
     result = await search_engine.get_dataset_user_progress(dataset, user)
 
     submitted_responses = result.get("submitted", 0)
@@ -413,34 +414,47 @@ async def get_user_dataset_metrics(
 
 
 async def get_dataset_progress(
+    db: AsyncSession,
     search_engine: SearchEngine,
     dataset: Dataset,
 ) -> dict:
     result = await search_engine.get_dataset_progress(dataset)
+    users = await get_users_with_responses_for_dataset(db, dataset)
+
     return {
         "total": result.get("total", 0),
         "completed": result.get("completed", 0),
         "pending": result.get("pending", 0),
+        "users": users,
     }
 
 
-async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:
+async def get_users_with_responses_for_dataset(
+    db: AsyncSession,
+    dataset: Dataset,
+) -> Sequence[User]:
+    query = select(DatasetUser).filter_by(dataset_id=dataset.id)
+    result = await db.scalars(query.order_by(DatasetUser.inserted_at.asc()))
+
+    return [r.user for r in result.all()]
+
+
+async def get_dataset_users_progress(db: AsyncSession, dataset: Dataset) -> List[dict]:
     query = (
         select(User.username, Record.status, Response.status, func.count(Response.id))
         .join(Record)
         .join(User)
-        .where(Record.dataset_id == dataset_id)
+        .where(Record.dataset_id == dataset.id)
         .group_by(User.username, Record.status, Response.status)
     )
 
-    async for session in get_async_db():
-        annotators_progress = defaultdict(lambda: defaultdict(dict))
-        results = (await session.execute(query)).all()
+    annotators_progress = defaultdict(lambda: defaultdict(dict))
+    results = (await db.execute(query)).all()
 
-        for username, record_status, response_status, count in results:
-            annotators_progress[username][record_status][response_status] = count
+    for username, record_status, response_status, count in results:
+        annotators_progress[username][record_status][response_status] = count
 
-        return [{"username": username, **progress} for username, progress in annotators_progress.items()]
+    return [{"username": username, **progress} for username, progress in annotators_progress.items()]
 
 
 _EXTRA_METADATA_FLAG = "extra"
@@ -565,38 +579,6 @@ async def _validate_record_metadata(
         return cache
     except (UnprocessableEntityError, ValueError) as e:
         raise UnprocessableEntityError(f"metadata is not valid: {e}") from e
-
-
-async def _build_record_responses(
-    db: AsyncSession,
-    record: Record,
-    responses_create: Optional[List[UserResponseCreate]],
-    cache: Optional[Set[UUID]] = None,
-) -> List[Response]:
-    """Create responses for a record."""
-    if not responses_create:
-        return []
-
-    responses = []
-
-    for idx, response_create in enumerate(responses_create):
-        try:
-            cache = await validate_user_exists(db, response_create.user_id, cache)
-
-            ResponseCreateValidator.validate(response_create, record)
-
-            responses.append(
-                Response(
-                    values=jsonable_encoder(response_create.values),
-                    status=response_create.status,
-                    user_id=response_create.user_id,
-                    record=record,
-                )
-            )
-        except (UnprocessableEntityError, ValueError) as e:
-            raise UnprocessableEntityError(f"response at position {idx} is not valid: {e}") from e
-
-    return responses
 
 
 async def _build_record_suggestions(
@@ -830,8 +812,13 @@ async def create_response(
         user_id=user.id,
         autocommit=False,
     )
-
     await _touch_dataset_last_activity_at(db, record.dataset)
+    await DatasetUser.upsert(
+        db,
+        schema={"dataset_id": record.dataset_id, "user_id": user.id},
+        constraints=[DatasetUser.dataset_id, DatasetUser.user_id],
+        autocommit=False,
+    )
 
     await db.commit()
 
@@ -888,7 +875,12 @@ async def upsert_response(
         autocommit=False,
     )
     await _touch_dataset_last_activity_at(db, response.record.dataset)
-
+    await DatasetUser.upsert(
+        db,
+        schema={"dataset_id": record.dataset_id, "user_id": user.id},
+        constraints=[DatasetUser.dataset_id, DatasetUser.user_id],
+        autocommit=False,
+    )
     await db.commit()
 
     await distribution.update_record_status(search_engine, record.id)

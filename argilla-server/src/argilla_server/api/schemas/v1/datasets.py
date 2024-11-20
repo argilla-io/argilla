@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import List, Literal, Optional, Union, Dict, Any
+from typing import List, Literal, Optional, Dict, Any
 from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
@@ -83,12 +83,6 @@ class DatasetMetrics(BaseModel):
     responses: ResponseMetrics
 
 
-class DatasetProgress(BaseModel):
-    total: int
-    completed: int
-    pending: int
-
-
 class RecordResponseDistribution(BaseModel):
     submitted: int = 0
     discarded: int = 0
@@ -99,6 +93,16 @@ class UserProgress(BaseModel):
     username: str
     completed: RecordResponseDistribution = RecordResponseDistribution()
     pending: RecordResponseDistribution = RecordResponseDistribution()
+
+    class Config:
+        orm_mode = True
+
+
+class DatasetProgress(BaseModel):
+    total: int
+    completed: int
+    pending: int
+    users: List[UserProgress] = Field(default_factory=list)
 
 
 class UsersProgress(BaseModel):
