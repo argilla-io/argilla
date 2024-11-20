@@ -140,6 +140,8 @@ class RecordCreate(BaseModel):
                     fields[key] = [
                         item if isinstance(item, ChatFieldValue) else ChatFieldValue(**item) for item in value
                     ]
+                except TypeError as e:
+                    raise ValueError(f"Error parsing chat field '{key}': {e}")
                 except ValidationError as e:
                     raise ValueError(f"Error parsing chat field '{key}': {e.errors()}")
 
