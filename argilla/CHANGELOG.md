@@ -21,6 +21,7 @@ These are the section headers that we use:
 ### Added
 
 - Added `Argilla.deploy_on_spaces` to deploy the Argilla server on Hugging Face Spaces. ([#5547](https://github.com/argilla-io/argilla/pull/5547))
+- Add support to webhooks. ([#5467](https://github.com/argilla-io/argilla/pull/5467))
 
 ### Changed
 

@@ -1,14 +1,17 @@
 import { ref } from "vue";
+import { useLocalStorage } from "./useLocalStorage";
 export const useColorSchema = () => {
+  const { get, set } = useLocalStorage();
   const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 
-  const currentTheme = ref(localStorage.getItem("theme") || "system");
+  const currentTheme = ref(get("theme") || "system");
 
   const setTheme = (theme: string) => {
     currentTheme.value = theme;
-    localStorage.setItem("theme", theme);
+    set("theme", theme);
+
     if (theme !== "system") {
       document.documentElement.setAttribute("data-theme", theme);
     } else {

@@ -2,6 +2,10 @@ import { type NuxtAxiosInstance } from "@nuxtjs/axios";
 import { PublicNuxtAxiosInstance } from "../services";
 import { DatasetCreation } from "~/v1/domain/entities/hub/DatasetCreation";
 
+export const enum HUB_REPOSITORY_ERRORS {
+  NOT_EXIST = "ERROR_FETCHING_DATASET",
+}
+
 export class HubRepository {
   private axios: NuxtAxiosInstance;
   constructor(axios: PublicNuxtAxiosInstance) {
@@ -19,8 +23,10 @@ export class HubRepository {
       );
 
       return data.dataset_info;
-    } catch {
-      return {};
+    } catch (e) {
+      throw {
+        response: HUB_REPOSITORY_ERRORS.NOT_EXIST,
+      };
     }
   }
 

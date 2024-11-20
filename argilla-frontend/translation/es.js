@@ -85,6 +85,8 @@ export default {
     apiKey: "Clave de API",
     apiKeyDescription:
       "Los tokens de clave API permiten administrar datasets utilizando el SDK de Python",
+    theme: "Tema",
+    language: "Idioma",
     copyKey: "Copiar clave",
   },
   userAvatarTooltip: {
@@ -276,6 +278,10 @@ export default {
       labelSelection: {
         atLeastTwoOptions: "Se requieren al menos dos opciones",
         optionsWithoutLabel: "No se permiten opciones vacías",
+        optionsSeparatedByComma: "Use comas para separar las etiquetas",
+      },
+      rating: {
+        atLeastTwoOptions: "Se requieren al menos dos opciones",
       },
     },
     atLeastOneQuestion: "Se requiere al menos una pregunta.",
@@ -328,6 +334,12 @@ export default {
       "El almacenamiento persistente no está habilitado. Todos los datos se perderán si este espacio se reinicia. Vaya a la configuración del espacio para habilitarlo",
     annotator:
       "El almacenamiento persistente no está habilitado. Todos los datos se perderán si este espacio se reinicia",
+  },
+  colorSchema: {
+    system: "Sistema",
+    light: "Claro",
+    dark: "Oscuro",
+    "high-contrast": "Alto contraste",
   },
   validations: {
     businessLogic: {
