@@ -96,7 +96,7 @@ export default {
     @include font-size(16px);
   }
   &__workspace {
-    margin: 0;
+    margin: 0 0 calc($base-space / 2) 0;
     color: var(--fg-secondary);
     @include font-size(12px);
   }
