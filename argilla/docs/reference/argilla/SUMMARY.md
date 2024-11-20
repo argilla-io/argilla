@@ -15,4 +15,5 @@
     * [rg.Vector](records/vectors.md)
     * [rg.Metadata](records/metadata.md)
 * [rg.Query](search.md)
+* [Webhooks](webhooks.md)
 * [rg.markdown](markdown.md)

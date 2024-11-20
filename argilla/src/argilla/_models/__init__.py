@@ -62,3 +62,4 @@ from argilla._models._settings._metadata import (
     IntegerMetadataPropertySettings,
 )
 from argilla._models._settings._vectors import VectorFieldModel
+from argilla._models._webhook import WebhookModel, EventType

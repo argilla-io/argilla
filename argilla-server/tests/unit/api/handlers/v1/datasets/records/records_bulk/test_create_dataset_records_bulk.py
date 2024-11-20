@@ -11,13 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import pytest
+
 from typing import Any
 from uuid import UUID
-
-import pytest
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
 from argilla_server.enums import (
     DatasetStatus,
@@ -27,7 +28,12 @@ from argilla_server.enums import (
     RecordStatus,
     DatasetDistributionStrategy,
 )
+from argilla_server.jobs.queues import HIGH_QUEUE
 from argilla_server.models.database import Record, Response, Suggestion, User
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import build_record_event
+from argilla_server.models.database import Record, Response, Suggestion, User
+
 from tests.factories import (
     DatasetFactory,
     LabelSelectionQuestionFactory,
@@ -40,6 +46,7 @@ from tests.factories import (
     TextQuestionFactory,
     ChatFieldFactory,
     CustomFieldFactory,
+    WebhookFactory,
     AnnotatorFactory,
 )
 
@@ -931,3 +938,48 @@ class TestCreateDatasetRecordsBulk:
         assert (await Record.get(db, UUID(response_items[1]["id"]))).status == RecordStatus.pending
         assert (await Record.get(db, UUID(response_items[2]["id"]))).status == RecordStatus.pending
         assert (await Record.get(db, UUID(response_items[3]["id"]))).status == RecordStatus.pending
+
+    async def test_create_dataset_records_bulk_enqueue_webhook_record_created_events(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="prompt", dataset=dataset)
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        webhook = await WebhookFactory.create(events=[RecordEvent.created])
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "prompt": "You should exercise more.",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "prompt": "Do you like to exercise?",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201, response.json()
+
+        records = (await db.execute(select(Record).order_by(Record.inserted_at.asc()))).scalars().all()
+
+        event_a = await build_record_event(db, RecordEvent.created, records[0])
+        event_b = await build_record_event(db, RecordEvent.created, records[1])
+
+        assert HIGH_QUEUE.count == 2
+
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.created
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event_a.data)
+
+        assert HIGH_QUEUE.jobs[1].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[1].args[1] == RecordEvent.created
+        assert HIGH_QUEUE.jobs[1].args[3] == jsonable_encoder(event_b.data)

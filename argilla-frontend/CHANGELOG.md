@@ -19,6 +19,11 @@ These are the section headers that we use:
 ### Added
 
 - Add a high-contrast theme & improvements for the forced-colors mode. ([#5661](https://github.com/argilla-io/argilla/pull/5661))
+- Add English as the default language and add language selector in the user settings page. ([#5690](https://github.com/argilla-io/argilla/pull/5690))
+
+### Fixed
+
+- Fixed highlighting on same record ([#5693](https://github.com/argilla-io/argilla/pull/5693))
 
 ## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
 
