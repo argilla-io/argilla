@@ -6,23 +6,17 @@
 </template>
 
 <script>
-import { useDatasetProgressViewModel } from "./useDatasetProgressViewModel";
-
 export default {
   props: {
-    datasetId: {
+    percent: {
       type: String,
       required: true,
     },
   },
   computed: {
     getPercent() {
-      const percent = this.progress ? this.progress.percentage.completed : NaN;
-      return isNaN(percent) ? "-" : percent;
+      return isNaN(this.percent) ? "-" : this.percent;
     },
-  },
-  setup(props) {
-    return useDatasetProgressViewModel(props);
   },
 };
 </script>

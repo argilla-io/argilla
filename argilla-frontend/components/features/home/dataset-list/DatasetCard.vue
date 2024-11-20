@@ -29,9 +29,10 @@
     </div>
     <div class="dataset-card__footer">
       <span class="dataset-card__row">
-        <DatasetProgress :datasetId="dataset.id" />
+        <DatasetProgress :percent="completedPercent" />
         <div class="dataset-card__column">
-          <DatasetTotal :datasetId="dataset.id" />
+          <DatasetTotal :total="total" />
+          <DatasetUsers :users="users" />
         </div>
       </span>
     </div>
@@ -43,12 +44,16 @@ import "assets/icons/copy";
 import "assets/icons/link";
 import "assets/icons/settings";
 import "assets/icons/update";
+import { useDatasetCardViewModel } from "./useDatasetCardViewModel";
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
     },
+  },
+  setup(props) {
+    return useDatasetCardViewModel(props);
   },
 };
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div class="dataset-total">
-    <template v-if="!!totalRecords">
+    <template v-if="!!total">
       <svgicon
         name="records"
         height="12"
@@ -8,24 +8,20 @@
         color="var(--fg-tertiary)"
         aria-hidden="true"
       />
-      <span v-text="`${totalRecords} ${$t('rows')}`" />
+      <span v-text="`${total} ${$t('rows')}`" />
     </template>
   </div>
 </template>
 
 <script>
 import "assets/icons/records";
-import { useDatasetTotalViewModel } from "./useDatasetTotalViewModel";
 
 export default {
   props: {
-    datasetId: {
-      type: String,
+    total: {
+      type: Number,
       required: true,
     },
-  },
-  setup(props) {
-    return useDatasetTotalViewModel(props);
   },
 };
 </script>
