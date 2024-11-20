@@ -16,8 +16,9 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
+from pydantic import BaseModel, Field, constr, ConfigDict
+
 from argilla_server.enums import UserRole
-from argilla_server.pydantic_v1 import BaseModel, Field, constr
 
 USER_PASSWORD_MIN_LENGTH = 8
 USER_PASSWORD_MAX_LENGTH = 100
@@ -26,7 +27,7 @@ USER_PASSWORD_MAX_LENGTH = 100
 class User(BaseModel):
     id: UUID
     first_name: str
-    last_name: Optional[str]
+    last_name: Optional[str] = None
     username: str
     role: UserRole
     # TODO: We need to move `api_key` outside of this schema and think about a more
@@ -35,16 +36,15 @@ class User(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreate(BaseModel):
-    first_name: constr(min_length=1, strip_whitespace=True)
-    last_name: Optional[constr(min_length=1, strip_whitespace=True)]
     username: str = Field(..., min_length=1)
-    role: Optional[UserRole]
     password: str = Field(min_length=USER_PASSWORD_MIN_LENGTH, max_length=USER_PASSWORD_MAX_LENGTH)
+    first_name: constr(min_length=1, strip_whitespace=True)
+    last_name: Optional[constr(min_length=1, strip_whitespace=True)] = None
+    role: Optional[UserRole] = None
 
 
 class Users(BaseModel):

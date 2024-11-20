@@ -16,9 +16,7 @@
 import pytest
 
 from argilla_server.api.schemas.v1.users import User, UserCreate
-from argilla_server.api.schemas.v1.workspaces import WorkspaceCreate
 from tests.factories import UserFactory
-from tests.pydantic_v1 import ValidationError
 
 
 @pytest.mark.parametrize(
@@ -47,11 +45,11 @@ def test_user_create(username: str):
 async def test_user_first_name():
     user = await UserFactory.create(first_name="first-name", workspaces=[])
 
-    assert User.from_orm(user).first_name == "first-name"
+    assert User.model_validate(user).first_name == "first-name"
 
 
 @pytest.mark.asyncio
 async def test_user_last_name():
     user = await UserFactory.create(last_name="last-name", workspaces=[])
 
-    assert User.from_orm(user).last_name == "last-name"
+    assert User.model_validate(user).last_name == "last-name"

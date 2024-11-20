@@ -224,7 +224,7 @@ async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCr
         name=field_create.name,
         title=field_create.title,
         required=field_create.required,
-        settings=field_create.settings.dict(),
+        settings=field_create.settings.model_dump(),
         dataset_id=dataset.id,
     )
 
@@ -235,7 +235,7 @@ async def update_field(db: AsyncSession, field: Field, field_update: "FieldUpdat
             f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'"
         )
 
-    params = field_update.dict(exclude_unset=True)
+    params = field_update.model_dump(exclude_unset=True)
     return await field.update(db, **params)
 
 
@@ -266,7 +266,7 @@ async def create_metadata_property(
         db,
         name=metadata_property_create.name,
         title=metadata_property_create.title,
-        settings=metadata_property_create.settings.dict(),
+        settings=metadata_property_create.settings.model_dump(),
         allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
         dataset_id=dataset.id,
     )
@@ -296,7 +296,7 @@ async def count_vectors_settings_by_dataset_id(db: AsyncSession, dataset_id: UUI
 async def update_vector_settings(
     db: AsyncSession, vector_settings: VectorSettings, vector_settings_update: "VectorSettingsUpdate"
 ) -> VectorSettings:
-    params = vector_settings_update.dict(exclude_unset=True)
+    params = vector_settings_update.model_dump(exclude_unset=True)
     return await vector_settings.update(db, **params)
 
 
@@ -518,7 +518,7 @@ async def _validate_vector(
                 f"vector with name={str(vector_name)} does not exist for dataset_id={str(dataset_id)}"
             )
 
-        vector_settings = VectorSettingsSchema.from_orm(vector_settings)
+        vector_settings = VectorSettingsSchema.model_validate(vector_settings)
         vectors_settings[vector_name] = vector_settings
 
     vector_settings.check_vector(vector_value)
@@ -685,7 +685,7 @@ async def _build_record_update(
             "vector_settings": {},
         }
 
-    params = record_update.dict(exclude_unset=True)
+    params = record_update.model_dump(exclude_unset=True)
     needs_search_engine_update = False
     suggestions = None
     vectors = []
@@ -773,7 +773,7 @@ async def update_record(
     db: AsyncSession, search_engine: "SearchEngine", record: Record, record_update: "RecordUpdate"
 ) -> Record:
     params, suggestions, vectors, needs_search_engine_update, _ = await _build_record_update(
-        db, record, RecordUpdateWithId(id=record.id, **record_update.dict(by_alias=True, exclude_unset=True))
+        db, record, RecordUpdateWithId(id=record.id, **record_update.model_dump(by_alias=True, exclude_unset=True))
     )
 
     # Remove existing suggestions
@@ -960,7 +960,7 @@ async def upsert_suggestion(
 
     suggestion = await Suggestion.upsert(
         db,
-        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
+        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.model_dump()),
         constraints=[Suggestion.record_id, Suggestion.question_id],
     )
 

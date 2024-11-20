@@ -521,6 +521,57 @@ class TestCreateDatasetRecordsBulk:
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
+    async def test_create_dataset_records_bulk_with_chat_field_empty_values(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {"chat": [{"role": "", "content": ""}]},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body", "items", 0, "fields"],
+                            "msg": "Value error, Error parsing chat "
+                            "field 'chat': [{'type': "
+                            "'string_too_short', 'loc': "
+                            "('role',), 'msg': 'String should "
+                            "have at least 1 character', "
+                            "'input': '', 'ctx': {'min_length': "
+                            "1}, 'url': "
+                            "'https://errors.pydantic.dev/2.9/v/string_too_short'}, "
+                            "{'type': 'string_too_short', 'loc': "
+                            "('content',), 'msg': 'String should "
+                            "have at least 1 character', "
+                            "'input': '', 'ctx': {'min_length': "
+                            "1}, 'url': "
+                            "'https://errors.pydantic.dev/2.9/v/string_too_short'}]",
+                            "type": "value_error",
+                        }
+                    ]
+                },
+            }
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
     async def test_create_dataset_records_bulk_with_chat_field_with_non_dicts(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):
@@ -609,7 +660,7 @@ class TestCreateDatasetRecordsBulk:
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "fields"],
-                            "msg": "Error parsing chat field 'chat': [{'loc': ('content',), 'msg': 'field required', 'type': 'value_error.missing'}]",
+                            "msg": "Value error, Error parsing chat field 'chat': [{'type': 'missing', 'loc': ('content',), 'msg': 'Field required', 'input': {'role': 'user'}, 'url': 'https://errors.pydantic.dev/2.9/v/missing'}]",
                             "type": "value_error",
                         }
                     ]

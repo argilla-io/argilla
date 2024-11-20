@@ -18,7 +18,7 @@ import pytest
 from argilla_server.utils import parse_query_param
 from fastapi import HTTPException
 
-from tests.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 
 @pytest.mark.parametrize(

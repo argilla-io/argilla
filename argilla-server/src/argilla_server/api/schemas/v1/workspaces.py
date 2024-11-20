@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from argilla_server.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class Workspace(BaseModel):
@@ -25,8 +25,7 @@ class Workspace(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class WorkspaceCreate(BaseModel):
