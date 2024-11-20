@@ -29,7 +29,11 @@
     </template>
     <template v-slot:page-content>
       <BaseLoading v-if="isLoadingDatasets" />
-      <DatasetList :datasets="datasets.datasets" @on-click-card="cardAction" />
+      <DatasetList
+        :workspaces="workspaces"
+        :datasets="datasets.datasets"
+        @on-click-card="cardAction"
+      />
     </template>
     <template v-slot:page-sidebar>
       <template v-if="isAdminOrOwnerRole">

@@ -1,7 +1,7 @@
 <template>
   <FilterButton
-    :button-name="$t('sorting.label')"
-    icon-name="sort"
+    :button-name="$t('Workspaces')"
+    icon-name="filter"
     :is-button-active="isButtonActive"
   />
 </template>

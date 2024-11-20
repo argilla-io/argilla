@@ -8,6 +8,11 @@
           :querySearch="querySearch"
           :placeholder="$t('searchDatasets')"
         />
+        <WorkspacesFilter
+          :workspaces="formattedWorkspaces"
+          v-model="selectedWorkspaces"
+          @on-change-workspaces-filter="onChangeWorkspaceFilter"
+        />
         <DatasetsSort
           @on-change-direction="onChangeDirection"
           @on-change-field="onChangeField"
@@ -18,7 +23,10 @@
       </div>
     </div>
     <div class="dataset-list__content">
-      <DatasetListCards v-if="datasets.length" :datasets="filteredDatasets" />
+      <DatasetListCards
+        v-if="datasets.length"
+        :datasets="filteredDatasetsByWorkspaces"
+      />
       <DatasetsEmpty v-else @on-click-card="cardAction" />
     </div>
   </div>
@@ -27,6 +35,10 @@
 <script>
 export default {
   props: {
+    workspaces: {
+      type: Array,
+      required: true,
+    },
     datasets: {
       type: Array,
       required: true,
@@ -42,6 +54,7 @@ export default {
         { value: "updatedAt", label: this.$t("home.updatedAt") },
         { value: "createdAt", label: this.$t("home.createdAt") },
       ],
+      selectedWorkspaces: [],
     };
   },
   computed: {
@@ -50,13 +63,29 @@ export default {
         dataset.name.toLowerCase().includes(this.querySearch?.toLowerCase())
       );
     },
+    filteredDatasetsByWorkspaces() {
+      return this.selectedWorkspaces.length
+        ? this.filteredDatasets.filter((dataset) =>
+            this.selectedWorkspaces.includes(dataset.workspaceName)
+          )
+        : this.filteredDatasets;
+    },
     sortedDatasets() {
-      return this.datasets.sort((a, b) => {
-        if (this.sortedOrder === "asc") {
-          return a[this.sortedByField] > b[this.sortedByField] ? 1 : -1;
-        }
-        return a[this.sortedByField] < b[this.sortedByField] ? 1 : -1;
-      });
+      const compare = (a, b) => {
+        const fieldA = a[this.sortedByField];
+        const fieldB = b[this.sortedByField];
+        return this.sortedOrder === "asc"
+          ? fieldA.localeCompare(fieldB)
+          : fieldB.localeCompare(fieldA);
+      };
+      return this.datasets.sort(compare);
+    },
+    formattedWorkspaces() {
+      return this.workspaces.map(({ name }) => ({
+        name,
+        numberOfDatasets: this.datasets.filter((d) => d.workspaceName === name)
+          .length,
+      }));
     },
   },
   methods: {
@@ -69,9 +98,18 @@ export default {
     onChangeField(field) {
       this.sortedByField = field;
     },
+    onChangeWorkspaceFilter(workspaces) {
+      this.selectedWorkspaces = workspaces;
+    },
     cardAction(action) {
       this.$emit("on-click-card", action);
     },
+  },
+  mounted() {
+    this.currentWorkspace = this.$route.query.workspaces;
+    if (this.currentWorkspace) {
+      this.onChangeWorkspaceFilter(this.currentWorkspace.split(","));
+    }
   },
 };
 </script>
