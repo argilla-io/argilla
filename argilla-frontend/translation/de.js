@@ -288,6 +288,7 @@ export default {
       labelSelection: {
         atLeastTwoOptions: "Mindestens zwei Optionen müssen vorhanden sein",
         optionsWithoutLabel: "Optionen ohne Label sind nicht erlaubt",
+        optionsSeparatedByComma: "Optionen müssen durch Kommas getrennt sein",
       },
     },
     atLeastOneQuestion: "Mindestens eine Frage wird benötigt",
