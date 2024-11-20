@@ -105,7 +105,7 @@ export default {
     margin: 0 0 $base-space 0;
     color: var(--fg-primary);
     font-weight: 500;
-    @include font-size(14px);
+    @include font-size(16px);
     word-break: break-word;
   }
   &__workspace {
