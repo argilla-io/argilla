@@ -229,11 +229,15 @@ class TestCreateDatasetRecordsBulk:
             },
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 6
+
+        assert dataset.users == [owner]
 
     async def test_create_dataset_records_bulk_with_empty_fields(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
