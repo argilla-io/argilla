@@ -1,5 +1,5 @@
 <template>
-  <BaseBadgeSkeleton v-if="isQuestionsLoading" :quantity="3" />
+  <BaseBadgeSkeleton font-size="11px" v-if="isQuestionsLoading" :quantity="3" />
   <div class="questions" v-else>
     <span class="questions__title">{{ $t("questions") }}</span>
     <div class="questions__badges">

@@ -17,9 +17,7 @@ export default {
   },
   computed: {
     getPercent() {
-      const percent = !!this.progress
-        ? this.progress.percentage.completed
-        : NaN;
+      const percent = this.progress ? this.progress.percentage.completed : NaN;
       return isNaN(percent) ? "-" : percent;
     },
   },
@@ -35,7 +33,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: calc($base-space / 2);
+  gap: $base-space;
   max-width: 160px;
   z-index: 0;
   &__title {

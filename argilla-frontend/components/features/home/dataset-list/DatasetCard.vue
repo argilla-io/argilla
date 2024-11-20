@@ -30,7 +30,10 @@
     <div class="dataset-card__footer">
       <span class="dataset-card__row">
         <DatasetProgress :datasetId="dataset.id" />
-        <DatasetTotal :datasetId="dataset.id" />
+        <div class="dataset-card__column">
+          <DatasetTotal :datasetId="dataset.id" />
+          <DatasetUsers :datasetId="dataset.id" />
+        </div>
       </span>
     </div>
   </div>
@@ -76,6 +79,11 @@ export default {
     align-items: flex-start;
     gap: $base-space;
   }
+  &__column {
+    display: flex;
+    flex-direction: column;
+    gap: calc($base-space / 3);
+  }
   &__header {
     display: flex;
     justify-content: space-between;
@@ -93,7 +101,7 @@ export default {
     margin: 0 0 $base-space 0;
     color: var(--fg-primary);
     font-weight: 500;
-    @include font-size(16px);
+    @include font-size(14px);
     word-break: break-word;
   }
   &__workspace {
@@ -111,6 +119,7 @@ export default {
   &__footer {
     padding-top: $base-space;
     border-top: 1px solid var(--bg-opacity-6);
+    min-height: $base-space * 7;
   }
   &__actions {
     display: flex;
