@@ -1,9 +1,7 @@
 <template>
   <div class="dataset-progress">
     <p class="dataset-progress__title">{{ $t("metrics.progress.team") }}</p>
-    <p class="dataset-progress__percent">
-      {{ !!progress ? progress.percentage.completed : "-" }}%
-    </p>
+    <p class="dataset-progress__percent">{{ getPercent }}%</p>
   </div>
 </template>
 
@@ -15,6 +13,14 @@ export default {
     datasetId: {
       type: String,
       required: true,
+    },
+  },
+  computed: {
+    getPercent() {
+      const percent = !!this.progress
+        ? this.progress.percentage.completed
+        : NaN;
+      return isNaN(percent) ? "-" : percent;
     },
   },
   setup(props) {
