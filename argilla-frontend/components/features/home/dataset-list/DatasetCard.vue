@@ -32,7 +32,6 @@
         <DatasetProgress :datasetId="dataset.id" />
         <div class="dataset-card__column">
           <DatasetTotal :datasetId="dataset.id" />
-          <DatasetUsers :datasetId="dataset.id" />
         </div>
       </span>
     </div>
