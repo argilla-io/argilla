@@ -94,6 +94,7 @@ export default {
     color: var(--fg-primary);
     font-weight: 500;
     @include font-size(16px);
+    word-break: break-word;
   }
   &__workspace {
     margin: 0 0 calc($base-space / 2) 0;
