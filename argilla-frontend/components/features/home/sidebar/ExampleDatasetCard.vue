@@ -14,7 +14,7 @@
         <DatasetBadge v-for="tag in dataset.tags" :text="tag" :key="tag" />
       </div>
       <p class="example-dataset__rows">
-        <svgicon name="rows" height="10" />{{ dataset.rows }} rows
+        <svgicon name="rows" height="10" />{{ dataset.rows }} {{ $t("rows") }}
       </p>
     </div>
   </BaseButton>

@@ -7,7 +7,7 @@
       color="var(--fg-tertiary)"
       aria-hidden="true"
     />
-    <span v-text="totalRecords" title="Records" />
+    <span v-text="`${totalRecords} ${$t('rows')}`" />
   </div>
 </template>
 

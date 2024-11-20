@@ -42,6 +42,7 @@ export default {
   required: "Required",
   optional: "Optional",
   template: "Template",
+  rows: "rows",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",
