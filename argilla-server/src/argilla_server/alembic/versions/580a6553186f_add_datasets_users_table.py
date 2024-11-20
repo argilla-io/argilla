@@ -53,7 +53,7 @@ def upgrade() -> None:
         INSERT INTO datasets_users (dataset_id, user_id)
         SELECT DISTINCT records.dataset_id, responses.user_id
         FROM responses
-        JOIN records ON responses.record_id = records.id
+        JOIN records ON records.id = responses.record_id
     """)
 
 
