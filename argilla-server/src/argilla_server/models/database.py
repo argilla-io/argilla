@@ -369,10 +369,7 @@ class DatasetUser(DatabaseModel):
     dataset: Mapped["Dataset"] = relationship(viewonly=True)
     user: Mapped["User"] = relationship(viewonly=True)
 
-    __table_args__ = (
-        PrimaryKeyConstraint("dataset_id", "user_id"),
-        UniqueConstraint("dataset_id", "user_id", name="dataset_id_user_id_uq"),
-    )
+    __table_args__ = (PrimaryKeyConstraint("dataset_id", "user_id"),)
 
     def __repr__(self):
         return (

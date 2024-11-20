@@ -41,7 +41,6 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["dataset_id"], ["datasets.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("dataset_id", "user_id"),
-        sa.UniqueConstraint("dataset_id", "user_id", name="dataset_id_user_id_uq"),
     )
     op.create_index(op.f("ix_datasets_users_dataset_id"), "datasets_users", ["dataset_id"], unique=False)
     op.create_index(op.f("ix_datasets_users_user_id"), "datasets_users", ["user_id"], unique=False)
