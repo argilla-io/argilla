@@ -20,9 +20,8 @@ Create Date: 2024-11-20 12:15:24.631417
 
 """
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "580a6553186f"
@@ -37,24 +36,34 @@ def upgrade() -> None:
         "datasets_users",
         sa.Column("dataset_id", sa.Uuid(), nullable=False),
         sa.Column("user_id", sa.Uuid(), nullable=False),
-        sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("inserted_at", sa.DateTime(), nullable=False),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["dataset_id"], ["datasets.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("dataset_id", "user_id"),
         sa.UniqueConstraint("dataset_id", "user_id", name="dataset_id_user_id_uq"),
     )
     op.create_index(op.f("ix_datasets_users_dataset_id"), "datasets_users", ["dataset_id"], unique=False)
     op.create_index(op.f("ix_datasets_users_user_id"), "datasets_users", ["user_id"], unique=False)
     # ### end Alembic commands ###
 
-    op.execute("""
-        INSERT INTO datasets_users (dataset_id, user_id)
-        SELECT DISTINCT records.dataset_id, responses.user_id
-        FROM responses
-        JOIN records ON records.id = responses.record_id
-    """)
+    bind = op.get_bind()
+
+    statement = """
+        INSERT INTO datasets_users (dataset_id, user_id, inserted_at, updated_at)
+        SELECT dataset_id, user_id, {now_func}, {now_func} FROM (
+            SELECT DISTINCT records.dataset_id AS dataset_id, responses.user_id as user_id
+            FROM responses
+            JOIN records ON records.id = responses.record_id
+        )
+    """
+
+    if bind.dialect.name == "postgresql":
+        op.execute(statement.format(now_func="NOW()"))
+    elif bind.dialect.name == "sqlite":
+        op.execute(statement.format(now_func="datetime('now')"))
+    else:
+        raise Exception("Unsupported database dialect")
 
 
 def downgrade() -> None:

@@ -18,7 +18,7 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
-from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Enum as SAEnum, PrimaryKeyConstraint
 from sqlalchemy import (
     JSON,
     ForeignKey,
@@ -361,13 +361,18 @@ class DatasetUser(DatabaseModel):
     __tablename__ = "datasets_users"
     __upsertable_columns__ = {}
 
+    id = None  # This is a workaround to avoid the id column in the table
+
     dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
     dataset: Mapped["Dataset"] = relationship(viewonly=True)
     user: Mapped["User"] = relationship(viewonly=True)
 
-    __table_args__ = (UniqueConstraint("dataset_id", "user_id", name="dataset_id_user_id_uq"),)
+    __table_args__ = (
+        PrimaryKeyConstraint("dataset_id", "user_id"),
+        UniqueConstraint("dataset_id", "user_id", name="dataset_id_user_id_uq"),
+    )
 
     def __repr__(self):
         return (
