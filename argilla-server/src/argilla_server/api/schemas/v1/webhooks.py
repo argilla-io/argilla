@@ -82,7 +82,7 @@ class WebhookUpdate(UpdateSchema):
     @classmethod
     def events_must_be_unique(cls, events: Optional[List[WebhookEvent]]):
         if events is None:
-            return None
+            return
 
         if len(set(events)) != len(events):
             raise ValueError("Events must be unique")
@@ -92,6 +92,6 @@ class WebhookUpdate(UpdateSchema):
     @field_serializer("url")
     def serialize_url(self, url: Optional[HttpUrl]):
         if url is None:
-            return None
+            return
 
         return str(url)
