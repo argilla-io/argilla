@@ -14,14 +14,25 @@
 
 from typing import Optional
 
-from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
-from argilla_server.pydantic_v1 import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+
+class HuggingfaceSettings(BaseModel):
+    space_id: Optional[str]
+    space_title: Optional[str]
+    space_subdomain: Optional[str]
+    space_host: Optional[str]
+    space_repo_name: Optional[str]
+    space_author_name: Optional[str]
+    space_persistent_storage_enabled: bool
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ArgillaSettings(BaseModel):
-    show_huggingface_space_persistent_storage_warning: Optional[bool]
+    show_huggingface_space_persistent_storage_warning: Optional[bool] = None
 
 
 class Settings(BaseModel):
     argilla: ArgillaSettings
-    huggingface: Optional[HuggingfaceSettings]
+    huggingface: Optional[HuggingfaceSettings] = None

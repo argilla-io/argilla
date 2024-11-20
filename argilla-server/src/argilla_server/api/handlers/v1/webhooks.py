@@ -53,7 +53,7 @@ async def create_webhook(
 ):
     await authorize(current_user, WebhookPolicy.create)
 
-    return await webhooks.create_webhook(db, webhook_create.dict())
+    return await webhooks.create_webhook(db, webhook_create.model_dump())
 
 
 @router.patch("/webhooks/{webhook_id}", response_model=WebhookSchema)
@@ -68,7 +68,7 @@ async def update_webhook(
 
     await authorize(current_user, WebhookPolicy.update)
 
-    return await webhooks.update_webhook(db, webhook, webhook_update.dict(exclude_unset=True))
+    return await webhooks.update_webhook(db, webhook, webhook_update.model_dump(exclude_unset=True))
 
 
 @router.delete("/webhooks/{webhook_id}", response_model=WebhookSchema)

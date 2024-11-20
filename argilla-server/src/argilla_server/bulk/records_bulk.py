@@ -94,7 +94,7 @@ class CreateRecordsBulk:
         upsert_many_suggestions = []
         for idx, (record, suggestions) in enumerate(records_and_suggestions):
             for suggestion_create in suggestions or []:
-                upsert_many_suggestions.append(dict(**suggestion_create.dict(), record_id=record.id))
+                upsert_many_suggestions.append(dict(**suggestion_create.model_dump(), record_id=record.id))
 
         if not upsert_many_suggestions:
             return []
@@ -113,7 +113,7 @@ class CreateRecordsBulk:
         datasets_users = set()
         for idx, (record, responses) in enumerate(records_and_responses):
             for response_create in responses or []:
-                upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
+                upsert_many_responses.append(dict(**response_create.model_dump(), record_id=record.id))
                 datasets_users.add((response_create.user_id, record.dataset_id))
 
         if not upsert_many_responses:
@@ -156,7 +156,7 @@ class CreateRecordsBulk:
 
     @classmethod
     def _metadata_is_set(cls, record_create: RecordCreate) -> bool:
-        return "metadata" in record_create.__fields_set__
+        return "metadata" in record_create.model_fields_set
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):

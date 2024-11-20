@@ -282,6 +282,7 @@ export default {
       labelSelection: {
         atLeastTwoOptions: "At least two options are required",
         optionsWithoutLabel: "Empty options are not allowed",
+        optionsSeparatedByComma: "Use comma to separate labels",
       },
       rating: {
         atLeastTwoOptions: "At least two options are required",

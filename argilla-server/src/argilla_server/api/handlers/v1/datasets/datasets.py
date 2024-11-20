@@ -50,7 +50,6 @@ from argilla_server.search_engine import (
     get_search_engine,
 )
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter()
 
@@ -202,7 +201,7 @@ async def create_dataset(
 ):
     await authorize(current_user, DatasetPolicy.create(dataset_create.workspace_id))
 
-    return await datasets.create_dataset(db, dataset_create.dict())
+    return await datasets.create_dataset(db, dataset_create.model_dump())
 
 
 @router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
@@ -309,7 +308,7 @@ async def update_dataset(
 
     await authorize(current_user, DatasetPolicy.update(dataset))
 
-    return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
+    return await datasets.update_dataset(db, dataset, dataset_update.model_dump(exclude_unset=True))
 
 
 @router.post("/datasets/{dataset_id}/import", status_code=status.HTTP_202_ACCEPTED, response_model=JobSchema)
@@ -329,7 +328,7 @@ async def import_dataset_from_hub(
         subset=hub_dataset.subset,
         split=hub_dataset.split,
         dataset_id=dataset.id,
-        mapping=hub_dataset.mapping.dict(),
+        mapping=hub_dataset.mapping.model_dump(),
     )
 
     return JobSchema(id=job.id, status=job.get_status())
