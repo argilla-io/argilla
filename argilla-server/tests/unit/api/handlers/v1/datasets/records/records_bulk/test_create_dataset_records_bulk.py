@@ -11,9 +11,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 import pytest
 
+from typing import Any
 from uuid import UUID
 from httpx import AsyncClient
 from sqlalchemy import func, select
@@ -680,6 +680,148 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    @pytest.mark.parametrize(
+        "value,expected_error",
+        [
+            (
+                1,
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "str type expected",
+                                    "type": "type_error.str",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "value is not a valid list",
+                                    "type": "type_error.list",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "value is not a valid dict",
+                                    "type": "type_error.dict",
+                                },
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                1.0,
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "str type expected",
+                                    "type": "type_error.str",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "value is not a valid list",
+                                    "type": "type_error.list",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "value is not a valid dict",
+                                    "type": "type_error.dict",
+                                },
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                True,
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "str type expected",
+                                    "type": "type_error.str",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "value is not a valid list",
+                                    "type": "type_error.list",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field"],
+                                    "msg": "value is not a valid dict",
+                                    "type": "type_error.dict",
+                                },
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                ["wrong", "value"],
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields"],
+                                    "msg": "argilla_server.api.schemas.v1.chat.ChatFieldValue() argument after ** must be a mapping, not str",
+                                    "type": "type_error",
+                                }
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                {"wrong": "value"},
+                {"detail": "Record at position 0 is not valid because text field 'text-field' value must be a string"},
+            ),  # Valid value for custom fields wrong value for text fields
+            (
+                [{"role": "user", "content": "Hello!"}],
+                {"detail": "Record at position 0 is not valid because text field 'text-field' value must be a string"},
+            ),  # Valid value for chat fields wrong value for text fields
+        ],
+    )
+    async def test_create_dataset_records_bulk_with_wrong_text_field_value(
+        self,
+        db: AsyncSession,
+        async_client: AsyncClient,
+        owner_auth_header: dict,
+        value: Any,
+        expected_error: dict,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": value,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == expected_error
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
     async def test_create_dataset_records_bulk_updates_records_status(
