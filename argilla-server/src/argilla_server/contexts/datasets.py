@@ -433,9 +433,9 @@ async def get_users_with_responses_for_dataset(
     db: AsyncSession,
     dataset: Dataset,
 ) -> Sequence[User]:
-    query = select(DatasetUser).filter_by(dataset_id=dataset.id)
-    result = await db.scalars(query.order_by(DatasetUser.inserted_at.asc()))
+    query = select(DatasetUser).filter_by(dataset_id=dataset.id).options(selectinload(DatasetUser.user))
 
+    result = await db.scalars(query.order_by(DatasetUser.inserted_at.asc()))
     return [r.user for r in result.all()]
 
 
