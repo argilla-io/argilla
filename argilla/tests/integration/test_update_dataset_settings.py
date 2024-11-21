@@ -64,6 +64,15 @@ class TestUpdateDatasetSettings:
         dataset = client.datasets(dataset.name)
         assert dataset.settings.vectors["vector"].title == "A new title for vector"
 
+    def test_update_question_title(self, client: Argilla, dataset: Dataset):
+        question = dataset.settings.questions["label"]
+        question.title = "A new title for label question"
+        dataset.settings.update()
+
+        dataset = client.datasets(dataset.name)
+        question = dataset.settings.questions["label"]
+        assert question.title == "A new title for label question"
+
     def test_update_distribution_settings(self, client: Argilla, dataset: Dataset):
         dataset.settings.distribution.min_submitted = 100
         dataset.update()
