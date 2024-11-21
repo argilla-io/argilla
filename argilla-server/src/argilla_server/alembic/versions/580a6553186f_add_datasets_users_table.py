@@ -54,7 +54,7 @@ def upgrade() -> None:
             SELECT DISTINCT records.dataset_id AS dataset_id, responses.user_id as user_id
             FROM responses
             JOIN records ON records.id = responses.record_id
-        )
+        ) AS subquery
     """
 
     if bind.dialect.name == "postgresql":
