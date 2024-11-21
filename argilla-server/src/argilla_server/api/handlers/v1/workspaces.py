@@ -58,7 +58,7 @@ async def create_workspace(
 ):
     await authorize(current_user, WorkspacePolicy.create)
 
-    return await accounts.create_workspace(db, workspace_create.dict())
+    return await accounts.create_workspace(db, workspace_create.model_dump())
 
 
 @router.delete("/workspaces/{workspace_id}", response_model=WorkspaceSchema)

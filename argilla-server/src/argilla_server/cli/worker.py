@@ -16,13 +16,13 @@ import typer
 
 from typing import List
 
-from argilla_server.jobs.queues import DEFAULT_QUEUE
+from argilla_server.jobs.queues import DEFAULT_QUEUE, HIGH_QUEUE
 
 DEFAULT_NUM_WORKERS = 2
 
 
 def worker(
-    queues: List[str] = typer.Option([DEFAULT_QUEUE.name], help="Name of queues to listen"),
+    queues: List[str] = typer.Option([DEFAULT_QUEUE.name, HIGH_QUEUE.name], help="Name of queues to listen"),
     num_workers: int = typer.Option(DEFAULT_NUM_WORKERS, help="Number of workers to start"),
 ) -> None:
     from rq.worker_pool import WorkerPool

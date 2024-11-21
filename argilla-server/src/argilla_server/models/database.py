@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 import secrets
+import base64
 from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
@@ -24,7 +25,6 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
-    and_,
     sql,
 )
 from sqlalchemy.engine.default import DefaultExecutionContext
@@ -46,7 +46,7 @@ from argilla_server.enums import (
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
 from argilla_server.models.mixins import inserted_at_current_value
-from argilla_server.pydantic_v1 import parse_obj_as
+from pydantic import TypeAdapter
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
 __all__ = [
@@ -62,9 +62,11 @@ __all__ = [
     "MetadataProperty",
     "Vector",
     "VectorSettings",
+    "Webhook",
 ]
 
 _USER_API_KEY_BYTES_LENGTH = 80
+_WEBHOOK_SECRET_BYTES_LENGTH = 64
 
 
 class Field(DatabaseModel):
@@ -248,6 +250,9 @@ class Record(DatabaseModel):
 
     __table_args__ = (UniqueConstraint("external_id", "dataset_id", name="record_external_id_dataset_id_uq"),)
 
+    def is_completed(self) -> bool:
+        return self.status == RecordStatus.completed
+
     def vector_value_by_vector_settings(self, vector_settings: "VectorSettings") -> Union[List[float], None]:
         for vector in self.vectors:
             if vector.vector_settings_id == vector_settings.id:
@@ -282,7 +287,7 @@ class Question(DatabaseModel):
 
     @property
     def parsed_settings(self) -> QuestionSettings:
-        return parse_obj_as(QuestionSettings, self.settings)
+        return TypeAdapter(QuestionSettings).validate_python(self.settings)
 
     @property
     def is_text(self) -> bool:
@@ -331,7 +336,7 @@ class MetadataProperty(DatabaseModel):
 
     @property
     def parsed_settings(self) -> MetadataPropertySettings:
-        return parse_obj_as(MetadataPropertySettings, self.settings)
+        return TypeAdapter(MetadataPropertySettings).validate_python(self.settings)
 
     @property
     def visible_for_annotators(self) -> bool:
@@ -533,5 +538,27 @@ class User(DatabaseModel):
         return (
             f"User(id={str(self.id)!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, "
             f"username={self.username!r}, role={self.role.value!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
+
+
+def generate_webhook_secret() -> str:
+    # NOTE: https://www.standardwebhooks.com implementation requires a base64 encoded secret
+    return base64.b64encode(secrets.token_bytes(_WEBHOOK_SECRET_BYTES_LENGTH)).decode("utf-8")
+
+
+class Webhook(DatabaseModel):
+    __tablename__ = "webhooks"
+
+    url: Mapped[str] = mapped_column(Text)
+    secret: Mapped[str] = mapped_column(Text, default=generate_webhook_secret)
+    events: Mapped[List[str]] = mapped_column(JSON)
+    enabled: Mapped[bool] = mapped_column(default=True, server_default=sql.true())
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    def __repr__(self):
+        return (
+            f"Webhook(id={str(self.id)!r}, url={self.url!r}, events={self.events!r}, "
+            f"enabled={self.enabled!r}, description={self.description!r}, "
             f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
         )

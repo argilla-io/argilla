@@ -18,7 +18,7 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.errors.future import UnprocessableEntityError
-from argilla_server.pydantic_v1 import BaseModel, Field, PositiveInt, constr
+from pydantic import BaseModel, Field, PositiveInt, constr, ConfigDict
 
 VECTOR_SETTINGS_CREATE_NAME_MIN_LENGTH = 1
 VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH = 200
@@ -45,8 +45,7 @@ class VectorSettings(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
     def check_vector(self, value: List[float]) -> None:
         num_elements = len(value)

@@ -12,7 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-try:
-    from pydantic.v1.errors import *  # noqa: F403
-except ImportError:
-    from pydantic.errors import *  # noqa: F403
+from enum import Enum
+
+
+class StrEnum(str, Enum):
+    """Custom StrEnum class for Python <3.11 compatibility."""
+
+    def __str__(self):
+        return str(self.value)

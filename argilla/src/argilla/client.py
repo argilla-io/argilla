@@ -22,6 +22,7 @@ from uuid import UUID
 from argilla import _api
 from argilla._api._base import ResourceAPI
 from argilla._api._client import DEFAULT_HTTP_CONFIG
+from argilla._api._webhooks import WebhookModel
 from argilla._exceptions import ArgillaError, NotFoundError
 from argilla._helpers import GenericIterator
 from argilla._helpers._deploy import SpacesDeploymentMixin
@@ -29,7 +30,7 @@ from argilla._helpers._resource_repr import NotebookHTMLReprMixin, ResourceHTMLR
 from argilla._models import DatasetModel, ResourceModel, UserModel, WorkspaceModel
 
 if TYPE_CHECKING:
-    from argilla import Dataset, User, Workspace
+    from argilla import Dataset, User, Workspace, Webhook
 
 __all__ = ["Argilla"]
 
@@ -87,6 +88,11 @@ class Argilla(_api.APIClient, SpacesDeploymentMixin, NotebookHTMLReprMixin):
     def users(self) -> "Users":
         """A collection of users on the server."""
         return Users(client=self)
+
+    @property
+    def webhooks(self) -> "Webhooks":
+        """A collection of webhooks on the server."""
+        return Webhooks(client=self)
 
     @cached_property
     def me(self) -> "User":
@@ -394,6 +400,69 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         from argilla.datasets import Dataset
 
         return Dataset.from_model(model=model, client=self._client)
+
+
+class Webhooks(Sequence["Webhook"], ResourceHTMLReprMixin):
+    """A webhooks class. It can be used to create a new webhook or to get an existing one."""
+
+    class _Iterator(GenericIterator["Webhook"]):
+        pass
+
+    def __init__(self, client: "Argilla") -> None:
+        self._client = client
+        self._api = client.api.webhooks
+
+    def __call__(self, id: Union[UUID, str]) -> Optional["Webhook"]:
+        """Get a webhook by id if exists. Otherwise, returns `None`"""
+
+        model = _get_model_by_id(self._api, id)
+        if model:
+            return self._from_model(model)  # noqa
+        warnings.warn(f"Webhook with id {id!r} not found")
+
+    def __iter__(self):
+        return self._Iterator(self.list())
+
+    @overload
+    @abstractmethod
+    def __getitem__(self, index: int) -> "Webhook": ...
+
+    @overload
+    @abstractmethod
+    def __getitem__(self, index: slice) -> Sequence["Webhook"]: ...
+
+    def __getitem__(self, index) -> "Webhook":
+        model = self._api.list()[index]
+        return self._from_model(model)
+
+    def __len__(self) -> int:
+        return len(self._api.list())
+
+    def add(self, webhook: "Webhook") -> "Webhook":
+        """Add a new webhook to the Argilla platform.
+        Args:
+            webhook: Webhook object.
+
+        Returns:
+            Webhook: The created webhook.
+        """
+        webhook._client = self._client
+        return webhook.create()
+
+    def list(self) -> List["Webhook"]:
+        return [self._from_model(model) for model in self._api.list()]
+
+    ############################
+    # Private methods
+    ############################
+
+    def _repr_html_(self) -> str:
+        return self._represent_as_html(resources=self.list())
+
+    def _from_model(self, model: WebhookModel) -> "Webhook":
+        from argilla.webhooks import Webhook
+
+        return Webhook.from_model(client=self._client, model=model)
 
 
 def _get_model_by_id(api: ResourceAPI, resource_id: Union[UUID, str]) -> Optional[ResourceModel]:

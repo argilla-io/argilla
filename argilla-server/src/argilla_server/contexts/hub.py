@@ -15,7 +15,7 @@
 import io
 import base64
 
-from typing import Union, Any
+from typing import Any
 from typing_extensions import Self
 
 from PIL import Image
