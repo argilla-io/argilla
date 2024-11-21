@@ -51,8 +51,6 @@ To restrict access or change the default behaviour, there's two options:
 **Modify the `.oauth.yml` configuration file**. You can find and modify this file under the `Files` tab of your Space. The default file looks like this:
 
 ```yaml
-# Change to `false` to disable HF oauth integration
-#enabled: false
 
 providers:
   - name: huggingface
@@ -61,10 +59,10 @@ providers:
 allowed_workspaces:
   - name: argilla
 ```
-You can modify two things:
+You can:
 
-- Uncomment `enabled: false` to completely disable the Sign in with Hugging Face. If you disable it make sure to set the `USERNAME` and `PASSWORD` Space secrets to be able to login as an `owner`.
 - Change the list of `allowed` workspaces.
+- Rename the `.oauth.yml` file to disable OAuth access.
 
 For example if you want to let users join a new workspace `community-initiative`:
 
