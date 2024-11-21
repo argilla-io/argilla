@@ -1534,6 +1534,7 @@ class TestSuiteDatasets:
         response = await async_client.post(
             f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
         )
+        await db.refresh(dataset, attribute_names=["users"])
 
         await db.refresh(annotator)
         await db.refresh(owner)
@@ -1542,6 +1543,9 @@ class TestSuiteDatasets:
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 2
         assert (await db.execute(select(func.count(Response.id)).where(Response.user_id == annotator.id))).scalar() == 2
         assert (await db.execute(select(func.count(Response.id)).where(Response.user_id == owner.id))).scalar() == 1
+
+        assert owner in dataset.users
+        assert annotator in dataset.users
 
         records = (await db.execute(select(Record))).scalars().all()
         mock_search_engine.index_records.assert_called_once_with(dataset, records)
@@ -2398,9 +2402,13 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
+
+        assert dataset.users == [owner]
 
     async def test_create_dataset_records_with_submitted_response_without_values(
         self,
@@ -2466,11 +2474,15 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
         assert (
             await db.execute(select(func.count(Response.id)).filter(Response.status == ResponseStatus.discarded))
         ).scalar() == 1
+
+        assert dataset.users == [owner]
 
     async def test_create_dataset_records_with_draft_response(
         self,
@@ -2505,11 +2517,15 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
         assert (
             await db.execute(select(func.count(Response.id)).filter(Response.status == ResponseStatus.draft))
         ).scalar() == 1
+
+        assert dataset.users == [owner]
 
     async def test_create_dataset_records_with_invalid_response_status(
         self,
@@ -2574,9 +2590,13 @@ class TestSuiteDatasets:
             f"/api/v1/datasets/{dataset.id}/records/bulk", headers=owner_auth_header, json=records_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
         assert (await db.execute(select(func.count(Record.id)))).scalar() == 1
+
+        assert dataset.users == [owner]
 
     async def test_create_dataset_records_with_non_published_dataset(
         self, async_client: "AsyncClient", db: "AsyncSession", owner_auth_header: dict
