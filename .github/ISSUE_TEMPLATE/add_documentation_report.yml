@@ -7,7 +7,7 @@ assignees: []
 body:
   - type: markdown
     attributes:
-      value: "Thank you for reporting the documentation mistake! Please fill out the section below."
+      value: "Thank you for reporting a documentation mistake! Before you get started, please [search to see](https://github.com/argilla-io/argilla/issues) if an issue already exists for the bug you encountered."
 
   - type: textarea
     id: doc_report

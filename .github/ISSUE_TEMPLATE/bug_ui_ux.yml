@@ -7,7 +7,7 @@ assignees: []
 body:
   - type: markdown
     attributes:
-      value: "Thank you for reporting a bug! Please fill out the sections below."
+      value: "Thank you for reporting a UI/UX bug! Before you get started, please [search to see](https://github.com/argilla-io/argilla/issues) if an issue already exists for the bug you encountered."
 
   - type: textarea
     id: bug_description
@@ -15,7 +15,7 @@ body:
       label: "Describe the bug"
       description: "A clear and concise description of the bug."
     validations:
-          required: false
+      required: true
 
   - type: textarea
     id: to_reproduce
@@ -67,3 +67,8 @@ body:
       description: "Add any other relevant information."
     validations:
       required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        📌  Make sure you have provided all the required information in each section so we can support you properly.
