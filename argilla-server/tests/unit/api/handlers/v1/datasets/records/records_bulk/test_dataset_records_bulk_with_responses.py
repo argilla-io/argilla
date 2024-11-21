@@ -73,6 +73,8 @@ class TestDatasetRecordsBulkWithResponses:
             },
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert http_response.status_code == 201, http_response.json()
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         response = (await db.execute(select(Response))).scalar_one()
@@ -90,6 +92,8 @@ class TestDatasetRecordsBulkWithResponses:
                     "updated_at": response.updated_at.isoformat(),
                 },
             ]
+
+        assert dataset.users == [user]
 
     async def test_update_records_with_new_responses_in_bulk(
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
@@ -164,6 +168,8 @@ class TestDatasetRecordsBulkWithResponses:
             },
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert http_response.status_code == 200, http_response.json()
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         response = (await db.execute(select(Response))).scalar_one()
@@ -182,6 +188,8 @@ class TestDatasetRecordsBulkWithResponses:
                     "updated_at": response.updated_at.isoformat(),
                 },
             ]
+
+        assert dataset.users == [user]
 
     async def test_update_record_responses_in_bulk(
         self, async_client: AsyncClient, db: AsyncSession, owner_auth_header: dict
