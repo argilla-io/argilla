@@ -32,6 +32,10 @@ def client() -> rg.Argilla:
 
 
 def _cleanup(client: rg.Argilla):
+    for dataset in client.datasets:
+        if dataset.name.startswith("test_"):
+            dataset.delete()
+
     for workspace in client.workspaces:
         if workspace.name.startswith("test_"):
             for dataset in workspace.datasets:

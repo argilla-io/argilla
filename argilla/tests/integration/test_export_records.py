@@ -28,8 +28,7 @@ from argilla import Argilla
 
 
 @pytest.fixture
-def dataset(client) -> rg.Dataset:
-    mock_dataset_name = "".join(random.choices(ascii_lowercase, k=16))
+def dataset(client, dataset_name: str) -> rg.Dataset:
     settings = rg.Settings(
         fields=[
             rg.TextField(name="text"),
@@ -41,7 +40,7 @@ def dataset(client) -> rg.Dataset:
         ],
     )
     dataset = rg.Dataset(
-        name=mock_dataset_name,
+        name=dataset_name,
         settings=settings,
         client=client,
     )
