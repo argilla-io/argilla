@@ -24,11 +24,6 @@ from sqlalchemy import func, inspect, select
 from argilla_server.api.handlers.v1.datasets.records import LIST_DATASET_RECORDS_LIMIT_DEFAULT
 from argilla_server.api.schemas.v1.datasets import DATASET_GUIDELINES_MAX_LENGTH, DATASET_NAME_MAX_LENGTH
 from argilla_server.api.schemas.v1.fields import FIELD_CREATE_NAME_MAX_LENGTH, FIELD_CREATE_TITLE_MAX_LENGTH
-from argilla_server.api.schemas.v1.metadata_properties import (
-    METADATA_PROPERTY_CREATE_NAME_MAX_LENGTH,
-    METADATA_PROPERTY_CREATE_TITLE_MAX_LENGTH,
-    TERMS_METADATA_PROPERTY_VALUES_MAX_ITEMS,
-)
 from argilla_server.api.schemas.v1.records import RECORDS_CREATE_MAX_ITEMS, RECORDS_CREATE_MIN_ITEMS
 from argilla_server.api.schemas.v1.vector_settings import (
     VECTOR_SETTINGS_CREATE_NAME_MAX_LENGTH,
@@ -48,7 +43,6 @@ from argilla_server.enums import (
 from argilla_server.models import (
     Dataset,
     Field,
-    MetadataProperty,
     Question,
     Record,
     Response,
@@ -1627,7 +1621,7 @@ class TestSuiteDatasets:
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "responses"],
-                            "msg": f"'responses' contains several responses for the same user_id='{str(owner.id)}'",
+                            "msg": f"Value error, 'responses' contains several responses for the same user_id='{str(owner.id)}'",
                             "type": "value_error",
                         }
                     ],
@@ -1736,19 +1730,19 @@ class TestSuiteDatasets:
                 "params": {
                     "errors": [
                         {
-                            "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "str type expected",
-                            "type": "type_error.str",
+                            "loc": ["body", "items", 0, "fields", "output", "constrained-str"],
+                            "msg": "Input should be a valid string",
+                            "type": "string_type",
                         },
                         {
-                            "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "value is not a valid list",
-                            "type": "type_error.list",
+                            "loc": ["body", "items", 0, "fields", "output", "list[ChatFieldValue]"],
+                            "msg": "Input should be a valid list",
+                            "type": "list_type",
                         },
                         {
-                            "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "value is not a valid dict",
-                            "type": "type_error.dict",
+                            "loc": ["body", "items", 0, "fields", "output", "dict[constrained-str,any]"],
+                            "msg": "Input should be a valid dictionary",
+                            "type": "dict_type",
                         },
                     ]
                 },
@@ -1846,19 +1840,19 @@ class TestSuiteDatasets:
                 "params": {
                     "errors": [
                         {
-                            "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "str type expected",
-                            "type": "type_error.str",
+                            "loc": ["body", "items", 0, "fields", "output", "constrained-str"],
+                            "msg": "Input should be a valid string",
+                            "type": "string_type",
                         },
                         {
-                            "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "value is not a valid list",
-                            "type": "type_error.list",
+                            "loc": ["body", "items", 0, "fields", "output", "list[ChatFieldValue]"],
+                            "msg": "Input should be a valid list",
+                            "type": "list_type",
                         },
                         {
-                            "loc": ["body", "items", 0, "fields", "output"],
-                            "msg": "value is not a valid dict",
-                            "type": "type_error.dict",
+                            "loc": ["body", "items", 0, "fields", "output", "dict[constrained-str,any]"],
+                            "msg": "Input should be a valid dictionary",
+                            "type": "dict_type",
                         },
                     ]
                 },
@@ -4351,7 +4345,8 @@ class TestSuiteDatasets:
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
 
         response = await async_client.put(
-            f"/api/v1/datasets/{dataset.id}/publish", headers={API_KEY_HEADER_NAME: admin.api_key}
+            f"/api/v1/datasets/{dataset.id}/publish",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
         assert response.status_code == 200
@@ -4650,7 +4645,8 @@ class TestSuiteDatasets:
         admin = await AdminFactory.create(workspaces=[dataset.workspace])
 
         response = await async_client.delete(
-            f"/api/v1/datasets/{dataset.id}", headers={API_KEY_HEADER_NAME: admin.api_key}
+            f"/api/v1/datasets/{dataset.id}",
+            headers={API_KEY_HEADER_NAME: admin.api_key},
         )
 
         assert response.status_code == 200

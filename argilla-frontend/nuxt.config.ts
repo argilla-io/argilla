@@ -115,14 +115,17 @@ const config: NuxtConfig = {
     locales: [
       {
         code: "en",
+        name: "English",
         file: "en.js",
       },
       {
         code: "de",
+        name: "Deutsch",
         file: "de.js",
       },
       {
         code: "es",
+        name: "Español",
         file: "es.js",
       },
     ],

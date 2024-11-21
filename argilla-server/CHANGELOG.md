@@ -16,9 +16,21 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added new endpoints to create, update, ping and delete webhooks. ([#5453](https://github.com/argilla-io/argilla/pull/5453))
+- Added new webhook events when responses are created, updated, deleted. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
+- Added new webhook events when datasets are created, updated, deleted or published. ([#5468](https://github.com/argilla-io/argilla/pull/5468))
+- Added new webhook events when records are created, updated, deleted or completed. ([#5489](https://github.com/argilla-io/argilla/pull/5489))
+- Added new `high` RQ queue to process high priority background jobs. ([#5467](https://github.com/argilla-io/argilla/pull/5467))
+
 ### Changed
 
 - Changed default python version to 3.13. ([#5649](https://github.com/argilla-io/argilla/pull/5649))
+
+### Fixed
+
+- Fixed error to prevent creating record fields including non-string values for text fields. ([#5682](https://github.com/argilla-io/argilla/pull/5682))
 
 ## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
 

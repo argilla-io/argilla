@@ -14,9 +14,14 @@
 
 import inspect
 import random
-
 import factory
+
+from factory.alchemy import SESSION_PERSISTENCE_COMMIT, SESSION_PERSISTENCE_FLUSH
+from factory.builder import BuildStep, StepBuilder, parse_declarations
+from sqlalchemy.ext.asyncio import async_object_session
+
 from argilla_server.enums import DatasetDistributionStrategy, FieldType, MetadataPropertyType, OptionsOrder
+from argilla_server.webhooks.v1.enums import WebhookEvent
 from argilla_server.models import (
     Dataset,
     Field,
@@ -32,11 +37,9 @@ from argilla_server.models import (
     VectorSettings,
     Workspace,
     WorkspaceUser,
+    Webhook,
 )
 from argilla_server.models.base import DatabaseModel
-from factory.alchemy import SESSION_PERSISTENCE_COMMIT, SESSION_PERSISTENCE_FLUSH
-from factory.builder import BuildStep, StepBuilder, parse_declarations
-from sqlalchemy.ext.asyncio import async_object_session
 
 from tests.database import SyncTestSession, TestSession
 
@@ -416,3 +419,11 @@ class SuggestionFactory(BaseFactory):
     record = factory.SubFactory(RecordFactory)
     question = factory.SubFactory(QuestionFactory)
     value = "negative"
+
+
+class WebhookFactory(BaseFactory):
+    class Meta:
+        model = Webhook
+
+    url = factory.Sequence(lambda n: f"https://example-{n}.com")
+    events = [WebhookEvent.response_created]

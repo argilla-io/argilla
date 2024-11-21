@@ -13,8 +13,7 @@
 #  limitations under the License.
 import os
 from collections import OrderedDict
-from sqlite3 import Connection as SQLite3Connection
-from typing import TYPE_CHECKING, AsyncGenerator, Optional
+from typing import AsyncGenerator, Optional
 
 from sqlalchemy import event, make_url
 from sqlalchemy.engine import Engine
@@ -38,6 +37,7 @@ TAGGED_REVISIONS = OrderedDict(
         "1.28": "ca7293c38970",
         "2.0": "237f7c674d74",
         "2.4": "660d6c6b3360",
+        "2.5": "6ed1b8bf8e08",
     }
 )
 

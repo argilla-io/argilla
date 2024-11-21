@@ -88,6 +88,7 @@ export default {
     apiKeyDescription:
       "API-Keys erlauben es die Datensätze über das Python SDK zu verwalten.",
     theme: "Theme",
+    language: "Sprache",
     copyKey: "API-Key kopieren",
   },
   userAvatarTooltip: {
@@ -286,6 +287,7 @@ export default {
       labelSelection: {
         atLeastTwoOptions: "Mindestens zwei Optionen müssen vorhanden sein",
         optionsWithoutLabel: "Optionen ohne Label sind nicht erlaubt",
+        optionsSeparatedByComma: "Optionen müssen durch Kommas getrennt sein",
       },
     },
     atLeastOneQuestion: "Mindestens eine Frage wird benötigt",
@@ -340,6 +342,12 @@ export default {
       "Der persistente Speicher ist nicht aktiviert. Alle Daten gehen verloren, wenn dieser Space neu gestartet wird. Gehen Sie zu den Space-Einstellungen, um ihn zu aktivieren.",
     annotator:
       "Der persistente Speicher ist nicht aktiviert. Alle Daten gehen verloren, wenn dieser Space neu gestartet wird.",
+  },
+  colorSchema: {
+    system: "System",
+    light: "Licht",
+    dark: "Dunkel",
+    "high-contrast": "Hoher Kontrast",
   },
   validations: {
     businessLogic: {
