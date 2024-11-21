@@ -1,25 +1,27 @@
 <template>
   <div class="dataset-card">
     <div>
-      <div class="dataset-card__date">
-        <span v-text="$t('home.updatedAt')" />
-        <BaseDate format="date-relative-now" :date="dataset.updatedAt" />
-      </div>
-      <p class="dataset-card__workspace">{{ dataset.workspaceName }}</p>
-      <!-- <div class="dataset-card__actions">
-        <BaseActionTooltip :tooltip="$t('copied')" tooltip-position="bottom">
+      <div class="dataset-card__row">
+        <div class="dataset-card__date">
+          <span v-text="$t('home.updatedAt')" />
+          <BaseDate format="date-relative-now" :date="dataset.updatedAt" />
+        </div>
+        <div class="dataset-card__actions">
+          <BaseActionTooltip :tooltip="$t('copied')" tooltip-position="bottom">
+            <BaseButton
+              class="dataset-card__action"
+              @click.prevent="$emit('copy-url')"
+              ><svgicon name="link"
+            /></BaseButton>
+          </BaseActionTooltip>
           <BaseButton
             class="dataset-card__action"
-            @click.prevent="$emit('copy-url')"
-            ><svgicon name="link"
+            @click.prevent="$emit('go-to-settings')"
+            ><svgicon name="settings"
           /></BaseButton>
-        </BaseActionTooltip>
-        <BaseButton
-          class="dataset-card__action"
-          @click.prevent="$emit('go-to-settings')"
-          ><svgicon name="settings"
-        /></BaseButton>
-      </div> -->
+        </div>
+      </div>
+      <p class="dataset-card__workspace">{{ dataset.workspaceName }}</p>
 
       <div class="dataset-card__content">
         <h1 class="dataset-card__title">{{ dataset.name }}</h1>
@@ -130,14 +132,14 @@ export default {
     justify-content: flex-end;
     gap: $base-space;
   }
-  // &__action {
-  //   &.button {
-  //     padding: $base-space;
-  //     color: var(--fg-secondary);
-  //     &:hover {
-  //       color: var(--fg-tertiary);
-  //     }
-  //   }
-  // }
+  &__action {
+    &.button {
+      padding: 0 calc($base-space / 2);
+      color: var(--fg-secondary);
+      &:hover {
+        color: var(--fg-tertiary);
+      }
+    }
+  }
 }
 </style>
