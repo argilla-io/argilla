@@ -16,6 +16,13 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.5.0)
+
+### Added
+
+- Added support to remove/override datasets settings. ([#5584](https://github.com/argilla-io/argilla/pull/5584))
+- Added support to update question attribures. ([#5680](https://github.com/argilla-io/argilla/pull/5680))
+
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
 ### Added
