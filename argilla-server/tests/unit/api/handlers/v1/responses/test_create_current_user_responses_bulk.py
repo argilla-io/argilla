@@ -440,7 +440,7 @@ class TestCreateCurrentUserResponsesBulk:
         profiler = Profiler()
 
         responses = [
-            DraftResponseUpsert.parse_obj(
+            DraftResponseUpsert.model_validate(
                 {
                     "values": {"prompt-quality": {"value": 10}},
                     "record_id": record.id,

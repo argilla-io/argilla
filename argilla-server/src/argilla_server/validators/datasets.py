@@ -20,7 +20,6 @@ from argilla_server.models import Dataset, Field, Question, Workspace
 from argilla_server.errors.future import (
     NotUniqueError,
     UnprocessableEntityError,
-    UpdateDistributionWithExistingResponsesError,
 )
 
 
