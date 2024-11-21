@@ -21,7 +21,8 @@ maintainers = [{ name = "argilla", email = "contact@argilla.io" }]
 dependencies = [
     # Basic dependencies
     "fastapi ~= 0.115.0",
-    "pydantic ~= 1.10.18",
+    "pydantic ~= 2.9.0",
+    "pydantic-settings ~= 2.6.0",
     "uvicorn[standard] ~= 0.32.0",
     "opensearch-py ~= 2.0.0",
     "elasticsearch8[async] ~= 8.7.0",
@@ -38,7 +39,7 @@ dependencies = [
     "PyYAML >= 5.4.1,< 6.1.0",
     # security dependencies
     "python-jose[cryptography] ~= 3.3.0",
-    "passlib[bcrypt] ~= 1.7.4",
+    "bcrypt ~= 4.2.0",
     # required by fastapi
     "python-multipart ~= 0.0.16",
     # OAuth2 integration
@@ -54,6 +55,8 @@ dependencies = [
     # For CLI
     "typer >= 0.6.0, < 0.10.0", # spaCy only supports typer<0.10.0
     "packaging>=23.2",
+    # For Webhooks
+    "standardwebhooks>=1.0.0",
     # For HF dataset import
     "datasets >= 3.0.1",
     "pillow >= 10.4.0",
@@ -98,6 +101,8 @@ test = [
     "factory-boy~=3.2.1",
     "httpx>=0.26.0",
     "pytest-randomly>=3.15.0",
+    # For mocking httpx requests and responses
+    "respx>=0.21.1",
     # pytest-randomly requires numpy < 2.0.0
     "numpy<2.0.0",
 ]

@@ -12,7 +12,3 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-try:
-    from pydantic.v1.utils import *  # noqa: F403
-except ImportError:
-    from pydantic.utils import *  # noqa: F403

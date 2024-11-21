@@ -16,7 +16,8 @@ import os
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from argilla_server.pydantic_v1 import BaseSettings, PrivateAttr
+from pydantic import PrivateAttr
+from pydantic_settings import BaseSettings
 
 if TYPE_CHECKING:
     from argilla_server.security.authentication.oauth2 import OAuth2Settings

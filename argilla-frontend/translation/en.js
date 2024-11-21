@@ -58,7 +58,7 @@ export default {
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",
-    userSettings: "my settings",
+    userSettings: "My settings",
   },
   datasets: {
     left: "left",
@@ -86,6 +86,7 @@ export default {
     apiKeyDescription:
       "API key tokens allow you to manage datasets using the Python SDK.",
     theme: "Theme",
+    language: "Language",
     copyKey: "Copy key",
   },
   userAvatarTooltip: {
@@ -281,6 +282,10 @@ export default {
       labelSelection: {
         atLeastTwoOptions: "At least two options are required",
         optionsWithoutLabel: "Empty options are not allowed",
+        optionsSeparatedByComma: "Use comma to separate labels",
+      },
+      rating: {
+        atLeastTwoOptions: "At least two options are required",
       },
     },
     atLeastOneQuestion: "At least one question is required.",
@@ -327,12 +332,26 @@ export default {
       span: "Span",
       "no mapping": "No mapping",
     },
+    questionId: {
+      text: "text",
+      rating: "rating",
+      label_selection: "label",
+      ranking: "ranking",
+      multi_label_selection: "multi-label",
+      span: "span",
+    },
   },
   persistentStorage: {
     adminOrOwner:
       "Persistent storage is not enabled. All data will be lost if this space restarts. Go to the space settings to enable it.",
     annotator:
       "Persistent storage is not enabled. All data will be lost if this space restarts.",
+  },
+  colorSchema: {
+    system: "System",
+    light: "Light",
+    dark: "Dark",
+    "high-contrast": "High contrast",
   },
   validations: {
     businessLogic: {

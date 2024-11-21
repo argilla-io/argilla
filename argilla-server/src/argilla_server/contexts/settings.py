@@ -14,8 +14,8 @@
 
 from typing import Union
 
-from argilla_server.api.schemas.v1.settings import ArgillaSettings, Settings
-from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS, HuggingfaceSettings
+from argilla_server.api.schemas.v1.settings import ArgillaSettings, Settings, HuggingfaceSettings
+from argilla_server.integrations.huggingface.spaces import HUGGINGFACE_SETTINGS
 from argilla_server.settings import settings
 
 
@@ -39,4 +39,4 @@ def _get_argilla_settings() -> ArgillaSettings:
 
 def _get_huggingface_settings() -> Union[HuggingfaceSettings, None]:
     if HUGGINGFACE_SETTINGS.is_running_on_huggingface:
-        return HUGGINGFACE_SETTINGS
+        return HuggingfaceSettings.model_validate(HUGGINGFACE_SETTINGS)

@@ -11,13 +11,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-from uuid import UUID
-
 import pytest
+
+from typing import Any
+from uuid import UUID
 from httpx import AsyncClient
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
 from argilla_server.enums import (
     DatasetStatus,
@@ -27,7 +28,12 @@ from argilla_server.enums import (
     RecordStatus,
     DatasetDistributionStrategy,
 )
+from argilla_server.jobs.queues import HIGH_QUEUE
 from argilla_server.models.database import Record, Response, Suggestion, User
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import build_record_event
+from argilla_server.models.database import Record, Response, Suggestion, User
+
 from tests.factories import (
     DatasetFactory,
     LabelSelectionQuestionFactory,
@@ -40,6 +46,7 @@ from tests.factories import (
     TextQuestionFactory,
     ChatFieldFactory,
     CustomFieldFactory,
+    WebhookFactory,
     AnnotatorFactory,
 )
 
@@ -514,6 +521,57 @@ class TestCreateDatasetRecordsBulk:
         assert response.status_code == 422
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
+    async def test_create_dataset_records_bulk_with_chat_field_empty_values(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await ChatFieldFactory.create(name="chat", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {"chat": [{"role": "", "content": ""}]},
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body", "items", 0, "fields"],
+                            "msg": "Value error, Error parsing chat "
+                            "field 'chat': [{'type': "
+                            "'string_too_short', 'loc': "
+                            "('role',), 'msg': 'String should "
+                            "have at least 1 character', "
+                            "'input': '', 'ctx': {'min_length': "
+                            "1}, 'url': "
+                            "'https://errors.pydantic.dev/2.9/v/string_too_short'}, "
+                            "{'type': 'string_too_short', 'loc': "
+                            "('content',), 'msg': 'String should "
+                            "have at least 1 character', "
+                            "'input': '', 'ctx': {'min_length': "
+                            "1}, 'url': "
+                            "'https://errors.pydantic.dev/2.9/v/string_too_short'}]",
+                            "type": "value_error",
+                        }
+                    ]
+                },
+            }
+        }
+
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
     async def test_create_dataset_records_bulk_with_chat_field_with_non_dicts(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
     ):
@@ -602,7 +660,7 @@ class TestCreateDatasetRecordsBulk:
                     "errors": [
                         {
                             "loc": ["body", "items", 0, "fields"],
-                            "msg": "Error parsing chat field 'chat': [{'loc': ('content',), 'msg': 'field required', 'type': 'value_error.missing'}]",
+                            "msg": "Value error, Error parsing chat field 'chat': [{'type': 'missing', 'loc': ('content',), 'msg': 'Field required', 'input': {'role': 'user'}, 'url': 'https://errors.pydantic.dev/2.9/v/missing'}]",
                             "type": "value_error",
                         }
                     ]
@@ -673,6 +731,150 @@ class TestCreateDatasetRecordsBulk:
         )
 
         assert response.status_code == 422
+        assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
+
+    @pytest.mark.parametrize(
+        "value,expected_error",
+        [
+            (
+                1,
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "constrained-str"],
+                                    "msg": "Input should be a valid string",
+                                    "type": "string_type",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "list[ChatFieldValue]"],
+                                    "msg": "Input should be a valid list",
+                                    "type": "list_type",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "dict[constrained-str,any]"],
+                                    "msg": "Input should be a valid dictionary",
+                                    "type": "dict_type",
+                                },
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                1.0,
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "constrained-str"],
+                                    "msg": "Input should be a valid string",
+                                    "type": "string_type",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "list[ChatFieldValue]"],
+                                    "msg": "Input should be a valid list",
+                                    "type": "list_type",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "dict[constrained-str,any]"],
+                                    "msg": "Input should be a valid dictionary",
+                                    "type": "dict_type",
+                                },
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                True,
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "constrained-str"],
+                                    "msg": "Input should be a valid string",
+                                    "type": "string_type",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "list[ChatFieldValue]"],
+                                    "msg": "Input should be a valid list",
+                                    "type": "list_type",
+                                },
+                                {
+                                    "loc": ["body", "items", 0, "fields", "text-field", "dict[constrained-str,any]"],
+                                    "msg": "Input should be a valid dictionary",
+                                    "type": "dict_type",
+                                },
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                ["wrong", "value"],
+                {
+                    "detail": {
+                        "code": "argilla.api.errors::ValidationError",
+                        "params": {
+                            "errors": [
+                                {
+                                    "loc": ["body", "items", 0, "fields"],
+                                    "msg": "Value error, Error parsing chat field 'text-field': "
+                                    "argilla_server.api.schemas.v1.chat.ChatFieldValue() "
+                                    "argument after ** must be a mapping, not str",
+                                    "type": "value_error",
+                                }
+                            ]
+                        },
+                    }
+                },
+            ),
+            (
+                {"wrong": "value"},
+                {"detail": "Record at position 0 is not valid because text field 'text-field' value must be a string"},
+            ),  # Valid value for custom fields wrong value for text fields
+            (
+                [{"role": "user", "content": "Hello!"}],
+                {"detail": "Record at position 0 is not valid because text field 'text-field' value must be a string"},
+            ),  # Valid value for chat fields wrong value for text fields
+        ],
+    )
+    async def test_create_dataset_records_bulk_with_wrong_text_field_value(
+        self,
+        db: AsyncSession,
+        async_client: AsyncClient,
+        owner_auth_header: dict,
+        value: Any,
+        expected_error: dict,
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+
+        await TextFieldFactory.create(name="text-field", dataset=dataset)
+        await LabelSelectionQuestionFactory.create(dataset=dataset)
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "text-field": value,
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 422, response.json()
+        assert response.json() == expected_error
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 
     async def test_create_dataset_records_bulk_updates_records_status(
@@ -789,3 +991,48 @@ class TestCreateDatasetRecordsBulk:
         assert (await Record.get(db, UUID(response_items[1]["id"]))).status == RecordStatus.pending
         assert (await Record.get(db, UUID(response_items[2]["id"]))).status == RecordStatus.pending
         assert (await Record.get(db, UUID(response_items[3]["id"]))).status == RecordStatus.pending
+
+    async def test_create_dataset_records_bulk_enqueue_webhook_record_created_events(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status=DatasetStatus.ready)
+        await TextFieldFactory.create(name="prompt", dataset=dataset)
+        await TextQuestionFactory.create(name="text-question", dataset=dataset)
+
+        webhook = await WebhookFactory.create(events=[RecordEvent.created])
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "items": [
+                    {
+                        "fields": {
+                            "prompt": "You should exercise more.",
+                        },
+                    },
+                    {
+                        "fields": {
+                            "prompt": "Do you like to exercise?",
+                        },
+                    },
+                ],
+            },
+        )
+
+        assert response.status_code == 201, response.json()
+
+        records = (await db.execute(select(Record).order_by(Record.inserted_at.asc()))).scalars().all()
+
+        event_a = await build_record_event(db, RecordEvent.created, records[0])
+        event_b = await build_record_event(db, RecordEvent.created, records[1])
+
+        assert HIGH_QUEUE.count == 2
+
+        assert HIGH_QUEUE.jobs[0].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[0].args[1] == RecordEvent.created
+        assert HIGH_QUEUE.jobs[0].args[3] == jsonable_encoder(event_a.data)
+
+        assert HIGH_QUEUE.jobs[1].args[0] == webhook.id
+        assert HIGH_QUEUE.jobs[1].args[1] == RecordEvent.created
+        assert HIGH_QUEUE.jobs[1].args[3] == jsonable_encoder(event_b.data)

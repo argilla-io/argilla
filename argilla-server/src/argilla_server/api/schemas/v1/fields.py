@@ -18,8 +18,7 @@ from uuid import UUID
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import FieldType
-from argilla_server.pydantic_v1 import BaseModel, constr
-from argilla_server.pydantic_v1 import Field as PydanticField
+from pydantic import BaseModel, constr, Field as PydanticField, ConfigDict
 
 FIELD_CREATE_NAME_MIN_LENGTH = 1
 FIELD_CREATE_NAME_MAX_LENGTH = 200
@@ -145,8 +144,7 @@ class Field(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Fields(BaseModel):
@@ -156,12 +154,12 @@ class Fields(BaseModel):
 class FieldCreate(BaseModel):
     name: FieldName
     title: FieldTitle
-    required: Optional[bool]
+    required: Optional[bool] = None
     settings: FieldSettingsCreate
 
 
 class FieldUpdate(UpdateSchema):
-    title: Optional[FieldTitle]
-    settings: Optional[FieldSettingsUpdate]
+    title: Optional[FieldTitle] = None
+    settings: Optional[FieldSettingsUpdate] = None
 
     __non_nullable_fields__ = {"title", "settings"}

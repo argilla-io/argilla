@@ -70,7 +70,7 @@ async def create_user(
 ):
     await authorize(current_user, UserPolicy.create)
 
-    user = await accounts.create_user(db, user_create.dict())
+    user = await accounts.create_user(db, user_create.model_dump())
 
     return user
 

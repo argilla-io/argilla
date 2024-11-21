@@ -25,7 +25,7 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         - Leave the default Space owner (your personal account)
         - Leave `USERNAME` and `PASSWORD` secrets empty since you'll sign in with your HF user as the Argilla Space `owner`.
         - Click create Space to launch Argilla 🚀.
-        - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-into-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
+        - Once you see the Argilla UI, [go to the Sign in into the Argilla UI section](#sign-in-to-the-argilla-ui). If you see the `Building` message for longer than 2-3 min refresh the page.
 
     === "Python SDK"
 
@@ -39,7 +39,7 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
 
         Next, we can use the `Argilla.deploy_on_spaces` method, which will create a Space in [the Hugging Face Hub](https://huggingface.co/). This method will automatically do the following:
 
-        - Deploy an Argilla Space on the Hugging Face Hub with [OAuth sign-in](#sign-in-into-the-argilla-ui) and a URL like `https://<your-username>-argilla.hf.space`, which takes around 2-3 minutes.
+        - Deploy an Argilla Space on the Hugging Face Hub with [OAuth sign-in](#sign-in-to-the-argilla-ui) and a URL like `https://<your-username>-argilla.hf.space`, which takes around 2-3 minutes.
         - Create a default workspace called `argilla` with an owner called `<your-username>` and an Argilla token set to `api_key`.
         - Automatically return the authenticated Argilla client, which can directly be used to interact with your Argilla server.
 
@@ -49,11 +49,8 @@ Argilla is a free, open-source, self-hosted tool. This means you need to deploy 
         authenticated_client = rg.Argilla.deploy_on_spaces(api_key="<api_key>")
         ```
 
-        Learn how to [create your first dataset](create-your-first-dataset.md).
-
-
     !!! tip "Argilla API Key"
-        Your Argilla API key can be found in the `My Settings` page of your Argilla Space. Take a look at the [sign in to the UI section](#sign-in-into-the-argilla-ui) to learn how to retrieve it.
+        Your Argilla API key can be found in the `My Settings` page of your Argilla Space. Take a look at the [sign in to the UI section](#sign-in-to-the-argilla-ui) to learn how to retrieve it.
 
     !!! warning "Persistent storage `SMALL`"
         Not setting persistent storage to `SMALL` means that **you will loose your data when the Space restarts**. Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings. If you want to **use the Space just for testing** you can use `FREE` temporarily.
@@ -88,7 +85,7 @@ Congrats! Your Argilla server is ready to start your first project.
 
 The quickest way to start exploring the tool and create your first dataset is by importing an exiting one from the Hugging Face Hub.
 
-To do this, log in to the Argilla UI and in the Home page click on "Import from Hub". You can choose one of the sample datasets or paste a repo id in the input. This will look something like `stanfordnlp/imdb`.
+To do this, log in to the Argilla UI and in the Home page click on "Import dataset from Hugging Face". You can choose one of the sample datasets or paste a repo id in the input. This will look something like `stanfordnlp/imdb`.
 
 Argilla will automatically interpret the columns in the dataset to map them to Fields and Questions.
 

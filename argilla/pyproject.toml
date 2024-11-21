@@ -1,12 +1,10 @@
 [project]
 name = "argilla"
 description = "The Argilla python server SDK"
-authors = [
-    {name = "Argilla", email = "contact@argilla.io"},
-]
-requires-python = ">= 3.9, <3.13"
+authors = [{ name = "Argilla", email = "contact@argilla.io" }]
+requires-python = ">= 3.9"
 readme = "README.md"
-license = {text = "Apache 2.0"}
+license = { text = "Apache 2.0" }
 
 dynamic = ["version"]
 
@@ -18,11 +16,10 @@ dependencies = [
     "rich>=10.0.0",
     "datasets>=2.0.0",
     "pillow>=9.5.0",
+    "standardwebhooks>=1.0.0",
 ]
 
-legacy = [
-    "argilla-v1[listeners]",
-]
+legacy = ["argilla-v1[listeners]"]
 
 [build-system]
 requires = ["pdm-backend"]
@@ -48,7 +45,7 @@ dev = [
     "flake8>=5.0.4",
     "ruff>=0.1.12",
     "pytest-mock>=3.12.0",
-    "pytest-httpx>=0.26.0",
+    "pytest-httpx ~=0.29.0",
     "black>=23.12.1",
     "build>=1.0.3",
     "pre-commit>=3.5.0",
@@ -63,14 +60,12 @@ dev = [
     "Pillow >= 9.5.0",
     "CairoSVG >= 2.7.1",
     "mknotebooks >= 0.8.0",
-    "argilla-v1[listeners] @ file:///${PROJECT_ROOT}/../argilla-v1",
     "pytest-retry>=1.5",
+    "pyarrow~=18.0.0",
 ]
 
 [tool.pdm.scripts]
 test = { cmd = "pytest tests", env_file = ".env.test" }
 lint = "ruff check"
 format = "black ."
-all = {composite = ["format", "lint", "test"]}
-
-
+all = { composite = ["format", "lint", "test"] }

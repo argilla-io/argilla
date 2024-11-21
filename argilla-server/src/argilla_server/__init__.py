@@ -12,12 +12,5 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-# Remove me
-import warnings
 
-from argilla_server.pydantic_v1 import PYDANTIC_MAJOR_VERSION
-
-if PYDANTIC_MAJOR_VERSION >= 2:
-    warnings.warn("The argilla_server package is not compatible with Pydantic 2. " "Please use Pydantic 1.x instead.")
-else:
-    from argilla_server._app import app  # noqa
+from argilla_server._app import app  # noqa

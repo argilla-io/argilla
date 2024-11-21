@@ -20,7 +20,7 @@ import yaml
 
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
-from argilla_server.pydantic_v1 import BaseModel, Field, constr
+from pydantic import BaseModel, Field, constr
 
 from .utils import get_or_new_workspace
 
