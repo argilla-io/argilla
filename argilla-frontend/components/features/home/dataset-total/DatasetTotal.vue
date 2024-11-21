@@ -32,6 +32,8 @@ export default {
   min-height: 20px;
   display: flex;
   align-items: center;
+  justify-items: flex-end;
+  margin-left: auto;
   gap: calc($base-space / 2);
   color: var(--fg-secondary);
   font-weight: 200;

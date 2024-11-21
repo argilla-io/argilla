@@ -1,8 +1,8 @@
 <template>
   <div class="dataset-users__wrapper" @mouseleave="expanded = false">
-    <div class="dataset-users">
+    <div class="dataset-users" v-if="!expanded">
       <BaseTooltip
-        v-for="{ username } in users.slice(0, 3)"
+        v-for="{ username } in users.slice(0, visibleBadges)"
         :key="username"
         :text="username"
       >
@@ -20,7 +20,7 @@
       >
       <div v-if="expanded" class="dataset-users__rest">
         <BaseTooltip
-          v-for="{ username } in users.slice(3, users.length)"
+          v-for="{ username } in users"
           :key="username"
           :text="username"
         >
@@ -51,7 +51,6 @@ export default {
 .dataset-users {
   display: flex;
   flex-direction: row-reverse;
-  z-index: 2;
   &__wrapper {
     display: flex;
     justify-content: flex-end;
@@ -67,13 +66,14 @@ export default {
   &__rest {
     position: absolute;
     top: 0;
-    left: 0;
+    bottom: 0;
+    right: 0;
     display: flex;
     flex-direction: row-reverse;
-    justify-content: flex-end;
+    justify-content: flex-start;
     border-radius: $border-radius;
     z-index: 1;
-    width: 140px;
+    width: 200px;
     flex-wrap: wrap;
     animation: animate-users-badges 0.2s ease;
     margin-left: -$base-space;
@@ -81,6 +81,7 @@ export default {
       position: relative;
       display: flex;
       align-items: center;
+      min-height: 26px;
     }
     .dataset-users__item {
       margin-bottom: -4px;
@@ -89,7 +90,7 @@ export default {
 }
 @keyframes animate-users-badges {
   0% {
-    transform: translateX(-8px);
+    transform: translateX(8px);
     opacity: 0;
   }
   100% {
