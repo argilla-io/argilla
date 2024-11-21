@@ -63,7 +63,7 @@ jobs:
             ANNOTATOR_PASSWORD=${{ steps.credentials.outputs.annotator }}
             ANNOTATOR_API_KEY=${{ steps.credentials.outputs.annotator }}
             HF_HUB_DISABLE_TELEMETRY=1
-            API_BASE_URL=https://dev.argilla.io/
+            API_BASE_URL=https://pre.argilla.io/
 
       - name: Post credentials in Slack
         uses: ./.github/actions/slack-post-credentials
