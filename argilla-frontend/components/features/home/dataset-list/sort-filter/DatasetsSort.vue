@@ -49,7 +49,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$sort-filter-width: 312px;
+$sort-filter-width: 240px;
 .sort-filter {
   user-select: none;
   &__container {

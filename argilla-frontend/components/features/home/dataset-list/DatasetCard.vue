@@ -123,7 +123,7 @@ export default {
     @include font-size(11px);
   }
   &__footer {
-    padding-top: $base-space;
+    padding-top: $base-space * 2;
     border-top: 1px solid var(--bg-opacity-6);
     min-height: $base-space * 7;
   }

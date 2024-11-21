@@ -53,7 +53,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$datasets-filter-width: 300px;
+$datasets-filter-width: 240px;
 .datasets-filter {
   &__container {
     display: block;
