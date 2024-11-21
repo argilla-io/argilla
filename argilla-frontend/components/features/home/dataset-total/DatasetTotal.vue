@@ -40,4 +40,3 @@ export default {
   @include font-size(12px);
 }
 </style>
-./useDatasetTotalViewModel
