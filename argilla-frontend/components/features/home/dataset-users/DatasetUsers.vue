@@ -2,14 +2,17 @@
   <div class="dataset-users__wrapper" @mouseleave="expanded = false">
     <div class="dataset-users">
       <BaseTooltip
-        v-for="user in users.slice(0, visibleBadges)"
-        :key="user.name"
-        :text="user.name"
+        v-for="{ username } in users.slice(0, 3)"
+        :key="username"
+        :text="username"
       >
-        <UserBadge class="dataset-users__item" :name="user.name" />
+        <UserBadge class="dataset-users__item" :name="username" />
       </BaseTooltip>
     </div>
-    <template v-if="users.length > visibleBadges">
+    <div
+      class="dataset-users__rest__wrapper"
+      v-if="users.length > visibleBadges"
+    >
       <BaseButton
         @mouseenter.native="expanded = true"
         class="dataset-users__button"
@@ -17,30 +20,28 @@
       >
       <div v-if="expanded" class="dataset-users__rest">
         <BaseTooltip
-          v-for="user in users.slice(visibleBadges, users.length)"
-          :key="user.name"
-          :text="user.name"
+          v-for="{ username } in users.slice(3, users.length)"
+          :key="username"
+          :text="username"
         >
-          <UserBadge class="dataset-users__item" :name="user.name" />
+          <UserBadge class="dataset-users__item" :name="username" />
         </BaseTooltip>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 <script>
 export default {
+  props: {
+    users: {
+      type: Array,
+      required: true,
+    },
+  },
   data: () => {
     return {
       visibleBadges: 3,
       expanded: false,
-      users: [
-        { name: "John" },
-        { name: "Jane" },
-        { name: "Doe" },
-        { name: "Smith" },
-        { name: "Mike" },
-        { name: "Pepe" },
-      ],
     };
   },
 };
@@ -50,9 +51,11 @@ export default {
 .dataset-users {
   display: flex;
   flex-direction: row-reverse;
+  z-index: 2;
   &__wrapper {
-    position: relative;
     display: flex;
+    justify-content: flex-end;
+    margin-right: calc($base-space / 2);
     gap: $base-space;
   }
   &__item {
@@ -63,13 +66,35 @@ export default {
   }
   &__rest {
     position: absolute;
-    right: 0;
+    top: 0;
+    left: 0;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
     border-radius: $border-radius;
+    z-index: 1;
+    width: 140px;
+    flex-wrap: wrap;
+    animation: animate-users-badges 0.2s ease;
+    margin-left: -$base-space;
+    &__wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
     .dataset-users__item {
       margin-bottom: -4px;
     }
+  }
+}
+@keyframes animate-users-badges {
+  0% {
+    transform: translateX(-8px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 </style>

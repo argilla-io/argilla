@@ -79,9 +79,9 @@ const METRICS = {
 };
 
 const PROGRESS = {
-  EMPTY: () => new Progress(0, 0, 0),
-  COMPLETED: () => new Progress(20, 20, 0),
-  IN_PROGRESS: () => new Progress(20, 10, 10),
+  EMPTY: () => new Progress(0, 0, 0, [{ username: "owner" }]),
+  COMPLETED: () => new Progress(20, 20, 0, [{ username: "owner" }]),
+  IN_PROGRESS: () => new Progress(20, 10, 10, [{ username: "owner" }]),
 };
 
 const mockMetricsWith = (metrics: Metrics) => {

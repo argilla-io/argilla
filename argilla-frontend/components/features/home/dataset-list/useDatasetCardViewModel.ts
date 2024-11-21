@@ -6,6 +6,7 @@ import { Progress } from "~/v1/domain/entities/dataset/Progress";
 export const useDatasetCardViewModel = (props) => {
   const datasetId = props.dataset.id;
   const completedPercent = ref("-");
+  const users = ref([]);
   const total = ref(0);
   const progress = ref<Progress | null>(null);
 
@@ -15,10 +16,12 @@ export const useDatasetCardViewModel = (props) => {
     progress.value = await getProgressUseCase.execute(datasetId);
     completedPercent.value = progress.value.percentage.completed;
     total.value = progress.value.total;
+    users.value = progress.value.users;
   });
 
   return {
     completedPercent,
     total,
+    users,
   };
 };
