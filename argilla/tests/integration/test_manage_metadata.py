@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-from string import ascii_lowercase
-
 import pytest
 
 import argilla as rg
@@ -22,8 +19,7 @@ from argilla import Argilla, Dataset, Settings, TextField, Workspace, LabelQuest
 
 
 @pytest.fixture
-def dataset_with_metadata(client: Argilla, workspace: Workspace) -> Dataset:
-    name = "".join(random.choices(ascii_lowercase, k=16))
+def dataset_with_metadata(client: Argilla, workspace: Workspace, dataset_name: str) -> Dataset:
     settings = Settings(
         fields=[TextField(name="text")],
         questions=[LabelQuestion(name="label", labels=["positive", "negative"])],
@@ -32,7 +28,7 @@ def dataset_with_metadata(client: Argilla, workspace: Workspace) -> Dataset:
         ],
     )
     dataset = Dataset(
-        name=name,
+        name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
@@ -42,8 +38,7 @@ def dataset_with_metadata(client: Argilla, workspace: Workspace) -> Dataset:
     return dataset
 
 
-def test_create_dataset_with_metadata(client: Argilla, workspace: Workspace) -> Dataset:
-    name = "".join(random.choices(ascii_lowercase, k=16))
+def test_create_dataset_with_metadata(client: Argilla, workspace: Workspace, dataset_name: str) -> None:
     settings = Settings(
         fields=[TextField(name="text")],
         questions=[LabelQuestion(name="label", labels=["positive", "negative"])],
@@ -52,7 +47,7 @@ def test_create_dataset_with_metadata(client: Argilla, workspace: Workspace) -> 
         ],
     )
     dataset = Dataset(
-        name=name,
+        name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
@@ -72,8 +67,9 @@ def test_create_dataset_with_metadata(client: Argilla, workspace: Workspace) -> 
         (None, None, rg.IntegerMetadataProperty),
     ],
 )
-def test_create_dataset_with_numerical_metadata(client: Argilla, workspace: Workspace, min, max, type) -> Dataset:
-    name = "".join(random.choices(ascii_lowercase, k=16))
+def test_create_dataset_with_numerical_metadata(
+    client: Argilla, workspace: Workspace, dataset_name: str, min, max, type
+) -> None:
     settings = Settings(
         fields=[TextField(name="text")],
         questions=[LabelQuestion(name="label", labels=["positive", "negative"])],
@@ -82,7 +78,7 @@ def test_create_dataset_with_numerical_metadata(client: Argilla, workspace: Work
         ],
     )
     dataset = Dataset(
-        name=name,
+        name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
