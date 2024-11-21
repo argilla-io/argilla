@@ -12,6 +12,10 @@ export default {
       type: String,
       required: true,
     },
+    fontSize: {
+      type: String,
+      default: "12px",
+    },
   },
   data() {
     return {
@@ -36,15 +40,14 @@ export default {
 .badge {
   display: flex;
   align-items: center;
-  height: $base-space * 3;
+  height: calc(v-bind(fontSize) * 2);
   width: fit-content;
   padding: 0.8em;
   border: 1px solid var(--fg-tertiary);
   border-radius: $border-radius-rounded;
   margin: 0;
   color: var(--fg-secondary);
-  @include font-size(12px);
-  @include line-height(12px);
+  font-size: v-bind(fontSize);
   &.--clickable {
     cursor: pointer;
     background-color: var(--bg-opacity-4);

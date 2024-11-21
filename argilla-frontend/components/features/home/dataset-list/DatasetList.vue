@@ -121,6 +121,7 @@ export default {
     justify-content: space-between;
     gap: $base-space;
     margin-bottom: $base-space * 2;
+    padding: 0 $base-space * 2;
   }
   &__title {
     margin: 0;
@@ -137,8 +138,10 @@ export default {
     height: 100%;
   }
   &__content {
+    @extend %hide-scrollbar;
     @include media(">tablet") {
-      overflow: auto;
+      overflow-x: auto;
+      padding: 0 $base-space * 2;
     }
   }
 }

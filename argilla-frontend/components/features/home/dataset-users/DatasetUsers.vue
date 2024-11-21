@@ -15,11 +15,13 @@
     >
       <BaseButton
         @mouseenter.native="expanded = true"
+        @click.prevent
         class="dataset-users__button"
         >+{{ users.length - visibleBadges }}</BaseButton
       >
       <div v-if="expanded" class="dataset-users__rest">
         <BaseTooltip
+          @click.stop
           v-for="{ username } in users"
           :key="username"
           :text="username"

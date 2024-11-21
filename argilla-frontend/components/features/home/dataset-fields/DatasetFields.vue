@@ -3,12 +3,11 @@
   <div class="fields" v-else>
     <span class="fields__title">{{ $t("fields") }}</span>
     <div class="fields__badges">
-      <DatasetBadge
+      <BaseBadge
         v-for="field in fields"
         :key="field.id"
         :text="$t(field.type)"
         font-size="11px"
-        color="hsl(50, 40%, 53%)"
       />
     </div>
   </div>
@@ -36,7 +35,7 @@ export default {
   gap: 8px;
   &__title {
     @include font-size(12px);
-    color: var(--fg-tertiary);
+    color: var(--fg-secondary);
     font-weight: 200;
     min-width: $base-space * 8;
   }

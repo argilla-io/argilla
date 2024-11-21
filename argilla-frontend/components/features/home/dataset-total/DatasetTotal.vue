@@ -36,7 +36,6 @@ export default {
   margin-left: auto;
   gap: calc($base-space / 2);
   color: var(--fg-secondary);
-  font-weight: 200;
   @include font-size(12px);
 }
 </style>

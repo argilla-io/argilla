@@ -45,7 +45,7 @@ export default {
     padding: $base-space * 4;
     background: var(--bg-accent-grey-1);
     @include media(">tablet") {
-      padding: $base-space * 4 $base-space * 4 0 $base-space * 4;
+      padding: $base-space * 4 $base-space * 2 0 $base-space * 2;
     }
   }
   &__sidebar {

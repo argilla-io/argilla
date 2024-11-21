@@ -38,11 +38,17 @@ export default {
       type: String,
       default: "",
     },
+    autofocus: {
+      type: Boolean,
+      default: false,
+    },
   },
   mounted() {
-    this.$nextTick(() => {
-      this.$refs.search.focus();
-    });
+    if (this.autofocus) {
+      this.$nextTick(() => {
+        this.$refs.search.focus();
+      });
+    }
   },
   methods: {
     onInput($event) {
