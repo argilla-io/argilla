@@ -24,9 +24,8 @@ from argilla._models import RecordModel
 
 
 @pytest.fixture
-def dataset(client: rg.Argilla) -> rg.Dataset:
+def dataset(client: rg.Argilla, dataset_name: str) -> rg.Dataset:
     workspace = client.workspaces[0]
-    mock_dataset_name = "".join(random.choices(ascii_lowercase, k=16))
     settings = rg.Settings(
         allow_extra_metadata=True,
         fields=[
@@ -37,7 +36,7 @@ def dataset(client: rg.Argilla) -> rg.Dataset:
         ],
     )
     dataset = rg.Dataset(
-        name=mock_dataset_name,
+        name=dataset_name,
         workspace=workspace.name,
         settings=settings,
         client=client,
