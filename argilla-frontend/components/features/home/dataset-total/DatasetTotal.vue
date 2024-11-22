@@ -8,7 +8,7 @@
         color="var(--fg-tertiary)"
         aria-hidden="true"
       />
-      <span v-text="`${total} ${$t('rows')}`" />
+      <span>{{ total | formatNumberToK(2) }} {{ $t("rows") }}</span>
     </template>
   </div>
 </template>

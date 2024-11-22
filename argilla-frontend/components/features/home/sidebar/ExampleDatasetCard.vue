@@ -43,14 +43,12 @@ export default {
     background: var(--bg-accent-grey-2);
     color: var(--fg-primary);
     text-align: left;
-    box-shadow: 0 0 0 0 var(--bg-opacity-4);
-    transition: all 0.2s ease;
     @include media("<desktop") {
       max-width: 100%;
     }
     &:hover {
       border-color: var(--bg-opacity-10);
-      box-shadow: 0 2px 1px 1px var(--bg-opacity-4);
+      background: var(--bg-accent-grey-3);
     }
   }
   &__content {

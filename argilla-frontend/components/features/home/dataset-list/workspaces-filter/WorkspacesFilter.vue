@@ -53,11 +53,13 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$datasets-filter-width: 240px;
+$datasets-filter-width: 120px;
+$datasets-filter-max-width: 300px;
 .datasets-filter {
   &__container {
     display: block;
-    width: $datasets-filter-width;
+    width: auto;
+    max-width: $datasets-filter-max-width;
   }
   &__header {
     display: flex;

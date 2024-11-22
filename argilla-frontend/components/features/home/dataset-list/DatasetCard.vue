@@ -78,7 +78,7 @@ export default {
   transition: all 0.2s ease;
   border: 1px solid var(--bg-opacity-4);
   &:hover {
-    box-shadow: 0 2px 1px 1px var(--bg-opacity-4);
+    box-shadow: $shadow-300;
     .dataset-card__title {
       transition: color 0.2s ease;
       color: var(--fg-cuaternary);

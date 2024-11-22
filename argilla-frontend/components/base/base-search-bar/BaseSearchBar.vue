@@ -36,7 +36,11 @@
       v-model="filter"
       :placeholder="placeholder"
     />
-    <BaseButton class="search-area__button__close" @click="removeFilter">
+    <BaseButton
+      v-show="!isCollapsed"
+      class="search-area__button__close"
+      @click="removeFilter"
+    >
       <svgicon
         v-if="filter || !isCollapsed"
         class="search-area__icon --close"
@@ -108,11 +112,22 @@ $searchBarSize: $base-space * 4;
   background: var(--bg-accent-grey-1);
   transition: all 0.2s ease;
   &.--collapsed {
-    max-width: 20px;
+    max-width: 34px;
     min-width: 0;
     padding: 0;
     overflow: hidden;
     border: none;
+    .button {
+      height: 34px;
+      width: 34px;
+      border-radius: 50%;
+      justify-content: center;
+    }
+    &:hover {
+      .button {
+        background: var(--bg-opacity-4);
+      }
+    }
   }
 
   &.active,

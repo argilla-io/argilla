@@ -3,11 +3,6 @@
     <div class="dataset-list__header">
       <h1 class="dataset-list__title" v-text="$t('home.argillaDatasets')" />
       <div class="dataset-list__filters" v-if="datasets.length">
-        <BaseSearchBar
-          @input="onSearch"
-          :querySearch="querySearch"
-          :placeholder="$t('searchDatasets')"
-        />
         <WorkspacesFilter
           :workspaces="formattedWorkspaces"
           v-model="selectedWorkspaces"
@@ -19,6 +14,11 @@
           :sorted-by-field="sortedByField"
           :sorted-order="sortedOrder"
           :sort-options="sortOptions"
+        />
+        <BaseSearchBar
+          @input="onSearch"
+          :querySearch="querySearch"
+          :placeholder="$t('searchDatasets')"
         />
       </div>
     </div>
@@ -120,6 +120,7 @@ export default {
     display: flex;
     justify-content: space-between;
     gap: $base-space;
+    align-items: center;
     margin-bottom: $base-space * 2;
     padding: 0 $base-space * 2;
   }
