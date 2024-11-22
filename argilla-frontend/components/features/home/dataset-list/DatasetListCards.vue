@@ -1,52 +1,49 @@
 <template>
-  <TransitionGroup
-    v-if="datasets.length"
-    name="list"
-    tag="ul"
-    class="dataset-list__cards"
-  >
-    <li v-for="dataset in datasets" :key="dataset.id">
-      <NuxtLink :to="getDatasetLink(dataset)" class="dataset-list__link">
-        <DatasetCard
-          @go-to-settings="goToSetting(dataset.id)"
-          @copy-url="copyUrl(dataset)"
-          @copy-name="copyName(dataset.name)"
-          :dataset="dataset"
-        />
-      </NuxtLink>
-    </li>
-  </TransitionGroup>
+  <div>
+    <TransitionGroup name="list" tag="ul" class="dataset-list__cards">
+      <li v-for="dataset in datasets" :key="dataset.id" :id="dataset.id">
+        <DatasetCard v-if="hydrate[dataset.id]" :dataset="dataset" />
+      </li>
+    </TransitionGroup>
 
-  <p
-    class="dataset-list__empty-message --heading3"
-    v-else
-    v-text="$t('home.zeroDatasetsFound')"
-  />
+    <p
+      v-if="datasets.length === 0"
+      class="dataset-list__empty-message --heading3"
+      v-text="$t('home.zeroDatasetsFound')"
+    />
+  </div>
 </template>
 
 <script>
-import { useRoutes } from "@/v1/infrastructure/services";
-
 export default {
+  data() {
+    return {
+      hydrate: {},
+    };
+  },
   props: {
     datasets: {
       type: Array,
       required: true,
     },
   },
-  methods: {
-    copyUrl(dataset) {
-      this.copy(`${window.origin}${this.getDatasetLink(dataset)}`);
-    },
-    copyName(name) {
-      this.copy(name);
-    },
-    copy(value) {
-      this.$copyToClipboard(value);
-    },
-  },
-  setup() {
-    return useRoutes();
+  mounted() {
+    const handleIntersection = (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          this.$set(this.hydrate, entry.target.id, true);
+        }
+      }
+    };
+
+    const observer = new IntersectionObserver(handleIntersection);
+
+    this.datasets.forEach((item) => {
+      const element = document.getElementById(item.id);
+      if (!element) return;
+
+      observer.observe(element);
+    });
   },
 };
 </script>
@@ -61,9 +58,10 @@ export default {
     list-style: none;
     padding: 0;
     margin-bottom: $base-space * 4;
-  }
-  &__link {
-    text-decoration: none;
+
+    li {
+      min-height: 200px;
+    }
   }
   &__empty-message {
     display: flex;

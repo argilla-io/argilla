@@ -2,8 +2,11 @@ import { useResolve } from "ts-injecty";
 import { onBeforeMount, ref } from "@nuxtjs/composition-api";
 import { GetDatasetProgressUseCase } from "@/v1/domain/usecases/get-dataset-progress-use-case";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
+import { useRoutes } from "@/v1/infrastructure/services";
 
 export const useDatasetCardViewModel = (props) => {
+  const { getDatasetLink, goToSetting } = useRoutes();
+
   const datasetId = props.dataset.id;
   const completedPercent = ref("-");
   const users = ref([]);
@@ -20,6 +23,9 @@ export const useDatasetCardViewModel = (props) => {
   });
 
   return {
+    getDatasetLink,
+    goToSetting: () => goToSetting(datasetId),
+
     completedPercent,
     total,
     users,

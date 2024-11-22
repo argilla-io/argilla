@@ -1,5 +1,5 @@
 <template>
-  <div class="dataset-card">
+  <NuxtLink :to="getDatasetLink(dataset)" class="dataset-card">
     <div>
       <div class="dataset-card__row">
         <div class="dataset-card__actions">
@@ -7,14 +7,14 @@
             <BaseButton
               :title="$t('copyLink')"
               class="dataset-card__action"
-              @click.prevent="$emit('copy-url')"
+              @click.prevent="copyUrl()"
               ><svgicon name="link" width="14" height="14"
             /></BaseButton>
           </BaseActionTooltip>
           <BaseButton
             :title="$t('settings.title')"
             class="dataset-card__action"
-            @click.prevent="$emit('go-to-settings')"
+            @click.prevent="goToSetting()"
             ><svgicon name="settings" width="14" height="14"
           /></BaseButton>
         </div>
@@ -40,7 +40,7 @@
         </div>
       </span>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <script>
@@ -48,12 +48,21 @@ import "assets/icons/copy";
 import "assets/icons/link";
 import "assets/icons/settings";
 import "assets/icons/update";
+
 import { useDatasetCardViewModel } from "./useDatasetCardViewModel";
+
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
+    },
+  },
+  methods: {
+    copyUrl() {
+      this.$copyToClipboard(
+        `${window.origin}${this.getDatasetLink(this.dataset)}`
+      );
     },
   },
   setup(props) {
@@ -64,6 +73,7 @@ export default {
 
 <style scoped lang="scss">
 .dataset-card {
+  text-decoration: none;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
