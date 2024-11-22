@@ -20,7 +20,7 @@ from sqlalchemy.orm import selectinload
 
 from argilla_server.models import Dataset
 from argilla_server.settings import settings
-from argilla_server.contexts.hub import HubDataset
+from argilla_server.contexts.hub import HubDataset, HubDatasetExporter
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.search_engine.base import SearchEngine
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
@@ -50,3 +50,20 @@ async def import_dataset_from_hub_job(name: str, subset: str, split: str, datase
                 .take(HUB_DATASET_TAKE_ROWS)
                 .import_to(db, search_engine, dataset)
             )
+
+
+@job(DEFAULT_QUEUE, timeout=JOB_TIMEOUT_DISABLED, retry=Retry(max=3))
+async def export_dataset_to_hub_job(
+    name: str, subset: str, split: str, private: bool, token: str, dataset_id: UUID
+) -> None:
+    async with AsyncSessionLocal() as db:
+        dataset = await Dataset.get_or_raise(
+            db,
+            dataset_id,
+            options=[
+                selectinload(Dataset.fields),
+                selectinload(Dataset.questions),
+            ],
+        )
+
+    HubDatasetExporter(dataset).export_to(name, subset, split, private, token)

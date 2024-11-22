@@ -19,10 +19,13 @@ from typing import Any
 from typing_extensions import Self
 
 from PIL import Image
-from datasets import load_dataset, features
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
+from datasets import load_dataset, features
+from datasets import Dataset as HFDataset, NamedSplit
 
-from argilla_server.models.database import Dataset
+from argilla_server.database import get_sync_db
+from argilla_server.models.database import Dataset, Record
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
@@ -187,6 +190,78 @@ class HubDataset:
             )
 
         return suggestions
+
+
+RECORDS_YIELD_PER = 100
+
+
+class HubDatasetExporter:
+    def __init__(self, dataset: Dataset):
+        self.dataset = dataset
+        self.version = 12  # TODO: Using this right now to bypass dataset generator cache
+
+    def export_to(self, name: str, subset: str, split: str, private: bool, token: str):
+        hf_dataset = HFDataset.from_generator(self.records_generator, split=NamedSplit(split))
+        hf_dataset.push_to_hub(
+            repo_id=name,
+            config_name=subset,
+            private=private,
+            token=token,
+        )
+
+    def records_generator(self):
+        for session in get_sync_db():
+            query = (
+                session.query(Record)
+                .filter_by(dataset_id=self.dataset.id)
+                .order_by(Record.inserted_at.asc())
+                .options(selectinload(Record.responses))
+            )
+
+            for record in query.yield_per(RECORDS_YIELD_PER):
+                yield self._record_to_row(record)
+
+    # TODO: Add metadata
+    # TODO: Add vectors
+    def _record_to_row(self, record: Record) -> dict:
+        return self._row_attributes(record) | self._row_fields(record) | self._row_responses(record)
+
+    def _row_attributes(self, record: Record) -> dict:
+        return {
+            "id": record.external_id,
+            "status": record.status,
+            "_server_id": str(record.id),
+        }
+
+    def _row_fields(self, record: Record) -> dict:
+        row_fields = {}
+        for field in self.dataset.fields:
+            # TODO: If field.is_image then we need to cast to PIL.Image (if it's a data-url string)
+            row_fields[field.name] = record.fields.get(field.name)
+
+        return row_fields
+
+    # TODO: When record.responses is None we should put the -1 default value as expected by HF
+    def _row_responses(self, record: Record) -> dict:
+        row_responses = {}
+        for question in self.dataset.questions:
+            response_label = f"{question.name}.responses"
+            response_label_users = f"{response_label}.users"
+            response_label_status = f"{response_label}.status"
+
+            row_responses[response_label] = []
+            row_responses[response_label_users] = []
+            row_responses[response_label_status] = []
+            for response in record.responses:
+                if response.values is not None:
+                    response_value = response.values.get(question.name)
+                    if response_value is not None:
+                        row_responses[response_label].append(response_value["value"])
+
+                row_responses[response_label_users].append(str(response.user_id))
+                row_responses[response_label_status].append(response.status)
+
+        return row_responses
 
 
 def pil_image_to_data_url(image: Image.Image):

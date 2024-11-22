@@ -193,3 +193,11 @@ class HubDataset(BaseModel):
     subset: str
     split: str
     mapping: HubDatasetMapping
+
+
+class HubDatasetExport(BaseModel):
+    name: str
+    subset: Optional[str] = "default"
+    split: Optional[str] = "train"
+    private: Optional[bool] = False
+    token: str

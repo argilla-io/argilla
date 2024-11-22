@@ -30,6 +30,7 @@ from argilla_server.api.schemas.v1.datasets import (
     Datasets,
     DatasetUpdate,
     HubDataset,
+    HubDatasetExport,
     UsersProgress,
 )
 from argilla_server.api.schemas.v1.fields import Field, FieldCreate, Fields
@@ -330,6 +331,30 @@ async def import_dataset_from_hub(
         split=hub_dataset.split,
         dataset_id=dataset.id,
         mapping=hub_dataset.mapping.model_dump(),
+    )
+
+    return JobSchema(id=job.id, status=job.get_status())
+
+
+@router.post("/datasets/{dataset_id}/export", status_code=status.HTTP_202_ACCEPTED, response_model=JobSchema)
+async def export_dataset_to_hub(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    dataset_id: UUID,
+    hub_dataset: HubDatasetExport,
+    current_user: User = Security(auth.get_current_user),
+):
+    dataset = await Dataset.get_or_raise(db, dataset_id)
+
+    await authorize(current_user, DatasetPolicy.export_to_hub(dataset))
+
+    job = hub_jobs.export_dataset_to_hub_job.delay(
+        name=hub_dataset.name,
+        subset=hub_dataset.subset,
+        split=hub_dataset.split,
+        private=hub_dataset.private,
+        token=hub_dataset.token,
+        dataset_id=dataset.id,
     )
 
     return JobSchema(id=job.id, status=job.get_status())
