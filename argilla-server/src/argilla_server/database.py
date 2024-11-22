@@ -42,6 +42,7 @@ TAGGED_REVISIONS = OrderedDict(
         "2.0": "237f7c674d74",
         "2.4": "660d6c6b3360",
         "2.5": "6ed1b8bf8e08",
+        "2.6": "580a6553186f",
     }
 )
 

@@ -668,6 +668,8 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         response_body = response.json()
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
@@ -684,6 +686,8 @@ class TestSuiteRecords:
 
         response = (await db.execute(select(Response).where(Response.record_id == record.id))).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
+
+        assert dataset.users == [owner]
 
     async def test_create_submitted_record_response_with_missing_required_questions(
         self, async_client: "AsyncClient", owner_auth_header: dict
@@ -724,6 +728,8 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         response_body = response.json()
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
@@ -740,6 +746,8 @@ class TestSuiteRecords:
 
         response = (await db.execute(select(Response).where(Response.record_id == record.id))).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
+
+        assert dataset.users == [owner]
 
     @pytest.mark.parametrize(
         "QuestionFactory, response_value",
@@ -768,13 +776,15 @@ class TestSuiteRecords:
         owner_auth_header: dict,
     ):
         question = await QuestionFactory.create()
-        record = await RecordFactory.create(dataset=question.dataset)
+        dataset = question.dataset
+        record = await RecordFactory.create(dataset=dataset)
 
         response_json = {"values": {question.name: {"value": response_value}}, "status": ResponseStatus.submitted}
 
         response = await async_client.post(
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
+        await db.refresh(dataset, attribute_names=["users"])
 
         response_body = response.json()
         assert response.status_code == 201
@@ -788,6 +798,8 @@ class TestSuiteRecords:
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
+
+        assert dataset.users == [owner]
 
     @pytest.mark.parametrize("response_status", [ResponseStatus.discarded, ResponseStatus.draft])
     @pytest.mark.parametrize(
@@ -824,13 +836,16 @@ class TestSuiteRecords:
         owner_auth_header: dict,
     ):
         question = await QuestionFactory.create()
-        record = await RecordFactory.create(dataset=question.dataset)
+        dataset = question.dataset
+        record = await RecordFactory.create(dataset=dataset)
 
         response_json = {"values": {question.name: {"value": response_value}}, "status": response_status}
 
         response = await async_client.post(
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
+
+        await db.refresh(dataset, attribute_names=["users"])
 
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
@@ -845,6 +860,8 @@ class TestSuiteRecords:
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
+
+        assert dataset.users == [owner]
 
     async def test_create_record_response_with_extra_question_responses(
         self, async_client: "AsyncClient", owner_auth_header: dict
@@ -1094,6 +1111,8 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}/responses", headers=owner_auth_header, json=response_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
@@ -1115,6 +1134,8 @@ class TestSuiteRecords:
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
 
+        assert dataset.users == [owner]
+
     @pytest.mark.parametrize(
         "status, expected_status_code, expected_response_count",
         [("submitted", 422, 0), ("discarded", 201, 1), ("draft", 201, 1)],
@@ -1130,6 +1151,7 @@ class TestSuiteRecords:
         expected_response_count: int,
     ):
         record = await RecordFactory.create()
+        dataset = record.dataset
         response_json = {"status": status}
 
         response = await async_client.post(
@@ -1140,6 +1162,7 @@ class TestSuiteRecords:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == expected_response_count
 
         if expected_status_code == 201:
+            await db.refresh(dataset, attribute_names=["users"])
             response_body = response.json()
             assert await db.get(Response, UUID(response_body["id"]))
             assert response_body == {
@@ -1151,6 +1174,7 @@ class TestSuiteRecords:
                 "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
                 "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
             }
+            assert dataset.users == [owner]
 
     @pytest.mark.parametrize("status", [ResponseStatus.submitted, ResponseStatus.discarded, ResponseStatus.draft])
     async def test_create_record_response_with_wrong_values(
@@ -1170,7 +1194,9 @@ class TestSuiteRecords:
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 0
 
     @pytest.mark.parametrize("role", [UserRole.owner, UserRole.admin, UserRole.annotator])
-    async def test_create_record_response_for_user_role(self, async_client: "AsyncClient", db: Session, role: UserRole):
+    async def test_create_record_response_for_user_role(
+        self, async_client: "AsyncClient", db: "AsyncSession", role: UserRole
+    ):
         dataset = await DatasetFactory.create()
         await TextQuestionFactory.create(name="input_ok", dataset=dataset)
         await TextQuestionFactory.create(name="output_ok", dataset=dataset)
@@ -1189,6 +1215,8 @@ class TestSuiteRecords:
             f"/api/v1/records/{record.id}/responses", headers={API_KEY_HEADER_NAME: user.api_key}, json=response_json
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
 
@@ -1205,6 +1233,8 @@ class TestSuiteRecords:
             "inserted_at": datetime.fromisoformat(response_body["inserted_at"]).isoformat(),
             "updated_at": datetime.fromisoformat(response_body["updated_at"]).isoformat(),
         }
+
+        assert dataset.users == [user]
 
     @pytest.mark.parametrize("role", [UserRole.admin, UserRole.annotator])
     async def test_create_record_response_as_restricted_user_from_different_workspace(

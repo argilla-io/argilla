@@ -12,25 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union, TYPE_CHECKING
 
 from argilla import Argilla
+from argilla._api import QuestionsAPI
 from argilla._models._settings._questions import (
-    LabelQuestionModel,
-    LabelQuestionSettings,
-    MultiLabelQuestionModel,
-    MultiLabelQuestionSettings,
     QuestionModel,
-    RankingQuestionModel,
-    RankingQuestionSettings,
-    RatingQuestionModel,
-    RatingQuestionSettings,
-    SpanQuestionModel,
-    SpanQuestionSettings,
-    TextQuestionModel,
+    QuestionSettings,
+    LabelQuestionSettings,
+    MultiLabelQuestionSettings,
     TextQuestionSettings,
+    RatingQuestionSettings,
+    RankingQuestionSettings,
+    SpanQuestionSettings,
 )
 from argilla.settings._common import SettingsPropertyBase
+
+if TYPE_CHECKING:
+    from argilla.datasets import Dataset
 
 try:
     from typing import Self
@@ -48,7 +47,62 @@ __all__ = [
 ]
 
 
-class QuestionPropertyBase(SettingsPropertyBase):
+class QuestionBase(SettingsPropertyBase):
+    _model: QuestionModel
+    _api: QuestionsAPI
+    _dataset: Optional["Dataset"]
+
+    def __init__(
+        self,
+        name: str,
+        settings: QuestionSettings,
+        title: Optional[str] = None,
+        required: Optional[bool] = True,
+        description: Optional[str] = None,
+        _client: Optional[Argilla] = None,
+    ):
+        client = _client or Argilla._get_default()
+
+        super().__init__(api=client.api.questions, client=client)
+
+        self._dataset = None
+        self._model = QuestionModel(
+            name=name,
+            settings=settings,
+            title=title,
+            required=required,
+            description=description,
+        )
+
+    @classmethod
+    def from_model(cls, model: QuestionModel) -> "Self":
+        instance = cls(name=model.name)  # noqa
+        instance._model = model
+
+        return instance
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Self":
+        model = QuestionModel(**data)
+        return cls.from_model(model)
+
+    @property
+    def dataset(self) -> "Dataset":
+        return self._dataset
+
+    @dataset.setter
+    def dataset(self, value: "Dataset") -> None:
+        self._dataset = value
+        self._model.dataset_id = self._dataset.id
+        self._with_client(self._dataset._client)
+
+    def _with_client(self, client: "Argilla") -> "Self":
+        # TODO: Review and simplify. Maybe only one of them is required
+        self._client = client
+        self._api = self._client.api.questions
+
+        return self
+
     @staticmethod
     def _render_values_as_options(values: Union[List[str], List[int], Dict[str, str]]) -> List[Dict[str, str]]:
         """Render values as options for the question so that the model conforms to the API schema"""
@@ -79,16 +133,8 @@ class QuestionPropertyBase(SettingsPropertyBase):
         """Render values as labels for the question so that they can be returned as a list of strings"""
         return list(cls._render_options_as_values(options=options).keys())
 
-    def _with_client(self, client: "Argilla") -> "Self":
-        self._client = client
-        self._api = client.api.questions
 
-        return self
-
-
-class LabelQuestion(QuestionPropertyBase):
-    _model: LabelQuestionModel
-
+class LabelQuestion(QuestionBase):
     def __init__(
         self,
         name: str,
@@ -97,6 +143,7 @@ class LabelQuestion(QuestionPropertyBase):
         description: Optional[str] = None,
         required: bool = True,
         visible_labels: Optional[int] = None,
+        client: Optional[Argilla] = None,
     ) -> None:
         """ Define a new label question for `Settings` of a `Dataset`. A label \
             question is a question where the user can select one label from \
@@ -112,26 +159,18 @@ class LabelQuestion(QuestionPropertyBase):
             visible_labels (Optional[int]): The number of visible labels for the question to be shown in the UI. \
                 Setting it to None show all options.
         """
-        self._model = LabelQuestionModel(
+
+        super().__init__(
             name=name,
             title=title,
-            description=description,
             required=required,
+            description=description,
             settings=LabelQuestionSettings(
-                options=self._render_values_as_options(labels), visible_options=visible_labels
+                options=self._render_values_as_options(labels),
+                visible_options=visible_labels,
             ),
+            _client=client,
         )
-
-    @classmethod
-    def from_model(cls, model: LabelQuestionModel) -> "LabelQuestion":
-        instance = cls(name=model.name, labels=cls._render_options_as_values(model.settings.options))
-        instance._model = model
-        return instance
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "LabelQuestion":
-        model = LabelQuestionModel(**data)
-        return cls.from_model(model=model)
 
     ##############################
     # Public properties
@@ -153,14 +192,15 @@ class LabelQuestion(QuestionPropertyBase):
     def visible_labels(self, visible_labels: Optional[int]) -> None:
         self._model.settings.visible_options = visible_labels
 
-    ##############################
-    # Private methods
-    ##############################
+    @classmethod
+    def from_model(cls, model: QuestionModel) -> "Self":
+        instance = cls(name=model.name, labels=cls._render_options_as_labels(model.settings.options))  # noqa
+        instance._model = model
+
+        return instance
 
 
 class MultiLabelQuestion(LabelQuestion):
-    _model: MultiLabelQuestionModel
-
     def __init__(
         self,
         name: str,
@@ -170,6 +210,7 @@ class MultiLabelQuestion(LabelQuestion):
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Create a new multi-label question for `Settings` of a `Dataset`. A \
             multi-label question is a question where the user can select multiple \
@@ -188,38 +229,29 @@ class MultiLabelQuestion(LabelQuestion):
             description (Optional[str]): The description of the question to be shown in the UI.
             required (bool): If the question is required for a record to be valid. At least one question must be required.
         """
-        self._model = MultiLabelQuestionModel(
+        QuestionBase.__init__(
+            self,
             name=name,
             title=title,
-            description=description,
             required=required,
+            description=description,
             settings=MultiLabelQuestionSettings(
                 options=self._render_values_as_options(labels),
                 visible_options=visible_labels,
                 options_order=labels_order,
             ),
+            _client=client,
         )
 
     @classmethod
-    def from_model(cls, model: MultiLabelQuestionModel) -> "MultiLabelQuestion":
-        instance = cls(
-            name=model.name,
-            labels=cls._render_options_as_values(model.settings.options),
-            labels_order=model.settings.options_order,
-        )
+    def from_model(cls, model: QuestionModel) -> "Self":
+        instance = cls(name=model.name, labels=cls._render_options_as_labels(model.settings.options))  # noqa
         instance._model = model
 
         return instance
 
-    @classmethod
-    def from_dict(cls, data: dict) -> "MultiLabelQuestion":
-        model = MultiLabelQuestionModel(**data)
-        return cls.from_model(model=model)
 
-
-class TextQuestion(QuestionPropertyBase):
-    _model: TextQuestionModel
-
+class TextQuestion(QuestionBase):
     def __init__(
         self,
         name: str,
@@ -227,6 +259,7 @@ class TextQuestion(QuestionPropertyBase):
         description: Optional[str] = None,
         required: bool = True,
         use_markdown: bool = False,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Create a new text question for `Settings` of a `Dataset`. A text question \
             is a question where the user can input text.
@@ -239,25 +272,14 @@ class TextQuestion(QuestionPropertyBase):
             use_markdown (Optional[bool]): Whether to render the markdown in the UI. When True, you will be able \
                 to use all the Markdown features for text formatting, including LaTex formulas and embedding multimedia content and PDFs.
         """
-        self._model = TextQuestionModel(
+        super().__init__(
             name=name,
             title=title,
-            description=description,
             required=required,
+            description=description,
             settings=TextQuestionSettings(use_markdown=use_markdown),
+            _client=client,
         )
-
-    @classmethod
-    def from_model(cls, model: TextQuestionModel) -> "TextQuestion":
-        instance = cls(name=model.name)
-        instance._model = model
-
-        return instance
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "TextQuestion":
-        model = TextQuestionModel(**data)
-        return cls.from_model(model=model)
 
     @property
     def use_markdown(self) -> bool:
@@ -268,9 +290,7 @@ class TextQuestion(QuestionPropertyBase):
         self._model.settings.use_markdown = use_markdown
 
 
-class RatingQuestion(QuestionPropertyBase):
-    _model: RatingQuestionModel
-
+class RatingQuestion(QuestionBase):
     def __init__(
         self,
         name: str,
@@ -278,6 +298,7 @@ class RatingQuestion(QuestionPropertyBase):
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Create a new rating question for `Settings` of a `Dataset`. A rating question \
             is a question where the user can select a value from a sequential list of options.
@@ -289,39 +310,33 @@ class RatingQuestion(QuestionPropertyBase):
             description (Optional[str]): The description of the question to be shown in the UI.
             required (bool): If the question is required for a record to be valid. At least one question must be required.
         """
-        self._model = RatingQuestionModel(
+
+        super().__init__(
             name=name,
             title=title,
-            description=description,
             required=required,
-            values=values,
+            description=description,
             settings=RatingQuestionSettings(options=self._render_values_as_options(values)),
+            _client=client,
         )
-
-    @classmethod
-    def from_model(cls, model: RatingQuestionModel) -> "RatingQuestion":
-        instance = cls(name=model.name, values=cls._render_options_as_values(model.settings.options))
-        instance._model = model
-
-        return instance
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "RatingQuestion":
-        model = RatingQuestionModel(**data)
-        return cls.from_model(model=model)
 
     @property
     def values(self) -> List[int]:
-        return self._render_options_as_labels(self._model.settings.options)
+        return self._render_options_as_labels(self._model.settings.options)  # noqa
 
     @values.setter
     def values(self, values: List[int]) -> None:
         self._model.values = self._render_values_as_options(values)
 
+    @classmethod
+    def from_model(cls, model: QuestionModel) -> "Self":
+        instance = cls(name=model.name, values=cls._render_options_as_labels(model.settings.options))  # noqa
+        instance._model = model
 
-class RankingQuestion(QuestionPropertyBase):
-    _model: RankingQuestionModel
+        return instance
 
+
+class RankingQuestion(QuestionBase):
     def __init__(
         self,
         name: str,
@@ -329,6 +344,7 @@ class RankingQuestion(QuestionPropertyBase):
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
+        client: Optional[Argilla] = None,
     ) -> None:
         """Create a new ranking question for `Settings` of a `Dataset`. A ranking question \
             is a question where the user can rank a list of options.
@@ -341,25 +357,14 @@ class RankingQuestion(QuestionPropertyBase):
             description (Optional[str]): The description of the question to be shown in the UI.
             required (bool): If the question is required for a record to be valid. At least one question must be required.
         """
-        self._model = RankingQuestionModel(
+        super().__init__(
             name=name,
             title=title,
-            description=description,
             required=required,
+            description=description,
             settings=RankingQuestionSettings(options=self._render_values_as_options(values)),
+            _client=client,
         )
-
-    @classmethod
-    def from_model(cls, model: RankingQuestionModel) -> "RankingQuestion":
-        instance = cls(name=model.name, values=cls._render_options_as_values(model.settings.options))
-        instance._model = model
-
-        return instance
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "RankingQuestion":
-        model = RankingQuestionModel(**data)
-        return cls.from_model(model=model)
 
     @property
     def values(self) -> List[str]:
@@ -369,10 +374,15 @@ class RankingQuestion(QuestionPropertyBase):
     def values(self, values: List[int]) -> None:
         self._model.settings.options = self._render_values_as_options(values)
 
+    @classmethod
+    def from_model(cls, model: QuestionModel) -> "Self":
+        instance = cls(name=model.name, values=cls._render_options_as_labels(model.settings.options))  # noqa
+        instance._model = model
 
-class SpanQuestion(QuestionPropertyBase):
-    _model: SpanQuestionModel
+        return instance
 
+
+class SpanQuestion(QuestionBase):
     def __init__(
         self,
         name: str,
@@ -383,6 +393,7 @@ class SpanQuestion(QuestionPropertyBase):
         title: Optional[str] = None,
         description: Optional[str] = None,
         required: bool = True,
+        client: Optional[Argilla] = None,
     ):
         """ Create a new span question for `Settings` of a `Dataset`. A span question \
             is a question where the user can select a section of text within a text field \
@@ -400,22 +411,19 @@ class SpanQuestion(QuestionPropertyBase):
                 description (Optional[str]): The description of the question to be shown in the UI.
                 required (bool): If the question is required for a record to be valid. At least one question must be required.
             """
-        self._model = SpanQuestionModel(
+        super().__init__(
             name=name,
             title=title,
-            description=description,
             required=required,
+            description=description,
             settings=SpanQuestionSettings(
                 field=field,
                 allow_overlapping=allow_overlapping,
                 visible_options=visible_labels,
                 options=self._render_values_as_options(labels),
             ),
+            _client=client,
         )
-
-    @property
-    def name(self):
-        return self._model.name
 
     @property
     def field(self):
@@ -450,20 +458,15 @@ class SpanQuestion(QuestionPropertyBase):
         self._model.settings.options = self._render_values_as_options(labels)
 
     @classmethod
-    def from_model(cls, model: SpanQuestionModel) -> "SpanQuestion":
+    def from_model(cls, model: QuestionModel) -> "Self":
         instance = cls(
             name=model.name,
             field=model.settings.field,
-            labels=cls._render_options_as_values(model.settings.options),
-        )
+            labels=cls._render_options_as_labels(model.settings.options),
+        )  # noqa
         instance._model = model
 
         return instance
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "SpanQuestion":
-        model = SpanQuestionModel(**data)
-        return cls.from_model(model=model)
 
 
 QuestionType = Union[
@@ -475,25 +478,25 @@ QuestionType = Union[
     SpanQuestion,
 ]
 
-_TYPE_TO_CLASS = {
-    "label_selection": LabelQuestion,
-    "multi_label_selection": MultiLabelQuestion,
-    "ranking": RankingQuestion,
-    "text": TextQuestion,
-    "rating": RatingQuestion,
-    "span": SpanQuestion,
-}
-
 
 def question_from_model(model: QuestionModel) -> QuestionType:
-    try:
-        return _TYPE_TO_CLASS[model.settings.type].from_model(model)
-    except KeyError:
-        raise ValueError(f"Unsupported question model type: {model.settings.type}")
+    question_type = model.type
+
+    if question_type == "label_selection":
+        return LabelQuestion.from_model(model)
+    elif question_type == "multi_label_selection":
+        return MultiLabelQuestion.from_model(model)
+    elif question_type == "ranking":
+        return RankingQuestion.from_model(model)
+    elif question_type == "text":
+        return TextQuestion.from_model(model)
+    elif question_type == "rating":
+        return RatingQuestion.from_model(model)
+    elif question_type == "span":
+        return SpanQuestion.from_model(model)
+    else:
+        raise ValueError(f"Unsupported question model type: {question_type}")
 
 
-def question_from_dict(data: dict) -> QuestionType:
-    try:
-        return _TYPE_TO_CLASS[data["settings"]["type"]].from_dict(data)
-    except KeyError:
-        raise ValueError(f"Unsupported question model type: {data['settings']['type']}")
+def _question_from_dict(data: dict) -> QuestionType:
+    return question_from_model(QuestionModel(**data))

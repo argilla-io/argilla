@@ -229,11 +229,15 @@ class TestCreateDatasetRecordsBulk:
             },
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert response.status_code == 201
 
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Response.id)))).scalar_one() == 1
         assert (await db.execute(select(func.count(Suggestion.id)))).scalar_one() == 6
+
+        assert dataset.users == [owner]
 
     async def test_create_dataset_records_bulk_with_empty_fields(
         self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
@@ -744,19 +748,19 @@ class TestCreateDatasetRecordsBulk:
                         "params": {
                             "errors": [
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "str type expected",
-                                    "type": "type_error.str",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "constrained-str"],
+                                    "msg": "Input should be a valid string",
+                                    "type": "string_type",
                                 },
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "value is not a valid list",
-                                    "type": "type_error.list",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "list[ChatFieldValue]"],
+                                    "msg": "Input should be a valid list",
+                                    "type": "list_type",
                                 },
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "value is not a valid dict",
-                                    "type": "type_error.dict",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "dict[constrained-str,any]"],
+                                    "msg": "Input should be a valid dictionary",
+                                    "type": "dict_type",
                                 },
                             ]
                         },
@@ -771,19 +775,19 @@ class TestCreateDatasetRecordsBulk:
                         "params": {
                             "errors": [
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "str type expected",
-                                    "type": "type_error.str",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "constrained-str"],
+                                    "msg": "Input should be a valid string",
+                                    "type": "string_type",
                                 },
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "value is not a valid list",
-                                    "type": "type_error.list",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "list[ChatFieldValue]"],
+                                    "msg": "Input should be a valid list",
+                                    "type": "list_type",
                                 },
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "value is not a valid dict",
-                                    "type": "type_error.dict",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "dict[constrained-str,any]"],
+                                    "msg": "Input should be a valid dictionary",
+                                    "type": "dict_type",
                                 },
                             ]
                         },
@@ -798,19 +802,19 @@ class TestCreateDatasetRecordsBulk:
                         "params": {
                             "errors": [
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "str type expected",
-                                    "type": "type_error.str",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "constrained-str"],
+                                    "msg": "Input should be a valid string",
+                                    "type": "string_type",
                                 },
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "value is not a valid list",
-                                    "type": "type_error.list",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "list[ChatFieldValue]"],
+                                    "msg": "Input should be a valid list",
+                                    "type": "list_type",
                                 },
                                 {
-                                    "loc": ["body", "items", 0, "fields", "text-field"],
-                                    "msg": "value is not a valid dict",
-                                    "type": "type_error.dict",
+                                    "loc": ["body", "items", 0, "fields", "text-field", "dict[constrained-str,any]"],
+                                    "msg": "Input should be a valid dictionary",
+                                    "type": "dict_type",
                                 },
                             ]
                         },
@@ -826,8 +830,10 @@ class TestCreateDatasetRecordsBulk:
                             "errors": [
                                 {
                                     "loc": ["body", "items", 0, "fields"],
-                                    "msg": "argilla_server.api.schemas.v1.chat.ChatFieldValue() argument after ** must be a mapping, not str",
-                                    "type": "type_error",
+                                    "msg": "Value error, Error parsing chat field 'text-field': "
+                                    "argilla_server.api.schemas.v1.chat.ChatFieldValue() "
+                                    "argument after ** must be a mapping, not str",
+                                    "type": "value_error",
                                 }
                             ]
                         },
@@ -871,7 +877,7 @@ class TestCreateDatasetRecordsBulk:
             },
         )
 
-        assert response.status_code == 422
+        assert response.status_code == 422, response.json()
         assert response.json() == expected_error
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 0
 

@@ -84,12 +84,6 @@ class DatasetMetrics(BaseModel):
     responses: ResponseMetrics
 
 
-class DatasetProgress(BaseModel):
-    total: int
-    completed: int
-    pending: int
-
-
 class RecordResponseDistribution(BaseModel):
     submitted: int = 0
     discarded: int = 0
@@ -100,6 +94,15 @@ class UserProgress(BaseModel):
     username: str
     completed: RecordResponseDistribution = RecordResponseDistribution()
     pending: RecordResponseDistribution = RecordResponseDistribution()
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DatasetProgress(BaseModel):
+    total: int
+    completed: int
+    pending: int
+    users: List[UserProgress] = Field(default_factory=list)
 
 
 class UsersProgress(BaseModel):
