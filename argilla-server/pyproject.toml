@@ -180,5 +180,6 @@ server-dev.composite = [
     "server",
 ]
 test = { cmd = "pytest", env_file = ".env.test" }
+
 docker-build-argilla-server = { shell = "pdm build && cp -R dist docker/server && docker build -t argilla/argilla-server:local docker/server" }
 docker-build-argilla-hf-spaces = { shell = "pdm run docker-build-argilla-server && docker build --build-arg ARGILLA_VERSION=local -t argilla/argilla-hf-spaces:local docker/argilla-hf-spaces" }
