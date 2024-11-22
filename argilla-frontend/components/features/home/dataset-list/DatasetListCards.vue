@@ -1,10 +1,10 @@
 <template>
   <div>
-    <TransitionGroup name="list" tag="ul" class="dataset-list__cards">
+    <ul class="dataset-list__cards">
       <li v-for="dataset in datasets" :key="dataset.id" :id="dataset.id">
         <DatasetCard v-if="hydrate[dataset.id]" :dataset="dataset" />
       </li>
-    </TransitionGroup>
+    </ul>
 
     <p
       v-if="datasets.length === 0"
