@@ -21,15 +21,15 @@ These are the section headers that we use:
 ### Added
 
 - Added support to remove/override datasets settings. ([#5584](https://github.com/argilla-io/argilla/pull/5584))
-- Added support to update question attribures. ([#5680](https://github.com/argilla-io/argilla/pull/5680))
+- Added support to update question attributes. ([#5680](https://github.com/argilla-io/argilla/pull/5680))
 - Added support to webhook listeners. ([#5502](https://github.com/argilla-io/argilla/pull/5502))
+- Added support to Python 3.13. ([#5652](https://github.com/argilla-io/argilla/pull/5652))
 
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
 ### Added
 
 - Added `Argilla.deploy_on_spaces` to deploy the Argilla server on Hugging Face Spaces. ([#5547](https://github.com/argilla-io/argilla/pull/5547))
-- Add support to webhooks. ([#5467](https://github.com/argilla-io/argilla/pull/5467))
 
 ### Changed
 
