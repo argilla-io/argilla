@@ -22,6 +22,7 @@ These are the section headers that we use:
 
 - Added support to remove/override datasets settings. ([#5584](https://github.com/argilla-io/argilla/pull/5584))
 - Added support to update question attribures. ([#5680](https://github.com/argilla-io/argilla/pull/5680))
+- Added support to webhook listeners. ([#5502](https://github.com/argilla-io/argilla/pull/5502))
 
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
