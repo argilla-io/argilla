@@ -1,3 +1,2 @@
-argilla @ git+https://github.com/argilla-io/argilla.git@feat/argilla/working-with-webhooks#subdirectory=argilla
-fastapi
-uvicorn[standard]
+gradio ~= 4.44.0
+argilla @ git+https://github.com/argilla-io/argilla.git@releases/2.5.0#subdirectory=argilla
