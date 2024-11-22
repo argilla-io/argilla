@@ -1,2 +1,0 @@
-gradio ~= 4.44.0
-argilla @ git+https://github.com/argilla-io/argilla.git@releases/2.5.0#subdirectory=argilla
