@@ -58,6 +58,7 @@ def load_supported_backends(extra_backends: list = None) -> Dict[str, Type[BaseO
         "argilla_server.security.authentication.oauth2._backends.HuggingfaceOpenId",
         "social_core.backends.github.GithubOAuth2",
         "social_core.backends.google.GoogleOAuth2",
+        "social_core.backends.keycloak.KeycloakOAuth2",
     ]
 
     if extra_backends:

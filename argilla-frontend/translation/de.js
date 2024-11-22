@@ -117,7 +117,7 @@ export default {
   button: {
     ignore_and_continue: "Ignorieren und fortfahren",
     login: "Anmelden",
-    signin_with_provider: "Anmeldung bei {provider} starten",
+    signin_with_provider: "Mit {provider} anmelden",
     "hf-login": "Mit Hugging Face anmelden",
     sign_in_with_username: "Mit Benutzername anmelden",
     cancel: "Abbrechen",
