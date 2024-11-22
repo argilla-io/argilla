@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
+
 ### Added
 
 - Add a high-contrast theme & improvements for the forced-colors mode. ([#5661](https://github.com/argilla-io/argilla/pull/5661))
