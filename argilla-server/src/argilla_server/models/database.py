@@ -307,8 +307,20 @@ class Question(DatabaseModel):
         return self.settings.get("type") == QuestionType.rating
 
     @property
+    def is_ranking(self) -> bool:
+        return self.settings.get("type") == QuestionType.ranking
+
+    @property
+    def is_span(self) -> bool:
+        return self.settings.get("type") == QuestionType.span
+
+    @property
     def type(self) -> QuestionType:
         return QuestionType(self.settings["type"])
+
+    @property
+    def values(self) -> List[Any]:
+        return [option["value"] for option in self.settings.get("options", [])]
 
     def __repr__(self):
         return (

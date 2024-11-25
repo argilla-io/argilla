@@ -21,11 +21,20 @@ from typing_extensions import Self
 from PIL import Image
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from datasets import load_dataset, features
-from datasets import Dataset as HFDataset, NamedSplit
+from datasets import (
+    Dataset as HFDataset,
+    Image as HFImage,
+    NamedSplit,
+    Features,
+    Sequence,
+    ClassLabel,
+    load_dataset,
+    features,
+)
 
+from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.database import get_sync_db
-from argilla_server.models.database import Dataset, Record
+from argilla_server.models.database import Dataset, Record, Question
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
@@ -198,10 +207,12 @@ RECORDS_YIELD_PER = 100
 class HubDatasetExporter:
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
-        self.version = 12  # TODO: Using this right now to bypass dataset generator cache
+        from uuid import uuid4
+
+        self.version = uuid4()  # TODO: Using this right now to bypass dataset generator cache
 
     def export_to(self, name: str, subset: str, split: str, private: bool, token: str):
-        hf_dataset = HFDataset.from_generator(self.records_generator, split=NamedSplit(split))
+        hf_dataset = HFDataset.from_generator(self.rows_generator, split=NamedSplit(split), features=self.features())
         hf_dataset.push_to_hub(
             repo_id=name,
             config_name=subset,
@@ -209,7 +220,70 @@ class HubDatasetExporter:
             token=token,
         )
 
-    def records_generator(self):
+    def features(self) -> Features:
+        return Features(self._features_attributes() | self._features_fields() | self._features_responses())
+
+    def _features_attributes(self) -> dict:
+        return {
+            "id": features.Value(dtype="string"),
+            "status": ClassLabel(names=[rs.value for rs in RecordStatus]),
+            "_server_id": features.Value(dtype="string"),
+        }
+
+    def _features_fields(self) -> dict:
+        features_fields = {}
+        for field in self.dataset.fields:
+            if field.is_image:
+                features_fields[field.name] = HFImage()
+            elif field.is_chat:
+                features_fields[field.name] = Sequence(
+                    {
+                        "role": features.Value(dtype="string"),
+                        "content": features.Value(dtype="string"),
+                    }
+                )
+            # TODO: Manage also custom type as feature
+            else:
+                features_fields[field.name] = features.Value(dtype="string")
+
+        return features_fields
+
+    def _features_responses(self) -> dict:
+        features_responses = {}
+        for question in self.dataset.questions:
+            response_feature_name = self._response_feature_name(question)
+            response_users_feature_name = self._response_users_feature_name(question)
+            response_status_feature_name = self._response_status_feature_name(question)
+
+            if question.is_label_selection:
+                features_responses[response_feature_name] = Sequence(ClassLabel(names=question.values))
+            elif question.is_multi_label_selection:
+                features_responses[response_feature_name] = Sequence(Sequence(ClassLabel(names=question.values)))
+            elif question.is_rating:
+                features_responses[response_feature_name] = Sequence(features.Value(dtype="int64"))
+            elif question.is_ranking:
+                features_responses[response_feature_name] = Sequence(Sequence(features.Value(dtype="string")))
+            elif question.is_span:
+                features_responses[response_feature_name] = Sequence(
+                    Sequence(
+                        {
+                            "label": ClassLabel(names=question.values),
+                            "start": features.Value(dtype="int64"),
+                            "end": features.Value(dtype="int64"),
+                        }
+                    )
+                )
+            else:
+                features_responses[response_feature_name] = Sequence(features.Value(dtype="string"))
+
+            features_responses[response_users_feature_name] = Sequence(features.Value(dtype="string"))
+            features_responses[response_status_feature_name] = Sequence(
+                ClassLabel(names=[rs.value for rs in ResponseStatus])
+            )
+
+        return features_responses
+
+    def rows_generator(self):
         for session in get_sync_db():
             query = (
                 session.query(Record)
@@ -236,8 +310,11 @@ class HubDatasetExporter:
     def _row_fields(self, record: Record) -> dict:
         row_fields = {}
         for field in self.dataset.fields:
-            # TODO: If field.is_image then we need to cast to PIL.Image (if it's a data-url string)
-            row_fields[field.name] = record.fields.get(field.name)
+            if field.is_image:
+                # TODO: What to do with images as URLs?
+                row_fields[field.name] = {"bytes": data_url_to_bytes(record.fields.get(field.name))}
+            else:
+                row_fields[field.name] = record.fields.get(field.name)
 
         return row_fields
 
@@ -245,23 +322,32 @@ class HubDatasetExporter:
     def _row_responses(self, record: Record) -> dict:
         row_responses = {}
         for question in self.dataset.questions:
-            response_label = f"{question.name}.responses"
-            response_label_users = f"{response_label}.users"
-            response_label_status = f"{response_label}.status"
+            response_feature_name = self._response_feature_name(question)
+            response_users_feature_name = self._response_users_feature_name(question)
+            response_status_feature_name = self._response_status_feature_name(question)
 
-            row_responses[response_label] = []
-            row_responses[response_label_users] = []
-            row_responses[response_label_status] = []
+            row_responses[response_feature_name] = []
+            row_responses[response_users_feature_name] = []
+            row_responses[response_status_feature_name] = []
             for response in record.responses:
                 if response.values is not None:
                     response_value = response.values.get(question.name)
                     if response_value is not None:
-                        row_responses[response_label].append(response_value["value"])
+                        row_responses[response_feature_name].append(response_value["value"])
 
-                row_responses[response_label_users].append(str(response.user_id))
-                row_responses[response_label_status].append(response.status)
+                row_responses[response_users_feature_name].append(str(response.user_id))
+                row_responses[response_status_feature_name].append(response.status)
 
         return row_responses
+
+    def _response_feature_name(self, question: Question) -> str:
+        return f"{question.name}.responses"
+
+    def _response_users_feature_name(self, question: Question) -> str:
+        return f"{self._response_feature_name(question)}.users"
+
+    def _response_status_feature_name(self, question: Question) -> str:
+        return f"{self._response_feature_name(question)}.status"
 
 
 def pil_image_to_data_url(image: Image.Image):
@@ -275,3 +361,9 @@ def pil_image_to_data_url(image: Image.Image):
     base64_image = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     return f"data:{image_mimetype};base64,{base64_image}"
+
+
+def data_url_to_bytes(data_url: str):
+    header, encoded = data_url.split(",", 1)
+
+    return base64.b64decode(encoded)
