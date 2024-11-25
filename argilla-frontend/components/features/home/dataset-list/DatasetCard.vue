@@ -1,6 +1,6 @@
 <template>
   <NuxtLink :to="getDatasetLink(dataset)" class="dataset-card">
-    <div>
+    <div class="dataset-card__body">
       <div class="dataset-card__row">
         <div class="dataset-card__actions">
           <BaseActionTooltip :tooltip="$t('copied')" tooltip-position="bottom">
@@ -27,8 +27,10 @@
 
       <div class="dataset-card__content">
         <h1 class="dataset-card__title">{{ dataset.name }}</h1>
-        <DatasetFields :dataset="dataset" />
-        <DatasetQuestions :dataset="dataset" />
+        <div class="dataset-card__badges">
+          <DatasetFields :dataset="dataset" />
+          <DatasetQuestions :dataset="dataset" />
+        </div>
       </div>
     </div>
     <div class="dataset-card__footer">
@@ -73,9 +75,9 @@ export default {
 
 <style scoped lang="scss">
 $shadow-default: rgba(0, 0, 0, 0.1) 0px 3px 12px 0px,
-  var(--bg-opacity-2) 0px 0px 0px 1px inset;
-$shadow-hover: rgba(0, 0, 0, 0.05) 0px 0px 4px 0px,
-  var(--bg-opacity-2) 0px 0px 0px 1px inset;
+  var(--bg-opacity-4) 0px 0px 0px 1px inset;
+$shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
+  var(--bg-opacity-4) 0px 0px 0px 1px inset;
 .dataset-card {
   text-decoration: none;
   display: flex;
@@ -92,7 +94,7 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 0px 4px 0px,
   transition: all 0.2s ease;
   &:hover {
     box-shadow: $shadow-hover;
-    background: hsla(from var(--bg-accent-grey-3) h s l / 60%);
+    background: hsla(from var(--bg-accent-grey-3) h s l / 40%);
     .dataset-card__title {
       transition: color 0.2s ease;
       color: var(--fg-cuaternary);
@@ -112,18 +114,22 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 0px 4px 0px,
     flex-direction: column;
     gap: calc($base-space / 3);
   }
-  &__header {
+  &__body {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: $base-space;
-    padding-bottom: $base-space;
+    flex-direction: column;
+    height: 100%;
   }
   &__content {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: $base-space;
     height: 100%;
+  }
+  &__badges {
+    display: flex;
+    flex-direction: column;
+    gap: $base-space;
   }
   &__title {
     margin: 0 0 $base-space 0;
@@ -139,13 +145,13 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 0px 4px 0px,
     @include font-size(12px);
   }
   &__date {
-    margin: 0;
+    margin: 0 0 calc($base-space / 2) 0;
     color: var(--fg-secondary);
     text-align: right;
-    font-weight: 200;
     @include font-size(11px);
   }
   &__footer {
+    flex-shrink: 0;
     padding-top: $base-space * 2;
     border-top: 1px solid var(--bg-opacity-6);
     min-height: $base-space * 7;

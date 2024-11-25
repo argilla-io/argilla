@@ -35,7 +35,7 @@ export default {
   justify-items: flex-end;
   margin-left: auto;
   gap: calc($base-space / 2);
-  color: var(--fg-secondary);
+  color: var(--fg-tertiary);
   @include font-size(12px);
 }
 </style>
