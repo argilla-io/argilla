@@ -73,7 +73,7 @@ SyncSessionLocal = sessionmaker(autocommit=False, expire_on_commit=False, bind=s
 AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
 
 
-def get_sync_db() -> Generator[Session, None]:
+def get_sync_db() -> Generator[Session, None, None]:
     db = SyncSessionLocal()
 
     try:
