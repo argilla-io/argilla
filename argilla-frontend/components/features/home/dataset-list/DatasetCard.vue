@@ -83,7 +83,7 @@ export default {
   padding: $base-space * 2;
   text-align: left;
   background: var(--bg-accent-grey-3);
-  border-radius: $border-radius-m;
+  border-radius: $border-radius-l;
   box-shadow: $shadow-400;
   transition: all 0.2s ease;
   border: 1px solid var(--bg-opacity-4);
