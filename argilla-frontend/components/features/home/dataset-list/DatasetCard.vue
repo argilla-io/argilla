@@ -72,6 +72,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+$shadow-default: rgba(0, 0, 0, 0.1) 0px 3px 12px 0px,
+  var(--bg-opacity-2) 0px 0px 0px 1px inset;
+$shadow-hover: rgba(0, 0, 0, 0.05) 0px 0px 4px 0px,
+  var(--bg-opacity-2) 0px 0px 0px 1px inset;
 .dataset-card {
   text-decoration: none;
   display: flex;
@@ -84,11 +88,11 @@ export default {
   text-align: left;
   background: var(--bg-accent-grey-3);
   border-radius: $border-radius-l;
-  box-shadow: $shadow-400;
+  box-shadow: $shadow-default;
   transition: all 0.2s ease;
-  border: 1px solid var(--bg-opacity-4);
   &:hover {
-    box-shadow: $shadow-300;
+    box-shadow: $shadow-hover;
+    background: hsla(from var(--bg-accent-grey-3) h s l / 60%);
     .dataset-card__title {
       transition: color 0.2s ease;
       color: var(--fg-cuaternary);
