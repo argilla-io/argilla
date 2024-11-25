@@ -30,23 +30,35 @@ export default {
       required: true,
     },
   },
-  mounted() {
-    const handleIntersection = (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          this.$set(this.hydrate, entry.target.id, true);
+  watch: {
+    datasets() {
+      this.hydrateDatasetList();
+    },
+  },
+  methods: {
+    hydrateDatasetList() {
+      const handleIntersection = (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            this.$set(this.hydrate, entry.target.id, true);
+          }
         }
-      }
-    };
+      };
 
-    const observer = new IntersectionObserver(handleIntersection);
+      const observer = new IntersectionObserver(handleIntersection);
 
-    this.datasets.forEach((item) => {
-      const element = document.getElementById(item.id);
-      if (!element) return;
+      this.datasets.forEach((item) => {
+        this.$nextTick(() => {
+          const element = document.getElementById(item.id);
+          if (!element) return;
 
-      observer.observe(element);
-    });
+          observer.observe(element);
+        });
+      });
+    },
+  },
+  mounted() {
+    this.hydrateDatasetList();
   },
 };
 </script>
