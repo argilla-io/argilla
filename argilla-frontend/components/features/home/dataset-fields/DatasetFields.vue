@@ -36,7 +36,6 @@ export default {
   &__title {
     @include font-size(12px);
     color: var(--fg-secondary);
-    font-weight: 200;
     min-width: $base-space * 8;
   }
   &__badges {

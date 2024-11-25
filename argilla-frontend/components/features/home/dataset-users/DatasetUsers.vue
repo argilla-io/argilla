@@ -13,7 +13,11 @@
       class="dataset-users__rest__wrapper"
       v-if="users.length > visibleBadges"
     >
+      <p v-if="users.length > maxVisibleBadges" class="dataset-users__text">
+        +{{ users.length - visibleBadges }}
+      </p>
       <BaseButton
+        v-else
         @mouseenter.native="expanded = true"
         @click.prevent
         class="dataset-users__button"
@@ -42,6 +46,7 @@ export default {
   },
   data: () => {
     return {
+      maxVisibleBadges: 10,
       visibleBadges: 3,
       expanded: false,
     };
@@ -64,6 +69,9 @@ export default {
   }
   &__button {
     padding: 0;
+  }
+  &__text {
+    margin: 0;
   }
   &__rest {
     position: absolute;
