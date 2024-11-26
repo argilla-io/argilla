@@ -1,4 +1,16 @@
+/* eslint-disable */
 import Vue from "vue";
+
+type Element = HTMLElement & {
+  textWrapper: HTMLElement;
+  openTooltip: () => void;
+  closeTooltip: () => void;
+  clickOnTooltipElementEvent: () => void;
+  clickOnClose: (event: Event) => void;
+  clickOutsideEvent: (event: Event) => void;
+  scrollInParent: () => void;
+  resize: () => void;
+};
 
 // NOTE - to use tooltip directive, add to your html element where to put a tooltip :
 //  v-tooltip="{ content: tooltipMessage, tooltipPosition: 'bottom' }"
@@ -6,7 +18,18 @@ import Vue from "vue";
 // TODO - implement the other tooltip direction top/right/left
 
 Vue.directive("tooltip", {
-  inserted: (element, binding) => {
+  inserted: (
+    element: Element,
+    binding: {
+      value: {
+        open: any;
+        content: string;
+        color: string;
+        width: number;
+        tooltipPosition: string;
+      };
+    }
+  ) => {
     const tooltipId = `${element.id}tooltip`;
     const tooltipCloseIconId = `${tooltipId}__close-icon`;
     let tooltip = null;
@@ -34,7 +57,10 @@ Vue.directive("tooltip", {
       // NOTE - init close icon
       let tooltipHeader = document.createElement("div");
       tooltipHeader = initTooltipHeaderStyle(tooltipHeader);
-      tooltipHeader.firstChild.setAttribute("id", tooltipCloseIconId);
+      (tooltipHeader.firstChild as HTMLElement).setAttribute(
+        "id",
+        tooltipCloseIconId
+      );
 
       // NOTE - triangle
       let tooltipTriangle = document.createElement("div");
@@ -50,7 +76,7 @@ Vue.directive("tooltip", {
       tooltipTriangle.appendChild(tooltipTriangleInner);
 
       // NOTE - text styles
-      textWrapper = initTextStyle(textWrapper, color);
+      textWrapper = initTextStyle(textWrapper);
 
       // NOTE - tooltip styles
       tooltip = initTooltipStyle(tooltip, width);
@@ -90,7 +116,9 @@ Vue.directive("tooltip", {
     };
 
     element.clickOutsideEvent = function (event) {
-      if (!(element == event.target || element.contains(event.target))) {
+      if (
+        !(element == event.target || element.contains(event.target as Node))
+      ) {
         element.closeTooltip();
       }
     };
@@ -136,7 +164,7 @@ const isScrollable = function (element) {
   const hasScrollableContent = element.scrollHeight > element.clientHeight;
 
   const overflowYStyle = window.getComputedStyle(element).overflowY;
-  const isOverflowHidden = overflowYStyle.indexOf("hidden") !== -1;
+  const isOverflowHidden = overflowYStyle.includes("hidden");
 
   return hasScrollableContent && !isOverflowHidden;
 };
@@ -198,7 +226,7 @@ const initTooltipStyle = (tooltip, width) => {
   tooltip.style.padding = "20px 8px 8px 8px";
   tooltip.style.boxShadow = "0 8px 20px 0 rgba(0,0,0,.2)";
   tooltip.style.transition = "opacity 0.3s ease 0.2s";
-  tooltip.style.border = `2px transparent solid`;
+  tooltip.style.border = "2px transparent solid";
   tooltip.style.cursor = "default";
   return tooltip;
 };

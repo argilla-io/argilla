@@ -1,9 +1,16 @@
 import Vue from "vue";
 
+declare global {
+  interface Navigator {
+    languages: string[];
+    userLanguage: string;
+    systemLanguage: string;
+  }
+}
+
 const locale = [
   ...(navigator.languages || []),
   navigator.language,
-  navigator.browserLanguage,
   navigator.userLanguage,
   navigator.systemLanguage,
 ].filter(Boolean);

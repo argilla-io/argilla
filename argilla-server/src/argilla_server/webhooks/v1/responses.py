@@ -56,5 +56,5 @@ async def build_response_event(db: AsyncSession, response_event: ResponseEvent, 
     return Event(
         event=response_event,
         timestamp=datetime.utcnow(),
-        data=ResponseEventSchema.from_orm(response).dict(),
+        data=ResponseEventSchema.model_validate(response).model_dump(),
     )

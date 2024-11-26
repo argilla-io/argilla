@@ -1,4 +1,5 @@
 import Vue from "vue";
+
 Vue.directive("circle", {
   bind: (element, binding) => {
     let circleDiameter = "0px";

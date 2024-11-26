@@ -154,11 +154,15 @@ class TestCreateCurrentUserResponsesBulk:
             ],
         }
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert records[0].status == RecordStatus.completed
         assert records[1].status == RecordStatus.completed
         assert records[2].status == RecordStatus.pending
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 2
+
+        assert dataset.users == [annotator]
 
         response_to_create = (await db.execute(select(Response).filter_by(id=response_to_create_id))).scalar_one()
         await db.refresh(response_to_update)
@@ -195,6 +199,8 @@ class TestCreateCurrentUserResponsesBulk:
             },
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert resp.status_code == 200
 
         resp_json = resp.json()
@@ -217,6 +223,8 @@ class TestCreateCurrentUserResponsesBulk:
         }
 
         assert (await db.execute(select(func.count(Response.id)))).scalar() == 1
+
+        assert dataset.users == [owner]
 
         response = (await db.execute(select(Response).filter_by(id=response_id))).scalar_one()
         mock_search_engine.update_record_response.assert_called_once_with(response)
@@ -440,7 +448,7 @@ class TestCreateCurrentUserResponsesBulk:
         profiler = Profiler()
 
         responses = [
-            DraftResponseUpsert.parse_obj(
+            DraftResponseUpsert.model_validate(
                 {
                     "values": {"prompt-quality": {"value": 10}},
                     "record_id": record.id,
@@ -490,10 +498,14 @@ class TestCreateCurrentUserResponsesBulk:
             },
         )
 
+        await db.refresh(dataset, attribute_names=["users"])
+
         assert resp.status_code == 200
 
         response = (await db.execute(select(Response))).scalar_one()
         event = await build_response_event(db, ResponseEvent.created, response)
+
+        assert dataset.users == [owner]
 
         assert HIGH_QUEUE.count == 1
         assert HIGH_QUEUE.jobs[0].args[0] == webhook.id

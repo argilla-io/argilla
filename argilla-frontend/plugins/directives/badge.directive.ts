@@ -1,7 +1,6 @@
-// style for button to open formular
 import Vue from "vue";
 
-//NOTE - to use this directive, add to your html element where to put a badge :
+// NOTE - to use this directive, add to your html element where to put a badge :
 //  v-badge="{showBadge: true,  verticalPosition: 'top',  horizontalPosition: 'right'}"
 //    => showBadge (Boolean) to show or not the badge : true or false
 //    => verticalPosition (String) vertical position : 'top' or 'bottom'
@@ -9,7 +8,19 @@ import Vue from "vue";
 //    => size (String) height and size of the badge: '10px
 
 Vue.directive("badge", {
-  bind: (element, binding) => {
+  bind: (
+    element,
+    binding: {
+      value: {
+        showBadge: boolean;
+        verticalPosition: string;
+        horizontalPosition: string;
+        backgroundColor: string;
+        borderColor: string;
+        size: string;
+      };
+    }
+  ) => {
     const { showBadge } = binding.value;
     if (showBadge) {
       const {

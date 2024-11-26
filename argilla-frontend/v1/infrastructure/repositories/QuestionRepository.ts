@@ -80,7 +80,12 @@ export class QuestionRepository implements IQuestionRepository {
     return {
       title,
       description: newDescription,
-      settings: settings as any,
+      settings: {
+        ...(settings as any),
+        visible_options: settings.shouldShowVisibleOptions
+          ? settings.visible_options
+          : undefined,
+      },
     };
   }
 }

@@ -51,5 +51,5 @@ async def build_record_event(db: AsyncSession, record_event: RecordEvent, record
     return Event(
         event=record_event,
         timestamp=datetime.utcnow(),
-        data=RecordEventSchema.from_orm(record).dict(),
+        data=RecordEventSchema.model_validate(record).model_dump(),
     )

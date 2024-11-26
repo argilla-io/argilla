@@ -50,7 +50,6 @@ from argilla_server.search_engine import (
     get_search_engine,
 )
 from argilla_server.security import auth
-from argilla_server.telemetry import TelemetryClient, get_telemetry_client
 
 router = APIRouter()
 
@@ -155,12 +154,12 @@ async def get_current_user_dataset_metrics(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    result = await datasets.get_user_dataset_metrics(search_engine, current_user, dataset)
+    result = await datasets.get_user_dataset_metrics(db, search_engine, current_user, dataset)
 
     return DatasetMetrics(responses=result)
 
 
-@router.get("/datasets/{dataset_id}/progress", response_model=DatasetProgress)
+@router.get("/datasets/{dataset_id}/progress", response_model=DatasetProgress, response_model_exclude_unset=True)
 async def get_dataset_progress(
     *,
     dataset_id: UUID,
@@ -172,7 +171,7 @@ async def get_dataset_progress(
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    result = await datasets.get_dataset_progress(search_engine, dataset)
+    result = await datasets.get_dataset_progress(db, search_engine, dataset)
 
     return DatasetProgress(**result)
 
@@ -182,14 +181,13 @@ async def get_dataset_users_progress(
     *,
     dataset_id: UUID,
     db: AsyncSession = Depends(get_async_db),
-    search_engine: SearchEngine = Depends(get_search_engine),
     current_user: User = Security(auth.get_current_user),
 ):
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicy.get(dataset))
 
-    progress = await datasets.get_dataset_users_progress(dataset.id)
+    progress = await datasets.get_dataset_users_progress(db, dataset)
 
     return UsersProgress(users=progress)
 
@@ -203,7 +201,7 @@ async def create_dataset(
 ):
     await authorize(current_user, DatasetPolicy.create(dataset_create.workspace_id))
 
-    return await datasets.create_dataset(db, dataset_create.dict())
+    return await datasets.create_dataset(db, dataset_create.model_dump())
 
 
 @router.post("/datasets/{dataset_id}/fields", status_code=status.HTTP_201_CREATED, response_model=Field)
@@ -310,7 +308,7 @@ async def update_dataset(
 
     await authorize(current_user, DatasetPolicy.update(dataset))
 
-    return await datasets.update_dataset(db, dataset, dataset_update.dict(exclude_unset=True))
+    return await datasets.update_dataset(db, dataset, dataset_update.model_dump(exclude_unset=True))
 
 
 @router.post("/datasets/{dataset_id}/import", status_code=status.HTTP_202_ACCEPTED, response_model=JobSchema)
@@ -330,7 +328,7 @@ async def import_dataset_from_hub(
         subset=hub_dataset.subset,
         split=hub_dataset.split,
         dataset_id=dataset.id,
-        mapping=hub_dataset.mapping.dict(),
+        mapping=hub_dataset.mapping.model_dump(),
     )
 
     return JobSchema(id=job.id, status=job.get_status())

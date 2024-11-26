@@ -38,6 +38,7 @@ from argilla_server.models import (
     Workspace,
     WorkspaceUser,
     Webhook,
+    DatasetUser,
 )
 from argilla_server.models.base import DatabaseModel
 
@@ -208,6 +209,14 @@ class DatasetFactory(BaseFactory):
     name = factory.Sequence(lambda n: f"dataset-{n}")
     distribution = {"strategy": DatasetDistributionStrategy.overlap, "min_submitted": 1}
     workspace = factory.SubFactory(WorkspaceFactory)
+
+
+class DatasetUserFactory(BaseFactory):
+    class Meta:
+        model = DatasetUser
+
+    dataset = factory.SubFactory(DatasetFactory)
+    user = factory.SubFactory(UserFactory)
 
 
 class RecordFactory(BaseFactory):
