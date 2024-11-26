@@ -141,7 +141,7 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
   }
   &__workspace {
     margin: 0 0 calc($base-space / 2) 0;
-    color: var(--fg-secondary);
+    color: var(--fg-primary);
     @include font-size(12px);
   }
   &__date {
