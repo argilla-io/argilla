@@ -33,9 +33,7 @@ export class DatasetCreation {
   }
 
   get textTypeFields() {
-    return this.selectedSubset.fields.filter(
-      (f) => f.settings.type.value === "text"
-    );
+    return this.selectedSubset.fields.filter((f) => f.settings.type.isTextType);
   }
 
   get mappedFields() {

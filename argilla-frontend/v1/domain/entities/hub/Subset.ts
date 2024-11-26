@@ -255,7 +255,6 @@ export class Subset {
         { text: "event", id: "3", value: "event" },
       ];
       settings.allow_overlapping = true;
-      settings.field = undefined;
     }
 
     if (type === "text") {
