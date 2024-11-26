@@ -36,7 +36,7 @@ export default {
   align-items: center;
   height: calc(v-bind(fontSize) * 2);
   border: 1px solid var(--bg-opacity-10);
-  border-radius: $border-radius-l;
+  border-radius: $border-radius-xl;
   font-size: v-bind(fontSize);
   background: linear-gradient(
     90deg,
@@ -49,7 +49,7 @@ export default {
     align-items: center;
     justify-content: center;
     padding: calc($base-space / 1.8) $base-space;
-    border-radius: $border-radius-l;
+    border-radius: $border-radius-xl;
     & + .dataset-badge__text {
       padding: calc($base-space / 2) $base-space calc($base-space / 2)
         calc($base-space / 2);

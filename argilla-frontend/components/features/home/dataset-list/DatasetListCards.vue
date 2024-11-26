@@ -75,7 +75,7 @@ export default {
     margin-bottom: $base-space * 4;
 
     li {
-      min-height: 200px;
+      min-height: 260px;
     }
   }
   &__empty-message {

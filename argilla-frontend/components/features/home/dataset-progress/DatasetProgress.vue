@@ -1,6 +1,6 @@
 <template>
   <div class="dataset-progress">
-    <p class="dataset-progress__title">{{ $t("metrics.progress.team") }}</p>
+    <p class="dataset-progress__title">{{ $t("metrics.progress.default") }}</p>
     <p class="dataset-progress__percent">{{ getPercent }}%</p>
   </div>
 </template>

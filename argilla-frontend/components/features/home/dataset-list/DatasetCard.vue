@@ -86,7 +86,7 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
   text-align: center;
   gap: $base-space * 2;
   height: 100%;
-  padding: $base-space * 2;
+  padding: $base-space * 3;
   text-align: left;
   background: var(--bg-accent-grey-3);
   border-radius: $border-radius-l;
@@ -122,7 +122,6 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
   &__content {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     gap: $base-space;
     height: 100%;
   }
@@ -135,13 +134,14 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
     margin: 0 0 $base-space 0;
     color: var(--fg-primary);
     font-weight: 500;
-    @include font-size(16px);
-    word-break: break-word;
+    min-height: $base-space * 5;
+    @include font-size(18px);
+    word-break: break-all;
     transition: color 0.3s ease;
   }
   &__workspace {
     margin: 0 0 calc($base-space / 2) 0;
-    color: var(--fg-secondary);
+    color: var(--fg-primary);
     @include font-size(12px);
   }
   &__date {
