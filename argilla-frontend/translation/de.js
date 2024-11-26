@@ -290,6 +290,12 @@ export default {
         optionsWithoutLabel: "Optionen ohne Label sind nicht erlaubt",
         optionsSeparatedByComma: "Optionen müssen durch Kommas getrennt sein",
       },
+      rating: {
+        atLeastTwoOptions: "Mindestens zwei Optionen müssen vorhanden sein",
+      },
+      span: {
+        fieldRelated: "One text field is required",
+      },
     },
     atLeastOneQuestion: "Mindestens eine Frage wird benötigt",
     atLeastOneRequired: "Mindestens eine erforderliche Frage wird benötigt",
@@ -309,6 +315,7 @@ export default {
     requiredQuestion: "Pflichtfrage",
     select: "Auswählen",
     mapToColumn: "Einer Spalte zuordnen",
+    applyToaAField: "Gelten für:",
     subset: "Teilmenge",
     selectSubset:
       "Sie können einen Datensatz nur aus einer Teilmenge erstellen.",

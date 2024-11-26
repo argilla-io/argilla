@@ -6,7 +6,7 @@
   >
     <template slot="dropdown-header">
       <svgicon name="assign" height="12" />
-      {{ $t("datasetCreation.mapToColumn") }}
+      {{ $t("datasetCreation.applyToaAField") }}
       <span
         v-if="options.length"
         class="column-selector__chip"
