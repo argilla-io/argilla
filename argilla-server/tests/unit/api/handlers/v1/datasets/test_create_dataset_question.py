@@ -155,7 +155,7 @@ class TestCreateDatasetQuestion:
     @pytest.mark.parametrize(
         "visible_options,error_msg",
         [
-            (1, "ensure this value is greater than or equal to 3"),
+            (1, "greater than or equal to 3"),
             (4, "the value for 'visible_options' must be less or equal to the number of items in 'options' (3)"),
         ],
     )

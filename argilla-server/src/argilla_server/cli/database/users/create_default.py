@@ -18,7 +18,7 @@ import typer
 from argilla_server.constants import DEFAULT_API_KEY, DEFAULT_PASSWORD, DEFAULT_USERNAME
 from argilla_server.contexts import accounts
 from argilla_server.database import AsyncSessionLocal
-from argilla_server.models import User, UserRole, Workspace
+from argilla_server.models import User, UserRole
 
 from .utils import get_or_new_workspace
 

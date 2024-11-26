@@ -18,14 +18,13 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from uuid import UUID
 
-from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Enum as SAEnum, PrimaryKeyConstraint
 from sqlalchemy import (
     JSON,
     ForeignKey,
     String,
     Text,
     UniqueConstraint,
-    and_,
     sql,
 )
 from sqlalchemy.engine.default import DefaultExecutionContext
@@ -47,7 +46,7 @@ from argilla_server.enums import (
 from argilla_server.models.base import DatabaseModel
 from argilla_server.models.metadata_properties import MetadataPropertySettings
 from argilla_server.models.mixins import inserted_at_current_value
-from argilla_server.pydantic_v1 import parse_obj_as
+from pydantic import TypeAdapter
 
 # Include here the data model ref to be accessible for automatic alembic migration scripts
 __all__ = [
@@ -64,6 +63,7 @@ __all__ = [
     "Vector",
     "VectorSettings",
     "Webhook",
+    "DatasetUser",
 ]
 
 _USER_API_KEY_BYTES_LENGTH = 80
@@ -288,7 +288,7 @@ class Question(DatabaseModel):
 
     @property
     def parsed_settings(self) -> QuestionSettings:
-        return parse_obj_as(QuestionSettings, self.settings)
+        return TypeAdapter(QuestionSettings).validate_python(self.settings)
 
     @property
     def is_text(self) -> bool:
@@ -337,7 +337,7 @@ class MetadataProperty(DatabaseModel):
 
     @property
     def parsed_settings(self) -> MetadataPropertySettings:
-        return parse_obj_as(MetadataPropertySettings, self.settings)
+        return TypeAdapter(MetadataPropertySettings).validate_python(self.settings)
 
     @property
     def visible_for_annotators(self) -> bool:
@@ -355,6 +355,28 @@ DatasetStatusEnum = SAEnum(DatasetStatus, name="dataset_status_enum")
 
 def _updated_at_current_value(context: DefaultExecutionContext) -> datetime:
     return context.get_current_parameters(isolate_multiinsert_groups=False)["updated_at"]
+
+
+class DatasetUser(DatabaseModel):
+    __tablename__ = "datasets_users"
+    __upsertable_columns__ = {}
+
+    id = None  # This is a workaround to avoid the id column in the table
+
+    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+
+    dataset: Mapped["Dataset"] = relationship(viewonly=True)
+    user: Mapped["User"] = relationship(viewonly=True)
+
+    __table_args__ = (PrimaryKeyConstraint("dataset_id", "user_id"),)
+
+    def __repr__(self):
+        return (
+            f"DatasetUser(id={str(self.id)!r}, dataset_id={str(self.dataset_id)!r}, "
+            f"user_id={str(self.user_id)!r}, "
+            f"inserted_at={str(self.inserted_at)!r}, updated_at={str(self.updated_at)!r})"
+        )
 
 
 class Dataset(DatabaseModel):
@@ -403,6 +425,13 @@ class Dataset(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=VectorSettings.inserted_at.asc(),
+    )
+
+    users: Mapped[List["User"]] = relationship(
+        secondary="datasets_users",
+        back_populates="datasets",
+        passive_deletes=True,
+        order_by=DatasetUser.inserted_at.asc(),
     )
 
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
@@ -514,6 +543,12 @@ class User(DatabaseModel):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by=Response.inserted_at.asc(),
+    )
+
+    datasets: Mapped[List["Dataset"]] = relationship(
+        secondary="datasets_users",
+        back_populates="users",
+        order_by=DatasetUser.inserted_at.asc(),
     )
 
     @property

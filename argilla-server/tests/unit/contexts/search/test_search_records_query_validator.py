@@ -37,7 +37,7 @@ class TestSearchRecordsQueryValidator:
         label_selection_question = await LabelSelectionQuestionFactory.create(dataset=dataset)
         metadata_property = await FloatMetadataPropertyFactory.create(dataset=dataset)
 
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -88,7 +88,7 @@ class TestSearchRecordsQueryValidator:
         await SearchRecordsQueryValidator.validate(db, dataset, query)
 
     async def test_validate_response_filter_scope_in_filters_without_question(self, db: AsyncSession):
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -102,7 +102,7 @@ class TestSearchRecordsQueryValidator:
     async def test_validate_response_filter_scope_in_filters_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -129,7 +129,7 @@ class TestSearchRecordsQueryValidator:
     async def test_validate_suggestion_filter_scope_in_filters_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -158,7 +158,7 @@ class TestSearchRecordsQueryValidator:
     ):
         dataset = await DatasetFactory.create()
 
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -184,7 +184,7 @@ class TestSearchRecordsQueryValidator:
         )
 
     async def test_validate_response_filter_scope_in_sort_without_question(self, db: AsyncSession):
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -198,7 +198,7 @@ class TestSearchRecordsQueryValidator:
     async def test_validate_response_filter_scope_in_sort_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -217,7 +217,7 @@ class TestSearchRecordsQueryValidator:
     async def test_validate_suggestion_filter_scope_in_sort_with_non_existent_question(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},
@@ -236,7 +236,7 @@ class TestSearchRecordsQueryValidator:
     async def test_validate_metadata_filter_scope_in_sort_with_non_existent_metadata_property(self, db: AsyncSession):
         dataset = await DatasetFactory.create()
 
-        query = SearchRecordsQuery.parse_obj(
+        query = SearchRecordsQuery.model_validate(
             {
                 "query": {
                     "text": {"q": "query"},

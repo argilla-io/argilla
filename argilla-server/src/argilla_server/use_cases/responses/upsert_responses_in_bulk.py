@@ -49,7 +49,7 @@ class UpsertResponsesInBulkUseCase:
             except Exception as err:
                 responses_bulk_items.append(ResponseBulk(item=None, error=ResponseBulkError(detail=str(err))))
             else:
-                responses_bulk_items.append(ResponseBulk(item=Response.from_orm(response), error=None))
+                responses_bulk_items.append(ResponseBulk(item=Response.model_validate(response), error=None))
 
         return responses_bulk_items
 
