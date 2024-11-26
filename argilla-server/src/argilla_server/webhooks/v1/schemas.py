@@ -16,20 +16,19 @@ from uuid import UUID
 from typing import Optional, List
 from datetime import datetime
 
-from argilla_server.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class UserEventSchema(BaseModel):
     id: UUID
     first_name: str
-    last_name: Optional[str]
+    last_name: Optional[str] = None
     username: str
     role: str
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class WorkspaceEventSchema(BaseModel):
@@ -38,22 +37,20 @@ class WorkspaceEventSchema(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DatasetQuestionEventSchema(BaseModel):
     id: UUID
     name: str
     title: str
-    description: Optional[str]
+    description: Optional[str] = None
     required: bool
     settings: dict
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DatasetFieldEventSchema(BaseModel):
@@ -65,8 +62,7 @@ class DatasetFieldEventSchema(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DatasetMetadataPropertyEventSchema(BaseModel):
@@ -78,8 +74,7 @@ class DatasetMetadataPropertyEventSchema(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DatasetVectorSettingsEventSchema(BaseModel):
@@ -90,14 +85,13 @@ class DatasetVectorSettingsEventSchema(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DatasetEventSchema(BaseModel):
     id: UUID
     name: str
-    guidelines: Optional[str]
+    guidelines: Optional[str] = None
     allow_extra_metadata: bool
     status: str
     distribution: dict
@@ -110,8 +104,7 @@ class DatasetEventSchema(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RecordEventSchema(BaseModel):
@@ -121,7 +114,7 @@ class RecordEventSchema(BaseModel):
     # Or find another possible solution.
     fields: dict
     metadata: Optional[dict] = Field(None, alias="metadata_")
-    external_id: Optional[str]
+    external_id: Optional[str] = None
     # TODO:
     # responses:
     # - Create a new `GET /api/v1/records/{record_id}/responses` endpoint.
@@ -142,18 +135,16 @@ class RecordEventSchema(BaseModel):
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ResponseEventSchema(BaseModel):
     id: UUID
-    values: Optional[dict]
+    values: Optional[dict] = None
     status: str
     record: RecordEventSchema
     user: UserEventSchema
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

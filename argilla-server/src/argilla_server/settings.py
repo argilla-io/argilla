@@ -24,6 +24,10 @@ import warnings
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from pydantic import Field, field_validator, model_validator
+from pydantic_core.core_schema import ValidationInfo
+from pydantic_settings import BaseSettings
+
 from argilla_server.constants import (
     DATABASE_POSTGRESQL,
     DATABASE_SQLITE,
@@ -35,7 +39,6 @@ from argilla_server.constants import (
     SEARCH_ENGINE_ELASTICSEARCH,
     SEARCH_ENGINE_OPENSEARCH,
 )
-from argilla_server.pydantic_v1 import BaseSettings, Field, root_validator, validator
 
 
 class Settings(BaseSettings):
@@ -73,10 +76,22 @@ class Settings(BaseSettings):
     __DATASETS_INDEX_NAME__ = "ar.datasets"
     __DATASETS_RECORDS_INDEX_NAME__ = "ar.dataset.{}"
 
-    home_path: Optional[str] = Field(description="The home path where argilla related files will be stored")
-    base_url: Optional[str] = Field(description="The default base url where server will be deployed")
+    home_path: Optional[str] = Field(
+        None,
+        validate_default=True,
+        description="The home path where argilla related files will be stored",
+    )
+    base_url: Optional[str] = Field(
+        None,
+        validate_default=True,
+        description="The default base url where server will be deployed",
+    )
 
-    database_url: Optional[str] = Field(description="The database url that argilla will use as data store")
+    database_url: Optional[str] = Field(
+        None,
+        validate_default=True,
+        description="The database url that argilla will use as data store",
+    )
     # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.pool_size
     database_postgresql_pool_size: Optional[int] = Field(
         default=DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
@@ -129,11 +144,14 @@ class Settings(BaseSettings):
 
     # Hugging Face telemetry
     enable_telemetry: bool = Field(
-        default=True, description="The telemetry configuration for Hugging Face hub telemetry. "
+        default=True,
+        validate_default=True,
+        description="The telemetry configuration for Hugging Face hub telemetry. ",
     )
 
     # See also the telemetry.py module
-    @validator("enable_telemetry", pre=True, always=True)
+    @field_validator("enable_telemetry", mode="before")
+    @classmethod
     def set_enable_telemetry(cls, enable_telemetry: bool) -> bool:
         if os.getenv("HF_HUB_DISABLE_TELEMETRY") == "1" or os.getenv("HF_HUB_OFFLINE") == "1":
             enable_telemetry = False
@@ -146,11 +164,13 @@ class Settings(BaseSettings):
 
         return enable_telemetry
 
-    @validator("home_path", always=True)
+    @field_validator("home_path", mode="before")
+    @classmethod
     def set_home_path_default(cls, home_path: str):
         return home_path or os.path.join(Path.home(), ".argilla")
 
-    @validator("base_url", always=True)
+    @field_validator("base_url")
+    @classmethod
     def normalize_base_url(cls, base_url: str):
         if not base_url:
             base_url = "/"
@@ -161,10 +181,11 @@ class Settings(BaseSettings):
 
         return base_url
 
-    @validator("database_url", pre=True, always=True)
-    def set_database_url(cls, database_url: str, values: dict) -> str:
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def set_database_url(cls, database_url: str, info: ValidationInfo) -> str:
         if not database_url:
-            home_path = values.get("home_path")
+            home_path = info.data.get("home_path")
             sqlite_file = os.path.join(home_path, "argilla.db")
             return f"sqlite+aiosqlite:///{sqlite_file}?check_same_thread=False"
 
@@ -190,11 +211,12 @@ class Settings(BaseSettings):
 
         return database_url
 
-    @root_validator(skip_on_failure=True)
-    def create_home_path(cls, values):
-        Path(values["home_path"]).mkdir(parents=True, exist_ok=True)
+    @model_validator(mode="after")
+    @classmethod
+    def create_home_path(cls, instance: "Settings") -> "Settings":
+        Path(instance.home_path).mkdir(parents=True, exist_ok=True)
 
-        return values
+        return instance
 
     @property
     def database_engine_args(self) -> Dict:

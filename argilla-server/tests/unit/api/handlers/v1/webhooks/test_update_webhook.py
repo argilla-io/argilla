@@ -256,7 +256,7 @@ class TestUpdateWebhook:
         assert webhook.url != "https://example.com/webhook"
         assert webhook.events != [WebhookEvent.response_updated]
 
-    @pytest.mark.parametrize("invalid_url", ["", "example.com", "http:example.com", "https:example.com"])
+    @pytest.mark.parametrize("invalid_url", ["", "example.com", "http.example.com", "https.example.com"])
     async def test_update_webhook_with_invalid_url(
         self, async_client: AsyncClient, owner_auth_header: dict, invalid_url: str
     ):

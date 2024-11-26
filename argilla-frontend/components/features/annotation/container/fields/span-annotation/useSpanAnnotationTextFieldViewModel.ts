@@ -9,13 +9,12 @@ import { SpanQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer
 import { SpanAnswer } from "~/v1/domain/entities/IAnswer";
 
 export const useSpanAnnotationTextFieldViewModel = (props: {
-  name: string;
   spanQuestion: Question;
   id: string;
   searchText: string;
 }) => {
-  const { name, spanQuestion, id } = props;
-  const searchTextHighlight = useSearchTextHighlight(name);
+  const { spanQuestion, id } = props;
+  const searchTextHighlight = useSearchTextHighlight(id);
   const spanAnnotationSupported = ref(true);
   const answer = spanQuestion.answer as SpanQuestionAnswer;
   const initialConfiguration = {
