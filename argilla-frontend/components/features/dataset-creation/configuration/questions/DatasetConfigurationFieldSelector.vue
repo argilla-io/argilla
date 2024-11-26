@@ -78,7 +78,6 @@ export default {
   mounted() {
     if (this.optionNames.length) {
       this.$emit("onValueChange", this.optionNames[0]);
-    } else {
     }
   },
 };
