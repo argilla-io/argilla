@@ -42,6 +42,7 @@ export default {
   required: "Required",
   optional: "Optional",
   template: "Template",
+  rows: "rows",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",
@@ -244,21 +245,16 @@ export default {
   youAreOffline: "You are offline",
   write: "Write",
   preview: "Preview",
-  datasetTable: {
-    name: "Dataset",
-    workspace: "Workspace",
-    createdAt: "Created",
-    lastActivityAt: "Updated",
-    progress: "Team progress",
-  },
   metrics: {
     total: "Total",
     progress: {
+      default: "Progress",
       my: "My Progress",
       team: "Team progress",
     },
   },
   home: {
+    zeroDatasetsFound: "0 datasets found",
     argillaDatasets: "Your datasets",
     none: "None yet",
     importTitle: "Import a dataset from Hugging Face Hub",
@@ -276,6 +272,9 @@ export default {
     pasteRepoIdPlaceholder: "Paste a repo id e.g., stanfordnlp/imdb",
     demoLink:
       "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
+    name: "Dataset name",
+    updatedAt: "Updated",
+    createdAt: "Created",
   },
   datasetCreation: {
     questions: {

@@ -41,6 +41,7 @@ export default {
   required: "Requerido",
   optional: "Opcional",
   template: "Plantilla",
+  rows: "filas",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",
@@ -243,16 +244,10 @@ export default {
   youAreOffline: "Estás fuera de línea",
   write: "Texto",
   preview: "Vista previa",
-  datasetTable: {
-    name: "Dataset",
-    workspace: "Espacio de trabajo",
-    createdAt: "Creado",
-    lastActivityAt: "Actualizado",
-    progress: "Progreso del equipo",
-  },
   metrics: {
     total: "total",
     progress: {
+      default: "Progreso",
       my: "Mi progreso",
       team: "Progreso del equipo",
     },
@@ -275,6 +270,9 @@ export default {
     pasteRepoIdPlaceholder: "Pega un repo id id p.ej., stanfordnlp/imdb",
     demoLink:
       "Entra en esta <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> para probar Argilla",
+    name: "Nombre del dataset",
+    updatedAt: "Actualizado",
+    createdAt: "Creado",
   },
   datasetCreation: {
     questions: {

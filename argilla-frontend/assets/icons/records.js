@@ -18,10 +18,10 @@
 /* eslint-disable */
 var icon = require('vue-svgicon')
 icon.register({
-  'high-contrast-theme': {
-    width: 16,
-    height: 16,
-    viewBox: '0 0 16 16',
-    data: '<path pid="0" clip-rule="evenodd" d="M9.5 1.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0M6 5.5l-4.535-.442A.531.531 0 011.531 4H14.47a.531.531 0 01.066 1.058L10 5.5V9l.452 6.42a.535.535 0 01-1.053.174L8.243 9.97c-.064-.252-.422-.252-.486 0l-1.156 5.624a.535.535 0 01-1.053-.174L6 9z"/>'
+  'records': {
+    width: 10,
+    height: 9,
+    viewBox: '0 0 10 9',
+    data: '<path pid="0" fill-rule="evenodd" clip-rule="evenodd" d="M9 .715H1.32a.3.3 0 00-.3.3v1.421H9.3v-1.42a.3.3 0 00-.3-.3zm-7.98 4.18v-1.76H9.3v1.76H1.02zm0 .7v1.42a.3.3 0 00.3.3H9a.3.3 0 00.3-.3v-1.42H1.02zm.3-5.58a1 1 0 00-1 1v6a1 1 0 001 1H9a1 1 0 001-1v-6a1 1 0 00-1-1H1.32z" _fill="#000"/>'
   }
 })
