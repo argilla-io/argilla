@@ -14,7 +14,7 @@
       />
     </template>
     <template slot="dropdown-content">
-      <span class="column-selector__options__intro">Field</span>
+      <span class="column-selector__options__intro" v-text="$t('field')" />
       <ul class="column-selector__options">
         <li
           :class="

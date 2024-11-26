@@ -229,6 +229,7 @@ export default {
   filters: "Filter",
   filterBy: "Filter nach...",
   fields: "Felder",
+  field: "Feld",
   questions: "Fragen",
   general: "Übersicht",
   metadata: "Metadaten",

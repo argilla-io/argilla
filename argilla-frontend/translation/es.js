@@ -224,6 +224,7 @@ export default {
   filters: "Filtros",
   filterBy: "Filtrar por ...",
   fields: "Campos",
+  field: "Campo",
   questions: "Preguntas",
   metadata: "Metadatos",
   vectors: "Vectores",
