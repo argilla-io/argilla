@@ -23,6 +23,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Assign field to span question on dataset creation. ([#5717](https://github.com/argilla-io/argilla/pull/5717))
 - Fixed highlighting on same record ([#5693](https://github.com/argilla-io/argilla/pull/5693))
 
 ## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
