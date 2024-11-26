@@ -16,6 +16,7 @@ import io
 import base64
 
 from typing import Any
+from uuid import uuid4
 from typing_extensions import Self
 
 from PIL import Image
@@ -207,11 +208,13 @@ RECORDS_YIELD_PER = 100
 class HubDatasetExporter:
     def __init__(self, dataset: Dataset):
         self.dataset = dataset
-        from uuid import uuid4
 
-        self.version = uuid4()  # TODO: Using this right now to bypass dataset generator cache
+        # NOTE: Using this to bypass datasets generator cache.
+        # self is the only parameter received by _rows_generator function. Setting a different value to self.version
+        # is bypassing the datasets generator cache.
+        self.version = uuid4()
 
-    def export_to(self, name: str, subset: str, split: str, private: bool, token: str):
+    def export_to(self, name: str, subset: str, split: str, private: bool, token: str) -> None:
         hf_dataset = HFDataset.from_generator(self.rows_generator, split=NamedSplit(split), features=self.features())
         hf_dataset.push_to_hub(
             repo_id=name,
@@ -262,7 +265,14 @@ class HubDatasetExporter:
             elif question.is_rating:
                 features_responses[response_feature_name] = Sequence(features.Value(dtype="int64"))
             elif question.is_ranking:
-                features_responses[response_feature_name] = Sequence(Sequence(features.Value(dtype="string")))
+                features_responses[response_feature_name] = Sequence(
+                    Sequence(
+                        {
+                            "value": features.Value(dtype="string"),
+                            "rank": features.Value(dtype="int64"),
+                        }
+                    )
+                )
             elif question.is_span:
                 features_responses[response_feature_name] = Sequence(
                     Sequence(
@@ -310,11 +320,18 @@ class HubDatasetExporter:
     def _row_fields(self, record: Record) -> dict:
         row_fields = {}
         for field in self.dataset.fields:
+            # TODO: If we are not managing custom fields we should
+            # check it here and continue.
+
+            field_value = record.fields.get(field.name)
+            if field_value is None:
+                continue
+
             if field.is_image:
                 # TODO: What to do with images as URLs?
-                row_fields[field.name] = {"bytes": data_url_to_bytes(record.fields.get(field.name))}
+                row_fields[field.name] = {"bytes": data_url_to_bytes(field_value)}
             else:
-                row_fields[field.name] = record.fields.get(field.name)
+                row_fields[field.name] = field_value
 
         return row_fields
 
