@@ -43,6 +43,7 @@ export default {
   required: "Erforderlich",
   optional: "Optional",
   template: "Template",
+  rows: "zeilen",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "Der Datensatz ist leer. Bitten Sie einen Administrator, Daten hochzuladen, und versuchen Sie es später erneut.",
@@ -249,16 +250,10 @@ export default {
   youAreOffline: "Sie sind offline",
   write: "Schreiben",
   preview: "Vorschau",
-  datasetTable: {
-    name: "Datensatz",
-    workspace: "Arbeitsbereich",
-    createdAt: "Erstellt am",
-    lastActivityAt: "Aktualisiert am",
-    progress: "Teamfortschritt",
-  },
   metrics: {
     total: "Total",
     progress: {
+      default: "Fortschritt",
       my: "mein Fortschritt",
       team: "Fortschritte im Team",
     },

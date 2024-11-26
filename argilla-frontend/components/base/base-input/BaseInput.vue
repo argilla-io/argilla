@@ -51,6 +51,18 @@ export default {
       default: false,
     },
   },
+  watch: {
+    autofocus: {
+      immediate: true,
+      handler() {
+        this.$nextTick(() => {
+          if (this.autofocus) {
+            this.$refs.input.focus();
+          }
+        });
+      },
+    },
+  },
   mounted() {
     this.$nextTick(() => {
       this.parentContainer = getClosestVueParent(
@@ -70,9 +82,6 @@ export default {
       this.setParentPlaceholder();
       this.handleMaxLength();
       this.updateValues();
-      if (this.autofocus) {
-        this.$refs.input.focus();
-      }
     });
   },
 };

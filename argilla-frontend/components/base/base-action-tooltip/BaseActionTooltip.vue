@@ -65,6 +65,12 @@ export default {
   &.--right {
     left: 100%;
   }
+  &.--top {
+    bottom: 100%;
+  }
+  &.--bottom {
+    top: 100%;
+  }
   &__container {
     position: relative;
   }
