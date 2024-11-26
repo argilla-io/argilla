@@ -16,10 +16,6 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
-### Fixed
-
-- Assign field to span question on dataset creation. ([#5715](https://github.com/argilla-io/argilla/pull/5717))
-
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
 ### Added
