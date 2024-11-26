@@ -108,7 +108,7 @@ $searchBarSize: $base-space * 4;
   gap: $base-space * 1.5;
   padding: $base-space * 1.2 $base-space * 1.5;
   border: 1px solid var(--bg-opacity-10);
-  border-radius: $border-radius-l;
+  border-radius: $border-radius-xl;
   background: var(--bg-accent-grey-1);
   transition: all 0.2s ease;
   &.--collapsed {

@@ -1,13 +1,13 @@
 <template>
-  <BaseBadgeSkeleton font-size="11px" v-if="isFieldsLoading" :quantity="2" />
+  <BaseBadgeSkeleton font-size="11px" v-if="isFieldsLoading" :quantity="1" />
   <div class="fields" v-else>
-    <span class="fields__title">{{ $t("fields") }}</span>
     <div class="fields__badges">
       <BaseBadge
         v-for="field in fields"
         :key="field.id"
         :text="$t(field.type)"
-        font-size="10px"
+        color="var(--bg-opacity-54)"
+        font-size="11px"
       />
     </div>
   </div>
@@ -33,11 +33,6 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: calc($base-space / 2);
-  &__title {
-    @include font-size(12px);
-    color: var(--fg-secondary);
-    min-width: $base-space * 7;
-  }
   &__badges {
     display: flex;
     flex-wrap: wrap;

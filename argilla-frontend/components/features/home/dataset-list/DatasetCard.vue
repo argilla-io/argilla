@@ -86,7 +86,7 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
   text-align: center;
   gap: $base-space * 2;
   height: 100%;
-  padding: $base-space * 2;
+  padding: $base-space * 3;
   text-align: left;
   background: var(--bg-accent-grey-3);
   border-radius: $border-radius-l;
@@ -135,7 +135,7 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
     margin: 0 0 $base-space 0;
     color: var(--fg-primary);
     font-weight: 500;
-    @include font-size(16px);
+    @include font-size(18px);
     word-break: break-word;
     transition: color 0.3s ease;
   }

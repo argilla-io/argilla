@@ -142,6 +142,7 @@ export default {
     @extend %hide-scrollbar;
     @include media(">tablet") {
       overflow-x: auto;
+      height: 100%;
       padding: 0 $base-space * 2;
     }
   }

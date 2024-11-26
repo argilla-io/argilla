@@ -47,7 +47,7 @@ export default {
   background: var(--bg-accent-grey-3);
   border: 1px dashed var(--bg-opacity-10);
   border-radius: $border-radius-m;
-  padding: $base-space * 2;
+  padding: $base-space * 3;
   &__title {
     @include font-size(18px);
     @include line-height(24px);

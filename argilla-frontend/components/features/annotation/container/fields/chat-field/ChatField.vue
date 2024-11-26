@@ -136,7 +136,7 @@ export default {
   &__bubble {
     max-width: 80%;
     padding: 2 * $base-space;
-    border-radius: $border-radius-l;
+    border-radius: $border-radius-xl;
     border-style: solid;
     border-width: 1px;
     @include font-size(16px);
