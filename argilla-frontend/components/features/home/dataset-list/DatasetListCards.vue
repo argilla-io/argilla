@@ -68,8 +68,8 @@ export default {
   &__cards {
     display: grid;
     gap: $base-space * 2;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    grid-auto-rows: auto;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    grid-auto-rows: 1fr;
     list-style: none;
     padding: 0;
     margin-bottom: $base-space * 4;

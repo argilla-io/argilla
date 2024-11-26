@@ -7,7 +7,7 @@
         v-for="question in questions"
         :key="question.id"
         :text="$t(question.type)"
-        font-size="11px"
+        font-size="10px"
       />
     </div>
   </div>
@@ -31,16 +31,16 @@ export default {
 <style scoped lang="scss">
 .questions {
   display: flex;
-  gap: $base-space;
+  gap: calc($base-space / 2);
   &__title {
     @include font-size(12px);
     color: var(--fg-secondary);
-    min-width: $base-space * 8;
+    min-width: $base-space * 7;
   }
   &__badges {
     display: flex;
     flex-wrap: wrap;
-    gap: $base-space;
+    gap: calc($base-space / 2);
   }
 }
 </style>

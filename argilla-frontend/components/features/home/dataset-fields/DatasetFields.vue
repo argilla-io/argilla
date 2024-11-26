@@ -7,7 +7,7 @@
         v-for="field in fields"
         :key="field.id"
         :text="$t(field.type)"
-        font-size="11px"
+        font-size="10px"
       />
     </div>
   </div>
@@ -32,16 +32,16 @@ export default {
 .fields {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: calc($base-space / 2);
   &__title {
     @include font-size(12px);
     color: var(--fg-secondary);
-    min-width: $base-space * 8;
+    min-width: $base-space * 7;
   }
   &__badges {
     display: flex;
     flex-wrap: wrap;
-    gap: $base-space;
+    gap: calc($base-space / 2);
   }
 }
 </style>
