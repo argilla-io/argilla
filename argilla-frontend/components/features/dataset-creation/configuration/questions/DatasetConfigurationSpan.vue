@@ -22,6 +22,11 @@
         $t('datasetCreation.questions.labelSelection.optionsSeparatedByComma')
       "
     />
+    <DatasetConfigurationFieldSelector
+      class="config-card__type"
+      :options="spanFields"
+      v-model="question.settings.field"
+    />
   </div>
 </template>
 
@@ -36,6 +41,10 @@ export default {
   props: {
     question: {
       type: Object,
+      required: true,
+    },
+    spanFields: {
+      type: Array,
       required: true,
     },
     placeholder: {

@@ -92,6 +92,7 @@
                   :key="question.name"
                   :question="question"
                   :columns="dataset.selectedSubset.columns"
+                  :span-fields="dataset.textTypeFields"
                   :remove-is-allowed="true"
                   :available-types="availableQuestionTypes"
                   @remove="dataset.selectedSubset.removeQuestion(question.name)"

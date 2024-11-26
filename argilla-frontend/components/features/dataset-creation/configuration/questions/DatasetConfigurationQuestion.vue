@@ -25,6 +25,7 @@
       <DatasetConfigurationSpan
         v-else-if="question.settings.type.isSpanType"
         :question="question"
+        :span-fields="spanFields"
         @is-focused="$emit('is-focused', $event)"
       />
       <DatasetConfigurationRating
@@ -64,6 +65,10 @@ export default {
       required: true,
     },
     columns: {
+      type: Array,
+      required: true,
+    },
+    spanFields: {
       type: Array,
       required: true,
     },
