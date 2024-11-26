@@ -90,12 +90,10 @@
                 <DatasetConfigurationQuestion
                   v-for="question in dataset.selectedSubset.questions"
                   :key="question.name"
+                  :selectedSubset="dataset.selectedSubset"
                   :question="question"
-                  :columns="dataset.selectedSubset.columns"
-                  :span-fields="dataset.textTypeFields"
                   :remove-is-allowed="true"
                   :available-types="availableQuestionTypes"
-                  @remove="dataset.selectedSubset.removeQuestion(question.name)"
                   @change-type="onTypeIsChanged(question.name, $event)"
                   @is-focused="isFocused = $event"
                 />

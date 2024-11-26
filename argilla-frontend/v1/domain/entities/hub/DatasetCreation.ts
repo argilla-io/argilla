@@ -32,10 +32,6 @@ export class DatasetCreation {
     return this.selectedSubset.fields;
   }
 
-  get textTypeFields() {
-    return this.selectedSubset.fields.filter((f) => f.settings.type.isTextType);
-  }
-
   get mappedFields() {
     return this.fields.filter(
       (f) => f.type.value !== "no mapping" && f.name !== "id"

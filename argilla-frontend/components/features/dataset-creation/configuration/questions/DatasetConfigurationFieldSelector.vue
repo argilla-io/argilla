@@ -75,11 +75,6 @@ export default {
       this.dropdownIsVisible = false;
     },
   },
-  mounted() {
-    if (this.optionNames.length) {
-      this.$emit("onValueChange", this.optionNames[0]);
-    }
-  },
 };
 </script>
 <style lang="scss" scoped>

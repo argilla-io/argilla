@@ -14,7 +14,7 @@
         class="dataset-config-label__input"
       />
     </div>
-    <Validation v-if="errors.length" :validations="translatedValidations" />
+    <Validation v-if="errors.options?.length" :validations="errors.options" />
     <label
       v-else
       class="dataset-config-label__label"
@@ -22,11 +22,13 @@
         $t('datasetCreation.questions.labelSelection.optionsSeparatedByComma')
       "
     />
+
     <DatasetConfigurationFieldSelector
       class="config-card__type"
-      :options="spanFields"
+      :options="textFields"
       v-model="question.settings.field"
     />
+    <Validation v-if="errors.field?.length" :validations="errors.field" />
   </div>
 </template>
 
@@ -34,7 +36,7 @@
 export default {
   data() {
     return {
-      errors: [],
+      errors: {},
       isDirty: false,
     };
   },
@@ -43,7 +45,7 @@ export default {
       type: Object,
       required: true,
     },
-    spanFields: {
+    textFields: {
       type: Array,
       required: true,
     },
@@ -52,14 +54,17 @@ export default {
       default: "",
     },
   },
+  watch: {
+    textFields: {
+      handler() {
+        this.validateOptions();
+      },
+      immediate: true,
+    },
+  },
   computed: {
     optionsJoinedByCommas() {
       return this.question.options.map((item) => item.text).join(",");
-    },
-    translatedValidations() {
-      return this.errors.map((validation) => {
-        return this.$t(validation);
-      });
     },
   },
   methods: {
