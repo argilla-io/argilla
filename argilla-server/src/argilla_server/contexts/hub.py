@@ -34,7 +34,7 @@ from datasets import (
 
 from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.database import get_sync_db
-from argilla_server.models.database import Dataset, Record, Question
+from argilla_server.models.database import Dataset, Record, Question, MetadataProperty
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
@@ -223,7 +223,13 @@ class HubDatasetExporter:
         )
 
     def features(self) -> Features:
-        return Features(self._features_attributes() | self._features_fields() | self._features_responses())
+        return Features(
+            self._features_attributes()
+            | self._features_fields()
+            | self._features_responses()
+            | self._features_metadata()
+            | self._features_vectors()
+        )
 
     def _features_attributes(self) -> dict:
         return {
@@ -290,6 +296,23 @@ class HubDatasetExporter:
 
         return features_responses
 
+    def _features_metadata(self) -> dict:
+        features_metadata = {}
+        for metadata_property in self.dataset.metadata_properties:
+            feature_name = self._feature_name_for_metadata_property(metadata_property)
+
+            if metadata_property.is_terms:
+                features_metadata[feature_name] = [ClassLabel(names=metadata_property.values)]
+            elif metadata_property.is_integer:
+                features_metadata[feature_name] = features.Value(dtype="int64")
+            elif metadata_property.is_float:
+                features_metadata[feature_name] = features.Value(dtype="float64")
+
+        return features_metadata
+
+    def _features_vectors(self) -> dict:
+        return {}
+
     def rows_generator(self):
         for session in get_sync_db():
             query = (
@@ -305,7 +328,13 @@ class HubDatasetExporter:
     # TODO: Add metadata
     # TODO: Add vectors
     def _record_to_row(self, record: Record) -> dict:
-        return self._row_attributes(record) | self._row_fields(record) | self._row_responses(record)
+        return (
+            self._row_attributes(record)
+            | self._row_fields(record)
+            | self._row_responses(record)
+            | self._row_metadata(record)
+            | self._row_vectors(record)
+        )
 
     def _row_attributes(self, record: Record) -> dict:
         return {
@@ -353,6 +382,21 @@ class HubDatasetExporter:
 
         return row_responses
 
+    def _row_metadata(self, record: Record) -> dict:
+        row_metadata = {}
+        for metadata_property in self.dataset.metadata_properties:
+            if record.metadata_ is None:
+                continue
+
+            feature_name = self._feature_name_for_metadata_property(metadata_property)
+
+            row_metadata[feature_name] = record.metadata_.get(metadata_property.name)
+
+        return row_metadata
+
+    def _row_vectors(self, record: Record) -> dict:
+        return {}
+
     def _feature_name_for_response(self, question: Question) -> str:
         return f"{question.name}.responses"
 
@@ -361,6 +405,9 @@ class HubDatasetExporter:
 
     def _feature_name_for_response_status(self, question: Question) -> str:
         return f"{self._feature_name_for_response(question)}.status"
+
+    def _feature_name_for_metadata_property(self, metadata_property: MetadataProperty) -> str:
+        return f"metadata.{metadata_property.name}"
 
 
 def pil_image_to_data_url(image: Image.Image):

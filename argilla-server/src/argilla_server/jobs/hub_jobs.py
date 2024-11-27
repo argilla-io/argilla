@@ -63,6 +63,7 @@ async def export_dataset_to_hub_job(
             options=[
                 selectinload(Dataset.fields),
                 selectinload(Dataset.questions),
+                selectinload(Dataset.metadata_properties),
             ],
         )
 

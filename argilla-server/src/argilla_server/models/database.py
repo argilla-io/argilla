@@ -84,19 +84,19 @@ class Field(DatabaseModel):
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="field_name_dataset_id_uq"),)
 
     @property
-    def is_text(self):
+    def is_text(self) -> bool:
         return self.settings.get("type") == FieldType.text
 
     @property
-    def is_image(self):
+    def is_image(self) -> bool:
         return self.settings.get("type") == FieldType.image
 
     @property
-    def is_chat(self):
+    def is_chat(self) -> bool:
         return self.settings.get("type") == FieldType.chat
 
     @property
-    def is_custom(self):
+    def is_custom(self) -> bool:
         return self.settings.get("type") == FieldType.custom
 
     def __repr__(self):
@@ -125,7 +125,7 @@ class Response(DatabaseModel):
     __upsertable_columns__ = {"values", "status"}
 
     @property
-    def is_submitted(self):
+    def is_submitted(self) -> bool:
         return self.status == ResponseStatus.submitted
 
     def __repr__(self):
@@ -344,8 +344,24 @@ class MetadataProperty(DatabaseModel):
     __table_args__ = (UniqueConstraint("name", "dataset_id", name="metadata_property_name_dataset_id_uq"),)
 
     @property
+    def is_terms(self) -> bool:
+        return self.settings.get("type") == MetadataPropertyType.terms
+
+    @property
+    def is_integer(self) -> bool:
+        return self.settings.get("type") == MetadataPropertyType.integer
+
+    @property
+    def is_float(self) -> bool:
+        return self.settings.get("type") == MetadataPropertyType.float
+
+    @property
     def type(self) -> MetadataPropertyType:
         return MetadataPropertyType(self.settings["type"])
+
+    @property
+    def values(self) -> List[Any]:
+        return self.settings.get("values", [])
 
     @property
     def parsed_settings(self) -> MetadataPropertySettings:
@@ -449,11 +465,11 @@ class Dataset(DatabaseModel):
     __table_args__ = (UniqueConstraint("name", "workspace_id", name="dataset_name_workspace_id_uq"),)
 
     @property
-    def is_draft(self):
+    def is_draft(self) -> bool:
         return self.status == DatasetStatus.draft
 
     @property
-    def is_ready(self):
+    def is_ready(self) -> bool:
         return self.status == DatasetStatus.ready
 
     @property
@@ -564,15 +580,15 @@ class User(DatabaseModel):
     )
 
     @property
-    def is_owner(self):
+    def is_owner(self) -> bool:
         return self.role == UserRole.owner
 
     @property
-    def is_admin(self):
+    def is_admin(self) -> bool:
         return self.role == UserRole.admin
 
     @property
-    def is_annotator(self):
+    def is_annotator(self) -> bool:
         return self.role == UserRole.annotator
 
     async def is_member(self, workspace_id: UUID) -> bool:
