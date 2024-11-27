@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`SelectOptionsSearch renders properly 1`] = `<div class="options-search"><input type="text" autofocus="autofocus" placeholder="#search#" class="options-search__input"> <a href="#" class="options-search__clear"><svg version="1.1" viewBox="0 0 10 10" class="svg-icon svg-fill" style="width: 10px; height: 10px;"></svg></a></div>`;

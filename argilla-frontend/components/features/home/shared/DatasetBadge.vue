@@ -23,6 +23,10 @@ export default {
     color: {
       type: String,
     },
+    fontSize: {
+      type: String,
+      default: "12px",
+    },
   },
 };
 </script>
@@ -30,22 +34,22 @@ export default {
 .dataset-badge {
   display: flex;
   align-items: center;
-  min-height: 26px;
+  height: calc(v-bind(fontSize) * 2);
   border: 1px solid var(--bg-opacity-10);
-  border-radius: $border-radius-l;
-  @include font-size(13px);
+  border-radius: $border-radius-xl;
+  font-size: v-bind(fontSize);
+  background: linear-gradient(
+    90deg,
+    hsl(from v-bind(color) h s l / 10%) 0%,
+    hsl(from v-bind(color) h s l / 1%) 30px
+  );
 
   &__icon-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: calc($base-space / 1.8) $base-space;
-    border-radius: $border-radius-l;
-    background: linear-gradient(
-      90deg,
-      hsl(from v-bind(color) h s l / 10%) 0%,
-      hsl(from v-bind(color) h s l / 1%) 100%
-    );
+    border-radius: $border-radius-xl;
     & + .dataset-badge__text {
       padding: calc($base-space / 2) $base-space calc($base-space / 2)
         calc($base-space / 2);

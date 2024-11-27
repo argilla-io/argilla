@@ -53,6 +53,7 @@ export interface BackendProgress {
   total: number;
   completed: number;
   pending: number;
+  users: Array<{ username: string }>;
 }
 
 export interface BackendJob {
