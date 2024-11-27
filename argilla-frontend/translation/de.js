@@ -309,7 +309,7 @@ export default {
     requiredField: "Pflichtfeld",
     requiredQuestion: "Pflichtfrage",
     select: "Auswählen",
-    mapToColumn: "Einer Spalte zuordnen",
+    mapToColumn: "Annotate spans on:",
     applyToaAField: "Gelten für:",
     subset: "Teilmenge",
     selectSubset:

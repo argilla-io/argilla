@@ -315,7 +315,7 @@ export default {
     requiredQuestion: "Pregunta obligatoria",
     select: "Seleccionar",
     mapToColumn: "Mapear a una columna",
-    applyToaAField: "Aplicar anotación de span a:",
+    applyToaAField: "Anotar span en:",
     subset: "Subconjunto",
     selectSubset: "Puedes crear un dataset con un solo subconjunto.",
     preview: "Vista previa",
