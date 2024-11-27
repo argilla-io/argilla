@@ -34,7 +34,7 @@ from datasets import (
 
 from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.database import get_sync_db
-from argilla_server.models.database import Dataset, Record, Question, MetadataProperty
+from argilla_server.models.database import Dataset, Record, Question, MetadataProperty, VectorSettings
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
@@ -238,6 +238,7 @@ class HubDatasetExporter:
             "_server_id": features.Value(dtype="string"),
         }
 
+    # TODO: Manage also custom type fields as feature
     def _features_fields(self) -> dict:
         features_fields = {}
         for field in self.dataset.fields:
@@ -250,7 +251,6 @@ class HubDatasetExporter:
                         "content": features.Value(dtype="string"),
                     }
                 ]
-            # TODO: Manage also custom type as feature
             else:
                 features_fields[field.name] = features.Value(dtype="string")
 
@@ -311,7 +311,13 @@ class HubDatasetExporter:
         return features_metadata
 
     def _features_vectors(self) -> dict:
-        return {}
+        features_vectors = {}
+        for vector_settings in self.dataset.vectors_settings:
+            feature_name = self._feature_name_for_vector_settings(vector_settings)
+
+            features_vectors[feature_name] = [features.Value(dtype="float64")]
+
+        return features_vectors
 
     def rows_generator(self):
         for session in get_sync_db():
@@ -319,14 +325,15 @@ class HubDatasetExporter:
                 session.query(Record)
                 .filter_by(dataset_id=self.dataset.id)
                 .order_by(Record.inserted_at.asc())
-                .options(selectinload(Record.responses))
+                .options(
+                    selectinload(Record.responses),
+                    selectinload(Record.vectors),
+                )
             )
 
             for record in query.yield_per(RECORDS_YIELD_PER):
                 yield self._record_to_row(record)
 
-    # TODO: Add metadata
-    # TODO: Add vectors
     def _record_to_row(self, record: Record) -> dict:
         return (
             self._row_attributes(record)
@@ -395,7 +402,13 @@ class HubDatasetExporter:
         return row_metadata
 
     def _row_vectors(self, record: Record) -> dict:
-        return {}
+        row_vectors = {}
+        for vector_settings in self.dataset.vectors_settings:
+            feature_name = self._feature_name_for_vector_settings(vector_settings)
+
+            row_vectors[feature_name] = record.vector_value_by_vector_settings(vector_settings)
+
+        return row_vectors
 
     def _feature_name_for_response(self, question: Question) -> str:
         return f"{question.name}.responses"
@@ -408,6 +421,9 @@ class HubDatasetExporter:
 
     def _feature_name_for_metadata_property(self, metadata_property: MetadataProperty) -> str:
         return f"metadata.{metadata_property.name}"
+
+    def _feature_name_for_vector_settings(self, vector_settings: VectorSettings) -> str:
+        return f"vector.{vector_settings.name}"
 
 
 def pil_image_to_data_url(image: Image.Image):
