@@ -55,6 +55,12 @@ export default {
     },
   },
   watch: {
+    "question.settings.field": {
+      handler() {
+        this.validateOptions();
+      },
+      immediate: true,
+    },
     textFields: {
       handler() {
         this.validateOptions();
