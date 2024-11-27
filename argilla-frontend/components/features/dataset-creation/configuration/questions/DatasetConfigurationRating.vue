@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      :class="{ '--error': errors.length }"
+      :class="{ '--error': errors.options?.length }"
       class="dataset-config-rating__input-container"
     >
       <input

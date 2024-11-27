@@ -2,7 +2,7 @@
   <div>
     <div
       class="dataset-config-label__input-container"
-      :class="{ '--error': errors.length }"
+      :class="{ '--error': errors.options?.length || errors.field?.length }"
     >
       <input
         type="text"
