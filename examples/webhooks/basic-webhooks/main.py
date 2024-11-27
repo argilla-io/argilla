@@ -12,7 +12,8 @@ client = rg.Argilla(api_key=API_KEY, api_url=API_URL)
 
 # Show the existing webhooks in the argilla server
 for webhook in client.webhooks:
-    print(webhook.url)
+    print("Deleting webhook with url", webhook.url)
+    webhook.delete()
 
 
 # Create a webhook listener using the decorator
@@ -31,46 +32,31 @@ for webhook in client.webhooks:
 # Related resources will be passed as keyword arguments to the decorated function
 # (for example the dataset for a record-related event, or the record for a response-related event)
 # When a resource is deleted
-@rg.webhook_listener(events=["record.created", "record.completed"])
-async def listen_record(
-    record: rg.Record, dataset: rg.Dataset, type: str, timestamp: datetime
-):
-    print(f"Received record event of type {type} at {timestamp}")
-
-    action = "completed" if type == "record.completed" else "created"
-    print(f"A record with id {record.id} has been {action} for dataset {dataset.name}!")
+@rg.webhook_listener(events=["record.deleted", "record.completed"])
+async def records_listener(record: rg.Record, type: str, timestamp: datetime):
+    print(f"Received event of type {type} at {timestamp} for record {record}")
 
 
-@rg.webhook_listener(events="response.updated")
-async def trigger_something_on_response_updated(response: rg.UserResponse, **kwargs):
-    print(
-        f"The user response {response.id} has been updated with the following responses:"
-    )
-    print([response.serialize() for response in response.responses])
+@rg.webhook_listener(events=["response.created", "response.updated"])
+async def responses_listener(response: rg.UserResponse, type: str, timestamp: datetime):
+    print(f"Received event of type {type} at {timestamp} for response {response}")
 
 
-@rg.webhook_listener(events=["dataset.created", "dataset.updated", "dataset.published"])
-async def with_raw_payload(
-    type: str,
-    timestamp: datetime,
-    dataset: rg.Dataset,
-    **kwargs,
-):
-    print(f"Event type {type} at {timestamp}")
-    print(dataset.settings)
-
-
-@rg.webhook_listener(events="dataset.deleted")
-async def on_dataset_deleted(
-    data: dict,
-    **kwargs,
-):
-    print(f"Dataset {data} has been deleted!")
+@rg.webhook_listener(
+    events=[
+        "dataset.created",
+        "dataset.updated",
+        "dataset.published",
+        "dataset.deleted",
+    ]
+)
+async def datasets_listener(type: str, timestamp: datetime, dataset: rg.Dataset):
+    print(f"Received event of type {type} at {timestamp} for dataset {dataset}")
 
 
 # Set the webhook server. The server is a FastAPI instance, so you need to expose it in order to run it using uvicorn:
 # ```bash
-# uvicorn main:webhook_server --reload
+# uvicorn main:server --reload
 # ```
 
 server = rg.get_webhook_server()
