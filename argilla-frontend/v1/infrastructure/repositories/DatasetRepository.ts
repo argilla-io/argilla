@@ -96,6 +96,42 @@ export class DatasetRepository implements IDatasetRepository {
     }
   }
 
+  async export(
+    dataset: Dataset,
+    {
+      subset,
+      split,
+      isPrivate,
+      hfToken,
+    }: {
+      subset?: string;
+      split?: string;
+      isPrivate: boolean;
+      hfToken: string;
+    }
+  ): Promise<JobId> {
+    try {
+      const { id, name } = dataset;
+
+      const { data } = await this.axios.post<BackendJob>(
+        `/v1/datasets/${id}/export`,
+        {
+          name,
+          subset,
+          split,
+          private: isPrivate,
+          token: hfToken,
+        }
+      );
+
+      return data.id;
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_IMPORTING_DATASET,
+      };
+    }
+  }
+
   async getById(id: string): Promise<Dataset> {
     const dataset = await this.getDatasetById(id);
     const workspace = await this.getWorkspaceById(dataset.workspace_id);

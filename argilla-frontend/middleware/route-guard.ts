@@ -21,6 +21,12 @@ import { useLocalStorage } from "~/v1/infrastructure/services";
 
 const { set } = useLocalStorage();
 
+const isCrawler = () => {
+  return /bot|googlebot|crawler|spider|robot|crawling/i.test(
+    navigator.userAgent
+  );
+};
+
 export default ({ $auth, route, redirect }: Context) => {
   const { isRunningOnHuggingFace } = useRunningEnvironment();
 
@@ -50,6 +56,8 @@ export default ({ $auth, route, redirect }: Context) => {
 
       break;
     default:
+      if (isCrawler()) return;
+
       if (!$auth.loggedIn) {
         if (route.path !== "/") {
           set("redirectTo", route.fullPath);

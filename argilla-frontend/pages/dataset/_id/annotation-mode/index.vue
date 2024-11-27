@@ -1,6 +1,11 @@
 <template>
   <div>
     <BaseLoading v-if="isLoadingDataset" />
+    <OpenGraph
+      :imagePath="`datasets/open-graph/${datasetId}.png`"
+      :title="dataset?.name"
+      :description="dataset?.name"
+    />
     <AnnotationPage>
       <template v-slot:header>
         <HeaderFeedbackTask
