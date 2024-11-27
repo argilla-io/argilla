@@ -17,6 +17,7 @@ import {
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { Progress } from "~/v1/domain/entities/dataset/Progress";
 import { DatasetCreation } from "~/v1/domain/entities/hub/DatasetCreation";
+import { DatasetExportSettings } from "~/v1/domain/entities/dataset/DatasetExport";
 
 export const DATASET_API_ERRORS = {
   ERROR_FETCHING_FEEDBACK_DATASETS: "ERROR_FETCHING_FEEDBACK_DATASETS",
@@ -29,6 +30,7 @@ export const DATASET_API_ERRORS = {
   ERROR_FETCHING_DATASET_PROGRESS: "ERROR_FETCHING_DATASET_PROGRESS",
   ERROR_PUBLISHING_DATASET: "ERROR_PUBLISHING_DATASET",
   ERROR_IMPORTING_DATASET: "ERROR_IMPORTING_DATASET",
+  ERROR_EXPORTING_DATASET: "ERROR_EXPORTING_DATASET",
 };
 
 export class DatasetRepository implements IDatasetRepository {
@@ -92,6 +94,33 @@ export class DatasetRepository implements IDatasetRepository {
     } catch (err) {
       throw {
         response: DATASET_API_ERRORS.ERROR_IMPORTING_DATASET,
+      };
+    }
+  }
+
+  async export(
+    dataset: Dataset,
+    exportSettings: DatasetExportSettings
+  ): Promise<JobId> {
+    try {
+      const { id, name } = dataset;
+      const { subset, split, isPrivate, hfToken } = exportSettings;
+
+      const { data } = await this.axios.post<BackendJob>(
+        `/v1/datasets/${id}/export`,
+        {
+          name,
+          subset,
+          split,
+          private: isPrivate,
+          token: hfToken,
+        }
+      );
+
+      return data.id;
+    } catch (err) {
+      throw {
+        response: DATASET_API_ERRORS.ERROR_EXPORTING_DATASET,
       };
     }
   }

@@ -1,15 +1,13 @@
-type Options =
-  | "showShortcutsHelper"
-  | "layout"
-  | "redirectTo"
-  | "language"
-  | "theme";
+import {
+  ILocalStorageService,
+  Options,
+} from "~/v1/domain/services/ILocalStorageService";
 
 const STORAGE_KEY = "argilla";
 
 const EMPTY_OBJECT = "{}";
 
-export const useLocalStorage = () => {
+export const useLocalStorage = (): ILocalStorageService => {
   const get = (key: Options) => {
     const storage = localStorage.getItem(STORAGE_KEY);
 
@@ -41,7 +39,9 @@ export const useLocalStorage = () => {
 
   const pop = (key: Options) => {
     const value = get(key);
+
     set(key, null);
+
     return value;
   };
 
