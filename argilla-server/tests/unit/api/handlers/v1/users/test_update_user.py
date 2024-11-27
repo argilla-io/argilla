@@ -32,7 +32,7 @@ class TestUpdateUser:
     async def test_update_user(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
         user = await UserFactory.create()
 
-        response = await async_client.put(
+        response = await async_client.patch(
             self.url(user.id),
             headers=owner_auth_header,
             json={
@@ -54,7 +54,7 @@ class TestUpdateUser:
     async def test_update_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
         user = await UserFactory.create()
 
-        response = await async_client.put(
+        response = await async_client.patch(
             self.url(user.id),
             json={
                 "first_name": "Updated First Name",
@@ -73,7 +73,7 @@ class TestUpdateUser:
         user = await UserFactory.create()
         user_with_unauthorized_role = await UserFactory.create(role=user_role)
 
-        response = await async_client.put(
+        response = await async_client.patch(
             self.url(user.id),
             headers={API_KEY_HEADER_NAME: user_with_unauthorized_role.api_key},
             json={
@@ -89,7 +89,7 @@ class TestUpdateUser:
     async def test_update_user_with_nonexistent_user_id(self, async_client: AsyncClient, owner_auth_header: dict):
         user_id = uuid4()
 
-        response = await async_client.put(
+        response = await async_client.patch(
             self.url(user_id),
             headers=owner_auth_header,
             json={
@@ -108,7 +108,7 @@ class TestUpdateUser:
     ):
         user = await UserFactory.create()
 
-        response = await async_client.put(
+        response = await async_client.patch(
             self.url(user.id),
             headers=owner_auth_header,
             json={
@@ -127,7 +127,7 @@ class TestUpdateUser:
         user1 = await UserFactory.create(username="user1")
         user2 = await UserFactory.create(username="user2")
 
-        response = await async_client.put(
+        response = await async_client.patch(
             self.url(user2.id),
             headers=owner_auth_header,
             json={
