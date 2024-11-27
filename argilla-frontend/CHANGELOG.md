@@ -24,6 +24,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Assign field to span question on dataset creation. ([#5717](https://github.com/argilla-io/argilla/pull/5717))
 - Fixed visible_options when updating question setting. ([#5716](https://github.com/argilla-io/argilla/pull/5716))
 - Fixed highlighting on same record ([#5693](https://github.com/argilla-io/argilla/pull/5693))
 
