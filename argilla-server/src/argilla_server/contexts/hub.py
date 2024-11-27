@@ -27,7 +27,6 @@ from datasets import (
     Image as HFImage,
     NamedSplit,
     Features,
-    Sequence,
     ClassLabel,
     load_dataset,
     features,
@@ -239,12 +238,12 @@ class HubDatasetExporter:
             if field.is_image:
                 features_fields[field.name] = HFImage()
             elif field.is_chat:
-                features_fields[field.name] = Sequence(
+                features_fields[field.name] = [
                     {
                         "role": features.Value(dtype="string"),
                         "content": features.Value(dtype="string"),
                     }
-                )
+                ]
             # TODO: Manage also custom type as feature
             else:
                 features_fields[field.name] = features.Value(dtype="string")
@@ -254,42 +253,40 @@ class HubDatasetExporter:
     def _features_responses(self) -> dict:
         features_responses = {}
         for question in self.dataset.questions:
-            response_feature_name = self._response_feature_name(question)
-            response_users_feature_name = self._response_users_feature_name(question)
-            response_status_feature_name = self._response_status_feature_name(question)
+            feature_name = self._feature_name_for_response(question)
+            feature_name_users = self._feature_name_for_response_users(question)
+            feature_name_status = self._feature_name_for_response_status(question)
 
             if question.is_label_selection:
-                features_responses[response_feature_name] = Sequence(ClassLabel(names=question.values))
+                features_responses[feature_name] = [ClassLabel(names=question.values)]
             elif question.is_multi_label_selection:
-                features_responses[response_feature_name] = Sequence(Sequence(ClassLabel(names=question.values)))
+                features_responses[feature_name] = [[ClassLabel(names=question.values)]]
             elif question.is_rating:
-                features_responses[response_feature_name] = Sequence(features.Value(dtype="int64"))
+                features_responses[feature_name] = [features.Value(dtype="int64")]
             elif question.is_ranking:
-                features_responses[response_feature_name] = Sequence(
-                    Sequence(
+                features_responses[feature_name] = [
+                    [
                         {
                             "value": features.Value(dtype="string"),
                             "rank": features.Value(dtype="int64"),
                         }
-                    )
-                )
+                    ]
+                ]
             elif question.is_span:
-                features_responses[response_feature_name] = Sequence(
-                    Sequence(
+                features_responses[feature_name] = [
+                    [
                         {
                             "label": ClassLabel(names=question.values),
                             "start": features.Value(dtype="int64"),
                             "end": features.Value(dtype="int64"),
                         }
-                    )
-                )
+                    ]
+                ]
             else:
-                features_responses[response_feature_name] = Sequence(features.Value(dtype="string"))
+                features_responses[feature_name] = [features.Value(dtype="string")]
 
-            features_responses[response_users_feature_name] = Sequence(features.Value(dtype="string"))
-            features_responses[response_status_feature_name] = Sequence(
-                ClassLabel(names=[rs.value for rs in ResponseStatus])
-            )
+            features_responses[feature_name_users] = [features.Value(dtype="string")]
+            features_responses[feature_name_status] = [ClassLabel(names=[rs.value for rs in ResponseStatus])]
 
         return features_responses
 
@@ -335,36 +332,35 @@ class HubDatasetExporter:
 
         return row_fields
 
-    # TODO: When record.responses is None we should put the -1 default value as expected by HF
     def _row_responses(self, record: Record) -> dict:
         row_responses = {}
         for question in self.dataset.questions:
-            response_feature_name = self._response_feature_name(question)
-            response_users_feature_name = self._response_users_feature_name(question)
-            response_status_feature_name = self._response_status_feature_name(question)
+            feature_name = self._feature_name_for_response(question)
+            feature_name_users = self._feature_name_for_response_users(question)
+            feature_name_status = self._feature_name_for_response_status(question)
 
-            row_responses[response_feature_name] = []
-            row_responses[response_users_feature_name] = []
-            row_responses[response_status_feature_name] = []
+            row_responses[feature_name] = []
+            row_responses[feature_name_users] = []
+            row_responses[feature_name_status] = []
             for response in record.responses:
                 if response.values is not None:
                     response_value = response.values.get(question.name)
                     if response_value is not None:
-                        row_responses[response_feature_name].append(response_value["value"])
+                        row_responses[feature_name].append(response_value["value"])
 
-                row_responses[response_users_feature_name].append(str(response.user_id))
-                row_responses[response_status_feature_name].append(response.status)
+                row_responses[feature_name_users].append(str(response.user_id))
+                row_responses[feature_name_status].append(response.status)
 
         return row_responses
 
-    def _response_feature_name(self, question: Question) -> str:
+    def _feature_name_for_response(self, question: Question) -> str:
         return f"{question.name}.responses"
 
-    def _response_users_feature_name(self, question: Question) -> str:
-        return f"{self._response_feature_name(question)}.users"
+    def _feature_name_for_response_users(self, question: Question) -> str:
+        return f"{self._feature_name_for_response(question)}.users"
 
-    def _response_status_feature_name(self, question: Question) -> str:
-        return f"{self._response_feature_name(question)}.status"
+    def _feature_name_for_response_status(self, question: Question) -> str:
+        return f"{self._feature_name_for_response(question)}.status"
 
 
 def pil_image_to_data_url(image: Image.Image):
