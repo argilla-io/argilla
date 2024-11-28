@@ -86,17 +86,14 @@ export default {
     color: var(--fg-tertiary);
   }
 }
-.list-move,
 .list-enter-active,
 .list-leave-active {
-  transition: transform 0.2s ease-in, opacity 0.1s ease;
+  transition: all 0.2s ease;
 }
-.list-enter-from,
+
+.list-enter,
 .list-leave-to {
   opacity: 0;
-  transform: translateX(10px);
-}
-.list-leave-active {
-  position: absolute;
+  transform: scale(0.8);
 }
 </style>
