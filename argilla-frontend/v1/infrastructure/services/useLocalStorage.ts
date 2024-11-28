@@ -8,7 +8,7 @@ const STORAGE_KEY = "argilla";
 const EMPTY_OBJECT = "{}";
 
 export const useLocalStorage = (): ILocalStorageService => {
-  const get = (key: Options) => {
+  const get = <T>(key: Options): T => {
     const storage = localStorage.getItem(STORAGE_KEY);
 
     if (!storage) return null;
@@ -16,13 +16,13 @@ export const useLocalStorage = (): ILocalStorageService => {
     try {
       const parsed = JSON.parse(storage);
 
-      return parsed[key];
+      return parsed[key] as T;
     } catch (error) {
       return undefined;
     }
   };
 
-  const set = (key: Options, value: any) => {
+  const set = <T>(key: Options, value: T) => {
     const storage = localStorage.getItem(STORAGE_KEY) ?? EMPTY_OBJECT;
     try {
       const parsed = JSON.parse(storage);
@@ -37,8 +37,8 @@ export const useLocalStorage = (): ILocalStorageService => {
     } catch {}
   };
 
-  const pop = (key: Options) => {
-    const value = get(key);
+  const pop = <T>(key: Options) => {
+    const value = get<T>(key);
 
     set(key, null);
 

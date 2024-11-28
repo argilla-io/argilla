@@ -7,7 +7,7 @@ export type Options =
   | "datasetExportJobIds";
 
 export interface ILocalStorageService {
-  get(key: Options): any;
-  set(key: Options, value: any): void;
-  pop(key: Options): any;
+  get<T>(key: Options): T;
+  set<T>(key: Options, value: T): void;
+  pop<T>(key: Options): T;
 }

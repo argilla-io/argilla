@@ -103,8 +103,8 @@ export class DatasetRepository implements IDatasetRepository {
     exportSettings: DatasetExportSettings
   ): Promise<JobId> {
     try {
-      const { id, name } = dataset;
-      const { subset, split, isPrivate, hfToken } = exportSettings;
+      const { id } = dataset;
+      const { name, subset, split, isPrivate, hfToken } = exportSettings;
 
       const { data } = await this.axios.post<BackendJob>(
         `/v1/datasets/${id}/export`,
