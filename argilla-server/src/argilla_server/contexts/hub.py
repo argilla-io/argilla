@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 import io
+import os
 import base64
 import json
 
 from uuid import uuid4
+from pathlib import Path
 from typing import Any, Optional, List
 from typing_extensions import Self
 from tempfile import TemporaryDirectory
@@ -25,7 +27,7 @@ from PIL import Image
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
-from huggingface_hub import HfApi
+from huggingface_hub import HfApi, DatasetCard, DatasetCardData
 from datasets import (
     Dataset as HFDataset,
     Image as HFImage,
@@ -62,6 +64,9 @@ FEATURE_CLASS_LABEL_NO_LABEL = -1
 
 DATA_URL_DEFAULT_IMAGE_FORMAT = "png"
 DATA_URL_DEFAULT_IMAGE_MIMETYPE = "image/png"
+
+HUB_RECORDS_YIELD_PER = 100
+HUB_DATASET_CARD_DEFAULT_TEMPLATE_PATH = os.path.join(Path(__file__).parent, "hub_templates", "README.md.jinja2")
 
 
 class HubDataset:
@@ -225,7 +230,8 @@ class HubDatasetSettingsSchema(BaseModel):
     vectors: List[VectorSettingsSchema]
 
 
-RECORDS_YIELD_PER = 100
+class HubDatasetCard(DatasetCard):
+    default_template_path = HUB_DATASET_CARD_DEFAULT_TEMPLATE_PATH
 
 
 class HubDatasetExporter:
@@ -360,7 +366,7 @@ class HubDatasetExporter:
                 )
             )
 
-            for record in query.yield_per(RECORDS_YIELD_PER):
+            for record in query.yield_per(HUB_RECORDS_YIELD_PER):
                 yield self._record_to_row(record)
 
     def _record_to_row(self, record: Record) -> dict:
@@ -469,26 +475,29 @@ class HubDatasetExporter:
         hf_api = HfApi(token=token)
 
         with TemporaryDirectory() as temporary_directory:
-            self._create_version_json_file(temporary_directory)
-            self._create_dataset_json_file(temporary_directory)
-            self._create_settings_json_file(temporary_directory)
+            argilla_directory = os.path.join(temporary_directory, ".argilla")
+            os.makedirs(argilla_directory)
+
+            self._create_version_file(argilla_directory)
+            self._create_dataset_file(argilla_directory)
+            self._create_settings_file(argilla_directory)
+            self._create_readme_file(temporary_directory, repo_id=name)
 
             hf_api.upload_folder(
                 repo_id=name,
                 repo_type="dataset",
                 folder_path=temporary_directory,
-                path_in_repo=".argilla",
             )
 
-    def _create_version_json_file(self, directory: str) -> None:
+    def _create_version_file(self, directory: str) -> None:
         with open(f"{directory}/version.json", "w") as file:
             file.write(json.dumps({"argilla": info.argilla_version()}, indent=2))
 
-    def _create_dataset_json_file(self, directory: str) -> None:
+    def _create_dataset_file(self, directory: str) -> None:
         with open(f"{directory}/dataset.json", "w") as file:
             file.write(DatasetSchema.model_validate(self.dataset).model_dump_json(indent=2))
 
-    def _create_settings_json_file(self, directory: str) -> None:
+    def _create_settings_file(self, directory: str) -> None:
         with open(f"{directory}/settings.json", "w") as file:
             dataset_settings = HubDatasetSettingsSchema(
                 guidelines=self.dataset.guidelines,
@@ -507,6 +516,24 @@ class HubDatasetExporter:
             )
 
             file.write(dataset_settings.model_dump_json(indent=2))
+
+    def _create_readme_file(self, directory: str, repo_id: str) -> None:
+        card = HubDatasetCard.from_template(
+            card_data=DatasetCardData(
+                # size_categories=size_categories_parser(dataset_size),
+                tags=["rlfh", "argilla", "human-feedback"],
+            ),
+            repo_id=repo_id,
+            argilla_fields=self.dataset.fields,
+            argilla_questions=self.dataset.questions,
+            argilla_guidelines=self.dataset.guidelines or None,
+            argilla_vectors_settings=self.dataset.vectors_settings or None,
+            argilla_metadata_properties=self.dataset.metadata_properties,
+            # argilla_record=sample_argilla_record.to_dict(),
+            # huggingface_record=sample_huggingface_record,
+        )
+
+        card.save(os.path.join(directory, "README.md"))
 
 
 def pil_image_to_data_url(image: Image.Image):
