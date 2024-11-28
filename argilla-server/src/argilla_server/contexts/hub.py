@@ -34,7 +34,7 @@ from datasets import (
 
 from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.database import get_sync_db
-from argilla_server.models.database import Dataset, Record, Question, MetadataProperty, VectorSettings
+from argilla_server.models.database import Dataset, Record, Field, Question, MetadataProperty, VectorSettings
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
@@ -242,17 +242,20 @@ class HubDatasetExporter:
     def _features_fields(self) -> dict:
         features_fields = {}
         for field in self.dataset.fields:
+            feature_name = self._feature_name_for_field(field)
+
             if field.is_image:
-                features_fields[field.name] = HFImage()
+                features_fields[feature_name] = HFImage()
+                features_fields[f"{feature_name}.url"] = features.Value(dtype="string")
             elif field.is_chat:
-                features_fields[field.name] = [
+                features_fields[feature_name] = [
                     {
                         "role": features.Value(dtype="string"),
                         "content": features.Value(dtype="string"),
                     }
                 ]
             else:
-                features_fields[field.name] = features.Value(dtype="string")
+                features_fields[feature_name] = features.Value(dtype="string")
 
         return features_fields
 
@@ -302,7 +305,7 @@ class HubDatasetExporter:
             feature_name = self._feature_name_for_metadata_property(metadata_property)
 
             if metadata_property.is_terms:
-                features_metadata[feature_name] = [ClassLabel(names=metadata_property.values)]
+                features_metadata[feature_name] = [features.Value(dtype="string")]
             elif metadata_property.is_integer:
                 features_metadata[feature_name] = features.Value(dtype="int64")
             elif metadata_property.is_float:
@@ -356,15 +359,18 @@ class HubDatasetExporter:
             # TODO: If we are not managing custom fields we should
             # check it here and continue.
 
-            field_value = record.fields.get(field.name)
-            if field_value is None:
+            feature_name = self._feature_name_for_field(field)
+            feature_value = record.fields.get(field.name)
+            if feature_value is None:
                 continue
 
             if field.is_image:
-                # TODO: What to do with images as URLs?
-                row_fields[field.name] = {"bytes": data_url_to_bytes(field_value)}
+                if feature_value.startswith("data:"):
+                    row_fields[feature_name] = {"bytes": data_url_to_bytes(feature_value)}
+                else:
+                    row_fields[f"{feature_name}.url"] = feature_value
             else:
-                row_fields[field.name] = field_value
+                row_fields[feature_name] = feature_value
 
         return row_fields
 
@@ -396,8 +402,12 @@ class HubDatasetExporter:
                 continue
 
             feature_name = self._feature_name_for_metadata_property(metadata_property)
+            feature_value = record.metadata_.get(metadata_property.name)
 
-            row_metadata[feature_name] = record.metadata_.get(metadata_property.name)
+            if metadata_property.is_terms and not isinstance(feature_value, list):
+                feature_value = [feature_value]
+
+            row_metadata[feature_name] = feature_value
 
         return row_metadata
 
@@ -405,10 +415,14 @@ class HubDatasetExporter:
         row_vectors = {}
         for vector_settings in self.dataset.vectors_settings:
             feature_name = self._feature_name_for_vector_settings(vector_settings)
+            feature_value = record.vector_value_by_vector_settings(vector_settings)
 
-            row_vectors[feature_name] = record.vector_value_by_vector_settings(vector_settings)
+            row_vectors[feature_name] = feature_value
 
         return row_vectors
+
+    def _feature_name_for_field(self, field: Field) -> str:
+        return field.name
 
     def _feature_name_for_response(self, question: Question) -> str:
         return f"{question.name}.responses"
