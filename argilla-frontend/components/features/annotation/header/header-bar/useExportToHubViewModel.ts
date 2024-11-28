@@ -54,7 +54,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
       isExporting.value = true;
 
       await exportToHubUseCase.execute(dataset, {
-        name: dataset.name,
+        name: `${localStorage.getItem("hfUsername") ?? ""}/${dataset.name}`, // Temporal, add just for testing
         isPrivate: false,
         hfToken: localStorage.getItem("hfToken") ?? "", // Temporal, add just for testing
       });
