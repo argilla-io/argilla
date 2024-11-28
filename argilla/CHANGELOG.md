@@ -25,6 +25,10 @@ These are the section headers that we use:
 - Added support to webhook listeners. ([#5502](https://github.com/argilla-io/argilla/pull/5502))
 - Added support to Python 3.13. ([#5652](https://github.com/argilla-io/argilla/pull/5652))
 
+### Fixed
+
+- Fixed error when update settings.distribution.min_submitted from defaults ([#5719](https://github.com/argilla-io/argilla/pull/5719))
+
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
 ### Added
