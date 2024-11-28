@@ -136,7 +136,7 @@ $shadow-hover: rgba(0, 0, 0, 0.05) 0px 1px 4px 0px,
     font-weight: 500;
     min-height: $base-space * 5;
     @include font-size(18px);
-    word-break: break-all;
+    word-break: break-word;
     transition: color 0.3s ease;
   }
   &__workspace {
