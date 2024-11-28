@@ -252,7 +252,7 @@ class HubDatasetExporter:
             token=token,
         )
 
-        self._push_extra_files_to_hub(name, token)
+        self._push_extra_files_to_hub(repo_id=name, token=token)
 
     def features(self) -> Features:
         return Features(
@@ -471,7 +471,7 @@ class HubDatasetExporter:
     def _feature_name_for_vector_settings(self, vector_settings: VectorSettings) -> str:
         return f"vector.{vector_settings.name}"
 
-    def _push_extra_files_to_hub(self, name: str, token: str) -> None:
+    def _push_extra_files_to_hub(self, repo_id: str, token: str) -> None:
         hf_api = HfApi(token=token)
 
         with TemporaryDirectory() as temporary_directory:
@@ -481,24 +481,24 @@ class HubDatasetExporter:
             self._create_version_file(argilla_directory)
             self._create_dataset_file(argilla_directory)
             self._create_settings_file(argilla_directory)
-            self._create_readme_file(temporary_directory, repo_id=name)
+            self._create_readme_file(temporary_directory, repo_id)
 
             hf_api.upload_folder(
-                repo_id=name,
+                repo_id=repo_id,
                 repo_type="dataset",
                 folder_path=temporary_directory,
             )
 
     def _create_version_file(self, directory: str) -> None:
-        with open(f"{directory}/version.json", "w") as file:
+        with open(os.path.join(directory, "version.json"), "w") as file:
             file.write(json.dumps({"argilla": info.argilla_version()}, indent=2))
 
     def _create_dataset_file(self, directory: str) -> None:
-        with open(f"{directory}/dataset.json", "w") as file:
+        with open(os.path.join(directory, "dataset.json"), "w") as file:
             file.write(DatasetSchema.model_validate(self.dataset).model_dump_json(indent=2))
 
     def _create_settings_file(self, directory: str) -> None:
-        with open(f"{directory}/settings.json", "w") as file:
+        with open(os.path.join(directory, "settings.json"), "w") as file:
             dataset_settings = HubDatasetSettingsSchema(
                 guidelines=self.dataset.guidelines,
                 allow_extra_metadata=self.dataset.allow_extra_metadata,
