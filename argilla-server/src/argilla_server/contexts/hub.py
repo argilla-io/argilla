@@ -14,14 +14,18 @@
 
 import io
 import base64
+import json
 
-from typing import Any
 from uuid import uuid4
+from typing import Any, Optional, List
 from typing_extensions import Self
+from tempfile import TemporaryDirectory
 
 from PIL import Image
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
+from huggingface_hub import HfApi
 from datasets import (
     Dataset as HFDataset,
     Image as HFImage,
@@ -32,14 +36,23 @@ from datasets import (
     features,
 )
 
+from argilla_server.contexts import info
 from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.database import get_sync_db
 from argilla_server.models.database import Dataset, Record, Field, Question, MetadataProperty, VectorSettings
 from argilla_server.search_engine import SearchEngine
 from argilla_server.bulk.records_bulk import UpsertRecordsBulk
-from argilla_server.api.schemas.v1.datasets import HubDatasetMapping
+from argilla_server.api.schemas.v1.datasets import (
+    HubDatasetMapping,
+    Dataset as DatasetSchema,
+    DatasetDistribution as DatasetDistributionSchema,
+)
+from argilla_server.api.schemas.v1.fields import Field as FieldSchema
+from argilla_server.api.schemas.v1.questions import Question as QuestionSchema
 from argilla_server.api.schemas.v1.records import RecordUpsert as RecordUpsertSchema
 from argilla_server.api.schemas.v1.records_bulk import RecordsBulkUpsert as RecordsBulkUpsertSchema
+from argilla_server.api.schemas.v1.metadata_properties import MetadataProperty as MetadataPropertySchema
+from argilla_server.api.schemas.v1.vector_settings import VectorSettings as VectorSettingsSchema
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
 
 BATCH_SIZE = 100
@@ -201,6 +214,17 @@ class HubDataset:
         return suggestions
 
 
+class HubDatasetSettingsSchema(BaseModel):
+    guidelines: Optional[str] = None
+    allow_extra_metadata: bool
+    distribution: DatasetDistributionSchema
+    # TODO: Add missing mapping attribute. Discuss it with Ben.
+    fields: List[FieldSchema]
+    questions: List[QuestionSchema]
+    metadata: List[MetadataPropertySchema]
+    vectors: List[VectorSettingsSchema]
+
+
 RECORDS_YIELD_PER = 100
 
 
@@ -214,13 +238,15 @@ class HubDatasetExporter:
         self.version = uuid4()
 
     def export_to(self, name: str, subset: str, split: str, private: bool, token: str) -> None:
-        hf_dataset = HFDataset.from_generator(self.rows_generator, split=NamedSplit(split), features=self.features())
+        hf_dataset = HFDataset.from_generator(self._rows_generator, split=NamedSplit(split), features=self.features())
         hf_dataset.push_to_hub(
             repo_id=name,
             config_name=subset,
             private=private,
             token=token,
         )
+
+        self._push_extra_files_to_hub(name, token)
 
     def features(self) -> Features:
         return Features(
@@ -322,7 +348,7 @@ class HubDatasetExporter:
 
         return features_vectors
 
-    def rows_generator(self):
+    def _rows_generator(self):
         for session in get_sync_db():
             query = (
                 session.query(Record)
@@ -438,6 +464,49 @@ class HubDatasetExporter:
 
     def _feature_name_for_vector_settings(self, vector_settings: VectorSettings) -> str:
         return f"vector.{vector_settings.name}"
+
+    def _push_extra_files_to_hub(self, name: str, token: str) -> None:
+        hf_api = HfApi(token=token)
+
+        with TemporaryDirectory() as temporary_directory:
+            self._create_version_json_file(temporary_directory)
+            self._create_dataset_json_file(temporary_directory)
+            self._create_settings_json_file(temporary_directory)
+
+            hf_api.upload_folder(
+                repo_id=name,
+                repo_type="dataset",
+                folder_path=temporary_directory,
+                path_in_repo=".argilla",
+            )
+
+    def _create_version_json_file(self, directory: str) -> None:
+        with open(f"{directory}/version.json", "w") as file:
+            file.write(json.dumps({"argilla": info.argilla_version()}, indent=2))
+
+    def _create_dataset_json_file(self, directory: str) -> None:
+        with open(f"{directory}/dataset.json", "w") as file:
+            file.write(DatasetSchema.model_validate(self.dataset).model_dump_json(indent=2))
+
+    def _create_settings_json_file(self, directory: str) -> None:
+        with open(f"{directory}/settings.json", "w") as file:
+            dataset_settings = HubDatasetSettingsSchema(
+                guidelines=self.dataset.guidelines,
+                allow_extra_metadata=self.dataset.allow_extra_metadata,
+                distribution=DatasetDistributionSchema.model_validate(self.dataset.distribution),
+                fields=[FieldSchema.model_validate(field) for field in self.dataset.fields],
+                questions=[QuestionSchema.model_validate(question) for question in self.dataset.questions],
+                metadata=[
+                    MetadataPropertySchema.model_validate(metadata_property)
+                    for metadata_property in self.dataset.metadata_properties
+                ],
+                vectors=[
+                    VectorSettingsSchema.model_validate(vector_settings)
+                    for vector_settings in self.dataset.vectors_settings
+                ],
+            )
+
+            file.write(dataset_settings.model_dump_json(indent=2))
 
 
 def pil_image_to_data_url(image: Image.Image):
