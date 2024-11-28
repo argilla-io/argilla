@@ -16,6 +16,6 @@ export default {
 
 <style lang="scss" scoped>
 .annotation-guidelines {
-  padding-inline: $base-space *2
+  padding-inline: $base-space * 2;
 }
 </style>
