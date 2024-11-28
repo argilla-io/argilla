@@ -18,7 +18,7 @@
         <link rel="prev" href="../custom_fields/">
       
       
-        <link rel="next" href="../use_markdown_to_format_rich_content/">
+        <link rel="next" href="../webhooks_internals/">
       
       
       <link rel="icon" href="../../assets/favicon.ico">
@@ -996,173 +996,71 @@
   
   
   
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+    
+    
+    
       
       
         
       
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_2" checked>
+        
           
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="./" class="md-nav__link md-nav__link--active">
+              
   
   <span class="md-ellipsis">
     Use webhooks to respond to server events
   </span>
   
 
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+            </a>
+            
+              
+              <label class="md-nav__link md-nav__link--active" for="__nav_3_2_2" id="__nav_3_2_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Use webhooks to respond to server events
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../webhooks_internals/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Use webhooks to respond to server events
+    Webhooks internals
   </span>
   
 
       </a>
-      
-        
+    </li>
+  
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#creating-a-webhook-listener-in-argilla" class="md-nav__link">
-    <span class="md-ellipsis">
-      Creating a webhook listener in Argilla
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-the-webhook-server" class="md-nav__link">
-    <span class="md-ellipsis">
-      Running the webhook server
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#webhooks-management" class="md-nav__link">
-    <span class="md-ellipsis">
-      Webhooks management
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Webhooks management">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#create-a-webhook" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create a webhook
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#list-webhooks" class="md-nav__link">
-    <span class="md-ellipsis">
-      List webhooks
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update-a-webhook" class="md-nav__link">
-    <span class="md-ellipsis">
-      Update a webhook
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#delete-a-webhook" class="md-nav__link">
-    <span class="md-ellipsis">
-      Delete a webhook
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deploying-a-webhooks-server-in-a-hugging-face-space" class="md-nav__link">
-    <span class="md-ellipsis">
-      Deploying a webhooks server in a Hugging Face Space
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#events" class="md-nav__link">
-    <span class="md-ellipsis">
-      Events
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Events">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dataset-events" class="md-nav__link">
-    <span class="md-ellipsis">
-      Dataset events
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#record-events" class="md-nav__link">
-    <span class="md-ellipsis">
-      Record events
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#response-events" class="md-nav__link">
-    <span class="md-ellipsis">
-      Response events
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -2778,13 +2676,13 @@ a proper resource object (<code>rg.Dataset</code>, <code>rg.Record</code>, and <
         
         
           
-          <a href="../use_markdown_to_format_rich_content/" class="md-footer__link md-footer__link--next" aria-label="Next: Use Markdown to format rich content">
+          <a href="../webhooks_internals/" class="md-footer__link md-footer__link--next" aria-label="Next: Webhooks internals">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Use Markdown to format rich content
+                Webhooks internals
               </div>
             </div>
             <div class="md-footer__button md-icon">
