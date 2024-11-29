@@ -142,7 +142,7 @@ export default {
     background: var(--bg-similarity);
     border: 1px solid hsl(from var(--fg-similarity) h s l / 25%);
     padding: 2px $base-space;
-    border-radius: $border-radius-l;
+    border-radius: $border-radius-xl;
     @include font-size(12px);
     &__text {
       flex: 1;

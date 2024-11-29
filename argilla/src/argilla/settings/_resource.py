@@ -73,7 +73,7 @@ class Settings(DefaultSettingsMixin, Resource):
         super().__init__(client=_dataset._client if _dataset else None)
 
         self._dataset = _dataset
-        self._distribution = distribution
+        self._distribution = distribution or TaskDistribution.default()
         self._mapping = mapping
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
@@ -137,7 +137,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
     @property
     def distribution(self) -> TaskDistribution:
-        return self._distribution or TaskDistribution.default()
+        return self._distribution
 
     @distribution.setter
     def distribution(self, value: TaskDistribution) -> None:

@@ -2,7 +2,7 @@
   <div class="chat" :key="title">
     <span class="chat__title" v-text="title" />
     <div
-      :id="`fields-content-${name}`"
+      :id="`fields-content-${id}`"
       class="chat__wrapper"
       :class="checkIfAreLessThanTwoRoles ? '--simple' : '--multiple'"
     >
@@ -32,8 +32,8 @@
           >
             <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
             <span v-else v-html="text" /><template>
-              <style :key="name" scoped>
-                ::highlight(search-text-highlight-{{name}}) {
+              <style :key="id" scoped>
+                ::highlight(search-text-highlight-{{id}}) {
                   color: #ff675f;
                 }
               </style>
@@ -47,9 +47,10 @@
 
 <script>
 import { useChatFieldViewModel } from "./useChatFieldViewModel";
+
 export default {
   props: {
-    name: {
+    id: {
       type: String,
       required: true,
     },
@@ -136,7 +137,7 @@ export default {
   &__bubble {
     max-width: 80%;
     padding: 2 * $base-space;
-    border-radius: $border-radius-l;
+    border-radius: $border-radius-xl;
     border-style: solid;
     border-width: 1px;
     @include font-size(16px);
