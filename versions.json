@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_review-2.5.0-docs",
-    "title": "docs_review-2.5.0-docs",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_oauth2-configuration",
     "title": "docs_oauth2-configuration",
     "aliases": [],
