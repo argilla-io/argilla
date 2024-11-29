@@ -11,6 +11,10 @@ export default {
       type: Number,
       default: 1,
     },
+    fontSize: {
+      type: String,
+      default: "14px",
+    },
   },
   computed: {
     range() {
@@ -31,7 +35,8 @@ $progressBackgroundColorSecondary: var(--bg-opacity-10);
 }
 
 .badge {
-  height: $base-space * 3;
+  height: calc(v-bind(fontSize) * 2);
+  font-size: v-bind(fontSize);
   width: 5em;
   border-radius: $border-radius-rounded;
   margin: 0;

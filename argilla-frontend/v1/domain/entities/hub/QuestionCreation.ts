@@ -14,6 +14,7 @@ import {
   QuestionPrototype,
 } from "../question/QuestionSetting";
 import { QuestionType } from "../question/QuestionType";
+import { Subset } from "./Subset";
 
 export const availableQuestionTypes = [
   QuestionType.from("label_selection"),
@@ -31,6 +32,7 @@ export class QuestionCreation {
   public required: boolean;
   public readonly originalColumn: string;
   constructor(
+    private readonly subset: Subset,
     public readonly name: string,
     settings: QuestionPrototype,
     public column: string = "no mapping"
@@ -97,31 +99,51 @@ export class QuestionCreation {
   }
 
   get isValid(): boolean {
-    return this.validate().length === 0;
+    const validation = this.validate();
+
+    return validation.field.length === 0 && validation.options.length === 0;
   }
 
-  validate(): string[] {
-    const errors = [];
+  validate(): Record<"options" | "field", string[]> {
+    const validation = {
+      options: [],
+      field: [],
+    };
+
+    if (this.isSpanType) {
+      if (
+        !this.subset.textFields.some(
+          (field) => field.name === this.settings.field
+        ) ||
+        !this.settings.field
+      ) {
+        validation.field.push("datasetCreation.questions.span.fieldRelated");
+      }
+    }
+
     if (this.isMultiLabelType || this.isSingleLabelType || this.isSpanType) {
       if (this.options.length < 2) {
-        errors.push(
+        validation.options.push(
           "datasetCreation.questions.labelSelection.atLeastTwoOptions"
         );
       }
 
       if (this.options.some((option) => !option.id)) {
-        errors.push(
+        validation.options.push(
           "datasetCreation.questions.labelSelection.optionsWithoutLabel"
         );
       }
     }
+
     if (this.isRatingType) {
       if (this.options.length < 2) {
-        errors.push("datasetCreation.questions.rating.atLeastTwoOptions");
+        validation.options.push(
+          "datasetCreation.questions.rating.atLeastTwoOptions"
+        );
       }
     }
 
-    return errors;
+    return validation;
   }
 
   public setSettings(settings: QuestionPrototype) {

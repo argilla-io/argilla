@@ -185,7 +185,7 @@ $searchBarSize: $base-space * 4;
   gap: $base-space;
   max-height: $searchBarSize;
   max-width: $searchBarSize;
-  border-radius: $border-radius-l;
+  border-radius: $border-radius-xl;
   transition: all 0.3s ease;
   border: 1px solid transparent;
   &.active,
@@ -214,7 +214,7 @@ $searchBarSize: $base-space * 4;
     padding: $base-space;
     color: var(--fg-secondary);
     &.--search {
-      border-radius: $border-radius-l;
+      border-radius: $border-radius-xl;
       &:hover {
         background: var(--bg-opacity-4);
         color: var(--fg-secondary);

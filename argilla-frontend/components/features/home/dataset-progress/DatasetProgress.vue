@@ -1,32 +1,22 @@
 <template>
-  <BaseLinearProgressSkeleton v-if="!isLoaded" class="dataset-progress__bar" />
-  <transition v-else-if="!!progress" name="fade" appear>
-    <div class="dataset-progress">
-      <p class="dataset-progress__pending-info">
-        {{ progress.pending }} {{ $t("datasets.left") }}
-      </p>
-      <BaseLinearProgress
-        class="dataset-progress__bar"
-        :progress-ranges="progressRanges"
-        :progress-max="progress.total"
-        :show-tooltip="true"
-      />
-    </div>
-  </transition>
+  <div class="dataset-progress">
+    <p class="dataset-progress__title">{{ $t("metrics.progress.default") }}</p>
+    <p class="dataset-progress__percent">{{ getPercent }}%</p>
+  </div>
 </template>
 
 <script>
-import { useDatasetProgressViewModel } from "./useDatasetProgressViewModel";
-
 export default {
   props: {
-    datasetId: {
+    percent: {
       type: String,
       required: true,
     },
   },
-  setup(props) {
-    return useDatasetProgressViewModel(props);
+  computed: {
+    getPercent() {
+      return isNaN(this.percent) ? "-" : this.percent;
+    },
   },
 };
 </script>
@@ -37,17 +27,18 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: calc($base-space / 2);
+  gap: $base-space;
   max-width: 160px;
   z-index: 0;
-  &__bar {
-    width: 100%;
-    max-width: 160px;
-  }
-  &__pending-info {
-    color: var(--fg-tertiary);
+  &__title {
+    margin: 0;
     @include font-size(12px);
-    margin: 0 0 0 auto;
+  }
+  &__percent {
+    margin: 0;
+    font-weight: 500;
+    color: var(--fg-primary);
+    @include font-size(18px);
   }
 }
 </style>

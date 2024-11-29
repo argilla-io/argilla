@@ -85,6 +85,10 @@ export class Subset {
     return ["no mapping", ...columnNames];
   }
 
+  get textFields() {
+    return this.fields.filter((f) => f.settings.type.isTextType);
+  }
+
   private setDefaultValues() {
     if (this.questions.length === 1) {
       this.questions[0].markAsRequired();
@@ -95,6 +99,7 @@ export class Subset {
     if (this.isASingleLabel(structure)) {
       this.questions.push(
         new QuestionCreation(
+          this,
           structure.name,
           {
             type: "label_selection",
@@ -114,6 +119,7 @@ export class Subset {
     if (this.isAMultiLabel(structure)) {
       this.questions.push(
         new QuestionCreation(
+          this,
           structure.name,
           {
             type: "multi_label_selection",
@@ -255,7 +261,10 @@ export class Subset {
         { text: "event", id: "3", value: "event" },
       ];
       settings.allow_overlapping = true;
-      settings.field = "text";
+
+      if (this.textFields.length > 0) {
+        settings.field = this.textFields[0].name;
+      }
     }
 
     if (type === "text") {
@@ -273,7 +282,7 @@ export class Subset {
     this.questions.splice(
       position ?? this.questions.length,
       0,
-      new QuestionCreation(name, settings)
+      new QuestionCreation(this, name, settings)
     );
   }
 }
