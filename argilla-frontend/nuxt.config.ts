@@ -54,9 +54,9 @@ const config: NuxtConfig = {
 
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: [
-    "~assets/scss/base/base.scss",
     "~assets/css/fonts.css",
     "~assets/css/themes.css",
+    "~assets/scss/base/base.scss",
   ],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
