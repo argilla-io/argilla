@@ -28,18 +28,9 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from huggingface_hub import HfApi, DatasetCard, DatasetCardData
-from datasets import (
-    Dataset as HFDataset,
-    Image as HFImage,
-    NamedSplit,
-    Features,
-    ClassLabel,
-    load_dataset,
-    features,
-)
+from datasets import Dataset as HFDataset, NamedSplit, load_dataset, features
 
 from argilla_server.contexts import info
-from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.database import get_sync_db
 from argilla_server.models.database import Dataset, Record, Field, Question, MetadataProperty, VectorSettings
 from argilla_server.search_engine import SearchEngine
@@ -244,7 +235,7 @@ class HubDatasetExporter:
         self.version = uuid4()
 
     def export_to(self, name: str, subset: str, split: str, private: bool, token: str) -> None:
-        hf_dataset = HFDataset.from_generator(self._rows_generator, split=NamedSplit(split), features=self.features())
+        hf_dataset = HFDataset.from_generator(self._rows_generator, split=NamedSplit(split))
         hf_dataset.push_to_hub(
             repo_id=name,
             config_name=subset,
@@ -253,106 +244,6 @@ class HubDatasetExporter:
         )
 
         self._push_extra_files_to_hub(repo_id=name, token=token)
-
-    def features(self) -> Features:
-        return Features(
-            self._features_attributes()
-            | self._features_fields()
-            | self._features_responses()
-            | self._features_metadata()
-            | self._features_vectors()
-        )
-
-    def _features_attributes(self) -> dict:
-        return {
-            "id": features.Value(dtype="string"),
-            "status": ClassLabel(names=[rs.value for rs in RecordStatus]),
-            "_server_id": features.Value(dtype="string"),
-        }
-
-    # TODO: Manage also custom type fields as feature
-    def _features_fields(self) -> dict:
-        features_fields = {}
-        for field in self.dataset.fields:
-            feature_name = self._feature_name_for_field(field)
-
-            if field.is_image:
-                features_fields[feature_name] = HFImage()
-                features_fields[f"{feature_name}.url"] = features.Value(dtype="string")
-            elif field.is_chat:
-                features_fields[feature_name] = [
-                    {
-                        "role": features.Value(dtype="string"),
-                        "content": features.Value(dtype="string"),
-                    }
-                ]
-            else:
-                features_fields[feature_name] = features.Value(dtype="string")
-
-        return features_fields
-
-    def _features_responses(self) -> dict:
-        features_responses = {}
-        for question in self.dataset.questions:
-            feature_name = self._feature_name_for_response(question)
-            feature_name_users = self._feature_name_for_response_users(question)
-            feature_name_status = self._feature_name_for_response_status(question)
-
-            if question.is_label_selection:
-                features_responses[feature_name] = [ClassLabel(names=question.values)]
-            elif question.is_multi_label_selection:
-                features_responses[feature_name] = [[ClassLabel(names=question.values)]]
-            elif question.is_rating:
-                features_responses[feature_name] = [features.Value(dtype="int64")]
-            elif question.is_ranking:
-                features_responses[feature_name] = [
-                    [
-                        {
-                            "value": features.Value(dtype="string"),
-                            "rank": features.Value(dtype="int64"),
-                        }
-                    ]
-                ]
-            elif question.is_span:
-                features_responses[feature_name] = [
-                    [
-                        {
-                            "label": ClassLabel(names=question.values),
-                            "start": features.Value(dtype="int64"),
-                            "end": features.Value(dtype="int64"),
-                        }
-                    ]
-                ]
-            else:
-                features_responses[feature_name] = [features.Value(dtype="string")]
-
-            features_responses[feature_name_users] = [features.Value(dtype="string")]
-            features_responses[feature_name_status] = [ClassLabel(names=[rs.value for rs in ResponseStatus])]
-
-        return features_responses
-
-    def _features_metadata(self) -> dict:
-        features_metadata = {}
-        for metadata_property in self.dataset.metadata_properties:
-            feature_name = self._feature_name_for_metadata_property(metadata_property)
-
-            if metadata_property.is_terms:
-                features_metadata[feature_name] = [features.Value(dtype="string")]
-            elif metadata_property.is_integer:
-                features_metadata[feature_name] = features.Value(dtype="int64")
-            elif metadata_property.is_float:
-                features_metadata[feature_name] = features.Value(dtype="float64")
-
-        return features_metadata
-
-    def _features_vectors(self) -> dict:
-        features_vectors = {}
-        for vector_settings in self.dataset.vectors_settings:
-            feature_name = self._feature_name_for_vector_settings(vector_settings)
-
-            features_vectors[feature_name] = [features.Value(dtype="float64")]
-
-        return features_vectors
 
     def _rows_generator(self):
         for session in get_sync_db():
@@ -375,6 +266,8 @@ class HubDatasetExporter:
             | self._row_fields(record)
             | self._row_responses(record)
             | self._row_metadata(record)
+            # TODO: Is not possible to add extra metadata because the features need to be specified (even if with NULL) for all records.
+            # | self._row_extra_metadata(record)
             | self._row_vectors(record)
         )
 
@@ -388,19 +281,11 @@ class HubDatasetExporter:
     def _row_fields(self, record: Record) -> dict:
         row_fields = {}
         for field in self.dataset.fields:
-            # TODO: If we are not managing custom fields we should
-            # check it here and continue.
-
             feature_name = self._feature_name_for_field(field)
             feature_value = record.fields.get(field.name)
-            if feature_value is None:
-                continue
 
-            if field.is_image:
-                if feature_value.startswith("data:"):
-                    row_fields[feature_name] = {"bytes": data_url_to_bytes(feature_value)}
-                else:
-                    row_fields[f"{feature_name}.url"] = feature_value
+            if field.is_image and feature_value is not None and feature_value.startswith("data:"):
+                row_fields[feature_name] = Image.open(io.BytesIO(data_url_to_bytes(feature_value)))
             else:
                 row_fields[feature_name] = feature_value
 
@@ -413,15 +298,21 @@ class HubDatasetExporter:
             feature_name_users = self._feature_name_for_response_users(question)
             feature_name_status = self._feature_name_for_response_status(question)
 
-            row_responses[feature_name] = []
-            row_responses[feature_name_users] = []
-            row_responses[feature_name_status] = []
+            row_responses[feature_name] = None
+            row_responses[feature_name_users] = None
+            row_responses[feature_name_status] = None
             for response in record.responses:
-                if response.values is not None:
-                    response_value = response.values.get(question.name)
-                    if response_value is not None:
-                        row_responses[feature_name].append(response_value["value"])
+                response_values = response.values or {}
+                response_value = response_values.get(question.name, {})
 
+                feature_value = response_value.get("value")
+
+                if row_responses[feature_name] is None:
+                    row_responses[feature_name] = []
+                    row_responses[feature_name_users] = []
+                    row_responses[feature_name_status] = []
+
+                row_responses[feature_name].append(feature_value)
                 row_responses[feature_name_users].append(str(response.user_id))
                 row_responses[feature_name_status].append(response.status)
 
@@ -429,12 +320,11 @@ class HubDatasetExporter:
 
     def _row_metadata(self, record: Record) -> dict:
         row_metadata = {}
-        for metadata_property in self.dataset.metadata_properties:
-            if record.metadata_ is None:
-                continue
 
+        record_metadata = record.metadata_ or {}
+        for metadata_property in self.dataset.metadata_properties:
             feature_name = self._feature_name_for_metadata_property(metadata_property)
-            feature_value = record.metadata_.get(metadata_property.name)
+            feature_value = record_metadata.get(metadata_property.name)
 
             if metadata_property.is_terms and not isinstance(feature_value, list):
                 feature_value = [feature_value]
@@ -442,6 +332,24 @@ class HubDatasetExporter:
             row_metadata[feature_name] = feature_value
 
         return row_metadata
+
+    def _row_extra_metadata(self, record: Record) -> dict:
+        if not self.dataset.allow_extra_metadata:
+            return {}
+
+        row_extra_metadata = {}
+        record_metadata = record.metadata_ or {}
+        metadata_properties_names = [metadata_property.name for metadata_property in self.dataset.metadata_properties]
+        for metadata_name, metadata_value in record_metadata.items():
+            if metadata_name in metadata_properties_names:
+                continue
+
+            feature_name = self._feature_name_for_extra_metadata(metadata_name)
+            feature_value = metadata_value
+
+            row_extra_metadata[feature_name] = feature_value
+
+        return row_extra_metadata
 
     def _row_vectors(self, record: Record) -> dict:
         row_vectors = {}
@@ -467,6 +375,9 @@ class HubDatasetExporter:
 
     def _feature_name_for_metadata_property(self, metadata_property: MetadataProperty) -> str:
         return f"metadata.{metadata_property.name}"
+
+    def _feature_name_for_extra_metadata(self, extra_metadata_name: str) -> str:
+        return f"metadata.{extra_metadata_name}"
 
     def _feature_name_for_vector_settings(self, vector_settings: VectorSettings) -> str:
         return f"vector.{vector_settings.name}"
