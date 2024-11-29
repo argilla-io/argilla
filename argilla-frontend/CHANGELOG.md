@@ -18,11 +18,14 @@ These are the section headers that we use:
 
 ### Added
 
+- Add new dataset list page ([#5684](https://github.com/argilla-io/argilla/pull/5684))
 - Add a high-contrast theme & improvements for the forced-colors mode. ([#5661](https://github.com/argilla-io/argilla/pull/5661))
 - Add English as the default language and add language selector in the user settings page. ([#5690](https://github.com/argilla-io/argilla/pull/5690))
 
 ### Fixed
 
+- Assign field to span question on dataset creation. ([#5717](https://github.com/argilla-io/argilla/pull/5717))
+- Fixed visible_options when updating question setting. ([#5716](https://github.com/argilla-io/argilla/pull/5716))
 - Fixed highlighting on same record ([#5693](https://github.com/argilla-io/argilla/pull/5693))
 
 ## [2.4.1](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.4.1)
