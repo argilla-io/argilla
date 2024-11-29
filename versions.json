@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_deploy_on_spaces",
-    "title": "docs_deploy_on_spaces",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_configure-issue-form",
     "title": "docs_configure-issue-form",
     "aliases": [],
