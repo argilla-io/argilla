@@ -5,14 +5,6 @@
     "aliases": []
   },
   {
-    "version": "docs_configure-issue-form",
-    "title": "docs_configure-issue-form",
-    "aliases": [],
-    "properties": {
-      "hidden": true
-    }
-  },
-  {
     "version": "docs_add-missing-env-vars",
     "title": "docs_add-missing-env-vars",
     "aliases": [],
