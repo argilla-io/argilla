@@ -71,8 +71,6 @@ jobs:
       image-name: argilla/argilla-frontend-for-dev
       dockerfile: argilla-frontend/dev.frontend.Dockerfile
       platforms: linux/amd64
-      build-args: |
-        ARGILLA_SERVER_TAG=main
     secrets: inherit
 
   deploy:

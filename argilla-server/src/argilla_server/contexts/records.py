@@ -27,6 +27,11 @@ from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
 from argilla_server.models import Dataset, Record, VectorSettings, Vector, Response, Suggestion
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.records import RecordUpdateValidator
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import (
+    build_record_event as build_record_event_v1,
+    notify_record_event as notify_record_event_v1,
+)
 
 
 async def list_dataset_records(
@@ -188,13 +193,18 @@ async def update_record(
     await _preload_record_relationships_before_index(db, record)
     await search_engine.index_records(record.dataset, [record])
 
+    await notify_record_event_v1(db, RecordEvent.updated, record)
+
     return record
 
 
 async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record: Record) -> Record:
+    deleted_record_event_v1 = await build_record_event_v1(db, RecordEvent.deleted, record)
     record = await record.delete(db=db, autocommit=True)
 
     await search_engine.delete_records(dataset=record.dataset, records=[record])
+
+    await deleted_record_event_v1.notify(db)
 
     return record
 
@@ -202,10 +212,23 @@ async def delete_record(db: AsyncSession, search_engine: "SearchEngine", record:
 async def delete_records(
     db: AsyncSession, search_engine: "SearchEngine", dataset: Dataset, records_ids: List[UUID]
 ) -> None:
+    params = [Record.id.in_(records_ids), Record.dataset_id == dataset.id]
+
+    records = (await db.execute(select(Record).filter(*params).order_by(Record.inserted_at.asc()))).scalars().all()
+
+    deleted_record_events_v1 = []
+    for record in records:
+        deleted_record_events_v1.append(
+            await build_record_event_v1(db, RecordEvent.deleted, record),
+        )
+
     records = await Record.delete_many(
-        db=db,
-        conditions=[Record.id.in_(records_ids), Record.dataset_id == dataset.id],
+        db,
+        conditions=params,
         autocommit=True,
     )
 
     await search_engine.delete_records(dataset=dataset, records=records)
+
+    for deleted_record_event_v1 in deleted_record_events_v1:
+        await deleted_record_event_v1.notify(db)

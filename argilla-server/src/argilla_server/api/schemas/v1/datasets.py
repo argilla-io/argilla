@@ -13,13 +13,14 @@
 #  limitations under the License.
 
 from datetime import datetime
-from typing import List, Literal, Optional, Union, Dict, Any
+from typing import List, Literal, Optional, Dict, Any
 from uuid import UUID
+
+from pydantic.v1.utils import GetterDict
 
 from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import DatasetDistributionStrategy, DatasetStatus
-from argilla_server.pydantic_v1 import BaseModel, Field, constr
-from argilla_server.pydantic_v1.utils import GetterDict
+from pydantic import BaseModel, Field, constr, ConfigDict, model_validator
 
 try:
     from typing import Annotated
@@ -83,12 +84,6 @@ class DatasetMetrics(BaseModel):
     responses: ResponseMetrics
 
 
-class DatasetProgress(BaseModel):
-    total: int
-    completed: int
-    pending: int
-
-
 class RecordResponseDistribution(BaseModel):
     submitted: int = 0
     discarded: int = 0
@@ -100,13 +95,22 @@ class UserProgress(BaseModel):
     completed: RecordResponseDistribution = RecordResponseDistribution()
     pending: RecordResponseDistribution = RecordResponseDistribution()
 
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DatasetProgress(BaseModel):
+    total: int
+    completed: int
+    pending: int
+    users: List[UserProgress] = Field(default_factory=list)
+
 
 class UsersProgress(BaseModel):
     users: List[UserProgress]
 
 
 class DatasetGetterDict(GetterDict):
-    def get(self, key: str, default: Any) -> Any:
+    def get(self, key: Any, default: Any = None) -> Any:
         if key == "metadata":
             return getattr(self._obj, "metadata_", None)
 
@@ -116,19 +120,28 @@ class DatasetGetterDict(GetterDict):
 class Dataset(BaseModel):
     id: UUID
     name: str
-    guidelines: Optional[str]
+    guidelines: Optional[str] = None
     allow_extra_metadata: bool
     status: DatasetStatus
     distribution: DatasetDistribution
-    metadata: Optional[Dict[str, Any]]
+    metadata: Optional[Dict[str, Any]] = None
     workspace_id: UUID
     last_activity_at: datetime
     inserted_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
-        getter_dict = DatasetGetterDict
+    model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate(cls, value) -> dict:
+        getter = DatasetGetterDict(value)
+
+        data = {}
+        for field in cls.model_fields:
+            data[field] = getter.get(field)
+
+        return data
 
 
 class Datasets(BaseModel):
@@ -137,7 +150,7 @@ class Datasets(BaseModel):
 
 class DatasetCreate(BaseModel):
     name: DatasetName
-    guidelines: Optional[DatasetGuidelines]
+    guidelines: Optional[DatasetGuidelines] = None
     allow_extra_metadata: bool = True
     distribution: DatasetDistributionCreate = DatasetOverlapDistributionCreate(
         strategy=DatasetDistributionStrategy.overlap,
@@ -148,10 +161,10 @@ class DatasetCreate(BaseModel):
 
 
 class DatasetUpdate(UpdateSchema):
-    name: Optional[DatasetName]
-    guidelines: Optional[DatasetGuidelines]
-    allow_extra_metadata: Optional[bool]
-    distribution: Optional[DatasetDistributionUpdate]
+    name: Optional[DatasetName] = None
+    guidelines: Optional[DatasetGuidelines] = None
+    allow_extra_metadata: Optional[bool] = None
+    distribution: Optional[DatasetDistributionUpdate] = None
     metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
 
     __non_nullable_fields__ = {"name", "allow_extra_metadata", "distribution"}
@@ -163,7 +176,7 @@ class HubDatasetMappingItem(BaseModel):
 
 
 class HubDatasetMapping(BaseModel):
-    fields: List[HubDatasetMappingItem] = Field(..., min_items=1)
+    fields: List[HubDatasetMappingItem] = Field(..., min_length=1)
     metadata: Optional[List[HubDatasetMappingItem]] = []
     suggestions: Optional[List[HubDatasetMappingItem]] = []
     external_id: Optional[str] = None

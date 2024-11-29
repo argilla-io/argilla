@@ -41,9 +41,27 @@ from argilla_server.api.schemas.v1.responses import (
     ResponseUpsert,
 )
 from argilla_server.api.schemas.v1.vector_settings import (
+    VectorSettings as VectorSettingsSchema,
+)
+from argilla_server.api.schemas.v1.vector_settings import (
     VectorSettingsCreate,
 )
-from argilla_server.contexts import distribution
+from argilla_server.api.schemas.v1.vectors import Vector as VectorSchema
+from argilla_server.models.database import DatasetUser
+from argilla_server.webhooks.v1.enums import DatasetEvent, ResponseEvent, RecordEvent
+from argilla_server.webhooks.v1.records import (
+    build_record_event as build_record_event_v1,
+    notify_record_event as notify_record_event_v1,
+)
+from argilla_server.webhooks.v1.responses import (
+    build_response_event as build_response_event_v1,
+    notify_response_event as notify_response_event_v1,
+)
+from argilla_server.webhooks.v1.datasets import (
+    build_dataset_event as build_dataset_event_v1,
+    notify_dataset_event as notify_dataset_event_v1,
+)
+from argilla_server.contexts import accounts, distribution
 from argilla_server.database import get_async_db
 from argilla_server.enums import DatasetStatus, UserRole
 from argilla_server.errors.future import NotUniqueError, UnprocessableEntityError
@@ -134,7 +152,11 @@ async def create_dataset(db: AsyncSession, dataset_attrs: dict) -> Dataset:
 
     await DatasetCreateValidator.validate(db, dataset)
 
-    return await dataset.save(db)
+    await dataset.save(db)
+
+    await notify_dataset_event_v1(db, DatasetEvent.created, dataset)
+
+    return dataset
 
 
 def _allowed_roles_for_metadata_property_create(metadata_property_create: MetadataPropertyCreate) -> List[UserRole]:
@@ -147,9 +169,11 @@ def _allowed_roles_for_metadata_property_create(metadata_property_create: Metada
 async def publish_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
     await DatasetPublishValidator.validate(db, dataset)
 
-    dataset = await dataset.update(db, status=DatasetStatus.ready, autocommit=True)
+    dataset = await dataset.update(db, status=DatasetStatus.ready)
 
     await search_engine.create_index(dataset)
+
+    await notify_dataset_event_v1(db, DatasetEvent.published, dataset)
 
     return dataset
 
@@ -161,13 +185,18 @@ async def update_dataset(db: AsyncSession, dataset: Dataset, dataset_attrs: dict
 
     dataset_jobs.update_dataset_records_status_job.delay(dataset.id)
 
+    await notify_dataset_event_v1(db, DatasetEvent.updated, dataset)
+
     return dataset
 
 
 async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset: Dataset) -> Dataset:
-    dataset = await dataset.delete(db, autocommit=True)
+    deleted_dataset_event_v1 = await build_dataset_event_v1(db, DatasetEvent.deleted, dataset)
+
+    dataset = await dataset.delete(db)
 
     await search_engine.delete_index(dataset)
+    await deleted_dataset_event_v1.notify(db)
 
     return dataset
 
@@ -184,7 +213,7 @@ async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCr
         name=field_create.name,
         title=field_create.title,
         required=field_create.required,
-        settings=field_create.settings.dict(),
+        settings=field_create.settings.model_dump(),
         dataset_id=dataset.id,
     )
 
@@ -195,7 +224,7 @@ async def update_field(db: AsyncSession, field: Field, field_update: "FieldUpdat
             f"Field type cannot be changed. Expected '{field.settings['type']}' but got '{field_update.settings.type}'"
         )
 
-    params = field_update.dict(exclude_unset=True)
+    params = field_update.model_dump(exclude_unset=True)
     return await field.update(db, **params)
 
 
@@ -226,10 +255,9 @@ async def create_metadata_property(
         db,
         name=metadata_property_create.name,
         title=metadata_property_create.title,
-        settings=metadata_property_create.settings.dict(),
+        settings=metadata_property_create.settings.model_dump(),
         allowed_roles=_allowed_roles_for_metadata_property_create(metadata_property_create),
         dataset_id=dataset.id,
-        autocommit=True,
     )
 
     if dataset.is_ready:
@@ -257,7 +285,7 @@ async def count_vectors_settings_by_dataset_id(db: AsyncSession, dataset_id: UUI
 async def update_vector_settings(
     db: AsyncSession, vector_settings: VectorSettings, vector_settings_update: "VectorSettingsUpdate"
 ) -> VectorSettings:
-    params = vector_settings_update.dict(exclude_unset=True)
+    params = vector_settings_update.model_dump(exclude_unset=True)
     return await vector_settings.update(db, **params)
 
 
@@ -286,7 +314,6 @@ async def create_vector_settings(
         title=vector_settings_create.title,
         dimensions=vector_settings_create.dimensions,
         dataset_id=dataset.id,
-        autocommit=True,
     )
 
     if dataset.is_ready:
@@ -354,11 +381,12 @@ async def _configure_query_relationships(
 
 
 async def get_user_dataset_metrics(
+    db: AsyncSession,
     search_engine: SearchEngine,
     user: User,
     dataset: Dataset,
 ) -> dict:
-    total_records = (await get_dataset_progress(search_engine, dataset))["total"]
+    total_records = (await get_dataset_progress(db, search_engine, dataset))["total"]
     result = await search_engine.get_dataset_user_progress(dataset, user)
 
     submitted_responses = result.get("submitted", 0)
@@ -376,34 +404,52 @@ async def get_user_dataset_metrics(
 
 
 async def get_dataset_progress(
+    db: AsyncSession,
     search_engine: SearchEngine,
     dataset: Dataset,
 ) -> dict:
     result = await search_engine.get_dataset_progress(dataset)
+    users = await get_users_with_responses_for_dataset(db, dataset)
+
     return {
         "total": result.get("total", 0),
         "completed": result.get("completed", 0),
         "pending": result.get("pending", 0),
+        "users": users,
     }
 
 
-async def get_dataset_users_progress(dataset_id: UUID) -> List[dict]:
+async def get_users_with_responses_for_dataset(
+    db: AsyncSession,
+    dataset: Dataset,
+) -> Sequence[User]:
+    query = (
+        select(DatasetUser)
+        .filter_by(dataset_id=dataset.id)
+        .options(selectinload(DatasetUser.user))
+        .order_by(DatasetUser.inserted_at.asc())
+    )
+
+    result = await db.scalars(query)
+    return [r.user for r in result.all()]
+
+
+async def get_dataset_users_progress(db: AsyncSession, dataset: Dataset) -> List[dict]:
     query = (
         select(User.username, Record.status, Response.status, func.count(Response.id))
         .join(Record)
         .join(User)
-        .where(Record.dataset_id == dataset_id)
+        .where(Record.dataset_id == dataset.id)
         .group_by(User.username, Record.status, Response.status)
     )
 
-    async for session in get_async_db():
-        annotators_progress = defaultdict(lambda: defaultdict(dict))
-        results = (await session.execute(query)).all()
+    annotators_progress = defaultdict(lambda: defaultdict(dict))
+    results = (await db.execute(query)).all()
 
-        for username, record_status, response_status, count in results:
-            annotators_progress[username][record_status][response_status] = count
+    for username, record_status, response_status, count in results:
+        annotators_progress[username][record_status][response_status] = count
 
-        return [{"username": username, **progress} for username, progress in annotators_progress.items()]
+    return [{"username": username, **progress} for username, progress in annotators_progress.items()]
 
 
 async def _load_users_from_responses(responses: Union[Response, Iterable[Response]]) -> None:
@@ -445,6 +491,12 @@ async def create_response(
         autocommit=False,
     )
     await _touch_dataset_last_activity_at(db, record.dataset)
+    await DatasetUser.upsert(
+        db,
+        schema={"dataset_id": record.dataset_id, "user_id": user.id},
+        constraints=[DatasetUser.dataset_id, DatasetUser.user_id],
+        autocommit=False,
+    )
 
     await db.commit()
 
@@ -452,6 +504,8 @@ async def create_response(
 
     await _load_users_from_responses([response])
     await search_engine.update_record_response(response)
+
+    await notify_response_event_v1(db, ResponseEvent.created, response)
 
     return response
 
@@ -477,6 +531,8 @@ async def update_response(
     await _load_users_from_responses(response)
     await search_engine.update_record_response(response)
 
+    await notify_response_event_v1(db, ResponseEvent.updated, response)
+
     return response
 
 
@@ -497,7 +553,12 @@ async def upsert_response(
         autocommit=False,
     )
     await _touch_dataset_last_activity_at(db, response.record.dataset)
-
+    await DatasetUser.upsert(
+        db,
+        schema={"dataset_id": record.dataset_id, "user_id": user.id},
+        constraints=[DatasetUser.dataset_id, DatasetUser.user_id],
+        autocommit=False,
+    )
     await db.commit()
 
     await distribution.update_record_status(search_engine, record.id)
@@ -505,10 +566,17 @@ async def upsert_response(
     await _load_users_from_responses(response)
     await search_engine.update_record_response(response)
 
+    if response.inserted_at == response.updated_at:
+        await notify_response_event_v1(db, ResponseEvent.created, response)
+    else:
+        await notify_response_event_v1(db, ResponseEvent.updated, response)
+
     return response
 
 
 async def delete_response(db: AsyncSession, search_engine: SearchEngine, response: Response) -> Response:
+    deleted_response_event_v1 = await build_response_event_v1(db, ResponseEvent.deleted, response)
+
     response = await response.delete(db, autocommit=False)
     await _touch_dataset_last_activity_at(db, response.record.dataset)
 
@@ -518,6 +586,8 @@ async def delete_response(db: AsyncSession, search_engine: SearchEngine, respons
 
     await _load_users_from_responses(response)
     await search_engine.delete_record_response(response)
+
+    await deleted_response_event_v1.notify(db)
 
     return response
 
@@ -544,9 +614,8 @@ async def upsert_suggestion(
 
     suggestion = await Suggestion.upsert(
         db,
-        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.dict()),
+        schema=SuggestionCreateWithRecordId(record_id=record.id, **suggestion_create.model_dump()),
         constraints=[Suggestion.record_id, Suggestion.question_id],
-        autocommit=True,
     )
 
     await _preload_suggestion_relationships_before_index(db, suggestion)
@@ -563,7 +632,6 @@ async def delete_suggestions(
     await Suggestion.delete_many(
         db=db,
         conditions=[Suggestion.id.in_(suggestions_ids), Suggestion.record_id == record.id],
-        autocommit=True,
     )
 
     for suggestion in suggestions:
@@ -586,7 +654,7 @@ async def list_suggestions_by_id_and_record_id(
 
 
 async def delete_suggestion(db: AsyncSession, search_engine: SearchEngine, suggestion: Suggestion) -> Suggestion:
-    suggestion = await suggestion.delete(db, autocommit=True)
+    suggestion = await suggestion.delete(db)
 
     await search_engine.delete_record_suggestion(suggestion)
 

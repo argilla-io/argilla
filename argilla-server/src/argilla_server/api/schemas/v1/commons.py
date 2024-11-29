@@ -14,7 +14,7 @@
 
 from typing import Any, Dict, Set, Union
 
-from argilla_server.pydantic_v1 import BaseModel, root_validator
+from pydantic import BaseModel, model_validator
 
 
 class UpdateSchema(BaseModel):
@@ -25,17 +25,18 @@ class UpdateSchema(BaseModel):
 
     __non_nullable_fields__: Union[Set[str], None] = None
 
-    @root_validator(pre=True)
-    def validate_non_nullable_fields(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    @model_validator(mode="before")
+    @classmethod
+    def validate_non_nullable_fields(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         if cls.__non_nullable_fields__ is None:
-            return values
+            return data
 
         invalid_keys = []
         for key in cls.__non_nullable_fields__:
-            if key in values and values[key] is None:
+            if key in data and data[key] is None:
                 invalid_keys.append(key)
 
         if invalid_keys:
             raise ValueError(f"The following keys must have non-null values: {', '.join(invalid_keys)}")
 
-        return values
+        return data

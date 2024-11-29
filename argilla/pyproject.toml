@@ -1,12 +1,10 @@
 [project]
 name = "argilla"
 description = "The Argilla python server SDK"
-authors = [
-    {name = "Argilla", email = "contact@argilla.io"},
-]
+authors = [{ name = "Argilla", email = "contact@argilla.io" }]
 requires-python = ">= 3.9"
 readme = "README.md"
-license = {text = "Apache 2.0"}
+license = { text = "Apache 2.0" }
 
 dynamic = ["version"]
 
@@ -18,11 +16,10 @@ dependencies = [
     "rich>=10.0.0",
     "datasets>=2.0.0",
     "pillow>=9.5.0",
+    "standardwebhooks>=1.0.0",
 ]
 
-legacy = [
-    "argilla-v1[listeners]",
-]
+legacy = ["argilla-v1[listeners]"]
 
 [build-system]
 requires = ["pdm-backend"]
@@ -71,6 +68,4 @@ dev = [
 test = { cmd = "pytest tests", env_file = ".env.test" }
 lint = "ruff check"
 format = "black ."
-all = {composite = ["format", "lint", "test"]}
-
-
+all = { composite = ["format", "lint", "test"] }

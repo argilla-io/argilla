@@ -17,16 +17,15 @@ from uuid import UUID
 from rq import Retry
 from rq.decorators import job
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from argilla_server.models import Record, Response
 from argilla_server.database import AsyncSessionLocal
-from argilla_server.jobs.queues import DEFAULT_QUEUE
+from argilla_server.jobs.queues import DEFAULT_QUEUE, JOB_TIMEOUT_DISABLED
 from argilla_server.search_engine.base import SearchEngine
 from argilla_server.settings import settings
 from argilla_server.contexts import distribution
 
-JOB_TIMEOUT_DISABLED = -1
 JOB_RECORDS_YIELD_PER = 100
 
 

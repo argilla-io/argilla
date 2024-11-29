@@ -326,7 +326,7 @@ async def search_current_user_dataset_records(
         record.metadata_ = await _filter_record_metadata_for_user(record, current_user)
 
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record),
+            record=RecordSchema.model_validate(record),
             query_score=record_id_score_map[record.id]["query_score"],
         )
 
@@ -382,7 +382,7 @@ async def search_dataset_records(
 
     for record in records:
         record_id_score_map[record.id]["search_record"] = SearchRecord(
-            record=RecordSchema.from_orm(record),
+            record=RecordSchema.model_validate(record),
             query_score=record_id_score_map[record.id]["query_score"],
         )
 

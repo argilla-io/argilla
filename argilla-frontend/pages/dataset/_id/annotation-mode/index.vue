@@ -12,6 +12,7 @@
         >
           <template slot="dialog-cta" v-if="dataset && dataset.createdFromUI">
             <ImportData
+              v-if="isAdminOrOwner"
               :snippet="dataset.createCodeSnippetFromHub(getUser())"
             />
           </template>
