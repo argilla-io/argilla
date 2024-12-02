@@ -139,14 +139,10 @@ allowed_workspaces:
 Then you need to set the two environment variables:
 
 ```bash
-export SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL="http://localhost:8080/realms/argilla/protocol/openid-connect/auth"
-export SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL="http://localhost:8080/realms/argilla/protocol/openid-connect/token"
-export SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=MIIBIj...
-export SOCIAL_AUTH_KEYCLOAK_KEY=argilla
+export SOCIAL_AUTH_OIDC_ENDPOINT=http://localhost:8080/realms/argilla
 ```
 
 - `http://localhost:8080` is your keycloak endpoint in this case the local docker
 - `argilla` is the name of the realm configured above
-- `MIIBIj...` is the public key from the script above `public_key = keycloak_openid.public_key()`
 
 
