@@ -43,6 +43,9 @@ export default {
   optional: "Optional",
   template: "Template",
   rows: "rows",
+  orgOrUsername: "Organization or username",
+  hfToken: "Hugging Face token",
+  private: "Is private",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",
@@ -121,6 +124,7 @@ export default {
     cancel: "Cancel",
     continue: "Continue",
     delete: "Delete",
+    exportToHub: "Export to Hub",
     tooltip: {
       copyToClipboard: "Copy to clipboard",
       copyNameToClipboard: "Copy dataset name to clipboard",
