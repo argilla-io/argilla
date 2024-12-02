@@ -57,7 +57,7 @@ DATA_URL_DEFAULT_IMAGE_FORMAT = "png"
 DATA_URL_DEFAULT_IMAGE_MIMETYPE = "image/png"
 
 HUB_RECORDS_YIELD_PER = 100
-HUB_DATASET_CARD_DEFAULT_TEMPLATE_PATH = os.path.join(Path(__file__).parent, "hub_templates", "README.md.jinja2")
+HUB_DATASET_CARD_TEMPLATE_PATH = os.path.join(Path(__file__).parent, "hub_templates", "README.md.jinja2")
 
 
 class HubDataset:
@@ -219,10 +219,6 @@ class HubDatasetSettingsSchema(BaseModel):
     questions: List[QuestionSchema]
     metadata: List[MetadataPropertySchema]
     vectors: List[VectorSettingsSchema]
-
-
-class HubDatasetCard(DatasetCard):
-    default_template_path = HUB_DATASET_CARD_DEFAULT_TEMPLATE_PATH
 
 
 class HubDatasetExporter:
@@ -429,11 +425,12 @@ class HubDatasetExporter:
             file.write(dataset_settings.model_dump_json(indent=2))
 
     def _create_readme_file(self, directory: str, repo_id: str) -> None:
-        card = HubDatasetCard.from_template(
+        card = DatasetCard.from_template(
             card_data=DatasetCardData(
                 # size_categories=size_categories_parser(dataset_size),
                 tags=["rlfh", "argilla", "human-feedback"],
             ),
+            template_path=HUB_DATASET_CARD_TEMPLATE_PATH,
             repo_id=repo_id,
             argilla_fields=self.dataset.fields,
             argilla_questions=self.dataset.questions,
