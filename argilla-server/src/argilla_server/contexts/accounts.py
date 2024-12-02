@@ -163,7 +163,7 @@ async def update_user(db: AsyncSession, user: User, user_attrs: dict) -> User:
     if "password" in user_attrs:
         user_attrs["password_hash"] = hash_password(user_attrs.pop("password"))
 
-    return await user.update(db, **user_attrs, autocommit=True)
+    return await user.update(db, **user_attrs)
 
 
 async def delete_user(db: AsyncSession, user: User) -> User:
