@@ -226,9 +226,9 @@ class HubDatasetExporter:
         self.dataset = dataset
 
         # NOTE: Using this to bypass datasets generator cache.
-        # self is the only parameter received by _rows_generator function. Setting a different value to self.version
-        # is bypassing the datasets generator cache.
-        self.version = uuid4()
+        # self is the only parameter received by _rows_generator function. Setting a different value to
+        # self.cache_version is bypassing the datasets generator cache.
+        self.cache_version = uuid4()
 
     def export_to(self, name: str, subset: str, split: str, private: bool, token: str) -> None:
         hf_dataset = HFDataset.from_generator(self._rows_generator, split=NamedSplit(split))
