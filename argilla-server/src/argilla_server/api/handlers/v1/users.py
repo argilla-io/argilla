@@ -101,7 +101,7 @@ async def update_user(
 
     await authorize(current_user, UserPolicy.update)
 
-    return await accounts.update_user(db, user, user_update.dict(exclude_unset=True))
+    return await accounts.update_user(db, user, user_update.model_dump(exclude_unset=True))
 
 
 @router.get("/users/{user_id}/workspaces", response_model=Workspaces)
