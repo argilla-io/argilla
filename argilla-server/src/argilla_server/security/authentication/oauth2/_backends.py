@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import os
-from typing import Type, Dict, Any
+from typing import Type, Dict, Any, Optional
 
 from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
@@ -48,6 +48,26 @@ class HuggingfaceOpenId(OpenIdConnectAuth):
     DEFAULT_SCOPE = ["openid", "profile"]
 
 
+class KeycloakOpenId(OpenIdConnectAuth):
+    """Huggingface OpenID Connect authentication backend."""
+
+    name = "keycloak"
+
+    def oidc_endpoint(self) -> str:
+        value = super().oidc_endpoint()
+
+        if value is None:
+            from social_core.utils import setting_name
+
+            name = setting_name("OIDC_ENDPOINT")
+            raise ValueError(
+                "oidc_endpoint needs to be set in the Keycloak configuration. "
+                f"Please set the {name} environment variable."
+            )
+
+        return value
+
+
 _SUPPORTED_BACKENDS = {}
 
 
@@ -56,9 +76,9 @@ def load_supported_backends(extra_backends: list = None) -> Dict[str, Type[BaseO
 
     backends = [
         "argilla_server.security.authentication.oauth2._backends.HuggingfaceOpenId",
+        "argilla_server.security.authentication.oauth2._backends.KeycloakOpenId",
         "social_core.backends.github.GithubOAuth2",
         "social_core.backends.google.GoogleOAuth2",
-        "social_core.backends.keycloak.KeycloakOAuth2",
     ]
 
     if extra_backends:
