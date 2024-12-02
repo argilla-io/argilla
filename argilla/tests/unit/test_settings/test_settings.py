@@ -176,6 +176,14 @@ class TestSettings:
         other_settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
         assert other_settings.distribution == TaskDistribution(min_submitted=1)
 
+    def test_settings_with_modified_task_distribution_value(self):
+        settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
+
+        assert settings.distribution == TaskDistribution(min_submitted=1)
+        settings.distribution.min_submitted = 10
+
+        assert settings.distribution == TaskDistribution(min_submitted=10)
+
     def test_compare_equal_settings(self):
         settings = rg.Settings(fields=[rg.TextField(name="text", title="title")])
         assert settings == settings

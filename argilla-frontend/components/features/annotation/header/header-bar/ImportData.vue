@@ -59,6 +59,7 @@ export default {
     display: block;
     margin-left: auto;
     padding: $base-space * 2;
+    background: var(--bg-accent-grey-2);
     border: 1px solid var(--bg-opacity-10);
     border-radius: $border-radius-m;
     box-shadow: $shadow;

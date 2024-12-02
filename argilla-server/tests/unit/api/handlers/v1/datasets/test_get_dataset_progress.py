@@ -21,7 +21,8 @@ from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import UserRole, RecordStatus
 from argilla_server.search_engine import SearchEngine
 
-from tests.factories import DatasetFactory, RecordFactory, UserFactory
+from tests.factories import DatasetFactory, RecordFactory, UserFactory, DatasetUserFactory
+from tests.unit.conftest import annotator
 
 
 @pytest.mark.asyncio
@@ -33,6 +34,10 @@ class TestGetDatasetProgress:
         self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
     ):
         dataset = await DatasetFactory.create()
+        users = await UserFactory.create_batch(100)
+
+        for user in users:
+            await DatasetUserFactory.create(dataset_id=dataset.id, user_id=user.id)
 
         mock_search_engine.get_dataset_progress.return_value = {
             "total": 5,
@@ -42,11 +47,12 @@ class TestGetDatasetProgress:
 
         response = await async_client.get(self.url(dataset.id), headers=owner_auth_header)
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.json()
         assert response.json() == {
             "completed": 3,
             "pending": 2,
             "total": 5,
+            "users": [{"username": user.username} for user in users],
         }
 
     async def test_get_dataset_progress_with_empty_dataset(
@@ -66,6 +72,7 @@ class TestGetDatasetProgress:
             "completed": 0,
             "pending": 0,
             "total": 0,
+            "users": [],
         }
 
     @pytest.mark.parametrize("user_role", [UserRole.admin, UserRole.annotator])

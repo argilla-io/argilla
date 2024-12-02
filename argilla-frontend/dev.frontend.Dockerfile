@@ -1,6 +1,6 @@
-ARG ARGILLA_SERVER_TAG=main
+ARG ARGILLA_SERVER_TAG=develop
 
-FROM argilla/argilla-quickstart:${ARGILLA_SERVER_TAG}
+FROM argilladev/argilla-hf-spaces:${ARGILLA_SERVER_TAG}
 
 USER root
 

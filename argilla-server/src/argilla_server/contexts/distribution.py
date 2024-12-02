@@ -22,6 +22,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
 from argilla_server.enums import DatasetDistributionStrategy, RecordStatus
 from argilla_server.models import Record
 from argilla_server.search_engine.base import SearchEngine
@@ -57,6 +59,11 @@ async def update_record_status(search_engine: SearchEngine, record_id: UUID) -> 
         await db.commit()
 
         await search_engine.partial_record_update(record, status=record.status)
+
+        await notify_record_event_v1(db, RecordEvent.updated, record)
+
+        if record.is_completed():
+            await notify_record_event_v1(db, RecordEvent.completed, record)
 
         return record
 

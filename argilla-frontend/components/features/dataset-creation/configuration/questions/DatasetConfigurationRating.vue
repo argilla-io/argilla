@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      :class="{ '--error': errors.length }"
+      :class="{ '--error': errors.options?.length }"
       class="dataset-config-rating__input-container"
     >
       <input
@@ -21,7 +21,7 @@
         class="dataset-config-rating__input"
       />
     </div>
-    <Validation v-if="errors.length" :validations="translatedValidations" />
+    <Validation v-if="errors.options?.length" :validations="errors.options" />
   </div>
 </template>
 
@@ -29,7 +29,7 @@
 export default {
   data() {
     return {
-      errors: [],
+      errors: {},
       isDirty: false,
     };
   },
@@ -41,13 +41,6 @@ export default {
     placeholder: {
       type: String,
       default: "",
-    },
-  },
-  computed: {
-    translatedValidations() {
-      return this.errors.map((validation) => {
-        return this.$t(validation);
-      });
     },
   },
   methods: {

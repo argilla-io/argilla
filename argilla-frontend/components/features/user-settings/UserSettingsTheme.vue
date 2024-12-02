@@ -14,7 +14,7 @@
       />
       <label :for="theme">
         <svgicon width="20" height="20" :name="`${theme}-theme`" />
-        {{ theme }}</label
+        {{ $t(`colorSchema.${theme}`) }}</label
       >
     </div>
   </div>
@@ -25,8 +25,8 @@ import "assets/icons/light-theme";
 import "assets/icons/dark-theme";
 import "assets/icons/system-theme";
 import "assets/icons/high-contrast-theme";
+
 export default {
-  name: "ThemeSwitch",
   data() {
     return {
       themes: ["system", "dark", "light", "high-contrast"],
@@ -62,6 +62,7 @@ label {
   &:hover {
     transition: color 0.3s ease;
     color: var(--fg-primary);
+    cursor: pointer;
     .svg-icon {
       transition: fill 0.3s ease;
       fill: var(--fg-primary);

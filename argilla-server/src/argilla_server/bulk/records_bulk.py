@@ -30,6 +30,9 @@ from argilla_server.api.schemas.v1.records_bulk import (
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
+from argilla_server.models.database import DatasetUser
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
 from argilla_server.contexts import distribution
 from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
@@ -69,6 +72,9 @@ class CreateRecordsBulk:
         await _preload_records_relationships_before_index(self._db, records)
         await self._search_engine.index_records(dataset, records)
 
+        for record in records:
+            await notify_record_event_v1(self._db, RecordEvent.created, record)
+
         return RecordsBulk(items=records)
 
     async def _upsert_records_relationships(self, records: List[Record], records_create: List[RecordCreate]) -> None:
@@ -88,7 +94,7 @@ class CreateRecordsBulk:
         upsert_many_suggestions = []
         for idx, (record, suggestions) in enumerate(records_and_suggestions):
             for suggestion_create in suggestions or []:
-                upsert_many_suggestions.append(dict(**suggestion_create.dict(), record_id=record.id))
+                upsert_many_suggestions.append(dict(**suggestion_create.model_dump(), record_id=record.id))
 
         if not upsert_many_suggestions:
             return []
@@ -104,12 +110,21 @@ class CreateRecordsBulk:
         self, records_and_responses: List[Tuple[Record, List[UserResponseCreate]]]
     ) -> List[Response]:
         upsert_many_responses = []
+        datasets_users = set()
         for idx, (record, responses) in enumerate(records_and_responses):
             for response_create in responses or []:
-                upsert_many_responses.append(dict(**response_create.dict(), record_id=record.id))
+                upsert_many_responses.append(dict(**response_create.model_dump(), record_id=record.id))
+                datasets_users.add((response_create.user_id, record.dataset_id))
 
         if not upsert_many_responses:
             return []
+
+        await DatasetUser.upsert_many(
+            self._db,
+            objects=[{"user_id": user_id, "dataset_id": dataset_id} for user_id, dataset_id in datasets_users],
+            constraints=[DatasetUser.user_id, DatasetUser.dataset_id],
+            autocommit=False,
+        )
 
         return await Response.upsert_many(
             self._db,
@@ -141,7 +156,7 @@ class CreateRecordsBulk:
 
     @classmethod
     def _metadata_is_set(cls, record_create: RecordCreate) -> bool:
-        return "metadata" in record_create.__fields_set__
+        return "metadata" in record_create.model_fields_set
 
 
 class UpsertRecordsBulk(CreateRecordsBulk):
@@ -186,6 +201,8 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         await _preload_records_relationships_before_index(self._db, records)
         await self._search_engine.index_records(dataset, records)
 
+        await self._notify_upsert_record_events(records)
+
         return RecordsBulkWithUpdateInfo(
             items=records,
             updated_item_ids=[record.id for record in found_records.values()],
@@ -204,6 +221,13 @@ class UpsertRecordsBulk(CreateRecordsBulk):
         )
 
         return {**records_by_external_id, **records_by_id}
+
+    async def _notify_upsert_record_events(self, records: List[Record]) -> None:
+        for record in records:
+            if record.inserted_at == record.updated_at:
+                await notify_record_event_v1(self._db, RecordEvent.created, record)
+            else:
+                await notify_record_event_v1(self._db, RecordEvent.updated, record)
 
 
 async def _preload_records_relationships_before_index(db: "AsyncSession", records: Sequence[Record]) -> None:

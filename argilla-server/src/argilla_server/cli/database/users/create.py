@@ -21,7 +21,7 @@ from argilla_server.api.schemas.v1.workspaces import WorkspaceCreate
 from argilla_server.contexts import accounts
 from argilla_server.database import AsyncSessionLocal
 from argilla_server.models import User, UserRole
-from argilla_server.pydantic_v1 import constr
+from pydantic import constr
 
 from .utils import get_or_new_workspace
 

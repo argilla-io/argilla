@@ -39,7 +39,8 @@ $base-space-between-records: $base-space;
 $border-radius-s: 5px;
 $border-radius: 5px;
 $border-radius-m: 10px;
-$border-radius-l: 25px;
+$border-radius-l: 16px;
+$border-radius-xl: 25px;
 $border-radius-rounded: 50em;
 
 // Shadows
@@ -47,9 +48,6 @@ $border-radius-rounded: 50em;
 $shadow: 0 8px 20px 0 rgba(0, 0, 0, 0.2);
 $shadow-100: 1px 1px 3px 0px rgba(0, 0, 0, 0.15);
 $shadow-200: 1px 2px 5px 2px rgba(0, 0, 0, 0.15);
-$shadow-300: 0 1px 3px 0 rgba(185, 185, 185, 0.4);
-$shadow-400: 0px 4px 10px rgba(0, 0, 0, 0.1);
-$shadow-500: 0 6px 10px 0 rgba(0, 0, 0, 0.1);
 
 // Input size
 //-----------

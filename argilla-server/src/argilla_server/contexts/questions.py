@@ -42,7 +42,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
         title=question_create.title,
         description=question_create.description,
         required=question_create.required,
-        settings=question_create.settings.dict(),
+        settings=question_create.settings.model_dump(),
         dataset_id=dataset.id,
     )
 
@@ -50,7 +50,7 @@ async def create_question(db: AsyncSession, dataset: Dataset, question_create: Q
 async def update_question(db: AsyncSession, question: Question, question_update: QuestionUpdate) -> Question:
     QuestionUpdateValidator.validate(question_update, question)
 
-    params = question_update.dict(exclude_unset=True)
+    params = question_update.model_dump(exclude_unset=True)
 
     return await question.update(db, **params)
 
