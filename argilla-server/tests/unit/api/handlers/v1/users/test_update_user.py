@@ -135,5 +135,5 @@ class TestUpdateUser:
             },
         )
 
-        assert response.status_code == 422
-        assert response.json() == {"detail": "Username `user1` already exists"}
+        assert response.status_code == 422, response.json()
+        assert response.json() == {"detail": "Username 'user1' already exists"}

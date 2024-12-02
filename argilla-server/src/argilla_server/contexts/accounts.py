@@ -26,7 +26,6 @@ from argilla_server.errors.future import NotUniqueError, UnprocessableEntityErro
 from argilla_server.models import User, Workspace, WorkspaceUser
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.userinfo import UserInfo
-from argilla_server.api.schemas.v1.users import UserUpdate
 
 
 async def create_workspace_user(db: AsyncSession, workspace_user_attrs: dict) -> WorkspaceUser:
@@ -156,7 +155,15 @@ async def create_user_with_random_password(
 
 
 async def update_user(db: AsyncSession, user: User, user_attrs: dict) -> User:
-    return await user.update(db, **user_attrs)
+    username = user_attrs.get("username")
+    if username is not None and username != user.username:
+        if await get_user_by_username(db, username):
+            raise UnprocessableEntityError(f"Username {username!r} already exists")
+
+    if "password" in user_attrs:
+        user_attrs["password_hash"] = hash_password(user_attrs.pop("password"))
+
+    return await user.update(db, **user_attrs, autocommit=True)
 
 
 async def delete_user(db: AsyncSession, user: User) -> User:
