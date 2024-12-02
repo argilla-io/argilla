@@ -11,18 +11,22 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-import os
-from collections import OrderedDict
-from typing import AsyncGenerator, Optional
 
-from sqlalchemy import event, make_url
+import os
+
+from collections import OrderedDict
+from typing import AsyncGenerator, Optional, Generator
+
+from sqlalchemy import create_engine, event, make_url
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.interfaces import IsolationLevel
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from sqlalchemy.dialects.sqlite.aiosqlite import AsyncAdapt_aiosqlite_connection
+from sqlalchemy.orm import sessionmaker, Session
+
+from argilla_server.settings import settings
 
 import argilla_server
-from argilla_server.settings import settings
 
 
 ALEMBIC_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(argilla_server.__file__), "alembic.ini"))
@@ -44,15 +48,37 @@ TAGGED_REVISIONS = OrderedDict(
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
-    if isinstance(dbapi_connection, AsyncAdapt_aiosqlite_connection):
+    if settings.database_is_sqlite:
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys = ON")
         cursor.close()
 
 
+def database_url_sync() -> str:
+    """
+    Returns a "sync" version of the configured database URL. This may be useful in cases we don't need
+    an asynchronous connection, like running database migration inside the alembic script.
+    """
+    database_url = make_url(settings.database_url)
+    return settings.database_url.replace(f"+{database_url.get_driver_name()}", "")
+
+
+sync_engine = create_engine(database_url_sync(), **settings.database_engine_args)
+
 async_engine = create_async_engine(settings.database_url, **settings.database_engine_args)
 
+SyncSessionLocal = sessionmaker(autocommit=False, expire_on_commit=False, bind=sync_engine)
+
 AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
+
+
+def get_sync_db() -> Generator[Session, None, None]:
+    db = SyncSessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
@@ -70,12 +96,3 @@ async def _get_async_db(isolation_level: Optional[IsolationLevel] = None) -> Asy
         yield db
     finally:
         await db.close()
-
-
-def database_url_sync() -> str:
-    """
-    Returns a "sync" version of the configured database URL. This may be useful in cases we don't need
-    an asynchronous connection, like running database migration inside the alembic script.
-    """
-    database_url = make_url(settings.database_url)
-    return settings.database_url.replace(f"+{database_url.get_driver_name()}", "")
