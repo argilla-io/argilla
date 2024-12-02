@@ -3,10 +3,13 @@ import { ref, useFetch } from "@nuxtjs/composition-api";
 import { useRoutes, useFocusTab } from "~/v1/infrastructure/services";
 import { GetDatasetCreationUseCase } from "~/v1/domain/usecases/get-dataset-creation-use-case";
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
+import { GetWorkspacesUseCase } from "~/v1/domain/usecases/get-workspaces-use-case";
 import { useDatasets } from "~/v1/infrastructure/storage/DatasetsStorage";
 import { useRole } from "~/v1/infrastructure/services/useRole";
 
 export const useHomeViewModel = () => {
+  const workspaces = ref<any[]>([]);
+  const getWorkspacesUseCase = useResolve(GetWorkspacesUseCase);
   const { isAdminOrOwnerRole } = useRole();
   const isLoadingDatasets = ref(false);
   const { goToImportDatasetFromHub } = useRoutes();
@@ -19,8 +22,9 @@ export const useHomeViewModel = () => {
     await onLoadDatasets();
   });
 
-  useFetch(() => {
+  useFetch(async () => {
     loadDatasets();
+    workspaces.value = await getWorkspacesUseCase.execute();
   });
 
   const getNewDatasetByRepoId = async (repositoryId: string) => {
@@ -73,6 +77,7 @@ export const useHomeViewModel = () => {
 
   return {
     datasets,
+    workspaces,
     isLoadingDatasets,
     getNewDatasetByRepoId,
     isAdminOrOwnerRole,

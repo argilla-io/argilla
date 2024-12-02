@@ -2,7 +2,7 @@
   <div class="datasets-empty">
     <span class="datasets-empty__message" v-text="$t('home.none')" />
     <div class="datasets-empty__cards" v-if="isAdminOrOwnerRole">
-      <DatasetListCard
+      <DatasetsEmptyCard
         :title="$t('home.importTitle')"
         :text="$t('home.importText')"
         :button-text="$t('home.importButton')"

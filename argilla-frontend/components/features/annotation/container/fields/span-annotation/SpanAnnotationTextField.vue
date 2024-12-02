@@ -1,7 +1,7 @@
 <template>
   <div
     class="text_field_component"
-    :key="name"
+    :key="id"
     @mouseenter.stop="mouseEnter = true"
     @mouseleave.stop="mouseEnter = false"
     aria-label="Data Record Field"
@@ -35,7 +35,7 @@
       </BaseActionTooltip>
     </div>
     <div
-      :id="`fields-content-${name}`"
+      :id="`fields-content-${id}`"
       class="text_field_component__area --body1"
       :aria-label="'Data entry for Field: ' + title"
     >
@@ -97,7 +97,7 @@
             [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
               background: {{color.palette.veryDark}};
             }
-            ::highlight(search-text-highlight-{{name}}) {
+            ::highlight(search-text-highlight-{{id}}) {
               color: #ff675f;
             }
           </style>
@@ -110,13 +110,8 @@
 <script>
 import { useSpanAnnotationTextFieldViewModel } from "./useSpanAnnotationTextFieldViewModel";
 export default {
-  name: "SpanAnnotationTextField",
   props: {
     id: {
-      type: String,
-      required: true,
-    },
-    name: {
       type: String,
       required: true,
     },

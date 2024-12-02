@@ -28,12 +28,9 @@
       <PersistentStorageBanner class="home__banner" />
     </template>
     <template v-slot:page-content>
-      <h1 class="home__title" v-text="$t('home.argillaDatasets')" />
-      <BaseLoading class="home__title" v-if="isLoadingDatasets" />
-      <DatasetsTable
-        v-else
-        class="home__table"
-        ref="table"
+      <BaseLoading v-if="isLoadingDatasets" />
+      <DatasetList
+        :workspaces="workspaces"
         :datasets="datasets.datasets"
         @on-click-card="cardAction"
       />
@@ -106,7 +103,7 @@ export default {
   methods: {
     onBreadcrumbAction(e) {
       if (e === "clearFilters") {
-        this.$refs.table?.clearFilters();
+        this.$refs.datasetList?.clearFilters();
       }
     },
     cardAction(action) {
@@ -129,11 +126,6 @@ export default {
 
 <style lang="scss" scoped>
 .home {
-  &__title {
-    margin: 0;
-    @include font-size(20px);
-    font-weight: 500;
-  }
   &__main {
     display: flex;
     flex-direction: column;
@@ -178,6 +170,7 @@ export default {
       display: flex;
       flex-direction: column;
       gap: $base-space * 2;
+      margin-bottom: $base-space;
     }
     &__link {
       margin-top: $base-space * 4;

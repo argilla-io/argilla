@@ -26,7 +26,7 @@ from argilla._resource import Resource
 from argilla.settings._field import Field, _field_from_dict, _field_from_model, FieldBase
 from argilla.settings._io import build_settings_from_repo_id
 from argilla.settings._metadata import MetadataType, MetadataField, MetadataPropertyBase
-from argilla.settings._question import QuestionType, question_from_model, question_from_dict, QuestionPropertyBase
+from argilla.settings._question import QuestionType, question_from_model, _question_from_dict, QuestionBase
 from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._templates import DefaultSettingsMixin
 from argilla.settings._vector import VectorField
@@ -73,12 +73,12 @@ class Settings(DefaultSettingsMixin, Resource):
         super().__init__(client=_dataset._client if _dataset else None)
 
         self._dataset = _dataset
-        self._distribution = distribution
+        self._distribution = distribution or TaskDistribution.default()
         self._mapping = mapping
         self.__guidelines = self.__process_guidelines(guidelines)
         self.__allow_extra_metadata = allow_extra_metadata
 
-        self.__questions = QuestionsProperties(self, questions)
+        self.__questions = SettingsProperties(self, questions)
         self.__fields = SettingsProperties(self, fields)
         self.__vectors = SettingsProperties(self, vectors)
         self.__metadata = SettingsProperties(self, metadata)
@@ -101,7 +101,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
     @questions.setter
     def questions(self, questions: List[QuestionType]):
-        self.__questions = QuestionsProperties(self, questions)
+        self.__questions = SettingsProperties(self, questions)
 
     @property
     def vectors(self) -> "SettingsProperties":
@@ -137,7 +137,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
     @property
     def distribution(self) -> TaskDistribution:
-        return self._distribution or TaskDistribution.default()
+        return self._distribution
 
     @distribution.setter
     def distribution(self, value: TaskDistribution) -> None:
@@ -220,6 +220,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
         self._update_dataset_related_attributes()
         self.__fields._update()
+        self.__questions._update()
         self.__vectors._update()
         self.__metadata._update()
         self.__questions._update()
@@ -314,7 +315,7 @@ class Settings(DefaultSettingsMixin, Resource):
 
         if isinstance(property, FieldBase):
             self.fields.add(property)
-        elif isinstance(property, QuestionPropertyBase):
+        elif isinstance(property, QuestionBase):
             self.questions.add(property)
         elif isinstance(property, VectorField):
             self.vectors.add(property)
@@ -349,7 +350,7 @@ class Settings(DefaultSettingsMixin, Resource):
         allow_extra_metadata = settings_dict.get("allow_extra_metadata")
         mapping = settings_dict.get("mapping")
 
-        questions = [question_from_dict(question) for question in settings_dict.get("questions", [])]
+        questions = [_question_from_dict(question) for question in settings_dict.get("questions", [])]
         fields = [_field_from_dict(field) for field in fields]
         vectors = [VectorField.from_dict(vector) for vector in vectors]
         metadata = [MetadataField.from_dict(metadata) for metadata in metadata]
@@ -566,34 +567,3 @@ class SettingsProperties(Sequence[Property]):
         """Return a string representation of the object."""
 
         return f"{repr([prop for prop in self])}"
-
-
-class QuestionsProperties(SettingsProperties[QuestionType]):
-    """
-    This class is used to align questions with the rest of the settings.
-
-    Since questions are not aligned with the Resource class definition, we use this
-    class to work with questions as we do with fields, vectors, or metadata (specially when creating questions).
-
-    Once issue https://github.com/argilla-io/argilla/issues/4931 is tackled, this class should be removed.
-    """
-
-    def _create(self):
-        for question in self:
-            try:
-                self._create_question(question)
-            except ArgillaAPIError as e:
-                raise SettingsError(f"Failed to create question {question.name}") from e
-
-    def _update(self):
-        pass
-
-    def _delete(self):
-        pass
-
-    def _create_question(self, question: QuestionType) -> None:
-        question_model = self._settings._client.api.questions.create(
-            dataset_id=self._settings.dataset.id,
-            question=question.api_model(),
-        )
-        question._model = question_model
