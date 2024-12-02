@@ -3,6 +3,8 @@
     <BaseButton
       class="primary export-to-hub__button"
       @click.prevent="isDialogVisible = !isDialogVisible"
+      :loading="isExporting"
+      :disabled="isExporting"
       >{{ $t("button.exportToHub") }}</BaseButton
     >
     <transition name="fade" appear>
