@@ -16,7 +16,7 @@ import uuid
 import pytest
 
 from argilla import User, Argilla, Workspace
-from argilla._exceptions import UnprocessableEntityError
+from argilla._exceptions import UnprocessableEntityError, ConflictError
 
 
 class TestManageUsers:
@@ -56,7 +56,7 @@ class TestManageUsers:
         user.first_name = "Updated First Name"
         user.last_name = "Updated Last Name"
         user.role = "admin"
-        client.users.update(user)
+        user.update()
 
         updated_user = client.users(id=user.id)
         assert updated_user.username == updated_username
@@ -72,4 +72,4 @@ class TestManageUsers:
 
         user2.username = user1.username
         with pytest.raises(expected_exception=UnprocessableEntityError):
-            client.users.update(user2)
+            user2.update()
