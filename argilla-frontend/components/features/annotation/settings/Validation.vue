@@ -6,7 +6,7 @@
         class="--error-message"
         v-for="error in validations"
         :key="error"
-        v-html="error"
+        v-html="$t(error)"
       />
     </template>
   </div>

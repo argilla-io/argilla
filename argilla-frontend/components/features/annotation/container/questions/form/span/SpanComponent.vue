@@ -76,7 +76,7 @@ export default {
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: $base-space * 1.5;
 }
 .question {
   &__warning {

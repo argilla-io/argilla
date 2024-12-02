@@ -56,28 +56,7 @@ const config: NuxtConfig = {
   css: ["~assets/scss/base/base.scss"],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
-  plugins: [
-    { src: "~/plugins/logo" },
-
-    { src: "~/plugins/directives" },
-
-    { src: "~/plugins/di" },
-
-    { src: "~/plugins/language" },
-
-    { src: "~/plugins/plugins/axios.ts" },
-    { src: "~/plugins/plugins/axios-cache.ts" },
-    { src: "~/plugins/plugins/svg-icon.js" },
-    { src: "~/plugins/plugins/click-outside.js" },
-    { src: "~/plugins/plugins/toast.ts" },
-    { src: "~/plugins/plugins/copy-to-clipboard.js" },
-    { src: "~/plugins/plugins/filters.js" },
-    { src: "~/plugins/plugins/vue-draggable.js" },
-    { src: "~/plugins/plugins/platform.ts" },
-    { src: "~/plugins/plugins/language.ts" },
-    { src: "~/plugins/plugins/color-schema" },
-    { src: "~/plugins/plugins/color-generator.ts" },
-  ],
+  plugins: [{ src: "~/plugins" }],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
   components: [

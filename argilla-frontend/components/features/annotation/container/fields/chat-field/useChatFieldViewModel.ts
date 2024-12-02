@@ -2,10 +2,10 @@ import { onMounted, watch } from "vue-demi";
 import { useSearchTextHighlight } from "../useSearchTextHighlight";
 
 export const useChatFieldViewModel = (props: {
-  name: string;
+  id: string;
   searchText: string;
 }) => {
-  const { highlightText } = useSearchTextHighlight(props.name);
+  const { highlightText } = useSearchTextHighlight(props.id);
 
   watch(
     () => props.searchText,
