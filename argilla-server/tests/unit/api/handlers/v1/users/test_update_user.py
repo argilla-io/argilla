@@ -15,6 +15,7 @@
 import pytest
 from uuid import UUID, uuid4
 from argilla_server.constants import API_KEY_HEADER_NAME
+from argilla_server.contexts import accounts
 from argilla_server.enums import UserRole
 from argilla_server.models import User
 from httpx import AsyncClient
@@ -54,6 +55,23 @@ class TestUpdateUser:
         assert updated_user.username == "updated_username"
         assert updated_user.role == UserRole.admin
         assert updated_user.password_hash != user_password_hash
+
+    async def test_update_user_password(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
+        user = await UserFactory.create()
+        old_password_hash = user.password_hash
+
+        response = await async_client.patch(
+            self.url(user.id),
+            headers=owner_auth_header,
+            json={
+                "password": "new_password",
+            },
+        )
+
+        assert response.status_code == 200
+
+        assert accounts.verify_password("new_password", user.password_hash) is True
+        assert accounts.verify_password("new_password", old_password_hash) is False
 
     async def test_update_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
         user = await UserFactory.create()
