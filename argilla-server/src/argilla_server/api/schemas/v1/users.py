@@ -18,6 +18,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, constr, ConfigDict
 
+from argilla_server.api.schemas.v1.commons import UpdateSchema
 from argilla_server.enums import UserRole
 
 USER_PASSWORD_MIN_LENGTH = 8
@@ -65,7 +66,9 @@ class UserCreate(BaseModel):
     password: UserPassword
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(UpdateSchema):
+    __non_nullable_fields__ = {"first_name", "username", "role", "password"}
+
     first_name: Optional[UserFirstName] = None
     last_name: Optional[UserLastName] = None
     username: Optional[UserUsername] = None
