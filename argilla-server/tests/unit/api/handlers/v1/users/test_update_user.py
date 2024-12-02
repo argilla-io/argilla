@@ -32,6 +32,8 @@ class TestUpdateUser:
     async def test_update_user(self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict):
         user = await UserFactory.create()
 
+        user_password_hash = user.password_hash
+
         response = await async_client.patch(
             self.url(user.id),
             headers=owner_auth_header,
@@ -40,6 +42,7 @@ class TestUpdateUser:
                 "last_name": "Updated Last Name",
                 "username": "updated_username",
                 "role": UserRole.admin,
+                "password": "new_password",
             },
         )
 
@@ -50,6 +53,7 @@ class TestUpdateUser:
         assert updated_user.last_name == "Updated Last Name"
         assert updated_user.username == "updated_username"
         assert updated_user.role == UserRole.admin
+        assert updated_user.password_hash != user_password_hash
 
     async def test_update_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
         user = await UserFactory.create()
@@ -131,9 +135,121 @@ class TestUpdateUser:
             self.url(user2.id),
             headers=owner_auth_header,
             json={
-                "username": "user1",
+                "username": user1.username,
             },
         )
 
         assert response.status_code == 422, response.json()
         assert response.json() == {"detail": "Username 'user1' already exists"}
+
+    async def test_update_user_with_none_first_name(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        user = await UserFactory.create()
+
+        response = await async_client.patch(
+            self.url(user.id),
+            headers=owner_auth_header,
+            json={
+                "first_name": None,
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body"],
+                            "msg": "Value error, The following keys must have non-null values: first_name",
+                            "type": "value_error",
+                        }
+                    ]
+                },
+            }
+        }
+
+    async def test_update_user_with_none_last_name(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        user = await UserFactory.create()
+
+        response = await async_client.patch(
+            self.url(user.id),
+            headers=owner_auth_header,
+            json={
+                "last_name": None,
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(user.id),
+            "api_key": user.api_key,
+            "first_name": user.first_name,
+            "last_name": None,
+            "username": user.username,
+            "role": user.role,
+            "inserted_at": user.inserted_at.isoformat(),
+            "updated_at": user.updated_at.isoformat(),
+        }
+
+    async def test_update_user_with_none_username(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        user = await UserFactory.create()
+
+        response = await async_client.patch(
+            self.url(user.id),
+            headers=owner_auth_header,
+            json={
+                "username": None,
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body"],
+                            "msg": "Value error, The following keys must have non-null values: username",
+                            "type": "value_error",
+                        }
+                    ]
+                },
+            }
+        }
+
+    async def test_update_user_with_none_password(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        user = await UserFactory.create()
+
+        response = await async_client.patch(
+            self.url(user.id),
+            headers=owner_auth_header,
+            json={
+                "password": None,
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "code": "argilla.api.errors::ValidationError",
+                "params": {
+                    "errors": [
+                        {
+                            "loc": ["body"],
+                            "msg": "Value error, The following keys must have non-null values: password",
+                            "type": "value_error",
+                        }
+                    ]
+                },
+            }
+        }
