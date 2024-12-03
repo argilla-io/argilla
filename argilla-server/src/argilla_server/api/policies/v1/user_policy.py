@@ -29,6 +29,10 @@ class UserPolicy:
         return actor.is_owner
 
     @classmethod
+    async def update(cls, actor: User) -> bool:
+        return actor.is_owner
+
+    @classmethod
     async def delete(cls, actor: User) -> bool:
         return actor.is_owner
 
