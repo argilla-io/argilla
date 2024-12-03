@@ -21,9 +21,10 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const notify = useNotifications();
   const debounce = useDebounce(3000);
   const { get, set } = useLocalStorage();
+  const isDialogOpen = ref(false);
   const exportToHubForm = ref({
-    orgOrUsername: user.value.userName,
-    datasetName: dataset.name,
+    orgOrUsername: "",
+    datasetName: "",
     hfToken: "",
     isPrivate: false,
   });
@@ -75,6 +76,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const exportToHub = async () => {
     try {
+      closeDialog();
       isExporting.value = true;
 
       await exportToHubUseCase.execute(dataset, {
@@ -89,11 +91,29 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     }
   };
 
+  const openDialog = () => {
+    exportToHubForm.value = {
+      orgOrUsername: user.value.userName,
+      datasetName: dataset.name,
+      hfToken: "",
+      isPrivate: false,
+    };
+
+    isDialogOpen.value = true;
+  };
+
+  const closeDialog = () => {
+    isDialogOpen.value = false;
+  };
+
   onBeforeMount(() => {
     watchExportStatus();
   });
 
   return {
+    isDialogOpen,
+    closeDialog,
+    openDialog,
     isExporting,
     exportToHub,
     exportToHubForm,

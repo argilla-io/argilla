@@ -2,14 +2,14 @@
   <div class="export-to-hub" @keydown.stop="">
     <BaseButton
       class="primary export-to-hub__button"
-      @click.prevent="isDialogVisible = !isDialogVisible"
+      @click.prevent="openDialog"
       :loading="isExporting"
       :disabled="isExporting"
       >{{ $t("button.exportToHub") }}</BaseButton
     >
     <transition name="fade" appear>
       <dialog
-        v-if="isDialogVisible"
+        v-if="isDialogOpen"
         v-click-outside="closeDialog"
         class="export-to-hub__dialog"
       >
@@ -42,9 +42,10 @@
           <div class="export-to-hub__form__group">
             <label v-text="$t('hfToken')" />
             <input
-              type="text"
-              v-model="exportToHubForm.hfToken"
               class="input"
+              type="password"
+              autocomplete="one-time-code"
+              v-model="exportToHubForm.hfToken"
               :placeholder="$t('hfToken')"
             />
           </div>
@@ -52,11 +53,9 @@
           <div>
             <BaseButton
               class="primary export-to-hub__button"
-              :loading="isExporting"
-              :disabled="isExporting"
               @click.prevent="exportToHub"
             >
-              Export to hub
+              Export
             </BaseButton>
           </div>
         </div>
@@ -73,16 +72,6 @@ export default {
     dataset: {
       type: Object,
       required: true,
-    },
-  },
-  data() {
-    return {
-      isDialogVisible: false,
-    };
-  },
-  methods: {
-    closeDialog() {
-      this.isDialogVisible = false;
     },
   },
   setup(props) {
