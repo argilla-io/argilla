@@ -7,7 +7,6 @@
     <span class="status-counter__counter" v-text="value" />
   </li>
 </template>
-
 <script>
 export default {
   props: {
