@@ -1,10 +1,11 @@
 <template>
   <div class="import-data">
     <BaseButton
+      :data-title="$t('datasetCreation.addRecords')"
       class="primary import-data__button"
       @click.prevent="visibleSnippet = !visibleSnippet"
-      >{{ $t("datasetCreation.importData") }}</BaseButton
-    >
+      ><svgicon name="plus"
+    /></BaseButton>
     <transition name="fade" appear>
       <dialog
         v-if="visibleSnippet"
@@ -59,6 +60,7 @@ export default {
     display: block;
     margin-left: auto;
     padding: $base-space * 2;
+    background: var(--bg-accent-grey-1);
     border: 1px solid var(--bg-opacity-10);
     border-radius: $border-radius-m;
     box-shadow: $shadow;
@@ -80,7 +82,9 @@ export default {
     right: $base-space;
   }
   &__button.button {
+    padding: $base-space * 1.45;
     background: hsl(0, 1%, 18%);
+    overflow: visible;
     &:hover {
       background: hsl(0, 1%, 22%);
     }
@@ -93,5 +97,10 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+[data-title] {
+  position: relative;
+  overflow: visible;
+  @include tooltip-mini("bottom", 8px);
 }
 </style>

@@ -22,6 +22,7 @@ export default {
   description: "Descripción",
   labels: "Etiquetas",
   order: "Orden",
+  owner: "Propietario",
   useMarkdown: "Usar Markdown",
   suggestionFirst: "Mostrar sugerencias primero",
   visibleForAnnotators: "Visible para los anotadores",
@@ -314,6 +315,13 @@ export default {
     none: "Ninguno",
     noWorkspaces:
       "Por favor, sigue <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>esta guía</a> para crear un espacio de trabajo",
+  },
+  exportToHub: {
+    dislogTitle: "Push to Hugging Face Hub",
+    ownerTooltip:
+      "Only a valid Hugging Face organization or username can export the dataset to the Hub",
+    tokenTooltip:
+      "You can manage your access tokens in your <a href='https://huggingface.co/settings/tokens' target='_blank'> Hugging Face settings</a>",
   },
   config: {
     field: {
