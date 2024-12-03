@@ -38,7 +38,7 @@ class JobStatus {
 
   get isRunning() {
     return (
-      !this.isFinished && !this.isFailed && !this.isStopped && !this.isCanceled
+      this.isStarted || this.isScheduled || this.isQueued || this.isDeferred
     );
   }
 }

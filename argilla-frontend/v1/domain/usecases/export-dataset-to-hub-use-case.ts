@@ -17,7 +17,10 @@ export class ExportDatasetToHubUseCase {
 
     this.localStorage.set("datasetExportJobIds", {
       ...datasetExportJobIds,
-      [dataset.id]: jobId,
+      [dataset.id]: {
+        jobId,
+        datasetName: exportSettings.name,
+      },
     });
   }
 }
