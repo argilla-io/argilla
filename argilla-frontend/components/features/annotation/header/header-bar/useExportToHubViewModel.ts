@@ -67,7 +67,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
       notify.notify({
         type: job.isFinished ? "success" : "danger",
         message: job.isFinished ? "Dataset exported to Hub" : "Export failed",
-        buttonText: "Go to Hub",
+        buttonText: job.isFinished ? "Go to Hub" : undefined,
         onClick: job.isFinished
           ? () => {
               window.open(
