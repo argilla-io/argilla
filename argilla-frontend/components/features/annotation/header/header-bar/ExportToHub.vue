@@ -1,5 +1,5 @@
 <template>
-  <div class="export-to-hub">
+  <div class="export-to-hub" @keydown.stop="">
     <BaseButton
       class="primary export-to-hub__button"
       @click.prevent="isDialogVisible = !isDialogVisible"
