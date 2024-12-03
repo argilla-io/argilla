@@ -14,6 +14,7 @@ export default {
   share: "Share",
   expand: "Expand",
   copied: "Copied",
+  copiedToClipboard: "Copied to clipboard",
   copyLink: "Copy link",
   copyRecord: "Copy record",
   refresh: "Refresh",

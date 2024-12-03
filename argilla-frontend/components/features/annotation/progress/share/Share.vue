@@ -2,11 +2,12 @@
   <div class="share">
     <BaseButton
       class="primary"
+      :title="$t('button.tooltip.copyToClipboard')"
       @mouseover="openDialog"
       @mouseleave="closeDialog"
       @click.stop="copyOnClipboard"
     >
-      Share your progress
+      {{ $t("share") }}
     </BaseButton>
     <transition name="fade" appear>
       <dialog
@@ -14,7 +15,10 @@
         class="share__dialog"
         v-click-outside="closeDialog"
       >
-        <img :src="imageLink" />
+        <div>
+          <img :src="imageLink" />
+          <p class="share__link" v-text="imageLink" />
+        </div>
       </dialog>
     </transition>
   </div>
@@ -38,7 +42,7 @@ export default {
       this.$copyToClipboard(this.imageLink);
 
       this.$notification.notify({
-        message: "Copied to clipboard",
+        message: this.$t("copiedToClipboard"),
         type: "success",
       });
     },
@@ -64,6 +68,7 @@ export default {
     left: auto;
     width: auto;
     min-width: 360px;
+    max-width: 360px;
     bottom: calc(100% + $base-space + 2px);
     display: block;
     padding: $base-space * 2;
@@ -71,6 +76,15 @@ export default {
     border-radius: $border-radius-m;
     box-shadow: $shadow;
     z-index: 2;
+  }
+
+  &__link {
+    width: 95%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 10px;
+    color: var(--fg-secondary);
   }
 }
 </style>
