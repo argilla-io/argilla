@@ -1,6 +1,7 @@
 <template>
   <div>
     <BaseLoading v-if="isLoadingDataset" />
+    <Share />
     <AnnotationPage>
       <template v-slot:header>
         <HeaderFeedbackTask
