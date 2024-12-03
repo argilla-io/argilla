@@ -1,7 +1,6 @@
 import { useResolve } from "ts-injecty";
 import { onBeforeMount, ref } from "vue";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
-import { JobId } from "~/v1/domain/services/IDatasetRepository";
 import { ExportDatasetToHubUseCase } from "~/v1/domain/usecases/export-dataset-to-hub-use-case";
 import { JobRepository } from "~/v1/infrastructure/repositories";
 import {
@@ -21,6 +20,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const notify = useNotifications();
   const debounce = useDebounce(3000);
   const { get, set } = useLocalStorage();
+
   const isDialogOpen = ref(false);
   const exportToHubForm = ref({
     orgOrUsername: "",
@@ -32,12 +32,16 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const exportToHubUseCase = useResolve(ExportDatasetToHubUseCase);
   const jobRepository = useResolve(JobRepository);
 
-  const datasetExporting =
+  const getDatasetExporting = () =>
     get<Record<string, string>>("datasetExportJobIds") ?? {};
-  const isExporting = ref(!!datasetExporting[dataset.id]);
 
-  const verifyExportStatus = async (jobId: JobId) => {
+  const isExporting = ref(!!getDatasetExporting()[dataset.id]);
+
+  const verifyExportStatus = async () => {
     try {
+      const datasetExporting = getDatasetExporting();
+      const jobId = datasetExporting[dataset.id];
+
       if (!jobId) return;
 
       const job = await jobRepository.getJobStatus(jobId);
@@ -65,10 +69,10 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   };
 
   const watchExportStatus = async () => {
-    while (datasetExporting[dataset.id]) {
+    while (isExporting.value) {
       await debounce.wait();
 
-      await verifyExportStatus(datasetExporting[dataset.id]);
+      await verifyExportStatus();
     }
 
     debounce.stop();
