@@ -174,7 +174,9 @@ nav:
         - Import and export datasets: how_to_guides/import_export.md
       - Advanced:
         - Custom fields with layout templates: how_to_guides/custom_fields.md
-        - Use webhooks to respond to server events: how_to_guides/webhooks.md
+        - Use webhooks to respond to server events:
+            - how_to_guides/webhooks.md
+            - Webhooks internals: how_to_guides/webhooks_internals.md
         - Use Markdown to format rich content: how_to_guides/use_markdown_to_format_rich_content.md
         - Migrate users, workspaces and datasets to Argilla V2: how_to_guides/migrate_from_legacy_datasets.md
   - Tutorials:

@@ -1,11 +1,15 @@
 <template>
-  <BaseBadgeSkeleton v-if="isQuestionsLoading" :quantity="3" />
+  <BaseBadgeSkeleton font-size="11px" v-if="isQuestionsLoading" :quantity="3" />
   <div class="questions" v-else>
-    <BaseBadge
-      v-for="question in questions"
-      :key="question.id"
-      :text="$t(question.type)"
-    />
+    <div class="questions__badges">
+      <BaseBadge
+        v-for="question in questions"
+        :key="question.id"
+        :text="$t(question.type)"
+        font-size="11px"
+        color="var(--fg-label)"
+      />
+    </div>
   </div>
 </template>
 <script>
@@ -24,10 +28,14 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .questions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: calc($base-space / 2);
+  &__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc($base-space / 2);
+  }
 }
 </style>
