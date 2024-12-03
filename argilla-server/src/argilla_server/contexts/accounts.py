@@ -155,6 +155,18 @@ async def create_user_with_random_password(
     return await create_user(db, user_attrs, workspaces)
 
 
+async def update_user(db: AsyncSession, user: User, user_attrs: dict) -> User:
+    username = user_attrs.get("username")
+    if username is not None and username != user.username:
+        if await get_user_by_username(db, username):
+            raise UnprocessableEntityError(f"Username {username!r} already exists")
+
+    if "password" in user_attrs:
+        user_attrs["password_hash"] = hash_password(user_attrs.pop("password"))
+
+    return await user.update(db, **user_attrs)
+
+
 async def delete_user(db: AsyncSession, user: User) -> User:
     return await user.delete(db)
 
