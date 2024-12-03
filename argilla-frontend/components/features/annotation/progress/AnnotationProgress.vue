@@ -24,6 +24,7 @@
     />
     <StatusCounter
       v-else
+      :rainbow="true"
       class="my-progress__status"
       :color="RecordStatus.submitted.color"
       :name="RecordStatus.submitted.name"
