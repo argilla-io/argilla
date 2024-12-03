@@ -55,7 +55,7 @@ export default {
     left: auto;
     width: auto;
     min-width: 360px;
-    top: calc(100% + $base-space);
+    top: calc(100% + $base-space + 2px);
     display: block;
     margin-left: auto;
     padding: $base-space * 2;
