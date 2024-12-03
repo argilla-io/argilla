@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import os
-from typing import Type, Dict, Any, Optional
+from typing import Type, Dict, Any, Optional, List
 
 from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
@@ -66,6 +66,41 @@ class KeycloakOpenId(OpenIdConnectAuth):
             )
 
         return value
+
+    def get_user_details(self, response: Dict[str, Any]) -> Dict[str, Any]:
+        user = super().get_user_details(response)
+
+        if role := self._extract_role(response):
+            user["role"] = role
+
+        if available_workspaces := self._extract_available_workspaces(response):
+            user["available_workspaces"] = available_workspaces
+
+        return user
+
+    def _extract_role(self, response: Dict[str, Any]) -> Optional[str]:
+        roles = self._read_realm_roles(response)
+
+        for role in roles:
+            if role.startswith("argilla_role:"):
+                role = role.split(":")[1]
+                return role
+
+    def _extract_available_workspaces(self, response: Dict[str, Any]) -> List[str]:
+        roles = self._read_realm_roles(response)
+
+        workspaces = []
+        for role in roles:
+            if role.startswith("argilla_workspace:"):
+                workspace = role.split(":")[1]
+                workspaces.append(workspace)
+
+        return workspaces
+
+    @classmethod
+    def _read_realm_roles(cls, response) -> List[str]:
+        realm_access = response.get("realm_access") or {}
+        return realm_access.get("roles") or []
 
 
 _SUPPORTED_BACKENDS = {}
