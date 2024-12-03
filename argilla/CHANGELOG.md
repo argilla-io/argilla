@@ -37,6 +37,7 @@ These are the section headers that we use:
 
 ### Changed
 
+- User parameters can now be updated using the client ([#5614](https://github.com/argilla-io/argilla/issues/5614))
 - Changed `Dataset.from_hub` method to open configure URL when `settings="ui"`. ([#5622](https://github.com/argilla-io/argilla/pull/5622))
 - Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
 - Added support for `with_vectors` while fetching records along with a search query. ([#5638](https://github.com/argilla-io/argilla/pull/5638))
