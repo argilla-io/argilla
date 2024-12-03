@@ -15,7 +15,10 @@
       <slot name="badge"></slot>
     </div>
     <div class="topbar--right">
-      <slot name="dialog-cta"></slot>
+      <div class="topbar__buttons">
+        <slot name="topbar-buttons" />
+      </div>
+
       <user-avatar-tooltip />
     </div>
   </BaseTopbarBrand>
@@ -50,17 +53,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.topbar--right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: $base-space * 4;
-  margin-left: auto;
-  @include media("<=tablet") {
-    gap: $base-space;
+.topbar {
+  &__buttons {
+    display: flex;
+    align-items: center;
+    gap: $base-space * 2;
   }
-}
-.topbar--left {
-  margin-right: auto;
+  &--right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: $base-space * 4;
+    margin-left: auto;
+    @include media("<=tablet") {
+      gap: $base-space;
+    }
+  }
+  &--left {
+    margin-right: auto;
+  }
 }
 </style>
