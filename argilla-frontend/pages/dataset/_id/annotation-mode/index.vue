@@ -11,15 +11,14 @@
           :showCopyButton="true"
         >
           <template
-            slot="dialog-cta"
+            slot="topbar-buttons"
             v-if="dataset && dataset.id && isAdminOrOwner"
           >
-            <ExportToHub :dataset="dataset" />
-
             <ImportData
               v-if="dataset.createdFromUI"
               :snippet="dataset.createCodeSnippetFromHub(getUser())"
             />
+            <ExportToHub :dataset="dataset" />
           </template>
         </HeaderFeedbackTask>
       </template>

@@ -1,7 +1,6 @@
 import { useResolve } from "ts-injecty";
 import { onBeforeMount, ref } from "vue";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
-import { JobId } from "~/v1/domain/services/IDatasetRepository";
 import { ExportDatasetToHubUseCase } from "~/v1/domain/usecases/export-dataset-to-hub-use-case";
 import { JobRepository } from "~/v1/infrastructure/repositories";
 import {
@@ -21,9 +20,11 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const notify = useNotifications();
   const debounce = useDebounce(3000);
   const { get, set } = useLocalStorage();
+
+  const isDialogOpen = ref(false);
   const exportToHubForm = ref({
-    orgOrUsername: user.value.userName,
-    datasetName: dataset.name,
+    orgOrUsername: "",
+    datasetName: "",
     hfToken: "",
     isPrivate: false,
   });
@@ -31,31 +32,48 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const exportToHubUseCase = useResolve(ExportDatasetToHubUseCase);
   const jobRepository = useResolve(JobRepository);
 
-  const datasetExporting =
-    get<Record<string, string>>("datasetExportJobIds") ?? {};
-  const isExporting = ref(!!datasetExporting[dataset.id]);
+  const getDatasetExporting = () =>
+    get<
+      Record<
+        string,
+        {
+          jobId: string;
+          datasetName: string;
+        }
+      >
+    >("datasetExportJobIds") ?? {};
 
-  const verifyExportStatus = async (jobId: JobId) => {
+  const isExporting = ref(!!getDatasetExporting()[dataset.id]);
+
+  const verifyExportStatus = async () => {
     try {
-      if (!jobId) return;
+      const datasetExporting = getDatasetExporting();
+      const exporting = datasetExporting[dataset.id];
+
+      if (!exporting) return;
+
+      const { jobId, datasetName } = exporting;
 
       const job = await jobRepository.getJobStatus(jobId);
 
+      if (job.isRunning) return;
+
       isExporting.value = job.isRunning;
 
-      if (!job.isRunning) {
-        delete datasetExporting[dataset.id];
+      delete datasetExporting[dataset.id];
 
-        set("datasetExportJobIds", datasetExporting);
-      }
+      set("datasetExportJobIds", datasetExporting);
 
       notify.notify({
         type: job.isFinished ? "success" : "danger",
         message: job.isFinished ? "Dataset exported to Hub" : "Export failed",
-        buttonText: "Go to Hub",
+        buttonText: job.isFinished ? "Go to Hub" : undefined,
         onClick: job.isFinished
           ? () => {
-              window.open("https://hub.huggingface.co/datasets", "_blank");
+              window.open(
+                `https://huggingface.co/datasets/${datasetName}`,
+                "_blank"
+              );
             }
           : undefined,
         permanent: true,
@@ -64,10 +82,10 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   };
 
   const watchExportStatus = async () => {
-    while (datasetExporting[dataset.id]) {
+    while (isExporting.value) {
       await debounce.wait();
 
-      await verifyExportStatus(datasetExporting[dataset.id]);
+      await verifyExportStatus();
     }
 
     debounce.stop();
@@ -75,6 +93,8 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const exportToHub = async () => {
     try {
+      closeDialog();
+
       isExporting.value = true;
 
       await exportToHubUseCase.execute(dataset, {
@@ -89,11 +109,29 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     }
   };
 
+  const openDialog = () => {
+    exportToHubForm.value = {
+      orgOrUsername: user.value.userName,
+      datasetName: dataset.name,
+      hfToken: "",
+      isPrivate: false,
+    };
+
+    isDialogOpen.value = true;
+  };
+
+  const closeDialog = () => {
+    isDialogOpen.value = false;
+  };
+
   onBeforeMount(() => {
     watchExportStatus();
   });
 
   return {
+    isDialogOpen,
+    closeDialog,
+    openDialog,
     isExporting,
     exportToHub,
     exportToHubForm,
