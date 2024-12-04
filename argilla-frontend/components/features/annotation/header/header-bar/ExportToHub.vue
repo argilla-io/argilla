@@ -57,14 +57,6 @@
           </div>
 
           <div class="export-to-hub__form__group">
-            <BaseSwitch
-              class="export-to-hub__form__switch"
-              v-model="exportToHubForm.isPrivate"
-              >{{ $t("private") }}</BaseSwitch
-            >
-          </div>
-
-          <div class="export-to-hub__form__group">
             <div class="export-to-hub__label">
               <label v-text="$t('hfToken')" />
               <BaseIconWithBadge
@@ -86,6 +78,14 @@
               autocomplete="one-time-code"
               v-model="exportToHubForm.hfToken"
             />
+          </div>
+
+          <div class="export-to-hub__form__group">
+            <BaseSwitch
+              class="export-to-hub__form__switch"
+              v-model="exportToHubForm.isPrivate"
+              >{{ $t("private") }}</BaseSwitch
+            >
           </div>
 
           <BaseButton
@@ -170,8 +170,9 @@ export default {
       color: var(--fg-tertiary);
     }
 
-    &___switch {
+    &__switch {
       color: var(--fg-primary);
+      margin-top: $base-space;
     }
 
     &__button {
