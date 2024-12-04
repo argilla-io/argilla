@@ -63,7 +63,7 @@ def configure_extra_pages(app: FastAPI):
     async def share_page(
         request: Request,
         image: str = Query("share_image"),
-        dataset_name: str = Query("dataset"),
+        dataset_name: str = Query("dataset_name"),
         dataset_id: str = Query("dataset_id"),
     ):
         url = request.url
