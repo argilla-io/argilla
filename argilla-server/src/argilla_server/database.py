@@ -21,8 +21,7 @@ from sqlalchemy import create_engine, event, make_url
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.interfaces import IsolationLevel
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
-from sqlalchemy.dialects.sqlite.aiosqlite import AsyncAdapt_aiosqlite_connection
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
 
 from argilla_server.settings import settings
 
@@ -67,7 +66,7 @@ sync_engine = create_engine(database_url_sync(), **settings.database_engine_args
 
 async_engine = create_async_engine(settings.database_url, **settings.database_engine_args)
 
-SyncSessionLocal = sessionmaker(autocommit=False, expire_on_commit=False, bind=sync_engine)
+SyncSessionLocal = scoped_session(sessionmaker(autocommit=False, expire_on_commit=False, bind=sync_engine))
 
 AsyncSessionLocal = async_sessionmaker(autocommit=False, expire_on_commit=False, bind=async_engine)
 
