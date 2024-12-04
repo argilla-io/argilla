@@ -24,7 +24,15 @@ export const useShareViewModel = () => {
   const copyOnClipboard = () => {
     closeDialog();
 
-    copy(imageLink.value);
+    const url = new URL(`${window.location.origin}/share`);
+    const params = new URLSearchParams("");
+    params.set("share_image", encodeURIComponent(createImageLink()));
+    params.set("dataset_name", dataset.name);
+    params.set("dataset_id", dataset.id);
+
+    url.search = params.toString();
+
+    copy(url.toString());
 
     notification.notify({
       message: t("copiedToClipboard"),
