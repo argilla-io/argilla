@@ -26,7 +26,7 @@ export const useShareViewModel = () => {
 
     const url = new URL(`${window.location.origin}/share`);
     const params = new URLSearchParams("");
-    params.set("share_image", encodeURIComponent(createImageLink()));
+    params.set("share_image", encodeURI(createImageLink()));
     params.set("dataset_name", dataset.name);
     params.set("dataset_id", dataset.id);
 
