@@ -62,9 +62,9 @@ def configure_extra_pages(app: FastAPI):
     @app.get("/share", include_in_schema=False)
     async def share_page(
         request: Request,
-        image: str = Query("share_image"),
-        dataset_name: str = Query("dataset"),
-        dataset_id: str = Query("dataset_id"),
+        share_image: str = Query(),
+        dataset_name: str = Query(),
+        dataset_id: str = Query(),
     ):
         url = request.url
 
@@ -79,7 +79,7 @@ def configure_extra_pages(app: FastAPI):
     <meta property="og:title" content="{dataset_name}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{url}" />
-    <meta property="og:image" content="{image}" />
+    <meta property="og:image" content="{share_image}" />
     <meta
       property="og:description"
       content="Contribute with this {dataset_name}"
@@ -94,7 +94,7 @@ def configure_extra_pages(app: FastAPI):
       name="twitter:description"
       content="Contribute with this {dataset_name}"
     />
-    <meta name="twitter:image" content="{dataset_name}" />
+    <meta name="twitter:image" content="{share_image}" />
     <meta name="twitter:site" content="" />
 
     <meta property="og:title" content="{dataset_name}" />
@@ -102,13 +102,13 @@ def configure_extra_pages(app: FastAPI):
       property="og:description"
       content="Contribute with this {dataset_name}"
     />
-    <meta property="og:image" content="{image}" />
+    <meta property="og:image" content="{share_image}" />
     <meta property="og:url" content="{url}" />
     <meta property="og:type" content="article" />
   </head>
   <body>
     <script>
-      window.location.href = `${{window.location.origin}}/dataset/${dataset_id}/annotation-mode`;
+      window.location.href = `${{window.location.origin}}/dataset/{dataset_id}/annotation-mode`;
     </script>
   </body>
 </html>"""
