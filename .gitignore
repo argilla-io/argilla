@@ -133,8 +133,6 @@ sw.*
 # Ruff cache
 .ruff_cache/
 
-yarn.lock
-package-lock.json
 
 # App generated files
 src/**/server/static/
