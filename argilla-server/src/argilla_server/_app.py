@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import base64
 import contextlib
 import glob
 import inspect
@@ -62,11 +63,12 @@ def configure_extra_pages(app: FastAPI):
     @app.get("/share", include_in_schema=False)
     async def share_page(
         request: Request,
-        share_image: str = Query(),
+        share_image_base64: str = Query(),
         dataset_name: str = Query(),
         dataset_id: str = Query(),
     ):
         url = request.url
+        share_image = base64.b64decode(share_image_base64)
 
         share_page = f"""
         <!DOCTYPE html>
