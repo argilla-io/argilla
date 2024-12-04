@@ -68,7 +68,7 @@ def configure_extra_pages(app: FastAPI):
         dataset_id: str = Query(),
     ):
         url = request.url
-        share_image = base64.b64decode(share_image_base64)
+        share_image = base64.b64decode(share_image_base64).decode("utf-8")
 
         share_page = f"""
         <!DOCTYPE html>
