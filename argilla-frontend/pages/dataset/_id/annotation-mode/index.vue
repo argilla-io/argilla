@@ -12,11 +12,11 @@
         >
           <template
             slot="topbar-buttons"
-            v-if="dataset && dataset.id && isAdminOrOwner"
+            v-if="dataset && dataset.id && user.isAdminOrOwner"
           >
             <ImportData
               v-if="dataset.createdFromUI"
-              :snippet="dataset.createCodeSnippetFromHub(getUser())"
+              :snippet="dataset.createCodeSnippetFromHub(user)"
             />
             <ExportToHub :dataset="dataset" />
           </template>
