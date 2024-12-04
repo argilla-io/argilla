@@ -18,7 +18,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added new `POST /api/v1/datasets/:dataset_id/export` to export datasets to Hugging Face Hub using a background job. ([#5709](https://github.com/argilla-io/argilla/pull/5709))
+- Added new `POST /api/v1/datasets/:dataset_id/export` endpoint to export datasets to Hugging Face Hub using a background job. ([#5709](https://github.com/argilla-io/argilla/pull/5709))
 
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
 
@@ -51,7 +51,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added new `POST /api/v1/datasets/:dataset_id/import` to import datasets from Hugging Face as a background job. ([#5572](https://github.com/argilla-io/argilla/pull/5572))
+- Added new `POST /api/v1/datasets/:dataset_id/import` endpoint to import datasets from Hugging Face as a background job. ([#5572](https://github.com/argilla-io/argilla/pull/5572))
 - Added new `metadata` attribute for endpoints getting, creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
 - Added new validation to avoid the creation of records with empty `fields` attributes. ([#5639](https://github.com/argilla-io/argilla/pull/5639))
 
