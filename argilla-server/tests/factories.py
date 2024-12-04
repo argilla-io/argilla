@@ -156,14 +156,14 @@ class WorkspaceUserFactory(BaseFactory):
         model = WorkspaceUser
 
 
-class WorkspaceFactory(BaseFactory):
+class WorkspaceSyncFactory(BaseSyncFactory):
     class Meta:
         model = Workspace
 
     name = factory.Sequence(lambda n: f"workspace-{n}")
 
 
-class WorkspaceSyncFactory(BaseSyncFactory):
+class WorkspaceFactory(BaseFactory):
     class Meta:
         model = Workspace
 
@@ -202,6 +202,15 @@ class AnnotatorFactory(UserFactory):
     role = UserRole.annotator
 
 
+class DatasetSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Dataset
+
+    name = factory.Sequence(lambda n: f"dataset-{n}")
+    distribution = {"strategy": DatasetDistributionStrategy.overlap, "min_submitted": 1}
+    workspace = factory.SubFactory(WorkspaceSyncFactory)
+
+
 class DatasetFactory(BaseFactory):
     class Meta:
         model = Dataset
@@ -217,6 +226,18 @@ class DatasetUserFactory(BaseFactory):
 
     dataset = factory.SubFactory(DatasetFactory)
     user = factory.SubFactory(UserFactory)
+
+
+class RecordSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Record
+
+    fields = {
+        "text": "This is a text",
+        "sentiment": "neutral",
+    }
+    external_id = factory.Sequence(lambda n: f"external-id-{n}")
+    dataset = factory.SubFactory(DatasetSyncFactory)
 
 
 class RecordFactory(BaseFactory):
@@ -255,6 +276,15 @@ class VectorFactory(BaseFactory):
 
     record = factory.SubFactory(RecordFactory)
     vector_settings = factory.SubFactory(VectorSettingsFactory)
+
+
+class FieldSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Field
+
+    name = factory.Sequence(lambda n: f"field-{n}")
+    title = "Field Title"
+    dataset = factory.SubFactory(DatasetSyncFactory)
 
 
 class FieldFactory(BaseFactory):
