@@ -42,7 +42,7 @@
     "sass": "^1.49.9",
     "ts-injecty": "^0.0.22",
     "v-click-outside": "^3.1.2",
-    "vue": "^2.7.14",
+    "vue": "^3.0.0",
     "vue-demi": "^0.14.5",
     "vue-svgicon": "^3.2.9",
     "vue-template-compiler": "^2.6.14",
