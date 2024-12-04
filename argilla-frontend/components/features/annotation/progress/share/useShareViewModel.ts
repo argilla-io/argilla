@@ -48,7 +48,7 @@ export const useShareViewModel = () => {
       "text",
       `<span size="10pt">@${user.value.userName}</span>
 
-I've just submitted ${metrics.submitted} rows reviews for:
+I just contributed ${metrics.submitted} examples to this dataset:
 
 <span size="10pt">${dataset.name}</span>
 
