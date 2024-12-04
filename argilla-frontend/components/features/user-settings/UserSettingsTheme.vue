@@ -62,6 +62,7 @@ label {
   &:hover {
     transition: color 0.3s ease;
     color: var(--fg-primary);
+    cursor: pointer;
     .svg-icon {
       transition: fill 0.3s ease;
       fill: var(--fg-primary);
