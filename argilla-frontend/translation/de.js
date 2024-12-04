@@ -330,6 +330,11 @@ export default {
       "Only a valid Hugging Face organization or username can export the dataset to the Hub",
     tokenTooltip:
       "You can manage your access tokens in your <a href='https://huggingface.co/settings/tokens' target='_blank'> Hugging Face settings</a>",
+    validations: {
+      orgOrUsernameIsRequired: "Organization or username is required",
+      hfTokenIsRequired: "Hugging Face token is required",
+      datasetNameIsRequired: "Dataset name is required",
+    },
   },
   config: {
     field: {

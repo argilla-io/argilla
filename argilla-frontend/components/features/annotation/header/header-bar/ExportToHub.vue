@@ -40,6 +40,9 @@
                 type="text"
                 v-model="exportToHubForm.orgOrUsername"
                 class="input"
+                @blur="validateForm('orgOrUsername')"
+                @input="validateForm('orgOrUsername')"
+                :placeholder="$t('owner')"
               />
             </div>
             <span aria-hidden="true" class="export-to-hub__form__separator"
@@ -52,6 +55,8 @@
                 v-model="exportToHubForm.datasetName"
                 class="input"
                 :placeholder="$t('datasetCreation.datasetName')"
+                @blur="validateForm('datasetName')"
+                @input="validateForm('datasetName')"
               />
             </div>
           </div>
@@ -77,6 +82,9 @@
               type="password"
               autocomplete="one-time-code"
               v-model="exportToHubForm.hfToken"
+              :placeholder="$t('hfToken')"
+              @blur="validateForm('hfToken')"
+              @input="validateForm('hfToken')"
             />
           </div>
 
@@ -87,8 +95,14 @@
               >{{ $t("private") }}</BaseSwitch
             >
           </div>
+          <Validation
+            v-for="(error, index) in errors"
+            :key="index"
+            :validations="error"
+          />
 
           <BaseButton
+            :disabled="!isValid"
             class="primary full-width export-to-hub__form__button"
             @click.prevent="exportToHub"
           >
@@ -108,6 +122,18 @@ export default {
     dataset: {
       type: Object,
       required: true,
+    },
+  },
+  data: () => ({
+    errors: {
+      orgOrUsername: [],
+      datasetName: [],
+      hfToken: [],
+    },
+  }),
+  methods: {
+    validateForm(input) {
+      this.errors[input] = this.validate()[input];
     },
   },
   setup(props) {
@@ -131,7 +157,7 @@ export default {
     right: 0;
     left: auto;
     width: auto;
-    min-width: 480px;
+    min-width: 450px;
     top: calc(100% + $base-space + 2px);
     display: block;
     margin-left: auto;
@@ -154,7 +180,7 @@ export default {
       width: 100%;
       gap: calc($base-space/2);
       &.--small {
-        max-width: 33%;
+        max-width: 30%;
       }
     }
 

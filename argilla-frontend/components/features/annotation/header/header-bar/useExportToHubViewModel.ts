@@ -32,6 +32,33 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const exportToHubUseCase = useResolve(ExportDatasetToHubUseCase);
   const jobRepository = useResolve(JobRepository);
 
+  const validate = () => {
+    const validations = {
+      orgOrUsername: [],
+      datasetName: [],
+      hfToken: [],
+    };
+    if (!exportToHubForm.value.orgOrUsername) {
+      validations.orgOrUsername.push(
+        "exportToHub.validations.orgOrUsernameIsRequired"
+      );
+    }
+    if (!exportToHubForm.value.datasetName) {
+      validations.datasetName.push(
+        "exportToHub.validations.datasetNameIsRequired"
+      );
+    }
+    if (!exportToHubForm.value.hfToken) {
+      validations.hfToken.push("exportToHub.validations.hfTokenIsRequired");
+    }
+    return validations;
+  };
+
+  const isValid =
+    !validate().orgOrUsername.length &&
+    !validate().datasetName.length &&
+    !validate().hfToken.length;
+
   const getDatasetExporting = () =>
     get<
       Record<
@@ -135,5 +162,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     isExporting,
     exportToHub,
     exportToHubForm,
+    validate,
+    isValid,
   };
 };
