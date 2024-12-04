@@ -75,7 +75,7 @@
     "jest-serializer-vue": "^2.0.2",
     "jest-transform-stub": "^2.0.0",
     "prettier": "^2.2.1",
-    "sass-loader": "10.1.0",
+    "sass-loader": "^10.1.0",
     "typescript": "^5.1.6",
     "vue-jest": "^3.0.7"
   }
