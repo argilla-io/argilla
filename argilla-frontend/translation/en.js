@@ -46,6 +46,7 @@ export default {
   orgOrUsername: "Organization or username",
   hfToken: "Hugging Face token",
   private: "Is private",
+  rows: "rows",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",
@@ -229,6 +230,7 @@ export default {
   filters: "Filters",
   filterBy: "Filter by...",
   fields: "Fields",
+  field: "Field",
   questions: "Questions",
   general: "General",
   metadata: "Metadata",
@@ -249,21 +251,16 @@ export default {
   youAreOffline: "You are offline",
   write: "Write",
   preview: "Preview",
-  datasetTable: {
-    name: "Dataset",
-    workspace: "Workspace",
-    createdAt: "Created",
-    lastActivityAt: "Updated",
-    progress: "Team progress",
-  },
   metrics: {
     total: "Total",
     progress: {
+      default: "Progress",
       my: "My Progress",
       team: "Team progress",
     },
   },
   home: {
+    zeroDatasetsFound: "0 datasets found",
     argillaDatasets: "Your datasets",
     none: "None yet",
     importTitle: "Import a dataset from Hugging Face Hub",
@@ -281,6 +278,9 @@ export default {
     pasteRepoIdPlaceholder: "Paste a repo id e.g., stanfordnlp/imdb",
     demoLink:
       "Log into this <a href='https://huggingface.co/spaces/argilla/argilla-template-space' target='_blank'>demo</a> to try Argilla out",
+    name: "Dataset name",
+    updatedAt: "Updated",
+    createdAt: "Created",
   },
   datasetCreation: {
     questions: {
@@ -291,6 +291,9 @@ export default {
       },
       rating: {
         atLeastTwoOptions: "At least two options are required",
+      },
+      span: {
+        fieldRelated: "One text field is required",
       },
     },
     atLeastOneQuestion: "At least one question is required.",
@@ -311,6 +314,7 @@ export default {
     requiredQuestion: "Required question",
     select: "Select",
     mapToColumn: "Map to column",
+    applyToaAField: "Annotate spans on:",
     subset: "Subset",
     selectSubset: "Your can create a dataset from only one subset.",
     preview: "Preview",

@@ -25,6 +25,7 @@
       <DatasetConfigurationSpan
         v-else-if="question.settings.type.isSpanType"
         :question="question"
+        :textFields="selectedSubset.textFields"
         @is-focused="$emit('is-focused', $event)"
       />
       <DatasetConfigurationRating
@@ -42,7 +43,7 @@
     <DatasetConfigurationColumnSelector
       v-if="showColumnSelector"
       class="config-card__type"
-      :options="columns"
+      :options="selectedSubset.columns"
       v-model="question.column"
     />
     <BaseCheckbox
@@ -63,8 +64,8 @@ export default {
       type: Object,
       required: true,
     },
-    columns: {
-      type: Array,
+    selectedSubset: {
+      type: Object,
       required: true,
     },
     removeIsAllowed: {
@@ -90,7 +91,7 @@ export default {
   },
   methods: {
     remove() {
-      this.$emit("remove");
+      this.selectedSubset.removeQuestion(this.question.name);
     },
   },
 };

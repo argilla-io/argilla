@@ -1,4 +1,3 @@
-<template></template>
 <template>
   <div class="card">
     <h2 class="card__title" v-text="title" />
@@ -45,9 +44,10 @@ export default {
   flex-direction: column;
   text-align: center;
   gap: $base-space * 2;
+  background: var(--bg-accent-grey-3);
   border: 1px dashed var(--bg-opacity-10);
   border-radius: $border-radius-m;
-  padding: $base-space * 2;
+  padding: $base-space * 3;
   &__title {
     @include font-size(18px);
     @include line-height(24px);

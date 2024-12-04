@@ -2,7 +2,7 @@
   <div>
     <div
       class="dataset-config-label__input-container"
-      :class="{ '--error': errors.length }"
+      :class="{ '--error': errors.options?.length || errors.field?.length }"
     >
       <input
         type="text"
@@ -14,7 +14,7 @@
         class="dataset-config-label__input"
       />
     </div>
-    <Validation v-if="errors.length" :validations="translatedValidations" />
+    <Validation v-if="errors.options?.length" :validations="errors.options" />
     <label
       v-else
       class="dataset-config-label__label"
@@ -22,6 +22,13 @@
         $t('datasetCreation.questions.labelSelection.optionsSeparatedByComma')
       "
     />
+
+    <DatasetConfigurationFieldSelector
+      class="config-card__type"
+      :options="textFields"
+      v-model="question.settings.field"
+    />
+    <Validation v-if="errors.field?.length" :validations="errors.field" />
   </div>
 </template>
 
@@ -29,7 +36,7 @@
 export default {
   data() {
     return {
-      errors: [],
+      errors: {},
       isDirty: false,
     };
   },
@@ -38,19 +45,32 @@ export default {
       type: Object,
       required: true,
     },
+    textFields: {
+      type: Array,
+      required: true,
+    },
     placeholder: {
       type: String,
       default: "",
     },
   },
+  watch: {
+    "question.settings.field": {
+      handler() {
+        this.validateOptions();
+      },
+      immediate: true,
+    },
+    textFields: {
+      handler() {
+        this.validateOptions();
+      },
+      immediate: true,
+    },
+  },
   computed: {
     optionsJoinedByCommas() {
       return this.question.options.map((item) => item.text).join(",");
-    },
-    translatedValidations() {
-      return this.errors.map((validation) => {
-        return this.$t(validation);
-      });
     },
   },
   methods: {

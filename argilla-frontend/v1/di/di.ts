@@ -67,6 +67,7 @@ import { OAuthLoginUseCase } from "@/v1/domain/usecases/oauth-login-use-case";
 import { GetEnvironmentUseCase } from "@/v1/domain/usecases/get-environment-use-case";
 import { GetWorkspacesUseCase } from "@/v1/domain/usecases/get-workspaces-use-case";
 import { GetDatasetQuestionsGroupedUseCase } from "@/v1/domain/usecases/get-dataset-questions-grouped-use-case";
+import { GetDatasetFieldsGroupedUseCase } from "@/v1/domain/usecases/get-dataset-fields-grouped-use-case";
 import { LoadUserUseCase } from "@/v1/domain/usecases/load-user-use-case";
 import { CreateDatasetUseCase } from "@/v1/domain/usecases/create-dataset-use-case";
 import { GetFirstRecordFromHub } from "@/v1/domain/usecases/get-first-record-from-hub";
@@ -200,6 +201,10 @@ export const loadDependencyContainer = (context: Context) => {
 
     register(GetDatasetQuestionsGroupedUseCase)
       .withDependency(QuestionRepository)
+      .build(),
+
+    register(GetDatasetFieldsGroupedUseCase)
+      .withDependency(FieldRepository)
       .build(),
 
     register(GetDatasetSuggestionsAgentsUseCase)
