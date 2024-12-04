@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.api.policies.v1 import UserPolicy, authorize
 from argilla_server.api.schemas.v1.users import User as UserSchema
-from argilla_server.api.schemas.v1.users import UserCreate, Users
+from argilla_server.api.schemas.v1.users import UserCreate, Users, UserUpdate
 from argilla_server.api.schemas.v1.workspaces import Workspaces
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
@@ -87,6 +87,21 @@ async def delete_user(
     await authorize(current_user, UserPolicy.delete)
 
     return await accounts.delete_user(db, user)
+
+
+@router.patch("/users/{user_id}", status_code=status.HTTP_200_OK, response_model=UserSchema)
+async def update_user(
+    *,
+    db: AsyncSession = Depends(get_async_db),
+    user_id: UUID,
+    user_update: UserUpdate,
+    current_user: User = Security(auth.get_current_user),
+):
+    user = await User.get_or_raise(db, user_id)
+
+    await authorize(current_user, UserPolicy.update)
+
+    return await accounts.update_user(db, user, user_update.model_dump(exclude_unset=True))
 
 
 @router.get("/users/{user_id}/workspaces", response_model=Workspaces)

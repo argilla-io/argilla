@@ -29,6 +29,7 @@ These are the section headers that we use:
 
 ### Changed
 
+- API endpoint added to the User router to allow updates to User objects ([#5615](https://github.com/argilla-io/argilla/pull/5615))
 - Changed default python version to 3.13. ([#5649](https://github.com/argilla-io/argilla/pull/5649))
 - Changed Pydantic version to v2. ([#5666](https://github.com/argilla-io/argilla/pull/5666))
 
