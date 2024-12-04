@@ -25,10 +25,10 @@ from pathlib import Path
 
 import backoff
 from brotli_asgi import BrotliMiddleware
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, HTMLResponse
 
 from argilla_server import helpers
 from argilla_server._version import __version__ as argilla_version
@@ -58,6 +58,64 @@ async def app_lifespan(app: FastAPI):
     yield
 
 
+def configure_extra_pages(app: FastAPI):
+    @app.get("/share", include_in_schema=False)
+    async def share_page(
+        request: Request,
+        image: str = Query("share_image"),
+        dataset_name: str = Query("dataset"),
+        dataset_id: str = Query("dataset_id"),
+    ):
+        url = request.url
+
+        share_page = f"""
+        <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title{dataset_name}</title>
+
+    <meta property="og:title" content="{dataset_name}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{url}" />
+    <meta property="og:image" content="{image}" />
+    <meta
+      property="og:description"
+      content="Contribute with this {dataset_name}"
+    />
+    <meta property="og:site_name" content="Argilla" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{dataset_name}" />
+    <meta
+      name="twitter:description"
+      content="Contribute with this {dataset_name}"
+    />
+    <meta name="twitter:image" content="{dataset_name}" />
+    <meta name="twitter:site" content="" />
+
+    <meta property="og:title" content="{dataset_name}" />
+    <meta
+      property="og:description"
+      content="Contribute with this {dataset_name}"
+    />
+    <meta property="og:image" content="{image}" />
+    <meta property="og:url" content="{url}" />
+    <meta property="og:type" content="article" />
+  </head>
+  <body>
+    <script>
+      window.location.href = `${{window.location.origin}}/dataset/${dataset_id}/annotation-mode`;
+    </script>
+  </body>
+</html>"""
+
+        return HTMLResponse(content=share_page, status_code=200)
+
+
 def create_server_app() -> FastAPI:
     """Configure the argilla server"""
 
@@ -74,6 +132,7 @@ def create_server_app() -> FastAPI:
     configure_logging()
     configure_common_middleware(app)
     configure_api_router(app)
+    configure_extra_pages(app)
     configure_telemetry(app)
     configure_app_statics(app)
     configure_api_docs(app)
