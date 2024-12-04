@@ -196,3 +196,11 @@ class HubDataset(BaseModel):
     subset: str
     split: str
     mapping: HubDatasetMapping
+
+
+class HubDatasetExport(BaseModel):
+    name: str = Field(..., min_length=1)
+    subset: Optional[str] = Field("default", min_length=1)
+    split: Optional[str] = Field("train", min_length=1)
+    private: Optional[bool] = False
+    token: str = Field(..., min_length=1)
