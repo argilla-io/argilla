@@ -108,7 +108,7 @@ def configure_extra_pages(app: FastAPI):
   </head>
   <body>
     <script>
-      window.location.href = `${{window.location.origin}}/dataset/${dataset_id}/annotation-mode`;
+      window.location.href = `${{window.location.origin}}/dataset/{dataset_id}/annotation-mode`;
     </script>
   </body>
 </html>"""
