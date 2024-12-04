@@ -92,7 +92,7 @@
             class="primary full-width export-to-hub__form__button"
             @click.prevent="exportToHub"
           >
-            Export
+            {{ $t("button.exportToHub") }}
           </BaseButton>
         </div>
       </dialog>
