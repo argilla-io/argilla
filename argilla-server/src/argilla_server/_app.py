@@ -77,13 +77,13 @@ def configure_extra_pages(app: FastAPI):
     <title{dataset_name}</title>
 
     <meta property="og:title" content="{dataset_name}" />
+    <meta
+      property="og:description"
+      content="Contribute with {dataset_name}"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{url}" />
     <meta property="og:image" content="{share_image}" />
-    <meta
-      property="og:description"
-      content="Contribute with this {dataset_name}"
-    />
     <meta property="og:site_name" content="Argilla" />
     <meta property="og:locale" content="en_US" />
 
@@ -92,19 +92,10 @@ def configure_extra_pages(app: FastAPI):
     <meta name="twitter:title" content="{dataset_name}" />
     <meta
       name="twitter:description"
-      content="Contribute with this {dataset_name}"
+      content="Contribute with {dataset_name}"
     />
     <meta name="twitter:image" content="{share_image}" />
-    <meta name="twitter:site" content="" />
-
-    <meta property="og:title" content="{dataset_name}" />
-    <meta
-      property="og:description"
-      content="Contribute with this {dataset_name}"
-    />
-    <meta property="og:image" content="{share_image}" />
-    <meta property="og:url" content="{url}" />
-    <meta property="og:type" content="article" />
+    <meta name="twitter:site" content="{url}" />
   </head>
   <body>
     <script>
