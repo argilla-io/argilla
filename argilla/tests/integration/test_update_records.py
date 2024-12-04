@@ -45,6 +45,36 @@ def dataset(client: rg.Argilla, dataset_name: str) -> rg.Dataset:
     return dataset
 
 
+class TestUpdateRecords:
+    def test_update_records_fields(self, client: rg.Argilla, dataset: rg.Dataset):
+        mock_data = [
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+            {
+                "text": "Hello World, how are you?",
+                "label": "negative",
+                "id": uuid.uuid4(),
+            },
+        ]
+
+        dataset.records.log(records=mock_data)
+
+        updated_mock_data = [{"text": "New text", "id": r["id"]} for r in mock_data]
+
+        dataset.records.log(records=updated_mock_data)
+
+        for record in dataset.records():
+            assert record.fields["text"] == "New text"
+
+
 class TestUpdateSuggestions:
     def test_update_records_suggestions_from_data(self, client: rg.Argilla, dataset: rg.Dataset):
         mock_data = [

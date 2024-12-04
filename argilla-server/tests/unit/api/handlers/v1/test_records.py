@@ -18,6 +18,7 @@ from unittest.mock import call
 from uuid import UUID, uuid4
 
 import pytest
+
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.enums import RecordStatus, ResponseStatus
 from argilla_server.models import Dataset, Record, Response, Suggestion, User, UserRole
@@ -44,6 +45,7 @@ from tests.factories import (
     VectorFactory,
     VectorSettingsFactory,
     WorkspaceFactory,
+    TextFieldFactory,
 )
 
 if TYPE_CHECKING:
@@ -316,8 +318,88 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
 
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
+    async def test_update_record_fields(
+        self, async_client: "AsyncClient", db: "AsyncSession", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create(status="ready")
+        await TextFieldFactory.create(dataset=dataset, name="text", required=True)
+        await TextFieldFactory.create(dataset=dataset, name="sentiment", required=False)
+        record = await RecordFactory.create(dataset=dataset, fields={"text": "This is a text"})
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"fields": {"text": "Updated text", "sentiment": "positive"}},
+        )
+
+        assert response.status_code == 200, response.json()
+        assert response.json() == {
+            "id": str(record.id),
+            "status": RecordStatus.pending,
+            "fields": {"text": "Updated text", "sentiment": "positive"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [],
+            "vectors": {},
+            "dataset_id": str(dataset.id),
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        assert record.updated_at > record.inserted_at
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
+    async def test_update_record_fields_with_less_fields(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(dataset=dataset, name="text", required=True)
+        await TextFieldFactory.create(dataset=dataset, name="sentiment", required=False)
+        record = await RecordFactory.create(dataset=dataset, fields={"text": "This is a text", "sentiment": "neutral"})
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"fields": {"text": "Updated text"}},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "id": str(record.id),
+            "status": RecordStatus.pending,
+            "fields": {"text": "Updated text"},
+            "metadata": None,
+            "external_id": record.external_id,
+            "responses": [],
+            "suggestions": [],
+            "vectors": {},
+            "dataset_id": str(dataset.id),
+            "inserted_at": record.inserted_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+        }
+        assert record.updated_at > record.inserted_at
+        mock_search_engine.index_records.assert_called_once_with(dataset, [record])
+
+    async def test_update_record_fields_with_empty_fields(
+        self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        record = await RecordFactory.create(dataset=dataset)
+
+        response = await async_client.patch(
+            f"/api/v1/records/{record.id}",
+            headers=owner_auth_header,
+            json={"fields": {}},
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {"detail": "fields cannot be empty"}
+        assert record.updated_at == record.inserted_at
+        mock_search_engine.index_records.assert_not_called()
 
     async def test_update_record_with_null_metadata(
         self, async_client: "AsyncClient", mock_search_engine: SearchEngine, owner_auth_header: dict
@@ -351,6 +433,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_metadata(
@@ -372,13 +455,14 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
             "vectors": {},
             "dataset_id": str(dataset.id),
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at == record.inserted_at
         mock_search_engine.index_records.assert_not_called()
 
     async def test_update_record_with_list_terms_metadata(
@@ -414,6 +498,7 @@ class TestSuiteRecords:
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         mock_search_engine.index_records.assert_called_once_with(dataset, [record])
 
     async def test_update_record_with_no_suggestions(
@@ -435,13 +520,14 @@ class TestSuiteRecords:
             "fields": {"text": "This is a text", "sentiment": "neutral"},
             "metadata": None,
             "external_id": record.external_id,
-            "responses": None,
+            "responses": [],
             "suggestions": [],
             "vectors": {},
             "dataset_id": str(record.dataset_id),
             "inserted_at": record.inserted_at.isoformat(),
             "updated_at": record.updated_at.isoformat(),
         }
+        assert record.updated_at > record.inserted_at
         assert (await db.execute(select(Suggestion).where(Suggestion.id == suggestion.id))).scalar_one_or_none() is None
 
     @pytest.mark.parametrize(
@@ -537,7 +623,9 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"suggestion for question_id={question.id} is not valid: 'not a valid value' is not a valid label for label selection question.\nValid labels are: ['option1', 'option2', 'option3']"
+            "detail": "record does not have valid suggestions: "
+            "'not a valid value' is not a valid label for label selection question.\n"
+            "Valid labels are: ['option1', 'option2', 'option3']"
         }
 
     async def test_update_record_with_invalid_vector(self, async_client: "AsyncClient", owner_auth_header: dict):
@@ -553,7 +641,9 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"vector with name={vector_settings.name} is not valid: vector must have 5 elements, got 6 elements"
+            "detail": "record does not have valid vectors: "
+            f"vector value for vector name={vector_settings.name} "
+            f"must have {vector_settings.dimensions} elements, got 6 elements"
         }
 
     async def test_update_record_with_suggestion_for_nonexistent_question(
@@ -576,7 +666,7 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"suggestion for question_id={question_id} is not valid: question_id={question_id} does not exist"
+            "detail": f"record does not have valid suggestions: question id={question_id} does not exists"
         }
 
     async def test_update_record_with_nonexistent_vector_settings(
@@ -593,7 +683,8 @@ class TestSuiteRecords:
 
         assert response.status_code == 422
         assert response.json() == {
-            "detail": f"vector with name=i-do-not-exist is not valid: vector with name=i-do-not-exist does not exist for dataset_id={dataset.id}"
+            "detail": "record does not have valid vectors: vector with name=i-do-not-exist "
+            f"does not exist for dataset_id={dataset.id}"
         }
 
     async def test_update_record_with_duplicate_suggestions_question_ids(
@@ -615,7 +706,9 @@ class TestSuiteRecords:
         )
 
         assert response.status_code == 422
-        assert response.json() == {"detail": "found duplicate suggestions question IDs"}
+        assert response.json() == {
+            "detail": "record does not have valid suggestions: found duplicate suggestions question IDs"
+        }
 
     async def test_update_record_as_admin_from_another_workspace(self, async_client: "AsyncClient"):
         record = await RecordFactory.create()

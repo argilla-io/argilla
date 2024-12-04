@@ -183,17 +183,12 @@ class RecordCreate(BaseModel):
 
 
 class RecordUpdate(UpdateSchema):
-    metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
+    fields: Optional[Dict[str, FieldValueCreate]] = None
+    metadata: Optional[Dict[str, Any]] = None
     suggestions: Optional[List[SuggestionCreate]] = None
     vectors: Optional[Dict[str, List[float]]] = None
 
-    @property
-    def metadata(self) -> Optional[Dict[str, Any]]:
-        # Align with the RecordCreate model. Both should have the same name for the metadata field.
-        # TODO(@frascuchon): This will be properly adapted once the bulk records refactor is completed.
-        return self.metadata_
-
-    @field_validator("metadata_")
+    @field_validator("metadata")
     @classmethod
     def prevent_nan_values(cls, metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         if metadata is None:
@@ -205,14 +200,19 @@ class RecordUpdate(UpdateSchema):
 
         return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
 
+    def is_set(self, attribute: str) -> bool:
+        return attribute in self.__fields_set__
 
-class RecordUpdateWithId(RecordUpdate):
-    id: UUID
+    def has_changes(self) -> bool:
+        return self.dict(exclude_unset=True) != {}
 
 
 class RecordUpsert(RecordCreate):
     id: Optional[UUID] = None
     fields: Optional[Dict[str, FieldValueCreate]] = None
+
+    def is_set(self, attribute: str) -> bool:
+        return attribute in self.__fields_set__
 
 
 class RecordIncludeParam(BaseModel):
@@ -276,13 +276,6 @@ class Records(BaseModel):
 
 class RecordsCreate(BaseModel):
     items: List[RecordCreate] = Field(..., min_length=RECORDS_CREATE_MIN_ITEMS, max_length=RECORDS_CREATE_MAX_ITEMS)
-
-
-class RecordsUpdate(BaseModel):
-    # TODO: review this definition and align to create model
-    items: List[RecordUpdateWithId] = Field(
-        ..., min_length=RECORDS_UPDATE_MIN_ITEMS, max_length=RECORDS_UPDATE_MAX_ITEMS
-    )
 
 
 class MetadataParsedQueryParam:
