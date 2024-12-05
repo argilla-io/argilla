@@ -1,14 +1,14 @@
 <template>
-  <div class="share">
-    <BaseButton
-      class="primary"
-      :title="$t('button.tooltip.copyToClipboard')"
-      @mouseover="openDialog"
-      @mouseleave="closeDialog"
-      @click.stop="copyOnClipboard"
-    >
-      {{ $t("share") }}
-    </BaseButton>
+  <div class="share" @click.stop="">
+    <BaseActionTooltip :tooltip="$t('copied')" @click.stop="copyOnClipboard">
+      <BaseButton
+        :title="$t('button.tooltip.copyToClipboard')"
+        @mouseover="openDialog"
+        @mouseleave="closeDialog"
+      >
+        Share
+      </BaseButton>
+    </BaseActionTooltip>
     <transition name="fade" appear>
       <dialog
         v-if="isDialogOpen"

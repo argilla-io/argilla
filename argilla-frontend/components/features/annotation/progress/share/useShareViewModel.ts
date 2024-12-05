@@ -1,21 +1,15 @@
 import { ref } from "vue";
-import {
-  useNotifications,
-  useTranslate,
-  useUser,
-} from "~/v1/infrastructure/services";
+import { useUser } from "~/v1/infrastructure/services";
 import { useClipboard } from "~/v1/infrastructure/services/useClipboard";
 import { useDataset } from "~/v1/infrastructure/storage/DatasetStorage";
 import { useMetrics } from "~/v1/infrastructure/storage/MetricsStorage";
 import { useTeamProgress } from "~/v1/infrastructure/storage/TeamProgressStorage";
 
 export const useShareViewModel = () => {
-  const { t } = useTranslate();
   const { copy } = useClipboard();
   const { user } = useUser();
   const { state: metrics } = useMetrics();
   const { state: dataset } = useDataset();
-  const notification = useNotifications();
   const { state: progress } = useTeamProgress();
 
   const isDialogOpen = ref(false);
@@ -35,11 +29,6 @@ export const useShareViewModel = () => {
     url.search = params.toString();
 
     copy(url.toString());
-
-    notification.notify({
-      message: t("copiedToClipboard"),
-      type: "success",
-    });
   };
 
   const createImageLink = () => {
