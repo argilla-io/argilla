@@ -19,7 +19,7 @@ import pytest
 from argilla_server.contexts import settings as settings_context
 from argilla_server.contexts.settings import HUGGINGFACE_SETTINGS
 from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
-from argilla_server.settings import settings as argilla_server_settings
+from argilla_server.settings import settings as argilla_server_settings, settings
 from httpx import AsyncClient
 
 
@@ -34,6 +34,7 @@ class TestGetSettings:
 
             assert response.status_code == 200
             assert response.json()["argilla"] == {
+                "share_your_progress_enabled": False,
                 "show_huggingface_space_persistent_storage_warning": True,
             }
 
@@ -46,6 +47,7 @@ class TestGetSettings:
 
                 assert response.status_code == 200
                 assert response.json()["argilla"] == {
+                    "share_your_progress_enabled": False,
                     "show_huggingface_space_persistent_storage_warning": False,
                 }
 
@@ -86,3 +88,11 @@ class TestGetSettings:
 
         assert response.status_code == 200
         assert "huggingface" not in response.json()
+
+    async def test_get_settings_with_share_your_progress_enabled(self, async_client: AsyncClient):
+        settings.enable_share_your_progress = True
+
+        response = await async_client.get(self.url())
+
+        assert response.status_code == 200
+        assert response.json()["argilla"]["share_your_progress_enabled"] is True
