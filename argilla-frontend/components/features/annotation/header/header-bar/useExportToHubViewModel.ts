@@ -54,10 +54,13 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     return validations;
   };
 
-  const isValid =
-    !validate().orgOrUsername.length &&
-    !validate().datasetName.length &&
-    !validate().hfToken.length;
+  const isValid = () => {
+    return (
+      !validate().orgOrUsername.length &&
+      !validate().datasetName.length &&
+      !validate().hfToken.length
+    );
+  };
 
   const getDatasetExporting = () =>
     get<

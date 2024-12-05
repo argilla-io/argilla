@@ -100,9 +100,8 @@
             :key="index"
             :validations="error"
           />
-
           <BaseButton
-            :disabled="!isValid"
+            :disabled="!isValid()"
             class="primary full-width export-to-hub__form__button"
             @click.prevent="exportToHub"
           >
