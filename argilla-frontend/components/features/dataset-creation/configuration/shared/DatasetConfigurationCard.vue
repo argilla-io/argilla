@@ -145,7 +145,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
     background: hsla(from $error-color h s l / 0.16);
     border-color: hsla(from $error-color h s l / 0.5);
   }
-  &:deep(.re-switch-label) {
+  &:deep(.switch-label) {
     @include font-size(13px);
   }
 }

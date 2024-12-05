@@ -17,7 +17,7 @@ export const useResizable = ({ id }: { id: string }) => {
 
     await debounce.wait();
 
-    const layout = get("layout");
+    const layout = get<Record<string, unknown>>("layout");
 
     set("layout", {
       ...layout,

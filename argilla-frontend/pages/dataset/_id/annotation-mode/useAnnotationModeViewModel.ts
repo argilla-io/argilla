@@ -9,14 +9,13 @@ import { useDatasetViewModel } from "../useDatasetViewModel";
 import { GetDatasetByIdUseCase } from "@/v1/domain/usecases/get-dataset-by-id-use-case";
 import { useDataset } from "@/v1/infrastructure/storage/DatasetStorage";
 import { RecordCriteria } from "~/v1/domain/entities/record/RecordCriteria";
-import { useRoutes, useUser, useRole } from "~/v1/infrastructure/services";
+import { useRoutes, useUser } from "~/v1/infrastructure/services";
 import { RecordStatus } from "~/v1/domain/entities/record/RecordAnswer";
 
 export const useAnnotationModeViewModel = () => {
-  const { isAdminOrOwner } = useRole();
   const router = useRouter();
   const routes = useRoutes();
-  const { getUser } = useUser();
+  const { user } = useUser();
   const { state: dataset } = useDataset();
   const getDatasetUseCase = useResolve(GetDatasetByIdUseCase);
 
@@ -113,7 +112,6 @@ export const useAnnotationModeViewModel = () => {
     datasetId,
     breadcrumbs,
     updateQueryParams,
-    getUser,
-    isAdminOrOwner,
+    user,
   };
 };

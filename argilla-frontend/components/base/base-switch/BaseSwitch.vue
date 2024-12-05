@@ -18,13 +18,13 @@
 <template>
   <div
     :class="{ disabled: !checked, 'disable-action': disableAction }"
-    class="re-switch"
+    class="switch"
   >
-    <label v-if="$slots.default" :for="id || name" class="re-switch-label">
+    <label v-if="$slots.default" :for="id || name" class="switch-label">
       <slot />
     </label>
-    <div class="re-switch-container" @click="toggle($event)">
-      <div class="re-switch-thumb" :style="styles">
+    <div class="switch-container" @click="toggle($event)">
+      <div class="switch-thumb" :style="styles">
         <input
           :id="id"
           type="checkbox"
@@ -33,7 +33,7 @@
           :value="value"
           tabindex="-1"
         />
-        <button :type="type" class="re-switch-holder">
+        <button :type="type" class="switch-holder">
           <svgicon width="10" height="10" name="check" color="white"></svgicon>
         </button>
       </div>
@@ -120,7 +120,7 @@ export default {
 $switch-width: 28px;
 $switch-height: 11px;
 $switch-thumb-size: 18px;
-.re-switch {
+.switch {
   display: flex;
   align-items: center;
   position: relative;
@@ -128,7 +128,7 @@ $switch-thumb-size: 18px;
     svg {
       display: none;
     }
-    .re-switch-thumb {
+    .switch-thumb {
       background-color: #f0f0f0 !important;
     }
   }
@@ -136,17 +136,17 @@ $switch-thumb-size: 18px;
     opacity: 0.5;
     pointer-events: none;
     cursor: default;
-    .re-switch-thumb {
+    .switch-thumb {
       background-color: var(--color-white) !important;
       transform: translate3d(-1px, -50%, 0px) !important;
     }
     &:active {
-      .re-switch-thumb {
+      .switch-thumb {
         transform: translate3d(50%, -50%, 0px) !important;
       }
     }
   }
-  .re-switch-container {
+  .switch-container {
     width: $switch-width;
     height: $switch-height;
     position: relative;
@@ -154,7 +154,7 @@ $switch-thumb-size: 18px;
     transition: $swift-ease-out;
     background-color: var(--bg-opacity-20);
     cursor: pointer;
-    .re-switch-thumb {
+    .switch-thumb {
       width: $switch-thumb-size;
       height: $switch-thumb-size;
       position: absolute;
@@ -168,7 +168,7 @@ $switch-thumb-size: 18px;
       position: absolute;
       left: -999em;
     }
-    .re-switch-holder {
+    .switch-holder {
       @include absoluteCenter;
       width: $switch-thumb-size;
       height: $switch-thumb-size;
@@ -183,9 +183,9 @@ $switch-thumb-size: 18px;
       }
     }
   }
-  .re-switch-label {
+  .switch-label {
     margin-right: 1em;
-    color: var(--fg-secondary);
+    color: var(--fg-primary);
   }
 }
 </style>
