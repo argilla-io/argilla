@@ -31,6 +31,7 @@ class HuggingfaceSettings(BaseModel):
 
 class ArgillaSettings(BaseModel):
     show_huggingface_space_persistent_storage_warning: Optional[bool] = None
+    share_your_progress_enabled: bool = False
 
 
 class Settings(BaseModel):
