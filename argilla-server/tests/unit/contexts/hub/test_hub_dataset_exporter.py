@@ -18,8 +18,8 @@ import pytest
 from PIL import Image
 from uuid import uuid4
 from typing import Generator
-from datasets import load_dataset, get_dataset_config_names, get_dataset_split_names
 from huggingface_hub import HfApi
+from datasets import load_dataset, get_dataset_config_names, get_dataset_split_names
 
 from argilla_server.contexts.hub import HubDatasetExporter
 from argilla_server.enums import DatasetStatus, FieldType, QuestionType, ResponseStatus, MetadataPropertyType
@@ -741,9 +741,24 @@ class TestHubDatasetExporter:
         FieldSyncFactory.create(name="text", settings={"type": FieldType.text, "use_markdown": False}, dataset=dataset)
         record = RecordSyncFactory.create(fields={"text": "Hello World"}, dataset=dataset)
 
-        vector_settings_a = VectorSettingsSyncFactory.create(name="vector-a", title="Vector A", dimensions=3)
-        vector_settings_b = VectorSettingsSyncFactory.create(name="vector-b", title="Vector B", dimensions=2)
-        VectorSettingsSyncFactory.create(name="vector-c", title="Vector C", dimensions=4)
+        vector_settings_a = VectorSettingsSyncFactory.create(
+            name="vector-a",
+            title="Vector A",
+            dimensions=3,
+            dataset=dataset,
+        )
+        vector_settings_b = VectorSettingsSyncFactory.create(
+            name="vector-b",
+            title="Vector B",
+            dimensions=2,
+            dataset=dataset,
+        )
+        VectorSettingsSyncFactory.create(
+            name="vector-c",
+            title="Vector C",
+            dimensions=4,
+            dataset=dataset,
+        )
 
         VectorSyncFactory.create(
             value=[1.0, 2.0, 3.0],
