@@ -67,19 +67,18 @@ def configure_share_your_progress(app: FastAPI):
     def create_image_link(username: str, dataset_name: str, submitted: int, team_progress: float) -> str:
         url = "https://argilla.imglab-cdn.net/dibt/dibt_v2.png"
 
-        text = f"""
-            <span size="7pt">{username}</span>
+        text = f"""<span size="7pt">{username}</span>
 
-            I just contributed {submitted} examples to this dataset:
+I've just contributed {submitted} examples to this dataset:
 
-            <span size="9pt">{dataset_name}</span>
+<span size="9pt">{dataset_name}</span>
 
-            <span size="8pt" weight="normal">Team progress</span>
-            {team_progress}%
-        """
+<span size="8pt" weight="normal">Team progress</span>
+{team_progress}%"""
 
         params = {
             "width": "1200",
+            "text": text,
             "text-width": "700",
             "text-height": "590",
             "text-weight": "bold",
@@ -89,7 +88,6 @@ def configure_share_your_progress(app: FastAPI):
             "text-y": "40",
             "format": "png",
             "dpr": "2",
-            "text": textwrap.dedent(text),
         }
 
         return f"{url}?{urlencode(params)}"
