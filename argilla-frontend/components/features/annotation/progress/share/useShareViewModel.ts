@@ -18,7 +18,7 @@ export const useShareViewModel = () => {
   const copyOnClipboard = () => {
     closeDialog();
 
-    const url = new URL(`${window.location.origin}/share`);
+    const url = new URL(`${window.location.origin}/share-your-progress`);
     const params = new URLSearchParams("");
     params.set("user_name", user.value.userName);
     params.set("records_submitted", metrics.submitted.toString());
