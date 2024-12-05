@@ -335,6 +335,7 @@ export default {
       hfTokenIsRequired: "Hugging Face token is required",
       datasetNameIsRequired: "Dataset name is required",
     },
+    exporting: "Exporting...",
   },
   config: {
     field: {

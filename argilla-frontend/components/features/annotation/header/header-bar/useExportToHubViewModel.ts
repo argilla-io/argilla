@@ -1,5 +1,5 @@
 import { useResolve } from "ts-injecty";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, computed } from "vue";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { ExportDatasetToHubUseCase } from "~/v1/domain/usecases/export-dataset-to-hub-use-case";
 import { JobRepository } from "~/v1/infrastructure/repositories";
@@ -54,13 +54,14 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     return validations;
   };
 
-  const isValid = () => {
+  const isValid = computed(() => {
+    const validations = validate();
     return (
-      !validate().orgOrUsername.length &&
-      !validate().datasetName.length &&
-      !validate().hfToken.length
+      !validations.orgOrUsername.length &&
+      !validations.datasetName.length &&
+      !validations.hfToken.length
     );
-  };
+  });
 
   const getDatasetExporting = () =>
     get<
@@ -123,8 +124,6 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const exportToHub = async () => {
     try {
-      closeDialog();
-
       isExporting.value = true;
 
       await exportToHubUseCase.execute(dataset, {
@@ -135,6 +134,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
       watchExportStatus();
     } catch {
+      closeDialog();
       isExporting.value = false;
     }
   };

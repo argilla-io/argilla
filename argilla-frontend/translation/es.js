@@ -340,6 +340,7 @@ export default {
       hfTokenIsRequired: "El token de Hugging Face es requerido",
       datasetNameIsRequired: "El nombre del dataset es requerido",
     },
+    exporting: "Exportando...",
   },
   config: {
     field: {

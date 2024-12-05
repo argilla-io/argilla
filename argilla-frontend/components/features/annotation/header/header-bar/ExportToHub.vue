@@ -12,8 +12,14 @@
         v-if="isDialogOpen"
         v-click-outside="closeDialog"
         class="export-to-hub__dialog"
+        :class="{ '--small': isExporting }"
       >
-        <form @submit.prevent="exportToHub" class="export-to-hub__form">
+        <p v-if="isExporting" class="export-to-hub__exporting-message">
+          <em v-text="$t('exportToHub.exporting')" />
+          {{ exportToHubForm.orgOrUsername }}/{{ exportToHubForm.datasetName }}
+          <span>{{ !exportToHub.isPrivate ? "(private)" : "" }}</span>
+        </p>
+        <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
             class="export-to-hub__title"
             v-text="$t('exportToHub.dislogTitle')"
@@ -95,14 +101,16 @@
               >{{ $t("private") }}</BaseSwitch
             >
           </div>
-          <Validation
-            v-for="(error, index) in errors"
-            :key="index"
-            :validations="error"
-          />
+          <span>
+            <Validation
+              v-for="(error, index) in errors"
+              :key="index"
+              :validations="error"
+            />
+          </span>
           <BaseButton
             type="submit"
-            :disabled="!isValid()"
+            :disabled="!isValid"
             class="primary full-width export-to-hub__form__button"
           >
             {{ $t("button.exportToHub") }}
@@ -166,6 +174,22 @@ export default {
     border-radius: $border-radius-m;
     box-shadow: $shadow;
     z-index: 2;
+    &.--small {
+      min-width: 200px;
+    }
+  }
+  &__exporting-message {
+    @include font-size(14px);
+    margin: 0;
+    em {
+      display: block;
+      font-weight: 200;
+      color: var(--fg-secondary);
+    }
+    span {
+      display: block;
+      color: var(--fg-secondary);
+    }
   }
 
   &__form {
@@ -198,10 +222,6 @@ export default {
     &__switch {
       color: var(--fg-primary);
       margin-top: $base-space;
-    }
-
-    &__button {
-      margin-top: $base-space * 2;
     }
   }
 
