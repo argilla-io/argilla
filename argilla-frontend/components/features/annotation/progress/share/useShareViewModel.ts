@@ -26,7 +26,9 @@ export const useShareViewModel = () => {
 
     const url = new URL(`${window.location.origin}/share`);
     const params = new URLSearchParams("");
-    params.set("share_image_base64", btoa(createImageLink()));
+    params.set("user_name", user.value.userName);
+    params.set("records_submitted", metrics.submitted.toString());
+    params.set("team_progress", progress.percentage.completed.toString());
     params.set("dataset_name", dataset.name);
     params.set("dataset_id", dataset.id);
 

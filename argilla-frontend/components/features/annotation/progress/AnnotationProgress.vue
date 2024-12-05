@@ -23,9 +23,9 @@
       class="my-progress__status--skeleton"
     />
     <div v-else class="my-progress__share">
-      <Share />
+      <Share v-if="canSeeShare" />
       <StatusCounter
-        :rainbow="true"
+        :rainbow="shouldShowSubmittedAnimation"
         class="my-progress__status"
         :color="RecordStatus.submitted.color"
         :name="RecordStatus.submitted.name"
@@ -77,6 +77,7 @@ $statusCounterMinHeight: 30px;
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: end;
     gap: $base-space;
   }
 }
