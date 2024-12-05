@@ -1,5 +1,5 @@
 <template>
-  <li class="status-counter" :class="{ rainbow }">
+  <li class="status-counter" :class="{ rainbow, ghost }">
     <span>
       <span class="color-bullet" :style="{ backgroundColor: color }"></span>
       <label class="status-counter__name" v-text="statusLabel" />
@@ -23,6 +23,10 @@ export default {
       required: true,
     },
     rainbow: {
+      type: Boolean,
+      default: false,
+    },
+    ghost: {
       type: Boolean,
       default: false,
     },
@@ -62,6 +66,10 @@ $bullet-size: 8px;
     color: var(--fg-primary);
     @include font-size(14px);
   }
+}
+
+.ghost {
+  background: none;
 }
 
 .rainbow {

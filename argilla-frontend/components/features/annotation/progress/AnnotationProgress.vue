@@ -25,6 +25,7 @@
     <div v-else class="my-progress__share">
       <Share v-if="canSeeShare" />
       <StatusCounter
+        :ghost="true"
         :rainbow="shouldShowSubmittedAnimation"
         class="my-progress__status"
         :color="RecordStatus.submitted.color"
