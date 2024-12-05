@@ -19,7 +19,7 @@ from fastapi.security import HTTPBearer
 from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
 
 from argilla_server.security.authentication.jwt import JWT
-from argilla_server.security.authentication.oauth2.providers import OAuth2ClientProvider
+from argilla_server.security.authentication.oauth2.provider import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 
 
@@ -39,7 +39,4 @@ class OAuth2AuthenticationBackend(AuthenticationBackend):
         token_data = JWT.decode(credentials.credentials)
         user = UserInfo(token_data)
 
-        provider = self.providers.get(user.get("provider"))
-        claims = provider.claims if provider else {}
-
-        return AuthCredentials(user.pop("scope", [])), user.use_claims(claims)
+        return AuthCredentials(user.pop("scope", [])), user

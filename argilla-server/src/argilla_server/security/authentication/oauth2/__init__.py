@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from argilla_server.security.authentication.oauth2.providers import OAuth2ClientProvider  # noqa
+from argilla_server.security.authentication.oauth2.provider import OAuth2ClientProvider  # noqa
 from argilla_server.security.authentication.oauth2.settings import OAuth2Settings  # noqa
 
 __all__ = ["OAuth2Settings", "OAuth2ClientProvider"]
