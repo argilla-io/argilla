@@ -40,6 +40,8 @@ export const useShareViewModel = () => {
     params.set("text-weight", "bold");
     params.set("text-padding", "60");
     params.set("text-color", "39,71,111");
+    params.set("text-x", "460");
+    params.set("text-y", "40");
     params.set("format", "png");
     params.set("dpr", "2");
 
