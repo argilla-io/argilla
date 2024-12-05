@@ -1,6 +1,10 @@
 <template>
   <div class="share" @click.stop="">
-    <BaseActionTooltip :tooltip="$t('copied')" @click.stop="copyOnClipboard">
+    <BaseActionTooltip
+      :tooltip="$t('copiedToClipboard')"
+      tooltipPosition="down"
+      @click.stop="copyOnClipboard"
+    >
       <BaseButton
         :title="$t('button.tooltip.copyToClipboard')"
         @mouseover="openDialog"
