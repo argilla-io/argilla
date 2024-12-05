@@ -13,7 +13,7 @@
         v-click-outside="closeDialog"
         class="export-to-hub__dialog"
       >
-        <div class="export-to-hub__form">
+        <form @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
             class="export-to-hub__title"
             v-text="$t('exportToHub.dislogTitle')"
@@ -101,13 +101,13 @@
             :validations="error"
           />
           <BaseButton
+            type="submit"
             :disabled="!isValid()"
             class="primary full-width export-to-hub__form__button"
-            @click.prevent="exportToHub"
           >
             {{ $t("button.exportToHub") }}
           </BaseButton>
-        </div>
+        </form>
       </dialog>
     </transition>
   </div>
