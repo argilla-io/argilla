@@ -63,12 +63,15 @@ async def get_access_token(
 
     user = await User.get_by(db, username=userinfo.username)
     if user is None:
+        default_available_workspaces = [workspace.name for workspace in settings.oauth.allowed_workspaces]
+        workspaces = userinfo.available_workspaces or default_available_workspaces
+
         user = await accounts.create_user_with_random_password(
             db,
             username=userinfo.username,
             first_name=userinfo.first_name,
             role=userinfo.role,
-            workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
+            workspaces=workspaces,
         )
 
     return Token(access_token=accounts.generate_user_token(user))

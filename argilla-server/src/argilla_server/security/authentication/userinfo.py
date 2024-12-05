@@ -41,6 +41,10 @@ class UserInfo(BaseUser, dict):
         role = self.get("role") or self._parse_role_from_environment()
         return UserRole(role)
 
+    @property
+    def available_workspaces(self) -> Optional[list]:
+        return self.get("available_workspaces")
+
     def _parse_role_from_environment(self) -> Optional[UserRole]:
         """This is a temporal solution, and it will be replaced by a proper Sign up process"""
         if self["username"] == os.getenv("USERNAME"):
