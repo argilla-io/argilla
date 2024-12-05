@@ -45,6 +45,7 @@ export default {
   optional: "Optional",
   template: "Template",
   rows: "zeilen",
+  datasetName: "Dataset name",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "Der Datensatz ist leer. Bitten Sie einen Administrator, Daten hochzuladen, und versuchen Sie es später erneut.",

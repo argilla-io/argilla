@@ -43,6 +43,7 @@ export default {
   optional: "Opcional",
   template: "Plantilla",
   rows: "filas",
+  datasetName: "Dataset name",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",

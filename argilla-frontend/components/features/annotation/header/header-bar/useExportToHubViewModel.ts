@@ -22,6 +22,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const { get, set } = useLocalStorage();
 
   const isDialogOpen = ref(false);
+  const errors = ref({});
   const exportToHubForm = ref({
     orgOrUsername: "",
     datasetName: "",
@@ -54,12 +55,16 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     return validations;
   };
 
+  const validateForm = (input: string) => {
+    errors.value[input] = validate()[input];
+  };
+
   const isValid = computed(() => {
     const validations = validate();
     return (
-      !validations.orgOrUsername.length &&
-      !validations.datasetName.length &&
-      !validations.hfToken.length
+      validations.orgOrUsername.length === 0 &&
+      validations.datasetName.length === 0 &&
+      validations.hfToken.length === 0
     );
   });
 
@@ -165,7 +170,8 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     isExporting,
     exportToHub,
     exportToHubForm,
-    validate,
+    validateForm,
+    errors,
     isValid,
   };
 };

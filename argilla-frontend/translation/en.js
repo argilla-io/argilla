@@ -47,6 +47,7 @@ export default {
   hfToken: "Hugging Face token",
   private: "Is private",
   rows: "rows",
+  datasetName: "Dataset name",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "The dataset is empty. Ask an administrator to upload records and come back soon.",

@@ -28,7 +28,7 @@
           <div class="export-to-hub__form__dataset">
             <div class="export-to-hub__form__group --small">
               <div class="export-to-hub__label">
-                <label v-text="$t('owner')" />
+                <label v-text="$t('owner')" for="owner" />
                 <BaseIconWithBadge
                   class="export-to-hub__label__info"
                   icon="info"
@@ -43,33 +43,37 @@
                 />
               </div>
               <input
+                id="owner"
                 type="text"
                 v-model="exportToHubForm.orgOrUsername"
                 class="input"
                 @blur="validateForm('orgOrUsername')"
                 @input="validateForm('orgOrUsername')"
                 :placeholder="$t('owner')"
+                aria-required="true"
               />
             </div>
             <span aria-hidden="true" class="export-to-hub__form__separator"
               >/</span
             >
             <div class="export-to-hub__form__group">
-              <label>Dataset name</label>
+              <label for="datasetName">Dataset name</label>
               <input
+                id="datasetName"
                 type="text"
                 v-model="exportToHubForm.datasetName"
                 class="input"
                 :placeholder="$t('datasetCreation.datasetName')"
                 @blur="validateForm('datasetName')"
                 @input="validateForm('datasetName')"
+                aria-required="true"
               />
             </div>
           </div>
 
           <div class="export-to-hub__form__group">
             <div class="export-to-hub__label">
-              <label v-text="$t('hfToken')" />
+              <label v-text="$t('hfToken')" for="hfToken" />
               <BaseIconWithBadge
                 class="export-to-hub__label__info"
                 icon="info"
@@ -84,6 +88,7 @@
               />
             </div>
             <input
+              id="hfToken"
               class="input"
               type="password"
               autocomplete="one-time-code"
@@ -91,6 +96,7 @@
               :placeholder="$t('hfToken')"
               @blur="validateForm('hfToken')"
               @input="validateForm('hfToken')"
+              aria-required="true"
             />
           </div>
 
@@ -129,18 +135,6 @@ export default {
     dataset: {
       type: Object,
       required: true,
-    },
-  },
-  data: () => ({
-    errors: {
-      orgOrUsername: [],
-      datasetName: [],
-      hfToken: [],
-    },
-  }),
-  methods: {
-    validateForm(input) {
-      this.errors[input] = this.validate()[input];
     },
   },
   setup(props) {
