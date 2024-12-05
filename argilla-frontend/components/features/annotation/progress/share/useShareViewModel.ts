@@ -45,7 +45,7 @@ export const useShareViewModel = () => {
 
     params.set(
       "text",
-      `<span size="10pt">@${user.value.userName}</span>
+      `<span size="10pt">${user.value.userName}</span>
 
 I just contributed ${metrics.submitted} examples to this dataset:
 
