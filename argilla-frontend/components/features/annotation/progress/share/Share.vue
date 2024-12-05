@@ -1,15 +1,14 @@
 <template>
   <div class="share" @click.stop="copyOnClipboard">
-    <BaseActionTooltip
-      :tooltip="$t('copiedToClipboard')"
-      tooltipPosition="down"
-    >
+    <BaseActionTooltip :tooltip="$t('copiedToClipboard')">
       <BaseButton
+        class="share__button"
         :title="$t('button.tooltip.copyToClipboard')"
         @mouseover="openDialog"
         @mouseleave="closeDialog"
       >
-        Share
+        <svgicon class="share__icon" name="link" width="14" height="14" />
+        {{ $t("share") }}
       </BaseButton>
     </BaseActionTooltip>
     <transition name="fade" appear>
@@ -20,7 +19,6 @@
       >
         <div>
           <img :src="imageLink" />
-          <p class="share__link" v-text="imageLink" />
         </div>
       </dialog>
     </transition>
@@ -37,6 +35,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$bullet-size: 8px;
 .share {
   z-index: 2;
   margin-left: auto;
@@ -58,13 +57,17 @@ export default {
     z-index: 2;
   }
 
-  &__link {
-    width: 95%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    font-size: 10px;
-    color: var(--fg-secondary);
+  &__button {
+    @include font-size(12px);
+    height: 24px;
+    padding: $base-space;
+    background: var(--bg-opacity-3);
+    border-radius: $border-radius;
+  }
+
+  &__icon {
+    padding: 0;
+    flex-shrink: 0;
   }
 }
 </style>

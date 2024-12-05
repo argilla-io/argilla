@@ -32,11 +32,11 @@ export const useShareViewModel = () => {
   };
 
   const createImageLink = () => {
-    const url = new URL("https://argilla.imglab-cdn.net/dibt/dibt.png");
+    const url = new URL("https://argilla.imglab-cdn.net/dibt/dibt_v2.png");
     const params = new URLSearchParams(url.search);
-    params.set("width", "900");
-    params.set("text-width", "450");
-    params.set("text-height", "750");
+    params.set("width", "1200");
+    params.set("text-width", "700");
+    params.set("text-height", "590");
     params.set("text-weight", "bold");
     params.set("text-padding", "60");
     params.set("text-color", "39,71,111");
@@ -45,11 +45,11 @@ export const useShareViewModel = () => {
 
     params.set(
       "text",
-      `<span size="10pt">${user.value.userName}</span>
+      `<span size="7pt">${user.value.userName}</span>
 
-I just contributed ${metrics.submitted} examples to this dataset:
+I've just contributed ${metrics.submitted} examples to this dataset:
 
-<span size="10pt">${dataset.name}</span>
+<span size="9pt">${dataset.name}</span>
 
 <span size="8pt" weight="normal">Team progress</span>
 ${progress.percentage.completed}%`
