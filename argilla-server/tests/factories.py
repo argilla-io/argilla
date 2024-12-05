@@ -198,6 +198,10 @@ class AdminFactory(UserFactory):
     role = UserRole.admin
 
 
+class AnnotatorSyncFactory(UserSyncFactory):
+    role = UserRole.annotator
+
+
 class AnnotatorFactory(UserFactory):
     role = UserRole.annotator
 
@@ -252,12 +256,30 @@ class RecordFactory(BaseFactory):
     dataset = factory.SubFactory(DatasetFactory)
 
 
+class ResponseSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Response
+
+    record = factory.SubFactory(RecordSyncFactory)
+    user = factory.SubFactory(UserSyncFactory)
+
+
 class ResponseFactory(BaseFactory):
     class Meta:
         model = Response
 
     record = factory.SubFactory(RecordFactory)
     user = factory.SubFactory(UserFactory)
+
+
+class VectorSettingsSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = VectorSettings
+
+    name = factory.Sequence(lambda n: f"vector-{n}")
+    title = "Vector Title"
+    dimensions = factory.LazyAttribute(lambda _: random.randrange(16, 1024))
+    dataset = factory.SubFactory(DatasetSyncFactory)
 
 
 class VectorSettingsFactory(BaseFactory):
@@ -268,6 +290,14 @@ class VectorSettingsFactory(BaseFactory):
     title = "Vector Title"
     dimensions = factory.LazyAttribute(lambda _: random.randrange(16, 1024))
     dataset = factory.SubFactory(DatasetFactory)
+
+
+class VectorSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Vector
+
+    record = factory.SubFactory(RecordSyncFactory)
+    vector_settings = factory.SubFactory(VectorSettingsSyncFactory)
 
 
 class VectorFactory(BaseFactory):
@@ -324,6 +354,16 @@ class CustomFieldFactory(FieldFactory):
     }
 
 
+class MetadataPropertySyncFactory(BaseSyncFactory):
+    class Meta:
+        model = MetadataProperty
+
+    name = factory.Sequence(lambda n: f"metadata-property-{n}")
+    title = "Metadata property title"
+    allowed_roles = [UserRole.admin, UserRole.annotator]
+    dataset = factory.SubFactory(DatasetSyncFactory)
+
+
 class MetadataPropertyFactory(BaseFactory):
     class Meta:
         model = MetadataProperty
@@ -355,6 +395,17 @@ class IntegerMetadataPropertyFactory(MetadataPropertyFactory):
 
 class FloatMetadataPropertyFactory(MetadataPropertyFactory):
     settings = {"type": MetadataPropertyType.float}
+
+
+class QuestionSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Question
+
+    name = factory.Sequence(lambda n: f"question-{n}")
+    title = "Question Title"
+    description = "Question Description"
+    dataset = factory.SubFactory(DatasetSyncFactory)
+    settings = {}
 
 
 class QuestionFactory(BaseFactory):
