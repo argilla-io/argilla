@@ -39,6 +39,7 @@ describe("useRunningEnvironment", () => {
             new Environment(
               {
                 showHuggingfaceSpacePersistentStorageWarning: false,
+                shareYourProgressEnabled: false,
               },
               {
                 spaceAuthorName: "USER_NAME_FAKE",

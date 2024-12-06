@@ -22,12 +22,27 @@ export class EnvironmentRepository implements IEnvironmentRepository {
         largeCache()
       );
 
-      const { argilla, huggingface } = data;
+      const {
+        argilla = {
+          share_your_progress_enabled: false,
+          show_huggingface_space_persistent_storage_warning: false,
+        },
+        huggingface = {
+          space_author_name: "",
+          space_host: "",
+          space_id: "",
+          space_persistent_storage_enabled: false,
+          space_repo_name: "",
+          space_subdomain: "",
+          space_title: "",
+        },
+      } = data;
 
       return new Environment(
         {
           showHuggingfaceSpacePersistentStorageWarning:
             argilla.show_huggingface_space_persistent_storage_warning,
+          shareYourProgressEnabled: argilla.share_your_progress_enabled,
         },
         {
           spaceId: huggingface.space_id,

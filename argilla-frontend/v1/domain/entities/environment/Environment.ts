@@ -2,6 +2,7 @@ export class Environment {
   constructor(
     private readonly argilla: {
       showHuggingfaceSpacePersistentStorageWarning: boolean;
+      shareYourProgressEnabled: boolean;
     },
     private readonly huggingface: {
       spaceId: string;
@@ -19,6 +20,10 @@ export class Environment {
       this.argilla.showHuggingfaceSpacePersistentStorageWarning &&
       !this.huggingface.spacePersistentStorageEnabled
     );
+  }
+
+  get shareYourProgressEnabled() {
+    return this.argilla.shareYourProgressEnabled;
   }
 
   get huggingFaceSpace() {
