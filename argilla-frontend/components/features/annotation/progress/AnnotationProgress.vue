@@ -23,10 +23,10 @@
       class="my-progress__status--skeleton"
     />
     <div v-else class="my-progress__share">
-      <Share v-if="isShareYourProgressEnabled && canSeeShare" />
+      <Share v-if="canSeeShare" />
       <StatusCounter
         :ghost="true"
-        :rainbow="isShareYourProgressEnabled && shouldShowSubmittedAnimation"
+        :rainbow="shouldShowSubmittedAnimation"
         class="my-progress__status"
         :color="RecordStatus.submitted.color"
         :name="RecordStatus.submitted.name"

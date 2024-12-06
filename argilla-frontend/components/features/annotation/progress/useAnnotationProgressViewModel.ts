@@ -16,9 +16,11 @@ export const useAnnotationProgressViewModel = () => {
     isShareYourProgressEnabled.value = await getShareYourProgressEnabled();
   });
 
-  const canSeeShare = computed(() => metrics.submitted > 0);
+  const canSeeShare = computed(
+    () => isShareYourProgressEnabled.value && metrics.submitted >= 2
+  );
   const shouldShowSubmittedAnimation = computed(
-    () => metrics.submitted % 20 === 0
+    () => canSeeShare.value && metrics.submitted % 10 === 0
   );
 
   onBeforeMount(() => {
@@ -27,7 +29,6 @@ export const useAnnotationProgressViewModel = () => {
 
   return {
     metrics,
-    isShareYourProgressEnabled,
     canSeeShare,
     shouldShowSubmittedAnimation,
   };
