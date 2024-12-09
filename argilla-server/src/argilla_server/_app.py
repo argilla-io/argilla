@@ -67,21 +67,18 @@ def configure_share_your_progress(app: FastAPI):
     def create_image_link(username: str, dataset_name: str, submitted: int, team_progress: float) -> str:
         url = "https://argilla.imglab-cdn.net/dibt/dibt_v2.png"
 
-        text = f"""<span size="7pt">{username}</span>
+        text = f"""<span><span size="9pt" weight="bold">@{username}</span>
+I've just contributed <span weight="bold">{submitted}</span> examples to this dataset:
+<span size="9pt" weight="bold">{dataset_name}</span></span>
 
-I've just contributed {submitted} examples to this dataset:
-
-<span size="9pt">{dataset_name}</span>
-
-<span size="8pt" weight="normal">Team progress</span>
-{team_progress}%"""
+<span size="8pt">Team progress</span>
+<span weight="bold">{team_progress}%</span>"""
 
         params = {
             "width": "1200",
             "text": text,
             "text-width": "700",
             "text-height": "590",
-            "text-weight": "bold",
             "text-padding": "60",
             "text-color": "39,71,111",
             "text-x": "460",
@@ -104,7 +101,7 @@ I've just contributed {submitted} examples to this dataset:
                 <meta property="og:title" content="{dataset_name}" />
                 <meta
                   property="og:description"
-                  content="Contribute with {dataset_name}"
+                  content="Contribute to {dataset_name}"
                 />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="{url}" />
@@ -117,7 +114,7 @@ I've just contributed {submitted} examples to this dataset:
                 <meta name="twitter:title" content="{dataset_name}" />
                 <meta
                   name="twitter:description"
-                  content="Contribute with {dataset_name}"
+                  content="Contribute to {dataset_name}"
                 />
                 <meta name="twitter:image" content="{share_image}" />
                 <meta name="twitter:site" content="{url}" />

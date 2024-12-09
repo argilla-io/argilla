@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useUser } from "~/v1/infrastructure/services";
 import { useClipboard } from "~/v1/infrastructure/services/useClipboard";
 import { useDataset } from "~/v1/infrastructure/storage/DatasetStorage";
@@ -28,7 +28,13 @@ export const useShareViewModel = () => {
 
     url.search = params.toString();
 
-    copy(url.toString());
+    const textToCopy = `I've just contributed ${
+      metrics.submitted
+    } examples to this dataset:
+
+${url.toString()}`;
+
+    copy(textToCopy);
   };
 
   const createImageLink = () => {
@@ -37,7 +43,6 @@ export const useShareViewModel = () => {
     params.set("width", "1200");
     params.set("text-width", "700");
     params.set("text-height", "590");
-    params.set("text-weight", "bold");
     params.set("text-padding", "60");
     params.set("text-color", "39,71,111");
     params.set("text-x", "460");
@@ -47,14 +52,13 @@ export const useShareViewModel = () => {
 
     params.set(
       "text",
-      `<span size="7pt">${user.value.userName}</span>
+      `<span>
+<span size="9pt" weight="bold">@${user.value.userName}</span>
+I've just contributed <span weight="bold">${metrics.submitted}</span> examples to this dataset:
+<span size="9pt" weight="bold">${dataset.name}</span></span>
 
-I've just contributed ${metrics.submitted} examples to this dataset:
-
-<span size="9pt">${dataset.name}</span>
-
-<span size="8pt" weight="normal">Team progress</span>
-${progress.percentage.completed}%`
+<span size="8pt">Team progress</span>
+<span weight="bold">${progress.percentage.completed}%</span>`
     );
 
     return `${url.origin}${url.pathname}?${params.toString()}`;
@@ -69,6 +73,13 @@ ${progress.percentage.completed}%`
   const closeDialog = () => {
     isDialogOpen.value = false;
   };
+
+  watch(
+    () => metrics.submitted,
+    () => {
+      fetch(createImageLink());
+    }
+  );
 
   return {
     imageLink,
