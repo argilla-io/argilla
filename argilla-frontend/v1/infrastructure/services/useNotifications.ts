@@ -27,13 +27,9 @@ export const useNotifications = () => {
         numberOfChars: message.length,
         buttonText,
         onClick() {
-          clear();
-
           if (onClick) onClick();
         },
         onClose() {
-          clear();
-
           if (onClose) onClose();
         },
         type: type || "default",
