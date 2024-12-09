@@ -18,8 +18,6 @@ export const useAxiosExtension = (axiosInstanceFn: () => NuxtAxiosInstance) => {
       publicAxios.interceptors.response = axios.interceptors.response;
     }
 
-    publicAxios.interceptors.request = axios.interceptors.request;
-
     return publicAxios;
   };
 

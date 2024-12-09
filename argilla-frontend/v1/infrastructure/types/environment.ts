@@ -1,7 +1,6 @@
 export interface BackendEnvironment {
   argilla: {
     show_huggingface_space_persistent_storage_warning: boolean;
-    share_your_progress_enabled: boolean;
   };
   huggingface: {
     space_id: string;
