@@ -451,6 +451,7 @@ async def get_dataset_users_progress(db: AsyncSession, dataset: Dataset) -> List
         .join(User)
         .where(Record.dataset_id == dataset.id)
         .group_by(User.username, Record.status, Response.status)
+        .order_by(User.inserted_at.asc())
     )
 
     annotators_progress = defaultdict(lambda: defaultdict(dict))
