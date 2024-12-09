@@ -17,8 +17,9 @@
         class="share__dialog"
         v-click-outside="closeDialog"
       >
-        <div>
-          <img :src="imageLink" />
+        <div class="share__dialog--container">
+          <BaseSpinner v-if="!sharingImage.loaded" :size="20" />
+          <img v-else :src="sharingImage.src" />
         </div>
       </dialog>
     </transition>
@@ -46,6 +47,7 @@ $bullet-size: 8px;
     right: 1em;
     left: auto;
     width: auto;
+    height: 204px;
     min-width: 360px;
     max-width: 360px;
     bottom: calc(100% + $base-space + 2px);
@@ -55,6 +57,13 @@ $bullet-size: 8px;
     border-radius: $border-radius-m;
     box-shadow: $shadow;
     z-index: 2;
+
+    &--container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
   }
 
   &__button {

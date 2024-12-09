@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import { useUser } from "~/v1/infrastructure/services";
 import { useClipboard } from "~/v1/infrastructure/services/useClipboard";
 import { useDataset } from "~/v1/infrastructure/storage/DatasetStorage";
@@ -13,7 +13,13 @@ export const useShareViewModel = () => {
   const { state: progress } = useTeamProgress();
 
   const isDialogOpen = ref(false);
-  const imageLink = ref("");
+  const sharingImage = ref<{
+    src: string;
+    loaded: boolean;
+  }>({
+    src: "",
+    loaded: false,
+  });
 
   const copyOnClipboard = () => {
     closeDialog();
@@ -65,7 +71,7 @@ I've just contributed <span weight="bold">${metrics.submitted}</span> examples t
   };
 
   const openDialog = () => {
-    imageLink.value = createImageLink();
+    setPreloadedImage();
 
     isDialogOpen.value = true;
   };
@@ -74,16 +80,34 @@ I've just contributed <span weight="bold">${metrics.submitted}</span> examples t
     isDialogOpen.value = false;
   };
 
+  const setPreloadedImage = () => {
+    sharingImage.value.loaded = false;
+
+    const image = createImageLink();
+
+    const preFetchImage = new Image();
+    preFetchImage.src = image;
+    preFetchImage.onload = () => {
+      sharingImage.value = {
+        src: image,
+        loaded: true,
+      };
+    };
+  };
+
+  onBeforeMount(() => {
+    setPreloadedImage();
+  });
+
   watch(
     () => metrics.submitted,
     () => {
-      const preFetchImage = new Image();
-      preFetchImage.src = createImageLink();
+      setPreloadedImage();
     }
   );
 
   return {
-    imageLink,
+    sharingImage,
     isDialogOpen,
     openDialog,
     closeDialog,
