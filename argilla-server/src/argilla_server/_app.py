@@ -64,6 +64,9 @@ async def app_lifespan(app: FastAPI):
 
 
 def configure_share_your_progress(app: FastAPI):
+    if settings.enable_share_your_progress is False:
+        return
+
     def create_image_link(username: str, dataset_name: str, submitted: int, team_progress: float) -> str:
         url = "https://argilla.imglab-cdn.net/dibt/dibt_v2.png"
 
