@@ -128,6 +128,9 @@ const config: NuxtConfig = {
     "/api/": {
       target: BASE_URL,
     },
+    "/share-your-progress": {
+      target: BASE_URL,
+    },
   },
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
