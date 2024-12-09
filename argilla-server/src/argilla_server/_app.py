@@ -104,7 +104,7 @@ I've just contributed <span weight="bold">{submitted}</span> examples to this da
                 <meta property="og:title" content="{dataset_name}" />
                 <meta
                   property="og:description"
-                  content="Contribute to {dataset_name}"
+                  content="Join and contribute to the dataset {dataset_name}"
                 />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="{url}" />
@@ -117,7 +117,7 @@ I've just contributed <span weight="bold">{submitted}</span> examples to this da
                 <meta name="twitter:title" content="{dataset_name}" />
                 <meta
                   name="twitter:description"
-                  content="Contribute to {dataset_name}"
+                  content="Join and contribute to the dataset {dataset_name}"
                 />
                 <meta name="twitter:image" content="{share_image}" />
                 <meta name="twitter:site" content="{url}" />
