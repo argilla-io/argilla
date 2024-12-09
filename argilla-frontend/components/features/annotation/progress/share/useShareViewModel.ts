@@ -77,7 +77,8 @@ I've just contributed <span weight="bold">${metrics.submitted}</span> examples t
   watch(
     () => metrics.submitted,
     () => {
-      fetch(createImageLink());
+      const preFetchImage = new Image();
+      preFetchImage.src = createImageLink();
     }
   );
 
