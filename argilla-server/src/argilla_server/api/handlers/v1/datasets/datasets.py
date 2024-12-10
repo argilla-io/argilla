@@ -39,6 +39,7 @@ from argilla_server.api.schemas.v1.metadata_properties import (
     MetadataProperty,
     MetadataPropertyCreate,
 )
+from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.api.schemas.v1.vector_settings import VectorSettings, VectorSettingsCreate, VectorsSettings
 from argilla_server.api.schemas.v1.jobs import Job as JobSchema
 from argilla_server.contexts import datasets
@@ -346,6 +347,9 @@ async def export_dataset_to_hub(
     dataset = await Dataset.get_or_raise(db, dataset_id)
 
     await authorize(current_user, DatasetPolicy.export_to_hub(dataset))
+
+    if not await datasets.dataset_has_records(db, dataset):
+        raise UnprocessableEntityError(f"Dataset with id `{dataset.id}` has no records to export")
 
     job = hub_jobs.export_dataset_to_hub_job.delay(
         name=hub_dataset.name,
