@@ -2,7 +2,7 @@
   <div class="export-to-hub" @keydown.stop="">
     <BaseButton
       class="primary export-to-hub__button"
-      @click.prevent="openDialog"
+      @mousedown.native.prevent="openDialog"
       :loading="isExporting"
       :disabled="isExporting"
       >{{ $t("button.exportToHub") }}</BaseButton
@@ -10,7 +10,10 @@
     <transition name="fade" appear>
       <dialog
         v-if="isDialogOpen"
-        v-click-outside="closeDialog"
+        v-click-outside="{
+          events: ['mousedown'],
+          handler: closeDialog,
+        }"
         class="export-to-hub__dialog"
         :class="{ '--small': isExporting }"
       >
