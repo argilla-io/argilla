@@ -338,6 +338,8 @@ export default {
       datasetNameIsRequired: "Dataset name is required",
     },
     exporting: "Exporting...",
+    private: "private",
+    public: "öffentliche",
   },
   config: {
     field: {

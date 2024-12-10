@@ -17,7 +17,13 @@
         <p v-if="isExporting" class="export-to-hub__exporting-message">
           <em v-text="$t('exportToHub.exporting')" />
           {{ exportToHubForm.orgOrUsername }}/{{ exportToHubForm.datasetName }}
-          <span>{{ !exportToHub.isPrivate ? "(private)" : "" }}</span>
+          <span
+            v-text="
+              exportToHubForm.isPrivate
+                ? `(${$t('exportToHub.private')})`
+                : `(${$t('exportToHub.public')})`
+            "
+          />
         </p>
         <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2

@@ -343,6 +343,8 @@ export default {
       datasetNameIsRequired: "El nombre del dataset es requerido",
     },
     exporting: "Exportando...",
+    private: "privado",
+    public: "público",
   },
   config: {
     field: {
