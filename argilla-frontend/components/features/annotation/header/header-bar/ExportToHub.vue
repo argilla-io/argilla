@@ -3,8 +3,7 @@
     <BaseButton
       class="primary export-to-hub__button"
       @mousedown.native.prevent="openDialog"
-      :loading="isExporting"
-      :disabled="isExporting"
+      :loading="!isExporting"
       >{{ $t("button.exportToHub") }}</BaseButton
     >
     <transition name="fade" appear>
