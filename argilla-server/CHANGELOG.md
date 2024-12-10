@@ -16,6 +16,11 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Added `GET /share-your-progress` endpoint to share user progress with the community. ([#5739](https://github.com/argilla-io/argilla/pull/5739))
+- Added `argilla.share_your_progress_enabled` attribute to `GET /api/v1/settings` endpoint. ([#5739](https://github.com/argilla-io/argilla/pull/5739))
+
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
 
 ### Added

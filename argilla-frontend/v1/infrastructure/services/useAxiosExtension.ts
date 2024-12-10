@@ -1,4 +1,7 @@
 import { type NuxtAxiosInstance } from "@nuxtjs/axios";
+import { loadCache } from "../repositories";
+import { loadErrorHandler } from "../repositories/AxiosErrorHandler";
+import { useTranslate } from "./useTranslate";
 
 type PublicAxiosConfig = {
   enableErrors: boolean;
@@ -10,13 +13,17 @@ export interface PublicNuxtAxiosInstance extends NuxtAxiosInstance {
 
 export const useAxiosExtension = (axiosInstanceFn: () => NuxtAxiosInstance) => {
   const makePublic = (axios: NuxtAxiosInstance, config: PublicAxiosConfig) => {
+    const { t } = useTranslate();
+
     const publicAxios = axios.create({
       withCredentials: false,
     });
 
     if (config.enableErrors) {
-      publicAxios.interceptors.response = axios.interceptors.response;
+      loadErrorHandler(publicAxios, t);
     }
+
+    loadCache(publicAxios);
 
     return publicAxios;
   };

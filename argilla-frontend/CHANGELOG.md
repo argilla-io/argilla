@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Add share progress feature ([#5727](https://github.com/argilla-io/argilla/pull/5727))
+
 ### Fixed
 
 - Fixed dataset update date information in the dataset list ([#5741](https://github.com/argilla-io/argilla/pull/#5741))
