@@ -77,7 +77,7 @@ export default {
 };
 </script>
 
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 $info-color: var(--bg-banner-info);
 $warning-color: var(--bg-banner-warning);
 $error-color: var(--bg-banner-error);
@@ -112,4 +112,4 @@ $error-color: var(--bg-banner-error);
     padding: 0;
   }
 }
-</styles>
+</style>

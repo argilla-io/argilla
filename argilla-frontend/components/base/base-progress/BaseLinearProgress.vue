@@ -102,7 +102,7 @@ export default {
 };
 </script>
 
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 $progressHeight: 14px;
 $tooltipBackgroundColor: var(--bg-solid-grey-3);
 $tooltipTriangleSize: 5px;
@@ -191,4 +191,4 @@ $borderRadius: 3px;
     transition: all 0.5s ease-in-out;
   }
 }
-</styles>
+</style>

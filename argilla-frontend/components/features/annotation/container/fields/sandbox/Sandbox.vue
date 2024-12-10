@@ -17,7 +17,10 @@ if (parent) {
   for (const style of styles) {
     currentHead.appendChild(style.cloneNode(true));
   }
-
+  const links = parent.document.querySelectorAll('link[href$=".css"]');
+  for (const link of links) {
+    currentHead.appendChild(link.cloneNode(true));
+  }
   const html = parent.document.getElementsByTagName("html")[0];
   document.getElementsByTagName("html")[0].setAttribute("data-theme", html.getAttribute("data-theme"));
 }

@@ -53,7 +53,7 @@ export default {
 };
 </script>
 
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 .settings {
   &__tabs {
     &-content {
@@ -67,4 +67,4 @@ export default {
     }
   }
 }
-</styles>
+</style>
