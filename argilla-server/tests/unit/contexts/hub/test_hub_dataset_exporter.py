@@ -21,9 +21,11 @@ from typing import Generator
 from huggingface_hub import HfApi
 from datasets import load_dataset, get_dataset_config_names, get_dataset_split_names
 
+from argilla_server.contexts import hub
 from argilla_server.contexts.hub import HubDatasetExporter
 from argilla_server.enums import DatasetStatus, FieldType, QuestionType, ResponseStatus, MetadataPropertyType
 
+from tests.database import SyncTestSession
 from tests.factories import (
     DatasetSyncFactory,
     FieldSyncFactory,
@@ -44,6 +46,18 @@ IMAGE_DATA_URL = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEA
 
 
 @pytest.fixture
+def sync_test_session(mocker):
+    session = SyncTestSession()
+
+    def override_get_sync_db():
+        yield session
+
+    mocker.patch.object(hub, "get_sync_db", override_get_sync_db)
+
+    yield session
+
+
+@pytest.fixture
 def hf_api() -> HfApi:
     return HfApi(token=HF_TOKEN)
 
@@ -59,7 +73,7 @@ def hf_dataset_name(hf_api: HfApi) -> Generator[str, None, None]:
 
 @pytest.mark.skipif(HF_TOKEN is None, reason="HF_TOKEN_ARGILLA_INTERNAL_TESTING is not defined")
 class TestHubDatasetExporter:
-    def test_export_to(self, async_client, hf_api: HfApi, hf_dataset_name: str):
+    def test_export_to(self, sync_test_session, hf_api: HfApi, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="text", settings={"type": FieldType.text, "use_markdown": False}, dataset=dataset)
@@ -84,7 +98,7 @@ class TestHubDatasetExporter:
         }
 
     @pytest.mark.skip(reason="the Hub is ignoring for some reason the subset and using default instead")
-    def test_export_to_with_custom_subset(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_custom_subset(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="text", settings={"type": FieldType.text, "use_markdown": False}, dataset=dataset)
@@ -100,7 +114,7 @@ class TestHubDatasetExporter:
 
         assert get_dataset_config_names(hf_dataset_name) == ["custom"]
 
-    def test_export_to_with_custom_split(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_custom_split(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="text", settings={"type": FieldType.text, "use_markdown": False}, dataset=dataset)
@@ -116,7 +130,7 @@ class TestHubDatasetExporter:
 
         assert get_dataset_split_names(hf_dataset_name) == ["custom"]
 
-    def test_export_to_with_private_dataset(self, async_client, hf_api: HfApi, hf_dataset_name: str):
+    def test_export_to_with_private_dataset(self, sync_test_session, hf_api: HfApi, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="text", settings={"type": FieldType.text, "use_markdown": False}, dataset=dataset)
@@ -132,7 +146,7 @@ class TestHubDatasetExporter:
 
         assert hf_api.dataset_info(hf_dataset_name).private == True
 
-    def test_export_to_with_chat_field(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_chat_field(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         chat_record_value = [
@@ -155,7 +169,7 @@ class TestHubDatasetExporter:
 
         assert exported_dataset[0]["chat"] == chat_record_value
 
-    def test_export_to_with_custom_field(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_custom_field(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(
@@ -181,7 +195,7 @@ class TestHubDatasetExporter:
 
         assert exported_dataset[0]["custom"] == "custom-value"
 
-    def test_export_to_with_image_field_as_url(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_image_field_as_url(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="image", settings={"type": FieldType.image}, dataset=dataset)
@@ -199,7 +213,7 @@ class TestHubDatasetExporter:
 
         assert exported_dataset[0]["image"] == IMAGE_URL
 
-    def test_export_to_with_image_field_as_data_url(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_image_field_as_data_url(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="image", settings={"type": FieldType.image}, dataset=dataset)
@@ -217,7 +231,7 @@ class TestHubDatasetExporter:
 
         assert isinstance(exported_dataset[0]["image"], Image.Image)
 
-    def test_export_to_with_text_question(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_text_question(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotators = AnnotatorSyncFactory.create_batch(2, workspaces=[dataset.workspace])
 
@@ -271,7 +285,7 @@ class TestHubDatasetExporter:
             "text-question.responses.users": [str(annotators[0].id), str(annotators[1].id)],
         }
 
-    def test_export_to_with_rating_question(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_rating_question(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotators = AnnotatorSyncFactory.create_batch(2, workspaces=[dataset.workspace])
 
@@ -330,7 +344,7 @@ class TestHubDatasetExporter:
             "rating-question.responses.users": [str(annotators[0].id), str(annotators[1].id)],
         }
 
-    def test_export_to_with_label_question(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_label_question(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotators = AnnotatorSyncFactory.create_batch(2, workspaces=[dataset.workspace])
 
@@ -388,7 +402,7 @@ class TestHubDatasetExporter:
             "label-question.responses.users": [str(annotators[0].id), str(annotators[1].id)],
         }
 
-    def test_export_to_with_multi_label_question(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_multi_label_question(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotators = AnnotatorSyncFactory.create_batch(2, workspaces=[dataset.workspace])
 
@@ -446,7 +460,7 @@ class TestHubDatasetExporter:
             "multi-label-question.responses.users": [str(annotators[0].id), str(annotators[1].id)],
         }
 
-    def test_export_to_with_ranking_question(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_ranking_question(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotators = AnnotatorSyncFactory.create_batch(2, workspaces=[dataset.workspace])
 
@@ -524,7 +538,7 @@ class TestHubDatasetExporter:
             "ranking-question.responses.users": [str(annotators[0].id), str(annotators[1].id)],
         }
 
-    def test_export_to_with_span_question(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_span_question(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotators = AnnotatorSyncFactory.create_batch(2, workspaces=[dataset.workspace])
 
@@ -597,7 +611,7 @@ class TestHubDatasetExporter:
             "span-question.responses.users": [str(annotators[0].id), str(annotators[1].id)],
         }
 
-    def test_export_to_with_draft_response(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_draft_response(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotator = AnnotatorSyncFactory.create(workspaces=[dataset.workspace])
 
@@ -638,7 +652,7 @@ class TestHubDatasetExporter:
             "text-question.responses.users": [str(annotator.id)],
         }
 
-    def test_export_to_with_discarded_response(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_discarded_response(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
         annotator = AnnotatorSyncFactory.create(workspaces=[dataset.workspace])
 
@@ -679,7 +693,7 @@ class TestHubDatasetExporter:
             "text-question.responses.users": [str(annotator.id)],
         }
 
-    def test_export_to_with_metadata(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_metadata(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="text", settings={"type": FieldType.text, "use_markdown": False}, dataset=dataset)
@@ -736,7 +750,7 @@ class TestHubDatasetExporter:
         assert exported_dataset[0]["metadata.metadata-integer"] == 42
         assert exported_dataset[0]["metadata.metadata-float"] == 3.14
 
-    def test_export_to_with_vectors(self, async_client, hf_dataset_name: str):
+    def test_export_to_with_vectors(self, sync_test_session, hf_dataset_name: str):
         dataset = DatasetSyncFactory.create(status=DatasetStatus.ready)
 
         FieldSyncFactory.create(name="text", settings={"type": FieldType.text, "use_markdown": False}, dataset=dataset)

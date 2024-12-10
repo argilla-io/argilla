@@ -20,7 +20,7 @@ from httpx import AsyncClient
 from opensearchpy import OpenSearch
 from sqlalchemy.engine.interfaces import IsolationLevel
 
-from argilla_server.contexts import distribution, datasets, records, hub
+from argilla_server.contexts import distribution, datasets, records
 from argilla_server.api.routes import api_v1
 from argilla_server.constants import API_KEY_HEADER_NAME, DEFAULT_API_KEY
 from argilla_server.database import get_async_db
@@ -29,7 +29,7 @@ from argilla_server.search_engine import SearchEngine, get_search_engine
 from argilla_server.settings import settings
 from argilla_server.telemetry import TelemetryClient
 
-from tests.database import SyncTestSession, TestSession
+from tests.database import TestSession
 from tests.factories import AnnotatorFactory, OwnerFactory, UserFactory
 
 if TYPE_CHECKING:
@@ -85,18 +85,12 @@ async def async_client(
 
         yield session
 
-    def override_get_sync_db():
-        session = SyncTestSession()
-
-        yield session
-
     async def override_get_search_engine():
         yield mock_search_engine
 
     mocker.patch.object(distribution, "_get_async_db", override_get_async_db)
     mocker.patch.object(datasets, "get_async_db", override_get_async_db)
     mocker.patch.object(records, "get_async_db", override_get_async_db)
-    mocker.patch.object(hub, "get_sync_db", override_get_sync_db)
 
     api_v1.dependency_overrides.update(
         {
