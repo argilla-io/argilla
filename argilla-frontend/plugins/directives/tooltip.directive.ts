@@ -24,6 +24,7 @@ Vue.directive("tooltip", {
       value: {
         open: any;
         content: string;
+        backgroundColor: string;
         color: string;
         width: number;
         tooltipPosition: string;
@@ -39,6 +40,7 @@ Vue.directive("tooltip", {
     let elementOffset = initElementOffset(element);
     const {
       content,
+      backgroundColor,
       color,
       width = content.length < 40 ? 100 : 400,
       tooltipPosition = TOOLTIP_DIRECTION.BOTTOM,
@@ -50,9 +52,8 @@ Vue.directive("tooltip", {
       tooltip.setAttribute("id", tooltipId);
 
       // NOTE - init text node
-      const text = document.createTextNode(`${content}`);
       let textWrapper = document.createElement("span");
-      textWrapper.appendChild(text);
+      textWrapper.innerHTML = content;
 
       // NOTE - init close icon
       let tooltipHeader = document.createElement("div");
@@ -66,8 +67,10 @@ Vue.directive("tooltip", {
       let tooltipTriangle = document.createElement("div");
       tooltipTriangle = initTooltipTriangleStyle(tooltipTriangle);
       let tooltipTriangleInner = document.createElement("div");
-      tooltipTriangleInner =
-        initTooltipTriangleInnerStyle(tooltipTriangleInner);
+      tooltipTriangleInner = initTooltipTriangleInnerStyle(
+        tooltipTriangleInner,
+        backgroundColor
+      );
 
       // NOTE - include close icon and text node inside tooltip
       tooltip.appendChild(tooltipHeader);
@@ -79,7 +82,7 @@ Vue.directive("tooltip", {
       textWrapper = initTextStyle(textWrapper);
 
       // NOTE - tooltip styles
-      tooltip = initTooltipStyle(tooltip, width);
+      tooltip = initTooltipStyle(tooltip, width, backgroundColor);
 
       // NOTE - init tooltip position
       tooltip = initTooltipPosition(tooltip, tooltipPosition, elementOffset);
@@ -215,15 +218,17 @@ const destroyEventsListener = (element) => {
   window.removeEventListener("resize", element.resize);
 };
 
-const initTooltipStyle = (tooltip, width) => {
+const initTooltipStyle = (tooltip, width, backgroundColor) => {
   tooltip.style.position = "fixed";
   tooltip.style.width = `${width}px`;
   tooltip.style.display = "none";
   tooltip.style.flexDirection = "column";
   tooltip.style.zIndex = "99999";
-  tooltip.style.backgroundColor = "var(--bg-accent-grey-2)";
+  tooltip.style.backgroundColor = `${
+    backgroundColor || "var(--bg-accent-grey-2)"
+  }`;
   tooltip.style.borderRadius = "5px";
-  tooltip.style.padding = "20px 8px 8px 8px";
+  tooltip.style.padding = "8px 20px 8px 8px";
   tooltip.style.boxShadow = "0 8px 20px 0 rgba(0,0,0,.2)";
   tooltip.style.transition = "opacity 0.3s ease 0.2s";
   tooltip.style.border = "2px transparent solid";
@@ -244,12 +249,15 @@ const initTooltipTriangleStyle = (tooltipTriangle) => {
   tooltipTriangle.style.position = "absolute";
   return tooltipTriangle;
 };
-const initTooltipTriangleInnerStyle = (tooltipTriangleInner) => {
+const initTooltipTriangleInnerStyle = (
+  tooltipTriangleInner,
+  backgroundColor
+) => {
   tooltipTriangleInner.style.position = "relative";
   tooltipTriangleInner.style.width = "0";
   tooltipTriangleInner.style.height = "0";
   tooltipTriangleInner.style.borderBottom =
-    "10px solid var(--bg-accent-grey-2)";
+    "10px solid " + (backgroundColor || "var(--bg-accent-grey-2)");
   tooltipTriangleInner.style.borderRight = "10px solid transparent";
   tooltipTriangleInner.style.borderLeft = "10px solid transparent";
   return tooltipTriangleInner;
