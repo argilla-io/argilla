@@ -61,7 +61,8 @@ dependencies = [
     "datasets >= 3.0.1",
     "pillow >= 10.4.0",
     # For Telemetry
-    "huggingface_hub >= 0.13, <1",
+    "huggingface-hub>=0.26.2",
+    "Jinja2>=3.1.4",           # Used by huggingface-hub to render dataset card templates
 ]
 
 [project.optional-dependencies]
