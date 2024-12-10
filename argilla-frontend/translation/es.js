@@ -342,7 +342,7 @@ export default {
       hfTokenInvalid: "El token de Hugging Face es inválido",
       datasetNameIsRequired: "El nombre del dataset es requerido",
     },
-    exporting: "Exportando...",
+    exporting: "Exportando al hub de Hugging Face",
     private: "privado",
     public: "público",
   },
