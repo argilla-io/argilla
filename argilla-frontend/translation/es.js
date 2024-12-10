@@ -339,6 +339,7 @@ export default {
       orgOrUsernameIsRequired:
         "El nombre de usuario u organización es requerido",
       hfTokenIsRequired: "El token de Hugging Face es requerido",
+      hfTokenInvalid: "El token de Hugging Face es inválido",
       datasetNameIsRequired: "El nombre del dataset es requerido",
     },
     exporting: "Exportando...",

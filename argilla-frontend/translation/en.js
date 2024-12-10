@@ -335,6 +335,7 @@ export default {
     validations: {
       orgOrUsernameIsRequired: "Organization or username is required",
       hfTokenIsRequired: "Hugging Face token is required",
+      hfTokenInvalid: "Invalid Hugging Face token",
       datasetNameIsRequired: "Dataset name is required",
     },
     exporting: "Exporting...",

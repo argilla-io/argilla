@@ -38,6 +38,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const jobRepository = useResolve(JobRepository);
 
   const validate = () => {
+    const regex = /hf_[A-Za-z0-9]+/i;
     const validations = {
       orgOrUsername: [],
       datasetName: [],
@@ -55,6 +56,8 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     }
     if (!exportToHubForm.value.hfToken) {
       validations.hfToken.push("exportToHub.validations.hfTokenIsRequired");
+    } else if (!regex.test(exportToHubForm.value.hfToken)) {
+      validations.hfToken.push("exportToHub.validations.hfTokenInvalid");
     }
     return validations;
   };
