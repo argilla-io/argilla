@@ -77,7 +77,23 @@ const config: NuxtConfig = {
     // https://go.nuxtjs.dev/typescript
     "@nuxt/typescript-build",
     "@nuxtjs/composition-api/module",
-    ["@pinia/nuxt", { disableVuex: false }],
+    [
+      "@pinia/nuxt",
+      {
+        disableVuex: false,
+      },
+    ],
+    [
+      "nuxt-compress",
+      {
+        gzip: {
+          cache: true,
+        },
+        brotli: {
+          threshold: 10240,
+        },
+      },
+    ],
   ],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
@@ -154,6 +170,21 @@ const config: NuxtConfig = {
         keep_fnames: true,
       },
     },
+    extractCSS: true,
+    splitChunks: {
+      pages: true,
+      commons: true,
+      layouts: true,
+    },
+    optimization: {
+      splitChunks: {
+        name: false,
+      },
+    },
+    filenames: {
+      css: ({ isDev }) => (isDev ? "[name].css" : "[contenthash].css"),
+    },
+    publicPath: "/_nuxt/",
   },
 
   // https://github.com/nuxt-community/style-resources-module
