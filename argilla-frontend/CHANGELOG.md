@@ -20,6 +20,10 @@ These are the section headers that we use:
 
 - Add share progress feature ([#5727](https://github.com/argilla-io/argilla/pull/5727))
 
+### Fixed
+
+- Fixed dataset update date information in the dataset list ([#5741](https://github.com/argilla-io/argilla/pull/#5741))
+
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
 
 ### Added
