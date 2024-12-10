@@ -20,7 +20,7 @@
         </div>
         <div class="dataset-card__date">
           <span v-text="$t('home.updatedAt')" />
-          <BaseDate format="date-relative-now" :date="dataset.updatedAt" />
+          <BaseDate format="date-relative-now" :date="dataset.lastActivityAt" />
         </div>
       </div>
       <p class="dataset-card__workspace">{{ dataset.workspaceName }}</p>
