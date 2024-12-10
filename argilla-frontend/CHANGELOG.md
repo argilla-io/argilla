@@ -16,6 +16,12 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed dataset update date information in the dataset list ([#5741](https://github.com/argilla-io/argilla/pull/#5741))
+
+## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
+
 ### Added
 
 - Add new dataset list page ([#5684](https://github.com/argilla-io/argilla/pull/5684))
@@ -24,6 +30,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Assign field to span question on dataset creation. ([#5717](https://github.com/argilla-io/argilla/pull/5717))
 - Fixed visible_options when updating question setting. ([#5716](https://github.com/argilla-io/argilla/pull/5716))
 - Fixed highlighting on same record ([#5693](https://github.com/argilla-io/argilla/pull/5693))
 

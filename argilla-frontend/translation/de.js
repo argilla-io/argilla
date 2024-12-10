@@ -230,6 +230,7 @@ export default {
   filters: "Filter",
   filterBy: "Filter nach...",
   fields: "Felder",
+  field: "Feld",
   questions: "Fragen",
   general: "Übersicht",
   metadata: "Metadaten",
@@ -284,6 +285,12 @@ export default {
         optionsWithoutLabel: "Optionen ohne Label sind nicht erlaubt",
         optionsSeparatedByComma: "Optionen müssen durch Kommas getrennt sein",
       },
+      rating: {
+        atLeastTwoOptions: "Mindestens zwei Optionen müssen vorhanden sein",
+      },
+      span: {
+        fieldRelated: "One text field is required",
+      },
     },
     atLeastOneQuestion: "Mindestens eine Frage wird benötigt",
     atLeastOneRequired: "Mindestens eine erforderliche Frage wird benötigt",
@@ -302,7 +309,8 @@ export default {
     requiredField: "Pflichtfeld",
     requiredQuestion: "Pflichtfrage",
     select: "Auswählen",
-    mapToColumn: "Einer Spalte zuordnen",
+    mapToColumn: "Annotate spans on:",
+    applyToaAField: "Gelten für:",
     subset: "Teilmenge",
     selectSubset:
       "Sie können einen Datensatz nur aus einer Teilmenge erstellen.",

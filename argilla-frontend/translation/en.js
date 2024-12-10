@@ -225,6 +225,7 @@ export default {
   filters: "Filters",
   filterBy: "Filter by...",
   fields: "Fields",
+  field: "Field",
   questions: "Questions",
   general: "General",
   metadata: "Metadata",
@@ -286,6 +287,9 @@ export default {
       rating: {
         atLeastTwoOptions: "At least two options are required",
       },
+      span: {
+        fieldRelated: "One text field is required",
+      },
     },
     atLeastOneQuestion: "At least one question is required.",
     atLeastOneRequired: "At least one required question is needed.",
@@ -305,6 +309,7 @@ export default {
     requiredQuestion: "Required question",
     select: "Select",
     mapToColumn: "Map to column",
+    applyToaAField: "Annotate spans on:",
     subset: "Subset",
     selectSubset: "Your can create a dataset from only one subset.",
     preview: "Preview",

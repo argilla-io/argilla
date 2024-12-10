@@ -53,6 +53,7 @@ label {
   &:hover {
     transition: color 0.3s ease;
     color: var(--fg-primary);
+    cursor: pointer;
   }
 }
 input:checked + label {

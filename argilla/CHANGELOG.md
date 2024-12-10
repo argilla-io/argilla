@@ -16,15 +16,28 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.5.0)
+
+### Added
+
+- Added support to remove/override datasets settings. ([#5584](https://github.com/argilla-io/argilla/pull/5584))
+- Added support to update question attributes. ([#5680](https://github.com/argilla-io/argilla/pull/5680))
+- Added support to webhook listeners. ([#5502](https://github.com/argilla-io/argilla/pull/5502))
+- Added support to Python 3.13. ([#5652](https://github.com/argilla-io/argilla/pull/5652))
+
+### Fixed
+
+- Fixed error when update settings.distribution.min_submitted from defaults ([#5719](https://github.com/argilla-io/argilla/pull/5719))
+
 ## [2.4.0](https://github.com/argilla-io/argilla/compare/v2.3.0...v2.4.0)
 
 ### Added
 
 - Added `Argilla.deploy_on_spaces` to deploy the Argilla server on Hugging Face Spaces. ([#5547](https://github.com/argilla-io/argilla/pull/5547))
-- Add support to webhooks. ([#5467](https://github.com/argilla-io/argilla/pull/5467))
 
 ### Changed
 
+- User parameters can now be updated using the client ([#5614](https://github.com/argilla-io/argilla/issues/5614))
 - Changed `Dataset.from_hub` method to open configure URL when `settings="ui"`. ([#5622](https://github.com/argilla-io/argilla/pull/5622))
 - Terms metadata properties accept other values than `str`. ([#5594](https://github.com/argilla-io/argilla/pull/5594))
 - Added support for `with_vectors` while fetching records along with a search query. ([#5638](https://github.com/argilla-io/argilla/pull/5638))
@@ -46,7 +59,7 @@ These are the section headers that we use:
 
 ### Changed
 
-- Changed the __repr__ method for `SettingsProperties` to display the details of all the properties in `Setting` object. ([#5380](https://github.com/argilla-io/argilla/issues/5380))
+- Changed the **repr** method for `SettingsProperties` to display the details of all the properties in `Setting` object. ([#5380](https://github.com/argilla-io/argilla/issues/5380))
 - Changed error messages when creating datasets with insufficient permissions. ([#5540](https://github.com/argilla-io/argilla/pull/5554))
 
 ### Fixed
@@ -80,7 +93,6 @@ These are the section headers that we use:
 - Added persistent record mapping to `rg.Settings` to be used in `rg.Dataset.records.log`. ([#5466](https://github.com/argilla-io/argilla/pull/5466))
 - Added multiple error handling methods to the `rg.Dataset.records.log` method to warn, ignore, or raise errors. ([#5466](https://github.com/argilla-io/argilla/pull/5463))
 - Changed dataset import and export of `rg.LabelQuestion` to use `datasets.ClassLabel` not `datasets.Value`. ([#5474](https://github.com/argilla-io/argilla/pull/5474))
-
 
 ## [2.1.0](https://github.com/argilla-io/argilla/compare/v2.0.1...v2.1.0)
 
