@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Added
+
+- Add share progress feature ([#5727](https://github.com/argilla-io/argilla/pull/5727))
+
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
 
 ### Added
