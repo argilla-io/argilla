@@ -22,7 +22,11 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const { get, set } = useLocalStorage();
 
   const isDialogOpen = ref(false);
-  const errors = ref({});
+  const errors = ref({
+    orgOrUsername: [],
+    datasetName: [],
+    hfToken: [],
+  });
   const exportToHubForm = ref({
     orgOrUsername: "",
     datasetName: "",
