@@ -228,7 +228,7 @@ const initTooltipStyle = (tooltip, width, backgroundColor) => {
     backgroundColor || "var(--bg-accent-grey-2)"
   }`;
   tooltip.style.borderRadius = "5px";
-  tooltip.style.padding = "20px 8px 8px 8px";
+  tooltip.style.padding = "8px 20px 8px 8px";
   tooltip.style.boxShadow = "0 8px 20px 0 rgba(0,0,0,.2)";
   tooltip.style.transition = "opacity 0.3s ease 0.2s";
   tooltip.style.border = "2px transparent solid";

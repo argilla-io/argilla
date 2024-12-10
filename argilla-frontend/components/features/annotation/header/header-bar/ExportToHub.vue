@@ -12,8 +12,14 @@
         v-if="isDialogOpen"
         v-click-outside="closeDialog"
         class="export-to-hub__dialog"
+        :class="{ '--small': isExporting }"
       >
-        <div class="export-to-hub__form">
+        <p v-if="isExporting" class="export-to-hub__exporting-message">
+          <em v-text="$t('exportToHub.exporting')" />
+          {{ exportToHubForm.orgOrUsername }}/{{ exportToHubForm.datasetName }}
+          <span>{{ !exportToHub.isPrivate ? "(private)" : "" }}</span>
+        </p>
+        <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
             class="export-to-hub__title"
             v-text="$t('exportToHub.dislogTitle')"
@@ -22,7 +28,7 @@
           <div class="export-to-hub__form__dataset">
             <div class="export-to-hub__form__group --small">
               <div class="export-to-hub__label">
-                <label v-text="$t('owner')" />
+                <label v-text="$t('owner')" for="owner" />
                 <BaseIconWithBadge
                   class="export-to-hub__label__info"
                   icon="info"
@@ -37,36 +43,37 @@
                 />
               </div>
               <input
+                id="owner"
                 type="text"
                 v-model="exportToHubForm.orgOrUsername"
                 class="input"
+                @blur="validateForm('orgOrUsername')"
+                @input="validateForm('orgOrUsername')"
+                :placeholder="$t('owner')"
+                aria-required="true"
               />
             </div>
             <span aria-hidden="true" class="export-to-hub__form__separator"
               >/</span
             >
             <div class="export-to-hub__form__group">
-              <label>Dataset name</label>
+              <label for="datasetName">Dataset name</label>
               <input
+                id="datasetName"
                 type="text"
                 v-model="exportToHubForm.datasetName"
                 class="input"
                 :placeholder="$t('datasetCreation.datasetName')"
+                @blur="validateForm('datasetName')"
+                @input="validateForm('datasetName')"
+                aria-required="true"
               />
             </div>
           </div>
 
           <div class="export-to-hub__form__group">
-            <BaseSwitch
-              class="export-to-hub__form__switch"
-              v-model="exportToHubForm.isPrivate"
-              >{{ $t("private") }}</BaseSwitch
-            >
-          </div>
-
-          <div class="export-to-hub__form__group">
             <div class="export-to-hub__label">
-              <label v-text="$t('hfToken')" />
+              <label v-text="$t('hfToken')" for="hfToken" />
               <BaseIconWithBadge
                 class="export-to-hub__label__info"
                 icon="info"
@@ -81,20 +88,40 @@
               />
             </div>
             <input
+              id="hfToken"
               class="input"
               type="password"
               autocomplete="one-time-code"
               v-model="exportToHubForm.hfToken"
+              :placeholder="$t('hfToken')"
+              @blur="validateForm('hfToken')"
+              @input="validateForm('hfToken')"
+              aria-required="true"
             />
           </div>
 
+          <div class="export-to-hub__form__group">
+            <BaseSwitch
+              class="export-to-hub__form__switch"
+              v-model="exportToHubForm.isPrivate"
+              >{{ $t("private") }}</BaseSwitch
+            >
+          </div>
+          <span>
+            <Validation
+              v-for="(error, index) in errors"
+              :key="index"
+              :validations="error"
+            />
+          </span>
           <BaseButton
+            type="submit"
+            :disabled="!isValid"
             class="primary full-width export-to-hub__form__button"
-            @click.prevent="exportToHub"
           >
-            Export
+            {{ $t("button.exportToHub") }}
           </BaseButton>
-        </div>
+        </form>
       </dialog>
     </transition>
   </div>
@@ -131,7 +158,7 @@ export default {
     right: 0;
     left: auto;
     width: auto;
-    min-width: 480px;
+    min-width: 450px;
     top: calc(100% + $base-space + 2px);
     display: block;
     margin-left: auto;
@@ -141,6 +168,22 @@ export default {
     border-radius: $border-radius-m;
     box-shadow: $shadow;
     z-index: 2;
+    &.--small {
+      min-width: 200px;
+    }
+  }
+  &__exporting-message {
+    @include font-size(14px);
+    margin: 0;
+    em {
+      display: block;
+      font-weight: 200;
+      color: var(--fg-secondary);
+    }
+    span {
+      display: block;
+      color: var(--fg-secondary);
+    }
   }
 
   &__form {
@@ -154,7 +197,7 @@ export default {
       width: 100%;
       gap: calc($base-space/2);
       &.--small {
-        max-width: 33%;
+        max-width: 30%;
       }
     }
 
@@ -170,12 +213,9 @@ export default {
       color: var(--fg-tertiary);
     }
 
-    &___switch {
+    &__switch {
       color: var(--fg-primary);
-    }
-
-    &__button {
-      margin-top: $base-space * 2;
+      margin-top: $base-space;
     }
   }
 

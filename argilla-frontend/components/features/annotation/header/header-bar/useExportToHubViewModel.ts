@@ -1,5 +1,5 @@
 import { useResolve } from "ts-injecty";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, computed } from "vue";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { ExportDatasetToHubUseCase } from "~/v1/domain/usecases/export-dataset-to-hub-use-case";
 import { JobRepository } from "~/v1/infrastructure/repositories";
@@ -22,6 +22,11 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const { get, set } = useLocalStorage();
 
   const isDialogOpen = ref(false);
+  const errors = ref({
+    orgOrUsername: [],
+    datasetName: [],
+    hfToken: [],
+  });
   const exportToHubForm = ref({
     orgOrUsername: "",
     datasetName: "",
@@ -31,6 +36,44 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const exportToHubUseCase = useResolve(ExportDatasetToHubUseCase);
   const jobRepository = useResolve(JobRepository);
+
+  const validate = () => {
+    const regex = /hf_[A-Za-z0-9]+/i;
+    const validations = {
+      orgOrUsername: [],
+      datasetName: [],
+      hfToken: [],
+    };
+    if (!exportToHubForm.value.orgOrUsername) {
+      validations.orgOrUsername.push(
+        "exportToHub.validations.orgOrUsernameIsRequired"
+      );
+    }
+    if (!exportToHubForm.value.datasetName) {
+      validations.datasetName.push(
+        "exportToHub.validations.datasetNameIsRequired"
+      );
+    }
+    if (!exportToHubForm.value.hfToken) {
+      validations.hfToken.push("exportToHub.validations.hfTokenIsRequired");
+    } else if (!regex.test(exportToHubForm.value.hfToken)) {
+      validations.hfToken.push("exportToHub.validations.hfTokenInvalid");
+    }
+    return validations;
+  };
+
+  const validateForm = (input: string) => {
+    errors.value[input] = validate()[input];
+  };
+
+  const isValid = computed(() => {
+    const validations = validate();
+    return (
+      validations.orgOrUsername.length === 0 &&
+      validations.datasetName.length === 0 &&
+      validations.hfToken.length === 0
+    );
+  });
 
   const getDatasetExporting = () =>
     get<
@@ -93,8 +136,6 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const exportToHub = async () => {
     try {
-      closeDialog();
-
       isExporting.value = true;
 
       await exportToHubUseCase.execute(dataset, {
@@ -105,6 +146,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
       watchExportStatus();
     } catch {
+      closeDialog();
       isExporting.value = false;
     }
   };
@@ -135,5 +177,8 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
     isExporting,
     exportToHub,
     exportToHubForm,
+    validateForm,
+    errors,
+    isValid,
   };
 };

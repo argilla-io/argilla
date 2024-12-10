@@ -45,6 +45,7 @@ export default {
   optional: "Optional",
   template: "Template",
   rows: "zeilen",
+  datasetName: "Dataset name",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "Der Datensatz ist leer. Bitten Sie einen Administrator, Daten hochzuladen, und versuchen Sie es später erneut.",
@@ -330,6 +331,13 @@ export default {
       "Only a valid Hugging Face organization or username can export the dataset to the Hub",
     tokenTooltip:
       "You can manage your access tokens in your <a href='https://huggingface.co/settings/tokens' target='_blank'> Hugging Face settings</a>",
+    validations: {
+      orgOrUsernameIsRequired: "Organization or username is required",
+      hfTokenIsRequired: "Hugging Face token is required",
+      hfTokenInvalid: "Invalid Hugging Face token",
+      datasetNameIsRequired: "Dataset name is required",
+    },
+    exporting: "Exporting...",
   },
   config: {
     field: {
