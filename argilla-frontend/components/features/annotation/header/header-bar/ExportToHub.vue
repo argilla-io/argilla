@@ -2,7 +2,7 @@
   <div class="export-to-hub" @keydown.stop="">
     <BaseButton
       class="primary export-to-hub__button"
-      @click.prevent="openDialog"
+      @mousedown.native.prevent="openDialog"
       :loading="isExporting"
       :disabled="isExporting"
       >{{ $t("button.exportToHub") }}</BaseButton
@@ -10,15 +10,30 @@
     <transition name="fade" appear>
       <dialog
         v-if="isDialogOpen"
-        v-click-outside="closeDialog"
+        v-click-outside="{
+          events: ['mousedown'],
+          handler: closeDialog,
+        }"
         class="export-to-hub__dialog"
-        :class="{ '--small': isExporting }"
       >
-        <p v-if="isExporting" class="export-to-hub__exporting-message">
-          <em v-text="$t('exportToHub.exporting')" />
-          {{ exportToHubForm.orgOrUsername }}/{{ exportToHubForm.datasetName }}
-          <span>{{ !exportToHub.isPrivate ? "(private)" : "" }}</span>
-        </p>
+        <div v-if="isExporting" class="export-to-hub__exporting-message">
+          <h2
+            class="export-to-hub__title"
+            v-text="$t('exportToHub.exporting')"
+          />
+          <p>
+            {{ exportToHubForm.orgOrUsername }}/{{
+              exportToHubForm.datasetName
+            }}
+            <span
+              v-text="
+                exportToHubForm.isPrivate
+                  ? `(${$t('exportToHub.private')})`
+                  : `(${$t('exportToHub.public')})`
+              "
+            />
+          </p>
+        </div>
         <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
             class="export-to-hub__title"
@@ -168,18 +183,10 @@ export default {
     border-radius: $border-radius-m;
     box-shadow: $shadow;
     z-index: 2;
-    &.--small {
-      min-width: 200px;
-    }
   }
   &__exporting-message {
     @include font-size(14px);
     margin: 0;
-    em {
-      display: block;
-      font-weight: 200;
-      color: var(--fg-secondary);
-    }
     span {
       display: block;
       color: var(--fg-secondary);
