@@ -18,5 +18,5 @@
 import { loadErrorHandler } from "~/v1/infrastructure/repositories/AxiosErrorHandler";
 
 export default ({ $axios, app }) => {
-  loadErrorHandler($axios, app.i18n.t);
+  loadErrorHandler($axios, (key: string) => app.i18n.t(key));
 };
