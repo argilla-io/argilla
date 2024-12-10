@@ -34,7 +34,7 @@ from uuid import UUID
 
 import sqlalchemy
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Select, and_, func, select
+from sqlalchemy import Select, and_, func, select, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import contains_eager, joinedload, selectinload
 
@@ -210,6 +210,10 @@ async def delete_dataset(db: AsyncSession, search_engine: SearchEngine, dataset:
     await deleted_dataset_event_v1.notify(db)
 
     return dataset
+
+
+async def dataset_has_records(db: AsyncSession, dataset: Dataset) -> bool:
+    return bool(await db.scalar(select(exists().where(Record.dataset_id == dataset.id))))
 
 
 async def create_field(db: AsyncSession, dataset: Dataset, field_create: FieldCreate) -> Field:

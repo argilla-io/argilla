@@ -22,87 +22,18 @@ import eventBus from "./bus";
 export const toast = (globalOptions = {}) => {
   return {
     open(options) {
-      let message;
-      if (typeof options === "string") message = options;
-
-      const defaultOptions = {
-        message,
+      const props = {
+        ...globalOptions,
+        ...options,
       };
-
-      const propsData = Object.assign(
-        {},
-        defaultOptions,
-        globalOptions,
-        options
-      );
 
       return new (Vue.extend(Toast))({
         el: document.createElement("div"),
-        propsData,
+        propsData: props,
       });
     },
     clear() {
       eventBus.$emit("toast.clear");
-    },
-    success(message, options = {}) {
-      return this.open(
-        Object.assign(
-          {},
-          {
-            message,
-            type: "success",
-          },
-          options
-        )
-      );
-    },
-    danger(message, options = {}) {
-      return this.open(
-        Object.assign(
-          {},
-          {
-            message,
-            type: "danger",
-          },
-          options
-        )
-      );
-    },
-    info(message, options = {}) {
-      return this.open(
-        Object.assign(
-          {},
-          {
-            message,
-            type: "info",
-          },
-          options
-        )
-      );
-    },
-    warning(message, options = {}) {
-      return this.open(
-        Object.assign(
-          {},
-          {
-            message,
-            type: "warning",
-          },
-          options
-        )
-      );
-    },
-    default(message, options = {}) {
-      return this.open(
-        Object.assign(
-          {},
-          {
-            message,
-            type: "default",
-          },
-          options
-        )
-      );
     },
   };
 };

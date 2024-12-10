@@ -22,6 +22,7 @@ export default {
   description: "Descripción",
   labels: "Etiquetas",
   order: "Orden",
+  owner: "Propietario",
   useMarkdown: "Usar Markdown",
   suggestionFirst: "Mostrar sugerencias primero",
   visibleForAnnotators: "Visible para los anotadores",
@@ -42,6 +43,7 @@ export default {
   optional: "Opcional",
   template: "Plantilla",
   rows: "filas",
+  datasetName: "Dataset name",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "El dataset está vacío. Pide a un administrador que suba registros y vuelve pronto.",
@@ -326,6 +328,21 @@ export default {
     none: "Ninguno",
     noWorkspaces:
       "Por favor, sigue <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>esta guía</a> para crear un espacio de trabajo",
+  },
+  exportToHub: {
+    dislogTitle: "Exportar dataset a Hugging Face",
+    ownerTooltip:
+      "Solo un usuario o una organización válida puede exportar un dataset a Hugging Face",
+    tokenTooltip:
+      "Puedes gestionar tus tokens en <a href='https://huggingface.co/settings/tokens' target='_blank'> Hugging Face settings</a>",
+    validations: {
+      orgOrUsernameIsRequired:
+        "El nombre de usuario u organización es requerido",
+      hfTokenIsRequired: "El token de Hugging Face es requerido",
+      hfTokenInvalid: "El token de Hugging Face es inválido",
+      datasetNameIsRequired: "El nombre del dataset es requerido",
+    },
+    exporting: "Exportando...",
   },
   config: {
     field: {

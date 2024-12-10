@@ -1,5 +1,5 @@
 <template>
-  <div :class="validations.length ? '--has-error' : null">
+  <div role="alert" :class="validations.length ? '--has-error' : null">
     <slot></slot>
     <template v-if="validations.length">
       <span
