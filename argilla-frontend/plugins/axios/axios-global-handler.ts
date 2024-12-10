@@ -15,57 +15,8 @@
  * limitations under the License.
  */
 
-import { AxiosError } from "axios";
-import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
-
-type BackendError = {
-  detail:
-    | {
-        params: {
-          detail: string;
-        };
-      }
-    | string;
-  code?: string;
-  message?: string;
-};
+import { loadErrorHandler } from "~/v1/infrastructure/repositories/AxiosErrorHandler";
 
 export default ({ $axios, app }) => {
-  const notification = useNotifications();
-
-  $axios.onError((error: AxiosError<BackendError>) => {
-    const { status, data } = error.response ?? {};
-    const t = (key: string) => app.i18n.t(key);
-
-    notification.clear();
-
-    const errorHandledKey = `validations.http.${status}.message`;
-    const handledTranslatedError = t(errorHandledKey);
-
-    if (handledTranslatedError !== errorHandledKey) {
-      notification.notify({
-        message: handledTranslatedError,
-        type: "danger",
-      });
-    }
-
-    if (data.code) {
-      const errorHandledKey = `validations.businessLogic.${data.code}.message`;
-      const handledTranslatedError = t(errorHandledKey);
-
-      if (handledTranslatedError !== errorHandledKey) {
-        notification.notify({
-          message: handledTranslatedError,
-          type: "danger",
-        });
-      }
-    } else if (data.detail && typeof data.detail === "string") {
-      notification.notify({
-        message: data.detail.toString(),
-        type: "danger",
-      });
-    }
-
-    throw error;
-  });
+  loadErrorHandler($axios, app.i18n.t);
 };
