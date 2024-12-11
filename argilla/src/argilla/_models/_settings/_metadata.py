@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum
 from typing import List, Literal, Optional, Union, Annotated, Any
 from uuid import UUID
 
@@ -22,19 +21,12 @@ from argilla._exceptions import MetadataError
 from argilla._models import ResourceModel
 
 
-class MetadataPropertyType(str, Enum):
-    terms = "terms"
-    integer = "integer"
-    float = "float"
-
-
 class BaseMetadataPropertySettings(BaseModel):
-    type: MetadataPropertyType
     visible_for_annotators: Optional[bool] = True
 
 
 class TermsMetadataPropertySettings(BaseMetadataPropertySettings):
-    type: Literal[MetadataPropertyType.terms]
+    type: Literal["terms"] = "terms"
     values: Optional[List[Any]] = None
 
     @field_validator("values")
@@ -64,7 +56,7 @@ class NumericMetadataPropertySettings(BaseMetadataPropertySettings):
 
 
 class IntegerMetadataPropertySettings(NumericMetadataPropertySettings):
-    type: Literal[MetadataPropertyType.integer]
+    type: Literal["integer"] = "integer"
 
     @model_validator(mode="before")
     @classmethod
@@ -78,7 +70,7 @@ class IntegerMetadataPropertySettings(NumericMetadataPropertySettings):
 
 
 class FloatMetadataPropertySettings(NumericMetadataPropertySettings):
-    type: Literal[MetadataPropertyType.float]
+    type: Literal["float"] = "float"
 
 
 MetadataPropertySettings = Annotated[
@@ -97,11 +89,14 @@ class MetadataFieldModel(ResourceModel):
     name: str
     settings: MetadataPropertySettings
 
-    type: Optional[MetadataPropertyType] = Field(None, validate_default=True)
     title: Optional[str] = None
     visible_for_annotators: Optional[bool] = True
 
     dataset_id: Optional[UUID] = None
+
+    @property
+    def type(self) -> str:
+        return self.settings.type
 
     @field_validator("title")
     @classmethod
@@ -112,10 +107,3 @@ class MetadataFieldModel(ResourceModel):
     @field_serializer("id", "dataset_id", when_used="unless-none")
     def serialize_id(self, value: UUID) -> str:
         return str(value)
-
-    @field_validator("type", mode="plain")
-    @classmethod
-    def __validate_type(cls, type, values):
-        if type is None:
-            return values.data["settings"].type
-        return type

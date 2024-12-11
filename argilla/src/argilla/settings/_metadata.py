@@ -17,7 +17,6 @@ from typing import Optional, Union, List, TYPE_CHECKING, Any
 from argilla._api._metadata import MetadataAPI
 from argilla._exceptions import MetadataError
 from argilla._models import (
-    MetadataPropertyType,
     TermsMetadataPropertySettings,
     FloatMetadataPropertySettings,
     IntegerMetadataPropertySettings,
@@ -122,13 +121,12 @@ class TermsMetadataProperty(MetadataPropertyBase):
         super().__init__(client=client)
 
         try:
-            settings = TermsMetadataPropertySettings(values=options, type=MetadataPropertyType.terms)
+            settings = TermsMetadataPropertySettings(values=options)
         except ValueError as e:
             raise MetadataError(f"Error defining metadata settings for {name}") from e
 
         self._model = MetadataFieldModel(
             name=name,
-            type=MetadataPropertyType.terms,
             title=title,
             settings=settings,
             visible_for_annotators=visible_for_annotators,
@@ -176,13 +174,12 @@ class FloatMetadataProperty(MetadataPropertyBase):
         super().__init__(client=client)
 
         try:
-            settings = FloatMetadataPropertySettings(min=min, max=max, type=MetadataPropertyType.float)
+            settings = FloatMetadataPropertySettings(min=min, max=max)
         except ValueError as e:
             raise MetadataError(f"Error defining metadata settings for {name}") from e
 
         self._model = MetadataFieldModel(
             name=name,
-            type=MetadataPropertyType.float,
             title=title,
             settings=settings,
             visible_for_annotators=visible_for_annotators,
@@ -237,13 +234,12 @@ class IntegerMetadataProperty(MetadataPropertyBase):
         super().__init__(client=client)
 
         try:
-            settings = IntegerMetadataPropertySettings(min=min, max=max, type=MetadataPropertyType.integer)
+            settings = IntegerMetadataPropertySettings(min=min, max=max)
         except ValueError as e:
             raise MetadataError(f"Error defining metadata settings for {name}") from e
 
         self._model = MetadataFieldModel(
             name=name,
-            type=MetadataPropertyType.integer,
             title=title,
             settings=settings,
             visible_for_annotators=visible_for_annotators,
@@ -283,27 +279,14 @@ MetadataType = Union[
 class MetadataField:
     @classmethod
     def from_model(cls, model: MetadataFieldModel) -> MetadataType:
-        switch = {
-            MetadataPropertyType.terms: TermsMetadataProperty,
-            MetadataPropertyType.float: FloatMetadataProperty,
-            MetadataPropertyType.integer: IntegerMetadataProperty,
-        }
-        metadata_type = model.type
-        try:
-            return switch[metadata_type].from_model(model)
-        except KeyError as e:
-            raise MetadataError(f"Unknown metadata property type: {metadata_type}") from e
+        if model.type == "terms":
+            return TermsMetadataProperty.from_model(model)
+        elif model.type == "float":
+            return FloatMetadataProperty.from_model(model)
+        elif model.type == "integer":
+            return IntegerMetadataProperty.from_model(model)
+        raise MetadataError(f"Unknown metadata property type: {model.type}")
 
     @classmethod
     def from_dict(cls, data: dict) -> MetadataType:
-        switch = {
-            MetadataPropertyType.terms: TermsMetadataProperty,
-            MetadataPropertyType.float: FloatMetadataProperty,
-            MetadataPropertyType.integer: IntegerMetadataProperty,
-        }
-        metadata_type = data["type"]
-        try:
-            metadata_model = MetadataFieldModel(**data)
-            return switch[metadata_type].from_model(metadata_model)
-        except KeyError as e:
-            raise MetadataError(f"Unknown metadata property type: {metadata_type}") from e
+        return cls.from_model(MetadataFieldModel(**data))
