@@ -328,9 +328,8 @@ export default {
   exportToHub: {
     dialogTitle: "Drücken",
     ownerTooltip:
-      "Nur eine gültige Umarmungsorganisation oder ein gültiger Benutzername kann den Datensatz in den Hub exportieren.",
-    tokenTooltip:
-      "Sie können Ihre Zugriffstoken in Ihrem <a href='https://huggingface.co/settings/tokens' target='_blank'>Hugging Face Einstellungen</a>",
+      "Verwenden Sie einen gültigen Hugging Face-Benutzernamen oder eine Organisation",
+    tokenTooltip: `Verwenden Sie ein vorhandenes Zugriffstoken oder erstellen Sie ein <a href='https://huggingface.co/settings/tokens' target='_blank'>neues Token</a> mit "Schreibberechtigung"`,
     validations: {
       orgOrUsernameIsRequired:
         "Organisation oder Benutzername sind erforderlich",

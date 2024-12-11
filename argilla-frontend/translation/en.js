@@ -328,10 +328,8 @@ export default {
   },
   exportToHub: {
     dialogTitle: "Push to Hugging Face Hub",
-    ownerTooltip:
-      "Only a valid Hugging Face organization or username can export the dataset to the Hub",
-    tokenTooltip:
-      "You can manage your access tokens in your <a href='https://huggingface.co/settings/tokens' target='_blank'>Hugging Face settings</a>",
+    ownerTooltip: "Use a valid Hugging Face username or organisation",
+    tokenTooltip: `Use an existing access token or create a <a href='https://huggingface.co/settings/tokens' target='_blank'>new token</a> with "write permission"`,
     validations: {
       orgOrUsernameIsRequired: "Organization or username is required",
       hfTokenIsRequired: "Hugging Face token is required",
