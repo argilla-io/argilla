@@ -502,6 +502,15 @@ class SpanQuestionFactory(QuestionFactory):
     }
 
 
+class SuggestionSyncFactory(BaseSyncFactory):
+    class Meta:
+        model = Suggestion
+
+    record = factory.SubFactory(RecordSyncFactory)
+    question = factory.SubFactory(QuestionSyncFactory)
+    value = "negative"
+
+
 class SuggestionFactory(BaseFactory):
     class Meta:
         model = Suggestion
