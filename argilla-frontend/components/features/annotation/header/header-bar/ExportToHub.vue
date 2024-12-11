@@ -249,6 +249,7 @@ export default {
     height: 24px;
     padding: 16px;
     background: var(--bg-accent-grey-2);
+    box-shadow: 0 0 0px 1000px var(--bg-accent-grey-2) inset;
     color: var(--fg-primary);
     border: 1px solid var(--bg-opacity-20);
     border-radius: $border-radius;
