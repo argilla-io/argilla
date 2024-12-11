@@ -13,14 +13,10 @@ type Element = HTMLElement & {
 };
 
 const renderStringToHtml = (content: string) => {
-  const rendered = Vue.extend(
-    Vue.component("html-rendered", {
-      template: `<span>${content}</span>`,
-    })
-  );
-  const r = new rendered();
-  r.$mount();
-  return r.$el;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(`<span>${content}</span>`, "text/html");
+
+  return doc.body.firstChild;
 };
 
 // NOTE - to use tooltip directive, add to your html element where to put a tooltip :
