@@ -12,6 +12,17 @@ type Element = HTMLElement & {
   resize: () => void;
 };
 
+const renderStringToHtml = (content: string) => {
+  const rendered = Vue.extend(
+    Vue.component("html-rendered", {
+      template: `<span>${content}</span>`,
+    })
+  );
+  const r = new rendered();
+  r.$mount();
+  return r.$el;
+};
+
 // NOTE - to use tooltip directive, add to your html element where to put a tooltip :
 //  v-tooltip="{ content: tooltipMessage, tooltipPosition: 'bottom' }"
 //    => content (String) the message to show in the tooltip
@@ -41,7 +52,6 @@ Vue.directive("tooltip", {
     const {
       content,
       backgroundColor,
-      color,
       width = content.length < 40 ? 100 : 400,
       tooltipPosition = TOOLTIP_DIRECTION.BOTTOM,
     } = binding.value;
@@ -53,7 +63,7 @@ Vue.directive("tooltip", {
 
       // NOTE - init text node
       let textWrapper = document.createElement("span");
-      textWrapper.innerHTML = content;
+      textWrapper.appendChild(renderStringToHtml(content));
 
       // NOTE - init close icon
       let tooltipHeader = document.createElement("div");

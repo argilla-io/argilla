@@ -37,7 +37,7 @@
         <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
             class="export-to-hub__title"
-            v-text="$t('exportToHub.dislogTitle')"
+            v-text="$t('exportToHub.dialogTitle')"
           />
 
           <div class="export-to-hub__form__dataset">

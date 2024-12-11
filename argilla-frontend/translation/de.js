@@ -326,19 +326,20 @@ export default {
       "Bitte folgen Sie der <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>Anleitung</a>, um einen Workspace zu erstellen",
   },
   exportToHub: {
-    dislogTitle: "Push to Hugging Face Hub",
+    dialogTitle: "Drücken",
     ownerTooltip:
-      "Only a valid Hugging Face organization or username can export the dataset to the Hub",
+      "Nur eine gültige Umarmungsorganisation oder ein gültiger Benutzername kann den Datensatz in den Hub exportieren.",
     tokenTooltip:
-      "You can manage your access tokens in your <a href='https://huggingface.co/settings/tokens' target='_blank'>Hugging Face settings</a>",
+      "Sie können Ihre Zugriffstoken in Ihrem <a href='https://huggingface.co/settings/tokens' target='_blank'>Hugging Face Einstellungen</a>",
     validations: {
-      orgOrUsernameIsRequired: "Organization or username is required",
-      hfTokenIsRequired: "Hugging Face token is required",
-      hfTokenInvalid: "Invalid Hugging Face token",
-      datasetNameIsRequired: "Dataset name is required",
+      orgOrUsernameIsRequired:
+        "Organisation oder Benutzername sind erforderlich",
+      hfTokenIsRequired: "Umarmen des Gesichts -Tokens ist erforderlich ",
+      hfTokenInvalid: "Ungültiges Umarmungs -Gesichts -Token ",
+      datasetNameIsRequired: "Datensatzname ist erforderlich ",
     },
-    exporting: "Exporting to Hugging Face hub",
-    private: "private",
+    exporting: "Exportieren in den Umarmungsgesichtszentrum ",
+    private: "Privat",
     public: "öffentliche",
   },
   config: {

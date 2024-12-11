@@ -327,7 +327,7 @@ export default {
       "Please, follow this <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>guide</a> to create a workspace",
   },
   exportToHub: {
-    dislogTitle: "Push to Hugging Face Hub",
+    dialogTitle: "Push to Hugging Face Hub",
     ownerTooltip:
       "Only a valid Hugging Face organization or username can export the dataset to the Hub",
     tokenTooltip:
