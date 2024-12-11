@@ -249,6 +249,7 @@ class HubDatasetExporter:
                 .order_by(Record.inserted_at.asc())
                 .options(
                     selectinload(Record.responses),
+                    selectinload(Record.suggestions),
                     selectinload(Record.vectors),
                 )
             )
@@ -261,6 +262,7 @@ class HubDatasetExporter:
             self._row_attributes(record)
             | self._row_fields(record)
             | self._row_responses(record)
+            | self._row_suggestions(record)
             | self._row_metadata(record)
             # TODO: Is not possible to add extra metadata because the features need to be specified (even if with NULL) for all records.
             # | self._row_extra_metadata(record)
@@ -313,6 +315,23 @@ class HubDatasetExporter:
                 row_responses[feature_name_status].append(response.status)
 
         return row_responses
+
+    def _row_suggestions(self, record: Record) -> dict:
+        row_suggestions = {}
+        for suggestion in record.suggestions:
+            question = self.dataset.question_by_id(suggestion.question_id)
+            if question is None:
+                continue
+
+            feature_name = self._feature_name_for_suggestion(question)
+            feature_name_agent = self._feature_name_for_suggestion_agent(question)
+            feature_name_score = self._feature_name_for_suggestion_score(question)
+
+            row_suggestions[feature_name] = suggestion.value
+            row_suggestions[feature_name_agent] = suggestion.agent
+            row_suggestions[feature_name_score] = suggestion.score
+
+        return row_suggestions
 
     def _row_metadata(self, record: Record) -> dict:
         row_metadata = {}
@@ -368,6 +387,15 @@ class HubDatasetExporter:
 
     def _feature_name_for_response_status(self, question: Question) -> str:
         return f"{self._feature_name_for_response(question)}.status"
+
+    def _feature_name_for_suggestion(self, question: Question) -> str:
+        return f"{question.name}.suggestion"
+
+    def _feature_name_for_suggestion_agent(self, question: Question) -> str:
+        return f"{self._feature_name_for_suggestion(question)}.agent"
+
+    def _feature_name_for_suggestion_score(self, question: Question) -> str:
+        return f"{self._feature_name_for_suggestion(question)}.score"
 
     def _feature_name_for_metadata_property(self, metadata_property: MetadataProperty) -> str:
         return f"metadata.{metadata_property.name}"
