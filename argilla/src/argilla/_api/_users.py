@@ -44,6 +44,15 @@ class UsersAPI(ResourceAPI[UserModel]):
         return user_created
 
     @api_error_handler
+    def update(self, user: UserModel) -> UserModel:
+        json_body = user.model_dump(exclude_unset=True)
+        response = self.http_client.patch(f"/api/v1/users/{user.id}", json=json_body).raise_for_status()
+        user_updated = self._model_from_json(response_json=response.json())
+        self._log_message(message=f"Updated user {user_updated.username}")
+
+        return user_updated
+
+    @api_error_handler
     def get(self, user_id: UUID) -> UserModel:
         # TODO: Implement this endpoint in the API
         response = self.http_client.get(url=f"/api/v1/users/{user_id}")
