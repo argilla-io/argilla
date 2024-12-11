@@ -49,7 +49,6 @@
                   icon="info"
                   icon-color="var(--fg-tertiary)"
                   v-tooltip="{
-                    backgroundColor: 'var(--bg-accent-grey-5)',
                     content: $t('exportToHub.ownerTooltip'),
                     width: 300,
                   }"
@@ -94,7 +93,6 @@
                 icon="info"
                 icon-color="var(--fg-tertiary)"
                 v-tooltip="{
-                  backgroundColor: 'var(--bg-accent-grey-5)',
                   content: $t('exportToHub.tokenTooltip'),
                   width: 200,
                 }"
