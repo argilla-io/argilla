@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed dataset update date information in the dataset list ([#5741](https://github.com/argilla-io/argilla/pull/#5741))
+
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
 
 ### Added
