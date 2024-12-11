@@ -91,7 +91,6 @@ async def async_client(
 
     mocker.patch.object(distribution, "_get_async_db", override_get_async_db)
     mocker.patch.object(datasets, "get_async_db", override_get_async_db)
-    mocker.patch.object(records, "get_async_db", override_get_async_db)
 
     api_v1.dependency_overrides.update(
         {
