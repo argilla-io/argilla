@@ -153,7 +153,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const openDialog = () => {
     exportToHubForm.value = {
-      orgOrUsername: user.value.userName,
+      orgOrUsername: "",
       datasetName: dataset.name,
       hfToken: "",
       isPrivate: false,
