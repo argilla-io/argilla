@@ -73,6 +73,7 @@
     "jest": "27.5.1",
     "jest-serializer-vue": "2.0.2",
     "jest-transform-stub": "2.0.0",
+    "nuxt-compress": "5.0.0",
     "prettier": "2.8.8",
     "sass-loader": "10.5.2",
     "typescript": "5.7.2",
