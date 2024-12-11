@@ -10,35 +10,38 @@ declare namespace CSS {
   };
 }
 
+type Indexes = { start: number; end: number }[];
+type Coincidences = {
+  textNode: Node;
+  indexes: Indexes;
+}[];
+
 const DSLChars = ["|", "+", "-", "*"];
 
 export const useSearchTextHighlight = (fieldId: string) => {
+  const isCSSHighlightsSupported = !!CSS.highlights;
   const FIELD_ID_TO_HIGHLIGHT = `fields-content-${fieldId}`;
   const HIGHLIGHT_CLASS = `search-text-highlight-${fieldId}`;
 
-  const scapeDSLChars = (value: string) => {
-    let output = value;
-
-    for (const char of DSLChars) {
-      output = output.replaceAll(char, " ");
-    }
-
-    return output
-      .split(" ")
-      .map((w) => w.trim())
-      .filter(Boolean);
-  };
-
-  const createRangesToHighlight = (
+  const createIndexesToHighlight = (
     fieldComponent: HTMLElement,
     searchText: string
-  ) => {
-    CSS.highlights.delete(HIGHLIGHT_CLASS);
+  ): Coincidences => {
+    const scapeDSLChars = (value: string) => {
+      let output = value;
 
-    const ranges = [];
+      for (const char of DSLChars) {
+        output = output.replaceAll(char, " ");
+      }
+
+      return output
+        .split(" ")
+        .map((w) => w.trim())
+        .filter(Boolean);
+    };
 
     const getTextNodesUnder = (el) => {
-      const textNodes = [];
+      const textNodes: Node[] = [];
       const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
 
       while (walker.nextNode()) {
@@ -48,8 +51,12 @@ export const useSearchTextHighlight = (fieldId: string) => {
       return textNodes.filter((node) => node.nodeValue.trim().length > 0);
     };
 
-    const getAllCoincidences = (textNode, word, mode: "PARTIAL" | "WORD") => {
-      const indexes = [];
+    const getAllCoincidences = (
+      textNode: Node,
+      word: string,
+      mode: "PARTIAL" | "WORD"
+    ) => {
+      const indexes: Indexes = [];
 
       if (mode === "PARTIAL") {
         let startIndex = 0;
@@ -88,46 +95,95 @@ export const useSearchTextHighlight = (fieldId: string) => {
       return indexes;
     };
 
-    const createRanges = (textNode, indexes) => {
-      const ranges = [];
-
-      for (const index of indexes) {
-        const range = new Range();
-
-        range.setStart(textNode, index.start);
-        range.setEnd(textNode, index.end);
-
-        ranges.push(range);
-      }
-
-      return ranges;
-    };
-
     const textNodes = getTextNodesUnder(fieldComponent);
     const words = scapeDSLChars(searchText);
 
+    const coincidences = [];
+
     for (const textNode of textNodes) {
+      const indexes = [];
       for (const word of words) {
-        const indexes = getAllCoincidences(textNode, word, "WORD");
+        const index = getAllCoincidences(textNode, word, "WORD");
 
-        const newRanges = createRanges(textNode, indexes);
-
-        ranges.push(...newRanges);
+        indexes.push(...index);
       }
+
+      coincidences.push({
+        textNode,
+        indexes,
+      });
     }
 
-    return ranges;
+    return coincidences;
+  };
+
+  const applyRangesToHighlight = (coincidences: Coincidences) => {
+    if (isCSSHighlightsSupported) {
+      const createRanges = (coincidences: Coincidences) => {
+        const ranges = [];
+
+        for (const coincidence of coincidences) {
+          for (const index of coincidence.indexes) {
+            const range = new Range();
+
+            range.setStart(coincidence.textNode, index.start);
+            range.setEnd(coincidence.textNode, index.end);
+
+            ranges.push(range);
+          }
+        }
+
+        return ranges;
+      };
+
+      const ranges = createRanges(coincidences);
+
+      return CSS.highlights.set(HIGHLIGHT_CLASS, new Highlight(...ranges));
+    }
+
+    for (const coincidence of coincidences) {
+      let highlightedHTML = "";
+      let offset = 0;
+      const textContent = coincidence.textNode.nodeValue;
+
+      coincidence.indexes
+        .sort((a, b) => a.start - b.start)
+        .forEach(({ start, end }) => {
+          highlightedHTML += textContent.slice(offset, start);
+
+          highlightedHTML += `<span class=${HIGHLIGHT_CLASS}>${textContent.slice(
+            start,
+            end
+          )}</span>`;
+
+          offset = end;
+        });
+
+      highlightedHTML += textContent.slice(offset);
+
+      const span = document.createElement("span");
+
+      span.innerHTML = highlightedHTML;
+
+      coincidence.textNode.parentElement?.replaceChild(
+        span,
+        coincidence.textNode
+      );
+    }
   };
 
   const highlightText = (searchText: string) => {
     const fieldComponent = document.getElementById(FIELD_ID_TO_HIGHLIGHT);
+
+    // CSS.highlights.delete(HIGHLIGHT_CLASS);
+
     if (!searchText || !fieldComponent) {
-      CSS.highlights.delete(HIGHLIGHT_CLASS);
       return;
     }
-    const ranges = createRangesToHighlight(fieldComponent, searchText);
 
-    CSS.highlights.set(HIGHLIGHT_CLASS, new Highlight(...ranges));
+    const coincidences = createIndexesToHighlight(fieldComponent, searchText);
+
+    applyRangesToHighlight(coincidences);
   };
 
   return {

@@ -20,14 +20,17 @@
       <MarkdownRenderer v-if="useMarkdown" :markdown="fieldText" />
       <Sandbox v-else-if="isHTML" :content="fieldText" />
       <div v-else :class="classes" v-html="fieldText" />
-      <template>
-        <style :key="id" scoped>
-          ::highlight(search-text-highlight-{{id}}) {
-            color: #ff675f;
-          }
-        </style>
-      </template>
     </div>
+    <template>
+      <style :key="id" scoped>
+        .search-text-highlight-{{id}} {
+          color: #ff675f;
+        }
+        ::highlight(search-text-highlight-{{id}}) {
+          color: #ff675f;
+        }
+      </style>
+    </template>
   </div>
 </template>
 
