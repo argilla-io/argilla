@@ -25,8 +25,6 @@ from pydantic import (
     BaseModel,
     Field,
     StrictStr,
-    root_validator,
-    validator,
     ValidationError,
     ConfigDict,
     model_validator,
@@ -201,10 +199,10 @@ class RecordUpdate(UpdateSchema):
         return {k: v for k, v in metadata.items() if v == v}  # By definition, NaN != NaN
 
     def is_set(self, attribute: str) -> bool:
-        return attribute in self.__fields_set__
+        return attribute in self.model_fields_set
 
     def has_changes(self) -> bool:
-        return self.dict(exclude_unset=True) != {}
+        return self.model_dump(exclude_unset=True) != {}
 
 
 class RecordUpsert(RecordCreate):
@@ -212,7 +210,7 @@ class RecordUpsert(RecordCreate):
     fields: Optional[Dict[str, FieldValueCreate]] = None
 
     def is_set(self, attribute: str) -> bool:
-        return attribute in self.__fields_set__
+        return attribute in self.model_fields_set
 
 
 class RecordIncludeParam(BaseModel):
