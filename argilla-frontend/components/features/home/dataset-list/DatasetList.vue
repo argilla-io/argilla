@@ -48,10 +48,10 @@ export default {
     return {
       querySearch: "",
       sortedOrder: "desc",
-      sortedByField: "updatedAt",
+      sortedByField: "lastActivityAt",
       sortOptions: [
         { value: "name", label: this.$t("home.name") },
-        { value: "updatedAt", label: this.$t("home.updatedAt") },
+        { value: "lastActivityAt", label: this.$t("home.updatedAt") },
         { value: "createdAt", label: this.$t("home.createdAt") },
       ],
       selectedWorkspaces: [],

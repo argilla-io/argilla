@@ -45,7 +45,7 @@ class UsersAPI(ResourceAPI[UserModel]):
 
     @api_error_handler
     def update(self, user: UserModel) -> UserModel:
-        json_body = user.model_dump()
+        json_body = user.model_dump(exclude_unset=True)
         response = self.http_client.patch(f"/api/v1/users/{user.id}", json=json_body).raise_for_status()
         user_updated = self._model_from_json(response_json=response.json())
         self._log_message(message=f"Updated user {user_updated.username}")
