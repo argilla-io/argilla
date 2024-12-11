@@ -334,7 +334,7 @@ export default {
     ownerTooltip:
       "Solo un usuario o una organización válida puede exportar un dataset a Hugging Face",
     tokenTooltip:
-      "Puedes gestionar tus tokens en <a href='https://huggingface.co/settings/tokens' target='_blank'> Hugging Face settings</a>",
+      "Puedes gestionar tus tokens en <a href='https://huggingface.co/settings/tokens' target='_blank'>Hugging Face settings</a>",
     validations: {
       orgOrUsernameIsRequired:
         "El nombre de usuario u organización es requerido",
