@@ -338,8 +338,9 @@ export default {
       datasetNameIsRequired: "Datensatzname ist erforderlich ",
     },
     exporting: "Exportieren in den Umarmungsgesichtszentrum ",
-    private: "Privat",
-    public: "öffentliche",
+    private: "privater Datensatz",
+    public: "öffentlicher Datensatz",
+    exportingWarning: "This might take a few seconds",
   },
   config: {
     field: {

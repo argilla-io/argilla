@@ -342,8 +342,9 @@ export default {
       datasetNameIsRequired: "El nombre del dataset es requerido",
     },
     exporting: "Exportando al hub de Hugging Face",
-    private: "privado",
-    public: "público",
+    private: "dataset privado",
+    public: "dataset público",
+    exportingWarning: "Esto puede tardar unos segundos",
   },
   config: {
     field: {

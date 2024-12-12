@@ -20,20 +20,25 @@
         }"
         class="export-to-hub__dialog"
       >
-        <div v-if="isExporting" class="export-to-hub__exporting-message">
+        <div v-if="!isExporting" class="export-to-hub__exporting-message">
           <h2
             class="export-to-hub__title"
             v-text="$t('exportToHub.exporting')"
           />
           <p>
+            <span
+              class="export-to-hub__exporting-message__warning"
+              v-text="$t('exportToHub.exportingWarning')"
+            />
             {{ exportToHubForm.orgOrUsername }}/{{
               exportToHubForm.datasetName
             }}
             <span
+              class="export-to-hub__exporting-message__private"
               v-text="
                 exportToHubForm.isPrivate
-                  ? `(${$t('exportToHub.private')})`
-                  : `(${$t('exportToHub.public')})`
+                  ? $t('exportToHub.private')
+                  : $t('exportToHub.public')
               "
             />
           </p>
@@ -192,9 +197,15 @@ export default {
   &__exporting-message {
     @include font-size(14px);
     margin: 0;
-    span {
+    &__private {
       display: block;
-      color: var(--fg-secondary);
+      text-transform: uppercase;
+      @include font-size(12px);
+    }
+    &__warning {
+      display: block;
+      color: var(--fg-tertiary);
+      @include font-size(14px);
     }
   }
 
