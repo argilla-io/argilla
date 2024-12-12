@@ -17,9 +17,9 @@ type Coincidences = {
 }[];
 
 const DSLChars = ["|", "+", "-", "*"];
+const isCSSHighlightsSupported = !!CSS.highlights;
 
 export const useSearchTextHighlight = (fieldId: string) => {
-  const isCSSHighlightsSupported = !!CSS.highlights;
   const FIELD_ID_TO_HIGHLIGHT = `fields-content-${fieldId}`;
   const HIGHLIGHT_CLASS = `search-text-highlight-${fieldId}`;
 
@@ -117,7 +117,7 @@ export const useSearchTextHighlight = (fieldId: string) => {
     return coincidences;
   };
 
-  const applyRangesToHighlight = (coincidences: Coincidences) => {
+  const highlightCoincidences = (coincidences: Coincidences) => {
     if (isCSSHighlightsSupported) {
       const createRanges = (coincidences: Coincidences) => {
         const ranges = [];
@@ -175,7 +175,7 @@ export const useSearchTextHighlight = (fieldId: string) => {
   const highlightText = (searchText: string) => {
     const fieldComponent = document.getElementById(FIELD_ID_TO_HIGHLIGHT);
 
-    // CSS.highlights.delete(HIGHLIGHT_CLASS);
+    if (isCSSHighlightsSupported) CSS.highlights.delete(HIGHLIGHT_CLASS);
 
     if (!searchText || !fieldComponent) {
       return;
@@ -183,7 +183,7 @@ export const useSearchTextHighlight = (fieldId: string) => {
 
     const coincidences = createIndexesToHighlight(fieldComponent, searchText);
 
-    applyRangesToHighlight(coincidences);
+    highlightCoincidences(coincidences);
   };
 
   return {

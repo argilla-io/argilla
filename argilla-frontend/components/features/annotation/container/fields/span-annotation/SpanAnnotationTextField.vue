@@ -63,47 +63,53 @@
         :entity-name="selectedEntity.text"
         :message="$t('spanAnnotation.shortcutHelper')"
       />
-      <template>
-        <template v-for="{ id, color } in spanQuestion.answer.options">
-          <style :key="id" scoped>
-            .span-annotation__field::highlight(hl-{{id}}), .span-annotation__field::highlight(hl-{{id}}-selection) {
-              background-color: {{color}};
-            }
-            [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}), [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-selection) {
-              background-color: {{color.palette.veryDark}};
-            }
-            .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
-              background: {{color.palette.light}};
-            }
-            [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
-              background: {{color.palette.dark}};
-            }
-            .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
-              background: {{color}};
-            }
-            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
-              background: {{color.palette.veryDark}};
-            }
-            .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
-              background: {{color.palette.light}};
-              color: inherit;
-            }
-            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
-              background: {{color.palette.dark}};
-            }
-            .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
-              background: {{color}};
-            }
-            [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
-              background: {{color.palette.veryDark}};
-            }
-            ::highlight(search-text-highlight-{{id}}) {
-              color: #ff675f;
-            }
-          </style>
-        </template>
-      </template>
     </div>
+    <template>
+      <template v-for="{ id, color } in spanQuestion.answer.options">
+        <style :key="id" scoped>
+          .span-annotation__field::highlight(hl-{{id}}), .span-annotation__field::highlight(hl-{{id}}-selection) {
+            background-color: {{color}};
+          }
+          [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}), [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-selection) {
+            background-color: {{color.palette.veryDark}};
+          }
+          .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
+            background: {{color.palette.light}};
+          }
+          [data-theme="dark"] .span-annotation__field::highlight(hl-{{id}}-pre-selection) {
+            background: {{color.palette.dark}};
+          }
+          .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
+            background: {{color}};
+          }
+          [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-selection) {
+            background: {{color.palette.veryDark}};
+          }
+          .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
+            background: {{color.palette.light}};
+            color: inherit;
+          }
+          [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-pre-selection) {
+            background: {{color.palette.dark}};
+          }
+          .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+            background: {{color}};
+          }
+          [data-theme="dark"] .span-annotation__field--overlapped::highlight(hl-{{id}}-hover) {
+            background: {{color.palette.veryDark}};
+          }
+        </style>
+      </template>
+
+      <style :key="id" scoped>
+        ::highlight(search-text-highlight-{{id}}) {
+          color: #ff675f;
+        }
+        .search-text-highlight-{{ id }} {
+          color: #ff675f;
+        }
+      </style>
+    </template>
   </div>
 </template>
 
