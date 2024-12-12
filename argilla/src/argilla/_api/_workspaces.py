@@ -112,8 +112,8 @@ class WorkspacesAPI(ResourceAPI[WorkspaceModel]):
         return WorkspaceModel(
             id=UUID(json_workspace["id"]),
             name=json_workspace["name"],
-            inserted_at=self._date_from_iso_format(date=json_workspace["inserted_at"]),
-            updated_at=self._date_from_iso_format(date=json_workspace["updated_at"]),
+            inserted_at=json_workspace["inserted_at"],
+            updated_at=json_workspace["updated_at"],
         )
 
     def _model_from_jsons(self, json_workspaces: List[Dict]) -> List[WorkspaceModel]:
