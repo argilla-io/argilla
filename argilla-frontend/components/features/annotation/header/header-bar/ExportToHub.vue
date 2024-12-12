@@ -67,9 +67,11 @@
                 aria-required="true"
               />
             </div>
-            <span aria-hidden="true" class="export-to-hub__form__separator"
-              >/</span
-            >
+            <span
+              aria-hidden="true"
+              class="export-to-hub__form__separator"
+              v-text="'/'"
+            />
             <div class="export-to-hub__form__group">
               <label for="datasetName">Dataset name</label>
               <input
