@@ -5,8 +5,12 @@
       @mousedown.native.prevent="openDialog"
       :loading="isExporting"
       :disabled="isExporting"
-      >{{ $t("button.exportToHub") }}</BaseButton
     >
+      <svgicon class="export-to-hub__button__icon" name="export" />
+      <span class="export-to-hub__button__text">{{
+        $t("button.exportToHub")
+      }}</span>
+    </BaseButton>
     <transition name="fade" appear>
       <dialog
         v-if="isDialogOpen"
@@ -144,6 +148,7 @@
 
 <script>
 import { useExportToHubViewModel } from "./useExportToHubViewModel";
+import "assets/icons/export";
 
 export default {
   props: {
@@ -226,10 +231,25 @@ export default {
     }
   }
 
-  &__button.button {
-    background: hsl(0, 1%, 18%);
-    &:hover {
-      background: hsl(0, 1%, 22%);
+  &__button {
+    &.button {
+      background: hsl(0, 1%, 18%);
+      @include media("<=tablet") {
+        padding: $base-space * 1.45;
+      }
+      &:hover {
+        background: hsl(0, 1%, 22%);
+      }
+    }
+    &__icon {
+      @include media(">tablet") {
+        display: none;
+      }
+    }
+    &__text {
+      @include media("<=tablet") {
+        display: none;
+      }
     }
   }
 
