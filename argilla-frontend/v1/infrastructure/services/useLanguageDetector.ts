@@ -52,6 +52,7 @@ export const useLanguageChanger = (context: Context) => {
 
   const change = (language: string) => {
     i18n.setLocale(language);
+    document.documentElement.lang = language;
 
     set("language", language);
   };

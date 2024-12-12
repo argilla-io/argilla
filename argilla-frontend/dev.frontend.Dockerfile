@@ -14,6 +14,7 @@ WORKDIR /home/argilla/frontend
 COPY --chown=argilla:argilla dist ./dist
 COPY --chown=argilla:argilla .nuxt ./.nuxt
 COPY --chown=argilla:argilla package.json ./package.json
+COPY --chown=argilla:argilla package-lock.json ./package-lock.json
 COPY --chown=argilla:argilla nuxt.config.ts ./nuxt.config.ts
 
 # NOTE: Right now this Docker image is using dev.argilla.io as server.

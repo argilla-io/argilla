@@ -40,7 +40,7 @@ class TestUpdateRecord:
         response = await async_client.patch(
             self.url(record.id),
             headers=owner_auth_header,
-            json={},
+            json={"metadata": {"new": "value"}},
         )
 
         assert response.status_code == 200
