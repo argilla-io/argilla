@@ -1,4 +1,4 @@
-import { onBeforeMount, ref, watch } from "vue";
+import { onBeforeMount, ref } from "vue";
 import { useUser } from "~/v1/infrastructure/services";
 import { useClipboard } from "~/v1/infrastructure/services/useClipboard";
 import { useDataset } from "~/v1/infrastructure/storage/DatasetStorage";
@@ -53,8 +53,6 @@ ${url.toString()}`;
     params.set("text-color", "39,71,111");
     params.set("text-x", "460");
     params.set("text-y", "40");
-    params.set("format", "png");
-    params.set("dpr", "2");
 
     params.set(
       "text",
@@ -98,13 +96,6 @@ I've just contributed <span weight="bold">${metrics.submitted}</span> examples t
   onBeforeMount(() => {
     setPreloadedImage();
   });
-
-  watch(
-    () => metrics.submitted,
-    () => {
-      setPreloadedImage();
-    }
-  );
 
   return {
     sharingImage,
