@@ -60,7 +60,6 @@
                   icon-color="var(--fg-tertiary)"
                   v-tooltip="{
                     content: $t('exportToHub.ownerTooltip'),
-                    width: 300,
                   }"
                   role="tooltip"
                   :aria-label="$t('exportToHub.ownerTooltip')"
@@ -106,7 +105,6 @@
                 icon-color="var(--fg-tertiary)"
                 v-tooltip="{
                   content: $t('exportToHub.tokenTooltip'),
-                  width: 200,
                 }"
                 role="tooltip"
                 :aria-label="$t('exportToHub.tokenTooltip')"
