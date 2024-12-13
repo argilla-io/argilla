@@ -263,11 +263,14 @@ class HubImportExportMixin(DiskImportExportMixin):
                 response_values = values["responses"][idx] or []
                 response_users = values["users"][idx] or []
                 response_status = values["status"][idx] or []
+
+                used_users = set()
                 for value, user_id, status in zip(response_values, response_users, response_status):
                     user_id = user_ids[UUID(user_id)]
-                    if user_id in response_users:
+                    if user_id in used_users:
                         continue
-                    response_users[user_id] = True
+
+                    used_users.add(user_id)
                     response = Response(
                         user_id=user_id,
                         question_name=question_name,
