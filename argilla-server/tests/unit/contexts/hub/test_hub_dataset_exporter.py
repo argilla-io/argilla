@@ -94,6 +94,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
         }
@@ -279,6 +281,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "text-question.responses": ["This is a response", "This is another response"],
@@ -340,6 +344,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "text-question.responses": ["This is a response", "This is another response"],
@@ -402,6 +408,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "rating-question.responses": [2, 0],
@@ -468,6 +476,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "rating-question.responses": [2, 0],
@@ -529,6 +539,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "label-question.responses": ["label-b", "label-a"],
@@ -594,6 +606,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "label-question.responses": ["label-b", "label-a"],
@@ -655,6 +669,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "multi-label-question.responses": [["label-a", "label-b"], ["label-c", "label-a"]],
@@ -720,6 +736,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "multi-label-question.responses": [["label-a", "label-b"], ["label-c", "label-a"]],
@@ -790,6 +808,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "ranking-question.responses": [
@@ -880,6 +900,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "ranking-question.responses": [
@@ -964,6 +986,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "span-question.responses": [
@@ -1047,6 +1071,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "span-question.responses": [
@@ -1102,6 +1128,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "text-question.responses": [None],
@@ -1143,6 +1171,8 @@ class TestHubDatasetExporter:
         assert exported_dataset[0] == {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
             "text": "Hello World",
             "text-question.responses": [None],

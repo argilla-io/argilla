@@ -273,6 +273,8 @@ class HubDatasetExporter:
         return {
             "id": record.external_id,
             "status": record.status,
+            "inserted_at": record.inserted_at,
+            "updated_at": record.updated_at,
             "_server_id": str(record.id),
         }
 
