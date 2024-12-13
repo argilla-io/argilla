@@ -340,7 +340,7 @@ export default {
     exporting: "Exportieren in den Umarmungsgesichtszentrum ",
     private: "privater Datensatz",
     public: "öffentlicher Datensatz",
-    exportingWarning: "This might take a few seconds",
+    exportingWarning: "Das kann ein paar Sekunden dauern",
   },
   config: {
     field: {

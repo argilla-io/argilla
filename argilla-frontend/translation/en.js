@@ -339,7 +339,7 @@ export default {
     exporting: "Exporting to Hugging Face hub",
     private: "private dataset",
     public: "public dataset",
-    exportingWarning: "Das kann ein paar Sekunden dauern",
+    exportingWarning: "This might take a few seconds",
   },
   config: {
     field: {
