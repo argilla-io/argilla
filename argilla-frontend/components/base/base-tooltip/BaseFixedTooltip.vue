@@ -135,6 +135,7 @@ $tooltip-color: var(--color-white);
 $tooltip-border-radius: $border-radius-s;
 $tooltip-max-width: 400px;
 $tooltip-small-max-width: 100px;
+
 .fixed-tooltip {
   position: fixed;
   z-index: 3;
@@ -160,6 +161,7 @@ $tooltip-small-max-width: 100px;
     }
     :deep(a) {
       outline: none;
+      color: $tooltip-color;
     }
   }
   &__button {
