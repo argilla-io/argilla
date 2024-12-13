@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed error when iterating over datasets and settings are not properly loaded. ([#5753](https://github.com/argilla-io/argilla/pull/5753))
+
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.5.0)
 
 ### Added
