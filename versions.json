@@ -5,6 +5,14 @@
     "aliases": []
   },
   {
+    "version": "docs_update-user",
+    "title": "docs_update-user",
+    "aliases": [],
+    "properties": {
+      "hidden": true
+    }
+  },
+  {
     "version": "dev",
     "title": "dev",
     "aliases": []
