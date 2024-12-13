@@ -330,11 +330,10 @@ export default {
       "Por favor, sigue <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>esta guía</a> para crear un espacio de trabajo",
   },
   exportToHub: {
-    dislogTitle: "Exportar dataset a Hugging Face",
+    dialogTitle: "Exportar dataset a Hugging Face",
     ownerTooltip:
-      "Solo un usuario o una organización válida puede exportar un dataset a Hugging Face",
-    tokenTooltip:
-      "Puedes gestionar tus tokens en <a href='https://huggingface.co/settings/tokens' target='_blank'> Hugging Face settings</a>",
+      "Utiliza un nombre de usuario u organización de Hugging Face válidos",
+    tokenTooltip: `Utiliza un token de acceso existente o crear un <a href='https://huggingface.co/settings/tokens' target='_blank'>nuevo token</a> con "permiso de escritura"`,
     validations: {
       orgOrUsernameIsRequired:
         "El nombre de usuario u organización es requerido",
@@ -342,7 +341,10 @@ export default {
       hfTokenInvalid: "El token de Hugging Face es inválido",
       datasetNameIsRequired: "El nombre del dataset es requerido",
     },
-    exporting: "Exportando...",
+    exporting: "Exportando al hub de Hugging Face",
+    private: "dataset privado",
+    public: "dataset público",
+    exportingWarning: "Esto puede tardar unos segundos",
   },
   config: {
     field: {

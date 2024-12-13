@@ -7,7 +7,6 @@ import {
   useDebounce,
   useLocalStorage,
   useNotifications,
-  useUser,
 } from "~/v1/infrastructure/services";
 
 interface ExportToHubProps {
@@ -16,7 +15,6 @@ interface ExportToHubProps {
 
 export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const { dataset } = props;
-  const { user } = useUser();
   const notify = useNotifications();
   const debounce = useDebounce(3000);
   const { get, set } = useLocalStorage();
@@ -153,7 +151,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const openDialog = () => {
     exportToHubForm.value = {
-      orgOrUsername: user.value.userName,
+      orgOrUsername: "",
       datasetName: dataset.name,
       hfToken: "",
       isPrivate: false,

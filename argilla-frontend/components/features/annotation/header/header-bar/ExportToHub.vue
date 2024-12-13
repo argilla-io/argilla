@@ -2,27 +2,52 @@
   <div class="export-to-hub" @keydown.stop="">
     <BaseButton
       class="primary export-to-hub__button"
-      @click.prevent="openDialog"
+      @mousedown.native.prevent="openDialog"
       :loading="isExporting"
       :disabled="isExporting"
-      >{{ $t("button.exportToHub") }}</BaseButton
     >
+      <svgicon class="export-to-hub__button__icon" name="export" />
+      <span class="export-to-hub__button__text">{{
+        $t("button.exportToHub")
+      }}</span>
+    </BaseButton>
     <transition name="fade" appear>
       <dialog
         v-if="isDialogOpen"
-        v-click-outside="closeDialog"
+        v-click-outside="{
+          events: ['mousedown'],
+          handler: closeDialog,
+          middleware: closeMiddleware,
+        }"
         class="export-to-hub__dialog"
-        :class="{ '--small': isExporting }"
       >
-        <p v-if="isExporting" class="export-to-hub__exporting-message">
-          <em v-text="$t('exportToHub.exporting')" />
-          {{ exportToHubForm.orgOrUsername }}/{{ exportToHubForm.datasetName }}
-          <span>{{ !exportToHub.isPrivate ? "(private)" : "" }}</span>
-        </p>
+        <div v-if="isExporting" class="export-to-hub__exporting-message">
+          <h2
+            class="export-to-hub__title"
+            v-text="$t('exportToHub.exporting')"
+          />
+          <p>
+            <span
+              class="export-to-hub__exporting-message__warning"
+              v-text="$t('exportToHub.exportingWarning')"
+            />
+            {{ exportToHubForm.orgOrUsername }}/{{
+              exportToHubForm.datasetName
+            }}
+            <span
+              class="export-to-hub__exporting-message__private"
+              v-text="
+                exportToHubForm.isPrivate
+                  ? $t('exportToHub.private')
+                  : $t('exportToHub.public')
+              "
+            />
+          </p>
+        </div>
         <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
             class="export-to-hub__title"
-            v-text="$t('exportToHub.dislogTitle')"
+            v-text="$t('exportToHub.dialogTitle')"
           />
 
           <div class="export-to-hub__form__dataset">
@@ -34,9 +59,7 @@
                   icon="info"
                   icon-color="var(--fg-tertiary)"
                   v-tooltip="{
-                    backgroundColor: 'var(--bg-accent-grey-5)',
                     content: $t('exportToHub.ownerTooltip'),
-                    width: 300,
                   }"
                   role="tooltip"
                   :aria-label="$t('exportToHub.ownerTooltip')"
@@ -53,9 +76,11 @@
                 aria-required="true"
               />
             </div>
-            <span aria-hidden="true" class="export-to-hub__form__separator"
-              >/</span
-            >
+            <span
+              aria-hidden="true"
+              class="export-to-hub__form__separator"
+              v-text="'/'"
+            />
             <div class="export-to-hub__form__group">
               <label for="datasetName">Dataset name</label>
               <input
@@ -79,9 +104,7 @@
                 icon="info"
                 icon-color="var(--fg-tertiary)"
                 v-tooltip="{
-                  backgroundColor: 'var(--bg-accent-grey-5)',
                   content: $t('exportToHub.tokenTooltip'),
-                  width: 200,
                 }"
                 role="tooltip"
                 :aria-label="$t('exportToHub.tokenTooltip')"
@@ -129,12 +152,21 @@
 
 <script>
 import { useExportToHubViewModel } from "./useExportToHubViewModel";
+import "assets/icons/export";
 
 export default {
   props: {
     dataset: {
       type: Object,
       required: true,
+    },
+  },
+  methods: {
+    closeMiddleware(e) {
+      if (e.target.closest(".fixed-tooltip")) {
+        return false;
+      }
+      return true;
     },
   },
   setup(props) {
@@ -168,21 +200,19 @@ export default {
     border-radius: $border-radius-m;
     box-shadow: $shadow;
     z-index: 2;
-    &.--small {
-      min-width: 200px;
-    }
   }
   &__exporting-message {
     @include font-size(14px);
     margin: 0;
-    em {
+    &__private {
       display: block;
-      font-weight: 200;
-      color: var(--fg-secondary);
+      text-transform: uppercase;
+      @include font-size(12px);
     }
-    span {
+    &__warning {
       display: block;
-      color: var(--fg-secondary);
+      color: var(--fg-tertiary);
+      @include font-size(14px);
     }
   }
 
@@ -219,10 +249,25 @@ export default {
     }
   }
 
-  &__button.button {
-    background: hsl(0, 1%, 18%);
-    &:hover {
-      background: hsl(0, 1%, 22%);
+  &__button {
+    &.button {
+      background: hsl(0, 1%, 18%);
+      @include media("<=tablet") {
+        padding: $base-space * 1.45;
+      }
+      &:hover {
+        background: hsl(0, 1%, 22%);
+      }
+    }
+    &__icon {
+      @include media(">tablet") {
+        display: none;
+      }
+    }
+    &__text {
+      @include media("<=tablet") {
+        display: none;
+      }
     }
   }
 
@@ -244,6 +289,7 @@ export default {
     height: 24px;
     padding: 16px;
     background: var(--bg-accent-grey-2);
+    box-shadow: 0 0 0px 1000px var(--bg-accent-grey-2) inset;
     color: var(--fg-primary);
     border: 1px solid var(--bg-opacity-20);
     border-radius: $border-radius;

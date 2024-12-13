@@ -177,6 +177,10 @@ $tooltip-border-radius: $border-radius-s;
       top: auto;
       transform: none;
     }
+  } @else if $position == "none" {
+    &:after {
+      display: none;
+    }
   }
   &:before {
     content: none !important;
