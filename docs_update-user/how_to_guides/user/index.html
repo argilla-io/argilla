@@ -882,6 +882,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#update-a-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update a user
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#delete-a-user" class="md-nav__link">
     <span class="md-ellipsis">
       Delete a user
@@ -2533,6 +2542,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#update-a-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update a user
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#delete-a-user" class="md-nav__link">
     <span class="md-ellipsis">
       Delete a user
@@ -2787,15 +2805,30 @@
 </span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
 </span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="n">removed_user</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">remove_from_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="delete-a-user">Delete a user<a class="headerlink" href="#delete-a-user" title="Permanent link">&para;</a></h2>
-<p>You can delete an existing user from Argilla by calling the <code>delete</code> method on the <code>User</code> class.</p>
+<h2 id="update-a-user">Update a user<a class="headerlink" href="#update-a-user" title="Permanent link">&para;</a></h2>
+<p>You can update an existing user in Argilla by calling the <code>update</code> method on the <code>User</code> class. You can update the <code>username</code>, <code>first_name</code>, <code>last_name</code>, and <code>role</code> attributes.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
 </span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
 </span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">user_to_delete</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="s1">&#39;my_username&#39;</span><span class="p">)</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">user_to_update</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="s1">&#39;my_username&#39;</span><span class="p">)</span>
 </span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">deleted_user</span> <span class="o">=</span> <span class="n">user_to_delete</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">user</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s1">&#39;new_username&#39;</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="n">user</span><span class="o">.</span><span class="n">first_name</span> <span class="o">=</span> <span class="s1">&#39;new_first_name&#39;</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">user</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="s1">&#39;new_last_name&#39;</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s1">&#39;admin&#39;</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="n">updated_user</span> <span class="o">=</span> <span class="n">user_to_update</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</span></code></pre></div>
+<h2 id="delete-a-user">Delete a user<a class="headerlink" href="#delete-a-user" title="Permanent link">&para;</a></h2>
+<p>You can delete an existing user from Argilla by calling the <code>delete</code> method on the <code>User</code> class.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span> <span class="nn">argilla</span> <span class="k">as</span> <span class="nn">rg</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">client</span> <span class="o">=</span> <span class="n">rg</span><span class="o">.</span><span class="n">Argilla</span><span class="p">(</span><span class="n">api_url</span><span class="o">=</span><span class="s2">&quot;&lt;api_url&gt;&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;&lt;api_key&gt;&quot;</span><span class="p">)</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="n">user_to_delete</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="s1">&#39;my_username&#39;</span><span class="p">)</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">deleted_user</span> <span class="o">=</span> <span class="n">user_to_delete</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 </span></code></pre></div>
 
 
