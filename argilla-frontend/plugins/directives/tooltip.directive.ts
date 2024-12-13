@@ -17,6 +17,6 @@ Vue.directive("tooltip", {
       },
     }).$mount();
 
-    element.appendChild(tooltipDiv.$el);
+    document.body.appendChild(tooltipDiv.$el);
   },
 });

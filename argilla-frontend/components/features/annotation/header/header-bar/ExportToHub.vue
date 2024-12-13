@@ -17,6 +17,7 @@
         v-click-outside="{
           events: ['mousedown'],
           handler: closeDialog,
+          middleware: closeMiddleware,
         }"
         class="export-to-hub__dialog"
       >
@@ -160,6 +161,14 @@ export default {
     dataset: {
       type: Object,
       required: true,
+    },
+  },
+  methods: {
+    closeMiddleware(e) {
+      if (e.target.closest(".fixed-tooltip")) {
+        return false;
+      }
+      return true;
     },
   },
   setup(props) {
