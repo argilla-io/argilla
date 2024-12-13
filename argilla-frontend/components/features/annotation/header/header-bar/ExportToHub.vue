@@ -20,7 +20,7 @@
         }"
         class="export-to-hub__dialog"
       >
-        <div v-if="!isExporting" class="export-to-hub__exporting-message">
+        <div v-if="isExporting" class="export-to-hub__exporting-message">
           <h2
             class="export-to-hub__title"
             v-text="$t('exportToHub.exporting')"
