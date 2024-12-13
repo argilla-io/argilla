@@ -209,6 +209,25 @@ workspace = client.workspaces('my_workspace')
 removed_user = user.remove_from_workspace(workspace)
 ```
 
+## Update a user
+
+You can update an existing user in Argilla by calling the `update` method on the `User` class. You can update the `username`, `first_name`, `last_name`, and `role` attributes.
+
+```python
+import argilla as rg
+
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
+
+user_to_update = client.users('my_username')
+
+user.username = 'new_username'
+user.first_name = 'new_first_name'
+user.last_name = 'new_last_name'
+user.role = 'admin'
+
+updated_user = user_to_update.update()
+```
+
 ## Delete a user
 
 You can delete an existing user from Argilla by calling the `delete` method on the `User` class.
