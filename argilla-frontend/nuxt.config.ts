@@ -53,11 +53,7 @@ const config: NuxtConfig = {
   },
 
   // Global CSS (https://go.nuxtjs.dev/config-css)
-  css: [
-    "~assets/css/fonts.css",
-    "~assets/css/themes.css",
-    "~assets/scss/base/base.scss",
-  ],
+  css: ["~assets/scss/base/base.scss"],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [{ src: "~/plugins" }],
@@ -149,8 +145,10 @@ const config: NuxtConfig = {
       target: BASE_URL,
     },
   },
+
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
+    cssSourceMap: false,
     extend(config) {
       config.resolve.alias.vue = "vue/dist/vue.common";
       config.module.rules.push({
