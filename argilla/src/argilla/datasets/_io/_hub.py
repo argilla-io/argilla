@@ -220,8 +220,11 @@ class HubImportExportMixin(DiskImportExportMixin):
         for col in responses_columns:
             question_name = col.split(".")[0]
             if col.endswith("users"):
-                response_questions[question_name]["users"] = hf_dataset[col]
-                user_ids.update({UUID(user_id): UUID(user_id) for user_id in set(sum(hf_dataset[col], []))})
+                response_questions[question_name]["users"] = hf_dataset[col] or []
+                for users in hf_dataset[col]:
+                    if users is None:
+                        continue
+                    user_ids.update({UUID(user_id): user_id for user_id in users})
             elif col.endswith("responses"):
                 response_questions[question_name]["responses"] = hf_dataset[col]
             elif col.endswith("status"):
@@ -240,7 +243,15 @@ class HubImportExportMixin(DiskImportExportMixin):
             user_ids[unknown_user_id] = my_user.id
 
         # Create a mapper to map the Hugging Face dataset to a Record object
-        mapping = {col: col for col in hf_dataset.column_names if ".suggestion" in col}
+        mapping = {}
+        for col in hf_dataset.column_names:
+            if ".suggestion" in col:
+                mapping[col] = col
+            elif col.startswith("metadata.") and col.replace("metadata.", "") in dataset.schema:
+                mapping[col] = col.replace("metadata.", "")
+            elif col.startswith("vector.") and col.replace("vector.", "") in dataset.schema:
+                mapping[col] = col.replace("vector.", "")
+
         mapper = IngestedRecordMapper(dataset=dataset, mapping=mapping, user_id=my_user.id)
 
         # Extract responses and create Record objects
@@ -249,14 +260,17 @@ class HubImportExportMixin(DiskImportExportMixin):
         for idx, row in enumerate(hf_dataset):
             record = mapper(row)
             for question_name, values in response_questions.items():
-                response_values = values["responses"][idx]
-                response_users = values["users"][idx]
-                response_status = values["status"][idx]
+                response_values = values["responses"][idx] or []
+                response_users = values["users"][idx] or []
+                response_status = values["status"][idx] or []
+
+                used_users = set()
                 for value, user_id, status in zip(response_values, response_users, response_status):
                     user_id = user_ids[UUID(user_id)]
-                    if user_id in response_users:
+                    if user_id in used_users:
                         continue
-                    response_users[user_id] = True
+
+                    used_users.add(user_id)
                     response = Response(
                         user_id=user_id,
                         question_name=question_name,

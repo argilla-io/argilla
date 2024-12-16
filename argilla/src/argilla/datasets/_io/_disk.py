@@ -114,6 +114,7 @@ class DiskImportExportMixin(ABC):
                 name=dataset_model.name, workspace_id=workspace.id
             )
             dataset = cls.from_model(model=dataset_model, client=client)
+            dataset.get()
         else:
             # Create a new dataset and load the settings and records
             if not os.path.exists(settings_path):
