@@ -74,7 +74,7 @@ The **questions** are the questions that will be asked to the annotators. They c
 
 | Question Name | Title | Type | Required | Description | Values/Labels |
 | ------------- | ----- | ---- | -------- | ----------- | ------------- |
-{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.type }} | {{ question.required }} | {{ question.description | default("N/A", true) }} | {% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking"] %}{% if question.type in ["rating", "ranking"] %}{{ question.values | list }}{% else %}{{ question.labels | list }}{% endif %}{% else %}N/A{% endif %} |
+{% for question in argilla_questions %}| {{ question.name }} | {{ question.title }} | {{ question.type }} | {{ question.required }} | {{ question.description | default("N/A", true) }} | {% if question.type in ["rating", "label_selection", "multi_label_selection", "ranking", "span"] %}{{ question.values | list }}{% else %}N/A{% endif %} |
 {% endfor %}
 
 <!-- check length of metadata properties -->
