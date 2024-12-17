@@ -1,5 +1,5 @@
 import { useResolve } from "ts-injecty";
-import { onBeforeMount, ref, computed } from "vue";
+import { onBeforeMount, ref, computed, watch } from "vue";
 import { Dataset } from "~/v1/domain/entities/dataset/Dataset";
 import { ExportDatasetToHubUseCase } from "~/v1/domain/usecases/export-dataset-to-hub-use-case";
 import { JobRepository } from "~/v1/infrastructure/repositories";
@@ -20,6 +20,7 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
   const { get, set } = useLocalStorage();
 
   const isDialogOpen = ref(false);
+  const isDialogHovered = ref(false);
   const errors = ref({
     orgOrUsername: [],
     datasetName: [],
@@ -162,16 +163,41 @@ export const useExportToHubViewModel = (props: ExportToHubProps) => {
 
   const closeDialog = () => {
     isDialogOpen.value = false;
+    isDialogHovered.value = false;
   };
+
+  const openDialogOnHover = () => {
+    if (isExporting.value) {
+      isDialogHovered.value = true;
+    }
+  };
+
+  const closeDialogOnLeave = () => {
+    if (isExporting.value && !isDialogOpen.value) {
+      isDialogHovered.value = false;
+    }
+  };
+
+  const isDialogVisible = computed(
+    () => isDialogOpen.value || isDialogHovered.value
+  );
+
+  watch(isExporting, (newValue) => {
+    if (!newValue) {
+      closeDialog();
+    }
+  });
 
   onBeforeMount(() => {
     watchExportStatus();
   });
 
   return {
-    isDialogOpen,
+    isDialogVisible,
     closeDialog,
     openDialog,
+    openDialogOnHover,
+    closeDialogOnLeave,
     isExporting,
     exportToHub,
     exportToHubForm,
