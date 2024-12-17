@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ## [2.6.0](https://github.com/argilla-io/argilla/compare/v2.5.0...v2.6.0)
 
+### Added
+
+- Added feature to export datasets from Argilla to Hugging Face hub from the UI ([#5730](https://github.com/argilla-io/argilla/pull/5730))
+
 ### Fixed
 
 - Improved performance and accessibility ([#5724](https://github.com/argilla-io/argilla/pull/5724))
