@@ -16,6 +16,8 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+## [2.6.0](https://github.com/argilla-io/argilla/compare/v2.5.0...v2.6.0)
+
 ### Added
 
 - Added new `POST /api/v1/datasets/:dataset_id/export` endpoint to export datasets to Hugging Face Hub using a background job. ([#5709](https://github.com/argilla-io/argilla/pull/5709))
