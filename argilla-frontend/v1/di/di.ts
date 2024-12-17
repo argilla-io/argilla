@@ -70,7 +70,7 @@ import { GetFirstRecordFromHub } from "@/v1/domain/usecases/get-first-record-fro
 import { AuthLoginUseCase } from "@/v1/domain/usecases/auth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
-  const useAxios = useAxiosExtension(() => context.$axios);
+  const useAxios = useAxiosExtension(context);
   const useAuth = () => context.$auth;
 
   const dependencies = [

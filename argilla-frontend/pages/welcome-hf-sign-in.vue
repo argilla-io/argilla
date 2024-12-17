@@ -1,6 +1,6 @@
 <template>
   <main class="hf-login">
-    <BaseLoading v-if="!isHuggingFaceConfigured" />
+    <BaseLoading v-if="!isHuggingFaceConfigured || !user || !space" />
     <div v-else class="hf-login__hero">
       <BrandLogo color="dark" class="hf-login__logo" />
       <div class="hf-login__hero__content">

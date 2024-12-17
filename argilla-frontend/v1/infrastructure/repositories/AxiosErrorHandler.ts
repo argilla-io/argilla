@@ -1,22 +1,13 @@
-import { AxiosError } from "axios";
+import { Context } from "@nuxt/types";
 import { useNotifications } from "../services";
 
-type BackendError = {
-  detail:
-    | {
-        params: {
-          detail: string;
-        };
-      }
-    | string;
-  code?: string;
-  message?: string;
-};
+export const loadErrorHandler = (context: Context) => {
+  const axios = context.$axios;
+  const t = (key: string) => context.app.i18n.t(key).toString();
 
-export const loadErrorHandler = (axios, t: (key: string) => string) => {
   const notification = useNotifications();
 
-  axios.onError((error: AxiosError<BackendError>) => {
+  axios.onError((error) => {
     const { status, data } = error.response ?? {};
 
     notification.clear();
