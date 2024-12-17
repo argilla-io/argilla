@@ -21,6 +21,10 @@ These are the section headers that we use:
 ### Fixed
 
 - Fixed error when iterating over datasets and settings are not properly loaded. ([#5753](https://github.com/argilla-io/argilla/pull/5753))
+- Fixed error when loading field from raw dictionaries. ([#5756](https://github.com/argilla-io/argilla/pull/5756))
+- Fixed error when importing datasets from hub that already exists. ([#5756](https://github.com/argilla-io/argilla/pull/5756))
+- Fixed error when importing discarded responses without a response. ([#5756](https://github.com/argilla-io/argilla/pull/5756))
+- Fixed error when importing datasets with responses from existing users. ([#5756](https://github.com/argilla-io/argilla/pull/5756))
 
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.0...v2.5.0)
 
