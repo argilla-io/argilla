@@ -23,6 +23,7 @@ export default {
   description: "Beschreibung",
   labels: "Labels",
   order: "Reihenfolge",
+  owner: "Owner",
   useMarkdown: "Verwende Markdown",
   suggestionFirst: "Vorschlag zuerst",
   visibleForAnnotators: "Sichtbar für Annotatoren",
@@ -44,6 +45,7 @@ export default {
   optional: "Optional",
   template: "Template",
   rows: "zeilen",
+  datasetName: "Dataset name",
   noRecordsMessages: {
     datasetEmptyForAnnotator:
       "Der Datensatz ist leer. Bitten Sie einen Administrator, Daten hochzuladen, und versuchen Sie es später erneut.",
@@ -322,6 +324,23 @@ export default {
     none: "Keine",
     noWorkspaces:
       "Bitte folgen Sie der <a target='_blank' href='https://docs.argilla.io/latest/how_to_guides/workspace/#create-a-new-workspace'>Anleitung</a>, um einen Workspace zu erstellen",
+  },
+  exportToHub: {
+    dialogTitle: "Drücken",
+    ownerTooltip:
+      "Verwenden Sie einen gültigen Hugging Face-Benutzernamen oder eine Organisation",
+    tokenTooltip: `Verwenden Sie ein vorhandenes Zugriffstoken oder erstellen Sie ein <a href='https://huggingface.co/settings/tokens' target='_blank'>neues Token</a> mit "Schreibberechtigung"`,
+    validations: {
+      orgOrUsernameIsRequired:
+        "Organisation oder Benutzername sind erforderlich",
+      hfTokenIsRequired: "Umarmen des Gesichts -Tokens ist erforderlich ",
+      hfTokenInvalid: "Ungültiges Umarmungs -Gesichts -Token ",
+      datasetNameIsRequired: "Datensatzname ist erforderlich ",
+    },
+    exporting: "Exportieren in den Umarmungsgesichtszentrum ",
+    private: "privater Datensatz",
+    public: "öffentlicher Datensatz",
+    exportingWarning: "Das kann ein paar Sekunden dauern",
   },
   config: {
     field: {
