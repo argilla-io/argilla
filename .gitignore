@@ -133,6 +133,7 @@ sw.*
 # Ruff cache
 .ruff_cache/
 
+
 # App generated files
 src/**/server/static/
 
