@@ -70,9 +70,9 @@ def configure_share_your_progress(app: FastAPI):
     def create_image_link(username: str, dataset_name: str, submitted: int, team_progress: float) -> str:
         url = "https://argilla.imglab-cdn.net/dibt/dibt_v2.png"
 
-        text = f"""<span><span size="9pt" weight="bold">@{username}</span>
+        text = f"""<span size="9pt" weight="bold">@{username}</span>
 I've just contributed <span weight="bold">{submitted}</span> examples to this dataset:
-<span size="9pt" weight="bold">{dataset_name}</span></span>
+<span size="9pt" weight="bold">{dataset_name}</span>
 
 <span size="8pt">Team progress</span>
 <span weight="bold">{team_progress}%</span>"""
