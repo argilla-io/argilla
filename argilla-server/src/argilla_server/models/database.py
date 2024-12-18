@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# FORCING SERVER IMAGE TO BE COMPILED. DELETE THIS LINE AFTER THAT
+
 import secrets
 import base64
 from datetime import datetime
