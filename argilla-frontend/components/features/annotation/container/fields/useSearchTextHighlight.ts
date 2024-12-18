@@ -161,14 +161,8 @@ export const useSearchTextHighlight = (fieldId: string) => {
 
       highlightedHTML += textContent.slice(offset);
 
-      const span = document.createElement("span");
-
-      span.innerHTML = highlightedHTML;
-
-      coincidence.textNode.parentElement?.replaceChild(
-        span,
-        coincidence.textNode
-      );
+      if (coincidence.textNode.parentElement)
+        coincidence.textNode.parentElement.innerHTML = highlightedHTML;
     }
   };
 
@@ -176,6 +170,19 @@ export const useSearchTextHighlight = (fieldId: string) => {
     const fieldComponent = document.getElementById(FIELD_ID_TO_HIGHLIGHT);
 
     if (isCSSHighlightsSupported) CSS.highlights.delete(HIGHLIGHT_CLASS);
+    else {
+      const currentSpans = document.getElementsByClassName(HIGHLIGHT_CLASS);
+
+      for (const span of Array.from(currentSpans)) {
+        const parent = span.parentElement;
+        if (!parent) continue;
+
+        parent.innerHTML = parent.innerHTML.replaceAll(
+          span.outerHTML,
+          span.innerHTML
+        );
+      }
+    }
 
     if (!searchText || !fieldComponent) {
       return;
