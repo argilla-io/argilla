@@ -3,6 +3,8 @@
     <BaseButton
       class="primary export-to-hub__button"
       @mousedown.native.prevent="openDialog"
+      @mouseenter.native="openDialogOnHover"
+      @mouseleave.native="closeDialogOnLeave"
       :loading="isExporting"
       :disabled="isExporting"
     >
@@ -13,7 +15,7 @@
     </BaseButton>
     <transition name="fade" appear>
       <dialog
-        v-if="isDialogOpen"
+        v-if="isDialogVisible"
         v-click-outside="{
           events: ['mousedown'],
           handler: closeDialog,
@@ -26,23 +28,24 @@
             class="export-to-hub__title"
             v-text="$t('exportToHub.exporting')"
           />
-          <p>
-            <span
-              class="export-to-hub__exporting-message__warning"
-              v-text="$t('exportToHub.exportingWarning')"
-            />
-            {{ exportToHubForm.orgOrUsername }}/{{
-              exportToHubForm.datasetName
-            }}
-            <span
-              class="export-to-hub__exporting-message__private"
-              v-text="
-                exportToHubForm.isPrivate
-                  ? $t('exportToHub.private')
-                  : $t('exportToHub.public')
-              "
-            />
-          </p>
+          <p
+            class="export-to-hub__exporting-message__warning"
+            v-text="$t('exportToHub.exportingWarning')"
+          />
+          <p
+            class="export-to-hub__exporting-message__name"
+            v-text="
+              `${exportToHubForm.orgOrUsername}/${exportToHubForm.datasetName}`
+            "
+          />
+          <p
+            class="export-to-hub__exporting-message__private"
+            v-text="
+              exportToHubForm.isPrivate
+                ? $t('exportToHub.private')
+                : $t('exportToHub.public')
+            "
+          />
         </div>
         <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
@@ -205,14 +208,16 @@ export default {
     @include font-size(14px);
     margin: 0;
     &__private {
-      display: block;
-      text-transform: uppercase;
-      @include font-size(12px);
+      margin: 0;
+      @include font-size(13px);
+    }
+    &__name {
+      margin: 0;
+      font-weight: 500;
     }
     &__warning {
-      display: block;
+      margin-top: 0;
       color: var(--fg-tertiary);
-      @include font-size(14px);
     }
   }
 
@@ -257,6 +262,9 @@ export default {
       }
       &:hover {
         background: hsl(0, 1%, 22%);
+      }
+      &[disabled] {
+        pointer-events: auto !important;
       }
     }
     &__icon {

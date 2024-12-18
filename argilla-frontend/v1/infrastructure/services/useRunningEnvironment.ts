@@ -47,6 +47,12 @@ export const useRunningEnvironment = () => {
     return providers.some((p) => p.isHuggingFace);
   };
 
+  const getShareYourProgressEnabled = async () => {
+    const environment = await getEnvironment();
+
+    return environment.shareYourProgressEnabled;
+  };
+
   return {
     isEmbebed,
     isRunningOnHuggingFace,
@@ -54,5 +60,6 @@ export const useRunningEnvironment = () => {
     getHuggingFaceSpace,
     hasPersistentStorageWarning,
     hasHuggingFaceOAuthConfigured,
+    getShareYourProgressEnabled,
   };
 };

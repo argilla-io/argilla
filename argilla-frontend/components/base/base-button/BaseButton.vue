@@ -25,6 +25,8 @@
     :target="target"
     :rel="newRel"
     @click="onClick"
+    @mouseover="$emit('mouseover')"
+    @mouseleave="$emit('mouseleave')"
   >
     <slot />
   </a>
@@ -36,6 +38,8 @@
     :loading="loading"
     :disabled="disabled"
     @click="onClick"
+    @mouseover="$emit('mouseover')"
+    @mouseleave="$emit('mouseleave')"
   >
     <slot />
   </nuxt-link>
@@ -48,6 +52,8 @@
     :type="type"
     :disabled="disabled"
     @click="onClick"
+    @mouseover="$emit('mouseover')"
+    @mouseleave="$emit('mouseleave')"
   >
     <BaseSpinner
       class="spinner"

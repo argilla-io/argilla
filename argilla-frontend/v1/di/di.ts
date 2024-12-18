@@ -75,7 +75,7 @@ import { ExportDatasetToHubUseCase } from "@/v1/domain/usecases/export-dataset-t
 import { AuthLoginUseCase } from "@/v1/domain/usecases/auth-login-use-case";
 
 export const loadDependencyContainer = (context: Context) => {
-  const useAxios = useAxiosExtension(() => context.$axios);
+  const useAxios = useAxiosExtension(context);
   const useAuth = () => context.$auth;
 
   const dependencies = [

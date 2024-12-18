@@ -84,3 +84,15 @@ def test_settings_database_postgresql_max_overflow(monkeypatch):
     monkeypatch.setenv("ARGILLA_DATABASE_POSTGRESQL_MAX_OVERFLOW", "12")
 
     assert Settings().database_postgresql_max_overflow == 12
+
+
+def test_enable_share_your_progress(monkeypatch):
+    monkeypatch.setenv("ARGILLA_ENABLE_SHARE_YOUR_PROGRESS", "true")
+
+    assert Settings().enable_share_your_progress is True
+
+
+def test_disable_enable_share_your_progress(monkeypatch):
+    monkeypatch.setenv("ARGILLA_ENABLE_SHARE_YOUR_PROGRESS", "false")
+
+    assert Settings().enable_share_your_progress is False
