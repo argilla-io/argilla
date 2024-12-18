@@ -53,7 +53,7 @@ const config: NuxtConfig = {
   },
 
   // Global CSS (https://go.nuxtjs.dev/config-css)
-  css: ["~assets/scss/base/base.scss"],
+  css: ["~assets/styles.scss"],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [{ src: "~/plugins" }],
@@ -73,7 +73,23 @@ const config: NuxtConfig = {
     // https://go.nuxtjs.dev/typescript
     "@nuxt/typescript-build",
     "@nuxtjs/composition-api/module",
-    ["@pinia/nuxt", { disableVuex: false }],
+    [
+      "@pinia/nuxt",
+      {
+        disableVuex: false,
+      },
+    ],
+    [
+      "nuxt-compress",
+      {
+        gzip: {
+          cache: true,
+        },
+        brotli: {
+          threshold: 10240,
+        },
+      },
+    ],
   ],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
@@ -132,10 +148,8 @@ const config: NuxtConfig = {
       target: BASE_URL,
     },
   },
-
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
-    cssSourceMap: false,
     extend(config) {
       config.resolve.alias.vue = "vue/dist/vue.common";
       config.module.rules.push({
@@ -146,6 +160,26 @@ const config: NuxtConfig = {
         },
       });
     },
+    postcss: {
+      postcssOptions: {
+        order: "presetEnvAndCssnanoLast",
+        plugins: {
+          cssnano:
+            process.env.NODE_ENV === "production"
+              ? {
+                  preset: [
+                    "default",
+                    {
+                      discardComments: {
+                        removeAll: true,
+                      },
+                    },
+                  ],
+                }
+              : false,
+        },
+      },
+    },
     babel: {
       plugins: [["@babel/plugin-proposal-private-methods", { loose: true }]],
     },
@@ -155,6 +189,21 @@ const config: NuxtConfig = {
         keep_fnames: true,
       },
     },
+    extractCSS: true,
+    splitChunks: {
+      pages: true,
+      commons: true,
+      layouts: true,
+    },
+    optimization: {
+      splitChunks: {
+        name: false,
+      },
+    },
+    filenames: {
+      css: ({ isDev }) => (isDev ? "[name].css" : "[contenthash].css"),
+    },
+    publicPath: "/_nuxt/",
   },
 
   // https://github.com/nuxt-community/style-resources-module

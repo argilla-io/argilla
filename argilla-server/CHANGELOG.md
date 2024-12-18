@@ -18,6 +18,9 @@ These are the section headers that we use:
 
 ### Added
 
+- Added new `POST /api/v1/datasets/:dataset_id/export` endpoint to export datasets to Hugging Face Hub using a background job. ([#5709](https://github.com/argilla-io/argilla/pull/5709))
+- Added support to update record fields in `PATCH /api/v1/records/:record_id` endpoint. ([#5685](https://github.com/argilla-io/argilla/pull/5685))
+- Added support to update record fields in `PUT /api/v1/datasets/:dataset_id/records/bulk` endpoint. ([#5685](https://github.com/argilla-io/argilla/pull/5685))
 - Added `GET /share-your-progress` endpoint to share user progress with the community. ([#5739](https://github.com/argilla-io/argilla/pull/5739))
 - Added `argilla.share_your_progress_enabled` attribute to `GET /api/v1/settings` endpoint. ([#5739](https://github.com/argilla-io/argilla/pull/5739))
 
@@ -52,7 +55,7 @@ These are the section headers that we use:
 
 ### Added
 
-- Added new `POST /api/v1/datasets/:dataset_id/import` to import datasets from Hugging Face as a background job. ([#5572](https://github.com/argilla-io/argilla/pull/5572))
+- Added new `POST /api/v1/datasets/:dataset_id/import` endpoint to import datasets from Hugging Face as a background job. ([#5572](https://github.com/argilla-io/argilla/pull/5572))
 - Added new `metadata` attribute for endpoints getting, creating and updating Datasets so now it is possible to store metadata associated to a dataset. ([#5586](https://github.com/argilla-io/argilla/pull/5586))
 - Added new validation to avoid the creation of records with empty `fields` attributes. ([#5639](https://github.com/argilla-io/argilla/pull/5639))
 

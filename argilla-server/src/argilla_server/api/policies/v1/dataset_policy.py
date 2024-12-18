@@ -148,3 +148,10 @@ class DatasetPolicy:
             return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
 
         return is_allowed
+
+    @classmethod
+    def export_to_hub(cls, dataset: Dataset) -> PolicyAction:
+        async def is_allowed(actor: User) -> bool:
+            return actor.is_owner or (actor.is_admin and await actor.is_member(dataset.workspace_id))
+
+        return is_allowed

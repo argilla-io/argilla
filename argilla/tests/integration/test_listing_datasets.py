@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla import Argilla, Dataset, Settings, TextField, TextQuestion, Workspace
+from argilla import Argilla, Dataset, Settings, TextField, TextQuestion, Workspace, TaskDistribution
 
 
 class TestDatasetsList:
@@ -33,3 +33,28 @@ class TestDatasetsList:
         for ds in datasets:
             if ds.name == "test_dataset":
                 assert ds == dataset, "The dataset was not loaded properly"
+
+    def test_list_dataset_with_custom_task_distribution(self, client: Argilla, workspace: Workspace):
+        dataset = Dataset(
+            name="test_dataset",
+            workspace=workspace.name,
+            settings=Settings(
+                fields=[TextField(name="text")],
+                questions=[TextQuestion(name="text_question")],
+                distribution=TaskDistribution(min_submitted=4),
+            ),
+            client=client,
+        )
+        dataset.create()
+        datasets = client.datasets
+        assert len(datasets) > 0, "No datasets were found"
+
+        dataset_idx = 0
+        for idx, ds in enumerate(datasets):
+            if ds.id == dataset.id:
+                dataset_idx = idx
+                assert ds.settings.distribution.min_submitted == 4, "The dataset was not loaded properly"
+                break
+
+        ds = client.datasets[dataset_idx]
+        assert ds.settings.distribution.min_submitted == 4, "The dataset was not loaded properly"

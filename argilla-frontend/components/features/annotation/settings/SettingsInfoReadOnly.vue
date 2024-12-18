@@ -69,7 +69,7 @@ export default {
 };
 </script>
 
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 .settings {
   &__area {
     max-width: 800px;
@@ -122,4 +122,4 @@ export default {
     }
   }
 }
-</styles>
+</style>
