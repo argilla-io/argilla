@@ -20,6 +20,7 @@ These are the section headers that we use:
 
 ### Added
 
+- Add share progress feature ([#5727](https://github.com/argilla-io/argilla/pull/5727))
 - Added feature to export datasets from Argilla to Hugging Face hub from the UI ([#5730](https://github.com/argilla-io/argilla/pull/5730))
 
 ### Fixed

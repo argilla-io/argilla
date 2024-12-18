@@ -22,16 +22,19 @@
       v-if="!metrics.hasMetrics"
       class="my-progress__status--skeleton"
     />
-    <StatusCounter
-      v-else
-      class="my-progress__status"
-      :color="RecordStatus.submitted.color"
-      :name="RecordStatus.submitted.name"
-      :value="metrics.submitted"
-    />
+    <div v-else class="my-progress__share">
+      <Share v-if="canSeeShare" />
+      <StatusCounter
+        :ghost="true"
+        :rainbow="shouldShowSubmittedAnimation"
+        class="my-progress__status"
+        :color="RecordStatus.submitted.color"
+        :name="RecordStatus.submitted.name"
+        :value="metrics.submitted"
+      />
+    </div>
   </div>
 </template>
-
 <script>
 import { RecordStatus } from "~/v1/domain/entities/record/RecordStatus";
 import { useAnnotationProgressViewModel } from "./useAnnotationProgressViewModel";
@@ -70,6 +73,13 @@ $statusCounterMinHeight: 30px;
       min-width: $statusCounterMinWidth;
       min-height: $statusCounterMinHeight;
     }
+  }
+  &__share {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: $base-space;
   }
 }
 </style>
