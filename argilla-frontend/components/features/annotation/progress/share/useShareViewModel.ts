@@ -56,10 +56,9 @@ ${url.toString()}`;
 
     params.set(
       "text",
-      `<span>
-<span size="9pt" weight="bold">@${user.value.userName}</span>
+      `<span size="9pt" weight="bold">@${user.value.userName}</span>
 I've just contributed <span weight="bold">${metrics.submitted}</span> examples to this dataset:
-<span size="9pt" weight="bold">${dataset.name}</span></span>
+<span size="9pt" weight="bold">${dataset.name}</span>
 
 <span size="8pt">Team progress</span>
 <span weight="bold">${progress.percentage.completed}%</span>`
