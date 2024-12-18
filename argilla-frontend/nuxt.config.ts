@@ -191,9 +191,9 @@ const config: NuxtConfig = {
     },
     extractCSS: true,
     splitChunks: {
-      pages: true,
-      commons: true,
-      layouts: true,
+      pages: false,
+      commons: false,
+      layouts: false,
     },
     optimization: {
       splitChunks: {
