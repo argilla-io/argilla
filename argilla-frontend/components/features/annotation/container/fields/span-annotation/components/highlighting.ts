@@ -50,6 +50,8 @@ type Styles = {
 
 type InitialConfiguration = Partial<Omit<Configuration, "lineHeight">>;
 
+const isCSSHighlightsSupported = !!CSS.highlights;
+
 export class Highlighting {
   private readonly spanSelection = SpanSelection.getInstance();
   private node: HTMLElement | undefined;
@@ -108,7 +110,7 @@ export class Highlighting {
   }
 
   mount(selections: LoadedSpan[] = []) {
-    if (!CSS.highlights) {
+    if (!isCSSHighlightsSupported) {
       throw new Error(
         "The CSS Custom Highlight API is not supported in this browser!"
       );
@@ -292,7 +294,7 @@ export class Highlighting {
   }
 
   private applyStyles() {
-    if (!CSS.highlights) return;
+    if (!isCSSHighlightsSupported) return;
 
     this.applyHighlightStyle();
     this.applyEntityStyle();

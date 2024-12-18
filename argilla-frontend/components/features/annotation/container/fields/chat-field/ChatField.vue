@@ -31,17 +31,21 @@
             }"
           >
             <MarkdownRenderer v-if="useMarkdown" :markdown="text" />
-            <span v-else v-html="text" /><template>
-              <style :key="id" scoped>
-                ::highlight(search-text-highlight-{{id}}) {
-                  color: #ff675f;
-                }
-              </style>
-            </template>
+            <span v-else v-html="text" />
           </div>
         </span>
       </div>
     </div>
+    <template>
+      <style :key="id" scoped>
+        .search-text-highlight-{{id}} {
+          color: #ff675f;
+        }
+        ::highlight(search-text-highlight-{{id}}) {
+          color: #ff675f;
+        }
+      </style>
+    </template>
   </div>
 </template>
 
