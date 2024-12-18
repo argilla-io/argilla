@@ -23,6 +23,7 @@ These are the section headers that we use:
 - Added support to update record fields in `PUT /api/v1/datasets/:dataset_id/records/bulk` endpoint. ([#5685](https://github.com/argilla-io/argilla/pull/5685))
 - Added `GET /share-your-progress` endpoint to share user progress with the community. ([#5739](https://github.com/argilla-io/argilla/pull/5739))
 - Added `argilla.share_your_progress_enabled` attribute to `GET /api/v1/settings` endpoint. ([#5739](https://github.com/argilla-io/argilla/pull/5739))
+- Added new environment variable `ARGILLA_ENABLE_SHARE_YOUR_PROGRESS` to enable or disable the share your progress feature. ([#5727](https://github.com/argilla-io/argilla/pull/5727))
 
 ## [2.5.0](https://github.com/argilla-io/argilla/compare/v2.4.1...v2.5.0)
 
