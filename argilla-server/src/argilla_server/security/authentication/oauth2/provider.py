@@ -17,66 +17,67 @@ import os
 import random
 import re
 import string
-from typing import Dict, Any, ClassVar, Type, Optional, Union, List, Tuple
+from typing import Dict, Any, ClassVar, Type, Optional, List, Tuple
 from urllib.parse import urljoin
 
 import httpx
 from oauthlib.oauth2 import WebApplicationClient
 from social_core.backends.oauth import BaseOAuth2
 from social_core.exceptions import AuthException
-
 from social_core.strategy import BaseStrategy
 from starlette.requests import Request
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, Response
 
 from argilla_server.errors import future
-from argilla_server.security.authentication.claims import Claims
+from argilla_server.security.authentication.oauth2._backends import Strategy
 from argilla_server.security.settings import settings
 
 
-class Strategy(BaseStrategy):
-    def request_data(self, merge=True) -> Dict[str, Any]:
-        return {}
-
-    def absolute_uri(self, path=None) -> str:
-        return path
-
-    def get_setting(self, name):
-        return None
-
-
 class OAuth2ClientProvider:
-    """OAuth2 flow handler  of a certain provider."""
+    """OAuth2 flow handler of a certain provider."""
 
     OAUTH_STATE_COOKIE_NAME = "oauth2_state"
     OAUTH_STATE_COOKIE_MAX_AGE = 90
 
-    name: ClassVar[str]
-    backend_class: ClassVar[Type[BaseOAuth2]]
-    claims: ClassVar[Optional[Union[Claims, dict]]] = None
     backend_strategy: ClassVar[BaseStrategy] = Strategy()
 
     def __init__(
         self,
+        backend_class: Type[BaseOAuth2],
         client_id: str = None,
         client_secret: str = None,
         scope: Optional[List[str]] = None,
         redirect_uri: str = None,
     ) -> None:
-        self.client_id = client_id or self._environment_variable_for_property("client_id")
-        self.client_secret = client_secret or self._environment_variable_for_property("client_secret")
-        self.scope = scope or self._environment_variable_for_property("scope", "")
-        self.scope = self.scope.split(" ") if self.scope else []
-        self.redirect_uri = redirect_uri or self._environment_variable_for_property("redirect_uri")
-        self.redirect_uri = self.redirect_uri or f"/oauth/{self.name}/callback"
+        self.name = backend_class.name
+        self._backend = backend_class(strategy=self.backend_strategy)
 
-        self._backend = self.backend_class(strategy=self.backend_strategy)
         self._authorization_endpoint = self._backend.authorization_url()
         self._token_endpoint = self._backend.access_token_url()
 
+        # Social Core uses the key and secret names for the client_id and client_secret
+        # These lines allow the use of the same environment variables as the social_core library.
+        # See https://python-social-auth.readthedocs.io/en/latest/configuration/settings.html for more information.
+        self.client_id = (client_id or self._environment_variable_for_property("client_id")) or self._backend.setting(
+            "key"
+        )
+
+        self.client_secret = (
+            client_secret or self._environment_variable_for_property("client_secret")
+        ) or self._backend.setting("secret")
+
+        self.scope = (scope or self._environment_variable_for_property("scope")) or self._backend.setting(
+            "scope",
+            default=self._backend.get_scope(),
+        )
+        if isinstance(self.scope, str):
+            self.scope = self.scope.split(" ")
+
+        self.redirect_uri = redirect_uri or f"/oauth/{self.name}/callback"
+
     @classmethod
-    def from_dict(cls, provider: dict) -> "OAuth2ClientProvider":
-        return cls(**provider)
+    def from_dict(cls, provider: dict, backend_class: Type[BaseOAuth2]) -> "OAuth2ClientProvider":
+        return cls(backend_class=backend_class, **provider)
 
     def new_oauth_client(self) -> WebApplicationClient:
         return WebApplicationClient(self.client_id)
@@ -89,8 +90,12 @@ class OAuth2ClientProvider:
         redirect_uri = self.get_redirect_uri(request)
         state = "".join([random.choice(string.ascii_letters) for _ in range(32)])
 
-        oauth2_query_params = dict(state=state, scope=self.scope, redirect_uri=redirect_uri)
-        oauth2_query_params.update(request.query_params)
+        oauth2_query_params = {
+            "state": state,
+            "scope": self.scope,
+            "redirect_uri": redirect_uri,
+            **request.query_params,
+        }
 
         authorization_url = str(
             self.new_oauth_client().prepare_request_uri(self._authorization_endpoint, **oauth2_query_params)
@@ -102,16 +107,17 @@ class OAuth2ClientProvider:
         url, state = self.authorization_url(request)
         response = RedirectResponse(url, 303)
 
-        response.set_cookie(
-            self.OAUTH_STATE_COOKIE_NAME,
-            value=state,
-            secure=True,
-            httponly=True,
-            max_age=self.OAUTH_STATE_COOKIE_MAX_AGE,
-            samesite="none",
-        )
+        self._set_state(state, response)
 
         return response
+
+    def standardize(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        data = self._backend.get_user_details(data)
+
+        data["provider"] = self.name
+        data["scope"] = self.scope
+
+        return data
 
     async def get_user_data(self, request: Request) -> dict:
         self._check_request_params(request)
@@ -131,9 +137,12 @@ class OAuth2ClientProvider:
         if "state" not in request.query_params:
             raise ValueError("'state' parameter was not found in callback request")
 
-        state = request.cookies.get(self.OAUTH_STATE_COOKIE_NAME)
+        state = self._get_state(request)
         if request.query_params.get("state") != state:
             raise ValueError("'state' parameter does not match")
+
+    def _get_state(self, request) -> Optional[str]:
+        return request.cookies.get(self._get_state_cookie_name())
 
     @staticmethod
     def _align_url_to_allow_http_redirect(url: str) -> str:
@@ -142,27 +151,40 @@ class OAuth2ClientProvider:
         scheme = "http" if settings.oauth.allow_http_redirect else "https"
         return re.sub(r"^https?", scheme, url)
 
-    def standardize(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        data["provider"] = self.name
-        data["scope"] = self.scope
+    def _set_state(self, state: str, response: Response) -> None:
+        response.set_cookie(
+            self._get_state_cookie_name(),
+            value=state,
+            secure=True,
+            httponly=True,
+            max_age=self.OAUTH_STATE_COOKIE_MAX_AGE,
+            samesite="none",
+        )
 
-        return data
+    def _get_state_cookie_name(self) -> str:
+        return f"{self.name}_{self.OAUTH_STATE_COOKIE_NAME}"
 
     async def _fetch_user_data(self, authorization_response: str, **oauth_query_params) -> dict:
         oauth_client = self.new_oauth_client()
+        token_request_params = {**oauth_query_params}
+
+        auth = None
+        if self._backend.use_basic_auth():
+            auth = httpx.BasicAuth(self.client_id, self.client_secret)
+        else:
+            token_request_params["client_secret"] = self.client_secret
+
         token_url, headers, content = oauth_client.prepare_token_request(
             self._token_endpoint,
             authorization_response=authorization_response,
-            **oauth_query_params,
+            **token_request_params,
         )
 
         headers.update({"Accept": "application/json"})
-        auth = httpx.BasicAuth(self.client_id, self.client_secret)
         async with httpx.AsyncClient(auth=auth) as session:
             try:
                 response = await session.post(token_url, headers=headers, content=content)
                 oauth_client.parse_request_body_response(json.dumps(response.json()))
-
                 return self.standardize(self._backend.user_data(oauth_client.access_token))
             except httpx.HTTPError as e:
                 raise ValueError(str(e))

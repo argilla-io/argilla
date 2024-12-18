@@ -78,12 +78,7 @@ class TestApp:
     async def test_create_allowed_workspaces(self, db: AsyncSession):
         with mock.patch(
             "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: OAuth2Settings.from_dict(
-                {
-                    "enabled": True,
-                    "allowed_workspaces": [{"name": "ws1"}, {"name": "ws2"}],
-                }
-            ),
+            new_callable=lambda: OAuth2Settings(allowed_workspaces=[{"name": "ws1"}, {"name": "ws2"}]),
         ):
             await _create_oauth_allowed_workspaces(db)
 
@@ -91,25 +86,8 @@ class TestApp:
             assert len(workspaces) == 2
             assert set([ws.name for ws in workspaces]) == {"ws1", "ws2"}
 
-    async def test_create_allowed_workspaces_with_oauth_disabled(self, db: AsyncSession):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: OAuth2Settings.from_dict(
-                {
-                    "enabled": False,
-                    "allowed_workspaces": [{"name": "ws1"}, {"name": "ws2"}],
-                }
-            ),
-        ):
-            await _create_oauth_allowed_workspaces(db)
-
-            workspaces = (await db.scalars(select(Workspace))).all()
-            assert len(workspaces) == 0
-
     async def test_create_workspaces_with_empty_workspaces_list(self, db: AsyncSession):
-        with mock.patch(
-            "argilla_server.security.settings.Settings.oauth", new_callable=lambda: OAuth2Settings(enabled=True)
-        ):
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=OAuth2Settings):
             await _create_oauth_allowed_workspaces(db)
 
             workspaces = (await db.scalars(select(Workspace))).all()
@@ -120,7 +98,7 @@ class TestApp:
 
         with mock.patch(
             "argilla_server.security.settings.Settings.oauth",
-            new_callable=lambda: OAuth2Settings(enabled=True, allowed_workspaces=[AllowedWorkspace(name=ws.name)]),
+            new_callable=lambda: OAuth2Settings(allowed_workspaces=[{"name": ws.name}]),
         ):
             await _create_oauth_allowed_workspaces(db)
 

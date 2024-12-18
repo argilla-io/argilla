@@ -123,6 +123,7 @@ export default {
   button: {
     ignore_and_continue: "Ignore and continue",
     login: "Sign in",
+    signin_with_provider: "Sign in with {provider}",
     "hf-login": "Sign in with Hugging Face",
     sign_in_with_username: "Sign in with username",
     cancel: "Cancel",

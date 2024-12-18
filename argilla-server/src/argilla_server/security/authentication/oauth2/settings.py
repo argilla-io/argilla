@@ -16,7 +16,11 @@ from typing import List
 
 import yaml
 
-from argilla_server.security.authentication.oauth2.providers import get_provider_by_name, OAuth2ClientProvider
+from argilla_server.security.authentication.oauth2._backends import (
+    get_supported_backend_by_name,
+    load_supported_backends,
+)
+from argilla_server.security.authentication.oauth2.provider import OAuth2ClientProvider
 
 __all__ = ["OAuth2Settings"]
 
@@ -31,8 +35,6 @@ class OAuth2Settings:
     OAuth2 settings model.
 
     Args:
-        enabled:
-            Whether OAuth2 authentication is enabled or not.
         allow_http_redirect:
             Whether to allow HTTP scheme on redirect urls (for tests purposes).
         providers:
@@ -43,18 +45,18 @@ class OAuth2Settings:
 
     ALLOWED_WORKSPACES_KEY = "allowed_workspaces"
     PROVIDERS_KEY = "providers"
+    EXTRA_BACKENDS_KEY = "extra_backends"
 
     def __init__(
         self,
-        enabled: bool = True,
         allow_http_redirect: bool = False,
-        providers: List[OAuth2ClientProvider] = None,
-        allowed_workspaces: List[AllowedWorkspace] = None,
+        extra_backends: List[str] = None,
+        **settings,
     ):
-        self.enabled = enabled
         self.allow_http_redirect = allow_http_redirect
-        self.allowed_workspaces = allowed_workspaces or []
-        self._providers = providers or []
+        self.extra_backends = extra_backends or []
+        self.allowed_workspaces = self._build_workspaces(settings) or []
+        self._providers = self._build_providers(settings, extra_backends) or []
 
         if self.allow_http_redirect:
             # See https://stackoverflow.com/questions/27785375/testing-flask-oauthlib-locally-without-https
@@ -69,16 +71,7 @@ class OAuth2Settings:
         """Creates an instance of OAuth2Settings from a YAML file."""
 
         with open(yaml_file) as f:
-            return cls.from_dict(yaml.safe_load(f))
-
-    @classmethod
-    def from_dict(cls, settings: dict) -> "OAuth2Settings":
-        """Creates an instance of OAuth2Settings from a dictionary."""
-
-        settings[cls.PROVIDERS_KEY] = cls._build_providers(settings)
-        settings[cls.ALLOWED_WORKSPACES_KEY] = cls._build_workspaces(settings)
-
-        return cls(**settings)
+            return cls(**yaml.safe_load(f))
 
     @classmethod
     def _build_workspaces(cls, settings: dict) -> List[AllowedWorkspace]:
@@ -86,13 +79,15 @@ class OAuth2Settings:
         return [AllowedWorkspace(**workspace) for workspace in allowed_workspaces]
 
     @classmethod
-    def _build_providers(cls, settings: dict) -> List["OAuth2ClientProvider"]:
+    def _build_providers(cls, settings: dict, extra_backends) -> List["OAuth2ClientProvider"]:
         providers = []
+
+        load_supported_backends(extra_backends=extra_backends)
 
         for provider in settings.pop("providers", []):
             name = provider.pop("name")
-            provider_class = get_provider_by_name(name)
 
-            providers.append(provider_class.from_dict(provider))
+            backend_class = get_supported_backend_by_name(name)
+            providers.append(OAuth2ClientProvider.from_dict(provider, backend_class))
 
         return providers
