@@ -35,7 +35,7 @@
     "marked": "5.1.2",
     "marked-highlight": "2.1.1",
     "marked-katex-extension": "5.0.2",
-    "nuxt": "2.18.1",
+    "nuxt": "3.12.4",
     "nuxt-highlightjs": "1.0.3",
     "pinia": "2.1.7",
     "sass": "1.77.1",
