@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-yaml
         exclude: argilla/mkdocs.yml|examples/deployments/k8s
@@ -8,16 +8,16 @@ repos:
         exclude_types: [text, jupyter]
       - id: trailing-whitespace
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.4.8
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.3
     hooks:
       - id: ruff-format
 
   ##############################################################################
   # argilla specific hooks
   ##############################################################################
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.4.8
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.3
     hooks:
       - id: ruff
         files: 'argilla/src/.*\.py$'
@@ -35,7 +35,7 @@ repos:
           - argilla/LICENSE_HEADER
           - --fuzzy-match-generates-todo
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.7.1
+    rev: 0.8.1
     hooks:
       - id: nbstripout
         files: '^argilla/.*\.ipynb$'
@@ -52,8 +52,8 @@ repos:
   ##############################################################################
   # argilla-server specific hooks
   ##############################################################################
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.4.8
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.3
     hooks:
       - id: ruff
         files: 'argila-server/src/.*\.py$'
@@ -75,7 +75,7 @@ repos:
   # Helm lint hook
   ##############################################################################
   - repo: https://github.com/gruntwork-io/pre-commit
-    rev: v0.1.24
+    rev: v0.1.25
     hooks:
       - id: helmlint
         name: Helm lint
