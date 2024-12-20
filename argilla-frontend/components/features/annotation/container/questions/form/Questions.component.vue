@@ -14,6 +14,7 @@
       <div
         v-for="(question, index) in questions"
         :key="question.id"
+        role="listitem"
         :aria-label="'Question: ' + question.name"
         @keydown.arrow-up.prevent="
           updateQuestionAutofocus(autofocusPosition - 1)

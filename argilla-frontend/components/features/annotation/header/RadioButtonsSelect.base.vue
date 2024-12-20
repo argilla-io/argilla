@@ -17,12 +17,19 @@
 
 <template>
   <div v-if="options.length">
-    <BaseDropdown :visible="dropdownIsVisible" @visibility="onVisibility">
+    <BaseDropdown
+      id="dropdown-menu"
+      :visible="dropdownIsVisible"
+      @visibility="onVisibility"
+    >
       <span slot="dropdown-header">
         <BaseButton
           class="selected-option"
           :class="currentOptionId"
           :data-title="$t('status')"
+          aria-haspopup="listbox"
+          :aria-expanded="dropdownIsVisible"
+          :aria-label="`Selected option: ${currentOptionName}`"
         >
           {{ currentOptionName }}
           <svgicon
@@ -34,14 +41,15 @@
         </BaseButton>
       </span>
       <span slot="dropdown-content">
-        <ul class="options" role="radiogroup">
+        <ul class="options" role="group">
           <li
             v-for="{ id, name, color } in options"
             class="option"
             :class="id"
             :key="id"
             tabindex="0"
-            :aria-checked="id"
+            :aria-checked="id === selectedOption"
+            :aria-label="name"
             role="radio"
             @keydown.space="changeOption(id)"
             @keydown.enter="changeOption(id)"

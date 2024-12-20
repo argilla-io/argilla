@@ -16,14 +16,17 @@
   -->
 
 <template>
-  <div
+  <form
+    role="search"
+    @submit.prevent="openOrApply"
     class="search-area"
     :class="{ active: isSearchActive, expanded: isExpanded }"
   >
     <BaseButton
-      @on-click="openOrApply"
+      type="submit"
       class="search-area__icon --search"
       :data-title="$t('search')"
+      :aria-label="$t('search')"
     >
       <svgicon name="search" width="16" height="16" aria-hidden="true" />
     </BaseButton>
@@ -32,7 +35,6 @@
       class="search-area__input"
       type="text"
       v-model.trim="searchValue"
-      role="search"
       :placeholder="$t('searchPlaceholder')"
       :aria-description="$t('searchPlaceholder')"
       autocomplete="off"
@@ -43,6 +45,7 @@
       @on-click="resetValue"
       v-if="showDelete"
       class="search-area__icon --close"
+      aria-label="close"
     >
       <svgicon name="close" width="12" height="12" aria-hidden="true" />
     </BaseButton>
@@ -71,7 +74,7 @@
         </ul>
       </template>
     </BaseDropdown>
-  </div>
+  </form>
 </template>
 
 <script>

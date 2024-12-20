@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="isVisible"
+    role="tooltip"
     class="fixed-tooltip"
     ref="tooltip"
     v-click-outside="closeTooltip"

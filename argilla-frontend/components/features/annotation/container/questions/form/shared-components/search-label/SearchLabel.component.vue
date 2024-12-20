@@ -1,5 +1,10 @@
 <template>
-  <div class="search-area" @click="focusInSearch" aria-label="Search Labels">
+  <div
+    class="search-area"
+    role="button"
+    @click="focusInSearch"
+    aria-label="Search Labels"
+  >
     <BaseIconWithBadge
       ref="iconSearchRef"
       class="search-area__icon --search"

@@ -47,6 +47,7 @@
           name="suggestion"
           width="8"
           height="8"
+          :aria-label="$t('suggestion.name')"
         />
         <span
           v-if="suggestedScore"

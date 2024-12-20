@@ -2,9 +2,10 @@
   <div class="import-data">
     <BaseButton
       :data-title="$t('datasetCreation.addRecords')"
+      :aria-label="$t('datasetCreation.addRecords')"
       class="primary import-data__button"
       @click.prevent="visibleSnippet = !visibleSnippet"
-      ><svgicon name="plus"
+      ><svgicon name="plus" aria-hidden="true"
     /></BaseButton>
     <transition name="fade" appear>
       <dialog

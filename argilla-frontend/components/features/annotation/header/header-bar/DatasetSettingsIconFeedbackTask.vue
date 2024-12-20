@@ -8,6 +8,7 @@
     badge-border-color="#212121"
     badge-size="20"
     icon="settings"
+    :aria-label="$t('settings.title')"
   />
 </template>
 
@@ -27,6 +28,7 @@ export default {
 .button-settings {
   padding: $base-space;
   overflow: visible;
+  flex-shrink: 0;
   &[data-title] {
     @include tooltip-mini("bottom");
   }

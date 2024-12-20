@@ -7,9 +7,7 @@
       @breadcrumb-action="$emit('breadcrumb-action', $event)"
     />
     <template v-if="datasetId && showSettingButton">
-      <div @click="goToSetting(datasetId)" role="button">
-        <DatasetSettingsIconFeedbackTask />
-      </div>
+      <DatasetSettingsIconFeedbackTask @click="goToSetting(datasetId)" />
     </template>
     <div class="topbar--left">
       <slot name="badge"></slot>
