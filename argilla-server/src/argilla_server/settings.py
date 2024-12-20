@@ -192,7 +192,7 @@ class Settings(BaseSettings):
         if not database_url:
             home_path = info.data.get("home_path")
             sqlite_file = os.path.join(home_path, "argilla.db")
-            return f"sqlite+aiosqlite:///{sqlite_file}?check_same_thread=False"
+            return f"sqlite+aiosqlite:///{sqlite_file}"
 
         if "sqlite" in database_url:
             regex = re.compile(r"sqlite(?!\+aiosqlite)")
