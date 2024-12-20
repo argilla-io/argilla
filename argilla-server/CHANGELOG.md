@@ -139,6 +139,10 @@ These are the section headers that we use:
 - Added `REINDEX_DATASETS` environment variable to Argilla server Docker image. ([#5268](https://github.com/argilla-io/argilla/pull/5268))
 - Added `argilla-hf-spaces` docker image for running Argilla server in HF spaces. ([#5307](https://github.com/argilla-io/argilla/pull/5307))
 
+### Added
+
+- Added some new performance tuning settings for SQLite database. ([#5150](https://github.com/argilla-io/argilla/pull/5150))
+
 ### Changed
 
 - Change `responses` table to delete rows on cascade when a user is deleted. ([#5126](https://github.com/argilla-io/argilla/pull/5126))
@@ -172,6 +176,7 @@ These are the section headers that we use:
 
 - Fixed error when updating records in bulk with wrong `external_id` but correct record `id`. ([#5014](https://github.com/argilla-io/argilla/pull/5014))
 - Fixed error when searching all record response values. ([#5003](https://github.com/argilla-io/argilla/pull/5003))
+- Fixed SQLite connection settings not working correctly due to a outdated conditional. ([#5149](https://github.com/argilla-io/argilla/pull/5149))
 
 ## [1.29.0](https://github.com/argilla-io/argilla/compare/v1.28.0...v1.29.0)
 
