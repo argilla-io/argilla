@@ -8,9 +8,10 @@
   >
     <BaseButton
       class="config-card__remove"
+      :aria-label="$t('config.removeQuestion')"
       @click="remove"
       v-if="removeIsAllowed"
-      ><svgicon name="close"
+      ><svgicon name="close" aria-hidden="true"
     /></BaseButton>
 
     <template v-if="noMapping">
