@@ -1,5 +1,4 @@
 #  coding=utf-8
-#  REMOVE
 #  Copyright 2021-present, the Recognai S.L. team.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
