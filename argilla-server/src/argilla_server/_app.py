@@ -307,9 +307,6 @@ def _show_telemetry_warning():
 async def _create_oauth_allowed_workspaces(db: AsyncSession):
     from argilla_server.security.settings import settings as security_settings
 
-    if not security_settings.oauth.enabled:
-        return
-
     for allowed_workspace in security_settings.oauth.allowed_workspaces:
         if await Workspace.get_by(db, name=allowed_workspace.name) is None:
             _LOGGER.info(f"Creating workspace with name {allowed_workspace.name!r}")

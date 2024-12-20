@@ -18,7 +18,6 @@ from pytest_mock import MockerFixture
 
 from argilla_server.enums import UserRole
 from argilla_server.security.authentication import UserInfo
-from argilla_server.security.authentication.claims import Claims
 
 
 class TestUserInfo:
@@ -43,19 +42,8 @@ class TestUserInfo:
         userinfo = UserInfo({"username": "user", "role": "owner"})
         assert userinfo.role == UserRole.owner
 
-    def test_get_userinfo_with_claims(self):
-        userinfo = UserInfo({"username": "user"}).use_claims(
-            Claims(
-                first_name=lambda user: user["username"].upper(),
-                last_name=lambda user: "Peter",
-            )
-        )
-
-        assert userinfo.first_name == "USER"
-        assert userinfo.last_name == "Peter"
-
     def test_get_userinfo_role_with_username_env(self, mocker: MockerFixture):
         mocker.patch.dict(os.environ, {"USERNAME": "user"})
 
-        userinfo = UserInfo({"id": "user"}).use_claims(Claims(username="id"))
+        userinfo = UserInfo({"username": "user"})
         assert userinfo.role == UserRole.owner
