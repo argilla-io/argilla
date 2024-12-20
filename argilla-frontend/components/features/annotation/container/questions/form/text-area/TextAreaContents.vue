@@ -13,6 +13,7 @@
       :markdown="question.answer.value"
       @click.native="onFocus"
       role="textbox"
+      :aria-label="question._title"
     />
     <ContentEditableFeedbackTask
       v-else
@@ -25,6 +26,7 @@
       @on-change-focus="onChangeFocus"
       @on-exit-edition-mode="onExitEditionMode"
       role="textbox"
+      :aria-label="question._title"
     />
   </div>
 </template>

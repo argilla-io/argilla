@@ -16,8 +16,8 @@
   -->
 
 <template>
-  <div class="breadcrumbs">
-    <ul role="navigation">
+  <nav aria-label="Breadcrumb" class="breadcrumbs">
+    <ul>
       <li v-for="breadcrumb in filteredBreadcrumbs" :key="breadcrumb.name">
         <nuxt-link
           class="breadcrumbs__item"
@@ -29,11 +29,12 @@
           v-else
           class="breadcrumbs__item --action"
           @click="onBreadcrumbAction(breadcrumb)"
+          :aria-current="breadcrumb.name"
           >{{ breadcrumb.name }}</span
         >
       </li>
     </ul>
-  </div>
+  </nav>
 </template>
 
 <script>

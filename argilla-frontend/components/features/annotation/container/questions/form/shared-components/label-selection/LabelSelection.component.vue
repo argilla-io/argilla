@@ -17,6 +17,8 @@
           class="show-less-button cursor-pointer"
           v-if="showCollapseButton"
           @click="toggleShowLess"
+          :aria-expanded="isExpanded"
+          :aria-label="textToShowInTheCollapseButton"
         >
           <span
             :class="isExpanded ? '--less' : '--more'"
@@ -38,16 +40,16 @@
       :css="options.length < 50"
       class="inputs-area"
       v-if="filteredOptions.length"
-      role="group"
-      aria-multiselectable="multiple"
+      :role="ariaRole"
+      :aria-multiselectable="ariaMultiselectable"
       aria-label="Label-Options"
     >
       <div
+        role="option"
         class="input-button"
         v-for="(option, index) in visibleOptions"
         :key="option.id"
         @keydown.enter.prevent
-        role="button"
         :aria-label="option.text"
       >
         <input
@@ -60,6 +62,7 @@
           @change="onSelect(option)"
           @focus="onFocus"
           @keydown.tab="expandLabelsOnTab(index)"
+          :aria-labelledby="`label-${option.id}`"
         />
         <BaseTooltip
           :title="isSuggested(option) ? $t('suggestion.name') : ''"
@@ -67,6 +70,7 @@
           minimalist
         >
           <label
+            :id="`label-${option.id}`"
             class="label-text"
             :class="{
               'label-active': option.isSelected,
@@ -83,7 +87,11 @@
             />
             <span class="label-text__text">{{ option.text }}</span>
             <span v-if="isSuggested(option)" class="label-text__suggestion">
-              <svgicon class="label-text__suggestion__icon" name="suggestion" />
+              <svgicon
+                class="label-text__suggestion__icon"
+                name="suggestion"
+                :aria-label="$t('suggestion.name')"
+              />
               <span
                 v-if="getSuggestedScore(option)"
                 class="label-text__suggestion__score"
@@ -135,6 +143,14 @@ export default {
       default: () => false,
     },
     visibleShortcuts: {
+      type: Boolean,
+      default: true,
+    },
+    ariaRole: {
+      type: String,
+      default: "listbox",
+    },
+    ariaMultiselectable: {
       type: Boolean,
       default: true,
     },

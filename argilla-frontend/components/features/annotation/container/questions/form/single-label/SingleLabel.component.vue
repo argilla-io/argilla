@@ -10,6 +10,8 @@
       v-model="question.answer.values"
       :multiple="false"
       :isFocused="isFocused"
+      :aria-role="'listbox'"
+      :aria-multiselectable="false"
       @on-focus="onFocus"
       @on-selected="onSelected"
     />

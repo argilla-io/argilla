@@ -3,5 +3,9 @@ export const usePlatform = () => {
 
   return {
     isMac: userAgent.includes("Mac"),
+    isMobile:
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        userAgent
+      ),
   };
 };

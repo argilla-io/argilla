@@ -196,10 +196,18 @@ a {
 .--heading1 {
   @include font-size(40px);
   @include line-height(50px);
+  @include media("<desktop") {
+    @include font-size(30px);
+    @include line-height(40px);
+  }
 }
 .--heading2 {
   @include font-size(32px);
   @include line-height(40px);
+  @include media("<desktop") {
+    @include font-size(24px);
+    @include line-height(30px);
+  }
 }
 .--heading3 {
   @include font-size(24px);

@@ -7,8 +7,13 @@
       @mouseleave.native="closeDialogOnLeave"
       :loading="isExporting"
       :disabled="isExporting"
+      :aria-label="$t('button.exportToHub')"
     >
-      <svgicon class="export-to-hub__button__icon" name="export" />
+      <svgicon
+        class="export-to-hub__button__icon"
+        aria-hidden="true"
+        name="export"
+      />
       <span class="export-to-hub__button__text">{{
         $t("button.exportToHub")
       }}</span>
@@ -22,6 +27,9 @@
           middleware: closeMiddleware,
         }"
         class="export-to-hub__dialog"
+        role="dialog"
+        aria-labelledby="dialog-title"
+        aria-modal="true"
       >
         <div v-if="isExporting" class="export-to-hub__exporting-message">
           <h2
@@ -49,6 +57,7 @@
         </div>
         <form v-else @submit.prevent="exportToHub" class="export-to-hub__form">
           <h2
+            id="dialog-title"
             class="export-to-hub__title"
             v-text="$t('exportToHub.dialogTitle')"
           />
@@ -64,7 +73,6 @@
                   v-tooltip="{
                     content: $t('exportToHub.ownerTooltip'),
                   }"
-                  role="tooltip"
                   :aria-label="$t('exportToHub.ownerTooltip')"
                 />
               </div>
@@ -109,7 +117,6 @@
                 v-tooltip="{
                   content: $t('exportToHub.tokenTooltip'),
                 }"
-                role="tooltip"
                 :aria-label="$t('exportToHub.tokenTooltip')"
               />
             </div>
@@ -130,6 +137,7 @@
             <BaseSwitch
               class="export-to-hub__form__switch"
               v-model="exportToHubForm.isPrivate"
+              :name="$t('private')"
               >{{ $t("private") }}</BaseSwitch
             >
           </div>

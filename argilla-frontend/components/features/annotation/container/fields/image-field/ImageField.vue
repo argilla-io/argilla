@@ -8,10 +8,11 @@
         :src="content"
         @error="handleError()"
         @load="onLoad()"
+        alt=""
       />
     </div>
     <div v-else class="image_field_placeholder">
-      <img src="images/img-placeholder.svg" />
+      <img src="images/img-placeholder.svg" alt="" />
       <p v-text="$t('couldNotLoadImage')" />
     </div>
   </div>

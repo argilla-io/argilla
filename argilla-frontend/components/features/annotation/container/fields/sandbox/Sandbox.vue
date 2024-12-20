@@ -1,6 +1,7 @@
 <template>
   <iframe
     :srcdoc="template"
+    title="sandbox"
     ref="iframe"
     frameborder="0"
     scrolling="no"

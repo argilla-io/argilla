@@ -1,16 +1,32 @@
 <template>
   <div :class="['card-with-tabs', tabClass]">
-    <ul class="card-with-tabs__tabs">
+    <ul class="card-with-tabs__tabs" role="tablist">
       <li
+        role="tab"
         class="card-with-tabs__tab"
         :class="[{ '--active': tab.id === currentTab.id }, tab?.class]"
         v-for="tab in tabs"
         :key="tab.id"
       >
-        <BaseTooltip :title="tab.tooltipTitle" :text="tab.tooltipText">
-          <BaseButton class="small" @on-click="changeTab(tab)">
+        <BaseTooltip
+          :title="tab.tooltipTitle"
+          :aria-label="tab.tooltipTitle"
+          :text="tab.tooltipText"
+        >
+          <BaseButton
+            class="small"
+            @on-click="changeTab(tab)"
+            :id="tab.component"
+            :aria-label="tab.name || tab.label"
+          >
             {{ tab.name }}
-            <svgicon v-if="tab.icon" :name="tab.icon" width="10" height="10" />
+            <svgicon
+              v-if="tab.icon"
+              :name="tab.icon"
+              width="10"
+              height="10"
+              aria-hidden="true"
+            />
             <span
               class="card-with-tabs__info"
               v-if="tab.info"
@@ -20,7 +36,11 @@
         </BaseTooltip>
       </li>
     </ul>
-    <div class="card-with-tabs__content">
+    <div
+      class="card-with-tabs__content"
+      role="tabpanel"
+      :aria-labelledby="currentComponent"
+    >
       <slot :current-component="currentComponent" />
     </div>
   </div>

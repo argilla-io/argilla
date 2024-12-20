@@ -6,7 +6,6 @@
       :disabled="isFirstPage"
       :aria-label="$t('shortcuts.pagination.go_to_previous_record')"
       :data-title="$t('shortcuts.pagination.go_to_previous_record')"
-      aria-controls="pagination"
       :aria-disabled="isFirstPage"
       @click="goToPrevPage"
     >
@@ -19,7 +18,6 @@
       :disabled="isLastPage"
       :aria-label="$t('shortcuts.pagination.go_to_next_record')"
       :data-title="$t('shortcuts.pagination.go_to_next_record')"
-      aria-controls="pagination"
       :aria-disabled="isLastPage"
       @click="goToNextPage"
     >

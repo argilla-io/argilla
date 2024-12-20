@@ -23,6 +23,7 @@
           <BaseSwitch
             class="settings__edition-form__switch"
             v-model="metadata.visibleForAnnotators"
+            :name="$t('visibleForAnnotators')"
             >{{ $t("visibleForAnnotators") }}</BaseSwitch
           >
 
