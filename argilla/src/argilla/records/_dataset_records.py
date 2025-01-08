@@ -13,7 +13,7 @@
 # limitations under the License.
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
 from enum import Enum
 
@@ -104,27 +104,30 @@ class DatasetRecordsIterator:
         self.__records_batch = list(self._list())
         self.__offset += len(self.__records_batch)
 
-    def _list(self) -> Sequence[Record]:
-        for record_model in self._fetch_from_server():
-            yield Record.from_model(model=record_model, dataset=self.__dataset)
+    def _list(self) -> Sequence[Tuple[Record, Optional[float]]]:
+        for record_model, score in self._fetch_from_server():
+            if score is not None:
+                yield Record.from_model(model=record_model, dataset=self.__dataset), score
+            else:
+                yield Record.from_model(model=record_model, dataset=self.__dataset)
 
-    def _fetch_from_server(self) -> List[RecordModel]:
+    def _fetch_from_server(self) -> List[Tuple[RecordModel, Optional[float]]]:
         if not self.__client.api.datasets.exists(self.__dataset.id):
             warnings.warn(f"Dataset {self.__dataset.id!r} does not exist on the server. Skipping...")
             return []
         return self._fetch_from_server_with_search() if self._is_search_query() else self._fetch_from_server_with_list()
 
-    def _fetch_from_server_with_list(self) -> List[RecordModel]:
-        return self.__client.api.records.list(
+    def _fetch_from_server_with_list(self) -> List[Tuple[RecordModel, None]]:
+        return [(record_model, None) for record_model in self.__client.api.records.list(
             dataset_id=self.__dataset.id,
             limit=self.__batch_size,
             offset=self.__offset,
             with_responses=self.__with_responses,
             with_suggestions=self.__with_suggestions,
             with_vectors=self.__with_vectors,
-        )
+        )]
 
-    def _fetch_from_server_with_search(self) -> List[RecordModel]:
+    def _fetch_from_server_with_search(self) -> List[Tuple[RecordModel, Optional[float]]]:
         search_items, total = self.__client.api.records.search(
             dataset_id=self.__dataset.id,
             query=self.__query.api_model(),
@@ -134,7 +137,7 @@ class DatasetRecordsIterator:
             with_suggestions=self.__with_suggestions,
             with_vectors=self.__with_vectors,
         )
-        return [record_model for record_model, _ in search_items]
+        return search_items
 
     def _is_search_query(self) -> bool:
         return self.__query.has_search()

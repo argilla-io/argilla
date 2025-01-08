@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Any, Dict, List, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from argilla import Record
@@ -24,7 +24,7 @@ class GenericIO:
     It handles methods for exporting records to generic python formats."""
 
     @staticmethod
-    def to_list(records: List["Record"], flatten: bool = False) -> List[Dict[str, Union[str, float, int, list]]]:
+    def to_list(records: List[Tuple["Record", Optional[float]]], flatten: bool = False) -> List[Dict[str, Union[str, float, int, list]]]:
         """Export records to a list of dictionaries with either names or record index as keys.
         Args:
             flatten (bool): The structure of the exported dictionary.
@@ -35,8 +35,10 @@ class GenericIO:
         """
         records_schema = set()
         dataset_records: list = []
-        for record in records:
+        for record, score in records:
             record_dict = GenericIO._record_to_dict(record=record, flatten=flatten)
+            if score is not None:  # Include score only if it exists
+                record_dict["score"] = score
             records_schema.update([k for k in record_dict])
             dataset_records.append(record_dict)
 
@@ -48,8 +50,8 @@ class GenericIO:
 
     @classmethod
     def to_dict(
-        cls, records: List["Record"], flatten: bool = False, orient: str = "names"
-    ) -> Dict[str, Union[str, float, int, list]]:
+        cls, records: List[Tuple["Record", Optional[float]]], flatten: bool = False, orient: str = "names"
+) -> Dict[str, Union[str, float, int, list]]:
         """Export records to a dictionary with either names or record index as keys.
         Args:
             flatten (bool): The structure of the exported dictionary.
@@ -63,13 +65,19 @@ class GenericIO:
         """
         if orient == "names":
             dataset_records: dict = defaultdict(list)
-            for record in cls.to_list(records, flatten=flatten):
-                for key, value in record.items():
+            for record, score in records:
+                record_dict = GenericIO._record_to_dict(record=record, flatten=flatten)
+                if score is not None:
+                    record_dict["score"] = score
+                for key, value in record_dict.items():
                     dataset_records[key].append(value)
         elif orient == "index":
             dataset_records: dict = {}
-            for record in records:
-                dataset_records[record.id] = GenericIO._record_to_dict(record=record, flatten=flatten)
+            for record, score in records:
+                record_dict = GenericIO._record_to_dict(record=record, flatten=flatten)
+                if score is not None:
+                    record_dict["score"] = score
+                dataset_records[record.id] = record_dict
         else:
             raise ValueError(f"Invalid value for orient parameter: {orient}")
         return dict(dataset_records)

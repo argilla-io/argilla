@@ -13,7 +13,7 @@
 # limitations under the License.
 import json
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Tuple, Union
 
 from argilla.records._resource import Record
 from argilla.records._io import GenericIO
@@ -21,7 +21,7 @@ from argilla.records._io import GenericIO
 
 class JsonIO:
     @staticmethod
-    def to_json(records: List["Record"], path: Union[Path, str]) -> Path:
+    def to_json(records: List[Tuple["Record", Optional[float]]], path: Union[Path, str]) -> Path:
         """
         Export the records to a file on disk. This is a convenient shortcut for dataset.records(...).to_disk().
 
@@ -37,7 +37,14 @@ class JsonIO:
             path = Path(path)
         if path.exists():
             raise FileExistsError(f"File {path} already exists.")
-        record_dicts = GenericIO.to_list(records, flatten=False)
+
+        record_dicts = []
+        for record, score in records:
+            record_dict = GenericIO._record_to_dict(record=record, flatten=False)
+            if score is not None:
+                record_dict["score"] = score
+            record_dicts.append(record_dict)
+
         with open(path, "w") as f:
             json.dump(record_dicts, f)
         return path
