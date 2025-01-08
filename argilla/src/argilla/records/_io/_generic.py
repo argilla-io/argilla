@@ -24,7 +24,9 @@ class GenericIO:
     It handles methods for exporting records to generic python formats."""
 
     @staticmethod
-    def to_list(records: List[Tuple["Record", Optional[float]]], flatten: bool = False) -> List[Dict[str, Union[str, float, int, list]]]:
+    def to_list(
+        records: List[Tuple["Record", Optional[float]]], flatten: bool = False
+    ) -> List[Dict[str, Union[str, float, int, list]]]:
         """Export records to a list of dictionaries with either names or record index as keys.
         Args:
             flatten (bool): The structure of the exported dictionary.
@@ -51,7 +53,7 @@ class GenericIO:
     @classmethod
     def to_dict(
         cls, records: List[Tuple["Record", Optional[float]]], flatten: bool = False, orient: str = "names"
-) -> Dict[str, Union[str, float, int, list]]:
+    ) -> Dict[str, Union[str, float, int, list]]:
         """Export records to a dictionary with either names or record index as keys.
         Args:
             flatten (bool): The structure of the exported dictionary.

@@ -118,14 +118,17 @@ class DatasetRecordsIterator:
         return self._fetch_from_server_with_search() if self._is_search_query() else self._fetch_from_server_with_list()
 
     def _fetch_from_server_with_list(self) -> List[Tuple[RecordModel, None]]:
-        return [(record_model, None) for record_model in self.__client.api.records.list(
-            dataset_id=self.__dataset.id,
-            limit=self.__batch_size,
-            offset=self.__offset,
-            with_responses=self.__with_responses,
-            with_suggestions=self.__with_suggestions,
-            with_vectors=self.__with_vectors,
-        )]
+        return [
+            (record_model, None)
+            for record_model in self.__client.api.records.list(
+                dataset_id=self.__dataset.id,
+                limit=self.__batch_size,
+                offset=self.__offset,
+                with_responses=self.__with_responses,
+                with_suggestions=self.__with_suggestions,
+                with_vectors=self.__with_vectors,
+            )
+        ]
 
     def _fetch_from_server_with_search(self) -> List[Tuple[RecordModel, Optional[float]]]:
         search_items, total = self.__client.api.records.search(
