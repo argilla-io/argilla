@@ -81,11 +81,7 @@ class KeycloakOpenId(OpenIdConnectAuth):
 
     def _extract_role(self, response: Dict[str, Any]) -> Optional[str]:
         roles = self._read_realm_roles(response)
-        role_to_value = {
-            UserRole.owner: 3,
-            UserRole.admin: 2,
-            UserRole.annotator: 1
-        }
+        role_to_value = {UserRole.owner: 3, UserRole.admin: 2, UserRole.annotator: 1}
         role_list = [role.split(":")[1] for role in roles if role.startswith("argilla_role:")]
         if role_list:
             max_role = max(role_list, key=lambda s: role_to_value.get(s, 0))
