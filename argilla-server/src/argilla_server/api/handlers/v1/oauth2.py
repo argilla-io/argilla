@@ -73,5 +73,8 @@ async def get_access_token(
             role=userinfo.role,
             workspaces=workspaces,
         )
+    else:
+        if user.role != userinfo.role:
+            user = await user.update(db, role=userinfo.role)
 
     return Token(access_token=accounts.generate_user_token(user))
