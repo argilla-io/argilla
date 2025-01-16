@@ -37,6 +37,10 @@ class UserInfo(BaseUser, dict):
         return self.get("first_name") or self.username
 
     @property
+    def last_name(self) -> str:
+        return self.get("last_name") or ''
+
+    @property
     def role(self) -> UserRole:
         role = self.get("role") or self._parse_role_from_environment()
         return UserRole(role)
