@@ -38,7 +38,7 @@ class UserInfo(BaseUser, dict):
 
     @property
     def last_name(self) -> str:
-        return self.get("last_name") or ''
+        return self.get("last_name") or ""
 
     @property
     def role(self) -> UserRole:
