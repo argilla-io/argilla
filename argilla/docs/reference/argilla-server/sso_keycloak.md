@@ -21,6 +21,9 @@ from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenIDConnection
 from keycloak import KeycloakOpenID
 
+ARGILLA_CLIENT_ID = "argilla-client"
+ARGILLA_REALM = "argilla"
+
 keycloak_connection = KeycloakOpenIDConnection(
     server_url="http://localhost:8080/",
     username="admin",
@@ -33,7 +36,7 @@ keycloak_admin = KeycloakAdmin(connection=keycloak_connection)
 
 keycloak_admin.create_realm(
     {
-        "realm": "argilla",
+        "realm": ARGILLA_REALM,
         "enabled": True,
         "displayName": "Argilla",
         "userManagedAccessAllowed": True,
@@ -44,14 +47,14 @@ keycloak_connection = KeycloakOpenIDConnection(
     username="admin",
     password="admin",
     user_realm_name="master",
-    realm_name="argilla",
+    realm_name=ARGILLA_REALM,
 )
 
 keycloak_admin = KeycloakAdmin(connection=keycloak_connection)
 
 client = keycloak_admin.create_client(
     {
-        "clientId": "example-client",  # The client ID (you can choose a name)
+        "clientId": ARGILLA_CLIENT_ID,  # The client ID (you can choose a name)
         "enabled": True,
         "protocol": "openid-connect",  # Protocol (you can use other protocols like 'saml' if needed)
         "publicClient": False,  # Set to False if the client will use client secrets
@@ -67,18 +70,19 @@ client = keycloak_admin.create_client(
 )
 
 keycloak_openid = KeycloakOpenID(server_url="http://localhost:8080/",
-                                 client_id="example-client",
-                                 realm_name="argilla")
+                                 client_id=ARGILLA_CLIENT_ID,
+                                 realm_name=ARGILLA_REALM)
 
 public_key = keycloak_openid.public_key()
 
 client_scope = keycloak_admin.create_client_scope({
-    "name": "example-client-scope_3",
-    "protocol": "openid-connect"
+    "name": "argilla_client_scope",
+    "protocol": "openid-connect",
+    "include.in.token.scope": "true"
 })
 
 # Create Audience Mapper
-mapper = keycloak_admin.add_mapper_to_client_scope(
+audience_mapper = keycloak_admin.add_mapper_to_client_scope(
     client_scope_id=client_scope,
     payload={
     "name": "Client Audience",
@@ -86,11 +90,49 @@ mapper = keycloak_admin.add_mapper_to_client_scope(
     "protocolMapper": "oidc-audience-mapper",
     "consentRequired": False,
     "config": {
-        "included.client.audience": "example-client",
+        "included.client.audience": ARGILLA_CLIENT_ID,
         "id.token.claim": "false",
         "access.token.claim": "true"
     }
 })
+# Create Realm Roles Mapper
+roles_mapper = keycloak_admin.add_mapper_to_client_scope(
+    client_scope_id=client_scope,
+    payload={
+        "name": "Realm Role Mapper",
+        "protocol": "openid-connect",
+        "protocolMapper": "oidc-usermodel-realm-role-mapper",
+        "consentRequired": False,
+        "config": {
+            "multivalued": "true",  # Indicates if the claim should support multiple values
+            "user.attribute": "",
+            "token.claim.name": "realm_access.roles",  # The claim in the token
+            "claim.name": "realm_access.roles",  # The mapped claim name
+            "jsonType.label": "String",  # Type of the claim
+            "id.token.claim": "true",  # Include in ID Token
+            "access.token.claim": "true",  # Include in Access Token
+            "userinfo.token.claim": "true"  # Include in User Info
+        }
+    }
+)
+# Create Group Membership Mapper
+group_mapper = keycloak_admin.add_mapper_to_client_scope(
+    client_scope_id=client_scope,
+    payload={
+        "name": "Group Membership Mapper",
+        "protocol": "openid-connect",
+        "protocolMapper": "oidc-group-membership-mapper",
+        "consentRequired": False,
+        "config": {
+            "multivalued": "true",  # The claim should support multiple group memberships
+            "token.claim.name": "groups",  # The claim name in the token
+            "full.path": "true",  # Include full path of groups (e.g., /parent-group/child-group)
+            "id.token.claim": "true",  # Include group membership in ID Token
+            "access.token.claim": "true",  # Include group membership in Access Token
+            "userinfo.token.claim": "true"  # Include group membership in User Info
+        }
+    }
+)
 
 keycloak_admin.add_default_default_client_scope(client_scope)
 
