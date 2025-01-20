@@ -66,7 +66,15 @@ async def create_workspace(db: AsyncSession, workspace_attrs: dict) -> Workspace
     if await Workspace.get_by(db, name=workspace_attrs["name"]) is not None:
         raise NotUniqueError(f"Workspace name `{workspace_attrs['name']}` is not unique")
 
-    return await Workspace.create(db, name=workspace_attrs["name"])
+    if workspace_id := workspace_attrs.get("id"):
+        if await Workspace.get(db, id=workspace_id) is not None:
+            raise NotUniqueError(f"Workspace with id `{workspace_id}` is not unique")
+
+    return await Workspace.create(
+        db,
+        id=workspace_attrs.get("id"),
+        name=workspace_attrs["name"],
+    )
 
 
 async def delete_workspace(db: AsyncSession, workspace: Workspace):
@@ -108,8 +116,13 @@ async def create_user(db: AsyncSession, user_attrs: dict, workspaces: Union[List
     if await get_user_by_username(db, user_attrs["username"]) is not None:
         raise NotUniqueError(f"User username `{user_attrs['username']}` is not unique")
 
+    if user_id := user_attrs.get("id"):
+        if await User.get(db, id=user_id) is not None:
+            raise NotUniqueError(f"User with id `{user_id}` is not unique")
+
     user = await User.create(
         db,
+        id=user_attrs.get("id"),
         first_name=user_attrs["first_name"],
         last_name=user_attrs["last_name"],
         username=user_attrs["username"],
