@@ -102,6 +102,14 @@ Redis is used by Argilla to store information about jobs to be processed on back
 
 - `ARGILLA_SPAN_OPTIONS_MAX_ITEMS`: Set the number of maximum items to be allowed by span questions (Default: `500`).
 
+- `ARGILLA_MIN_MESSAGE_LENGTH`: Set the minimum length of the message to be allowed in chat questions (Default: `1`).
+
+- `ARGILLA_MAX_MESSAGE_LENGTH`: Set the maximum length of the message to be allowed in chat questions (Default: `20000`).
+
+- `ARGILLA_MIN_ROLE_LENGTH`: Set the minimum length of the role to be allowed in chat questions (Default: `1`).
+
+- `ARGILLA_MAX_ROLE_LENGTH`: Set the maximum length of the role to be allowed in chat questions (Default: `20`).
+
 ### Hugging Face
 
 - `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING`: When Argilla is running on Hugging Face Spaces you can use this environment variable to disable the warning message showed when persistent storage is disabled for the space (Default: `true`).

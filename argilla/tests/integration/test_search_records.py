@@ -173,7 +173,7 @@ class TestSearchRecords:
             )
         )
         assert len(records) == 1000
-        assert records[0].id == str(data[3]["id"])
+        assert records[0][0].id == str(data[3]["id"])
 
     def test_search_records_by_least_similar_value(self, client: Argilla, dataset: Dataset):
         data = [
@@ -194,7 +194,7 @@ class TestSearchRecords:
                 )
             )
         )
-        assert records[-1].id == str(data[3]["id"])
+        assert records[-1][0].id == str(data[3]["id"])
 
     def test_search_records_by_similar_record(self, client: Argilla, dataset: Dataset):
         data = [
@@ -218,7 +218,7 @@ class TestSearchRecords:
             )
         )
         assert len(records) == 1000
-        assert records[0].id != str(record.id)
+        assert records[0][0].id != str(record.id)
 
     def test_search_records_by_least_similar_record(self, client: Argilla, dataset: Dataset):
         data = [
@@ -241,4 +241,4 @@ class TestSearchRecords:
                 )
             )
         )
-        assert all(r.id != str(record.id) for r in records)
+        assert all(r.id != str(record.id) for r, s in records)
