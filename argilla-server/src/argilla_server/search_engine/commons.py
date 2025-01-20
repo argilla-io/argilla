@@ -875,9 +875,10 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
             if field.is_image:
                 fields[field.name] = None
             elif field.is_custom:
-                fields[field.name] = str(fields.get(field.name, ""))
+                value = fields.get(field.name) or ""
+                fields[field.name] = str(value)
             else:
-                fields[field.name] = fields.get(field.name, "")
+                fields[field.name] = fields.get(field.name)
 
         return fields
 
