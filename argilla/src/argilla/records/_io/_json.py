@@ -38,11 +38,7 @@ class JsonIO:
         if path.exists():
             raise FileExistsError(f"File {path} already exists.")
 
-        record_dicts = []
-        for record in records:
-            record_dict = GenericIO._record_to_dict(record=record, flatten=False)
-            record_dicts.append(record_dict)
-
+        record_dicts = GenericIO.to_list(records, flatten=False)
         with open(path, "w") as f:
             json.dump(record_dicts, f)
         return path

@@ -65,15 +65,13 @@ class GenericIO:
         """
         if orient == "names":
             dataset_records: dict = defaultdict(list)
-            for record in records:
-                record_dict = GenericIO._record_to_dict(record=record, flatten=flatten)
-                for key, value in record_dict.items():
+            for record in cls.to_list(records, flatten=flatten):
+                for key, value in record.items():
                     dataset_records[key].append(value)
         elif orient == "index":
             dataset_records: dict = {}
             for record in records:
-                record_dict = GenericIO._record_to_dict(record=record, flatten=flatten)
-                dataset_records[record.id] = record_dict
+                dataset_records[record.id] = GenericIO._record_to_dict(record=record, flatten=flatten)
         else:
             raise ValueError(f"Invalid value for orient parameter: {orient}")
         return dict(dataset_records)
