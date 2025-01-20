@@ -26,6 +26,12 @@ class TestManageUsers:
         assert user.id is not None
         assert client.users(username=user.username).id == user.id
 
+    def test_create_user_with_id(self, client: Argilla):
+        user = User(id=uuid.uuid4(), username=f"test_user_{uuid.uuid4()}", password="test_password")
+        client.users.add(user)
+        assert user.id is not None
+        assert client.users(username=user.username).id == user.id
+
     def test_create_user_without_password(self, client: Argilla):
         user = User(username=f"test_user_{uuid.uuid4()}")
         with pytest.raises(expected_exception=UnprocessableEntityError):
