@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from uuid import uuid4
 
 import pytest
 from argilla_server.constants import API_KEY_HEADER_NAME
@@ -46,6 +47,77 @@ class TestCreateWorkspace:
             "inserted_at": workspace.inserted_at.isoformat(),
             "updated_at": workspace.updated_at.isoformat(),
         }
+
+    async def test_create_workspace_with_predefined_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        workspace_id = uuid4()
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={"id": str(workspace_id), "name": "workspace"},
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 1
+        workspace = (await db.execute(select(Workspace).filter_by(name="workspace"))).scalar_one()
+
+        assert response.json() == {
+            "id": str(workspace_id),
+            "name": "workspace",
+            "inserted_at": workspace.inserted_at.isoformat(),
+            "updated_at": workspace.updated_at.isoformat(),
+        }
+
+    async def test_create_workspace_with_none_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={"id": None, "name": "workspace"},
+        )
+
+        assert response.status_code == 201
+
+        assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 1
+        workspace = (await db.execute(select(Workspace).filter_by(name="workspace"))).scalar_one()
+
+        assert response.json() == {
+            "id": str(workspace.id),
+            "name": "workspace",
+            "inserted_at": workspace.inserted_at.isoformat(),
+            "updated_at": workspace.updated_at.isoformat(),
+        }
+
+    async def test_create_workspace_with_wrong_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={"id": "wrong_id", "name": "workspace"},
+        )
+
+        assert response.status_code == 422
+
+        assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 0
+
+    async def test_create_workspace_with_existing_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        workspace_id = uuid4()
+        await WorkspaceFactory.create(id=workspace_id)
+
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={"id": str(workspace_id), "name": "workspace"},
+        )
+
+        assert response.status_code == 409
+        assert (await db.execute(select(func.count(Workspace.id)))).scalar() == 1
 
     async def test_create_workspace_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
         response = await async_client.post(
