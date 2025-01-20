@@ -30,8 +30,8 @@ class Workspace(BaseModel):
 
 
 class WorkspaceCreate(BaseModel):
-    name: str = Field(min_length=1)
     id: Optional[UUID] = None
+    name: str = Field(min_length=1)
 
 
 class Workspaces(BaseModel):
