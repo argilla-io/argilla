@@ -29,8 +29,7 @@ from argilla._models import (
     FieldSettings,
 )
 from argilla.settings._common import SettingsPropertyBase
-from argilla.settings._metadata import MetadataField, MetadataType
-from argilla.settings._vector import VectorField
+
 
 try:
     from typing import Self
@@ -296,21 +295,6 @@ def _field_from_model(model: FieldModel) -> Field:
         raise ArgillaError(f"Unsupported field type: {model.settings.type}")
 
 
-def _field_from_dict(data: dict) -> Union[Field, VectorField, MetadataType]:
+def _field_from_dict(data: dict) -> Field:
     """Create a field instance from a field dictionary"""
-    field_type = data["type"]
-
-    if field_type == "text":
-        return TextField.from_dict(data)
-    elif field_type == "image":
-        return ImageField.from_dict(data)
-    elif field_type == "chat":
-        return ChatField.from_dict(data)
-    elif field_type == "custom":
-        return CustomField.from_dict(data)
-    elif field_type == "vector":
-        return VectorField.from_dict(data)
-    elif field_type == "metadata":
-        return MetadataField.from_dict(data)
-    else:
-        raise ArgillaError(f"Unsupported field type: {field_type}")
+    return _field_from_model(FieldModel(**data))

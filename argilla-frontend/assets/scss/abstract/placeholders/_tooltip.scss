@@ -115,7 +115,7 @@ $tooltip-border-radius: $border-radius-s;
       height: auto;
       opacity: 1;
       transition: opacity 0.3s ease 0.2s;
-      z-index: 2;
+      z-index: 3;
     }
     &:before {
       opacity: 1;
@@ -176,6 +176,10 @@ $tooltip-border-radius: $border-radius-s;
       bottom: calc(100% + $offset);
       top: auto;
       transform: none;
+    }
+  } @else if $position == "none" {
+    &:after {
+      display: none;
     }
   }
   &:before {

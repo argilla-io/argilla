@@ -61,15 +61,15 @@ class Response:
             status (Union[ResponseStatus, str]): The status of the response as "draft", "submitted", "discarded".
         """
 
+        if isinstance(status, str):
+            status = ResponseStatus(status)
+
         if question_name is None:
             raise ValueError("question_name is required")
-        if value is None:
+        if value is None and status == ResponseStatus.submitted:
             raise ValueError("value is required")
         if user_id is None:
             raise ValueError("user_id is required")
-
-        if isinstance(status, str):
-            status = ResponseStatus(status)
 
         self._record = _record
         self.question_name = question_name
@@ -253,7 +253,7 @@ class UserResponse(Resource):
     @staticmethod
     def __responses_as_model_values(responses: List[Response]) -> Dict[str, Dict[str, Any]]:
         """Creates a dictionary of response values from a list of Responses"""
-        return {answer.question_name: {"value": answer.value} for answer in responses}
+        return {answer.question_name: {"value": answer.value} for answer in responses if answer.value is not None}
 
     @classmethod
     def __model_as_responses_list(cls, model: UserResponseModel, record: "Record") -> List[Response]:
@@ -276,4 +276,12 @@ class UserResponse(Resource):
 
     @classmethod
     def __ranking_to_model_value(cls, value: List[str]) -> List[Dict[str, str]]:
-        return [{"value": v} for v in value]
+        values = []
+        for v in value or []:
+            if isinstance(v, dict):
+                values.append(v)
+            elif isinstance(v, str):
+                values.append({"value": v})
+            else:
+                raise RecordResponsesError(f"Invalid value for ranking question: {v}")
+        return values

@@ -1,0 +1,7 @@
+@font-face {
+  font-family: "raptor_v2_premiumbold";
+  src: url("/fonts/raptorv2premium-bold-webfont.woff2") format("woff2"),
+    url("/fonts/raptorv2premium-bold-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}

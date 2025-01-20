@@ -48,7 +48,6 @@ jobs:
       - name: Build package 📦
         env:
           # BASE_URL is used in the server to support parameterizable base root path
-          # See scripts/build_frontend.sh
           BASE_URL: "@@baseUrl@@"
           DIST_FOLDER: ./dist
         run: |

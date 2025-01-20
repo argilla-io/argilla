@@ -110,7 +110,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap");
 .span-entity {
   &__dropdown {
     position: fixed;

@@ -18,7 +18,6 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from argilla_server.api.schemas.v1.datasets import HubDatasetMapping, HubDatasetMappingItem
-from argilla_server.api.schemas.v1.metadata_properties import IntegerMetadataProperty
 from argilla_server.enums import DatasetStatus, QuestionType
 from argilla_server.models import Record
 from argilla_server.contexts.hub import HubDataset

@@ -19,7 +19,7 @@ import pytest
 from argilla_server.contexts import settings as settings_context
 from argilla_server.contexts.settings import HUGGINGFACE_SETTINGS
 from argilla_server.integrations.huggingface.spaces import HuggingfaceSettings
-from argilla_server.settings import settings as argilla_server_settings
+from argilla_server.settings import settings as argilla_server_settings, settings
 from httpx import AsyncClient
 
 
@@ -33,9 +33,7 @@ class TestGetSettings:
             response = await async_client.get(self.url())
 
             assert response.status_code == 200
-            assert response.json()["argilla"] == {
-                "show_huggingface_space_persistent_storage_warning": True,
-            }
+            assert response.json()["argilla"]["show_huggingface_space_persistent_storage_warning"] is True
 
     async def test_get_settings_for_argilla_settings_running_on_huggingface_with_disabled_storage_warning(
         self, async_client: AsyncClient
@@ -45,9 +43,7 @@ class TestGetSettings:
                 response = await async_client.get(self.url())
 
                 assert response.status_code == 200
-                assert response.json()["argilla"] == {
-                    "show_huggingface_space_persistent_storage_warning": False,
-                }
+                assert response.json()["argilla"]["show_huggingface_space_persistent_storage_warning"] is False
 
     async def test_get_settings_for_argilla_settings_not_running_on_huggingface(self, async_client: AsyncClient):
         response = await async_client.get(self.url())
@@ -86,3 +82,14 @@ class TestGetSettings:
 
         assert response.status_code == 200
         assert "huggingface" not in response.json()
+
+    async def test_get_settings_with_share_your_progress_enabled(self, async_client: AsyncClient):
+        try:
+            settings.enable_share_your_progress = True
+
+            response = await async_client.get(self.url())
+
+            assert response.status_code == 200
+            assert response.json()["argilla"]["share_your_progress_enabled"] is True
+        finally:
+            settings.enable_share_your_progress = False

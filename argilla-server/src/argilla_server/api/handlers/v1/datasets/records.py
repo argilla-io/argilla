@@ -264,7 +264,7 @@ async def delete_dataset_records(
     if num_records > DELETE_DATASET_RECORDS_LIMIT:
         raise UnprocessableEntityError(f"Cannot delete more than {DELETE_DATASET_RECORDS_LIMIT} records at once")
 
-    await datasets.delete_records(db, search_engine, dataset, record_ids)
+    await records.delete_records(db, search_engine, dataset, record_ids)
 
 
 @router.post(

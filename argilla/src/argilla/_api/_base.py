@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
 from typing import Generic, TYPE_CHECKING, TypeVar
 from uuid import UUID
 
 from argilla._helpers import LoggingMixin
 
-
 if TYPE_CHECKING:
     from httpx import Client
-
 
 __all__ = ["ResourceAPI"]
 
@@ -51,10 +48,3 @@ class ResourceAPI(LoggingMixin, Generic[T]):
 
     def update(self, resource: T) -> T:
         return resource
-
-    ####################
-    # Utility methods #
-    ####################
-
-    def _date_from_iso_format(self, date: str) -> datetime:
-        return datetime.fromisoformat(date)

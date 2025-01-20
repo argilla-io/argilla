@@ -10,7 +10,7 @@ export const useSignInViewModel = () => {
   const { pop } = useLocalStorage();
 
   const redirect = () => {
-    const redirect = pop("redirectTo");
+    const redirect = pop<string | null>("redirectTo");
     router.go(redirect || "/");
   };
 
