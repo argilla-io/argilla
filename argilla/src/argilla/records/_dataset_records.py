@@ -86,7 +86,7 @@ class DatasetRecordsIterator:
             return False
         return self.__limit <= 0
 
-    def _next_record(self) -> Record:
+    def _next_record(self) -> Union[Record, Tuple[Record, float]]:
         if self._limit_reached() or self._no_records():
             raise StopIteration()
 
@@ -104,33 +104,35 @@ class DatasetRecordsIterator:
         self.__records_batch = list(self._list())
         self.__offset += len(self.__records_batch)
 
-    def _list(self) -> Sequence[Tuple[Record, Optional[float]]]:
-        for record_model, score in self._fetch_from_server():
-            if score is not None:
-                yield Record.from_model(model=record_model, dataset=self.__dataset), score
-            else:
-                yield Record.from_model(model=record_model, dataset=self.__dataset)
-
-    def _fetch_from_server(self) -> List[Tuple[RecordModel, Optional[float]]]:
+    def _list(self) -> Sequence[Union[Record, Tuple[Record, float]]]:
         if not self.__client.api.datasets.exists(self.__dataset.id):
             warnings.warn(f"Dataset {self.__dataset.id!r} does not exist on the server. Skipping...")
             return []
-        return self._fetch_from_server_with_search() if self._is_search_query() else self._fetch_from_server_with_list()
 
-    def _fetch_from_server_with_list(self) -> List[Tuple[RecordModel, None]]:
-        return [
-            (record_model, None)
-            for record_model in self.__client.api.records.list(
-                dataset_id=self.__dataset.id,
-                limit=self.__batch_size,
-                offset=self.__offset,
-                with_responses=self.__with_responses,
-                with_suggestions=self.__with_suggestions,
-                with_vectors=self.__with_vectors,
-            )
-        ]
+        if self._is_search_query():
+            records = self._fetch_from_server_with_search()
 
-    def _fetch_from_server_with_search(self) -> List[Tuple[RecordModel, Optional[float]]]:
+            if self.__query.has_similar():
+                for record_model, score in records:
+                    yield Record.from_model(model=record_model, dataset=self.__dataset), score
+            else:
+                for record_model, _ in records:
+                    yield Record.from_model(model=record_model, dataset=self.__dataset)
+        else:
+            for record_model in self._fetch_from_server_with_list():
+                yield Record.from_model(model=record_model, dataset=self.__dataset)
+
+    def _fetch_from_server_with_list(self) -> List[RecordModel]:
+        return self.__client.api.records.list(
+            dataset_id=self.__dataset.id,
+            limit=self.__batch_size,
+            offset=self.__offset,
+            with_responses=self.__with_responses,
+            with_suggestions=self.__with_suggestions,
+            with_vectors=self.__with_vectors,
+        )
+
+    def _fetch_from_server_with_search(self) -> List[Tuple[RecordModel, float]]:
         search_items, total = self.__client.api.records.search(
             dataset_id=self.__dataset.id,
             query=self.__query.api_model(),

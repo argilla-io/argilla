@@ -194,7 +194,7 @@ class HFDatasetsIO:
         return isinstance(dataset, HFDataset)
 
     @staticmethod
-    def to_datasets(records: List[Tuple["Record", Optional[float]]], dataset: "Dataset") -> HFDataset:
+    def to_datasets(records: List[Union["Record", Tuple["Record", float]]], dataset: "Dataset") -> HFDataset:
         """
         Export the records to a Hugging Face dataset.
 
