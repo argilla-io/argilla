@@ -57,7 +57,7 @@ class User(Resource):
             last_name (str): The last name of the user
             role (str): The role of the user, either 'annotator', admin, or 'owner'
             password (str): The password of the user
-            id (UUID): The ID of the user
+            id (UUID): The ID of the user. If provided before a .create, the will be created with this ID
             client (Argilla): The client used to interact with Argilla
 
         Returns:

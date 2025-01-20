@@ -51,7 +51,7 @@ class Workspace(Resource):
 
         Parameters:
             name (str): The name of the workspace
-            id (UUID): The id of the workspace
+            id (UUID): The id of the workspace. If provided before a .create, the workspace will be created with this ID
             client (Argilla): The client used to interact with Argilla
 
         Returns:
