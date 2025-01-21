@@ -1025,7 +1025,7 @@ class TestBaseElasticAndOpenSearchEngine:
                     text_field.name: None,
                     # image_field.name: None, # image fields are not indexed
                     chat_field.name: None,
-                    custom_field.name: "",
+                    custom_field.name: None,
                 },
                 "external_id": record.external_id,
                 "status": RecordStatus.pending,
