@@ -1007,7 +1007,18 @@ class TestBaseElasticAndOpenSearchEngine:
             responses=[],
         )
 
-        records = [record]
+        other_record = await RecordFactory.create(
+            dataset=dataset,
+            fields={
+                text_field.name: "This is the value for text",
+                image_field.name: "https://random.url/image",
+                chat_field.name: [{"role": "user", "content": "Hello world"}, {"role": "bot", "content": "Hi"}],
+                custom_field.name: {"a": "This is a value", "b": 100},
+            },
+            responses=[],
+        )
+
+        records = [record, other_record]
 
         await refresh_dataset(dataset)
         await refresh_records(records)
@@ -1031,8 +1042,19 @@ class TestBaseElasticAndOpenSearchEngine:
                 "status": RecordStatus.pending,
                 "inserted_at": record.inserted_at.isoformat(),
                 "updated_at": record.updated_at.isoformat(),
-            }
-            for record in records
+            },
+            {
+                "id": str(other_record.id),
+                "fields": {
+                    text_field.name: other_record.fields[text_field.name],
+                    chat_field.name: other_record.fields[chat_field.name],
+                    custom_field.name: other_record.fields[custom_field.name],
+                },
+                "external_id": other_record.external_id,
+                "status": RecordStatus.pending,
+                "inserted_at": other_record.inserted_at.isoformat(),
+                "updated_at": other_record.updated_at.isoformat(),
+            },
         ]
 
     async def test_configure_metadata_property(
