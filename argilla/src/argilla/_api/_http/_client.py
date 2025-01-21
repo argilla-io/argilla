@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import inspect
 from dataclasses import dataclass
 
 import httpx
@@ -27,18 +27,7 @@ class HTTPClientConfig:
     retries: int = 5
 
 
-TRANSPORT_ARGS = [
-    "verify",
-    "cert",
-    "http1",
-    "http2",
-    "limits",
-    "trust_env",
-    "proxy",
-    "uds",
-    "local_address",
-    "socket_options",
-]  # See httpx.HTTPTransport init for more details
+TRANSPORT_ARGS = inspect.getfullargspec(httpx.HTTPTransport.__init__).args
 
 
 def create_http_client(api_url: str, api_key: str, timeout: int, retries: int, **client_args) -> httpx.Client:
