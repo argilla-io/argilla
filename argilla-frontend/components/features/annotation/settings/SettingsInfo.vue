@@ -143,7 +143,7 @@ export default {
 };
 </script>
 
-<styles lang="scss" scoped>
+<style lang="scss" scoped>
 .settings {
   &__container {
     display: flex;
@@ -239,4 +239,4 @@ export default {
     @include tooltip-mini("top", $base-space);
   }
 }
-</styles>
+</style>

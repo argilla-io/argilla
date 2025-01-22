@@ -33,7 +33,7 @@ jobs:
           USERNAME: argilla
           PASSWORD: 12345678
           API_KEY: argilla.apikey
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: argilla

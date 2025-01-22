@@ -22,7 +22,7 @@ export const useOAuthViewModel = () => {
   });
 
   const redirect = () => {
-    const redirect = pop("redirectTo");
+    const redirect = pop<string | null>("redirectTo");
     router.go(redirect || "/");
   };
 

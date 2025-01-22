@@ -80,8 +80,6 @@ class FieldsAPI(ResourceAPI[FieldModel]):
     ####################
 
     def _model_from_json(self, response_json: Dict) -> FieldModel:
-        response_json["inserted_at"] = self._date_from_iso_format(date=response_json["inserted_at"])
-        response_json["updated_at"] = self._date_from_iso_format(date=response_json["updated_at"])
         return FieldModel(**response_json)
 
     def _model_from_jsons(self, response_jsons: List[Dict]) -> List[FieldModel]:

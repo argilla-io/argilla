@@ -14,9 +14,14 @@ export class Progress {
   ) {
     this.hasMetrics = total >= 0;
 
+    const percentagePending = (this.pending * 100) / this.total;
+    const percentageCompleted = (this.completed * 100) / this.total;
+
     this.percentage = {
-      pending: ((this.pending * 100) / this.total).toFixed(2),
-      completed: ((this.completed * 100) / this.total).toFixed(2),
+      pending: isNaN(percentagePending) ? "0.00" : percentagePending.toFixed(2),
+      completed: isNaN(percentageCompleted)
+        ? "0.00"
+        : percentageCompleted.toFixed(2),
     };
   }
 

@@ -82,6 +82,8 @@ jobs:
         run: pdm install
 
       - name: Run tests 📈
+        env:
+          HF_TOKEN_ARGILLA_INTERNAL_TESTING: ${{ secrets.HF_TOKEN_ARGILLA_INTERNAL_TESTING }}
         run: |
           ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/argilla
           ARGILLA_ELASTICSEARCH=http://localhost:9200

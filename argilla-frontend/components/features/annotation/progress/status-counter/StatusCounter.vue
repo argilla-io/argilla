@@ -1,5 +1,5 @@
 <template>
-  <li class="status-counter">
+  <li class="status-counter" :class="{ rainbow, ghost }">
     <span>
       <span class="color-bullet" :style="{ backgroundColor: color }"></span>
       <label class="status-counter__name" v-text="statusLabel" />
@@ -7,7 +7,6 @@
     <span class="status-counter__counter" v-text="value" />
   </li>
 </template>
-
 <script>
 export default {
   props: {
@@ -22,6 +21,14 @@ export default {
     value: {
       type: Number,
       required: true,
+    },
+    rainbow: {
+      type: Boolean,
+      default: false,
+    },
+    ghost: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
@@ -59,5 +66,52 @@ $bullet-size: 8px;
     color: var(--fg-primary);
     @include font-size(14px);
   }
+}
+
+.ghost {
+  background: none;
+}
+
+.rainbow {
+  position: relative;
+  padding: $base-space;
+}
+
+.rainbow::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  bottom: -2px;
+  left: -2px;
+  border-radius: $border-radius;
+  border: solid 2px transparent;
+  border-image: conic-gradient(
+      from var(--angle),
+      #e70000,
+      #ff8c00,
+      #ffef00,
+      #00811f,
+      #3064a9,
+      #87189d
+    )
+    1;
+  animation: 2s rotate linear infinite;
+  filter: blur(1px);
+  z-index: -1;
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
 }
 </style>

@@ -12,13 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import os
 from pydantic import BaseModel, Field
 
-MIN_MESSAGE_LENGTH = 1
-MAX_MESSAGE_LENGTH = 20000
+MIN_MESSAGE_LENGTH = int(os.getenv("ARGILLA_MIN_MESSAGE_LENGTH", 1))
+MAX_MESSAGE_LENGTH = int(os.getenv("ARGILLA_MAX_MESSAGE_LENGTH", 20000))
 
-MIN_ROLE_LENGTH = 1
-MAX_ROLE_LENGTH = 20
+MIN_ROLE_LENGTH = int(os.getenv("ARGILLA_MIN_ROLE_LENGTH", 1))
+MAX_ROLE_LENGTH = int(os.getenv("ARGILLA_MAX_ROLE_LENGTH", 20))
 
 
 class ChatFieldValue(BaseModel):

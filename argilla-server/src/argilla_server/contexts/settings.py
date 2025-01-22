@@ -27,7 +27,7 @@ def get_settings() -> Settings:
 
 
 def _get_argilla_settings() -> ArgillaSettings:
-    argilla_settings = ArgillaSettings()
+    argilla_settings = ArgillaSettings(share_your_progress_enabled=settings.enable_share_your_progress)
 
     if _get_huggingface_settings():
         argilla_settings.show_huggingface_space_persistent_storage_warning = (

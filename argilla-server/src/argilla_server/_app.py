@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import base64
 import contextlib
 import glob
 import inspect
@@ -19,16 +20,20 @@ import logging
 import os
 import shutil
 import tempfile
+import textwrap
+from urllib.parse import urlencode
+
 import redis
 from datetime import datetime
 from pathlib import Path
 
 import backoff
 from brotli_asgi import BrotliMiddleware
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, HTMLResponse
 
 from argilla_server import helpers
 from argilla_server._version import __version__ as argilla_version
@@ -58,6 +63,90 @@ async def app_lifespan(app: FastAPI):
     yield
 
 
+def configure_share_your_progress(app: FastAPI):
+    if settings.enable_share_your_progress is False:
+        return
+
+    def create_image_link(username: str, dataset_name: str, submitted: int, team_progress: float) -> str:
+        url = "https://argilla.imglab-cdn.net/dibt/dibt_v2.png"
+
+        text = f"""<span size="9pt" weight="bold">@{username}</span>
+I've just contributed <span weight="bold">{submitted}</span> examples to this dataset:
+<span size="9pt" weight="bold">{dataset_name}</span>
+
+<span size="8pt">Team progress</span>
+<span weight="bold">{team_progress}%</span>"""
+
+        params = {
+            "width": "1200",
+            "text": text,
+            "text-width": "700",
+            "text-height": "590",
+            "text-padding": "60",
+            "text-color": "39,71,111",
+            "text-x": "460",
+            "text-y": "40",
+            "format": "png",
+            "dpr": "2",
+        }
+
+        return f"{url}?{urlencode(params)}"
+
+    def create_share_html(dataset_name: str, dataset_id: str, share_image: str, url: URL) -> str:
+        share_page = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+              <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title{dataset_name}</title>
+
+                <meta property="og:title" content="{dataset_name}" />
+                <meta
+                  property="og:description"
+                  content="Join and contribute to the dataset {dataset_name}"
+                />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="{url}" />
+                <meta property="og:image" content="{share_image}" />
+                <meta property="og:site_name" content="Argilla" />
+                <meta property="og:locale" content="en_US" />
+
+                <!-- Twitter meta tags -->
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content="{dataset_name}" />
+                <meta
+                  name="twitter:description"
+                  content="Join and contribute to the dataset {dataset_name}"
+                />
+                <meta name="twitter:image" content="{share_image}" />
+                <meta name="twitter:site" content="{url}" />
+              </head>
+              <body>
+                <script>
+                  window.location.href = `${{window.location.origin}}/dataset/{dataset_id}/annotation-mode`;
+                </script>
+              </body>
+            </html>
+        """
+
+        return textwrap.dedent(share_page)
+
+    @app.get("/share-your-progress", include_in_schema=False)
+    async def share_your_progress_page(
+        request: Request,
+        dataset_name: str = Query(),
+        dataset_id: str = Query(),
+        user_name: str = Query(),
+        team_progress: float = Query(default=0.0),
+        records_submitted: int = Query(default=0),
+    ):
+        share_image = create_image_link(user_name, dataset_name, records_submitted, team_progress)
+        share_page = create_share_html(dataset_name, dataset_id, share_image, request.url)
+
+        return HTMLResponse(content=share_page, status_code=200)
+
+
 def create_server_app() -> FastAPI:
     """Configure the argilla server"""
 
@@ -74,6 +163,7 @@ def create_server_app() -> FastAPI:
     configure_logging()
     configure_common_middleware(app)
     configure_api_router(app)
+    configure_share_your_progress(app)
     configure_telemetry(app)
     configure_app_statics(app)
     configure_api_docs(app)

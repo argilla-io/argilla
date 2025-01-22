@@ -149,6 +149,11 @@ class Settings(BaseSettings):
         description="The telemetry configuration for Hugging Face hub telemetry. ",
     )
 
+    enable_share_your_progress: bool = Field(
+        default=False,
+        description="Share your progress feature for community initiatives. Default=False",
+    )
+
     # See also the telemetry.py module
     @field_validator("enable_telemetry", mode="before")
     @classmethod

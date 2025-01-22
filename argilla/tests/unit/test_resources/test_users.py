@@ -322,3 +322,9 @@ class TestUsersAPI:
             assert user.id == user_id
             assert user.username == "test-user"
             assert user.password == "test-password"
+
+
+class TestUserModel:
+    def test_create_user_with_empty_first_name(self):
+        user = UserModel(username="test-user", first_name=None)
+        assert user.first_name is user.username

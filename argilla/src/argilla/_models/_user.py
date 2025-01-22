@@ -16,6 +16,7 @@ from enum import Enum
 from typing import Optional
 
 from pydantic import field_validator, ConfigDict
+from pydantic_core.core_schema import ValidationInfo
 
 from argilla._models import ResourceModel
 
@@ -43,12 +44,12 @@ class UserModel(ResourceModel):
 
     @field_validator("first_name")
     @classmethod
-    def __validate_first_name(cls, v, values):
+    def __validate_first_name(cls, v, info: ValidationInfo):
         """Set first_name to username if not provided"""
         if isinstance(v, str):
             return v
         elif not v:
-            return values["username"]
+            return info.data["username"]
 
     @field_validator("username", mode="before")
     @classmethod

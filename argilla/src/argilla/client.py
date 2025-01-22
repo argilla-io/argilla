@@ -312,7 +312,9 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
     """A collection of datasets. It can be used to create a new dataset or to get an existing one."""
 
     class _Iterator(GenericIterator["Dataset"]):
-        pass
+        def __next__(self):
+            dataset = super().__next__()
+            return dataset.get()
 
     def __init__(self, client: "Argilla") -> None:
         self._client = client
@@ -366,7 +368,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
 
     def __getitem__(self, index) -> "Dataset":
         model = self._api.list()[index]
-        return self._from_model(model)
+        return self._from_model(model).get()
 
     def __len__(self) -> int:
         return len(self._api.list())
