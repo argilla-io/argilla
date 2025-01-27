@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Dict, List, Sequence, Tuple, Union
 from uuid import UUID
 
-from datetime import UTC
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,9 +30,6 @@ from argilla_server.api.schemas.v1.records_bulk import (
 )
 from argilla_server.api.schemas.v1.responses import UserResponseCreate
 from argilla_server.api.schemas.v1.suggestions import SuggestionCreate
-from argilla_server.models.database import DatasetUser
-from argilla_server.webhooks.v1.enums import RecordEvent
-from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
 from argilla_server.contexts import distribution
 from argilla_server.contexts.records import (
     fetch_records_by_external_ids_as_dict,
@@ -41,8 +37,11 @@ from argilla_server.contexts.records import (
 )
 from argilla_server.errors.future import UnprocessableEntityError
 from argilla_server.models import Dataset, Record, Response, Suggestion, Vector
+from argilla_server.models.database import DatasetUser
 from argilla_server.search_engine import SearchEngine
 from argilla_server.validators.records import RecordsBulkCreateValidator, RecordUpsertValidator
+from argilla_server.webhooks.v1.enums import RecordEvent
+from argilla_server.webhooks.v1.records import notify_record_event as notify_record_event_v1
 
 
 class CreateRecordsBulk:
@@ -189,7 +188,7 @@ class UpsertRecordsBulk(CreateRecordsBulk):
                     record.fields = jsonable_encoder(record_upsert.fields)
 
                 if self._db.is_modified(record):
-                    record.updated_at = datetime.now(UTC)
+                    record.updated_at = datetime.utcnow()
 
             records.append(record)
 
