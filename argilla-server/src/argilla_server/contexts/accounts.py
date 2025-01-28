@@ -116,7 +116,6 @@ async def create_user(
     user_attrs: dict,
     workspaces: Union[List[str], None] = None,
 ) -> User:
-  
     if await get_user_by_username(db, user_attrs["username"]) is not None:
         raise NotUniqueError(f"User username `{user_attrs['username']}` is not unique")
 
