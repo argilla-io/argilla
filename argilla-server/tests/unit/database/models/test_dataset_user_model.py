@@ -33,8 +33,5 @@ class TestDatasetUserModel:
             ]
         )
 
-        with pytest.raises(
-            IntegrityError,
-            match="UNIQUE constraint failed: datasets_users.dataset_id, datasets_users.user_id",
-        ):
+        with pytest.raises(IntegrityError, match="constraint"):
             await db.commit()
