@@ -444,7 +444,7 @@ async def get_dataset_users_progress(db: AsyncSession, dataset: Dataset) -> List
         .join(Record)
         .join(User)
         .where(Record.dataset_id == dataset.id)
-        .group_by(User.username, Record.status, Response.status)
+        .group_by(User.username, Record.status, Response.status, User.inserted_at)
         .order_by(User.inserted_at.asc())
     )
 

@@ -69,26 +69,30 @@ Next, recreate the users and workspaces on the Argilla V2 server:
 ```python
 for workspace in workspaces_v1:
     rg.Workspace(
-        name=workspace.name
+        id=workspace.id,
+        name=workspace.name,
     ).create()
 ```
 
 ```python
 for user in users_v1:
-    user = rg.User(
+    user_v2 = rg.User(
+        id=user.id,
         username=user.username,
         first_name=user.first_name,
         last_name=user.last_name,
         role=user.role,
         password="<your_chosen_password>" # (1)
     ).create()
+
     if user.role == "owner":
        continue
 
-    for workspace_name in user.workspaces:
-        if workspace_name != user.name:
-            workspace = client.workspaces(name=workspace_name)
-            user.add_to_workspace(workspace)
+    for workspace in user.workspaces:
+        workspace_v2 = client.workspaces(name=workspace.name)
+        if workspace_v2 is None:
+            continue
+        user.add_to_workspace(workspace_v2)
 ```
 
 1. You need to chose a new password for the user, to do this programmatically you can use the `uuid` package to generate a random password. Take care to keep track of the passwords you chose, since you will not be able to retrieve them later.

@@ -873,11 +873,13 @@ class BaseElasticAndOpenSearchEngine(SearchEngine):
     def _map_record_fields_to_es(cls, fields: dict, dataset_fields: List[Field]) -> dict:
         for field in dataset_fields:
             if field.is_image:
-                fields[field.name] = None
-            elif field.is_custom:
-                fields[field.name] = str(fields.get(field.name, ""))
-            else:
-                fields[field.name] = fields.get(field.name, "")
+                continue
+
+            value = fields.get(field.name)
+            if field.is_custom and value is not None:
+                value = str(value)
+
+            fields[field.name] = value
 
         return fields
 

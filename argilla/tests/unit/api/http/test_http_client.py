@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import ssl
 from unittest.mock import MagicMock, patch
 
 import pytest
-from argilla import Argilla
 from httpx import Timeout
+
+from argilla import Argilla
 
 
 class TestHTTPClient:
@@ -76,3 +77,21 @@ class TestHTTPClient:
             mock_create_http_client.assert_called_once_with(
                 api_url="http://test.com", api_key="test_key", timeout=60, retries=retries
             )
+
+    def test_create_client_with_verify(self):
+        http_client = Argilla(
+            api_url="http://test.com",
+            api_key="test_key",
+            verify=True,
+        ).http_client
+
+        # See https://docs.python.org/3/library/ssl.html#ssl.SSLContext.verify_mode
+        assert http_client._transport._pool._ssl_context.verify_mode == ssl.CERT_REQUIRED
+
+        http_client = Argilla(
+            api_url="http://test.com",
+            api_key="test_key",
+            verify=False,
+        ).http_client
+
+        assert http_client._transport._pool._ssl_context.verify_mode == ssl.CERT_NONE

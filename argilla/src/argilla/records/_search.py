@@ -175,7 +175,10 @@ class Query:
         self.similar = similar
 
     def has_search(self) -> bool:
-        return bool(self.query or self.similar or self.filter)
+        return bool(self.query or self.has_similar() or self.filter)
+
+    def has_similar(self) -> bool:
+        return bool(self.similar)
 
     def api_model(self) -> SearchQueryModel:
         model = SearchQueryModel()

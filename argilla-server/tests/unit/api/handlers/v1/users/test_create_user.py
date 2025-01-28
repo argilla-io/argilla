@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
+from uuid import uuid4
 
 import pytest
 from argilla_server.constants import API_KEY_HEADER_NAME
@@ -145,6 +145,86 @@ class TestCreateUser:
 
         assert response.json()["role"] == UserRole.owner
         assert user.role == UserRole.owner
+
+    async def test_create_user_with_predefined_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        user_id = uuid4()
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "id": str(user_id),
+                "first_name": "First name",
+                "last_name": "Last name",
+                "username": "username",
+                "password": "12345678",
+            },
+        )
+
+        assert response.status_code == 201
+
+        user = (await db.execute(select(User).filter_by(username="username"))).scalar_one()
+        assert user.id == user_id
+
+    async def test_create_user_with_none_user_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "id": None,
+                "first_name": "First name",
+                "last_name": "Last name",
+                "username": "username",
+                "password": "12345678",
+            },
+        )
+
+        assert response.status_code == 201
+
+        user = (await db.execute(select(User).filter_by(username="username"))).scalar_one()
+        assert user.id is not None
+
+    async def test_create_user_with_wrong_user_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "id": "wrong_id",
+                "first_name": "First name",
+                "last_name": "Last name",
+                "username": "username",
+                "password": "12345678",
+            },
+        )
+
+        assert response.status_code == 422
+        assert (await db.execute(select(func.count(User.id)))).scalar() == 1
+
+    async def test_create_user_with_existing_id(
+        self, db: AsyncSession, async_client: AsyncClient, owner_auth_header: dict
+    ):
+        user_id = uuid4()
+        await UserFactory.create(id=user_id)
+
+        response = await async_client.post(
+            self.url(),
+            headers=owner_auth_header,
+            json={
+                "id": str(user_id),
+                "first_name": "First name",
+                "last_name": "Last name",
+                "username": "username",
+                "password": "12345678",
+            },
+        )
+
+        assert response.status_code == 409
+        assert (await db.execute(select(func.count(User.id)))).scalar() == 2
 
     async def test_create_user_without_authentication(self, db: AsyncSession, async_client: AsyncClient):
         response = await async_client.post(

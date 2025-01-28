@@ -983,6 +983,80 @@ class TestBaseElasticAndOpenSearchEngine:
             for record in records
         ]
 
+    async def test_index_records_with_none_field_values(
+        self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
+    ):
+        text_field = await TextFieldFactory.create(name="text", required=False)
+        image_field = await ImageFieldFactory.create(name="image", required=False)
+        chat_field = await ChatFieldFactory.create(name="chat", required=False)
+        custom_field = await CustomFieldFactory.create(name="custom", required=False)
+
+        dataset = await DatasetFactory.create(
+            fields=[text_field, image_field, chat_field, custom_field],
+            questions=[],
+        )
+
+        record = await RecordFactory.create(
+            dataset=dataset,
+            fields={
+                text_field.name: None,
+                image_field.name: None,
+                chat_field.name: None,
+                custom_field.name: None,
+            },
+            responses=[],
+        )
+
+        other_record = await RecordFactory.create(
+            dataset=dataset,
+            fields={
+                text_field.name: "This is the value for text",
+                image_field.name: "https://random.url/image",
+                chat_field.name: [{"role": "user", "content": "Hello world"}, {"role": "bot", "content": "Hi"}],
+                custom_field.name: {"a": "This is a value", "b": 100},
+            },
+            responses=[],
+        )
+
+        records = [record, other_record]
+
+        await refresh_dataset(dataset)
+        await refresh_records(records)
+
+        await search_engine.create_index(dataset)
+        await search_engine.index_records(dataset, records)
+
+        index_name = es_index_name_for_dataset(dataset)
+
+        es_docs = [hit["_source"] for hit in opensearch.search(index=index_name)["hits"]["hits"]]
+        assert es_docs == [
+            {
+                "id": str(record.id),
+                "fields": {
+                    text_field.name: None,
+                    # image_field.name: None, # image fields are not indexed
+                    chat_field.name: None,
+                    custom_field.name: None,
+                },
+                "external_id": record.external_id,
+                "status": RecordStatus.pending,
+                "inserted_at": record.inserted_at.isoformat(),
+                "updated_at": record.updated_at.isoformat(),
+            },
+            {
+                "id": str(other_record.id),
+                "fields": {
+                    text_field.name: other_record.fields[text_field.name],
+                    chat_field.name: other_record.fields[chat_field.name],
+                    custom_field.name: other_record.fields[custom_field.name],
+                },
+                "external_id": other_record.external_id,
+                "status": RecordStatus.pending,
+                "inserted_at": other_record.inserted_at.isoformat(),
+                "updated_at": other_record.updated_at.isoformat(),
+            },
+        ]
+
     async def test_configure_metadata_property(
         self, search_engine: BaseElasticAndOpenSearchEngine, opensearch: OpenSearch
     ):

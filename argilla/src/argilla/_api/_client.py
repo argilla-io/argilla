@@ -131,12 +131,12 @@ class APIClient:
         self.api_key = api_key
 
         http_client_args = http_client_args or {}
-        http_client_args["timeout"] = timeout
-        http_client_args["retries"] = retries
 
         self.http_client = create_http_client(
             api_url=self.api_url,  # type: ignore
             api_key=self.api_key,  # type: ignore
+            timeout=timeout,
+            retries=retries,
             **http_client_args,
         )
 

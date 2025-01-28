@@ -50,9 +50,9 @@ class Workspace(Resource):
         """Initializes a Workspace object with a client and a name or id
 
         Parameters:
-            client (Argilla): The client used to interact with Argilla
             name (str): The name of the workspace
-            id (UUID): The id of the workspace
+            id (UUID): The id of the workspace. If provided before a .create, the workspace will be created with this ID
+            client (Argilla): The client used to interact with Argilla
 
         Returns:
             Workspace: The initialized workspace object

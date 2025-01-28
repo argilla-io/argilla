@@ -434,7 +434,7 @@ class TestHubDataset:
         await hub_dataset.import_to(db, mock_search_engine, dataset)
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
 
-        records = (await db.execute(select(Record))).scalars().all()
+        records = (await db.execute(select(Record).order_by(Record.inserted_at.asc()))).scalars().all()
         assert [record.external_id for record in records] == [
             "7bd227d9-afc9-11e6-aba1-c4b301cdf627",
             "7bd22905-afc9-11e6-a5dc-c4b301cdf627",

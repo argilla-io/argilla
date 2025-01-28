@@ -85,9 +85,9 @@ jobs:
         env:
           HF_TOKEN_ARGILLA_INTERNAL_TESTING: ${{ secrets.HF_TOKEN_ARGILLA_INTERNAL_TESTING }}
         run: |
-          ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/argilla
-          ARGILLA_ELASTICSEARCH=http://localhost:9200
-          ARGILLA_SEARCH_ENGINE=elasticsearch
+          ARGILLA_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/argilla \
+          ARGILLA_ELASTICSEARCH=http://localhost:9200 \
+          ARGILLA_SEARCH_ENGINE=elasticsearch \
           pdm test tests/unit -vs --cov=argilla_server --cov-report=xml:coverage.xml
 
       - name: Upload test coverage
