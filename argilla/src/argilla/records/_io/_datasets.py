@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional, Tuple
 
 from datasets import Dataset as HFDataset, Sequence
 from datasets import Image, ClassLabel, Value
@@ -194,7 +194,7 @@ class HFDatasetsIO:
         return isinstance(dataset, HFDataset)
 
     @staticmethod
-    def to_datasets(records: List["Record"], dataset: "Dataset") -> HFDataset:
+    def to_datasets(records: List[Union["Record", Tuple["Record", float]]], dataset: "Dataset") -> HFDataset:
         """
         Export the records to a Hugging Face dataset.
 

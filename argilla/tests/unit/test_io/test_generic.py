@@ -60,3 +60,38 @@ class TestGenericIO:
                 "q2.suggestion.agent": None,
             }
         ]
+
+    def test_records_tuple_to_list(self):
+        record = rg.Record(fields={"field": "The field"}, metadata={"key": "value"})
+
+        records_list = GenericIO.to_list(
+            [
+                (record, 1.0),
+                (record, 0.5),
+            ]
+        )
+
+        assert records_list == [
+            {
+                "id": str(record.id),
+                "status": record.status,
+                "_server_id": record._server_id,
+                "fields": {"field": "The field"},
+                "metadata": {"key": "value"},
+                "responses": {},
+                "vectors": {},
+                "suggestions": {},
+                "score": 1.0,
+            },
+            {
+                "id": str(record.id),
+                "status": record.status,
+                "_server_id": record._server_id,
+                "fields": {"field": "The field"},
+                "metadata": {"key": "value"},
+                "responses": {},
+                "vectors": {},
+                "suggestions": {},
+                "score": 0.5,
+            },
+        ]

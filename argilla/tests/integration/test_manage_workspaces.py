@@ -24,6 +24,13 @@ class TestWorkspacesManagement:
         assert workspace in client.workspaces
         assert client.api.workspaces.exists(workspace.id)
 
+    def test_create_workspace_with_id(self, client: Argilla):
+        workspace_id = uuid.uuid4()
+        workspace = Workspace(id=workspace_id, name=f"test_workspace{uuid.uuid4()}")
+        client.workspaces.add(workspace)
+        assert workspace in client.workspaces
+        assert client.workspaces(workspace.name).id == workspace_id
+
     def test_create_and_delete_workspace(self, client: Argilla):
         workspace = client.workspaces(name="test_workspace")
         if workspace:

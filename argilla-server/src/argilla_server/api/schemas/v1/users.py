@@ -59,6 +59,7 @@ class User(BaseModel):
 
 
 class UserCreate(BaseModel):
+    id: Optional[UUID] = None
     first_name: UserFirstName
     last_name: Optional[UserLastName] = None
     username: UserUsername

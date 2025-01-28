@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Any, Dict, List, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from argilla import Record
@@ -24,7 +24,9 @@ class GenericIO:
     It handles methods for exporting records to generic python formats."""
 
     @staticmethod
-    def to_list(records: List["Record"], flatten: bool = False) -> List[Dict[str, Union[str, float, int, list]]]:
+    def to_list(
+        records: List[Union["Record", Tuple["Record", float]]], flatten: bool = False
+    ) -> List[Dict[str, Union[str, float, int, list]]]:
         """Export records to a list of dictionaries with either names or record index as keys.
         Args:
             flatten (bool): The structure of the exported dictionary.
@@ -48,7 +50,7 @@ class GenericIO:
 
     @classmethod
     def to_dict(
-        cls, records: List["Record"], flatten: bool = False, orient: str = "names"
+        cls, records: List[Union["Record", Tuple["Record", float]]], flatten: bool = False, orient: str = "names"
     ) -> Dict[str, Union[str, float, int, list]]:
         """Export records to a dictionary with either names or record index as keys.
         Args:
@@ -79,10 +81,10 @@ class GenericIO:
     ############################
 
     @staticmethod
-    def _record_to_dict(record: "Record", flatten=False) -> Dict[str, Any]:
+    def _record_to_dict(record: Union["Record", Tuple["Record", float]], flatten=False) -> Dict[str, Any]:
         """Converts a Record object to a dictionary for export.
         Args:
-            record (Record): The Record object to convert.
+            record (Record): The Record object or the record and the linked score to convert.
             flatten (bool): The structure of the exported dictionary.
                 - True: The record fields, metadata, suggestions and responses will be flattened
                         so that their keys becomes the keys of the record dictionary, using
@@ -92,6 +94,12 @@ class GenericIO:
         Returns:
             A dictionary representing the record.
         """
+        if isinstance(record, tuple):
+            record, score = record
+
+            record_dict = GenericIO._record_to_dict(record, flatten)
+            record_dict["score"] = score
+            return record_dict
 
         record_dict = record.to_dict()
         if flatten:
