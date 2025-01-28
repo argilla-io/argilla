@@ -37,7 +37,7 @@ class UserInfo(BaseUser, dict):
         return self.get("first_name") or self.username
 
     @property
-    def last_name(self) -> str:
+    def last_name(self) -> Optional[str]:
         return self.get("last_name") or ""
 
     @property
