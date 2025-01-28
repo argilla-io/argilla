@@ -119,12 +119,7 @@ async def create_user(
     if await get_user_by_username(db, user_attrs["username"]) is not None:
         raise NotUniqueError(f"User username `{user_attrs['username']}` is not unique")
 
-    if user_id := user_attrs.get("id"):
-        if await User.get(db, id=user_id) is not None:
-            raise NotUniqueError(f"User with id `{user_id}` is not unique")
-
-    user = await User.create(
-        db,
+    new_user = User(
         id=user_attrs.get("id"),
         first_name=user_attrs["first_name"],
         last_name=user_attrs["last_name"],
