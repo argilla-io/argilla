@@ -1,11 +1,18 @@
 <template>
   <BaseButton class="sign-in-button" @click="$emit('click')">
+    <KeycloakLogo v-if="provider === 'keycloak'" />
     {{ signinText }}
   </BaseButton>
 </template>
+
 <script>
+import KeycloakLogo from "./KeycloakLogo.vue";
+
 export default {
   name: "OAuthLoginButton",
+  components: {
+    KeycloakLogo,
+  },
   props: {
     provider: {
       type: String,

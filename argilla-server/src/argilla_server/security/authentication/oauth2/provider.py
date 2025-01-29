@@ -48,6 +48,7 @@ class OAuth2ClientProvider:
         client_secret: str = None,
         scope: Optional[List[str]] = None,
         redirect_uri: str = None,
+        sync_user: bool = False,
     ) -> None:
         self.name = backend_class.name
         self._backend = backend_class(strategy=self.backend_strategy)
@@ -74,6 +75,7 @@ class OAuth2ClientProvider:
             self.scope = self.scope.split(" ")
 
         self.redirect_uri = redirect_uri or f"/oauth/{self.name}/callback"
+        self.sync_user = sync_user
 
     @classmethod
     def from_dict(cls, provider: dict, backend_class: Type[BaseOAuth2]) -> "OAuth2ClientProvider":

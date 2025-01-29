@@ -19,13 +19,14 @@ from httpcore import URL
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from argilla_server.enums import UserRole
 from argilla_server.errors.future import AuthenticationError
 from argilla_server.models import User
 from argilla_server.security.authentication import JWT
 from argilla_server.security.authentication.oauth2 import OAuth2Settings
-from tests.factories import AdminFactory, AnnotatorFactory
+from tests.factories import AdminFactory, AnnotatorFactory, WorkspaceFactory
 
 
 @pytest.fixture
@@ -109,6 +110,40 @@ class TestOauth2:
                 user = await db.scalar(select(User).filter_by(username="username"))
                 assert user is not None
                 assert user.role == UserRole.annotator
+
+    async def test_provider_access_token_with_specific_userinfo_workspace(
+        self,
+        async_client: AsyncClient,
+        db: AsyncSession,
+        owner_auth_header: dict,
+        default_oauth_settings: OAuth2Settings,
+    ):
+        workspace = await WorkspaceFactory.create()
+
+        with mock.patch("argilla_server.security.settings.Settings.oauth", new_callable=lambda: default_oauth_settings):
+            with mock.patch(
+                "argilla_server.security.authentication.oauth2.provider.OAuth2ClientProvider._fetch_user_data",
+                return_value={"username": "username", "name": "name", "available_workspaces": [workspace.name]},
+            ):
+                response = await async_client.get(
+                    "/api/v1/oauth2/providers/huggingface/access-token",
+                    params={"code": "code", "state": "valid"},
+                    headers=owner_auth_header,
+                    cookies={"huggingface_oauth2_state": "valid"},
+                )
+
+                assert response.status_code == 200
+
+                json_response = response.json()
+                assert JWT.decode(json_response["access_token"])["username"] == "username"
+                assert json_response["token_type"] == "bearer"
+
+                user = await db.scalar(
+                    select(User).options(selectinload(User.workspaces)).filter_by(username="username")
+                )
+                assert user is not None
+                assert user.role == UserRole.annotator
+                assert user.workspaces == [workspace]
 
     async def test_provider_huggingface_access_token_with_missing_username(
         self,

@@ -20,7 +20,7 @@ from argilla_server.api.schemas.v1.oauth2 import Provider, Providers, Token
 from argilla_server.contexts import accounts
 from argilla_server.database import get_async_db
 from argilla_server.errors.future import NotFoundError
-from argilla_server.models import User
+from argilla_server.models import Workspace, WorkspaceUser
 from argilla_server.security.authentication.oauth2 import OAuth2ClientProvider
 from argilla_server.security.authentication.userinfo import UserInfo
 from argilla_server.security.settings import settings
@@ -61,14 +61,51 @@ async def get_access_token(
     if not userinfo.username:
         raise RuntimeError("OAuth error: Missing username")
 
-    user = await User.get_by(db, username=userinfo.username)
-    if user is None:
-        user = await accounts.create_user_with_random_password(
+    default_available_workspaces = [workspace.name for workspace in settings.oauth.allowed_workspaces]
+    available_workspaces = userinfo.available_workspaces or default_available_workspaces
+
+    oauth_user = await accounts.get_user_by_username(db, username=userinfo.username)
+
+    if oauth_user is None:
+        for workspace_name in available_workspaces:
+            if await Workspace.get_by(db, name=workspace_name) is None:
+                await Workspace.create(db, name=workspace_name, autocommit=False)
+
+        oauth_user = await accounts.create_user_with_random_password(
             db,
             username=userinfo.username,
             first_name=userinfo.first_name,
             role=userinfo.role,
-            workspaces=[workspace.name for workspace in settings.oauth.allowed_workspaces],
+            workspaces=available_workspaces,
         )
+    elif provider.sync_user:
+        oauth_role = oauth_user.role
+        oauth_workspaces = oauth_user.workspaces or []
 
-    return Token(access_token=accounts.generate_user_token(user))
+        # Sync user role
+        if oauth_role != userinfo.role:
+            await accounts.update_user(db, user=oauth_user, user_attrs={"role": userinfo.role})
+        # Sync removed workspaces
+        for workspace in oauth_workspaces:
+            if workspace.name not in available_workspaces:
+                ws_user = await WorkspaceUser.get_by(db, workspace_id=workspace.id, user_id=oauth_user.id)
+                await ws_user.delete(db, autocommit=False)
+        # Sync added workspaces
+        for workspace_name in available_workspaces:
+            if workspace_name in [ws.name for ws in oauth_workspaces]:
+                continue
+
+            workspace = await Workspace.get_by(db, name=workspace_name)
+            if not workspace:
+                workspace = await Workspace.create(db, name=workspace_name, autocommit=False)
+
+            if not await WorkspaceUser.get_by(db, workspace_id=workspace.id, user_id=oauth_user.id):
+                await WorkspaceUser.create(
+                    db,
+                    workspace_id=workspace.id,
+                    user_id=oauth_user.id,
+                    autocommit=False,
+                )
+        await db.commit()
+
+    return Token(access_token=accounts.generate_user_token(oauth_user))

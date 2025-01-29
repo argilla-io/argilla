@@ -37,9 +37,17 @@ class UserInfo(BaseUser, dict):
         return self.get("first_name") or self.username
 
     @property
+    def last_name(self) -> Optional[str]:
+        return self.get("last_name") or None
+
+    @property
     def role(self) -> UserRole:
         role = self.get("role") or self._parse_role_from_environment()
         return UserRole(role)
+
+    @property
+    def available_workspaces(self) -> Optional[list]:
+        return self.get("available_workspaces")
 
     def _parse_role_from_environment(self) -> Optional[UserRole]:
         """This is a temporal solution, and it will be replaced by a proper Sign up process"""
