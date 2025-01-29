@@ -96,6 +96,7 @@ The following environment variables are useful only when PostgreSQL is used:
 Redis is used by Argilla to store information about jobs to be processed on background. The following environment variables are useful to config how Argilla connects to Redis:
 
 - `ARGILLA_REDIS_URL`: A URL string that contains the necessary information to connect to a Redis instance (Default: `redis://localhost:6379/0`).
+- `ARGILLA_REDIS_USE_CLUSTER`: If "True" tries the connection with the URL to a  Redis Cluster instead of a Redis Standalone instance.
 
 ### Datasets
 

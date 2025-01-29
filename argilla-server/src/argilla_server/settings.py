@@ -114,6 +114,7 @@ class Settings(BaseSettings):
     cors_origins: List[str] = ["*"]
 
     redis_url: str = "redis://localhost:6379/0"
+    redis_use_cluster: bool = False
 
     docs_enabled: bool = True
 
