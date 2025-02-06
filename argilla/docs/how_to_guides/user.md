@@ -220,10 +220,10 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 user_to_update = client.users('my_username')
 
-user.username = 'new_username'
-user.first_name = 'new_first_name'
-user.last_name = 'new_last_name'
-user.role = 'admin'
+user_to_update.username = 'new_username'
+user_to_update.first_name = 'new_first_name'
+user_to_update.last_name = 'new_last_name'
+user_to_update.role = 'admin'
 
 updated_user = user_to_update.update()
 ```
