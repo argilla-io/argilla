@@ -81,7 +81,9 @@ redis:
           memory: 2Gi
 
 externalRedis:
-  url: "redis.local"
+  enabled: false
+  url: "redis://localhost:6379/0"
+  is_redis_cluster: false
 
 serviceAccount:
   create: false
