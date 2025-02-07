@@ -15,6 +15,7 @@ export const useAxiosExtension = (context: Context) => {
   const makePublic = (config: PublicAxiosConfig) => {
     const $axios = context.$axios.create({
       withCredentials: false,
+      headers: { Authorization: undefined },
     });
 
     if (config.enableErrors) {
