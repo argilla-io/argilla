@@ -79,6 +79,10 @@ redis:
         limits:
           cpu: 1
           memory: 2Gi
+
+externalRedis:
+  url: "redis.local"
+
 serviceAccount:
   create: false
 
