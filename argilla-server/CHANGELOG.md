@@ -17,6 +17,7 @@ These are the section headers that we use:
 ## [Unreleased]()
 
 ## Added
+
 - Add configuration switch to use Redis cluster vs Redis standalone via ARGILLA_REDIS_USE_CLUSTER ([#5799](https://github.com/argilla-io/argilla/pull/5799))
 
 ### Fixed
