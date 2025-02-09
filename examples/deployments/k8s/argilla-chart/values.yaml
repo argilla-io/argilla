@@ -38,6 +38,7 @@ argilla:
 # To disable it, set `elasticsearch.useOperator` to `false`
 # and set `externalElasticsearch.host` to the host of your existing Elasticsearch instance.
 elasticsearch:
+  sslVerify: true
   useOperator: true
   version: 8.5.3
   nodeCount: 1
