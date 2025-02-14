@@ -356,7 +356,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
             warnings.warn(f"Dataset with name {name!r} not found in workspace {workspace.name!r}")
 
     def __iter__(self):
-        return self._Iterator(self.list())
+        return self._Iterator([self._from_model(model) for model in self._api.list()])
 
     @overload
     @abstractmethod
@@ -389,7 +389,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         return dataset
 
     def list(self) -> List["Dataset"]:
-        return [self._from_model(model) for model in self._api.list()]
+        return list(self)
 
     ############################
     # Private methods
