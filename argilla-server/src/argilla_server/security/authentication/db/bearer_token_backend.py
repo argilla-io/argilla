@@ -16,14 +16,15 @@ import typing
 
 from fastapi import Request
 from fastapi.security import HTTPBearer
-from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
+from starlette.authentication import AuthCredentials, BaseUser
 
 from argilla_server.contexts import accounts
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.userinfo import UserInfo
+from argilla_server.security.authentication.db.login_backend import LoginAuthenticationBackend
 
 
-class BearerTokenAuthenticationBackend(AuthenticationBackend):
+class BearerTokenAuthenticationBackend(LoginAuthenticationBackend):
     """Authenticate the user using the username and password Bearer header"""
 
     scheme = HTTPBearer(auto_error=False)
@@ -36,12 +37,16 @@ class BearerTokenAuthenticationBackend(AuthenticationBackend):
 
         token = credentials.credentials
         username = JWT.decode(token).get("username")
+        is_locked = self.check_lockout(username)
+        if is_locked:
+            return None
 
         db = request.state.db
         user = await accounts.get_user_by_username(db, username)
         if not user:
+            self.increase_lockout(user)
             return None
-
+        self.clear_lockout(user)
         return AuthCredentials(), UserInfo(
             username=user.username, name=user.first_name, role=user.role, identity=str(user.id)
         )
