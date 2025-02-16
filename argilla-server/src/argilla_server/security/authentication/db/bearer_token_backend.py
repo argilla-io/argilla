@@ -32,21 +32,25 @@ class BearerTokenAuthenticationBackend(LoginAuthenticationBackend):
     async def authenticate(self, request: Request) -> typing.Optional[typing.Tuple[AuthCredentials, BaseUser]]:
         """Authenticate the user using the username and password Bearer header"""
         credentials = await self.scheme(request)
+        client_ip = request.client.host
         if not credentials:
             return None
 
         token = credentials.credentials
         username = JWT.decode(token).get("username")
         is_locked = self.check_lockout(username)
-        if is_locked:
+        is_locked_ip = self.check_lockout(client_ip)
+        if is_locked or is_locked_ip:
             return None
 
         db = request.state.db
         user = await accounts.get_user_by_username(db, username)
         if not user:
-            self.increase_lockout(user)
+            self.increase_lockout(username)
+            self.increase_lockout(client_ip)
             return None
-        self.clear_lockout(user)
+        self.clear_lockout(username)
+        self.clear_lockout(client_ip)
         return AuthCredentials(), UserInfo(
             username=user.username, name=user.first_name, role=user.role, identity=str(user.id)
         )
