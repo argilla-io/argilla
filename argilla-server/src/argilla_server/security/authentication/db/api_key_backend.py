@@ -16,14 +16,15 @@ from typing import Optional, Tuple
 
 from fastapi import Request
 from fastapi.security import APIKeyHeader
-from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
+from starlette.authentication import AuthCredentials, BaseUser
 
 from argilla_server.constants import API_KEY_HEADER_NAME
 from argilla_server.contexts import accounts
 from argilla_server.security.authentication.userinfo import UserInfo
+from argilla_server.security.authentication.db.login_backend import LoginAuthenticationBackend
 
 
-class APIKeyAuthenticationBackend(AuthenticationBackend):
+class APIKeyAuthenticationBackend(LoginAuthenticationBackend):
     """Authentication backend for API Key authentication"""
 
     scheme = APIKeyHeader(name=API_KEY_HEADER_NAME, auto_error=False)
@@ -31,13 +32,19 @@ class APIKeyAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request: Request) -> Optional[Tuple[AuthCredentials, BaseUser]]:
         """Authenticate the user using the API Key header"""
         api_key: str = await self.scheme(request)
+        client_ip = request.client.host
         if not api_key:
+            return None
+        is_locked = self.check_lockout(client_ip)
+        if is_locked:
             return None
 
         db = request.state.db
         user = await accounts.get_user_by_api_key(db, api_key=api_key)
         if not user:
+            self.increase_lockout(client_ip)
             return None
+        self.clear_lockout(client_ip)
 
         return AuthCredentials(), UserInfo(
             username=user.username, name=user.first_name, role=user.role, identity=str(user.id)
