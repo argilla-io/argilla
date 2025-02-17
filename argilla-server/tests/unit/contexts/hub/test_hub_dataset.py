@@ -471,7 +471,7 @@ class TestHubDataset:
         await hub_dataset.import_to(db, mock_search_engine, dataset)
         assert (await db.execute(select(func.count(Record.id)))).scalar_one() == 5
 
-        records = (await db.execute(select(Record))).scalars().all()
+        records = (await db.execute(select(Record).order_by(Record.inserted_at.asc()))).scalars().all()
         assert [record.external_id for record in records] == ["train_0", "train_1", "train_2", "train_3", "train_4"]
 
     async def test_hub_dataset_import_to_idempotency_without_external_id_and_multiple_splits(
