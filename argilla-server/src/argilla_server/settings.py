@@ -28,9 +28,12 @@ from pydantic import Field, field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings
 
+from sqlalchemy.pool import NullPool
+
 from argilla_server.constants import (
     DATABASE_POSTGRESQL,
     DATABASE_SQLITE,
+    DEFAULT_DATABASE_POSTGRESQL_POOLING_ENABLED,
     DEFAULT_DATABASE_POSTGRESQL_MAX_OVERFLOW,
     DEFAULT_DATABASE_POSTGRESQL_POOL_SIZE,
     DEFAULT_DATABASE_SQLITE_TIMEOUT,
@@ -91,6 +94,12 @@ class Settings(BaseSettings):
         None,
         validate_default=True,
         description="The database url that argilla will use as data store",
+    )
+
+    # https://docs.sqlalchemy.org/en/20/core/pooling.html#using-connection-pools-with-multiprocessing-or-os-fork
+    database_postgresql_enable_pooling: Optional[int] = Field(
+        default=DEFAULT_DATABASE_POSTGRESQL_POOLING_ENABLED,
+        description="PostgreSQL enable connection pooling (poolclass config; for PgBouncer compatability)",
     )
     # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.pool_size
     database_postgresql_pool_size: Optional[int] = Field(
@@ -236,9 +245,15 @@ class Settings(BaseSettings):
             return {
                 "pool_size": self.database_postgresql_pool_size,
                 "max_overflow": self.database_postgresql_max_overflow,
+                "poolclass": self.database_pool_class,
             }
 
         return {}
+
+    @property
+    def database_pool_class(self) -> NullPool | None:
+        if self.database_postgresql_enable_pooling is False:
+            return NullPool
 
     @property
     def database_is_sqlite(self) -> bool:
