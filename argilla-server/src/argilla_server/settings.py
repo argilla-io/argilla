@@ -97,7 +97,7 @@ class Settings(BaseSettings):
     )
 
     # https://docs.sqlalchemy.org/en/20/core/pooling.html#using-connection-pools-with-multiprocessing-or-os-fork
-    database_postgresql_enable_pooling: Optional[int] = Field(
+    database_postgresql_enable_pooling: Optional[bool] = Field(
         default=DEFAULT_DATABASE_POSTGRESQL_POOLING_ENABLED,
         description="PostgreSQL enable connection pooling (poolclass config; for PgBouncer compatability)",
     )
@@ -251,9 +251,10 @@ class Settings(BaseSettings):
         return {}
 
     @property
-    def database_pool_class(self) -> NullPool | None:
+    def database_pool_class(self) -> Optional[type]:
         if self.database_postgresql_enable_pooling is False:
             return NullPool
+        return None
 
     @property
     def database_is_sqlite(self) -> bool:
