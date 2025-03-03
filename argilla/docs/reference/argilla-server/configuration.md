@@ -73,6 +73,8 @@ The following environment variables are useful only when SQLite is used:
 
 The following environment variables are useful only when PostgreSQL is used:
 
+- `ARGILLA_DATABASE_POSTGRESQL_ENABLE_POOLING`: Toggle SQLAlchemy Database pooling class between NullPool/ QueuePool (disabled/ enabled). Useful for compatability with PgBouncer Pooling (Default: `True`)
+
 - `ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE`: The number of connections to keep open inside the database connection pool (Default: `15`).
 
 - `ARGILLA_DATABASE_POSTGRESQL_MAX_OVERFLOW`: The number of connections that can be opened above and beyond `ARGILLA_DATABASE_POSTGRESQL_POOL_SIZE` setting (Default: `10`).
