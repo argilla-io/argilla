@@ -35,7 +35,7 @@ spec:
             - name: ARGILLA_ELASTICSEARCH_SSL_VERIFY
               value: {{ .Values.elasticsearch.sslVerify | quote }}
             - name: ARGILLA_DATABASE_POSTGRESQL_ENABLE_POOLING
-              value: {{ .Values.argilla.dbPooling.enabled | quote }}
+              value: {{ .Values.argilla.db.pooling.enabled | quote }}
             - name: ARGILLA_AUTH_SECRET_KEY
               value: {{ .Values.argilla.authSecretKey | quote }}
             - name: ARGILLA_REDIS_URL
