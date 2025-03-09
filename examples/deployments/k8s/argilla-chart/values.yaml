@@ -34,7 +34,7 @@ argilla:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 50
   db:
-    pooling: 
+    pooling:
       enabled: true
 
 # Elasticsearch installation is enabled by default.
