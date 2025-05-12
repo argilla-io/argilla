@@ -39,7 +39,9 @@ spec:
             - name: ARGILLA_AUTH_SECRET_KEY
               value: {{ .Values.argilla.authSecretKey | quote }}
             - name: ARGILLA_REDIS_URL
-              value: redis://{{ .Release.Name }}-redis-master:6379/0
+              value: {{if .Values.externalRedis.enabled}}"{{ .Values.externalRedis.url }}"{{else}}"redis://{{ .Release.Name }}-redis-master:6379/0"{{end}}
+            - name: ARGILLA_REDIS_USE_CLUSTER
+              value: {{ if and .Values.externalRedis.enabled .Values.externalRedis.is_redis_cluster }} "True" {{ else }} "False" {{ end }}
             - name: USERNAME
               value: {{ .Values.argilla.auth.username | quote }}
             - name: PASSWORD

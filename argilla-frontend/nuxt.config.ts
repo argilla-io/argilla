@@ -123,6 +123,11 @@ const config: NuxtConfig = {
         name: "Español",
         file: "es.js",
       },
+      {
+        code: "ja",
+        name: "日本語",
+        file: "ja.js",
+      },
     ],
     detectBrowserLanguage: false,
     vueI18n: {
