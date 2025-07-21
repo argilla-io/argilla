@@ -8,7 +8,7 @@ If you're interested in helping maintain or extend this project, we'd love to he
   Argilla
   <br>
 </h1>
-<h3 align="center">Build high quality datasets for your AI models</h2>
+<h3 align="center">Build high quality datasets for your AI models</h3>
 
 <p align="center">
 <a  href="https://pypi.org/project/argilla/">
