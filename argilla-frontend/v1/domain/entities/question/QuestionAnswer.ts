@@ -34,6 +34,7 @@ export abstract class QuestionAnswer {
   abstract clear();
   abstract get isValid(): boolean;
   abstract get valuesAnswered();
+  abstract get values(): string | { isSelected: boolean }[] | any[];
 }
 export class TextQuestionAnswer extends QuestionAnswer {
   public originalValue: string;
@@ -54,6 +55,10 @@ export class TextQuestionAnswer extends QuestionAnswer {
   }
 
   get valuesAnswered() {
+    return this.value;
+  }
+
+  get values() {
     return this.value;
   }
 }

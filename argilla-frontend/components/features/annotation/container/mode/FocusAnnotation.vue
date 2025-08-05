@@ -149,8 +149,8 @@ export default {
       await this.saveAsDraft(this.record);
     },
   },
-  setup() {
-    return useFocusAnnotationViewModel();
+  setup(props) {
+    return useFocusAnnotationViewModel(props);
   },
 };
 </script>

@@ -45,7 +45,8 @@
     "vue-demi": "0.14.10",
     "vue-svgicon": "3.3.2",
     "vue-template-compiler": "2.7.16",
-    "vuedraggable": "2.24.3"
+    "vuedraggable": "2.24.3",
+    "words-to-numbers": "^1.5.1"
   },
   "devDependencies": {
     "@babel/core": "7.25.2",

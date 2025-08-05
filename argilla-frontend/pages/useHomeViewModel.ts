@@ -1,13 +1,15 @@
 import { useResolve } from "ts-injecty";
-import { ref, useFetch } from "@nuxtjs/composition-api";
+import { onMounted, ref, useFetch } from "@nuxtjs/composition-api";
 import { useRoutes, useFocusTab } from "~/v1/infrastructure/services";
 import { GetDatasetCreationUseCase } from "~/v1/domain/usecases/get-dataset-creation-use-case";
 import { GetDatasetsUseCase } from "@/v1/domain/usecases/get-datasets-use-case";
 import { GetWorkspacesUseCase } from "~/v1/domain/usecases/get-workspaces-use-case";
 import { useDatasets } from "~/v1/infrastructure/storage/DatasetsStorage";
 import { useRole } from "~/v1/infrastructure/services/useRole";
+import { useSpeech } from "~/v1/infrastructure/services/useSpeech";
 
 export const useHomeViewModel = () => {
+  const speech = useSpeech();
   const workspaces = ref<any[]>([]);
   const getWorkspacesUseCase = useResolve(GetWorkspacesUseCase);
   const { isAdminOrOwnerRole } = useRole();
@@ -75,7 +77,14 @@ export const useHomeViewModel = () => {
     isLoadingDatasets.value = false;
   };
 
+  onMounted(() => {
+    speech.textToSpeech("Welcome to Argilla");
+
+    speech.explainCommands();
+  });
+
   return {
+    speech,
     datasets,
     workspaces,
     isLoadingDatasets,

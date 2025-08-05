@@ -177,6 +177,14 @@ export class Question {
     this.initializeOriginal();
   }
 
+  answerByIndex(optionNumber: number) {
+    if (Array.isArray(this.answer.values)) {
+      this.answer.values.forEach((value, index) => {
+        value.isSelected = index === optionNumber;
+      });
+    }
+  }
+
   addSuggestion(suggestion: Suggestion) {
     if (!suggestion) return;
 
