@@ -15,8 +15,9 @@ dependencies = [
     "tqdm>=4.60.0",
     "rich>=10.0.0",
     "datasets>=2.0.0",
-    "pillow>=9.5.0",
+    "pillow==11.3.0",
     "standardwebhooks>=1.0.0",
+    "pandas==2.2.3",
 ]
 
 legacy = ["argilla-v1[listeners]"]
