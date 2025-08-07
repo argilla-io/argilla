@@ -345,6 +345,8 @@ export default {
     exportingWarning: "This might take a few seconds",
   },
   config: {
+    addQuestion: "Add question",
+    removeQuestion: "Remove question",
     field: {
       text: "Text field",
       chat: "Chat field",

@@ -1,6 +1,6 @@
 <template>
   <div class="top-content" :class="separator ? '--separator' : null">
-    <h1 v-text="$t('settings.title')" />
+    <h1 class="--heading2" v-text="$t('settings.title')" />
     <base-button @click="$emit('goToDataset')" class="secondary text">
       <svgicon name="chevron-left" width="10" height="10" />
       {{ $t("settings.seeYourDataset") }}

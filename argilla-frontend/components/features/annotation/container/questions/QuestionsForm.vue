@@ -11,6 +11,7 @@
       <QuestionsComponent
         :questions="record.questions"
         :autofocusPosition="autofocusPosition"
+        :visible-shortcuts="!$platform.isMobile"
         :is-bulk-mode="isBulkMode"
         @on-focus="updateQuestionAutofocus"
       />
@@ -29,7 +30,7 @@
           @on-click="onDiscard"
         >
           <span
-            v-if="!isDiscarding"
+            v-if="!isDiscarding && !$platform.isMobile"
             class="button__shortcuts"
             v-text="'⌫'"
           /><span v-text="$t('questions_form.discard')" />
@@ -44,7 +45,7 @@
           :data-title="!isSaving ? draftSavingTooltip : null"
           @on-click="onSaveDraft"
         >
-          <span v-if="!isDraftSaving"
+          <span v-if="!isDraftSaving && !$platform.isMobile"
             ><span
               class="button__shortcuts"
               v-text="$platform.isMac ? '⌘' : 'ctrl'" /><span
@@ -79,7 +80,11 @@
           "
           @on-click="onSubmit"
         >
-          <span v-if="!isSubmitting" class="button__shortcuts" v-text="'↵'" />
+          <span
+            v-if="!isSubmitting && !$platform.isMobile"
+            class="button__shortcuts"
+            v-text="'↵'"
+          />
           <span v-text="$t('questions_form.submit')" />
         </BaseButton>
       </div>
@@ -179,7 +184,11 @@ export default {
         return "--focused-form";
     },
     formHasFocus() {
-      return this.autofocusPosition || this.autofocusPosition == 0;
+      if (!this.$platform.isMobile) {
+        return this.autofocusPosition || this.autofocusPosition == 0;
+      } else {
+        return false;
+      }
     },
     numberOfQuestions() {
       return this.record.questions.length;

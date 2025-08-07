@@ -38,7 +38,12 @@
 
           <span v-if="isSuggested(item)" class="draggable__suggestion">
             <span v-text="getSuggestedRank(item)" />
-            <svgicon name="suggestion" width="10" height="10" />
+            <svgicon
+              name="suggestion"
+              width="10"
+              height="10"
+              :aria-label="$t('suggestion.name')"
+            />
             <span
               class="draggable__suggestion__score"
               v-if="getSuggestedScore(item)"

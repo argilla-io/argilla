@@ -8,6 +8,7 @@
             width="6"
             name="draggable"
             color="var(--bg-opacity-20)"
+            aria-hidden="true"
           />{{ item.name }}
           <span v-if="item.primitiveType" class="config-card__primitive-type">{{
             item.primitiveType
@@ -104,7 +105,7 @@ $no-mapping-color: hsl(0, 0%, 50%);
   &__icon {
     position: absolute;
     left: 6px;
-    top: 19px;
+    top: 18px;
     opacity: 0;
   }
   &__primitive-type {

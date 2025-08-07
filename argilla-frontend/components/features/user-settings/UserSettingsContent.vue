@@ -1,10 +1,14 @@
 <template>
   <div class="edition-user-info">
     <div class="form-group circle-and-role">
-      <span v-circle="{ size: 'MEDIUM' }">
+      <span aria-hidden="true" v-circle="{ size: 'MEDIUM' }">
         {{ user.avatar }}
       </span>
-      <BaseBadge class="--capitalized" :text="user.role" />
+      <BaseBadge
+        :aria-label="`role: ${user.role}`"
+        class="--capitalized"
+        :text="user.role"
+      />
     </div>
 
     <div class="form-group">

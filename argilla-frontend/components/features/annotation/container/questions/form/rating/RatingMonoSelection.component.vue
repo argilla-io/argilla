@@ -36,6 +36,7 @@
               v-if="isSuggested(option)"
               class="label-text__suggestion-icon"
               name="suggestion"
+              :aria-label="$t('suggestion.name')"
             />
           </label>
         </BaseTooltip>

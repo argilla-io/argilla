@@ -60,6 +60,7 @@
                 class="settings__edition-form__switch --subcategory"
                 :id="`options-order-${question.id}`"
                 v-model="question.settings.suggestionFirst"
+                :name="$t('suggestionFirst')"
                 >{{ $t("suggestionFirst") }}</BaseSwitch
               >
 

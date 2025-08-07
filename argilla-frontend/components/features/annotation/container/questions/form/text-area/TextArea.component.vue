@@ -54,6 +54,9 @@ export default {
             : "",
           tooltipText: this.isSuggested ? this.suggestedAgent : "",
           component: "TextAreaContents",
+          label: this.isSuggested
+            ? this.$nuxt.$t("suggestion.name")
+            : this.$nuxt.$t("questions_form.write"),
         },
         ...(!this.isSuggested
           ? [
@@ -65,6 +68,7 @@ export default {
                 tooltipTitle: this.$nuxt.$t("suggestion.name"),
                 tooltipText: this.suggestedAgent,
                 component: "TextAreaSuggestion",
+                label: this.$nuxt.$t("suggestion.name"),
               },
             ]
           : []),

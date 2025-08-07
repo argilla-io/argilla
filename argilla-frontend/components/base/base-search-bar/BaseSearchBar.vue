@@ -44,6 +44,7 @@
       v-show="!isCollapsed"
       class="search-area__button__close"
       @click="removeFilter"
+      aria-label="close"
     >
       <svgicon
         v-if="filter || !isCollapsed"

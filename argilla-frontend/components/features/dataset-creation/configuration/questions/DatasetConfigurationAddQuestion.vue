@@ -6,9 +6,11 @@
     v-if="options.length"
   >
     <template slot="dropdown-header">
-      <BaseButton class="add-question-selector__button"
+      <BaseButton
+        class="add-question-selector__button"
+        :aria-label="$t('config.addQuestion')"
         ><span class="add-question-selector__button-icon"
-          ><svgicon name="plus" /></span
+          ><svgicon name="plus" aria-hidden="true" /></span
       ></BaseButton>
     </template>
     <template slot="dropdown-content">

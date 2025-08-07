@@ -35,6 +35,7 @@
             v-if="field.isTextType || field.isChatType"
             class="settings__edition-form__switch"
             v-model="field.settings.use_markdown"
+            :name="$t('useMarkdown')"
             >{{ $t("useMarkdown") }}</BaseSwitch
           >
 

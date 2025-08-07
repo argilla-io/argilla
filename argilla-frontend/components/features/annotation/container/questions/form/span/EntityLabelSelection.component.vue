@@ -42,8 +42,8 @@
       name="shuffle"
       class="inputs-area"
       v-if="filteredOptions.length"
-      role="group"
-      aria-multiselectable="multiple"
+      role="listbox"
+      :aria-multiselectable="true"
       aria-label="Label-Options"
     >
       <EntityLabelBadge
@@ -58,6 +58,7 @@
         @on-selected="onSelect(option)"
         @on-expand-labels-on-tab="expandLabelsOnTab(index)"
         @on-focus="onFocus"
+        role="option"
       />
     </transition-group>
     <i class="no-result" v-if="!filteredOptions.length" />

@@ -23,19 +23,32 @@
     <label v-if="$slots.default" :for="id || name" class="switch-label">
       <slot />
     </label>
-    <div class="switch-container" @click="toggle($event)">
+    <div
+      class="switch-container"
+      type="button"
+      role="switch"
+      @click="toggle($event)"
+      :aria-label="`${name} ${checked ? 'on' : 'off'}`"
+      :aria-checked="checked ? 'true' : 'false'"
+    >
       <div class="switch-thumb" :style="styles">
         <input
-          :id="id"
+          :id="id || name"
           type="checkbox"
           :name="name"
           :disabled="disabled"
           :value="value"
           tabindex="-1"
         />
-        <button :type="type" class="switch-holder">
-          <svgicon width="10" height="10" name="check" color="white"></svgicon>
-        </button>
+        <div class="switch-holder">
+          <svgicon
+            width="10"
+            height="10"
+            name="check"
+            color="white"
+            aria-hidden="true"
+          ></svgicon>
+        </div>
       </div>
     </div>
   </div>
@@ -172,6 +185,9 @@ $switch-thumb-size: 18px;
       @include absoluteCenter;
       width: $switch-thumb-size;
       height: $switch-thumb-size;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin: 0;
       padding: 0;
       z-index: 2;

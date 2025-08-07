@@ -59,6 +59,7 @@
             <div class="dataset-config__preview">
               <iframe
                 v-if="!!dataset.repoId"
+                :title="$t('preview')"
                 :src="`https://huggingface.co/datasets/${dataset.repoId}/embed/viewer/ParaphraseRC/train`"
                 frameborder="0"
                 width="100%"

@@ -1,6 +1,12 @@
 <template>
-  <ul class="chip-selector__options">
+  <ul
+    class="chip-selector__options"
+    role="listbox"
+    aria-multiselectable="false"
+    :aria-label="id"
+  >
     <li
+      role="option"
       class="chip-selector__option"
       v-for="option in options"
       :key="`${id}-${option.value}`"

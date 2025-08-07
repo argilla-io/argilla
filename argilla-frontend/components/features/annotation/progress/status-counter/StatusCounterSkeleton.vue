@@ -1,5 +1,5 @@
 <template>
-  <div class="status-counter"></div>
+  <li class="status-counter"></li>
 </template>
 
 <style scoped lang="scss">
