@@ -124,6 +124,11 @@ const config: NuxtConfig = {
         file: "es.js",
       },
       {
+        code: "fr",
+        name: "Français",
+        file: "fr.js",
+      },
+      {
         code: "ja",
         name: "日本語",
         file: "ja.js",

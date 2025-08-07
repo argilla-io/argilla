@@ -18,6 +18,10 @@ These are the section headers that we use:
 
 ### Added
 
+- Added French language ([#5825](https://github.com/argilla-io/argilla/issues/5825)).
+
+### Added
+
 - Added Japanese language ([#5816](https://github.com/argilla-io/argilla/pull/5816)). Contributed by @Tomoya-Matsubara.
 
 ## [2.7.1](https://github.com/argilla-io/argilla/compare/v2.7.0...v2.7.1)
