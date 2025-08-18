@@ -33,6 +33,9 @@ argilla:
     minReplicas: 1
     maxReplicas: 3
     targetCPUUtilizationPercentage: 50
+  db:
+    pooling:
+      enabled: true
 
 # Elasticsearch installation is enabled by default.
 # To disable it, set `elasticsearch.useOperator` to `false`
