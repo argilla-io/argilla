@@ -16,14 +16,15 @@ import typing
 
 from fastapi import Request
 from fastapi.security import HTTPBearer
-from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
+from starlette.authentication import AuthCredentials, BaseUser
 
 from argilla_server.contexts import accounts
 from argilla_server.security.authentication.jwt import JWT
 from argilla_server.security.authentication.userinfo import UserInfo
+from argilla_server.security.authentication.db.login_backend import LoginAuthenticationBackend
 
 
-class BearerTokenAuthenticationBackend(AuthenticationBackend):
+class BearerTokenAuthenticationBackend(LoginAuthenticationBackend):
     """Authenticate the user using the username and password Bearer header"""
 
     scheme = HTTPBearer(auto_error=False)
@@ -31,17 +32,25 @@ class BearerTokenAuthenticationBackend(AuthenticationBackend):
     async def authenticate(self, request: Request) -> typing.Optional[typing.Tuple[AuthCredentials, BaseUser]]:
         """Authenticate the user using the username and password Bearer header"""
         credentials = await self.scheme(request)
+        client_ip = request.client.host
         if not credentials:
             return None
 
         token = credentials.credentials
         username = JWT.decode(token).get("username")
+        is_locked = self.check_lockout(username)
+        is_locked_ip = self.check_lockout(client_ip)
+        if is_locked or is_locked_ip:
+            return None
 
         db = request.state.db
         user = await accounts.get_user_by_username(db, username)
         if not user:
+            self.increase_lockout(username)
+            self.increase_lockout(client_ip)
             return None
-
+        self.clear_lockout(username)
+        self.clear_lockout(client_ip)
         return AuthCredentials(), UserInfo(
             username=user.username, name=user.first_name, role=user.role, identity=str(user.id)
         )
