@@ -6,12 +6,21 @@ export type SpanAnswer = {
   label: string;
 };
 
+export type ImageAnnotationAnswer = {
+  label: string;
+  points: number[][];
+  shape_type: string;
+  group_id?: number;
+  flags?: Record<string, any>;
+};
+
 export type AnswerCombinations =
   | string
   | string[]
   | number
   | RankingAnswer[]
-  | SpanAnswer[];
+  | SpanAnswer[]
+  | ImageAnnotationAnswer[];
 
 export interface Answer {
   value: AnswerCombinations;

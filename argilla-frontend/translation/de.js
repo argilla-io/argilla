@@ -357,7 +357,17 @@ export default {
       ranking: "Ranking",
       multi_label_selection: "Multi-Label",
       span: "Bereichsannotation",
+      image_annotation: "Bildannotation",
       "no mapping": "Keine Zuordnung",
+    },
+    questionId: {
+      text: "text",
+      rating: "bewertung",
+      label_selection: "label",
+      ranking: "ranking",
+      multi_label_selection: "multi-label",
+      span: "bereich",
+      image_annotation: "bild-annotation",
     },
   },
   persistentStorage: {

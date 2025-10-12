@@ -361,7 +361,17 @@ export default {
       ranking: "Ranking",
       multi_label_selection: "Selección de múltiples etiquetas",
       span: "Span",
+      image_annotation: "Anotación de imagen",
       "no mapping": "Sin mapeo",
+    },
+    questionId: {
+      text: "texto",
+      rating: "calificación",
+      label_selection: "etiqueta",
+      ranking: "ranking",
+      multi_label_selection: "multi-etiqueta",
+      span: "span",
+      image_annotation: "anotación-imagen",
     },
   },
   persistentStorage: {

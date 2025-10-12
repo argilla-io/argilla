@@ -15,6 +15,7 @@
 from typing import Optional
 
 from argilla_server.api.schemas.v1.questions import (
+    ImageAnnotationQuestionSettings,
     LabelSelectionQuestionSettings,
     MultiLabelSelectionQuestionSettings,
     QuestionSettings,
@@ -23,6 +24,7 @@ from argilla_server.api.schemas.v1.questions import (
     SpanQuestionSettings,
 )
 from argilla_server.api.schemas.v1.responses import (
+    ImageAnnotationQuestionResponseValue,
     MultiLabelSelectionQuestionResponseValue,
     RankingQuestionResponseValue,
     RatingQuestionResponseValue,
@@ -56,6 +58,8 @@ class ResponseValueValidator:
             RankingQuestionResponseValueValidator(response_value).validate_for(question_settings, response_status)
         elif question_settings.type == QuestionType.span:
             SpanQuestionResponseValueValidator(response_value).validate_for(question_settings, record)
+        elif question_settings.type == QuestionType.image_annotation:
+            ImageAnnotationQuestionResponseValueValidator(response_value).validate_for(question_settings, record)
         else:
             raise UnprocessableEntityError(f"unknown question type f{question_settings.type!r}")
 
@@ -281,3 +285,50 @@ class SpanQuestionResponseValueValidator:
                     raise UnprocessableEntityError(
                         f"overlapping values found between spans at index idx={span_i} and idx={span_j}"
                     )
+
+
+class ImageAnnotationQuestionResponseValueValidator:
+    def __init__(self, response_value: ImageAnnotationQuestionResponseValue):
+        self._response_value = response_value
+
+    def validate_for(self, image_annotation_question_settings: ImageAnnotationQuestionSettings, record: Record) -> None:
+        self._validate_value_type()
+        self._validate_question_settings_field_is_present_at_record(image_annotation_question_settings, record)
+        self._validate_labels_are_available_at_question_settings(image_annotation_question_settings)
+        self._validate_shape_types_are_allowed(image_annotation_question_settings)
+
+    def _validate_value_type(self) -> None:
+        if not isinstance(self._response_value, list):
+            raise UnprocessableEntityError(
+                f"image annotation question expects a list of values, found {type(self._response_value)}"
+            )
+
+    def _validate_question_settings_field_is_present_at_record(
+        self, image_annotation_question_settings: ImageAnnotationQuestionSettings, record: Record
+    ) -> None:
+        if image_annotation_question_settings.field not in record.fields:
+            raise UnprocessableEntityError(
+                f"image annotation question requires record to have field `{image_annotation_question_settings.field}`"
+            )
+
+    def _validate_labels_are_available_at_question_settings(
+        self, image_annotation_question_settings: ImageAnnotationQuestionSettings
+    ) -> None:
+        available_labels = [option.value for option in image_annotation_question_settings.options]
+
+        for value_item in self._response_value:
+            if value_item.label not in available_labels:
+                raise UnprocessableEntityError(
+                    f"undefined label '{value_item.label}' for image annotation question.\nValid labels are: {available_labels!r}"
+                )
+
+    def _validate_shape_types_are_allowed(
+        self, image_annotation_question_settings: ImageAnnotationQuestionSettings
+    ) -> None:
+        allowed_shapes = image_annotation_question_settings.shape_types
+
+        for value_item in self._response_value:
+            if value_item.shape_type not in allowed_shapes:
+                raise UnprocessableEntityError(
+                    f"shape type '{value_item.shape_type}' is not allowed for this question.\nAllowed shapes are: {allowed_shapes!r}"
+                )

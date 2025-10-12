@@ -30,6 +30,8 @@ SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS = 10_000
 SPAN_QUESTION_RESPONSE_VALUE_ITEM_START_GREATER_THAN_OR_EQUAL = 0
 SPAN_QUESTION_RESPONSE_VALUE_ITEM_END_GREATER_THAN_OR_EQUAL = 1
 
+IMAGE_ANNOTATION_QUESTION_RESPONSE_VALUE_MAX_ITEMS = 10_000
+
 
 class RankingQuestionResponseValueItem(BaseModel):
     value: str
@@ -52,9 +54,49 @@ class SpanQuestionResponseValueItem(BaseModel):
         return instance
 
 
+class ImageAnnotationQuestionResponseValueItem(BaseModel):
+    """Image annotation in labelme format"""
+    label: str
+    points: List[List[float]] = Field(..., description="Coordinates in [[x1,y1], [x2,y2], ...] format")
+    shape_type: str = Field(..., description="Shape type: rectangle, polygon, circle, line, point")
+    group_id: Optional[int] = None
+    flags: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    @classmethod
+    def check_points_format(cls, instance: "ImageAnnotationQuestionResponseValueItem") -> "ImageAnnotationQuestionResponseValueItem":
+        points = instance.points
+        shape_type = instance.shape_type
+        
+        if not points:
+            raise ValueError("points cannot be empty")
+        
+        # Validate each point has exactly 2 coordinates [x, y]
+        for point in points:
+            if len(point) != 2:
+                raise ValueError(f"Each point must have exactly 2 coordinates [x, y], got {len(point)}")
+        
+        # Shape-specific validations
+        if shape_type == "rectangle" and len(points) != 2:
+            raise ValueError("rectangle shape requires exactly 2 points (top-left and bottom-right)")
+        elif shape_type == "point" and len(points) != 1:
+            raise ValueError("point shape requires exactly 1 point")
+        elif shape_type == "line" and len(points) < 2:
+            raise ValueError("line shape requires at least 2 points")
+        elif shape_type == "polygon" and len(points) < 3:
+            raise ValueError("polygon shape requires at least 3 points")
+        elif shape_type == "circle" and len(points) != 2:
+            raise ValueError("circle shape requires exactly 2 points (center and edge)")
+        
+        return instance
+
+
 RankingQuestionResponseValue = List[RankingQuestionResponseValueItem]
 SpanQuestionResponseValue = Annotated[
     List[SpanQuestionResponseValueItem], Field(..., max_length=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS)
+]
+ImageAnnotationQuestionResponseValue = Annotated[
+    List[ImageAnnotationQuestionResponseValueItem], Field(..., max_length=IMAGE_ANNOTATION_QUESTION_RESPONSE_VALUE_MAX_ITEMS)
 ]
 MultiLabelSelectionQuestionResponseValue = List[str]
 RatingQuestionResponseValue = StrictInt
@@ -62,6 +104,7 @@ TextAndLabelSelectionQuestionResponseValue = StrictStr
 
 ResponseValueTypes = Union[
     SpanQuestionResponseValue,
+    ImageAnnotationQuestionResponseValue,
     RankingQuestionResponseValue,
     MultiLabelSelectionQuestionResponseValue,
     RatingQuestionResponseValue,

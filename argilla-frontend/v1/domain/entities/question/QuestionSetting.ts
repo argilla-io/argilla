@@ -9,6 +9,8 @@ export interface QuestionPrototype {
   allow_overlapping?: boolean;
   allow_character_annotation?: boolean;
   field?: string;
+  allow_multiple?: boolean;
+  shape_types?: string[];
 }
 
 export class QuestionSetting {
@@ -20,6 +22,8 @@ export class QuestionSetting {
   field: string;
   options: any;
   options_order: "natural" | "suggestion";
+  allow_multiple: boolean;
+  shape_types: string[];
 
   constructor(settings: QuestionPrototype) {
     this.type = QuestionType.from(settings.type);
@@ -31,6 +35,8 @@ export class QuestionSetting {
     this.allow_overlapping = settings.allow_overlapping;
     this.allow_character_annotation = settings.allow_character_annotation;
     this.field = settings.field;
+    this.allow_multiple = settings.allow_multiple;
+    this.shape_types = settings.shape_types;
   }
 
   get suggestionFirst() {

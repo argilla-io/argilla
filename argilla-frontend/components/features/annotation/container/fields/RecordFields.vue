@@ -41,6 +41,14 @@
         :content="content"
         :searchText="recordCriteria.committed.searchText.value.text"
       />
+      <ImageAnnotationField
+        v-else-if="isImageType && hasImageAnnotationQuestion(name)"
+        :id="`${id}-${record.id}`"
+        :name="name"
+        :title="title"
+        :content="content"
+        :imageAnnotationQuestion="getImageAnnotationQuestion(name)"
+      />
       <ImageField
         v-else-if="isImageType"
         :name="name"
@@ -80,10 +88,19 @@ export default {
     hasSpanQuestion(fieldName) {
       return !!this.getSpanQuestion(fieldName);
     },
+    getImageAnnotationQuestion(fieldName) {
+      return this.imageAnnotationQuestions?.find((q) => q.settings.field === fieldName);
+    },
+    hasImageAnnotationQuestion(fieldName) {
+      return !!this.getImageAnnotationQuestion(fieldName);
+    },
   },
   computed: {
     spanQuestions() {
       return this.record?.questions?.filter((q) => q.isSpanType);
+    },
+    imageAnnotationQuestions() {
+      return this.record?.questions?.filter((q) => q.isImageAnnotationType);
     },
   },
 };

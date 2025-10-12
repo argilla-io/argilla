@@ -74,6 +74,14 @@
           :enableSpanQuestionShortcutsGlobal="enableSpanQuestionShortcutsGlobal"
           @on-focus="updateQuestionAutofocus(index)"
         />
+
+        <ImageAnnotationComponent
+          v-if="question.isImageAnnotationType"
+          ref="imageAnnotation"
+          :question="question"
+          :isFocused="checkIfQuestionIsFocused(index)"
+          @on-focus="updateQuestionAutofocus(index)"
+        />
       </div>
     </div>
   </div>
@@ -105,7 +113,7 @@ export default {
   },
   computed: {
     questionsWithLoopMovement() {
-      return ["singleLabel", "multiLabel", "rating", "ranking", "span"]
+      return ["singleLabel", "multiLabel", "rating", "ranking", "span", "imageAnnotation"]
         .filter((componentType) => this.$refs[componentType])
         .map((componentType) => this.$refs[componentType][0].$el);
     },

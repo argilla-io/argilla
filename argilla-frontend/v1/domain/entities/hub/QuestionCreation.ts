@@ -8,6 +8,7 @@ import {
   SingleLabelQuestionAnswer,
   SpanQuestionAnswer,
   TextQuestionAnswer,
+  ImageAnnotationQuestionAnswer,
 } from "../question/QuestionAnswer";
 import {
   QuestionSetting,
@@ -23,6 +24,7 @@ export const availableQuestionTypes = [
   QuestionType.from("text"),
   QuestionType.from("span"),
   QuestionType.from("rating"),
+  QuestionType.from("image_annotation"),
 ];
 
 export class QuestionCreation {
@@ -94,6 +96,10 @@ export class QuestionCreation {
     return this.type.isRankingType;
   }
 
+  get isImageAnnotationType(): boolean {
+    return this.type.isImageAnnotationType;
+  }
+
   get answer(): QuestionAnswer {
     return this.createInitialAnswers();
   }
@@ -121,7 +127,18 @@ export class QuestionCreation {
       }
     }
 
-    if (this.isMultiLabelType || this.isSingleLabelType || this.isSpanType) {
+    if (this.isImageAnnotationType) {
+      if (
+        !this.subset.imageFields.some(
+          (field) => field.name === this.settings.field
+        ) ||
+        !this.settings.field
+      ) {
+        validation.field.push("datasetCreation.questions.imageAnnotation.fieldRelated");
+      }
+    }
+
+    if (this.isMultiLabelType || this.isSingleLabelType || this.isSpanType || this.isImageAnnotationType) {
       if (this.options.length < 2) {
         validation.options.push(
           "datasetCreation.questions.labelSelection.atLeastTwoOptions"
@@ -152,7 +169,7 @@ export class QuestionCreation {
   }
 
   private initialize() {
-    if (this.isSpanType) {
+    if (this.isSpanType || this.isImageAnnotationType) {
       this.settings.options = this.settings.options.map((option) => {
         return {
           ...option,
@@ -205,6 +222,14 @@ export class QuestionCreation {
 
     if (this.isRankingType) {
       return new RankingQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
+    if (this.isImageAnnotationType) {
+      return new ImageAnnotationQuestionAnswer(
         this.type,
         this.name,
         this.settings.options

@@ -1,4 +1,4 @@
-import { Answer, RankingAnswer, SpanAnswer } from "../IAnswer";
+import { Answer, RankingAnswer, SpanAnswer, ImageAnnotationAnswer } from "../IAnswer";
 import { QuestionType } from "./QuestionType";
 
 export abstract class QuestionAnswer {
@@ -305,5 +305,64 @@ export class RankingQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered(): RankingValue[] {
     return this.values;
+  }
+}
+
+type ImageAnnotationValue = {
+  id: string;
+  text: string;
+  value: string;
+  color: string;
+  isSelected: boolean;
+};
+
+export class ImageAnnotationQuestionAnswer extends QuestionAnswer {
+  public readonly options: ImageAnnotationValue[] = [];
+  public values: ImageAnnotationAnswer[] = [];
+
+  constructor(
+    public readonly type: QuestionType,
+    questionName: string,
+    options: Omit<ImageAnnotationValue, "isSelected" | "id">[]
+  ) {
+    super(type);
+
+    const makeSafeForCSS = (str: string) => {
+      return str.replace(/[^a-z0-9]/g, (s) => {
+        const c = s.charCodeAt(0);
+        if (c === 32) return "-";
+        if (c >= 65 && c <= 90) return `-${s.toLowerCase()}`;
+        return `-${c.toString(16)}`;
+      });
+    };
+
+    this.options = options.map((e) => ({
+      ...e,
+      id: makeSafeForCSS(`${questionName}-${e.value}`),
+      isSelected: false,
+    }));
+    this.clear();
+  }
+
+  protected fill(answer: Answer) {
+    this.values = answer.value as ImageAnnotationAnswer[];
+  }
+
+  clear() {
+    this.values = [];
+  }
+
+  get isValid(): boolean {
+    return true;
+  }
+
+  get valuesAnswered(): ImageAnnotationAnswer[] {
+    return this.values.map((value) => ({
+      label: value.label,
+      points: value.points,
+      shape_type: value.shape_type,
+      group_id: value.group_id,
+      flags: value.flags,
+    }));
   }
 }

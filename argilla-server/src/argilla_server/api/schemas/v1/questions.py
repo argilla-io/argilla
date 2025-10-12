@@ -57,6 +57,9 @@ RATING_VALUE_LESS_THAN_OR_EQUAL = 10
 SPAN_OPTIONS_MIN_ITEMS = 1
 SPAN_MIN_VISIBLE_OPTIONS = 3
 
+IMAGE_ANNOTATION_OPTIONS_MIN_ITEMS = 1
+IMAGE_ANNOTATION_MIN_VISIBLE_OPTIONS = 3
+
 
 class UniqueValuesCheckerMixin(BaseModel):
     @model_validator(mode="after")
@@ -275,6 +278,73 @@ class SpanQuestionSettingsUpdate(UpdateSchema):
     allow_overlapping: Optional[bool] = None
 
 
+# Image annotation question (labelme format)
+class ImageAnnotationQuestionSettings(BaseModel):
+    type: Literal[QuestionType.image_annotation]
+    field: str
+    options: List[OptionSettings]
+    visible_options: Optional[int] = None
+    # Allow multiple shapes per annotation
+    allow_multiple: bool = Field(default=True, description="Allow multiple annotations")
+    # Supported shape types: rectangle (bbox), polygon, circle, line, point
+    shape_types: List[str] = Field(default=["rectangle", "polygon"], description="Allowed shape types")
+
+
+class ImageAnnotationQuestionSettingsCreate(UniqueValuesCheckerMixin):
+    type: Literal[QuestionType.image_annotation]
+    field: FieldName
+    options: conlist(
+        item_type=OptionSettingsCreate,
+        min_length=IMAGE_ANNOTATION_OPTIONS_MIN_ITEMS,
+        max_length=settings.label_selection_options_max_items,
+    )
+    visible_options: Optional[int] = Field(None, ge=IMAGE_ANNOTATION_MIN_VISIBLE_OPTIONS)
+    allow_multiple: bool = True
+    shape_types: List[str] = Field(default=["rectangle", "polygon"])
+
+    @model_validator(mode="after")
+    @classmethod
+    def check_visible_options_value(
+        cls, instance: "ImageAnnotationQuestionSettingsCreate"
+    ) -> "ImageAnnotationQuestionSettingsCreate":
+        visible_options = instance.visible_options
+        if visible_options is not None:
+            num_options = len(instance.options)
+            if visible_options > num_options:
+                raise ValueError(
+                    "the value for 'visible_options' must be less or equal to the number of items in 'options'"
+                    f" ({num_options})"
+                )
+        return instance
+
+    @model_validator(mode="after")
+    @classmethod
+    def check_shape_types(
+        cls, instance: "ImageAnnotationQuestionSettingsCreate"
+    ) -> "ImageAnnotationQuestionSettingsCreate":
+        allowed_shapes = {"rectangle", "polygon", "circle", "line", "point"}
+        for shape in instance.shape_types:
+            if shape not in allowed_shapes:
+                raise ValueError(
+                    f"Invalid shape type '{shape}'. Allowed types: {allowed_shapes}"
+                )
+        return instance
+
+
+class ImageAnnotationQuestionSettingsUpdate(UpdateSchema):
+    type: Literal[QuestionType.image_annotation]
+    options: Optional[
+        conlist(
+            item_type=OptionSettings,
+            min_length=IMAGE_ANNOTATION_OPTIONS_MIN_ITEMS,
+            max_length=settings.label_selection_options_max_items,
+        )
+    ] = None
+    visible_options: Optional[int] = Field(None, ge=IMAGE_ANNOTATION_MIN_VISIBLE_OPTIONS)
+    allow_multiple: Optional[bool] = None
+    shape_types: Optional[List[str]] = None
+
+
 QuestionSettings = Annotated[
     Union[
         TextQuestionSettings,
@@ -283,6 +353,7 @@ QuestionSettings = Annotated[
         MultiLabelSelectionQuestionSettings,
         RankingQuestionSettings,
         SpanQuestionSettings,
+        ImageAnnotationQuestionSettings,
     ],
     Field(..., discriminator="type"),
 ]
@@ -319,6 +390,7 @@ QuestionSettingsCreate = Annotated[
         MultiLabelSelectionQuestionSettingsCreate,
         RankingQuestionSettingsCreate,
         SpanQuestionSettingsCreate,
+        ImageAnnotationQuestionSettingsCreate,
     ],
     Field(discriminator="type"),
 ]
@@ -331,6 +403,7 @@ QuestionSettingsUpdate = Annotated[
         MultiLabelSelectionQuestionSettingsUpdate,
         RankingQuestionSettingsUpdate,
         SpanQuestionSettingsUpdate,
+        ImageAnnotationQuestionSettingsUpdate,
     ],
     Field(..., discriminator="type"),
 ]

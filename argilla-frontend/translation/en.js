@@ -358,6 +358,7 @@ export default {
       ranking: "Ranking",
       multi_label_selection: "Multi-label",
       span: "Span",
+      image_annotation: "Image annotation",
       "no mapping": "No mapping",
     },
     questionId: {
@@ -367,6 +368,7 @@ export default {
       ranking: "ranking",
       multi_label_selection: "multi-label",
       span: "span",
+      image_annotation: "image-annotation",
     },
   },
   persistentStorage: {

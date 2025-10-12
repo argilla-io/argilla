@@ -124,6 +124,35 @@ class TextQuestionSettings(BaseModel):
     use_markdown: bool = False
 
 
+class ImageAnnotationQuestionSettings(BaseModel):
+    type: Literal["image_annotation"] = "image_annotation"
+
+    _MIN_VISIBLE_OPTIONS: ClassVar[int] = 3
+
+    field: Optional[str] = None
+    options: List[Dict[str, Optional[str]]] = Field(default_factory=list, validate_default=True)
+    visible_options: Optional[int] = Field(None, validate_default=True, ge=_MIN_VISIBLE_OPTIONS)
+    allow_multiple: bool = True
+    shape_types: List[str] = Field(default=["rectangle", "polygon"])
+
+    @field_validator("options", mode="before")
+    @classmethod
+    def __values_are_unique(cls, options: List[Dict[str, Optional[str]]]) -> List[Dict[str, Optional[str]]]:
+        """Ensure that values are unique"""
+
+        unique_values = list(set([option["value"] for option in options]))
+        if len(unique_values) != len(options):
+            raise ValueError("All values must be unique")
+
+        return options
+
+    @model_validator(mode="after")
+    def __validate_visible_options(self) -> "Self":
+        if self.visible_options is None and self.options and len(self.options) >= self._MIN_VISIBLE_OPTIONS:
+            self.visible_options = len(self.options)
+        return self
+
+
 QuestionSettings = Annotated[
     Union[
         LabelQuestionSettings,
@@ -132,6 +161,7 @@ QuestionSettings = Annotated[
         RatingQuestionSettings,
         SpanQuestionSettings,
         TextQuestionSettings,
+        ImageAnnotationQuestionSettings,
     ],
     Field(..., discriminator="type"),
 ]
