@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, watch, onUnmounted } from "vue-demi";
+import { ref, computed, onMounted, watch, onUnmounted, type Ref } from "vue-demi";
 import Konva from "konva";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
@@ -24,6 +24,11 @@ export const useImageAnnotationFieldViewModel = (props: {
     y: 0,
     annotationIndex: null,
   });
+  const draggingPoint = ref<{ annotationIndex: number; pointIndex: number } | null>(null);
+  const editMode = ref<{ active: boolean; annotationIndex: number | null }>({
+    active: false,
+    annotationIndex: null,
+  });
 
   let stage: Konva.Stage | null = null;
   let layer: Konva.Layer | null = null;
@@ -35,11 +40,36 @@ export const useImageAnnotationFieldViewModel = (props: {
   let polygonPointCircles: Konva.Circle[] = [];
   let polygonPreviewLine: Konva.Line | null = null;
   let isDrawingPolygon = false;
+  let resizeTimeout: NodeJS.Timeout | null = null;
+  let originalImageWidth = 0;
+  let originalImageHeight = 0;
+  let resizeObserver: ResizeObserver | null = null;
   const CLOSE_THRESHOLD = 10;
 
   const answer = imageAnnotationQuestion.answer as ImageAnnotationQuestionAnswer;
 
   const annotations = computed(() => answer.values);
+
+  type SharedState = {
+    editModeActive: Ref<boolean>;
+    currentAnnotationIndex: Ref<number | null>;
+    reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
+  };
+
+  const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
+    const answerTarget = target as any;
+    if (!answerTarget.__imageAnnotationSync) {
+      const syncState: SharedState = {
+        editModeActive: ref(false),
+        currentAnnotationIndex: ref<number | null>(null),
+        reassignLabel: ref(null),
+      };
+      answerTarget.__imageAnnotationSync = syncState;
+    }
+    return answerTarget.__imageAnnotationSync as SharedState;
+  };
+
+  const sharedState = ensureSharedState(answer);
 
   const selectedLabel = computed(() => {
     return answer.options.find((opt) => opt.isSelected);
@@ -64,9 +94,23 @@ export const useImageAnnotationFieldViewModel = (props: {
   const highlightAnnotation = (index: number, highlight: boolean) => {
     const shape = layer?.findOne(`#annotation-${index}`);
     if (shape) {
-      (shape as any).strokeWidth(highlight ? 4 : 2);
+      const isEditing = editMode.value.active && editMode.value.annotationIndex === index;
+      
+      if (isEditing) {
+        // Editing mode: thicker stroke + glow effect + semi-transparent
+        (shape as any).strokeWidth(4);
+        (shape as any).shadowColor(getAnnotationColor(annotations.value[index].label));
+        (shape as any).shadowBlur(8);
+        (shape as any).shadowOpacity(0.8);
+        (shape as any).opacity(0.5); // Semi-transparent to see through
+      } else {
+        // Normal hover or no hover
+        (shape as any).strokeWidth(highlight ? 4 : 2);
+        (shape as any).shadowBlur(0);
+      }
+      
       const stage = (shape as any).getStage();
-      if (stage) {
+      if (stage && !editMode.value.active) {
         stage.container().style.cursor = highlight ? 'pointer' : 'default';
       }
       layer?.batchDraw();
@@ -75,11 +119,13 @@ export const useImageAnnotationFieldViewModel = (props: {
 
   const hoverAnnotation = (index: number) => {
     hoveredAnnotation.value = index;
-    highlightAnnotation(index, true);
+    if (!editMode.value.active) {
+      highlightAnnotation(index, true);
+    }
   };
 
   const unhoverAnnotation = () => {
-    if (hoveredAnnotation.value !== null) {
+    if (hoveredAnnotation.value !== null && !editMode.value.active) {
       highlightAnnotation(hoveredAnnotation.value, false);
     }
     hoveredAnnotation.value = null;
@@ -92,6 +138,71 @@ export const useImageAnnotationFieldViewModel = (props: {
       y,
       annotationIndex: index,
     };
+  };
+
+  const enterEditMode = (annotationIndex: number) => {
+    // Cancel any ongoing drawing
+    if (isDrawingPolygon) {
+      cancelPolygon();
+    }
+
+    editMode.value = {
+      active: true,
+      annotationIndex,
+    };
+    sharedState.editModeActive.value = true;
+    sharedState.currentAnnotationIndex.value = annotationIndex;
+
+    // Broadcast edit mode state to question component
+    (answer as any).editModeState = true;
+    
+    // Show anchor points for the selected annotation
+    renderAnchorPoints(annotationIndex);
+    
+    // Highlight the annotation
+    highlightAnnotation(annotationIndex, true);
+    
+    // Fade other annotations
+    fadeNonEditedAnnotations(annotationIndex);
+    
+    hideContextMenu();
+  };
+
+  const exitEditMode = () => {
+    if (editMode.value.annotationIndex !== null) {
+      highlightAnnotation(editMode.value.annotationIndex, false);
+    }
+
+    removeAnchorPoints();
+    restoreAllAnnotations();
+
+    editMode.value = {
+      active: false,
+      annotationIndex: null,
+    };
+    sharedState.editModeActive.value = false;
+    sharedState.currentAnnotationIndex.value = null;
+
+    // Broadcast edit mode state to question component
+    (answer as any).editModeState = false;
+  };
+
+  const editNextAnnotation = () => {
+    if (!editMode.value.active || editMode.value.annotationIndex === null) return;
+    
+    const currentIndex = editMode.value.annotationIndex;
+    const nextIndex = (currentIndex + 1) % annotations.value.length;
+    
+    enterEditMode(nextIndex);
+  };
+
+  const editPreviousAnnotation = () => {
+    if (!editMode.value.active || editMode.value.annotationIndex === null) return;
+    
+    const currentIndex = editMode.value.annotationIndex;
+    const prevIndex = currentIndex === 0 ? annotations.value.length - 1 : currentIndex - 1;
+    
+    enterEditMode(prevIndex);
   };
 
   const hideContextMenu = () => {
@@ -110,6 +221,209 @@ export const useImageAnnotationFieldViewModel = (props: {
       deleteAnnotation(contextMenu.value.annotationIndex);
       hideContextMenu();
     }
+  };
+
+  const handleContextMenuEdit = () => {
+    if (contextMenu.value.annotationIndex !== null) {
+      enterEditMode(contextMenu.value.annotationIndex);
+    }
+  };
+
+  const fadeNonEditedAnnotations = (editingIndex: number) => {
+    if (!layer) return;
+    
+    annotations.value.forEach((_, index) => {
+      if (index !== editingIndex) {
+        const shape = layer?.findOne(`#annotation-${index}`);
+        if (shape) {
+          (shape as any).opacity(0.2); // More faded for non-edited annotations
+        }
+      }
+    });
+    
+    layer.batchDraw();
+  };
+
+  const restoreAllAnnotations = () => {
+    if (!layer) return;
+    
+    annotations.value.forEach((_, index) => {
+      const shape = layer?.findOne(`#annotation-${index}`);
+      if (shape) {
+        (shape as any).opacity(0.3); // Restore to default opacity
+      }
+    });
+    
+    layer.batchDraw();
+  };
+
+  const renderAnchorPoints = (annotationIndex: number) => {
+    if (!layer) return;
+    
+    // Remove existing anchor points
+    removeAnchorPoints();
+    
+    const annotation = annotations.value[annotationIndex];
+    if (!annotation) return;
+    
+    const color = getAnnotationColor(annotation.label);
+    const canvasPoints = getCanvasCoordinates(annotation.points);
+    
+    // Create anchor points based on shape type
+    if (annotation.shape_type === "rectangle" && canvasPoints.length === 2) {
+      // For rectangles, show 4 corner points
+      const [p1, p2] = canvasPoints;
+      const corners = [
+        { x: p1[0], y: p1[1] }, // top-left
+        { x: p2[0], y: p1[1] }, // top-right
+        { x: p2[0], y: p2[1] }, // bottom-right
+        { x: p1[0], y: p2[1] }, // bottom-left
+      ];
+      
+      corners.forEach((corner, pointIndex) => {
+        createAnchorPoint(corner.x, corner.y, color, annotationIndex, pointIndex);
+      });
+    } else if (annotation.shape_type === "polygon") {
+      // For polygons, show all vertex points
+      canvasPoints.forEach((point, pointIndex) => {
+        createAnchorPoint(point[0], point[1], color, annotationIndex, pointIndex);
+      });
+    }
+    
+    layer.batchDraw();
+  };
+
+  const createAnchorPoint = (x: number, y: number, color: string, annotationIndex: number, pointIndex: number) => {
+    const anchor = new Konva.Circle({
+      x,
+      y,
+      radius: 6,
+      fill: 'white',
+      stroke: color,
+      strokeWidth: 2,
+      draggable: true,
+      name: 'anchor-point',
+      id: `anchor-${annotationIndex}-${pointIndex}`,
+    });
+    
+    // Change cursor on hover
+    anchor.on('mouseenter', () => {
+      const stage = anchor.getStage();
+      if (stage) {
+        stage.container().style.cursor = 'move';
+      }
+      anchor.radius(8); // Make slightly larger on hover
+      layer?.batchDraw();
+    });
+    
+    anchor.on('mouseleave', () => {
+      if (!draggingPoint.value) {
+        const stage = anchor.getStage();
+        if (stage) {
+          stage.container().style.cursor = 'default';
+        }
+        anchor.radius(6);
+        layer?.batchDraw();
+      }
+    });
+    
+    // Handle dragging
+    anchor.on('dragstart', () => {
+      draggingPoint.value = { annotationIndex, pointIndex };
+    });
+    
+    anchor.on('dragmove', () => {
+      if (draggingPoint.value) {
+        updateAnnotationFromDrag(annotationIndex, pointIndex, anchor.position());
+      }
+    });
+    
+    anchor.on('dragend', () => {
+      if (draggingPoint.value) {
+        finalizeAnnotationEdit(annotationIndex);
+        draggingPoint.value = null;
+        const stage = anchor.getStage();
+        if (stage) {
+          stage.container().style.cursor = 'default';
+        }
+      }
+    });
+    
+    layer?.add(anchor);
+  };
+
+  const removeAnchorPoints = () => {
+    if (!layer) return;
+    layer.find('.anchor-point').forEach((anchor) => anchor.destroy());
+    layer.batchDraw();
+  };
+
+  const updateAnnotationFromDrag = (annotationIndex: number, pointIndex: number, newPos: { x: number; y: number }) => {
+    const annotation = annotations.value[annotationIndex];
+    if (!annotation) return;
+    
+    if (annotation.shape_type === "rectangle") {
+      // For rectangles, update the appropriate corners
+      const imageCoords = getImageCoordinates([[newPos.x, newPos.y]])[0];
+      
+      // Rectangle has 2 points: [top-left, bottom-right]
+      // pointIndex: 0=top-left, 1=top-right, 2=bottom-right, 3=bottom-left
+      const currentPoints = annotation.points;
+      
+      if (pointIndex === 0) {
+        // Top-left corner
+        annotation.points = [imageCoords, currentPoints[1]];
+      } else if (pointIndex === 1) {
+        // Top-right corner
+        annotation.points = [[currentPoints[0][0], imageCoords[1]], [imageCoords[0], currentPoints[1][1]]];
+      } else if (pointIndex === 2) {
+        // Bottom-right corner
+        annotation.points = [currentPoints[0], imageCoords];
+      } else if (pointIndex === 3) {
+        // Bottom-left corner
+        annotation.points = [[imageCoords[0], currentPoints[0][1]], [currentPoints[1][0], imageCoords[1]]];
+      }
+    } else if (annotation.shape_type === "polygon") {
+      // For polygons, update the specific vertex
+      const imageCoords = getImageCoordinates([[newPos.x, newPos.y]])[0];
+      annotation.points[pointIndex] = imageCoords;
+    }
+    
+    // Re-render the annotation shape in real-time
+    updateAnnotationShape(annotationIndex);
+  };
+
+  const updateAnnotationShape = (annotationIndex: number) => {
+    if (!layer) return;
+    
+    // Find and update the annotation shape
+    const shape = layer.findOne(`#annotation-${annotationIndex}`);
+    if (!shape) return;
+    
+    const annotation = annotations.value[annotationIndex];
+    const color = getAnnotationColor(annotation.label);
+    const canvasPoints = getCanvasCoordinates(annotation.points);
+    
+    if (annotation.shape_type === "rectangle" && canvasPoints.length === 2) {
+      const [p1, p2] = canvasPoints;
+      (shape as Konva.Rect).x(Math.min(p1[0], p2[0]));
+      (shape as Konva.Rect).y(Math.min(p1[1], p2[1]));
+      (shape as Konva.Rect).width(Math.abs(p2[0] - p1[0]));
+      (shape as Konva.Rect).height(Math.abs(p2[1] - p1[1]));
+    } else if (annotation.shape_type === "polygon") {
+      const points = canvasPoints.flat();
+      (shape as Konva.Line).points(points);
+    }
+    
+    layer.batchDraw();
+  };
+
+  const finalizeAnnotationEdit = (annotationIndex: number) => {
+    // Save the changes
+    updateAnswer();
+    
+    // Re-render anchor points at new positions
+    renderAnchorPoints(annotationIndex);
   };
 
   const initCanvas = () => {
@@ -137,6 +451,10 @@ export const useImageAnnotationFieldViewModel = (props: {
 
     img.onload = () => {
       if (!stage || !layer) return;
+
+      // Store original image dimensions
+      originalImageWidth = img.width;
+      originalImageHeight = img.height;
 
       const stageWidth = stage.width();
       const stageHeight = stage.height();
@@ -248,6 +566,11 @@ export const useImageAnnotationFieldViewModel = (props: {
   };
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    // Don't start drawing if in edit mode
+    if (editMode.value.active) {
+      return;
+    }
+    
     if (!selectedLabel.value) {
       alert("Please select a label first");
       return;
@@ -422,6 +745,37 @@ export const useImageAnnotationFieldViewModel = (props: {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    // Handle edit mode shortcuts
+    if (editMode.value.active) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        exitEditMode();
+        return;
+      } else if (e.key === "ArrowRight" || e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        editNextAnnotation();
+        return;
+      } else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "p") {
+        e.preventDefault();
+        editPreviousAnnotation();
+        return;
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        if (editMode.value.annotationIndex !== null) {
+          const indexToDelete = editMode.value.annotationIndex;
+          // Move to next annotation or exit if this was the last one
+          if (annotations.value.length > 1) {
+            editNextAnnotation();
+          } else {
+            exitEditMode();
+          }
+          deleteAnnotation(indexToDelete);
+        }
+        return;
+      }
+    }
+    
+    // Handle polygon drawing shortcuts
     if (selectedTool.value === "polygon" && isDrawingPolygon) {
       if (e.key === "Escape") {
         // Cancel polygon drawing
@@ -548,6 +902,43 @@ export const useImageAnnotationFieldViewModel = (props: {
     });
   };
 
+  const resizeCanvas = () => {
+    if (!stage || !canvasContainer.value || !imageNode) return;
+    
+    // Get new container dimensions
+    const containerWidth = canvasContainer.value.offsetWidth;
+    const containerHeight = canvasContainer.value.offsetHeight;
+    
+    if (containerWidth === 0 || containerHeight === 0) return;
+    
+    // Update stage size
+    stage.width(containerWidth);
+    stage.height(containerHeight);
+    
+    // Recalculate scale for image
+    const scale = Math.min(
+      containerWidth / originalImageWidth,
+      containerHeight / originalImageHeight,
+      1 // Don't scale up
+    );
+    
+    // Recenter and rescale image
+    imageNode.x((containerWidth - originalImageWidth * scale) / 2);
+    imageNode.y((containerHeight - originalImageHeight * scale) / 2);
+    imageNode.width(originalImageWidth * scale);
+    imageNode.height(originalImageHeight * scale);
+    
+    // Re-render annotations
+    renderAnnotations();
+    
+    // If in edit mode, re-render anchor points
+    if (editMode.value.active && editMode.value.annotationIndex !== null) {
+      renderAnchorPoints(editMode.value.annotationIndex);
+    }
+    
+    layer?.batchDraw();
+  };
+
   // Watch for changes in annotations from the question component
   watch(
     () => answer.values.length,
@@ -566,17 +957,68 @@ export const useImageAnnotationFieldViewModel = (props: {
     }
   );
 
+  // Watch for enter edit mode signal from question component
+  watch(
+    () => (answer as any).enterEditMode,
+    (annotationIndex) => {
+      if (annotationIndex !== null && annotationIndex !== undefined) {
+        enterEditMode(annotationIndex);
+      }
+    }
+  );
+
+  // Watch for exit edit mode signal from question component
+  watch(
+    () => (answer as any).exitEditMode,
+    (shouldExit) => {
+      if (shouldExit && editMode.value.active) {
+        exitEditMode();
+      }
+    }
+  );
+
+  // Watch for label reassignment in edit mode
+  watch(sharedState.reassignLabel, (reassignData) => {
+    if (reassignData && editMode.value.active && editMode.value.annotationIndex !== null) {
+      const annotationIndex = editMode.value.annotationIndex;
+      const annotation = annotations.value[annotationIndex];
+
+      if (annotation) {
+        // Update the annotation's label
+        annotation.label = reassignData.labelValue;
+
+        // Re-render the annotation with new color
+        renderAnnotations();
+
+        // Re-render anchor points if in edit mode
+        renderAnchorPoints(annotationIndex);
+
+        // Update the answer
+        updateAnswer();
+      }
+    }
+  });
+
   onMounted(() => {
     initCanvas();
 
-    // Handle window resize
-    window.addEventListener("resize", () => {
-      if (stage && canvasContainer.value) {
-        const width = canvasContainer.value.offsetWidth;
-        stage.width(width);
-        renderAnnotations();
-      }
-    });
+    // Handle window resize with debouncing
+    const handleResize = () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        resizeCanvas();
+      }, 150); // Wait 150ms after last resize event
+    };
+    
+    window.addEventListener("resize", handleResize);
+
+    // Watch for container size changes (e.g., from resizable bar)
+    if (canvasContainer.value) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(canvasContainer.value);
+    }
 
     // Close context menu on click outside
     document.addEventListener('click', hideContextMenu);
@@ -585,6 +1027,8 @@ export const useImageAnnotationFieldViewModel = (props: {
   onUnmounted(() => {
     window.removeEventListener("keydown", handleKeyDown);
     clearInterval(toolPollInterval);
+    if (resizeTimeout) clearTimeout(resizeTimeout);
+    if (resizeObserver) resizeObserver.disconnect();
     document.removeEventListener('click', hideContextMenu);
     stage?.destroy();
   });
@@ -594,6 +1038,12 @@ export const useImageAnnotationFieldViewModel = (props: {
     imageLoaded,
     hasError,
     contextMenu,
+    editMode,
     handleContextMenuDelete,
+    handleContextMenuEdit,
+    enterEditMode,
+    exitEditMode,
+    editNextAnnotation,
+    editPreviousAnnotation,
   };
 };

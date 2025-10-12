@@ -11,9 +11,13 @@
             v-for="tool in tools"
             :key="tool.type"
             class="tool-button"
-            :class="{ 'tool-button--active': selectedTool === tool.type }"
+            :class="{ 
+              'tool-button--active': selectedTool === tool.type,
+              'tool-button--disabled': editModeActive 
+            }"
             @click="selectTool(tool.type)"
             :title="tool.label"
+            :disabled="editModeActive"
           >
             <span class="tool-icon">{{ tool.icon }}</span>
             <span class="tool-label">{{ tool.label }}</span>
@@ -38,29 +42,31 @@
       <!-- Annotations List -->
       <div class="image-annotation-question__annotations">
         <h4 class="section-title">Annotations ({{ annotations.length }})</h4>
-        <div class="annotations-list">
-          <div
-            v-for="(annotation, index) in annotations"
-            :key="index"
-            class="annotation-item"
-            :class="{ 'annotation-item--hovered': hoveredAnnotation === index }"
-            @mouseenter="hoverAnnotation(index)"
-            @mouseleave="unhoverAnnotation()"
-            @click="selectAnnotation(index)"
-          >
-            <span
-              class="annotation-color"
-              :style="{ backgroundColor: getAnnotationColor(annotation.label) }"
-            />
-            <span class="annotation-label">{{ annotation.label }}</span>
-            <span class="annotation-type">{{ annotation.shape_type }}</span>
-            <button
-              class="annotation-delete"
-              @click.stop="deleteAnnotation(index)"
-              title="Delete"
+        <div class="image-annotation-question__annotations-container">
+          <div class="annotations-list">
+            <div
+              v-for="(annotation, index) in annotations"
+              :key="index"
+              class="annotation-item"
+              :class="{ 'annotation-item--hovered': hoveredAnnotation === index }"
+              @mouseenter="hoverAnnotation(index)"
+              @mouseleave="unhoverAnnotation()"
+              @click="onEditAnnotation(index)"
             >
-              ×
-            </button>
+              <span
+                class="annotation-color"
+                :style="{ backgroundColor: getAnnotationColor(annotation.label) }"
+              />
+              <span class="annotation-label">{{ annotation.label }}</span>
+              <span class="annotation-type">{{ annotation.shape_type }}</span>
+              <button
+                class="annotation-delete"
+                @click.stop="deleteAnnotation(index)"
+                title="Delete"
+              >
+                ×
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -122,7 +128,7 @@ export default {
     gap: $base-space * 1.5;
   }
 
-  &__annotations {
+  &__annotations-container {
     background: var(--bg-opacity-8);
     padding: $base-space * 2;
     border-radius: $border-radius-s;
@@ -157,7 +163,7 @@ export default {
   transition: all 0.2s;
   color: var(--fg-primary);
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--bg-opacity-16);
   }
 
@@ -165,6 +171,12 @@ export default {
     background: var(--bg-brand);
     color: white;
     border-color: var(--bg-brand);
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(100%);
   }
 }
 

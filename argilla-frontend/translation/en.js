@@ -63,6 +63,20 @@ export default {
     noDraftRecordsToReview: "You have no draft records to review",
   },
   couldNotLoadImage: "Could not load image",
+  imageAnnotation: {
+    shapesCount: "Shapes: {count}",
+    editShapes: "Edit Shapes",
+    editMode: {
+      previous: "Previous",
+      next: "Next",
+      exitEditMode: "Exit Edit Mode",
+      shapeCounter: "Shape {current}/{total}",
+    },
+    contextMenu: {
+      edit: "Edit Annotation",
+      delete: "Delete Annotation",
+    },
+  },
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",

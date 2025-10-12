@@ -1,4 +1,4 @@
-import { ref, computed } from "vue-demi";
+import { ref, computed, watch, type Ref } from "vue-demi";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 
@@ -14,11 +14,39 @@ export const useImageAnnotationQuestionViewModel = (props: {
 
   const answer = question.answer as ImageAnnotationQuestionAnswer;
 
+  type SharedState = {
+    editModeActive: Ref<boolean>;
+    currentAnnotationIndex: Ref<number | null>;
+    reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
+  };
+
+  const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
+    const answerTarget = target as any;
+    if (!answerTarget.__imageAnnotationSync) {
+      const syncState: SharedState = {
+        editModeActive: ref(false),
+        currentAnnotationIndex: ref<number | null>(null),
+        reassignLabel: ref(null),
+      };
+      answerTarget.__imageAnnotationSync = syncState;
+    }
+    return answerTarget.__imageAnnotationSync as SharedState;
+  };
+
+  const sharedState = ensureSharedState(answer);
+  const editModeActive = sharedState.editModeActive;
+
+  watch(sharedState.editModeActive, (state) => {
+    if (state) {
+      // keep local state aligned when external edit mode starts
+      sharedState.currentAnnotationIndex.value ??= 0;
+    }
+  });
+
   const annotations = computed(() => answer.values);
 
   // Initialize the selected tool in the answer object
   (answer as any).selectedTool = selectedTool.value;
-
   const selectTool = (tool: Tool) => {
     // Signal to field component to cancel any ongoing polygon drawing
     if (selectedTool.value === "polygon" && tool !== "polygon") {
@@ -39,6 +67,30 @@ export const useImageAnnotationQuestionViewModel = (props: {
     // The EntityLabelSelection component already handles the selection logic
     // We just need to ensure the selected tool is stored
     (answer as any).selectedTool = selectedTool.value;
+    
+    // If in edit mode, reassign the current annotation to the new label
+    if (editModeActive.value) {
+      // Find the currently selected label
+      const selectedOption = answer.options.find((opt) => opt.isSelected);
+      
+      if (selectedOption) {
+        const reassignData = {
+          labelValue: selectedOption.value,
+          timestamp: Date.now(),
+        };
+
+        sharedState.reassignLabel.value = reassignData;
+
+        // Reset flag after a tick to allow consecutive reassignments
+        setTimeout(() => {
+          if (sharedState.reassignLabel.value?.timestamp === reassignData.timestamp) {
+            sharedState.reassignLabel.value = null;
+          }
+        }, 0);
+      } else {
+        sharedState.reassignLabel.value = null;
+      }
+    }
   };
 
   const onFocus = () => {
@@ -61,7 +113,36 @@ export const useImageAnnotationQuestionViewModel = (props: {
   };
 
   const selectAnnotation = (index: number) => {
-    // TODO: Enable editing mode for selected annotation
+    // Clicking on annotation in list - could trigger edit mode
+  };
+
+  const onEditAnnotation = (index: number) => {
+    // Signal to field component to enter edit mode
+    (answer as any).enterEditMode = index;
+    sharedState.editModeActive.value = true;
+    sharedState.currentAnnotationIndex.value = index;
+    
+    // Reset flag after a tick
+    setTimeout(() => {
+      (answer as any).enterEditMode = null;
+    }, 100);
+  };
+
+  const toggleEditMode = () => {
+    if (editModeActive.value) {
+      // Exit edit mode
+      (answer as any).exitEditMode = true;
+      editModeActive.value = false;
+      
+      setTimeout(() => {
+        (answer as any).exitEditMode = false;
+      }, 100);
+    } else {
+      // Enter edit mode with first annotation
+      if (annotations.value.length > 0) {
+        onEditAnnotation(0);
+      }
+    }
   };
 
   const deleteAnnotation = (index: number) => {
@@ -79,6 +160,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
     selectedTool,
     hoveredAnnotation,
     annotations,
+    editModeActive,
     selectTool,
     onLabelSelected,
     onFocus,
@@ -87,5 +169,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
     unhoverAnnotation,
     selectAnnotation,
     deleteAnnotation,
+    onEditAnnotation,
+    toggleEditMode,
   };
 };
