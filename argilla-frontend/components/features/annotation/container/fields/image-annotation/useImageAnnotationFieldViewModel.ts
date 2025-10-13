@@ -175,15 +175,10 @@ export const useImageAnnotationFieldViewModel = (props: {
     // Signal to question component to select the annotation's label
     const annotation = annotations.value[annotationIndex];
     if (annotation && annotation.label) {
-      sharedState.selectLabelSignal.value = { 
-        labelValue: annotation.label, 
-        timestamp: Date.now() 
+      sharedState.selectLabelData.value = { 
+        labelValue: annotation.label
       };
-      
-      // Reset signal after a tick
-      setTimeout(() => {
-        sharedState.selectLabelSignal.value = null;
-      }, 100);
+      sharedState.selectLabelTrigger.value++;
     }
     
     // Show anchor points for the selected annotation
@@ -980,12 +975,17 @@ export const useImageAnnotationFieldViewModel = (props: {
     if (mode.value.kind === "draw-hole-poly") {
       // Create hole and add to parent
       const parent = annotations.value[mode.value.parentIndex];
+      
+      // Clamp hole coordinates to parent bounds
+      const parentBounds = getParentShapeBounds(parent.points, parent.shape_type);
+      const clampedCoords = imageCoords.map(point => clampToParentBounds(point, parentBounds));
+      
       if (!parent.holes) {
         parent.holes = [];
       }
 
       parent.holes.push({
-        points: imageCoords,
+        points: clampedCoords,
         shape_type: "polygon",
         flags: {},
       });
@@ -1302,14 +1302,18 @@ export const useImageAnnotationFieldViewModel = (props: {
           [pos.x, pos.y],
         ]);
 
-        // Create hole and add to parent
+        // Clamp hole coordinates to parent bounds
         const parent = annotations.value[mode.value.parentIndex];
+        const parentBounds = getParentShapeBounds(parent.points, parent.shape_type);
+        const clampedCoords = imageCoords.map(point => clampToParentBounds(point, parentBounds));
+
+        // Create hole and add to parent
         if (!parent.holes) {
           parent.holes = [];
         }
 
         parent.holes.push({
-          points: imageCoords,
+          points: clampedCoords,
           shape_type: "rectangle",
           flags: {},
         });
@@ -1399,8 +1403,16 @@ export const useImageAnnotationFieldViewModel = (props: {
         break;
 
       case "idle":
+        // Exit hole drawing mode if active
+        if (e.key === "Escape" && sharedState.holeDrawingMode.value.active) {
+          e.preventDefault();
+          exitHoleDrawingMode();
+          return;
+        }
+        break;
+
       case "draw-rect":
-        // No keyboard shortcuts in these modes
+        // No keyboard shortcuts in this mode
         break;
     }
   };
@@ -1626,43 +1638,43 @@ export const useImageAnnotationFieldViewModel = (props: {
   );
 
   // Watch for cancel polygon signal from question component
-  watch(
-    () => (answer as any).cancelPolygon,
-    (shouldCancel) => {
-      if (shouldCancel && (mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly")) {
-        cancelPolygon();
-      }
+  watch(sharedState.cancelPolygonTrigger, () => {
+    if (mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly") {
+      cancelPolygon();
     }
-  );
+  });
 
   // Watch for enter edit mode signal from question component
-  watch(sharedState.enterEditModeSignal, (editModeData) => {
+  watch(sharedState.enterEditModeTrigger, () => {
+    const editModeData = sharedState.enterEditModeData.value;
     if (editModeData && editModeData.index !== null && editModeData.index !== undefined) {
       enterEditMode(editModeData.index);
     }
   });
 
   // Watch for exit edit mode signal from question component
-  watch(sharedState.exitEditModeSignal, (shouldExit) => {
-    if (shouldExit && editMode.value.active) {
+  watch(sharedState.exitEditModeTrigger, () => {
+    if (editMode.value.active) {
       exitEditMode();
     }
   });
 
   // Watch for delete shape signal from question component
-  watch(sharedState.deleteShapeSignal, (deleteSignal) => {
-    if (deleteSignal && deleteSignal.index !== null && deleteSignal.index !== undefined) {
-      deleteShape(deleteSignal.index);
+  watch(sharedState.deleteShapeTrigger, () => {
+    const deleteData = sharedState.deleteShapeData.value;
+    if (deleteData && deleteData.index !== null && deleteData.index !== undefined) {
+      deleteShape(deleteData.index);
     }
   });
 
   // Watch for delete hole signal from question component
-  watch(sharedState.deleteHoleSignal, (deleteSignal) => {
-    if (deleteSignal && deleteSignal.annotationIndex !== null && deleteSignal.holeIndex !== null) {
-      const annotation = annotations.value[deleteSignal.annotationIndex];
-      if (annotation && annotation.holes && annotation.holes[deleteSignal.holeIndex]) {
+  watch(sharedState.deleteHoleTrigger, () => {
+    const deleteData = sharedState.deleteHoleData.value;
+    if (deleteData && deleteData.annotationIndex !== null && deleteData.holeIndex !== null) {
+      const annotation = annotations.value[deleteData.annotationIndex];
+      if (annotation && annotation.holes && annotation.holes[deleteData.holeIndex]) {
         // Remove the hole from the array
-        annotation.holes.splice(deleteSignal.holeIndex, 1);
+        annotation.holes.splice(deleteData.holeIndex, 1);
         
         // If no holes left, remove the holes array
         if (annotation.holes.length === 0) {
@@ -1676,15 +1688,16 @@ export const useImageAnnotationFieldViewModel = (props: {
         renderAnnotations();
         
         // If in edit mode for this annotation, re-render anchor points
-        if (editMode.value.active && editMode.value.annotationIndex === deleteSignal.annotationIndex) {
-          renderAnchorPoints(deleteSignal.annotationIndex);
+        if (editMode.value.active && editMode.value.annotationIndex === deleteData.annotationIndex) {
+          renderAnchorPoints(deleteData.annotationIndex);
         }
       }
     }
   });
 
   // Watch for label reassignment in edit mode
-  watch(sharedState.reassignLabel, (reassignData) => {
+  watch(sharedState.reassignLabelTrigger, () => {
+    const reassignData = sharedState.reassignLabelData.value;
     if (reassignData && editMode.value.active && editMode.value.annotationIndex !== null) {
       const annotationIndex = editMode.value.annotationIndex;
       const annotation = annotations.value[annotationIndex];

@@ -4,12 +4,19 @@ import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/Que
 export type ImageAnnotationSharedState = {
   editModeActive: Ref<boolean>;
   currentAnnotationIndex: Ref<number | null>;
-  reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
-  deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
-  deleteHoleSignal: Ref<{ annotationIndex: number; holeIndex: number; timestamp: number } | null>;
-  enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
-  exitEditModeSignal: Ref<boolean>;
-  selectLabelSignal: Ref<{ labelValue: string; timestamp: number } | null>;
+  // Counter-based signals - increment to trigger action
+  cancelPolygonTrigger: Ref<number>;
+  reassignLabelTrigger: Ref<number>;
+  reassignLabelData: Ref<{ labelValue: string } | null>;
+  deleteShapeTrigger: Ref<number>;
+  deleteShapeData: Ref<{ index: number } | null>;
+  deleteHoleTrigger: Ref<number>;
+  deleteHoleData: Ref<{ annotationIndex: number; holeIndex: number } | null>;
+  enterEditModeTrigger: Ref<number>;
+  enterEditModeData: Ref<{ index: number } | null>;
+  exitEditModeTrigger: Ref<number>;
+  selectLabelTrigger: Ref<number>;
+  selectLabelData: Ref<{ labelValue: string } | null>;
   holeDrawingMode: Ref<{ active: boolean; parentIndex: number | null }>;
 };
 
@@ -28,12 +35,19 @@ export const useImageAnnotationSharedState = (
     state = {
       editModeActive: ref(false),
       currentAnnotationIndex: ref<number | null>(null),
-      reassignLabel: ref(null),
-      deleteShapeSignal: ref(null),
-      deleteHoleSignal: ref(null),
-      enterEditModeSignal: ref(null),
-      exitEditModeSignal: ref(false),
-      selectLabelSignal: ref(null),
+      // Counter-based signals
+      cancelPolygonTrigger: ref(0),
+      reassignLabelTrigger: ref(0),
+      reassignLabelData: ref(null),
+      deleteShapeTrigger: ref(0),
+      deleteShapeData: ref(null),
+      deleteHoleTrigger: ref(0),
+      deleteHoleData: ref(null),
+      enterEditModeTrigger: ref(0),
+      enterEditModeData: ref(null),
+      exitEditModeTrigger: ref(0),
+      selectLabelTrigger: ref(0),
+      selectLabelData: ref(null),
       holeDrawingMode: ref({ active: false, parentIndex: null }),
     };
     

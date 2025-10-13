@@ -27,7 +27,8 @@ export const useImageAnnotationQuestionViewModel = (props: {
   });
 
   // Watch for label selection signal from field component
-  watch(sharedState.selectLabelSignal, (selectData) => {
+  watch(sharedState.selectLabelTrigger, () => {
+    const selectData = sharedState.selectLabelData.value;
     if (selectData && selectData.labelValue) {
       // Find the option with this label value
       const option = answer.options.find(opt => opt.value === selectData.labelValue);
@@ -47,11 +48,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
   const selectTool = (tool: Tool) => {
     // Signal to field component to cancel any ongoing polygon drawing
     if (selectedTool.value === "polygon" && tool !== "polygon") {
-      (answer as any).cancelPolygon = true;
-      // Reset flag after a tick
-      setTimeout(() => {
-        (answer as any).cancelPolygon = false;
-      }, 100);
+      sharedState.cancelPolygonTrigger.value++;
     }
     
     selectedTool.value = tool;
@@ -71,21 +68,13 @@ export const useImageAnnotationQuestionViewModel = (props: {
       const selectedOption = answer.options.find((opt) => opt.isSelected);
       
       if (selectedOption) {
-        const reassignData = {
+        // Set data and increment trigger - watcher will react immediately
+        sharedState.reassignLabelData.value = {
           labelValue: selectedOption.value,
-          timestamp: Date.now(),
         };
-
-        sharedState.reassignLabel.value = reassignData;
-
-        // Reset flag after a tick to allow consecutive reassignments
-        setTimeout(() => {
-          if (sharedState.reassignLabel.value?.timestamp === reassignData.timestamp) {
-            sharedState.reassignLabel.value = null;
-          }
-        }, 0);
+        sharedState.reassignLabelTrigger.value++;
       } else {
-        sharedState.reassignLabel.value = null;
+        sharedState.reassignLabelData.value = null;
       }
     }
   };
@@ -120,25 +109,17 @@ export const useImageAnnotationQuestionViewModel = (props: {
     }
     
     // Signal to field component to enter edit mode via sharedState
-    sharedState.enterEditModeSignal.value = { index, timestamp: Date.now() };
+    sharedState.enterEditModeData.value = { index };
     sharedState.editModeActive.value = true;
     sharedState.currentAnnotationIndex.value = index;
-    
-    // Reset flag after a tick
-    setTimeout(() => {
-      sharedState.enterEditModeSignal.value = null;
-    }, 100);
+    sharedState.enterEditModeTrigger.value++;
   };
 
   const toggleEditMode = () => {
     if (editModeActive.value) {
       // Exit edit mode - signal to field component
       // Don't change editModeActive here - let the field component handle it
-      sharedState.exitEditModeSignal.value = true;
-      
-      setTimeout(() => {
-        sharedState.exitEditModeSignal.value = false;
-      }, 100);
+      sharedState.exitEditModeTrigger.value++;
     } else {
       // Enter edit mode with first annotation
       if (annotations.value.length > 0) {
@@ -157,11 +138,8 @@ export const useImageAnnotationQuestionViewModel = (props: {
     // 1. Exiting edit mode if needed
     // 2. Removing the shape from the array
     // 3. Re-rendering the canvas
-    sharedState.deleteShapeSignal.value = { index, timestamp: Date.now() };
-    
-    setTimeout(() => {
-      sharedState.deleteShapeSignal.value = null;
-    }, 100);
+    sharedState.deleteShapeData.value = { index };
+    sharedState.deleteShapeTrigger.value++;
   };
   
   // Keep old name for backward compatibility temporarily
@@ -196,15 +174,11 @@ export const useImageAnnotationQuestionViewModel = (props: {
       // 1. Removing the hole from the array
       // 2. Re-rendering the canvas
       // 3. Updating anchor points if in edit mode
-      sharedState.deleteHoleSignal.value = { 
+      sharedState.deleteHoleData.value = { 
         annotationIndex, 
-        holeIndex, 
-        timestamp: Date.now() 
+        holeIndex
       };
-      
-      setTimeout(() => {
-        sharedState.deleteHoleSignal.value = null;
-      }, 100);
+      sharedState.deleteHoleTrigger.value++;
     }
   };
 
