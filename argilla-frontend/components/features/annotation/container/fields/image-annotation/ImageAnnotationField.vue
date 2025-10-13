@@ -14,7 +14,7 @@
       <!-- Navigation Bar (under canvas) -->
       <div class="image-annotation-field__edit-nav">
         <!-- Hole Drawing Mode: Show parent info and exit button -->
-        <template v-if="imageAnnotationQuestion.answer.__imageAnnotationSync?.holeDrawingMode?.value?.active">
+        <template v-if="holeDrawingMode.active">
           <span class="edit-nav-counter">
             <span class="hole-mode-icon">⬚</span>
             Drawing holes - Click ESC to exit

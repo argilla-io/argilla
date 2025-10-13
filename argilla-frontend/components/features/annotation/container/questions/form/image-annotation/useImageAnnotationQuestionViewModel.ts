@@ -1,6 +1,7 @@
 import { ref, computed, watch, type Ref } from "vue-demi";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
+import { useImageAnnotationSharedState } from "../../../fields/image-annotation/useImageAnnotationSharedState";
 
 type Tool = "rectangle" | "polygon";
 
@@ -15,37 +16,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
 
   const answer = question.answer as ImageAnnotationQuestionAnswer;
 
-  type SharedState = {
-    editModeActive: Ref<boolean>;
-    currentAnnotationIndex: Ref<number | null>;
-    reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
-    deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
-    deleteHoleSignal: Ref<{ annotationIndex: number; holeIndex: number; timestamp: number } | null>;
-    enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
-    exitEditModeSignal: Ref<boolean>;
-    selectLabelSignal: Ref<{ labelValue: string; timestamp: number } | null>;
-    holeDrawingMode?: Ref<{ active: boolean; parentIndex: number | null }>;
-  };
-
-  const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
-    const answerTarget = target as any;
-    if (!answerTarget.__imageAnnotationSync) {
-      const syncState: SharedState = {
-        editModeActive: ref(false),
-        currentAnnotationIndex: ref<number | null>(null),
-        reassignLabel: ref(null),
-        deleteShapeSignal: ref(null),
-        deleteHoleSignal: ref(null),
-        enterEditModeSignal: ref(null),
-        exitEditModeSignal: ref(false),
-        selectLabelSignal: ref(null),
-      };
-      answerTarget.__imageAnnotationSync = syncState;
-    }
-    return answerTarget.__imageAnnotationSync as SharedState;
-  };
-
-  const sharedState = ensureSharedState(answer);
+  const sharedState = useImageAnnotationSharedState(answer);
   const editModeActive = sharedState.editModeActive;
 
   watch(sharedState.editModeActive, (state) => {
@@ -211,12 +182,10 @@ export const useImageAnnotationQuestionViewModel = (props: {
 
   const onAddHole = (index: number) => {
     // Signal to field component to enter hole drawing mode
-    if (sharedState.holeDrawingMode) {
-      sharedState.holeDrawingMode.value = {
-        active: true,
-        parentIndex: index,
-      };
-    }
+    sharedState.holeDrawingMode.value = {
+      active: true,
+      parentIndex: index,
+    };
   };
 
   const deleteHole = (annotationIndex: number, holeIndex: number) => {

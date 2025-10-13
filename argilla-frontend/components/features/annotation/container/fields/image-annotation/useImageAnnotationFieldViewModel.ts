@@ -3,6 +3,7 @@ import Konva from "konva";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
+import { useImageAnnotationSharedState } from "./useImageAnnotationSharedState";
 
 type Mode =
   | { kind: "idle" }
@@ -56,38 +57,7 @@ export const useImageAnnotationFieldViewModel = (props: {
 
   const annotations = computed(() => answer.values);
 
-  type SharedState = {
-    editModeActive: Ref<boolean>;
-    currentAnnotationIndex: Ref<number | null>;
-    reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
-    deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
-    deleteHoleSignal: Ref<{ annotationIndex: number; holeIndex: number; timestamp: number } | null>;
-    enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
-    exitEditModeSignal: Ref<boolean>;
-    selectLabelSignal: Ref<{ labelValue: string; timestamp: number } | null>;
-    holeDrawingMode: Ref<{ active: boolean; parentIndex: number | null }>;
-  };
-
-  const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
-    const answerTarget = target as any;
-    if (!answerTarget.__imageAnnotationSync) {
-      const syncState: SharedState = {
-        editModeActive: ref(false),
-        currentAnnotationIndex: ref<number | null>(null),
-        reassignLabel: ref(null),
-        deleteShapeSignal: ref(null),
-        deleteHoleSignal: ref(null),
-        enterEditModeSignal: ref(null),
-        exitEditModeSignal: ref(false),
-        selectLabelSignal: ref(null),
-        holeDrawingMode: ref({ active: false, parentIndex: null }),
-      };
-      answerTarget.__imageAnnotationSync = syncState;
-    }
-    return answerTarget.__imageAnnotationSync as SharedState;
-  };
-
-  const sharedState = ensureSharedState(answer);
+  const sharedState = useImageAnnotationSharedState(answer);
 
   const selectedLabel = computed(() => {
     return answer.options.find((opt) => opt.isSelected);
@@ -1735,6 +1705,18 @@ export const useImageAnnotationFieldViewModel = (props: {
     }
   });
 
+  // Watch for hole drawing mode signal from question component
+  watch(sharedState.holeDrawingMode, (holeMode, oldHoleMode) => {
+    // Enter hole drawing mode when activated from question component
+    if (holeMode.active && holeMode.parentIndex !== null) {
+      // Check if this is a new activation (not already in hole mode for this parent)
+      const isNewActivation = !oldHoleMode?.active || oldHoleMode.parentIndex !== holeMode.parentIndex;
+      if (isNewActivation) {
+        enterHoleDrawingMode(holeMode.parentIndex);
+      }
+    }
+  });
+
   onMounted(() => {
     initCanvas();
 
@@ -1775,6 +1757,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     hasError,
     contextMenu,
     editMode,
+    holeDrawingMode: computed(() => sharedState.holeDrawingMode.value),
     deleteShape,
     handleContextMenuDelete,
     handleContextMenuEdit,
