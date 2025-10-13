@@ -284,7 +284,10 @@ export const useImageAnnotationFieldViewModel = (props: {
         createAnchorPoint(corner.x, corner.y, color, annotationIndex, pointIndex);
       });
     } else if (annotation.shape_type === "polygon") {
-      // For polygons, show all vertex points
+      // For polygons, render edge handles first (lower z-index)
+      renderEdgeHandles(annotationIndex, canvasPoints, color);
+      
+      // Then show all vertex points (higher z-index)
       canvasPoints.forEach((point, pointIndex) => {
         createAnchorPoint(point[0], point[1], color, annotationIndex, pointIndex);
       });
@@ -355,7 +358,85 @@ export const useImageAnnotationFieldViewModel = (props: {
   const removeAnchorPoints = () => {
     if (!layer) return;
     layer.find('.anchor-point').forEach((anchor) => anchor.destroy());
+    layer.find('.edge-handle').forEach((edge) => edge.destroy());
     layer.batchDraw();
+  };
+
+  const renderEdgeHandles = (annotationIndex: number, canvasPoints: number[][], color: string) => {
+    if (!layer) return;
+    
+    // Create edge handles between consecutive points
+    for (let i = 0; i < canvasPoints.length; i++) {
+      const startPoint = canvasPoints[i];
+      const endPoint = canvasPoints[(i + 1) % canvasPoints.length]; // Wrap around to first point
+      
+      // Create an invisible/semi-transparent line that's easier to click
+      const edgeLine = new Konva.Line({
+        points: [startPoint[0], startPoint[1], endPoint[0], endPoint[1]],
+        stroke: color,
+        strokeWidth: 16, // Thicker for easier clicking
+        opacity: 0, // Invisible by default
+        lineCap: 'round',
+        lineJoin: 'round',
+        name: 'edge-handle',
+        id: `edge-${annotationIndex}-${i}`,
+      });
+      
+      // Hover effects
+      edgeLine.on('mouseenter', () => {
+        const stage = edgeLine.getStage();
+        if (stage) {
+          stage.container().style.cursor = 'copy'; // Indicate insertion
+        }
+        edgeLine.opacity(0.3); // Make visible on hover
+        edgeLine.strokeWidth(4);
+        layer?.batchDraw();
+      });
+      
+      edgeLine.on('mouseleave', () => {
+        const stage = edgeLine.getStage();
+        if (stage) {
+          stage.container().style.cursor = 'default';
+        }
+        edgeLine.opacity(0);
+        edgeLine.strokeWidth(16);
+        layer?.batchDraw();
+      });
+      
+      // Click to insert point
+      edgeLine.on('click', (e) => {
+        const stage = edgeLine.getStage();
+        if (!stage) return;
+        
+        const pointerPos = stage.getPointerPosition();
+        if (!pointerPos) return;
+        
+        // Insert new point at click position
+        insertPointOnEdge(annotationIndex, i, pointerPos);
+      });
+      
+      layer.add(edgeLine);
+    }
+  };
+
+  const insertPointOnEdge = (annotationIndex: number, edgeIndex: number, position: { x: number; y: number }) => {
+    const annotation = annotations.value[annotationIndex];
+    if (!annotation || annotation.shape_type !== "polygon") return;
+    
+    // Convert canvas position to image coordinates
+    const imageCoords = getImageCoordinates([[position.x, position.y]])[0];
+    
+    // Insert the new point after the edge's start point
+    annotation.points.splice(edgeIndex + 1, 0, imageCoords);
+    
+    // Update the answer
+    updateAnswer();
+    
+    // Re-render anchor points to show the new point
+    renderAnchorPoints(annotationIndex);
+    
+    // Update the annotation shape
+    updateAnnotationShape(annotationIndex);
   };
 
   const updateAnnotationFromDrag = (annotationIndex: number, pointIndex: number, newPos: { x: number; y: number }) => {

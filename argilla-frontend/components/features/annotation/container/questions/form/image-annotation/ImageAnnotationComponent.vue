@@ -130,7 +130,6 @@ export default {
 
   &__annotations-container {
     background: var(--bg-opacity-8);
-    padding: $base-space * 2;
     border-radius: $border-radius-s;
     max-height: 300px;
     overflow-y: auto;

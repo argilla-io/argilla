@@ -55,8 +55,46 @@ export class Record {
 
   get isModified() {
     const { original, ...rest } = this;
+    
+    if (!original) return false;
+    
+    // Clean up UI-only properties from questions before comparison
+    const cleanedRest = this.removeUIOnlyProperties(rest);
+    const cleanedOriginal = this.removeUIOnlyProperties(original);
+    
+    return !isEqual(cleanedOriginal, cleanedRest);
+  }
 
-    return !!original && !isEqual(original, rest);
+  private removeUIOnlyProperties(obj: any): any {
+    if (!obj) return obj;
+    
+    // Deep clone to avoid mutating the original
+    const cleaned = cloneDeep(obj);
+    
+    // Remove UI-only properties from image annotation questions
+    if (cleaned.questions) {
+      cleaned.questions.forEach((question: any) => {
+        // Only clean up image annotation questions
+        if (question.isImageAnnotationType && question.answer) {
+          // Remove UI-only properties that are added during rendering
+          delete question.answer.__imageAnnotationSync;
+          delete question.answer.selectedTool;
+          delete question.answer.cancelPolygon;
+          delete question.answer.enterEditMode;
+          delete question.answer.exitEditMode;
+          delete question.answer.editModeState;
+          
+          // Compare only the actual values array, not the entire answer object
+          // This avoids issues with valuesAnswered creating new objects each time
+          if (question.answer.values) {
+            const values = question.answer.values;
+            question.answer = { values };
+          }
+        }
+      });
+    }
+    
+    return cleaned;
   }
 
   discard(answer: RecordAnswer) {
