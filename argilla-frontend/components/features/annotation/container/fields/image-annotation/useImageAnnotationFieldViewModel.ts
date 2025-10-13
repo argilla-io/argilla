@@ -59,6 +59,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
     enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
     exitEditModeSignal: Ref<boolean>;
+    selectLabelSignal: Ref<{ labelValue: string; timestamp: number } | null>;
   };
 
   const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
@@ -71,6 +72,7 @@ export const useImageAnnotationFieldViewModel = (props: {
         deleteShapeSignal: ref(null),
         enterEditModeSignal: ref(null),
         exitEditModeSignal: ref(false),
+        selectLabelSignal: ref(null),
       };
       answerTarget.__imageAnnotationSync = syncState;
     }
@@ -160,6 +162,20 @@ export const useImageAnnotationFieldViewModel = (props: {
 
     // Broadcast edit mode state to question component
     (answer as any).editModeState = true;
+    
+    // Signal to question component to select the annotation's label
+    const annotation = annotations.value[annotationIndex];
+    if (annotation && annotation.label) {
+      sharedState.selectLabelSignal.value = { 
+        labelValue: annotation.label, 
+        timestamp: Date.now() 
+      };
+      
+      // Reset signal after a tick
+      setTimeout(() => {
+        sharedState.selectLabelSignal.value = null;
+      }, 100);
+    }
     
     // Show anchor points for the selected annotation
     renderAnchorPoints(annotationIndex);

@@ -21,6 +21,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
     deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
     enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
     exitEditModeSignal: Ref<boolean>;
+    selectLabelSignal: Ref<{ labelValue: string; timestamp: number } | null>;
   };
 
   const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
@@ -33,6 +34,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
         deleteShapeSignal: ref(null),
         enterEditModeSignal: ref(null),
         exitEditModeSignal: ref(false),
+        selectLabelSignal: ref(null),
       };
       answerTarget.__imageAnnotationSync = syncState;
     }
@@ -46,6 +48,20 @@ export const useImageAnnotationQuestionViewModel = (props: {
     if (state) {
       // keep local state aligned when external edit mode starts
       sharedState.currentAnnotationIndex.value ??= 0;
+    }
+  });
+
+  // Watch for label selection signal from field component
+  watch(sharedState.selectLabelSignal, (selectData) => {
+    if (selectData && selectData.labelValue) {
+      // Find the option with this label value
+      const option = answer.options.find(opt => opt.value === selectData.labelValue);
+      if (option) {
+        // Deselect all options
+        answer.options.forEach(opt => opt.isSelected = false);
+        // Select the matching option
+        option.isSelected = true;
+      }
     }
   });
 
