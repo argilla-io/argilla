@@ -35,7 +35,7 @@
     <!-- Shape Types Selector -->
     <div class="shape-types-section">
       <label class="shape-types-section__label">
-        {{ $t('datasetCreation.questions.imageAnnotation.shapeTypes') || 'Annotation Types' }}
+        {{ $t('datasetCreation.questions.imageAnnotation.shapeTypes') }}
       </label>
       <div class="shape-types-section__options">
         <label
@@ -60,7 +60,7 @@
       :value="question.settings.allow_multiple"
       @input="question.settings.allow_multiple = !question.settings.allow_multiple"
     >
-      {{ $t('datasetCreation.questions.imageAnnotation.allowMultiple') || 'Allow multiple annotations' }}
+      {{ $t('datasetCreation.questions.imageAnnotation.allowMultiple') }}
     </BaseCheckbox>
   </div>
 </template>
@@ -74,9 +74,6 @@ export default {
       availableShapeTypes: [
         { value: "rectangle", label: "Rectangle (Bounding Box)" },
         { value: "polygon", label: "Polygon" },
-        { value: "circle", label: "Circle" },
-        { value: "line", label: "Line" },
-        { value: "point", label: "Point" },
       ],
     };
   },

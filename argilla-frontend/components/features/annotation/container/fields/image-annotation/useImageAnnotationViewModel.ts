@@ -85,16 +85,6 @@ export const useImageAnnotationViewModel = (props: {
     // TODO: Enable editing mode for selected annotation
   };
 
-  /**
-   * @deprecated This function is not used. Use deleteShape from useImageAnnotationFieldViewModel instead.
-   * This entire file appears to be legacy code and should be reviewed for removal.
-   */
-  const deleteAnnotation = (index: number) => {
-    answer.values.splice(index, 1);
-    renderAnnotations();
-    updateAnswer();
-  };
-
   const highlightAnnotation = (index: number, highlight: boolean) => {
     const shape = layer?.findOne(`#annotation-${index}`);
     if (shape) {
@@ -119,13 +109,6 @@ export const useImageAnnotationViewModel = (props: {
   const hideContextMenu = () => {
     contextMenu.value.visible = false;
     contextMenu.value.annotationIndex = null;
-  };
-
-  const handleContextMenuDelete = () => {
-    if (contextMenu.value.annotationIndex !== null) {
-      deleteAnnotation(contextMenu.value.annotationIndex);
-      hideContextMenu();
-    }
   };
 
   const initCanvas = () => {
@@ -475,8 +458,6 @@ export const useImageAnnotationViewModel = (props: {
     hoverAnnotation,
     unhoverAnnotation,
     selectAnnotation,
-    deleteAnnotation,
     hideContextMenu,
-    handleContextMenuDelete,
   };
 };

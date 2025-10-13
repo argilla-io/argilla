@@ -315,6 +315,10 @@ export default {
       span: {
         fieldRelated: "One text field is required",
       },
+      imageAnnotation: {
+        shapeTypes: "Annotation Types",
+        allowMultiple: "Allow multiple annotations",
+      },
     },
     atLeastOneQuestion: "At least one question is required.",
     atLeastOneRequired: "At least one required question is needed.",
