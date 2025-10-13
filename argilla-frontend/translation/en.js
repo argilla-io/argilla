@@ -75,6 +75,8 @@ export default {
     contextMenu: {
       edit: "Edit Annotation",
       delete: "Delete Annotation",
+      addHole: "Add Hole",
+      deleteHole: "Delete Hole",
     },
   },
   breadcrumbs: {

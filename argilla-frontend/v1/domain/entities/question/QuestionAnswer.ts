@@ -363,6 +363,7 @@ export class ImageAnnotationQuestionAnswer extends QuestionAnswer {
       shape_type: value.shape_type,
       group_id: value.group_id,
       flags: value.flags,
+      holes: value.holes,
     }));
   }
 }

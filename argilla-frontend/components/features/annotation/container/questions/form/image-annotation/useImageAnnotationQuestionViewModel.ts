@@ -11,6 +11,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
   
   const selectedTool = ref<Tool>("rectangle");
   const hoveredAnnotation = ref<number | null>(null);
+  const expandedAnnotations = ref<Record<number, boolean>>({});
 
   const answer = question.answer as ImageAnnotationQuestionAnswer;
 
@@ -19,9 +20,11 @@ export const useImageAnnotationQuestionViewModel = (props: {
     currentAnnotationIndex: Ref<number | null>;
     reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
     deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
+    deleteHoleSignal: Ref<{ annotationIndex: number; holeIndex: number; timestamp: number } | null>;
     enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
     exitEditModeSignal: Ref<boolean>;
     selectLabelSignal: Ref<{ labelValue: string; timestamp: number } | null>;
+    holeDrawingMode?: Ref<{ active: boolean; parentIndex: number | null }>;
   };
 
   const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
@@ -32,6 +35,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
         currentAnnotationIndex: ref<number | null>(null),
         reassignLabel: ref(null),
         deleteShapeSignal: ref(null),
+        deleteHoleSignal: ref(null),
         enterEditModeSignal: ref(null),
         exitEditModeSignal: ref(false),
         selectLabelSignal: ref(null),
@@ -192,9 +196,53 @@ export const useImageAnnotationQuestionViewModel = (props: {
   // Keep old name for backward compatibility temporarily
   const deleteAnnotation = deleteShapeFromList;
 
+  const toggleExpanded = (index: number) => {
+    expandedAnnotations.value[index] = !expandedAnnotations.value[index];
+  };
+
+  const onAnnotationItemClick = (index: number) => {
+    const annotation = annotations.value[index];
+    if (!annotation) return;
+
+    if (annotation.holes && annotation.holes.length > 0) {
+      toggleExpanded(index);
+    }
+  };
+
+  const onAddHole = (index: number) => {
+    // Signal to field component to enter hole drawing mode
+    if (sharedState.holeDrawingMode) {
+      sharedState.holeDrawingMode.value = {
+        active: true,
+        parentIndex: index,
+      };
+    }
+  };
+
+  const deleteHole = (annotationIndex: number, holeIndex: number) => {
+    const annotation = annotations.value[annotationIndex];
+    if (annotation && annotation.holes && annotation.holes[holeIndex]) {
+      // Signal to field component to delete this hole via sharedState
+      // The field component will handle:
+      // 1. Removing the hole from the array
+      // 2. Re-rendering the canvas
+      // 3. Updating anchor points if in edit mode
+      sharedState.deleteHoleSignal.value = { 
+        annotationIndex, 
+        holeIndex, 
+        timestamp: Date.now() 
+      };
+      
+      setTimeout(() => {
+        sharedState.deleteHoleSignal.value = null;
+      }, 100);
+    }
+  };
+
   return {
     selectedTool,
     hoveredAnnotation,
+    expandedAnnotations,
     annotations,
     editModeActive,
     selectTool,
@@ -206,6 +254,10 @@ export const useImageAnnotationQuestionViewModel = (props: {
     selectAnnotation,
     deleteAnnotation,
     onEditAnnotation,
+    onAnnotationItemClick,
     toggleEditMode,
+    toggleExpanded,
+    onAddHole,
+    deleteHole,
   };
 };

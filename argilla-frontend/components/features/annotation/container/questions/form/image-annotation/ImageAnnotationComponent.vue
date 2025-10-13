@@ -47,43 +47,111 @@
             <div
               v-for="(annotation, index) in annotations"
               :key="index"
-              class="annotation-item"
-              :class="{ 'annotation-item--hovered': hoveredAnnotation === index }"
-              @mouseenter="hoverAnnotation(index)"
-              @mouseleave="unhoverAnnotation()"
-              @click="onEditAnnotation(index)"
+              class="annotation-group"
+              @click="onAnnotationItemClick(index)"
             >
-              <span
-                class="annotation-color"
-                :style="{ backgroundColor: getAnnotationColor(annotation.label) }"
-              />
-              <span class="annotation-label">{{ annotation.label }}</span>
-              <span class="annotation-type">{{ annotation.shape_type }}</span>
-              <div class="annotation-actions">
+              <!-- Parent Annotation -->
+              <div
+                class="annotation-item"
+                :class="{ 'annotation-item--hovered': hoveredAnnotation === index }"
+                @mouseenter="hoverAnnotation(index)"
+                @mouseleave="unhoverAnnotation()"
+              >
+                <!-- Expand/Collapse Button (only if has holes) -->
                 <button
-                  class="annotation-edit"
-                  @click.stop="onEditAnnotation(index)"
-                  title="Edit"
+                  v-if="annotation.holes && annotation.holes.length > 0"
+                  class="annotation-expand"
+                  @click.stop="toggleExpanded(index)"
+                  :title="expandedAnnotations[index] ? 'Collapse' : 'Expand'"
                 >
-                  <svgicon 
-                    name="pen" 
-                    width="12" 
-                    height="12" 
-                    aria-hidden="true"
-                  />
+                  <span class="expand-icon">{{ expandedAnnotations[index] ? '▼' : '▶' }}</span>
                 </button>
-                <button
-                  class="annotation-delete"
-                  @click.stop="deleteAnnotation(index)"
-                  title="Delete"
+                <span v-else class="annotation-expand-spacer" />
+                
+                <span
+                  class="annotation-color"
+                  :style="{ backgroundColor: getAnnotationColor(annotation.label) }"
+                />
+                <span class="annotation-label">{{ annotation.label }}</span>
+                <span class="annotation-type">{{ annotation.shape_type }}</span>
+                
+                <!-- Hole Count Badge -->
+                <span
+                  v-if="annotation.holes && annotation.holes.length > 0"
+                  class="annotation-hole-badge"
+                  :title="`${annotation.holes.length} hole${annotation.holes.length > 1 ? 's' : ''}`"
                 >
-                  <svgicon 
-                    name="close" 
-                    width="12" 
-                    height="12" 
-                    aria-hidden="true"
-                  />
-                </button>
+                  <span class="hole-icon">⬚</span>
+                  {{ annotation.holes.length }}
+                </span>
+                
+                <div class="annotation-actions">
+                  <!-- Add Hole Button -->
+                  <button
+                    v-if="!annotation.holes || annotation.holes.length < 10"
+                    class="annotation-add-hole"
+                    @click.stop="onAddHole(index)"
+                    title="Add Hole"
+                  >
+                    <span class="add-hole-icon">⬚</span>
+                  </button>
+                  
+                  <button
+                    class="annotation-edit"
+                    @click.stop="onEditAnnotation(index)"
+                    title="Edit"
+                  >
+                    <svgicon 
+                      name="pen" 
+                      width="12" 
+                      height="12" 
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    class="annotation-delete"
+                    @click.stop="deleteAnnotation(index)"
+                    title="Delete"
+                  >
+                    <svgicon 
+                      name="close" 
+                      width="12" 
+                      height="12" 
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Holes List (expandable) -->
+              <div
+                v-if="annotation.holes && annotation.holes.length > 0 && expandedAnnotations[index]"
+                class="holes-list"
+              >
+                <div
+                  v-for="(hole, holeIndex) in annotation.holes"
+                  :key="`${index}-hole-${holeIndex}`"
+                  class="hole-item"
+                >
+                  <span class="hole-indent" />
+                  <span class="hole-icon-small">⬚</span>
+                  <span class="hole-label">Hole {{ holeIndex + 1 }}</span>
+                  <span class="hole-type">{{ hole.shape_type }}</span>
+                  <div class="hole-actions">
+                    <button
+                      class="hole-delete"
+                      @click.stop="deleteHole(index, holeIndex)"
+                      title="Delete Hole"
+                    >
+                      <svgicon 
+                        name="close" 
+                        width="10" 
+                        height="10" 
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -211,7 +279,12 @@ export default {
 .annotations-list {
   display: flex;
   flex-direction: column;
-  gap: $base-space;
+  gap: $base-space * 0.5;
+}
+
+.annotation-group {
+  display: flex;
+  flex-direction: column;
 }
 
 .annotation-item {
@@ -230,6 +303,35 @@ export default {
   &--hovered {
     background: var(--bg-opacity-24);
   }
+}
+
+.annotation-expand {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fg-secondary);
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--fg-primary);
+  }
+}
+
+.expand-icon {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.annotation-expand-spacer {
+  width: 16px;
+  flex-shrink: 0;
 }
 
 .annotation-color {
@@ -251,10 +353,54 @@ export default {
   text-transform: capitalize;
 }
 
+.annotation-hole-badge {
+  display: flex;
+  align-items: center;
+  gap: $base-space * 0.25;
+  padding: $base-space * 0.25 $base-space * 0.5;
+  background: var(--bg-opacity-16);
+  border-radius: $border-radius-s;
+  color: var(--fg-secondary);
+  @include font-size(11px);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.hole-icon {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--bg-brand);
+}
+
 .annotation-actions {
   display: flex;
   gap: $base-space * 0.5;
   align-items: center;
+}
+
+.annotation-add-hole {
+  background: none;
+  border: 1px solid var(--border-field);
+  cursor: pointer;
+  padding: $base-space * 0.5;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  color: var(--fg-secondary);
+
+  &:hover {
+    background-color: var(--bg-opacity-8);
+    border-color: var(--bg-brand);
+    color: var(--bg-brand);
+  }
+}
+
+.add-hole-icon {
+  font-size: 14px;
+  line-height: 1;
 }
 
 .annotation-edit,
@@ -286,6 +432,87 @@ export default {
 .annotation-delete {
   &:hover :deep(svg) {
     fill: var(--fg-error);
+  }
+}
+
+// Holes List
+.holes-list {
+  display: flex;
+  flex-direction: column;
+  gap: $base-space * 0.25;
+  padding-left: $base-space * 2;
+  margin-top: $base-space * 0.25;
+}
+
+.hole-item {
+  display: flex;
+  align-items: center;
+  gap: $base-space * 0.5;
+  padding: $base-space * 0.5 $base-space;
+  border-radius: $border-radius-s;
+  background: var(--bg-opacity-4);
+  transition: background 0.2s;
+
+  &:hover {
+    background: var(--bg-opacity-12);
+  }
+}
+
+.hole-indent {
+  width: 2px;
+  height: 16px;
+  background: var(--border-field);
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+
+.hole-icon-small {
+  font-size: 12px;
+  line-height: 1;
+  color: var(--fg-secondary);
+  flex-shrink: 0;
+}
+
+.hole-label {
+  flex: 1;
+  color: var(--fg-secondary);
+  @include font-size(13px);
+}
+
+.hole-type {
+  color: var(--fg-tertiary);
+  @include font-size(11px);
+  text-transform: capitalize;
+}
+
+.hole-actions {
+  display: flex;
+  gap: $base-space * 0.25;
+  align-items: center;
+}
+
+.hole-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $base-space * 0.25;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+
+  :deep(svg) {
+    fill: var(--fg-tertiary);
+  }
+
+  &:hover {
+    background-color: var(--bg-opacity-8);
+    
+    :deep(svg) {
+      fill: var(--fg-error);
+    }
   }
 }
 </style>

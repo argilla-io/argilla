@@ -13,8 +13,22 @@
       
       <!-- Navigation Bar (under canvas) -->
       <div class="image-annotation-field__edit-nav">
+        <!-- Hole Drawing Mode: Show parent info and exit button -->
+        <template v-if="imageAnnotationQuestion.answer.__imageAnnotationSync?.holeDrawingMode?.value?.active">
+          <span class="edit-nav-counter">
+            <span class="hole-mode-icon">⬚</span>
+            Drawing holes - Click ESC to exit
+          </span>
+          <button 
+            class="edit-nav-button edit-nav-button--exit"
+            @click="exitHoleDrawingMode"
+          >
+            Exit Hole Mode
+          </button>
+        </template>
+        
         <!-- Edit Mode: Full navigation -->
-        <template v-if="editMode.active">
+        <template v-else-if="editMode.active">
           <button 
             class="edit-nav-button"
             @click="editPreviousAnnotation"
@@ -57,12 +71,25 @@
         class="image-annotation-field__context-menu"
         :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
       >
-        <div class="context-menu-item" @click.stop="handleContextMenuEdit">
-          <span v-text="$t('imageAnnotation.contextMenu.edit')" />
-        </div>
-        <div class="context-menu-item" @click.stop="handleContextMenuDelete">
-          <span v-text="$t('imageAnnotation.contextMenu.delete')" />
-        </div>
+        <!-- Hole-specific menu -->
+        <template v-if="contextMenu.holeIndex !== null">
+          <div class="context-menu-item context-menu-item--delete" @click.stop="handleContextMenuDeleteHole">
+            <span v-text="$t('imageAnnotation.contextMenu.deleteHole')" />
+          </div>
+        </template>
+        
+        <!-- Parent annotation menu -->
+        <template v-else>
+          <div class="context-menu-item" @click.stop="handleContextMenuEdit">
+            <span v-text="$t('imageAnnotation.contextMenu.edit')" />
+          </div>
+          <div class="context-menu-item" @click.stop="handleContextMenuAddHole">
+            <span v-text="$t('imageAnnotation.contextMenu.addHole')" />
+          </div>
+          <div class="context-menu-item context-menu-item--delete" @click.stop="handleContextMenuDelete">
+            <span v-text="$t('imageAnnotation.contextMenu.delete')" />
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -154,6 +181,9 @@ export default {
     z-index: 1000;
     min-width: 160px;
     .context-menu-item {
+      display: flex;
+      align-items: center;
+      gap: $base-space;
       padding: $base-space;
       cursor: pointer;
       border-radius: $border-radius-s;
@@ -170,9 +200,14 @@ export default {
         color: var(--bg-brand);
       }
       
-      &:last-child:hover {
+      &--delete:hover {
         color: var(--fg-error);
       }
+    }
+    
+    .context-menu-icon {
+      font-size: 16px;
+      line-height: 1;
     }
   }
   
@@ -228,6 +263,15 @@ export default {
       color: var(--fg-primary);
       @include font-size(14px);
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: $base-space * 0.5;
+    }
+    
+    .hole-mode-icon {
+      font-size: 18px;
+      line-height: 1;
+      color: var(--bg-brand);
     }
   }
 }
