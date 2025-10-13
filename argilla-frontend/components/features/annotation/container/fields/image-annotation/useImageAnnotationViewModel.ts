@@ -85,6 +85,10 @@ export const useImageAnnotationViewModel = (props: {
     // TODO: Enable editing mode for selected annotation
   };
 
+  /**
+   * @deprecated This function is not used. Use deleteShape from useImageAnnotationFieldViewModel instead.
+   * This entire file appears to be legacy code and should be reviewed for removal.
+   */
   const deleteAnnotation = (index: number) => {
     answer.values.splice(index, 1);
     renderAnnotations();

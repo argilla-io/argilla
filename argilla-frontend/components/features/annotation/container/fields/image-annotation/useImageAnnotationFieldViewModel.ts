@@ -25,10 +25,12 @@ export const useImageAnnotationFieldViewModel = (props: {
     annotationIndex: null,
   });
   const draggingPoint = ref<{ annotationIndex: number; pointIndex: number } | null>(null);
-  const editMode = ref<{ active: boolean; annotationIndex: number | null }>({
-    active: false,
-    annotationIndex: null,
-  });
+  
+  // Use sharedState directly for edit mode - no local state
+  const editMode = computed(() => ({
+    active: sharedState.editModeActive.value,
+    annotationIndex: sharedState.currentAnnotationIndex.value,
+  }));
 
   let stage: Konva.Stage | null = null;
   let layer: Konva.Layer | null = null;
@@ -54,6 +56,9 @@ export const useImageAnnotationFieldViewModel = (props: {
     editModeActive: Ref<boolean>;
     currentAnnotationIndex: Ref<number | null>;
     reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
+    deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
+    enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
+    exitEditModeSignal: Ref<boolean>;
   };
 
   const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
@@ -63,6 +68,9 @@ export const useImageAnnotationFieldViewModel = (props: {
         editModeActive: ref(false),
         currentAnnotationIndex: ref<number | null>(null),
         reassignLabel: ref(null),
+        deleteShapeSignal: ref(null),
+        enterEditModeSignal: ref(null),
+        exitEditModeSignal: ref(false),
       };
       answerTarget.__imageAnnotationSync = syncState;
     }
@@ -146,10 +154,7 @@ export const useImageAnnotationFieldViewModel = (props: {
       cancelPolygon();
     }
 
-    editMode.value = {
-      active: true,
-      annotationIndex,
-    };
+    // Update sharedState (editMode computed will reflect this)
     sharedState.editModeActive.value = true;
     sharedState.currentAnnotationIndex.value = annotationIndex;
 
@@ -176,10 +181,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     removeAnchorPoints();
     restoreAllAnnotations();
 
-    editMode.value = {
-      active: false,
-      annotationIndex: null,
-    };
+    // Update sharedState (editMode computed will reflect this)
     sharedState.editModeActive.value = false;
     sharedState.currentAnnotationIndex.value = null;
 
@@ -210,15 +212,28 @@ export const useImageAnnotationFieldViewModel = (props: {
     contextMenu.value.annotationIndex = null;
   };
 
-  const deleteAnnotation = (index: number) => {
+  /**
+   * Core function to delete a shape (annotation).
+   * This is the single source of truth for shape deletion.
+   * Called from: question list, context menu, keyboard shortcuts.
+   */
+  const deleteShape = (index: number) => {
+    // If we're in edit mode and deleting the shape being edited, exit edit mode first
+    // This ensures anchor points and edge handles are properly removed
+    if (editMode.value.active && editMode.value.annotationIndex === index) {
+      exitEditMode();
+    }
+    
+    // Delete the shape from the array
     answer.values.splice(index, 1);
-    renderAnnotations();
+    
+    // Update answer - this triggers the watch on answer.values.length which re-renders the canvas
     updateAnswer();
   };
 
   const handleContextMenuDelete = () => {
     if (contextMenu.value.annotationIndex !== null) {
-      deleteAnnotation(contextMenu.value.annotationIndex);
+      deleteShape(contextMenu.value.annotationIndex);
       hideContextMenu();
     }
   };
@@ -850,7 +865,7 @@ export const useImageAnnotationFieldViewModel = (props: {
           } else {
             exitEditMode();
           }
-          deleteAnnotation(indexToDelete);
+          deleteShape(indexToDelete);
         }
         return;
       }
@@ -1039,24 +1054,25 @@ export const useImageAnnotationFieldViewModel = (props: {
   );
 
   // Watch for enter edit mode signal from question component
-  watch(
-    () => (answer as any).enterEditMode,
-    (annotationIndex) => {
-      if (annotationIndex !== null && annotationIndex !== undefined) {
-        enterEditMode(annotationIndex);
-      }
+  watch(sharedState.enterEditModeSignal, (editModeData) => {
+    if (editModeData && editModeData.index !== null && editModeData.index !== undefined) {
+      enterEditMode(editModeData.index);
     }
-  );
+  });
 
   // Watch for exit edit mode signal from question component
-  watch(
-    () => (answer as any).exitEditMode,
-    (shouldExit) => {
-      if (shouldExit && editMode.value.active) {
-        exitEditMode();
-      }
+  watch(sharedState.exitEditModeSignal, (shouldExit) => {
+    if (shouldExit && editMode.value.active) {
+      exitEditMode();
     }
-  );
+  });
+
+  // Watch for delete shape signal from question component
+  watch(sharedState.deleteShapeSignal, (deleteSignal) => {
+    if (deleteSignal && deleteSignal.index !== null && deleteSignal.index !== undefined) {
+      deleteShape(deleteSignal.index);
+    }
+  });
 
   // Watch for label reassignment in edit mode
   watch(sharedState.reassignLabel, (reassignData) => {
@@ -1120,6 +1136,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     hasError,
     contextMenu,
     editMode,
+    deleteShape, // Core deletion function - single source of truth
     handleContextMenuDelete,
     handleContextMenuEdit,
     enterEditMode,

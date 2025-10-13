@@ -59,13 +59,32 @@
               />
               <span class="annotation-label">{{ annotation.label }}</span>
               <span class="annotation-type">{{ annotation.shape_type }}</span>
-              <button
-                class="annotation-delete"
-                @click.stop="deleteAnnotation(index)"
-                title="Delete"
-              >
-                ×
-              </button>
+              <div class="annotation-actions">
+                <button
+                  class="annotation-edit"
+                  @click.stop="onEditAnnotation(index)"
+                  title="Edit"
+                >
+                  <svgicon 
+                    name="pen" 
+                    width="12" 
+                    height="12" 
+                    aria-hidden="true"
+                  />
+                </button>
+                <button
+                  class="annotation-delete"
+                  @click.stop="deleteAnnotation(index)"
+                  title="Delete"
+                >
+                  <svgicon 
+                    name="close" 
+                    width="12" 
+                    height="12" 
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -76,6 +95,8 @@
 
 <script>
 import { useImageAnnotationQuestionViewModel } from "./useImageAnnotationQuestionViewModel";
+import "assets/icons/close";
+import "assets/icons/pen";
 
 export default {
   name: "ImageAnnotationComponent",
@@ -230,17 +251,41 @@ export default {
   text-transform: capitalize;
 }
 
+.annotation-actions {
+  display: flex;
+  gap: $base-space * 0.5;
+  align-items: center;
+}
+
+.annotation-edit,
 .annotation-delete {
   background: none;
   border: none;
-  color: var(--fg-secondary);
-  font-size: 20px;
   cursor: pointer;
-  padding: 0 $base-space;
+  padding: $base-space * 0.5;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+
+  :deep(svg) {
+    fill: var(--fg-secondary);
+  }
 
   &:hover {
-    color: var(--fg-error);
+    background-color: var(--bg-opacity-1);
+    
+    :deep(svg) {
+      fill: var(--fg-primary);
+    }
+  }
+}
+
+.annotation-delete {
+  &:hover :deep(svg) {
+    fill: var(--fg-error);
   }
 }
 </style>

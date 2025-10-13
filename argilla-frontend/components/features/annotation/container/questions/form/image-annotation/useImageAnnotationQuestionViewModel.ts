@@ -18,6 +18,9 @@ export const useImageAnnotationQuestionViewModel = (props: {
     editModeActive: Ref<boolean>;
     currentAnnotationIndex: Ref<number | null>;
     reassignLabel: Ref<{ labelValue: string; timestamp: number } | null>;
+    deleteShapeSignal: Ref<{ index: number; timestamp: number } | null>;
+    enterEditModeSignal: Ref<{ index: number; timestamp: number } | null>;
+    exitEditModeSignal: Ref<boolean>;
   };
 
   const ensureSharedState = (target: ImageAnnotationQuestionAnswer): SharedState => {
@@ -27,6 +30,9 @@ export const useImageAnnotationQuestionViewModel = (props: {
         editModeActive: ref(false),
         currentAnnotationIndex: ref<number | null>(null),
         reassignLabel: ref(null),
+        deleteShapeSignal: ref(null),
+        enterEditModeSignal: ref(null),
+        exitEditModeSignal: ref(false),
       };
       answerTarget.__imageAnnotationSync = syncState;
     }
@@ -117,25 +123,30 @@ export const useImageAnnotationQuestionViewModel = (props: {
   };
 
   const onEditAnnotation = (index: number) => {
-    // Signal to field component to enter edit mode
-    (answer as any).enterEditMode = index;
+    // If already in edit mode with this annotation, do nothing
+    if (editModeActive.value && sharedState.currentAnnotationIndex.value === index) {
+      return;
+    }
+    
+    // Signal to field component to enter edit mode via sharedState
+    sharedState.enterEditModeSignal.value = { index, timestamp: Date.now() };
     sharedState.editModeActive.value = true;
     sharedState.currentAnnotationIndex.value = index;
     
     // Reset flag after a tick
     setTimeout(() => {
-      (answer as any).enterEditMode = null;
+      sharedState.enterEditModeSignal.value = null;
     }, 100);
   };
 
   const toggleEditMode = () => {
     if (editModeActive.value) {
-      // Exit edit mode
-      (answer as any).exitEditMode = true;
-      editModeActive.value = false;
+      // Exit edit mode - signal to field component
+      // Don't change editModeActive here - let the field component handle it
+      sharedState.exitEditModeSignal.value = true;
       
       setTimeout(() => {
-        (answer as any).exitEditMode = false;
+        sharedState.exitEditModeSignal.value = false;
       }, 100);
     } else {
       // Enter edit mode with first annotation
@@ -145,16 +156,25 @@ export const useImageAnnotationQuestionViewModel = (props: {
     }
   };
 
-  const deleteAnnotation = (index: number) => {
-    answer.values.splice(index, 1);
-    updateAnswer();
+  /**
+   * Delete a shape from the question list UI.
+   * This signals the Field component to handle the actual deletion.
+   */
+  const deleteShapeFromList = (index: number) => {
+    // Signal to field component to delete this shape via sharedState
+    // The field component will handle:
+    // 1. Exiting edit mode if needed
+    // 2. Removing the shape from the array
+    // 3. Re-rendering the canvas
+    sharedState.deleteShapeSignal.value = { index, timestamp: Date.now() };
+    
+    setTimeout(() => {
+      sharedState.deleteShapeSignal.value = null;
+    }, 100);
   };
-
-  const updateAnswer = () => {
-    question.answer.response({
-      value: answer.valuesAnswered,
-    });
-  };
+  
+  // Keep old name for backward compatibility temporarily
+  const deleteAnnotation = deleteShapeFromList;
 
   return {
     selectedTool,
