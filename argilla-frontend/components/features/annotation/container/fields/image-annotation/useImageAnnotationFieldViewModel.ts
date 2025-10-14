@@ -1,6 +1,25 @@
 import { ref, computed, onMounted, watch, onUnmounted } from "vue-demi";
 import Konva from "konva";
 import { useImageAnnotationSharedState } from "./useImageAnnotationSharedState";
+import {
+  getImageCoordinates as getImageCoords,
+  getCanvasCoordinates as getCanvasCoords,
+} from "./coordinateTransformUtils";
+import {
+  getParentShapeBounds,
+  clampToParentBounds,
+  getClosestPointOnPolygon,
+  isPointWithinParent as checkPointWithinParent,
+} from "./geometryUtils";
+import {
+  getAnnotationNodes as getAnnotationNodesUtil,
+  getParentShapeNode as getParentShapeNodeUtil,
+  createShape,
+  updateKonvaShape,
+  updateRectanglePoint,
+  createPointCircle,
+  type AnnotationNodes,
+} from "./konvaShapeUtils";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
@@ -108,27 +127,8 @@ export const useImageAnnotationFieldViewModel = (props: {
     return option?.color || "#cccccc";
   };
 
-  type AnnotationNodes = {
-    element: Konva.Group | Konva.Shape | null;
-    parentShape: Konva.Shape | null;
-    holeShapes: Konva.Shape[];
-  };
-
   const getAnnotationNodes = (index: number): AnnotationNodes => {
-    const element = layer?.findOne(`#annotation-${index}`) as
-      | Konva.Group
-      | Konva.Shape
-      | null;
-    if (!element) return { element: null, parentShape: null, holeShapes: [] };
-
-    if (element instanceof Konva.Group) {
-      const parentShape = element.findOne(
-        ".annotation-shape"
-      ) as Konva.Shape | null;
-      const holeShapes = element.find(".annotation-hole") as Konva.Shape[];
-      return { element, parentShape, holeShapes };
-    }
-    return { element, parentShape: element as Konva.Shape, holeShapes: [] };
+    return getAnnotationNodesUtil(layer, index);
   };
 
   const highlightAnnotation = (index: number, highlight: boolean) => {
@@ -762,75 +762,8 @@ export const useImageAnnotationFieldViewModel = (props: {
     }
   };
 
-  /**
-   * Get the bounding box of a parent shape in image coordinates
-   */
-  const getParentShapeBounds = (parentPoints: number[][]) => {
-    const xs = parentPoints.map((p) => p[0]);
-    const ys = parentPoints.map((p) => p[1]);
-    return {
-      minX: Math.min(...xs),
-      maxX: Math.max(...xs),
-      minY: Math.min(...ys),
-      maxY: Math.max(...ys),
-    };
-  };
-
-  /**
-   * Clamp a point to stay within parent shape bounds
-   */
-  const clampToParentBounds = (
-    point: number[],
-    parentBounds: { minX: number; maxX: number; minY: number; maxY: number }
-  ): number[] => {
-    return [
-      Math.max(parentBounds.minX, Math.min(parentBounds.maxX, point[0])),
-      Math.max(parentBounds.minY, Math.min(parentBounds.maxY, point[1])),
-    ];
-  };
-
   const getParentShapeNode = (annotationIndex: number): Konva.Shape | null => {
-    return getAnnotationNodes(annotationIndex).parentShape;
-  };
-
-  const getClosestPointOnPolygon = (
-    point: Konva.Vector2d,
-    polygonPoints: { x: number; y: number }[]
-  ): Konva.Vector2d => {
-    let closestPoint: Konva.Vector2d = { x: point.x, y: point.y };
-    let minDistance = Infinity;
-
-    if (polygonPoints.length < 2) {
-      return closestPoint;
-    }
-
-    for (let i = 0; i < polygonPoints.length; i++) {
-      const p1 = polygonPoints[i];
-      const p2 = polygonPoints[(i + 1) % polygonPoints.length];
-
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-
-      if (dx === 0 && dy === 0) continue;
-
-      const t =
-        ((point.x - p1.x) * dx + (point.y - p1.y) * dy) / (dx * dx + dy * dy);
-      const clampedT = Math.max(0, Math.min(1, t));
-
-      const candidate = {
-        x: p1.x + clampedT * dx,
-        y: p1.y + clampedT * dy,
-      };
-
-      const distance = Math.hypot(point.x - candidate.x, point.y - candidate.y);
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestPoint = candidate;
-      }
-    }
-
-    return closestPoint;
+    return getParentShapeNodeUtil(layer, annotationIndex);
   };
 
   const constrainPointToParentShape = (
@@ -909,29 +842,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     updateAnnotationShape(annotationIndex);
   };
 
-  // Helper to update rectangle corner points
-  const updateRectanglePoint = (
-    currentPoints: number[][],
-    pointIndex: number,
-    imageCoords: number[]
-  ): number[][] => {
-    if (pointIndex === 0) {
-      return [imageCoords, currentPoints[1]];
-    } else if (pointIndex === 1) {
-      return [
-        [currentPoints[0][0], imageCoords[1]],
-        [imageCoords[0], currentPoints[1][1]],
-      ];
-    } else if (pointIndex === 2) {
-      return [currentPoints[0], imageCoords];
-    } else if (pointIndex === 3) {
-      return [
-        [imageCoords[0], currentPoints[0][1]],
-        [currentPoints[1][0], imageCoords[1]],
-      ];
-    }
-    return currentPoints;
-  };
+  // updateRectanglePoint is imported from konvaShapeUtils.ts
 
   const updateAnnotationFromDrag = (
     annotationIndex: number,
@@ -960,22 +871,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     updateAnnotationShape(annotationIndex);
   };
 
-  // Helper to update a Konva shape based on shape type and points
-  const updateKonvaShape = (
-    shape: Konva.Shape,
-    shapeType: string,
-    canvasPoints: number[][]
-  ) => {
-    if (shapeType === "rectangle" && canvasPoints.length === 2) {
-      const [p1, p2] = canvasPoints;
-      (shape as Konva.Rect).x(Math.min(p1[0], p2[0]));
-      (shape as Konva.Rect).y(Math.min(p1[1], p2[1]));
-      (shape as Konva.Rect).width(Math.abs(p2[0] - p1[0]));
-      (shape as Konva.Rect).height(Math.abs(p2[1] - p1[1]));
-    } else if (shapeType === "polygon") {
-      (shape as Konva.Line).points(canvasPoints.flat());
-    }
-  };
+  // updateKonvaShape is imported from konvaShapeUtils.ts
 
   const updateAnnotationShape = (annotationIndex: number) => {
     if (!layer) return;
@@ -1095,19 +991,17 @@ export const useImageAnnotationFieldViewModel = (props: {
     window.addEventListener("keydown", handleKeyDown);
   };
 
-  const createPointCircle = (
+  // createPointCircle is imported from konvaShapeUtils.ts - wrap it to handle default color
+  const createPointCircleLocal = (
     x: number,
     y: number,
     color?: string
   ): Konva.Circle => {
-    return new Konva.Circle({
+    return createPointCircle(
       x,
       y,
-      radius: 5,
-      fill: color || selectedLabel.value?.color || "#cccccc",
-      stroke: "white",
-      strokeWidth: 2,
-    });
+      color || selectedLabel.value?.color || "#cccccc"
+    );
   };
 
   const completePolygon = () => {
@@ -1201,19 +1095,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     if (!parent) return false;
 
     const canvasPoints = getCanvasCoordinates(parent.points);
-
-    // Get bounding box of parent
-    const xs = canvasPoints.map((p) => p[0]);
-    const ys = canvasPoints.map((p) => p[1]);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-
-    // Check if point is within bounding box
-    return (
-      point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY
-    );
+    return checkPointWithinParent(point, canvasPoints);
   };
 
   // Helper to start rectangle drawing
@@ -1247,7 +1129,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     isHole: boolean,
     parentIndex?: number
   ) => {
-    const circle = createPointCircle(pos.x, pos.y, color);
+    const circle = createPointCircleLocal(pos.x, pos.y, color);
     const previewLine = new Konva.Line({
       points: [pos.x, pos.y, pos.x, pos.y],
       stroke: color,
@@ -1307,7 +1189,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     (drawingShape as Konva.Line)?.points(mode.value.points);
 
     // Add point circle
-    const circle = createPointCircle(pos.x, pos.y, color);
+    const circle = createPointCircleLocal(pos.x, pos.y, color);
     mode.value.circles.push(circle);
     layer?.add(circle);
     layer?.batchDraw();
@@ -1604,35 +1486,11 @@ export const useImageAnnotationFieldViewModel = (props: {
   };
 
   const getImageCoordinates = (canvasPoints: number[][]): number[][] => {
-    if (!imageNode) return canvasPoints;
-
-    const imageX = imageNode.x();
-    const imageY = imageNode.y();
-    const imageWidth = imageNode.width();
-    const imageHeight = imageNode.height();
-    const img = imageNode.image() as HTMLImageElement;
-
-    return canvasPoints.map(([x, y]) => [
-      ((x - imageX) / imageWidth) * (img?.width || 1),
-      ((y - imageY) / imageHeight) * (img?.height || 1),
-    ]);
+    return getImageCoords(canvasPoints, imageNode);
   };
 
   const getCanvasCoordinates = (imagePoints: number[][]): number[][] => {
-    if (!imageNode) return imagePoints;
-
-    const imageX = imageNode.x();
-    const imageY = imageNode.y();
-    const imageWidth = imageNode.width();
-    const imageHeight = imageNode.height();
-    const img = imageNode.image() as HTMLImageElement;
-    const originalWidth = img?.width || 1;
-    const originalHeight = img?.height || 1;
-
-    return imagePoints.map(([x, y]) => [
-      (x / originalWidth) * imageWidth + imageX,
-      (y / originalHeight) * imageHeight + imageY,
-    ]);
+    return getCanvasCoords(imagePoints, imageNode);
   };
 
   // Helper to attach context menu handler to a Konva element
@@ -1767,51 +1625,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     layer.batchDraw();
   };
 
-  const createShape = (
-    shapeType: string,
-    canvasPoints: number[][],
-    color: string,
-    annotationIndex: number,
-    isParent: boolean,
-    holeIndex?: number
-  ): Konva.Rect | Konva.Line | null => {
-    const shapeId = isParent
-      ? `annotation-${annotationIndex}`
-      : `annotation-${annotationIndex}-hole-${holeIndex}`;
-    const shapeName = isParent ? "annotation-shape" : "annotation-hole";
-
-    if (shapeType === "rectangle" && canvasPoints.length === 2) {
-      const [p1, p2] = canvasPoints;
-      return new Konva.Rect({
-        id: shapeId,
-        name: shapeName,
-        x: Math.min(p1[0], p2[0]),
-        y: Math.min(p1[1], p2[1]),
-        width: Math.abs(p2[0] - p1[0]),
-        height: Math.abs(p2[1] - p1[1]),
-        stroke: color,
-        strokeWidth: 2,
-        fill: color,
-        opacity: isParent ? 0.3 : 1, // Holes are fully opaque for cutout
-        listening: true,
-      });
-    } else if (shapeType === "polygon") {
-      const points = canvasPoints.flat();
-      return new Konva.Line({
-        id: shapeId,
-        name: shapeName,
-        points,
-        stroke: color,
-        strokeWidth: 2,
-        fill: color,
-        opacity: isParent ? 0.3 : 1, // Holes are fully opaque for cutout
-        closed: true,
-        listening: true,
-      });
-    }
-
-    return null;
-  };
+  // createShape is imported from konvaShapeUtils.ts
 
   const updateAnswer = () => {
     imageAnnotationQuestion.answer.response({
