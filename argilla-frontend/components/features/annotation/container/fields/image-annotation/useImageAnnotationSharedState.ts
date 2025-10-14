@@ -20,7 +20,10 @@ export type ImageAnnotationSharedState = {
   holeDrawingMode: Ref<{ active: boolean; parentIndex: number | null }>;
 };
 
-const sharedStateMap = new WeakMap<ImageAnnotationQuestionAnswer, ImageAnnotationSharedState>();
+const sharedStateMap = new WeakMap<
+  ImageAnnotationQuestionAnswer,
+  ImageAnnotationSharedState
+>();
 
 /**
  * Get or create shared state for an ImageAnnotationQuestionAnswer instance.
@@ -30,7 +33,7 @@ export const useImageAnnotationSharedState = (
   answer: ImageAnnotationQuestionAnswer
 ): ImageAnnotationSharedState => {
   let state = sharedStateMap.get(answer);
-  
+
   if (!state) {
     state = {
       editModeActive: ref(false),
@@ -50,9 +53,9 @@ export const useImageAnnotationSharedState = (
       selectLabelData: ref(null),
       holeDrawingMode: ref({ active: false, parentIndex: null }),
     };
-    
+
     sharedStateMap.set(answer, state);
   }
-  
+
   return state;
 };

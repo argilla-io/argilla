@@ -13,13 +13,18 @@ export const useImageAnnotationViewModel = (props: {
   imageAnnotationQuestion: Question;
 }) => {
   const { content, imageAnnotationQuestion } = props;
-  
+
   const canvasContainer = ref<HTMLDivElement | null>(null);
   const imageLoaded = ref(false);
   const hasError = ref(false);
   const selectedTool = ref<Tool>("select");
   const hoveredAnnotation = ref<number | null>(null);
-  const contextMenu = ref<{ visible: boolean; x: number; y: number; annotationIndex: number | null }>({
+  const contextMenu = ref<{
+    visible: boolean;
+    x: number;
+    y: number;
+    annotationIndex: number | null;
+  }>({
     visible: false,
     x: 0,
     y: 0,
@@ -34,7 +39,8 @@ export const useImageAnnotationViewModel = (props: {
   let startPos = { x: 0, y: 0 };
   let polygonPoints: number[] = [];
 
-  const answer = imageAnnotationQuestion.answer as ImageAnnotationQuestionAnswer;
+  const answer =
+    imageAnnotationQuestion.answer as ImageAnnotationQuestionAnswer;
 
   const annotations = computed(() => answer.values);
 
@@ -81,7 +87,7 @@ export const useImageAnnotationViewModel = (props: {
     hoveredAnnotation.value = null;
   };
 
-  const selectAnnotation = (index: number) => {
+  const selectAnnotation = (_index: number) => {
     // TODO: Enable editing mode for selected annotation
   };
 
@@ -91,7 +97,7 @@ export const useImageAnnotationViewModel = (props: {
       (shape as any).strokeWidth(highlight ? 4 : 2);
       const stage = (shape as any).getStage();
       if (stage) {
-        stage.container().style.cursor = highlight ? 'pointer' : 'default';
+        stage.container().style.cursor = highlight ? "pointer" : "default";
       }
       layer?.batchDraw();
     }
@@ -178,7 +184,7 @@ export const useImageAnnotationViewModel = (props: {
     stage.on("dblclick", handleDoubleClick);
   };
 
-  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseDown = () => {
     if (selectedTool.value === "select") return;
     if (!selectedLabel.value) {
       alert("Please select a label first");
@@ -222,7 +228,7 @@ export const useImageAnnotationViewModel = (props: {
     layer?.batchDraw();
   };
 
-  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseMove = () => {
     if (!isDrawing || selectedTool.value !== "rectangle") return;
 
     const pos = stage?.getPointerPosition();
@@ -237,7 +243,7 @@ export const useImageAnnotationViewModel = (props: {
     layer?.batchDraw();
   };
 
-  const handleMouseUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleMouseUp = () => {
     if (!isDrawing || selectedTool.value === "polygon") return;
     if (selectedTool.value !== "rectangle") return;
 
@@ -374,7 +380,7 @@ export const useImageAnnotationViewModel = (props: {
         shape = new Konva.Line({
           id: `annotation-${index}`,
           name: "annotation-shape",
-          points: points,
+          points,
           stroke: color,
           strokeWidth: 2,
           fill: color,
@@ -386,16 +392,16 @@ export const useImageAnnotationViewModel = (props: {
 
       if (shape) {
         // Add hover event listeners
-        shape.on('mouseenter', () => {
+        shape.on("mouseenter", () => {
           hoverAnnotation(index);
         });
 
-        shape.on('mouseleave', () => {
+        shape.on("mouseleave", () => {
           unhoverAnnotation();
         });
 
         // Add right-click context menu
-        shape.on('contextmenu', (e) => {
+        shape.on("contextmenu", (e) => {
           e.evt.preventDefault();
           const stage = shape?.getStage();
           if (stage) {
@@ -404,7 +410,11 @@ export const useImageAnnotationViewModel = (props: {
               // Convert stage coordinates to page coordinates
               const container = stage.container();
               const rect = container.getBoundingClientRect();
-              showContextMenu(index, rect.left + pointerPos.x, rect.top + pointerPos.y);
+              showContextMenu(
+                index,
+                rect.left + pointerPos.x,
+                rect.top + pointerPos.y
+              );
             }
           }
         });
@@ -435,12 +445,12 @@ export const useImageAnnotationViewModel = (props: {
     });
 
     // Close context menu on click outside
-    document.addEventListener('click', hideContextMenu);
+    document.addEventListener("click", hideContextMenu);
   });
 
   onUnmounted(() => {
     stage?.destroy();
-    document.removeEventListener('click', hideContextMenu);
+    document.removeEventListener("click", hideContextMenu);
   });
 
   return {

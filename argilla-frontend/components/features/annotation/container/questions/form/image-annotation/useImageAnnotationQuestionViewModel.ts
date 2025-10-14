@@ -1,7 +1,7 @@
-import { ref, computed, watch, type Ref } from "vue-demi";
+import { ref, computed, watch } from "vue-demi";
+import { useImageAnnotationSharedState } from "../../../fields/image-annotation/useImageAnnotationSharedState";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
-import { useImageAnnotationSharedState } from "../../../fields/image-annotation/useImageAnnotationSharedState";
 
 type Tool = "rectangle" | "polygon";
 
@@ -9,7 +9,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
   question: Question;
 }) => {
   const { question } = props;
-  
+
   const selectedTool = ref<Tool>("rectangle");
   const hoveredAnnotation = ref<number | null>(null);
   const expandedAnnotations = ref<Record<number, boolean>>({});
@@ -31,10 +31,12 @@ export const useImageAnnotationQuestionViewModel = (props: {
     const selectData = sharedState.selectLabelData.value;
     if (selectData && selectData.labelValue) {
       // Find the option with this label value
-      const option = answer.options.find(opt => opt.value === selectData.labelValue);
+      const option = answer.options.find(
+        (opt) => opt.value === selectData.labelValue
+      );
       if (option) {
         // Deselect all options
-        answer.options.forEach(opt => opt.isSelected = false);
+        answer.options.forEach((opt) => (opt.isSelected = false));
         // Select the matching option
         option.isSelected = true;
       }
@@ -50,7 +52,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
     if (selectedTool.value === "polygon" && tool !== "polygon") {
       sharedState.cancelPolygonTrigger.value++;
     }
-    
+
     selectedTool.value = tool;
     // Store the selected tool in the answer object for the field to access
     (answer as any).selectedTool = tool;
@@ -61,12 +63,12 @@ export const useImageAnnotationQuestionViewModel = (props: {
     // The EntityLabelSelection component already handles the selection logic
     // We just need to ensure the selected tool is stored
     (answer as any).selectedTool = selectedTool.value;
-    
+
     // If in edit mode, reassign the current annotation to the new label
     if (editModeActive.value) {
       // Find the currently selected label
       const selectedOption = answer.options.find((opt) => opt.isSelected);
-      
+
       if (selectedOption) {
         // Set data and increment trigger - watcher will react immediately
         sharedState.reassignLabelData.value = {
@@ -98,16 +100,19 @@ export const useImageAnnotationQuestionViewModel = (props: {
     // TODO: Emit event to field component to unhighlight annotation
   };
 
-  const selectAnnotation = (index: number) => {
+  const selectAnnotation = (_index: number) => {
     // Clicking on annotation in list - could trigger edit mode
   };
 
   const onEditAnnotation = (index: number) => {
     // If already in edit mode with this annotation, do nothing
-    if (editModeActive.value && sharedState.currentAnnotationIndex.value === index) {
+    if (
+      editModeActive.value &&
+      sharedState.currentAnnotationIndex.value === index
+    ) {
       return;
     }
-    
+
     // Signal to field component to enter edit mode via sharedState
     sharedState.enterEditModeData.value = { index };
     sharedState.editModeActive.value = true;
@@ -120,11 +125,9 @@ export const useImageAnnotationQuestionViewModel = (props: {
       // Exit edit mode - signal to field component
       // Don't change editModeActive here - let the field component handle it
       sharedState.exitEditModeTrigger.value++;
-    } else {
+    } else if (annotations.value.length > 0) {
       // Enter edit mode with first annotation
-      if (annotations.value.length > 0) {
-        onEditAnnotation(0);
-      }
+      onEditAnnotation(0);
     }
   };
 
@@ -141,7 +144,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
     sharedState.deleteShapeData.value = { index };
     sharedState.deleteShapeTrigger.value++;
   };
-  
+
   // Keep old name for backward compatibility temporarily
   const deleteAnnotation = deleteShapeFromList;
 
@@ -174,9 +177,9 @@ export const useImageAnnotationQuestionViewModel = (props: {
       // 1. Removing the hole from the array
       // 2. Re-rendering the canvas
       // 3. Updating anchor points if in edit mode
-      sharedState.deleteHoleData.value = { 
-        annotationIndex, 
-        holeIndex
+      sharedState.deleteHoleData.value = {
+        annotationIndex,
+        holeIndex,
       };
       sharedState.deleteHoleTrigger.value++;
     }
