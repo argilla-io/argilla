@@ -366,4 +366,12 @@ export class ImageAnnotationQuestionAnswer extends QuestionAnswer {
       holes: value.holes,
     }));
   }
+
+  getAnnotationColor(labelValue: string): string {
+    const option = this.options.find((opt) => opt.value === labelValue);
+    return option?.color || "#cccccc";
+  }
+  deleteAnnotation(index: number): void {
+    this.values.splice(index, 1);
+  }
 }

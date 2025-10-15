@@ -82,10 +82,8 @@ export const useImageAnnotationQuestionViewModel = (props: {
     // Handle focus events if needed
   };
 
-  const getAnnotationColor = (labelValue: string) => {
-    const option = answer.options.find((opt) => opt.value === labelValue);
-    return option?.color || "#cccccc";
-  };
+  const getAnnotationColor = (labelValue: string) =>
+    answer.getAnnotationColor(labelValue);
 
   const hoverAnnotation = (index: number) => {
     hoveredAnnotation.value = index;

@@ -106,3 +106,51 @@ export const isPointWithinParent = (
     point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY
   );
 };
+
+/**
+ * Calculate the scale factor to fit an image within a container while maintaining aspect ratio.
+ * Will not scale up beyond 1:1 (original size).
+ *
+ * @param containerWidth - Width of the container
+ * @param containerHeight - Height of the container
+ * @param imageWidth - Original width of the image
+ * @param imageHeight - Original height of the image
+ * @returns Scale factor (between 0 and 1)
+ */
+export const calculateImageScale = (
+  containerWidth: number,
+  containerHeight: number,
+  imageWidth: number,
+  imageHeight: number
+): number => {
+  return Math.min(
+    containerWidth / imageWidth,
+    containerHeight / imageHeight,
+    1 // Don't scale up beyond original size
+  );
+};
+
+/**
+ * Calculate the position and dimensions to center an image within a container.
+ *
+ * @param containerWidth - Width of the container
+ * @param containerHeight - Height of the container
+ * @param imageWidth - Original width of the image
+ * @param imageHeight - Original height of the image
+ * @param scale - Scale factor to apply
+ * @returns Object with x, y, width, height for positioning the image
+ */
+export const centerImage = (
+  containerWidth: number,
+  containerHeight: number,
+  imageWidth: number,
+  imageHeight: number,
+  scale: number
+): { x: number; y: number; width: number; height: number } => {
+  return {
+    x: (containerWidth - imageWidth * scale) / 2,
+    y: (containerHeight - imageHeight * scale) / 2,
+    width: imageWidth * scale,
+    height: imageHeight * scale,
+  };
+};

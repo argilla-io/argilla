@@ -176,3 +176,52 @@ export const createPointCircle = (
     strokeWidth: 2,
   });
 };
+
+/**
+ * Apply highlight styling to an annotation shape.
+ *
+ * @param layer - The Konva layer containing the annotations
+ * @param imageLayer - The Konva image layer
+ * @param index - The index of the annotation
+ * @param highlight - Whether to highlight the annotation
+ * @param isEditing - Whether the annotation is in edit mode
+ * @param color - The color to use for the highlight
+ */
+export const highlightAnnotation = (
+  layer: Konva.Layer | null,
+  imageLayer: Konva.Layer | null,
+  index: number,
+  highlight: boolean,
+  isEditing: boolean,
+  color: string
+) => {
+  const { element, parentShape, holeShapes } = getAnnotationNodes(layer, index);
+  if (!element || !parentShape) return;
+
+  if (isEditing) {
+    // Editing mode: thicker stroke + glow effect + semi-transparent
+    (parentShape as any).strokeWidth(4);
+    (parentShape as any).shadowColor(color);
+    (parentShape as any).shadowBlur(8);
+    (parentShape as any).shadowOpacity(0.8);
+    (parentShape as any).opacity(0.5);
+  } else {
+    // Normal hover or no hover
+    (parentShape as any).strokeWidth(highlight ? 4 : 2);
+    (parentShape as any).shadowBlur(0);
+    (parentShape as any).opacity(0.3);
+  }
+
+  // Update hole strokes as well
+  holeShapes.forEach((holeShape) => {
+    (holeShape as any).strokeWidth(isEditing ? 4 : highlight ? 4 : 2);
+  });
+
+  const stage = element.getStage();
+  if (stage && !isEditing) {
+    stage.container().style.cursor = highlight ? "pointer" : "default";
+  }
+
+  layer?.batchDraw();
+  imageLayer?.batchDraw();
+};

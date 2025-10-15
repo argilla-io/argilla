@@ -1,6 +1,7 @@
 import { ref, computed, onMounted, watch, onUnmounted } from "vue-demi";
 import Konva from "konva";
 import { useImageAnnotationSharedState } from "./useImageAnnotationSharedState";
+import { useContextMenu } from "./useContextMenu";
 import {
   getImageCoordinates,
   getCanvasCoordinates,
@@ -8,25 +9,24 @@ import {
 import {
   getParentShapeBounds,
   clampToParentBounds,
-  getClosestPointOnPolygon,
-  isPointWithinParent as checkPointWithinParent, // TODO clean up
+  isPointWithinParent as checkPointWithinParent,
+  calculateImageScale,
+  centerImage,
 } from "./utils/geometryUtils";
 import {
   getAnnotationNodes,
   createShape,
-  updateKonvaShape,
-  updateRectanglePoint,
-  createPointCircle,
+  highlightAnnotation as highlightAnnotationUtil,
 } from "./utils/konvaShapeUtils";
 import {
-  initRectDrawing,
-  initPolyDrawing,
-  updateRectangleDrawing,
-  updatePolygonPreview,
-  addPolygonPoint as addPolyPoint,
   flatPointsToCoordinatePairs,
-  cleanupPolygonDrawing as cleanupPolyDrawing,
 } from "./utils/drawingModeHelpers";
+import {
+  ANNOTATION_SHORTCUTS,
+  matchesKey,
+} from "./utils/keyboardShortcuts";
+import { AnnotationToolFactory } from "./tools/AnnotationToolFactory";
+import { ToolContext } from "./tools/IAnnotationTool";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
@@ -66,35 +66,23 @@ export const useImageAnnotationFieldViewModel = (props: {
   const { content, imageAnnotationQuestion } = props;
   const answer =
     imageAnnotationQuestion.answer as ImageAnnotationQuestionAnswer;
+  const sharedState = useImageAnnotationSharedState(answer);
+  const contextMenu = useContextMenu();
 
   let stage: Konva.Stage | null = null;
   let imageLayer: Konva.Layer | null = null;
-  let layer: Konva.Layer | null = null;
+  let annotationLayer: Konva.Layer | null = null;
   let imageNode: Konva.Image | null = null;
-  let drawingShape: Konva.Rect | Konva.Line | null = null;
   let resizeTimeout: NodeJS.Timeout | null = null;
   let originalImageWidth = 0;
   let originalImageHeight = 0;
   let resizeObserver: ResizeObserver | null = null;
-  const CLOSE_THRESHOLD = 10;
+  let toolFactory: AnnotationToolFactory | null = null;
 
   const canvasContainer = ref<HTMLDivElement | null>(null);
   const imageLoaded = ref(false);
   const hasError = ref(false);
   const hoveredAnnotation = ref<number | null>(null);
-  const contextMenu = ref<{
-    visible: boolean;
-    x: number;
-    y: number;
-    annotationIndex: number | null;
-    holeIndex: number | null;
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    annotationIndex: null,
-    holeIndex: null,
-  });
   const draggingPoint = ref<{
     annotationIndex: number;
     pointIndex: number;
@@ -111,56 +99,46 @@ export const useImageAnnotationFieldViewModel = (props: {
 
   const annotations = computed(() => answer.values);
 
-  const sharedState = useImageAnnotationSharedState(answer);
-
   const selectedLabel = computed(() => {
     return answer.options.find((opt) => opt.isSelected);
   });
 
-  // TODO outsource -- additional input answer
-  const getAnnotationColor = (labelValue: string) => {
-    const option = answer.options.find((opt) => opt.value === labelValue);
-    return option?.color || "#cccccc";
+  const getAnnotationColor = (labelValue: string) =>
+    answer.getAnnotationColor(labelValue);
+
+  const getToolContext = (): ToolContext => ({
+    annotationLayer,
+    imageLayer,
+    imageNode,
+    getAnnotationColor,
+    getImageCoordinates: (points: number[][], _imageNode: Konva.Image | null) => 
+      getImageCoordinates(points, imageNode), // Always use current imageNode
+    getCanvasCoordinates: (points: number[][], _imageNode: Konva.Image | null) => 
+      getCanvasCoordinates(points, imageNode), // Always use current imageNode
+    updateAnswer,
+    renderAnnotations,
+    renderAnchorPoints,
+    getToolForShape: (shapeType: string) => toolFactory?.getToolForShape(shapeType) || null,
+  });
+
+  const initializeToolFactory = () => {
+    toolFactory = new AnnotationToolFactory(getToolContext());
   };
 
-  // TODO outsource -- additional input layer,imageLayer + editMode + annotations
   const highlightAnnotation = (index: number, highlight: boolean) => {
-    const { element, parentShape, holeShapes } = getAnnotationNodes(
-      layer,
-      index
-    );
-    if (!element || !parentShape) return;
-
     const isEditing =
       editMode.value.active && editMode.value.annotationIndex === index;
     const annotation = annotations.value[index];
     const color = getAnnotationColor(annotation.label);
 
-    if (isEditing) {
-      // Editing mode: thicker stroke + glow effect + semi-transparent
-      (parentShape as any).strokeWidth(4);
-      (parentShape as any).shadowColor(color);
-      (parentShape as any).shadowBlur(8);
-      (parentShape as any).shadowOpacity(0.8);
-      (parentShape as any).opacity(0.5);
-    } else {
-      // Normal hover or no hover
-      (parentShape as any).strokeWidth(highlight ? 4 : 2);
-      (parentShape as any).shadowBlur(0);
-      (parentShape as any).opacity(0.3);
-    }
-
-    // Update hole strokes as well
-    holeShapes.forEach((holeShape) => {
-      (holeShape as any).strokeWidth(isEditing ? 4 : highlight ? 4 : 2);
-    });
-
-    const stage = element.getStage();
-    if (stage && !editMode.value.active) {
-      stage.container().style.cursor = highlight ? "pointer" : "default";
-    }
-    layer?.batchDraw();
-    imageLayer?.batchDraw();
+    highlightAnnotationUtil(
+      annotationLayer,
+      imageLayer,
+      index,
+      highlight,
+      isEditing,
+      color
+    );
   };
 
   const hoverAnnotation = (index: number) => {
@@ -177,20 +155,17 @@ export const useImageAnnotationFieldViewModel = (props: {
     hoveredAnnotation.value = null;
   };
 
-  // TODO outsource - only input contextMenu
   const showContextMenu = (
     index: number,
     x: number,
     y: number,
     holeIndex: number | null = null
   ) => {
-    contextMenu.value = {
-      visible: true,
-      x,
-      y,
-      annotationIndex: index,
-      holeIndex,
-    };
+    contextMenu.show(index, x, y, holeIndex);
+  };
+
+  const hideContextMenu = () => {
+    contextMenu.hide();
   };
 
   const enterEditMode = (annotationIndex: number) => {
@@ -222,8 +197,8 @@ export const useImageAnnotationFieldViewModel = (props: {
     }
 
     // Move edited shape to top of z-order (so it receives events first)
-    const shapeNode = layer?.findOne(`#annotation-${annotationIndex}`);
-    const groupNode = layer?.findOne(
+    const shapeNode = annotationLayer?.findOne(`#annotation-${annotationIndex}`);
+    const groupNode = annotationLayer?.findOne(
       `.annotation-group#annotation-${annotationIndex}`
     );
     if (shapeNode) {
@@ -243,7 +218,7 @@ export const useImageAnnotationFieldViewModel = (props: {
 
     hideContextMenu();
 
-    layer?.batchDraw();
+    annotationLayer?.batchDraw();
   };
 
   const exitEditMode = () => {
@@ -269,7 +244,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     // Broadcast edit mode state to question component
     (answer as any).editModeState = false;
 
-    layer?.batchDraw();
+    annotationLayer?.batchDraw();
   };
 
   const editNextAnnotation = () => {
@@ -293,18 +268,6 @@ export const useImageAnnotationFieldViewModel = (props: {
     enterEditMode(prevIndex);
   };
 
-  // TODO outsource
-  const hideContextMenu = () => {
-    contextMenu.value = {
-      visible: false,
-      x: 0,
-      y: 0,
-      annotationIndex: null,
-      holeIndex: null,
-    };
-  };
-
-  // TODO outsource - editMode, answer - what about update answer
   /**
    * Delete a shape (annotation) from the canvas and data.
    * Called from: question list, context menu, keyboard shortcuts.
@@ -316,46 +279,45 @@ export const useImageAnnotationFieldViewModel = (props: {
       exitEditMode();
     }
 
-    // Delete the shape from the array
-    answer.values.splice(index, 1);
+    answer.deleteAnnotation(index);
 
     // Update answer - this triggers the watch on answer.values.length which re-renders the canvas
     updateAnswer();
   };
 
   const handleContextMenuDelete = () => {
-    if (contextMenu.value.annotationIndex !== null) {
-      deleteShape(contextMenu.value.annotationIndex);
+    if (contextMenu.state.value.annotationIndex !== null) {
+      deleteShape(contextMenu.state.value.annotationIndex);
       hideContextMenu();
     }
   };
 
   const handleContextMenuEdit = () => {
-    if (contextMenu.value.annotationIndex !== null) {
-      enterEditMode(contextMenu.value.annotationIndex);
+    if (contextMenu.state.value.annotationIndex !== null) {
+      enterEditMode(contextMenu.state.value.annotationIndex);
     }
   };
 
   const handleContextMenuAddHole = () => {
-    if (contextMenu.value.annotationIndex !== null) {
-      enterHoleDrawingMode(contextMenu.value.annotationIndex);
+    if (contextMenu.state.value.annotationIndex !== null) {
+      enterHoleDrawingMode(contextMenu.state.value.annotationIndex);
       hideContextMenu();
     }
   };
 
   const handleContextMenuDeleteHole = () => {
     if (
-      contextMenu.value.annotationIndex !== null &&
-      contextMenu.value.holeIndex !== null
+      contextMenu.state.value.annotationIndex !== null &&
+      contextMenu.state.value.holeIndex !== null
     ) {
-      const annotation = annotations.value[contextMenu.value.annotationIndex];
+      const annotation = annotations.value[contextMenu.state.value.annotationIndex];
       if (
         annotation &&
         annotation.holes &&
-        annotation.holes[contextMenu.value.holeIndex]
+        annotation.holes[contextMenu.state.value.holeIndex]
       ) {
         // Remove the hole
-        annotation.holes.splice(contextMenu.value.holeIndex, 1);
+        annotation.holes.splice(contextMenu.state.value.holeIndex, 1);
 
         // Clean up if no holes left
         if (annotation.holes.length === 0) {
@@ -369,9 +331,9 @@ export const useImageAnnotationFieldViewModel = (props: {
         // Update anchor points if in edit mode
         if (
           editMode.value.active &&
-          editMode.value.annotationIndex === contextMenu.value.annotationIndex
+          editMode.value.annotationIndex === contextMenu.state.value.annotationIndex
         ) {
-          renderAnchorPoints(contextMenu.value.annotationIndex);
+          renderAnchorPoints(contextMenu.state.value.annotationIndex);
         }
       }
       hideContextMenu();
@@ -438,7 +400,7 @@ export const useImageAnnotationFieldViewModel = (props: {
   };
 
   const highlightParentForHoleDrawing = (parentIndex: number) => {
-    const { parentShape } = getAnnotationNodes(layer, parentIndex);
+    const { parentShape } = getAnnotationNodes(annotationLayer, parentIndex);
     if (!parentShape) return;
 
     const annotation = annotations.value[parentIndex];
@@ -449,36 +411,36 @@ export const useImageAnnotationFieldViewModel = (props: {
     (parentShape as any).dash([10, 5]); // Dashed stroke to indicate hole drawing mode
     (parentShape as any).opacity(0.4);
 
-    layer?.batchDraw();
+    annotationLayer?.batchDraw();
     imageLayer?.batchDraw();
   };
 
   const fadeNonEditedAnnotations = (editingIndex: number) => {
-    if (!layer) return;
+    if (!annotationLayer) return;
 
     annotations.value.forEach((_, index) => {
       if (index !== editingIndex) {
-        const { parentShape } = getAnnotationNodes(layer, index);
+        const { parentShape } = getAnnotationNodes(annotationLayer, index);
         if (parentShape) {
           (parentShape as any).opacity(0.2);
         }
       }
     });
 
-    layer.batchDraw();
+    annotationLayer.batchDraw();
   };
 
   const restoreAllAnnotations = () => {
-    if (!layer) return;
+    if (!annotationLayer) return;
 
     annotations.value.forEach((_, index) => {
-      const { parentShape } = getAnnotationNodes(layer, index);
+      const { parentShape } = getAnnotationNodes(annotationLayer, index);
       if (parentShape) {
         (parentShape as any).opacity(0.3);
       }
     });
 
-    layer.batchDraw();
+    annotationLayer.batchDraw();
   };
 
   /**
@@ -488,7 +450,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     annotationIndex: number,
     color: string
   ) => {
-    if (!layer) return;
+    if (!annotationLayer) return;
 
     const annotation = annotations.value[annotationIndex];
     if (!annotation) return;
@@ -527,54 +489,13 @@ export const useImageAnnotationFieldViewModel = (props: {
     }
 
     if (boundaryShape) {
-      layer.add(boundaryShape);
+      annotationLayer.add(boundaryShape);
       boundaryShape.moveToBottom(); // Keep it behind anchor points
     }
   };
 
-  // Helper to render anchor points for a shape (parent or hole)
-  const renderShapeAnchors = (
-    shapeType: string,
-    canvasPoints: number[][],
-    color: string,
-    annotationIndex: number,
-    holeIndex: number | null
-  ) => {
-    if (shapeType === "rectangle" && canvasPoints.length === 2) {
-      const [p1, p2] = canvasPoints;
-      const corners = [
-        { x: p1[0], y: p1[1] }, // top-left
-        { x: p2[0], y: p1[1] }, // top-right
-        { x: p2[0], y: p2[1] }, // bottom-right
-        { x: p1[0], y: p2[1] }, // bottom-left
-      ];
-      corners.forEach((corner, pointIndex) => {
-        createAnchorPoint(
-          corner.x,
-          corner.y,
-          color,
-          annotationIndex,
-          pointIndex,
-          holeIndex
-        );
-      });
-    } else if (shapeType === "polygon") {
-      renderEdgeHandles(annotationIndex, canvasPoints, color, holeIndex);
-      canvasPoints.forEach((point, pointIndex) => {
-        createAnchorPoint(
-          point[0],
-          point[1],
-          color,
-          annotationIndex,
-          pointIndex,
-          holeIndex
-        );
-      });
-    }
-  };
-
   const renderAnchorPoints = (annotationIndex: number) => {
-    if (!layer) return;
+    if (!annotationLayer || !toolFactory) return;
 
     removeAnchorPoints();
 
@@ -582,300 +503,57 @@ export const useImageAnnotationFieldViewModel = (props: {
     if (!annotation) return;
 
     const color = getAnnotationColor(annotation.label);
+    const tool = toolFactory.getToolForShape(annotation.shape_type);
+    if (!tool) return;
 
     // Show parent boundary guide if editing a hole
     if (draggingPoint.value?.holeIndex !== null) {
       renderParentBoundaryGuide(annotationIndex, color);
     }
 
-    // Render parent shape anchors
-    // Note: We use custom anchor points instead of Konva.Transformer for rectangles
-    // because Transformer doesn't work properly with Groups that have holes (which use
-    // composite operations like 'destination-out' for cutout effects)
-    const canvasPoints = getCanvasCoordinates(annotation.points, imageNode);
-    renderShapeAnchors(
-      annotation.shape_type,
-      canvasPoints,
-      color,
+    const anchorConfig = {
       annotationIndex,
-      null
-    );
-
-    // Render hole anchors
-    annotation.holes?.forEach((hole, holeIndex) => {
-      const holeCanvasPoints = getCanvasCoordinates(hole.points, imageNode);
-      renderShapeAnchors(
-        hole.shape_type,
-        holeCanvasPoints,
-        color,
-        annotationIndex,
-        holeIndex
-      );
-    });
-
-    layer.batchDraw();
-  };
-
-  // TODO outsource - needs layer
-  const createAnchorPoint = (
-    x: number,
-    y: number,
-    color: string,
-    annotationIndex: number,
-    pointIndex: number,
-    holeIndex: number | null
-  ) => {
-    const anchorId =
-      holeIndex !== null
-        ? `anchor-${annotationIndex}-hole-${holeIndex}-${pointIndex}`
-        : `anchor-${annotationIndex}-${pointIndex}`;
-
-    const anchor = new Konva.Circle({
-      x,
-      y,
-      radius: 6,
-      fill: "white",
-      stroke: color,
-      strokeWidth: 2,
-      draggable: true,
-      name: "anchor-point",
-      id: anchorId,
-    });
-
-    // Change cursor on hover
-    anchor.on("mouseenter", () => {
-      const stage = anchor.getStage();
-      if (stage) {
-        stage.container().style.cursor = "move";
-      }
-      anchor.radius(8); // Make slightly larger on hover
-      layer?.batchDraw();
-    });
-
-    anchor.on("mouseleave", () => {
-      if (!draggingPoint.value) {
-        const stage = anchor.getStage();
-        if (stage) {
-          stage.container().style.cursor = "default";
+      pointIndex: 0, // Will be overridden by tool
+      holeIndex: null,
+      onDragStart: (annIdx: number, ptIdx: number, holeIdx: number | null) => {
+        draggingPoint.value = { annotationIndex: annIdx, pointIndex: ptIdx, holeIndex: holeIdx };
+      },
+      onDragMove: (annIdx: number, ptIdx: number, pos: { x: number; y: number }, holeIdx: number | null) => {
+        // Constrain point if editing a hole
+        let constrainedPos = pos;
+        if (holeIdx !== null && toolFactory) {
+          // Get the tool for the hole being dragged (not the parent)
+          const holeShape = annotation.holes?.[holeIdx];
+          if (holeShape) {
+            const holeTool = toolFactory.getToolForShape(holeShape.shape_type);
+            if (holeTool) {
+              constrainedPos = holeTool.constrainPointToParentShape(annotation, pos, holeIdx);
+            }
+          }
         }
-        anchor.radius(6);
-        layer?.batchDraw();
-      }
-    });
-
-    // Handle dragging
-    anchor.on("dragstart", () => {
-      draggingPoint.value = { annotationIndex, pointIndex, holeIndex };
-    });
-
-    anchor.on("dragmove", () => {
-      if (draggingPoint.value) {
-        const constrainedPosition = constrainPointToParentShape(
-          annotationIndex,
-          anchor.position(),
-          holeIndex
-        );
-
-        if (
-          constrainedPosition.x !== anchor.x() ||
-          constrainedPosition.y !== anchor.y()
-        ) {
-          anchor.position(constrainedPosition);
-        }
-
-        updateAnnotationFromDrag(
-          annotationIndex,
-          pointIndex,
-          constrainedPosition,
-          holeIndex
-        );
-        layer?.batchDraw();
-      }
-    });
-
-    // Allow context menu on anchor points to show shape context menu
-    attachContextMenuHandler(anchor, annotationIndex, holeIndex ?? undefined);
-
-    anchor.on("dragend", () => {
-      if (draggingPoint.value) {
-        finalizeAnnotationEdit(annotationIndex);
+        updateAnnotationFromDrag(annIdx, ptIdx, constrainedPos, holeIdx);
+      },
+      onDragEnd: (annIdx: number) => {
+        finalizeAnnotationEdit(annIdx);
         draggingPoint.value = null;
-        const stage = anchor.getStage();
-        if (stage) {
-          stage.container().style.cursor = "default";
-        }
-      }
-    });
+      },
+      attachContextMenuHandler,
+    };
 
-    layer?.add(anchor);
+    // Render parent shape anchors
+    tool.renderAnchorPoints(annotation, annotationIndex, color, anchorConfig);
+
+    annotationLayer.batchDraw();
   };
 
-  // TODO outsource - just needs layer
   const removeAnchorPoints = () => {
-    if (!layer) return;
-    layer.find(".anchor-point").forEach((anchor) => anchor.destroy());
-    layer.find(".edge-handle").forEach((edge) => edge.destroy());
-    layer.find(".parent-boundary-guide").forEach((guide) => guide.destroy());
-    layer.batchDraw();
-  };
-
-  const renderEdgeHandles = (
-    annotationIndex: number,
-    canvasPoints: number[][],
-    color: string,
-    holeIndex: number | null
-  ) => {
-    if (!layer) return;
-
-    // Create edge handles between consecutive points
-    for (let i = 0; i < canvasPoints.length; i++) {
-      const startPoint = canvasPoints[i];
-      const endPoint = canvasPoints[(i + 1) % canvasPoints.length]; // Wrap around to first point
-
-      const edgeId =
-        holeIndex !== null
-          ? `edge-${annotationIndex}-hole-${holeIndex}-${i}`
-          : `edge-${annotationIndex}-${i}`;
-
-      // Create an invisible/semi-transparent line that's easier to click
-      const edgeLine = new Konva.Line({
-        points: [startPoint[0], startPoint[1], endPoint[0], endPoint[1]],
-        stroke: color,
-        strokeWidth: 16, // Thicker for easier clicking
-        opacity: 0, // Invisible by default
-        lineCap: "round",
-        lineJoin: "round",
-        name: "edge-handle",
-        id: edgeId,
-      });
-
-      // Hover effects
-      edgeLine.on("mouseenter", () => {
-        const stage = edgeLine.getStage();
-        if (stage) {
-          stage.container().style.cursor = "copy"; // Indicate insertion
-        }
-        edgeLine.opacity(0.3); // Make visible on hover
-        edgeLine.strokeWidth(4);
-        layer?.batchDraw();
-      });
-
-      edgeLine.on("mouseleave", () => {
-        const stage = edgeLine.getStage();
-        if (stage) {
-          stage.container().style.cursor = "default";
-        }
-        edgeLine.opacity(0);
-        edgeLine.strokeWidth(16);
-        layer?.batchDraw();
-      });
-
-      // Click to insert point
-      edgeLine.on("click", () => {
-        const stage = edgeLine.getStage();
-        if (!stage) return;
-
-        const pointerPos = stage.getPointerPosition();
-        if (!pointerPos) return;
-
-        // Insert new point at click position
-        insertPointOnEdge(annotationIndex, i, pointerPos, holeIndex);
-      });
-
-      // Allow context menu on edge handles to show shape context menu
-      attachContextMenuHandler(
-        edgeLine,
-        annotationIndex,
-        holeIndex ?? undefined
-      );
-
-      layer.add(edgeLine);
+    if (!annotationLayer || !toolFactory) return;
+    const tool = toolFactory.getTool("rectangle"); // Any tool will do for this common operation
+    if (tool) {
+      tool.removeAnchorPoints();
     }
   };
 
-  const constrainPointToParentShape = (
-    annotationIndex: number,
-    stagePoint: Konva.Vector2d,
-    holeIndex: number | null
-  ): Konva.Vector2d => {
-    const annotation = annotations.value[annotationIndex];
-    if (!annotation) {
-      return stagePoint;
-    }
-
-    // Only constrain when moving a hole point
-    if (holeIndex === null) {
-      return stagePoint;
-    }
-
-    if (annotation.shape_type === "rectangle") {
-      const parentBounds = getParentShapeBounds(annotation.points);
-      const clampedImagePoint = clampToParentBounds(
-        getImageCoordinates([[stagePoint.x, stagePoint.y]], imageNode)[0],
-        parentBounds
-      );
-      const [canvasX, canvasY] = getCanvasCoordinates(
-        [clampedImagePoint],
-        imageNode
-      )[0];
-      return { x: canvasX, y: canvasY };
-    }
-
-    if (annotation.shape_type === "polygon") {
-      const parentShape = getAnnotationNodes(
-        layer,
-        annotationIndex
-      ).parentShape;
-      if (parentShape && parentShape.intersects(stagePoint)) {
-        return stagePoint;
-      }
-
-      const polygonCanvasPoints = getCanvasCoordinates(
-        annotation.points,
-        imageNode
-      ).map(([x, y]) => ({ x, y }));
-      return getClosestPointOnPolygon(stagePoint, polygonCanvasPoints);
-    }
-
-    return stagePoint;
-  };
-
-  const insertPointOnEdge = (
-    annotationIndex: number,
-    edgeIndex: number,
-    position: { x: number; y: number },
-    holeIndex: number | null
-  ) => {
-    const annotation = annotations.value[annotationIndex];
-    if (!annotation) return;
-
-    const constrainedPos = constrainPointToParentShape(
-      annotationIndex,
-      position,
-      holeIndex
-    );
-
-    // Convert canvas position to image coordinates
-    const imageCoords = getImageCoordinates(
-      [[constrainedPos.x, constrainedPos.y]],
-      imageNode
-    )[0];
-
-    if (holeIndex !== null) {
-      // Insert point into hole - clamp to parent bounds
-      const hole = annotation.holes?.[holeIndex];
-      if (hole && hole.shape_type === "polygon") {
-        hole.points.splice(edgeIndex + 1, 0, imageCoords);
-      }
-    } else if (annotation.shape_type === "polygon") {
-      // Insert point into parent shape
-      annotation.points.splice(edgeIndex + 1, 0, imageCoords);
-    }
-
-    updateAnswer();
-    renderAnchorPoints(annotationIndex);
-    updateAnnotationShape(annotationIndex);
-  };
 
   const updateAnnotationFromDrag = (
     annotationIndex: number,
@@ -884,61 +562,28 @@ export const useImageAnnotationFieldViewModel = (props: {
     holeIndex: number | null
   ) => {
     const annotation = annotations.value[annotationIndex];
-    if (!annotation) return;
+    if (!annotation || !toolFactory) return;
 
-    const imageCoords = getImageCoordinates(
-      [[newPos.x, newPos.y]],
-      imageNode
-    )[0];
-    const target =
-      holeIndex !== null ? annotation.holes?.[holeIndex] : annotation;
-    if (!target) return;
+    // Determine which shape is being dragged (hole or parent)
+    const targetShape = holeIndex !== null ? annotation.holes?.[holeIndex] : annotation;
+    if (!targetShape) return;
 
-    if (target.shape_type === "rectangle") {
-      target.points = updateRectanglePoint(
-        target.points,
-        pointIndex,
-        imageCoords
-      );
-    } else if (target.shape_type === "polygon") {
-      target.points[pointIndex] = imageCoords;
-    }
+    // Get the tool for the actual shape being dragged
+    const tool = toolFactory.getToolForShape(targetShape.shape_type);
+    if (!tool) return;
 
+    tool.updateAnnotationFromDrag(annotation, pointIndex, newPos, holeIndex);
     updateAnnotationShape(annotationIndex);
   };
 
   const updateAnnotationShape = (annotationIndex: number) => {
-    if (!layer) return;
-
-    const { element, parentShape } = getAnnotationNodes(layer, annotationIndex);
-    if (!element || !parentShape) return;
-
     const annotation = annotations.value[annotationIndex];
+    if (!annotation || !toolFactory) return;
 
-    // Update parent shape
-    updateKonvaShape(
-      parentShape,
-      annotation.shape_type,
-      getCanvasCoordinates(annotation.points, imageNode)
-    );
+    const tool = toolFactory.getToolForShape(annotation.shape_type);
+    if (!tool) return;
 
-    // Update hole shapes if they exist
-    if (element instanceof Konva.Group && annotation.holes) {
-      annotation.holes.forEach((hole, holeIndex) => {
-        const holeShape = element.findOne(
-          `#annotation-${annotationIndex}-hole-${holeIndex}`
-        );
-        if (holeShape) {
-          updateKonvaShape(
-            holeShape as Konva.Shape,
-            hole.shape_type,
-            getCanvasCoordinates(hole.points, imageNode)
-          );
-        }
-      });
-    }
-
-    layer.batchDraw();
+    tool.updateAnnotationShape(annotation, annotationIndex);
   };
 
   const finalizeAnnotationEdit = (annotationIndex: number) => {
@@ -962,10 +607,13 @@ export const useImageAnnotationFieldViewModel = (props: {
     });
 
     imageLayer = new Konva.Layer();
-    layer = new Konva.Layer();
+    annotationLayer = new Konva.Layer();
 
     stage.add(imageLayer);
-    stage.add(layer);
+    stage.add(annotationLayer);
+
+    // Initialize tool factory after layers are created
+    initializeToolFactory();
 
     loadImage();
     setupEventHandlers();
@@ -976,7 +624,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     img.crossOrigin = "anonymous";
 
     img.onload = () => {
-      if (!stage || !layer) return;
+      if (!stage || !annotationLayer) return;
 
       // Store original image dimensions
       originalImageWidth = img.width;
@@ -1025,20 +673,33 @@ export const useImageAnnotationFieldViewModel = (props: {
     window.addEventListener("keydown", handleKeyDown);
   };
 
+
+  const isPointWithinParent = (
+    point: { x: number; y: number },
+    parentIndex: number
+  ): boolean => {
+    const parent = annotations.value[parentIndex];
+    if (!parent) return false;
+
+    const canvasPoints = getCanvasCoordinates(parent.points, imageNode);
+    return checkPointWithinParent(point, canvasPoints);
+  };
+
   const completePolygon = () => {
     if (mode.value.kind !== "draw-poly" && mode.value.kind !== "draw-hole-poly")
       return;
-    if (mode.value.points.length < 6) return;
+    if (!toolFactory) return;
 
-    // Convert flat array to point pairs
-    const points = flatPointsToCoordinatePairs(mode.value.points);
-
-    // Convert to image coordinates
-    const imageCoords = getImageCoordinates(points, imageNode);
+    const tool = toolFactory.getTool("polygon");
+    if (!tool) return;
 
     if (mode.value.kind === "draw-hole-poly") {
       // Create hole and add to parent
       const parent = annotations.value[mode.value.parentIndex];
+      
+      // Convert flat array to point pairs
+      const points = flatPointsToCoordinatePairs(mode.value.points);
+      const imageCoords = getImageCoordinates(points, imageNode);
 
       // Clamp hole coordinates to parent bounds
       const parentBounds = getParentShapeBounds(parent.points);
@@ -1057,81 +718,46 @@ export const useImageAnnotationFieldViewModel = (props: {
       });
 
       updateAnswer();
-      cleanupPolygonDrawing();
+      tool.cleanupDrawing(mode.value);
       renderAnnotations();
 
       // Stay in hole drawing mode for adding more holes
       highlightParentForHoleDrawing(mode.value.parentIndex);
     } else {
       // Normal annotation creation
-      if (!selectedLabel.value) return;
+      const annotation = tool.completeDrawing(
+        mode.value,
+        annotations.value,
+        selectedLabel.value
+      );
 
-      const annotation: ImageAnnotationAnswer = {
-        label: selectedLabel.value.value,
-        points: imageCoords,
-        shape_type: "polygon",
-        flags: {},
-      };
-
-      answer.values.push(annotation);
-      updateAnswer();
-      cleanupPolygonDrawing();
-      renderAnnotations();
+      if (annotation) {
+        answer.values.push(annotation);
+        updateAnswer();
+        tool.cleanupDrawing(mode.value);
+        renderAnnotations();
+      }
     }
 
     mode.value = { kind: "idle" };
   };
 
   const cancelPolygon = () => {
-    cleanupPolygonDrawing();
+    if (!toolFactory) return;
+    const tool = toolFactory.getTool("polygon");
+    if (tool && (mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly")) {
+      tool.cancelDrawing(mode.value);
+    }
     mode.value = { kind: "idle" };
-    layer?.batchDraw();
+    annotationLayer?.batchDraw();
   };
 
   const cleanupPolygonDrawing = () => {
-    const circles =
-      mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly"
-        ? mode.value.circles
-        : [];
-    const previewLine =
-      mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly"
-        ? mode.value.previewLine
-        : null;
-
-    cleanupPolyDrawing(
-      drawingShape,
-      circles as Konva.Circle[],
-      previewLine as Konva.Line | null
-    );
-
-    if (drawingShape) {
-      drawingShape = null;
+    if (!toolFactory) return;
+    const tool = toolFactory.getTool("polygon");
+    if (tool && (mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly")) {
+      tool.cleanupDrawing(mode.value);
     }
-  };
-
-  const isPointWithinParent = (
-    point: { x: number; y: number },
-    parentIndex: number
-  ): boolean => {
-    const parent = annotations.value[parentIndex];
-    if (!parent) return false;
-
-    const canvasPoints = getCanvasCoordinates(parent.points, imageNode);
-    return checkPointWithinParent(point, canvasPoints);
-  };
-
-  // Helper to start rectangle drawing
-  const startRectangleDrawing = (
-    pos: { x: number; y: number },
-    color: string,
-    isHole: boolean,
-    parentIndex?: number
-  ) => {
-    mode.value = isHole
-      ? { kind: "draw-hole-rect", parentIndex: parentIndex!, start: pos, color }
-      : { kind: "draw-rect", start: pos, color };
-
-    drawingShape = initRectDrawing(pos, color, layer);
   };
 
   // Helper to start polygon drawing
@@ -1141,54 +767,50 @@ export const useImageAnnotationFieldViewModel = (props: {
     isHole: boolean,
     parentIndex?: number
   ) => {
+    if (!toolFactory) return;
+    const tool = toolFactory.getTool("polygon");
+    if (!tool) return;
+
     const drawColor = color || selectedLabel.value?.color || "#cccccc";
-    const result = initPolyDrawing(pos, drawColor, layer, createPointCircle);
-
-    mode.value = isHole
-      ? {
-          kind: "draw-hole-poly",
-          parentIndex: parentIndex!,
-          color,
-          points: [pos.x, pos.y],
-          circles: [result.circle],
-          previewLine: result.previewLine,
-        }
-      : {
-          kind: "draw-poly",
-          color,
-          points: [pos.x, pos.y],
-          circles: [result.circle],
-          previewLine: result.previewLine,
-        };
-
-    drawingShape = result.drawingShape;
+    const state = tool.startDrawing(pos, drawColor, isHole, parentIndex);
+    mode.value = state as any;
   };
 
   // Helper to handle polygon point addition
   const addPolygonPoint = (pos: { x: number; y: number }, color: string) => {
     if (mode.value.kind !== "draw-poly" && mode.value.kind !== "draw-hole-poly")
       return;
+    if (!toolFactory) return;
 
-    const drawColor = color || selectedLabel.value?.color || "#cccccc";
-    const result = addPolyPoint(
-      pos,
-      drawColor,
-      mode.value.points,
-      drawingShape as Konva.Line,
-      mode.value.circles as Konva.Circle[],
-      layer,
-      CLOSE_THRESHOLD,
-      createPointCircle
-    );
+    const tool = toolFactory.getTool("polygon");
+    if (!tool || !tool.addPoint) return;
 
+    const result = tool.addPoint(mode.value, pos);
     if (result.shouldComplete) {
       completePolygon();
       return;
     }
 
-    mode.value.circles = result.updatedCircles;
+    mode.value = result.state as any;
   };
 
+  // Helper to start rectangle drawing
+  const startRectangleDrawing = (
+    pos: { x: number; y: number },
+    color: string,
+    isHole: boolean,
+    parentIndex?: number
+  ) => {
+    if (!toolFactory) return;
+    const tool = toolFactory.getTool("rectangle");
+    if (!tool) return;
+
+    const state = tool.startDrawing(pos, color, isHole, parentIndex);
+    mode.value = state as any;
+  };
+
+
+  // Handle mouse & keyboard events
   const handleMouseDown = () => {
     const pos = stage?.getPointerPosition();
     if (!pos) return;
@@ -1243,33 +865,24 @@ export const useImageAnnotationFieldViewModel = (props: {
 
   const handleMouseMove = () => {
     const pos = stage?.getPointerPosition();
-    if (!pos) return;
+    if (!pos || !toolFactory) return;
 
     switch (mode.value.kind) {
       case "draw-rect":
       case "draw-hole-rect": {
-        if (drawingShape) {
-          updateRectangleDrawing(
-            drawingShape as Konva.Rect,
-            mode.value.start,
-            pos,
-            layer
-          );
+        const tool = toolFactory.getTool("rectangle");
+        if (tool) {
+          tool.updateDrawing(mode.value, pos);
         }
         break;
       }
 
       case "draw-poly":
       case "draw-hole-poly": {
-        updatePolygonPreview(
-          mode.value.previewLine as Konva.Line | null,
-          mode.value.points,
-          pos,
-          mode.value.circles as Konva.Circle[],
-          mode.value.color,
-          CLOSE_THRESHOLD,
-          layer
-        );
+        const tool = toolFactory.getTool("polygon");
+        if (tool) {
+          tool.updateDrawing(mode.value, pos);
+        }
         break;
       }
 
@@ -1282,19 +895,21 @@ export const useImageAnnotationFieldViewModel = (props: {
 
   const handleMouseUp = () => {
     const pos = stage?.getPointerPosition();
-    if (!pos || !drawingShape) return;
+    if (!pos || !toolFactory) return;
 
     // Use mode state machine for cleaner logic
     switch (mode.value.kind) {
       case "draw-rect": {
+        const tool = toolFactory.getTool("rectangle");
+        if (!tool) return;
+
         const width = pos.x - mode.value.start.x;
         const height = pos.y - mode.value.start.y;
 
         // Minimum size check
         if (Math.abs(width) < 5 || Math.abs(height) < 5) {
-          drawingShape.destroy();
-          drawingShape = null;
-          layer?.batchDraw();
+          tool.cleanupDrawing(mode.value);
+          annotationLayer?.batchDraw();
           mode.value = { kind: "idle" };
           return;
         }
@@ -1323,8 +938,7 @@ export const useImageAnnotationFieldViewModel = (props: {
 
         answer.values.push(annotation);
         updateAnswer();
-        drawingShape.destroy();
-        drawingShape = null;
+        tool.cleanupDrawing(mode.value);
         renderAnnotations();
 
         mode.value = { kind: "idle" };
@@ -1332,14 +946,16 @@ export const useImageAnnotationFieldViewModel = (props: {
       }
 
       case "draw-hole-rect": {
+        const tool = toolFactory.getTool("rectangle");
+        if (!tool) return;
+
         const width = pos.x - mode.value.start.x;
         const height = pos.y - mode.value.start.y;
 
         // Minimum size check
         if (Math.abs(width) < 5 || Math.abs(height) < 5) {
-          drawingShape.destroy();
-          drawingShape = null;
-          layer?.batchDraw();
+          tool.cleanupDrawing(mode.value);
+          annotationLayer?.batchDraw();
           mode.value = { kind: "idle" };
           return;
         }
@@ -1372,8 +988,7 @@ export const useImageAnnotationFieldViewModel = (props: {
         });
 
         updateAnswer();
-        drawingShape.destroy();
-        drawingShape = null;
+        tool.cleanupDrawing(mode.value);
         renderAnnotations();
 
         // Stay in hole drawing mode for adding more holes
@@ -1395,33 +1010,36 @@ export const useImageAnnotationFieldViewModel = (props: {
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (mode.value.kind) {
       case "draw-hole-poly":
-        if (e.key === "Escape") {
+        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
           e.preventDefault();
           cancelPolygon();
-        } else if (e.key === "Enter" && mode.value.points.length >= 6) {
+        } else if (
+          matchesKey(e, ANNOTATION_SHORTCUTS.COMPLETE) &&
+          mode.value.points.length >= 6
+        ) {
           e.preventDefault();
           completePolygon();
         }
         break;
 
       case "draw-hole-rect":
-        if (e.key === "Escape") {
+        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
           e.preventDefault();
           exitHoleDrawingMode();
         }
         break;
 
       case "edit":
-        if (e.key === "Escape") {
+        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
           e.preventDefault();
           exitEditMode();
-        } else if (e.key === "ArrowRight" || e.key.toLowerCase() === "n") {
+        } else if (matchesKey(e, ANNOTATION_SHORTCUTS.NEXT)) {
           e.preventDefault();
           editNextAnnotation();
-        } else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "p") {
+        } else if (matchesKey(e, ANNOTATION_SHORTCUTS.PREVIOUS)) {
           e.preventDefault();
           editPreviousAnnotation();
-        } else if (e.key === "Delete" || e.key === "Backspace") {
+        } else if (matchesKey(e, ANNOTATION_SHORTCUTS.DELETE)) {
           e.preventDefault();
           if (mode.value.index !== null) {
             const indexToDelete = mode.value.index;
@@ -1437,10 +1055,13 @@ export const useImageAnnotationFieldViewModel = (props: {
         break;
 
       case "draw-poly":
-        if (e.key === "Escape") {
+        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
           e.preventDefault();
           cancelPolygon();
-        } else if (e.key === "Enter" && mode.value.points.length >= 6) {
+        } else if (
+          matchesKey(e, ANNOTATION_SHORTCUTS.COMPLETE) &&
+          mode.value.points.length >= 6
+        ) {
           e.preventDefault();
           completePolygon();
         }
@@ -1448,7 +1069,10 @@ export const useImageAnnotationFieldViewModel = (props: {
 
       case "idle":
         // Exit hole drawing mode if active
-        if (e.key === "Escape" && sharedState.holeDrawingMode.value.active) {
+        if (
+          matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL) &&
+          sharedState.holeDrawingMode.value.active
+        ) {
           e.preventDefault();
           exitHoleDrawingMode();
         }
@@ -1547,7 +1171,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     attachHoverHandlers(group, index);
     attachContextMenuHandler(group, index);
 
-    layer?.add(group);
+    annotationLayer?.add(group);
   };
 
   // Helper to render simple annotation (no holes)
@@ -1568,16 +1192,16 @@ export const useImageAnnotationFieldViewModel = (props: {
     if (shape) {
       attachHoverHandlers(shape, index);
       attachContextMenuHandler(shape, index);
-      layer?.add(shape);
+      annotationLayer?.add(shape);
     }
   };
 
   const renderAnnotations = () => {
-    if (!layer) return;
+    if (!annotationLayer) return;
 
     // Remove existing annotation shapes and groups
-    layer.find(".annotation-shape").forEach((shape) => shape.destroy());
-    layer.find(".annotation-group").forEach((group) => group.destroy());
+    annotationLayer.find(".annotation-shape").forEach((shape) => shape.destroy());
+    annotationLayer.find(".annotation-group").forEach((group) => group.destroy());
 
     // Render each annotation
     annotations.value.forEach((annotation, index) => {
@@ -1592,10 +1216,8 @@ export const useImageAnnotationFieldViewModel = (props: {
       }
     });
 
-    layer.batchDraw();
+    annotationLayer.batchDraw();
   };
-
-  // createShape is imported from konvaShapeUtils.ts
 
   const updateAnswer = () => {
     imageAnnotationQuestion.answer.response({
@@ -1616,18 +1238,27 @@ export const useImageAnnotationFieldViewModel = (props: {
     stage.width(containerWidth);
     stage.height(containerHeight);
 
-    // Recalculate scale for image
-    const scale = Math.min(
-      containerWidth / originalImageWidth,
-      containerHeight / originalImageHeight,
-      1 // Don't scale up
+    // Calculate scale and position for image
+    const scale = calculateImageScale(
+      containerWidth,
+      containerHeight,
+      originalImageWidth,
+      originalImageHeight
     );
 
-    // Recenter and rescale image
-    imageNode.x((containerWidth - originalImageWidth * scale) / 2);
-    imageNode.y((containerHeight - originalImageHeight * scale) / 2);
-    imageNode.width(originalImageWidth * scale);
-    imageNode.height(originalImageHeight * scale);
+    const imageProps = centerImage(
+      containerWidth,
+      containerHeight,
+      originalImageWidth,
+      originalImageHeight,
+      scale
+    );
+
+    // Apply image positioning
+    imageNode.x(imageProps.x);
+    imageNode.y(imageProps.y);
+    imageNode.width(imageProps.width);
+    imageNode.height(imageProps.height);
 
     // Re-render annotations
     renderAnnotations();
@@ -1637,7 +1268,7 @@ export const useImageAnnotationFieldViewModel = (props: {
       renderAnchorPoints(editMode.value.annotationIndex);
     }
 
-    layer?.batchDraw();
+    annotationLayer?.batchDraw();
   };
 
   // TODO only watch should stay
@@ -1808,7 +1439,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     canvasContainer,
     imageLoaded,
     hasError,
-    contextMenu,
+    contextMenu: contextMenu.state,
     editMode,
     holeDrawingMode: computed(() => sharedState.holeDrawingMode.value),
     deleteShape,
