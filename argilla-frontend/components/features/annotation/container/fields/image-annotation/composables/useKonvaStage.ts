@@ -1,4 +1,3 @@
-import { Ref } from "vue-demi";
 import Konva from "konva";
 
 /**

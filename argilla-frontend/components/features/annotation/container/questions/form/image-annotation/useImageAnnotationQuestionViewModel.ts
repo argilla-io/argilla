@@ -55,14 +55,20 @@ export const useImageAnnotationQuestionViewModel = (props: {
     const cache = new Map<string, string>();
     annotations.value.forEach((annotation) => {
       if (!cache.has(annotation.label)) {
-        cache.set(annotation.label, answer.getAnnotationColor(annotation.label));
+        cache.set(
+          annotation.label,
+          answer.getAnnotationColor(annotation.label)
+        );
       }
     });
     return cache;
   });
 
   const getAnnotationColorMemoized = (labelValue: string) => {
-    return annotationColorsCache.value.get(labelValue) || answer.getAnnotationColor(labelValue);
+    return (
+      annotationColorsCache.value.get(labelValue) ||
+      answer.getAnnotationColor(labelValue)
+    );
   };
 
   const selectTool = (tool: Tool) => {
@@ -97,21 +103,14 @@ export const useImageAnnotationQuestionViewModel = (props: {
     // Handle focus events if needed
   };
 
-  const getAnnotationColor = (labelValue: string) =>
-    answer.getAnnotationColor(labelValue);
-
   const hoverAnnotation = (index: number) => {
     hoveredAnnotation.value = index;
-    // TODO: Emit event to field component to highlight annotation
+    // Note: Canvas hover highlighting is handled by the field component's own hover handlers
+    // attached directly to Konva shapes. List hover only updates local UI state.
   };
 
   const unhoverAnnotation = () => {
     hoveredAnnotation.value = null;
-    // TODO: Emit event to field component to unhighlight annotation
-  };
-
-  const selectAnnotation = (_index: number) => {
-    // Clicking on annotation in list - could trigger edit mode
   };
 
   const onEditAnnotation = (index: number) => {
@@ -145,7 +144,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
    * Delete a shape from the question list UI.
    * This signals the Field component to handle the actual deletion.
    */
-  const deleteShapeFromList = (index: number) => {
+  const deleteAnnotation = (index: number) => {
     // Signal to field component to delete this shape via sharedState
     // The field component will handle:
     // 1. Exiting edit mode if needed
@@ -154,9 +153,6 @@ export const useImageAnnotationQuestionViewModel = (props: {
     sharedState.deleteShapeData.value = { index };
     sharedState.deleteShapeTrigger.value++;
   };
-
-  // Keep old name for backward compatibility temporarily
-  const deleteAnnotation = deleteShapeFromList;
 
   const toggleExpanded = (index: number) => {
     // Use Vue.set for Vue 2 reactivity
@@ -190,7 +186,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
 
   const deleteHole = (annotationIndex: number, holeIndex: number) => {
     const annotation = annotations.value[annotationIndex];
-    if (annotation && annotation.holes && annotation.holes[holeIndex]) {
+    if (annotation?.holes?.[holeIndex]) {
       // Signal to field component to delete this hole via sharedState
       // The field component will handle:
       // 1. Removing the hole from the array
@@ -216,7 +212,6 @@ export const useImageAnnotationQuestionViewModel = (props: {
     getAnnotationColor: getAnnotationColorMemoized,
     hoverAnnotation,
     unhoverAnnotation,
-    selectAnnotation,
     deleteAnnotation,
     onEditAnnotation,
     onAnnotationItemClick,

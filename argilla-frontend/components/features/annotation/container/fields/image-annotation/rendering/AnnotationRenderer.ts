@@ -1,17 +1,26 @@
 import Konva from "konva";
-import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 import { getAnnotationNodes } from "../utils/konvaShapes";
 import { getCanvasCoordinates } from "../utils/coordinates";
 import { AnnotationToolFactory } from "../tools/AnnotationToolFactory";
+import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 
 export interface AnchorConfig {
   annotationIndex: number;
   pointIndex: number;
   holeIndex: number | null;
   onDragStart: (annIdx: number, ptIdx: number, holeIdx: number | null) => void;
-  onDragMove: (annIdx: number, ptIdx: number, pos: { x: number; y: number }, holeIdx: number | null) => void;
+  onDragMove: (
+    annIdx: number,
+    ptIdx: number,
+    pos: { x: number; y: number },
+    holeIdx: number | null
+  ) => void;
   onDragEnd: (annIdx: number) => void;
-  attachContextMenuHandler: (element: Konva.Node, annotationIndex: number, holeIndex?: number) => void;
+  attachContextMenuHandler: (
+    element: Konva.Node,
+    annotationIndex: number,
+    holeIndex?: number
+  ) => void;
 }
 
 export interface RendererDependencies {
@@ -83,7 +92,9 @@ export class AnnotationRenderer {
    * Attach hover handlers to a Konva element
    */
   private attachHoverHandlers(element: Konva.Node, annotationIndex: number) {
-    element.on("mouseenter", () => this.deps.onHoverAnnotation(annotationIndex));
+    element.on("mouseenter", () =>
+      this.deps.onHoverAnnotation(annotationIndex)
+    );
     element.on("mouseleave", () => this.deps.onUnhoverAnnotation());
   }
 
@@ -95,7 +106,11 @@ export class AnnotationRenderer {
     index: number,
     color: string,
     canvasPoints: number[][],
-    attachContextMenuHandler: (element: Konva.Node, annotationIndex: number, holeIndex?: number) => void
+    attachContextMenuHandler: (
+      element: Konva.Node,
+      annotationIndex: number,
+      holeIndex?: number
+    ) => void
   ) {
     if (!this.deps.annotationLayer) return;
 
@@ -118,7 +133,10 @@ export class AnnotationRenderer {
 
     // Render holes as cutouts
     annotation.holes!.forEach((hole, holeIndex) => {
-      const holeCanvasPoints = getCanvasCoordinates(hole.points, this.deps.imageNode);
+      const holeCanvasPoints = getCanvasCoordinates(
+        hole.points,
+        this.deps.imageNode
+      );
       const holeShape = this.createShape(
         hole.shape_type,
         holeCanvasPoints,
@@ -150,7 +168,11 @@ export class AnnotationRenderer {
     index: number,
     color: string,
     canvasPoints: number[][],
-    attachContextMenuHandler: (element: Konva.Node, annotationIndex: number, holeIndex?: number) => void
+    attachContextMenuHandler: (
+      element: Konva.Node,
+      annotationIndex: number,
+      holeIndex?: number
+    ) => void
   ) {
     if (!this.deps.annotationLayer) return;
 
@@ -174,7 +196,11 @@ export class AnnotationRenderer {
    */
   renderAnnotations(
     annotations: ImageAnnotationAnswer[],
-    attachContextMenuHandler: (element: Konva.Node, annotationIndex: number, holeIndex?: number) => void
+    attachContextMenuHandler: (
+      element: Konva.Node,
+      annotationIndex: number,
+      holeIndex?: number
+    ) => void
   ) {
     if (!this.deps.annotationLayer) return;
 
@@ -189,13 +215,28 @@ export class AnnotationRenderer {
     // Render each annotation
     annotations.forEach((annotation, index) => {
       const color = this.deps.getAnnotationColor(annotation.label);
-      const canvasPoints = getCanvasCoordinates(annotation.points, this.deps.imageNode);
+      const canvasPoints = getCanvasCoordinates(
+        annotation.points,
+        this.deps.imageNode
+      );
       const hasHoles = annotation.holes && annotation.holes.length > 0;
 
       if (hasHoles) {
-        this.renderAnnotationWithHoles(annotation, index, color, canvasPoints, attachContextMenuHandler);
+        this.renderAnnotationWithHoles(
+          annotation,
+          index,
+          color,
+          canvasPoints,
+          attachContextMenuHandler
+        );
       } else {
-        this.renderSimpleAnnotation(annotation, index, color, canvasPoints, attachContextMenuHandler);
+        this.renderSimpleAnnotation(
+          annotation,
+          index,
+          color,
+          canvasPoints,
+          attachContextMenuHandler
+        );
       }
     });
 
@@ -245,12 +286,18 @@ export class AnnotationRenderer {
   /**
    * Fade all annotations except the one being edited
    */
-  fadeNonEditedAnnotations(editingIndex: number, annotations: ImageAnnotationAnswer[]) {
+  fadeNonEditedAnnotations(
+    editingIndex: number,
+    annotations: ImageAnnotationAnswer[]
+  ) {
     if (!this.deps.annotationLayer) return;
 
     annotations.forEach((_, index) => {
       if (index !== editingIndex) {
-        const { parentShape } = getAnnotationNodes(this.deps.annotationLayer, index);
+        const { parentShape } = getAnnotationNodes(
+          this.deps.annotationLayer,
+          index
+        );
         if (parentShape) {
           (parentShape as any).opacity(0.2);
         }
@@ -267,7 +314,10 @@ export class AnnotationRenderer {
     if (!this.deps.annotationLayer) return;
 
     annotations.forEach((_, index) => {
-      const { parentShape } = getAnnotationNodes(this.deps.annotationLayer, index);
+      const { parentShape } = getAnnotationNodes(
+        this.deps.annotationLayer,
+        index
+      );
       if (parentShape) {
         (parentShape as any).opacity(0.3);
       }
@@ -280,13 +330,16 @@ export class AnnotationRenderer {
    * Render a visual guide showing the parent shape boundary when editing holes
    */
   renderParentBoundaryGuide(
-    annotationIndex: number,
+    _annotationIndex: number,
     annotation: ImageAnnotationAnswer,
     color: string
   ) {
     if (!this.deps.annotationLayer) return;
 
-    const canvasPoints = getCanvasCoordinates(annotation.points, this.deps.imageNode);
+    const canvasPoints = getCanvasCoordinates(
+      annotation.points,
+      this.deps.imageNode
+    );
 
     // Create a dashed boundary line to show the constraint
     let boundaryShape: Konva.Shape | null = null;
@@ -364,10 +417,64 @@ export class AnnotationRenderer {
   }
 
   /**
+   * Update rectangle anchor point positions during drag
+   * This ensures all corner anchors move correctly when dragging any corner
+   */
+  updateRectangleAnchorPositions(
+    annotationIndex: number,
+    holeIndex: number | null,
+    annotation: ImageAnnotationAnswer
+  ) {
+    if (!this.deps.annotationLayer) return;
+
+    // Determine which shape we're updating (hole or parent)
+    const targetShape =
+      holeIndex !== null ? annotation.holes?.[holeIndex] : annotation;
+    if (!targetShape || targetShape.shape_type !== "rectangle") return;
+
+    // Get updated canvas coordinates for the rectangle
+    const canvasPoints = getCanvasCoordinates(
+      targetShape.points,
+      this.deps.imageNode
+    );
+
+    if (canvasPoints.length !== 2) return;
+
+    const [p1, p2] = canvasPoints;
+    const corners = [
+      { x: p1[0], y: p1[1] }, // top-left
+      { x: p2[0], y: p1[1] }, // top-right
+      { x: p2[0], y: p2[1] }, // bottom-right
+      { x: p1[0], y: p2[1] }, // bottom-left
+    ];
+
+    // Update each anchor point position
+    corners.forEach((corner, pointIndex) => {
+      const anchorId =
+        holeIndex !== null
+          ? `anchor-${annotationIndex}-hole-${holeIndex}-${pointIndex}`
+          : `anchor-${annotationIndex}-${pointIndex}`;
+
+      const anchor = this.deps.annotationLayer!.findOne(`#${anchorId}`);
+      if (anchor) {
+        anchor.position({ x: corner.x, y: corner.y });
+      }
+    });
+
+    this.deps.annotationLayer.batchDraw();
+  }
+
+  /**
    * Highlight parent shape for hole drawing mode
    */
-  highlightParentForHoleDrawing(parentIndex: number, annotation: ImageAnnotationAnswer) {
-    const { parentShape } = getAnnotationNodes(this.deps.annotationLayer, parentIndex);
+  highlightParentForHoleDrawing(
+    parentIndex: number,
+    annotation: ImageAnnotationAnswer
+  ) {
+    const { parentShape } = getAnnotationNodes(
+      this.deps.annotationLayer,
+      parentIndex
+    );
     if (!parentShape) return;
 
     const color = this.deps.getAnnotationColor(annotation.label);

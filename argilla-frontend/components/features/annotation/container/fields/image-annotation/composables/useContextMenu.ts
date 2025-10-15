@@ -1,4 +1,4 @@
-import { ref, type Ref } from "vue-demi";
+import { ref } from "vue-demi";
 import Konva from "konva";
 
 export interface ContextMenuState {
@@ -19,7 +19,7 @@ export interface ContextMenuActions {
 /**
  * Consolidated context menu composable
  * Manages state, visibility, and action handlers for annotation context menus
- * 
+ *
  * @param actions - Callbacks for menu actions (delete, edit, add hole, delete hole)
  * @returns Context menu state and handler functions
  */
@@ -101,10 +101,7 @@ export const useContextMenu = (actions?: ContextMenuActions) => {
       state.value.holeIndex !== null &&
       actions
     ) {
-      actions.onDeleteHole(
-        state.value.annotationIndex,
-        state.value.holeIndex
-      );
+      actions.onDeleteHole(state.value.annotationIndex, state.value.holeIndex);
       hide();
     }
   };

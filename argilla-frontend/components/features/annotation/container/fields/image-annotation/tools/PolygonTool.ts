@@ -553,10 +553,7 @@ export class PolygonTool extends BaseAnnotationTool {
             holeIndex,
           });
         });
-      } else if (
-        hole.shape_type === "rectangle" &&
-        this.context.getTool
-      ) {
+      } else if (hole.shape_type === "rectangle" && this.context.getTool) {
         // Delegate rectangle holes to RectangleTool
         const rectTool = this.context.getTool("rectangle");
         if (rectTool) {

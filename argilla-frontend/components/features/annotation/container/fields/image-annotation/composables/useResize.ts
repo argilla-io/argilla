@@ -31,7 +31,7 @@ export const useResize = (
     const stage = getStage();
     const imageNode = getImageNode();
     const annotationLayer = getAnnotationLayer();
-    
+
     if (!stage || !container.value || !imageNode) return;
 
     // Get new container dimensions
@@ -44,7 +44,8 @@ export const useResize = (
     stage.width(containerWidth);
     stage.height(containerHeight);
 
-    const { width: originalWidth, height: originalHeight } = getOriginalDimensions();
+    const { width: originalWidth, height: originalHeight } =
+      getOriginalDimensions();
 
     // Calculate scale and position for image
     const scale = calculateImageScale(

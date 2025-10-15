@@ -8,17 +8,13 @@ import { useKeyboardShortcuts } from "./composables/useKeyboardShortcuts";
 import { useContextMenu } from "./composables/useContextMenu";
 import { AnnotationRenderer } from "./rendering/AnnotationRenderer";
 import { getImageCoordinates, getCanvasCoordinates } from "./utils/coordinates";
-import {
-  isPointWithinParent as checkPointWithinParent,
-} from "./utils/geometry";
-import { getAnnotationNodes } from "./utils/konvaShapes";
+import { isPointWithinParent as checkPointWithinParent } from "./utils/geometry";
 import { completeHoleCreation } from "./utils/holeCreationUtils";
 import { AnnotationToolFactory } from "./tools/AnnotationToolFactory";
 import { ToolContext } from "./tools/IAnnotationTool";
 import { ToolInteraction, InteractionContext } from "./tools/IToolInteraction";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
-import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 /**
@@ -101,10 +97,6 @@ export const useImageAnnotationFieldViewModel = (props: {
   const getAnnotationColor = (labelValue: string) =>
     answer.getAnnotationColor(labelValue);
 
-  // Removed: createShape() - now in AnnotationRenderer
-
-  // Removed: highlightAnnotationUtil() - now in AnnotationRenderer
-
   /**
    * Create base context with shared properties
    */
@@ -126,8 +118,7 @@ export const useImageAnnotationFieldViewModel = (props: {
   const getToolContext = (): ToolContext => ({
     ...getBaseContext(),
     renderAnchorPoints,
-    getTool: (toolType: string) =>
-      toolFactory?.getTool(toolType) || null,
+    getTool: (toolType: string) => toolFactory?.getTool(toolType) || null,
   });
 
   const initializeToolFactory = () => {
@@ -309,9 +300,6 @@ export const useImageAnnotationFieldViewModel = (props: {
     hoveredAnnotation.value = null;
   };
 
-  // Removed: showContextMenu() - now contextMenu.show()
-  // Removed: hideContextMenu() - now contextMenu.hide()
-
   const enterEditMode = (annotationIndex: number) => {
     // Cancel any ongoing drawing
     if (activeInteraction.value) {
@@ -447,11 +435,6 @@ export const useImageAnnotationFieldViewModel = (props: {
     updateAnswer();
   };
 
-  // Removed: handleContextMenuDelete() - now in useContextMenuHandlers composable
-  // Removed: handleContextMenuEdit() - now in useContextMenuHandlers composable
-  // Removed: handleContextMenuAddHole() - now in useContextMenuHandlers composable
-  // Removed: handleContextMenuDeleteHole() - now in useContextMenuHandlers composable
-
   const enterHoleDrawingMode = (parentIndex: number) => {
     // Cancel any ongoing drawing
     if (activeInteraction.value) {
@@ -527,8 +510,6 @@ export const useImageAnnotationFieldViewModel = (props: {
     renderer.restoreAllAnnotations(annotations.value);
   };
 
-  // Removed: renderParentBoundaryGuide() - now in AnnotationRenderer
-
   const renderAnchorPoints = (annotationIndex: number) => {
     if (!renderer) return;
 
@@ -571,6 +552,24 @@ export const useImageAnnotationFieldViewModel = (props: {
           }
         }
         updateAnnotationFromDrag(annIdx, ptIdx, constrainedPos, holeIdx);
+
+        // Update anchor point positions for rectangles during drag
+        // This ensures all corner anchors move correctly when dragging any corner
+        const targetAnnotation = annotations.value[annIdx];
+        if (targetAnnotation && renderer) {
+          // Check if we're dragging a rectangle (parent or hole)
+          const targetShape =
+            holeIdx !== null
+              ? targetAnnotation.holes?.[holeIdx]
+              : targetAnnotation;
+          if (targetShape && targetShape.shape_type === "rectangle") {
+            renderer.updateRectangleAnchorPositions(
+              annIdx,
+              holeIdx,
+              targetAnnotation
+            );
+          }
+        }
       },
       onDragEnd: (annIdx: number) => {
         finalizeAnnotationEdit(annIdx);
@@ -579,7 +578,12 @@ export const useImageAnnotationFieldViewModel = (props: {
       attachContextMenuHandler: contextMenu.attachContextMenuHandler,
     };
 
-    renderer.renderAnchorPoints(annotation, annotationIndex, color, anchorConfig);
+    renderer.renderAnchorPoints(
+      annotation,
+      annotationIndex,
+      color,
+      anchorConfig
+    );
   };
 
   const removeAnchorPoints = () => {
@@ -651,11 +655,11 @@ export const useImageAnnotationFieldViewModel = (props: {
         imageNode = node;
         originalImageWidth = originalWidth;
         originalImageHeight = originalHeight;
-        
+
         // Initialize renderer AFTER imageNode is available
         // This ensures coordinate transformations work correctly
         initializeRenderer();
-        
+
         imageLoaded.value = true;
         renderAnnotations();
       })
@@ -665,9 +669,6 @@ export const useImageAnnotationFieldViewModel = (props: {
 
     // Keyboard listener now handled by useKeyboardShortcuts composable
   };
-
-  // Removed: loadImage() - now handled by loadImageNode composable
-  // Removed: setupEventHandlers() - now handled by initKonvaStage composable
 
   // Handle mouse events
   const handleMouseDown = () => {
@@ -699,12 +700,6 @@ export const useImageAnnotationFieldViewModel = (props: {
     handleInteractionResult(result);
   };
 
-  // Removed: handleKeyDown() - now handled by useKeyboardShortcuts composable
-  // Removed: attachContextMenuHandler() - now handled by useContextMenuHandlers composable
-  // Removed: attachHoverHandlers() - now in AnnotationRenderer
-  // Removed: renderAnnotationWithHoles() - now in AnnotationRenderer
-  // Removed: renderSimpleAnnotation() - now in AnnotationRenderer
-
   const renderAnnotations = () => {
     if (!renderer) return;
     renderer.renderAnnotations(
@@ -718,8 +713,6 @@ export const useImageAnnotationFieldViewModel = (props: {
       value: answer.valuesAnswered,
     });
   };
-
-  // Removed: resizeCanvas() - now handled by useResize composable
 
   // Initialize composables after all functions are declared
   // Context menu (consolidated state + handlers)
@@ -751,7 +744,9 @@ export const useImageAnnotationFieldViewModel = (props: {
     {
       mode,
       activeInteraction,
-      holeDrawingModeActive: computed(() => sharedState.holeDrawingMode.value.active),
+      holeDrawingModeActive: computed(
+        () => sharedState.holeDrawingMode.value.active
+      ),
       annotationCount: computed(() => annotations.value.length),
     },
     {

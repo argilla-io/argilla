@@ -7,16 +7,24 @@ export interface KeyboardShortcutHandlers {
   onNextAnnotation?: () => void;
   onPreviousAnnotation?: () => void;
   onDeleteInEditMode?: () => void;
-  
+
   // Idle mode handlers
   onExitHoleDrawingMode?: () => void;
-  
+
   // Interaction handlers
-  onInteractionKeyDown?: (e: KeyboardEvent) => { shouldComplete?: boolean; shouldCancel?: boolean; shouldContinue?: boolean } | void;
+  onInteractionKeyDown?: (e: KeyboardEvent) => {
+    shouldComplete?: boolean;
+    shouldCancel?: boolean;
+    shouldContinue?: boolean;
+  } | void;
 }
 
 export interface KeyboardShortcutState {
-  mode: Ref<{ kind: "idle" } | { kind: "drawing" } | { kind: "edit"; annotationIndex: number }>;
+  mode: Ref<
+    | { kind: "idle" }
+    | { kind: "drawing" }
+    | { kind: "edit"; annotationIndex: number }
+  >;
   activeInteraction: Ref<{ onKeyDown: (e: KeyboardEvent) => any } | null>;
   holeDrawingModeActive: Ref<boolean>;
   annotationCount: Ref<number>;
