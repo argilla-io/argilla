@@ -1,5 +1,10 @@
 import Konva from "konva";
-import { getParentShapeBounds, clampToParentBounds } from "../utils/geometry";
+import {
+  getParentShapeBounds,
+  clampToParentBounds,
+  getClosestPointOnPolygon,
+  isPointWithinParent as checkPointWithinParent,
+} from "../utils/geometry";
 import { updateRectanglePoint } from "../utils/konvaShapes";
 import { ANNOTATION_SHORTCUTS, matchesKey } from "../utils/keyboardShortcuts";
 import { BaseAnnotationTool } from "./BaseAnnotationTool";
@@ -400,6 +405,23 @@ export class RectangleTool extends BaseAnnotationTool {
         this.context.imageNode
       )[0];
       return { x: canvasX, y: canvasY };
+    }
+
+    if (parentAnnotation.shape_type === "polygon") {
+      const polygonCanvasPoints = this.context.getCanvasCoordinates(
+        parentAnnotation.points,
+        this.context.imageNode
+      );
+
+      // Check if point is within parent polygon's bounding box
+      if (checkPointWithinParent(stagePoint, polygonCanvasPoints)) {
+        // Point is inside, allow free movement
+        return stagePoint;
+      }
+
+      // Point is outside, snap to closest point on polygon boundary
+      const polygonPoints = polygonCanvasPoints.map(([x, y]) => ({ x, y }));
+      return getClosestPointOnPolygon(stagePoint, polygonPoints);
     }
 
     return stagePoint;
