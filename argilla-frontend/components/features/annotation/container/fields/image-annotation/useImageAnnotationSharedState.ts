@@ -4,6 +4,7 @@ import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/Que
 export type ImageAnnotationSharedState = {
   editModeActive: Ref<boolean>;
   currentAnnotationIndex: Ref<number | null>;
+  selectedTool: Ref<string>;
   // Counter-based signals - increment to trigger action
   cancelPolygonTrigger: Ref<number>;
   reassignLabelTrigger: Ref<number>;
@@ -38,6 +39,7 @@ export const useImageAnnotationSharedState = (
     state = {
       editModeActive: ref(false),
       currentAnnotationIndex: ref<number | null>(null),
+      selectedTool: ref("rectangle"),
       // Counter-based signals
       cancelPolygonTrigger: ref(0),
       reassignLabelTrigger: ref(0),

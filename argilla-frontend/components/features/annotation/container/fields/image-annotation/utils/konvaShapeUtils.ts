@@ -36,19 +36,6 @@ export const getAnnotationNodes = (
   return { element, parentShape: element as Konva.Shape, holeShapes: [] };
 };
 
-/**
- * Get the parent shape node for an annotation.
- *
- * @param layer - The Konva layer containing the annotations
- * @param annotationIndex - The index of the annotation
- * @returns The parent shape node or null
- */
-export const getParentShapeNode = (
-  layer: Konva.Layer | null,
-  annotationIndex: number
-): Konva.Shape | null => {
-  return getAnnotationNodes(layer, annotationIndex).parentShape;
-};
 
 /**
  * Create a Konva shape (rectangle or polygon) for an annotation.
@@ -171,13 +158,14 @@ export const updateRectanglePoint = (
  *
  * @param x - X coordinate in canvas space
  * @param y - Y coordinate in canvas space
- * @param color - Color for the circle
+ * @param color - Optional color for the circle
+ * @param selectedLabel - Optional computed ref containing selected label with color fallback
  * @returns A Konva.Circle representing the point
  */
 export const createPointCircle = (
   x: number,
   y: number,
-  color: string
+  color?: string,
 ): Konva.Circle => {
   return new Konva.Circle({
     x,

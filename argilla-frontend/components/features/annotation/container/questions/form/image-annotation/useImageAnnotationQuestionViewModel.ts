@@ -10,7 +10,6 @@ export const useImageAnnotationQuestionViewModel = (props: {
 }) => {
   const { question } = props;
 
-  const selectedTool = ref<Tool>("rectangle");
   const hoveredAnnotation = ref<number | null>(null);
   const expandedAnnotations = ref<Record<number, boolean>>({});
 
@@ -18,6 +17,12 @@ export const useImageAnnotationQuestionViewModel = (props: {
 
   const sharedState = useImageAnnotationSharedState(answer);
   const editModeActive = sharedState.editModeActive;
+  const selectedTool = computed({
+    get: () => sharedState.selectedTool.value as Tool,
+    set: (value: Tool) => {
+      sharedState.selectedTool.value = value;
+    },
+  });
 
   watch(sharedState.editModeActive, (state) => {
     if (state) {
@@ -45,8 +50,6 @@ export const useImageAnnotationQuestionViewModel = (props: {
 
   const annotations = computed(() => answer.values);
 
-  // Initialize the selected tool in the answer object
-  (answer as any).selectedTool = selectedTool.value;
   const selectTool = (tool: Tool) => {
     // Signal to field component to cancel any ongoing polygon drawing
     if (selectedTool.value === "polygon" && tool !== "polygon") {
@@ -54,16 +57,10 @@ export const useImageAnnotationQuestionViewModel = (props: {
     }
 
     selectedTool.value = tool;
-    // Store the selected tool in the answer object for the field to access
-    (answer as any).selectedTool = tool;
   };
 
   // Called when a label is selected via EntityLabelSelection component
   const onLabelSelected = () => {
-    // The EntityLabelSelection component already handles the selection logic
-    // We just need to ensure the selected tool is stored
-    (answer as any).selectedTool = selectedTool.value;
-
     // If in edit mode, reassign the current annotation to the new label
     if (editModeActive.value) {
       // Find the currently selected label
