@@ -9,8 +9,14 @@ export interface InteractionContext {
   imageLayer: Konva.Layer | null;
   imageNode: Konva.Image | null;
   getAnnotationColor: (labelValue: string) => string;
-  getImageCoordinates: (points: number[][], imageNode: Konva.Image | null) => number[][];
-  getCanvasCoordinates: (points: number[][], imageNode: Konva.Image | null) => number[][];
+  getImageCoordinates: (
+    points: number[][],
+    imageNode: Konva.Image | null
+  ) => number[][];
+  getCanvasCoordinates: (
+    points: number[][],
+    imageNode: Konva.Image | null
+  ) => number[][];
   updateAnswer: () => void;
   renderAnnotations: () => void;
 }
@@ -44,7 +50,7 @@ export interface ToolInteraction {
   readonly parentIndex?: number;
   /** Color for the shape being drawn */
   readonly color: string;
-  
+
   // Event handlers
   /**
    * Handle pointer down event
@@ -52,50 +58,50 @@ export interface ToolInteraction {
    * @returns Result indicating whether to complete, cancel, or continue
    */
   onPointerDown(pos: { x: number; y: number }): InteractionResult;
-  
+
   /**
    * Handle pointer move event
    * @param pos - Pointer position in stage coordinates
    */
   onPointerMove(pos: { x: number; y: number }): void;
-  
+
   /**
    * Handle pointer up event
    * @param pos - Pointer position in stage coordinates
    * @returns Result indicating whether to complete, cancel, or continue
    */
   onPointerUp(pos: { x: number; y: number }): InteractionResult;
-  
+
   /**
    * Handle keyboard event
    * @param e - Keyboard event
    * @returns Result indicating whether to complete, cancel, or continue
    */
   onKeyDown(e: KeyboardEvent): InteractionResult;
-  
+
   // Lifecycle methods
   /**
    * Complete the interaction and return the created annotation
    * @returns The created annotation or null if creation failed
    */
   complete(): ImageAnnotationAnswer | null;
-  
+
   /**
    * Cancel the interaction without creating an annotation
    */
   cancel(): void;
-  
+
   /**
    * Cleanup any temporary visual elements (shapes, circles, etc.)
    */
   cleanup(): void;
-  
+
   // Optional callbacks for controller to execute
   /**
    * Optional callback to highlight the parent shape when drawing holes
    */
   onParentHighlight?: () => void;
-  
+
   /**
    * Optional callback to remove parent shape highlight
    */

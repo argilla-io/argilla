@@ -53,3 +53,20 @@ export const getCanvasCoordinates = (
     (y / originalHeight) * imageHeight + imageY,
   ]);
 };
+
+/**
+ * Convert flat points array to coordinate pairs.
+ * Useful for converting Konva.Line points format to standard coordinate pairs.
+ *
+ * @param flatPoints - Flat array [x1, y1, x2, y2, ...]
+ * @returns Array of coordinate pairs [[x1, y1], [x2, y2], ...]
+ */
+export const flatPointsToCoordinatePairs = (
+  flatPoints: number[]
+): number[][] => {
+  const pairs: number[][] = [];
+  for (let i = 0; i < flatPoints.length; i += 2) {
+    pairs.push([flatPoints[i], flatPoints[i + 1]]);
+  }
+  return pairs;
+};

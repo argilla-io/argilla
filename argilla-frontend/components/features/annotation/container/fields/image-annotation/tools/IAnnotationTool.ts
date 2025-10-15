@@ -1,6 +1,6 @@
 import Konva from "konva";
-import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 import { ToolInteraction, InteractionContext } from "./IToolInteraction";
+import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 
 export interface DrawingState {
   kind: string;
@@ -8,27 +8,27 @@ export interface DrawingState {
   [key: string]: any;
 }
 
-export interface ToolContext {
-  annotationLayer: Konva.Layer | null;
-  imageLayer: Konva.Layer | null;
-  imageNode: Konva.Image | null;
-  getAnnotationColor: (labelValue: string) => string;
-  getImageCoordinates: (points: number[][], imageNode: Konva.Image | null) => number[][];
-  getCanvasCoordinates: (points: number[][], imageNode: Konva.Image | null) => number[][];
-  updateAnswer: () => void;
-  renderAnnotations: () => void;
-  renderAnchorPoints?: (annotationIndex: number) => void;
-  getToolForShape?: (shapeType: string) => IAnnotationTool | null;
-}
-
 export interface AnchorPointConfig {
   annotationIndex: number;
   pointIndex: number;
   holeIndex: number | null;
-  onDragStart?: (annotationIndex: number, pointIndex: number, holeIndex: number | null) => void;
-  onDragMove?: (annotationIndex: number, pointIndex: number, position: { x: number; y: number }, holeIndex: number | null) => void;
+  onDragStart?: (
+    annotationIndex: number,
+    pointIndex: number,
+    holeIndex: number | null
+  ) => void;
+  onDragMove?: (
+    annotationIndex: number,
+    pointIndex: number,
+    position: { x: number; y: number },
+    holeIndex: number | null
+  ) => void;
   onDragEnd?: (annotationIndex: number) => void;
-  attachContextMenuHandler?: (element: Konva.Node, annotationIndex: number, holeIndex?: number) => void;
+  attachContextMenuHandler?: (
+    element: Konva.Node,
+    annotationIndex: number,
+    holeIndex?: number
+  ) => void;
 }
 
 /**
@@ -164,8 +164,17 @@ export interface IAnnotationTool {
     canvasPoints: number[][],
     color: string,
     holeIndex: number | null,
-    onInsertPoint: (annotationIndex: number, edgeIndex: number, position: { x: number; y: number }, holeIndex: number | null) => void,
-    attachContextMenuHandler?: (element: Konva.Node, annotationIndex: number, holeIndex?: number) => void
+    onInsertPoint: (
+      annotationIndex: number,
+      edgeIndex: number,
+      position: { x: number; y: number },
+      holeIndex: number | null
+    ) => void,
+    attachContextMenuHandler?: (
+      element: Konva.Node,
+      annotationIndex: number,
+      holeIndex?: number
+    ) => void
   ): void;
 
   /**
@@ -225,4 +234,23 @@ export interface IAnnotationTool {
     annotation: ImageAnnotationAnswer,
     annotationIndex: number
   ): void;
+}
+
+export interface ToolContext {
+  annotationLayer: Konva.Layer | null;
+  imageLayer: Konva.Layer | null;
+  imageNode: Konva.Image | null;
+  getAnnotationColor: (labelValue: string) => string;
+  getImageCoordinates: (
+    points: number[][],
+    imageNode: Konva.Image | null
+  ) => number[][];
+  getCanvasCoordinates: (
+    points: number[][],
+    imageNode: Konva.Image | null
+  ) => number[][];
+  updateAnswer: () => void;
+  renderAnnotations: () => void;
+  renderAnchorPoints?: (annotationIndex: number) => void;
+  getToolForShape?: (shapeType: string) => IAnnotationTool | null;
 }

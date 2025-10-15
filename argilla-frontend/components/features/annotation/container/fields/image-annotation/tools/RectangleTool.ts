@@ -1,20 +1,14 @@
 import Konva from "konva";
-import {
-  initRectDrawing,
-  updateRectangleDrawing,
-} from "../utils/drawingModeHelpers";
-import {
-  getParentShapeBounds,
-  clampToParentBounds,
-} from "../utils/geometryUtils";
-import { updateRectanglePoint } from "../utils/konvaShapeUtils";
-import {
-  ANNOTATION_SHORTCUTS,
-  matchesKey,
-} from "../utils/keyboardShortcuts";
+import { getParentShapeBounds, clampToParentBounds } from "../utils/geometry";
+import { updateRectanglePoint } from "../utils/konvaShapes";
+import { ANNOTATION_SHORTCUTS, matchesKey } from "../utils/keyboardShortcuts";
 import { BaseAnnotationTool } from "./BaseAnnotationTool";
 import { DrawingState, AnchorPointConfig } from "./IAnnotationTool";
-import { ToolInteraction, InteractionContext, InteractionResult } from "./IToolInteraction";
+import {
+  ToolInteraction,
+  InteractionContext,
+  InteractionResult,
+} from "./IToolInteraction";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 
 interface RectangleDrawingState extends DrawingState {
@@ -55,11 +49,17 @@ class RectangleInteraction implements ToolInteraction {
     this.parentIndex = parentIndex;
 
     // Initialize drawing shape
-    this.drawingShape = initRectDrawing(
-      startPos,
-      color,
-      context.annotationLayer
-    );
+    this.drawingShape = new Konva.Rect({
+      x: startPos.x,
+      y: startPos.y,
+      width: 0,
+      height: 0,
+      stroke: color,
+      strokeWidth: 2,
+      dash: [5, 5],
+    });
+    context.annotationLayer?.add(this.drawingShape);
+    context.annotationLayer?.batchDraw();
   }
 
   onPointerDown(_pos: { x: number; y: number }): InteractionResult {
@@ -70,18 +70,17 @@ class RectangleInteraction implements ToolInteraction {
   onPointerMove(pos: { x: number; y: number }): void {
     this.currentPos = pos;
     if (this.drawingShape) {
-      updateRectangleDrawing(
-        this.drawingShape,
-        this.startPos,
-        pos,
-        this.context.annotationLayer
-      );
+      const width = pos.x - this.startPos.x;
+      const height = pos.y - this.startPos.y;
+      this.drawingShape.width(width);
+      this.drawingShape.height(height);
+      this.context.annotationLayer?.batchDraw();
     }
   }
 
   onPointerUp(pos: { x: number; y: number }): InteractionResult {
     this.currentPos = pos;
-    
+
     const width = Math.abs(pos.x - this.startPos.x);
     const height = Math.abs(pos.y - this.startPos.y);
 
@@ -191,11 +190,17 @@ export class RectangleTool extends BaseAnnotationTool {
     isHole: boolean,
     parentIndex?: number
   ): RectangleDrawingState {
-    this.drawingShape = initRectDrawing(
-      pos,
-      color,
-      this.context.annotationLayer
-    );
+    this.drawingShape = new Konva.Rect({
+      x: pos.x,
+      y: pos.y,
+      width: 0,
+      height: 0,
+      stroke: color,
+      strokeWidth: 2,
+      dash: [5, 5],
+    });
+    this.context.annotationLayer?.add(this.drawingShape);
+    this.context.annotationLayer?.batchDraw();
 
     return isHole
       ? {
@@ -214,12 +219,12 @@ export class RectangleTool extends BaseAnnotationTool {
   updateDrawing(state: DrawingState, pos: { x: number; y: number }): void {
     const rectState = state as RectangleDrawingState;
     if (this.drawingShape) {
-      updateRectangleDrawing(
-        this.drawingShape as Konva.Rect,
-        rectState.start,
-        pos,
-        this.context.annotationLayer
-      );
+      const rect = this.drawingShape as Konva.Rect;
+      const width = pos.x - rectState.start.x;
+      const height = pos.y - rectState.start.y;
+      rect.width(width);
+      rect.height(height);
+      this.context.annotationLayer?.batchDraw();
     }
   }
 
@@ -261,7 +266,7 @@ export class RectangleTool extends BaseAnnotationTool {
     this.cleanupDrawing(state);
   }
 
-  cleanupDrawing(state: DrawingState): void {
+  cleanupDrawing(_state: DrawingState): void {
     if (this.drawingShape) {
       this.drawingShape.destroy();
       this.drawingShape = null;
@@ -321,7 +326,10 @@ export class RectangleTool extends BaseAnnotationTool {
             });
           });
         }
-      } else if (hole.shape_type === "polygon" && this.context.getToolForShape) {
+      } else if (
+        hole.shape_type === "polygon" &&
+        this.context.getToolForShape
+      ) {
         // Delegate polygon holes to PolygonTool
         const polyTool = this.context.getToolForShape("polygon");
         if (polyTool) {
@@ -329,7 +337,7 @@ export class RectangleTool extends BaseAnnotationTool {
             hole.points,
             this.context.imageNode
           );
-          
+
           // Render edge handles FIRST (so they're behind anchor points)
           if (polyTool.renderEdgeHandles) {
             polyTool.renderEdgeHandles(
@@ -340,13 +348,19 @@ export class RectangleTool extends BaseAnnotationTool {
               holeIndex,
               (annIdx, edgeIdx, pos, holeIdx) => {
                 if (polyTool.insertPointOnEdge) {
-                  polyTool.insertPointOnEdge(annotation, annIdx, edgeIdx, pos, holeIdx);
+                  polyTool.insertPointOnEdge(
+                    annotation,
+                    annIdx,
+                    edgeIdx,
+                    pos,
+                    holeIdx
+                  );
                 }
               },
               config.attachContextMenuHandler
             );
           }
-          
+
           // Render vertex anchor points LAST (so they're on top and clickable)
           holeCanvasPoints.forEach((point, pointIndex) => {
             this.createAnchorPoint(point[0], point[1], color, {

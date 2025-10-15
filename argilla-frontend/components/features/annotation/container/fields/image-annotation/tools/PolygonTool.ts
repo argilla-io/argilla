@@ -1,27 +1,19 @@
 import Konva from "konva";
-import {
-  initPolyDrawing,
-  updatePolygonPreview,
-  addPolygonPoint as addPolyPoint,
-  flatPointsToCoordinatePairs,
-  cleanupPolygonDrawing as cleanupPolyDrawing,
-} from "../utils/drawingModeHelpers";
+import { flatPointsToCoordinatePairs } from "../utils/coordinates";
 import {
   getParentShapeBounds,
   clampToParentBounds,
   getClosestPointOnPolygon,
   isPointWithinParent as checkPointWithinParent,
-} from "../utils/geometryUtils";
-import {
-  createPointCircle,
-} from "../utils/konvaShapeUtils";
-import {
-  ANNOTATION_SHORTCUTS,
-  matchesKey,
-} from "../utils/keyboardShortcuts";
+} from "../utils/geometry";
+import { ANNOTATION_SHORTCUTS, matchesKey } from "../utils/keyboardShortcuts";
 import { BaseAnnotationTool } from "./BaseAnnotationTool";
 import { DrawingState, AnchorPointConfig } from "./IAnnotationTool";
-import { ToolInteraction, InteractionContext, InteractionResult } from "./IToolInteraction";
+import {
+  ToolInteraction,
+  InteractionContext,
+  InteractionResult,
+} from "./IToolInteraction";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 
 interface PolygonDrawingState extends DrawingState {
@@ -63,44 +55,125 @@ class PolygonInteraction implements ToolInteraction {
     this.parentIndex = parentIndex;
 
     // Initialize first point
-    const result = initPolyDrawing(
-      startPos,
-      color,
-      context.annotationLayer,
-      createPointCircle
-    );
+    const result = this.initPolyDrawing(startPos, color);
     this.points = [startPos.x, startPos.y];
     this.circles = [result.circle];
     this.previewLine = result.previewLine;
     this.drawingShape = result.drawingShape;
   }
 
-  onPointerDown(pos: { x: number; y: number }): InteractionResult {
-    const result = addPolyPoint(
-      pos,
-      this.color,
-      this.points,
-      this.drawingShape as Konva.Line,
-      this.circles,
-      this.context.annotationLayer,
-      this.CLOSE_THRESHOLD,
-      createPointCircle
-    );
+  /**
+   * Create a visual point circle for polygon drawing
+   */
+  private createPointCircle(x: number, y: number, color: string): Konva.Circle {
+    return new Konva.Circle({
+      x,
+      y,
+      radius: 5,
+      fill: color,
+      stroke: "white",
+      strokeWidth: 2,
+    });
+  }
 
+  /**
+   * Initialize polygon drawing with first point
+   */
+  private initPolyDrawing(
+    pos: { x: number; y: number },
+    color: string
+  ): {
+    drawingShape: Konva.Line;
+    circle: Konva.Circle;
+    previewLine: Konva.Line;
+  } {
+    const circle = this.createPointCircle(pos.x, pos.y, color);
+
+    const previewLine = new Konva.Line({
+      points: [pos.x, pos.y, pos.x, pos.y],
+      stroke: color,
+      strokeWidth: 2,
+      dash: [5, 5],
+    });
+
+    const drawingShape = new Konva.Line({
+      points: [pos.x, pos.y],
+      stroke: color,
+      strokeWidth: 2,
+      fill: color,
+      opacity: 0.3,
+      closed: false,
+    });
+
+    this.context.annotationLayer?.add(previewLine);
+    this.context.annotationLayer?.add(drawingShape);
+    this.context.annotationLayer?.add(circle);
+    this.context.annotationLayer?.batchDraw();
+
+    return { drawingShape, circle, previewLine };
+  }
+
+  /**
+   * Add a point to the polygon
+   */
+  private addPolyPoint(pos: { x: number; y: number }): {
+    shouldComplete: boolean;
+    updatedCircles: Konva.Circle[];
+  } {
+    const firstPoint = { x: this.points[0], y: this.points[1] };
+    const distance = Math.hypot(pos.x - firstPoint.x, pos.y - firstPoint.y);
+
+    if (distance < this.CLOSE_THRESHOLD && this.points.length >= 6) {
+      return { shouldComplete: true, updatedCircles: this.circles };
+    }
+
+    this.points.push(pos.x, pos.y);
+    (this.drawingShape as Konva.Line).points(this.points);
+
+    const circle = this.createPointCircle(pos.x, pos.y, this.color);
+    const updatedCircles = [...this.circles, circle];
+    this.context.annotationLayer?.add(circle);
+    this.context.annotationLayer?.batchDraw();
+
+    return { shouldComplete: false, updatedCircles };
+  }
+
+  /**
+   * Update polygon preview line
+   */
+  private updatePolygonPreview(pos: { x: number; y: number }): void {
+    if (!this.previewLine) return;
+
+    const lastX = this.points[this.points.length - 2];
+    const lastY = this.points[this.points.length - 1];
+    this.previewLine.points([lastX, lastY, pos.x, pos.y]);
+
+    if (this.points.length >= 6 && this.circles.length > 0) {
+      const firstPoint = { x: this.points[0], y: this.points[1] };
+      const distance = Math.hypot(pos.x - firstPoint.x, pos.y - firstPoint.y);
+
+      if (distance < this.CLOSE_THRESHOLD) {
+        this.circles[0].radius(8);
+        this.circles[0].fill("white");
+        this.circles[0].stroke(this.color);
+      } else {
+        this.circles[0].radius(5);
+        this.circles[0].fill(this.color);
+        this.circles[0].stroke("white");
+      }
+    }
+
+    this.context.annotationLayer?.batchDraw();
+  }
+
+  onPointerDown(pos: { x: number; y: number }): InteractionResult {
+    const result = this.addPolyPoint(pos);
     this.circles = result.updatedCircles;
     return { shouldComplete: result.shouldComplete };
   }
 
   onPointerMove(pos: { x: number; y: number }): void {
-    updatePolygonPreview(
-      this.previewLine,
-      this.points,
-      pos,
-      this.circles,
-      this.color,
-      this.CLOSE_THRESHOLD,
-      this.context.annotationLayer
-    );
+    this.updatePolygonPreview(pos);
   }
 
   onPointerUp(_pos: { x: number; y: number }): InteractionResult {
@@ -152,7 +225,9 @@ class PolygonInteraction implements ToolInteraction {
   }
 
   cleanup(): void {
-    cleanupPolyDrawing(this.drawingShape, this.circles, this.previewLine);
+    this.drawingShape?.destroy();
+    this.circles.forEach((circle) => circle.destroy());
+    this.previewLine?.destroy();
     this.context.annotationLayer?.batchDraw();
   }
 
@@ -170,6 +245,119 @@ class PolygonInteraction implements ToolInteraction {
 export class PolygonTool extends BaseAnnotationTool {
   readonly shapeType = "polygon";
   private readonly CLOSE_THRESHOLD = 10;
+
+  /**
+   * Create a visual point circle for polygon drawing
+   */
+  private createPointCircle(x: number, y: number, color: string): Konva.Circle {
+    return new Konva.Circle({
+      x,
+      y,
+      radius: 5,
+      fill: color,
+      stroke: "white",
+      strokeWidth: 2,
+    });
+  }
+
+  /**
+   * Initialize polygon drawing with first point
+   */
+  private initPolyDrawing(
+    pos: { x: number; y: number },
+    color: string
+  ): {
+    drawingShape: Konva.Line;
+    circle: Konva.Circle;
+    previewLine: Konva.Line;
+  } {
+    const circle = this.createPointCircle(pos.x, pos.y, color);
+
+    const previewLine = new Konva.Line({
+      points: [pos.x, pos.y, pos.x, pos.y],
+      stroke: color,
+      strokeWidth: 2,
+      dash: [5, 5],
+    });
+
+    const drawingShape = new Konva.Line({
+      points: [pos.x, pos.y],
+      stroke: color,
+      strokeWidth: 2,
+      fill: color,
+      opacity: 0.3,
+      closed: false,
+    });
+
+    this.context.annotationLayer?.add(previewLine);
+    this.context.annotationLayer?.add(drawingShape);
+    this.context.annotationLayer?.add(circle);
+    this.context.annotationLayer?.batchDraw();
+
+    return { drawingShape, circle, previewLine };
+  }
+
+  /**
+   * Add a point to the polygon
+   */
+  private addPolyPoint(
+    pos: { x: number; y: number },
+    color: string,
+    points: number[],
+    drawingShape: Konva.Line,
+    circles: Konva.Circle[]
+  ): { shouldComplete: boolean; updatedCircles: Konva.Circle[] } {
+    const firstPoint = { x: points[0], y: points[1] };
+    const distance = Math.hypot(pos.x - firstPoint.x, pos.y - firstPoint.y);
+
+    if (distance < this.CLOSE_THRESHOLD && points.length >= 6) {
+      return { shouldComplete: true, updatedCircles: circles };
+    }
+
+    points.push(pos.x, pos.y);
+    drawingShape.points(points);
+
+    const circle = this.createPointCircle(pos.x, pos.y, color);
+    const updatedCircles = [...circles, circle];
+    this.context.annotationLayer?.add(circle);
+    this.context.annotationLayer?.batchDraw();
+
+    return { shouldComplete: false, updatedCircles };
+  }
+
+  /**
+   * Update polygon preview line
+   */
+  private updatePolygonPreview(
+    previewLine: Konva.Line | null,
+    points: number[],
+    pos: { x: number; y: number },
+    circles: Konva.Circle[],
+    color: string
+  ): void {
+    if (!previewLine) return;
+
+    const lastX = points[points.length - 2];
+    const lastY = points[points.length - 1];
+    previewLine.points([lastX, lastY, pos.x, pos.y]);
+
+    if (points.length >= 6 && circles.length > 0) {
+      const firstPoint = { x: points[0], y: points[1] };
+      const distance = Math.hypot(pos.x - firstPoint.x, pos.y - firstPoint.y);
+
+      if (distance < this.CLOSE_THRESHOLD) {
+        circles[0].radius(8);
+        circles[0].fill("white");
+        circles[0].stroke(color);
+      } else {
+        circles[0].radius(5);
+        circles[0].fill(color);
+        circles[0].stroke("white");
+      }
+    }
+
+    this.context.annotationLayer?.batchDraw();
+  }
 
   createInteraction(
     context: InteractionContext,
@@ -196,12 +384,7 @@ export class PolygonTool extends BaseAnnotationTool {
     parentIndex?: number
   ): PolygonDrawingState {
     const drawColor = color || "#cccccc";
-    const result = initPolyDrawing(
-      pos,
-      drawColor,
-      this.context.annotationLayer,
-      createPointCircle
-    );
+    const result = this.initPolyDrawing(pos, drawColor);
 
     this.drawingShape = result.drawingShape;
 
@@ -225,14 +408,12 @@ export class PolygonTool extends BaseAnnotationTool {
 
   updateDrawing(state: DrawingState, pos: { x: number; y: number }): void {
     const polyState = state as PolygonDrawingState;
-    updatePolygonPreview(
+    this.updatePolygonPreview(
       polyState.previewLine,
       polyState.points,
       pos,
       polyState.circles,
-      polyState.color,
-      this.CLOSE_THRESHOLD,
-      this.context.annotationLayer
+      polyState.color
     );
   }
 
@@ -243,15 +424,12 @@ export class PolygonTool extends BaseAnnotationTool {
     const polyState = state as PolygonDrawingState;
     const drawColor = polyState.color || "#cccccc";
 
-    const result = addPolyPoint(
+    const result = this.addPolyPoint(
       pos,
       drawColor,
       polyState.points,
       this.drawingShape as Konva.Line,
-      polyState.circles,
-      this.context.annotationLayer,
-      this.CLOSE_THRESHOLD,
-      createPointCircle
+      polyState.circles
     );
 
     if (result.shouldComplete) {
@@ -266,7 +444,7 @@ export class PolygonTool extends BaseAnnotationTool {
 
   completeDrawing(
     state: DrawingState,
-    annotations: ImageAnnotationAnswer[],
+    _annotations: ImageAnnotationAnswer[],
     selectedLabel: { value: string; color: string } | undefined
   ): ImageAnnotationAnswer | null {
     const polyState = state as PolygonDrawingState;
@@ -304,12 +482,9 @@ export class PolygonTool extends BaseAnnotationTool {
 
   cleanupDrawing(state: DrawingState): void {
     const polyState = state as PolygonDrawingState;
-    cleanupPolyDrawing(
-      this.drawingShape,
-      polyState.circles,
-      polyState.previewLine
-    );
-
+    this.drawingShape?.destroy();
+    polyState.circles.forEach((circle) => circle.destroy());
+    polyState.previewLine?.destroy();
     if (this.drawingShape) {
       this.drawingShape = null;
     }
@@ -378,7 +553,10 @@ export class PolygonTool extends BaseAnnotationTool {
             holeIndex,
           });
         });
-      } else if (hole.shape_type === "rectangle" && this.context.getToolForShape) {
+      } else if (
+        hole.shape_type === "rectangle" &&
+        this.context.getToolForShape
+      ) {
         // Delegate rectangle holes to RectangleTool
         const rectTool = this.context.getToolForShape("rectangle");
         if (rectTool) {
@@ -410,7 +588,7 @@ export class PolygonTool extends BaseAnnotationTool {
   }
 
   renderEdgeHandles(
-    annotation: ImageAnnotationAnswer,
+    _annotation: ImageAnnotationAnswer,
     annotationIndex: number,
     canvasPoints: number[][],
     color: string,
@@ -484,7 +662,11 @@ export class PolygonTool extends BaseAnnotationTool {
 
       // Allow context menu on edge handles
       if (attachContextMenuHandler) {
-        attachContextMenuHandler(edgeLine, annotationIndex, holeIndex ?? undefined);
+        attachContextMenuHandler(
+          edgeLine,
+          annotationIndex,
+          holeIndex ?? undefined
+        );
       }
 
       this.context.annotationLayer.add(edgeLine);
@@ -522,7 +704,7 @@ export class PolygonTool extends BaseAnnotationTool {
         parentAnnotation.points,
         this.context.imageNode
       );
-      
+
       // Check if point is within parent polygon's bounding box
       if (checkPointWithinParent(stagePoint, polygonCanvasPoints)) {
         // Point is inside, allow free movement
@@ -568,7 +750,7 @@ export class PolygonTool extends BaseAnnotationTool {
     // Update the annotation shape visually
     this.updateAnnotationShape(annotation, annotationIndex);
     this.context.updateAnswer();
-    
+
     // Re-render anchor points to show the new point
     if (this.context.renderAnchorPoints) {
       this.context.renderAnchorPoints(annotationIndex);

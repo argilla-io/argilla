@@ -1,8 +1,13 @@
 import Konva from "konva";
-import { IAnnotationTool, ToolContext, AnchorPointConfig, DrawingState } from "./IAnnotationTool";
+import { getAnnotationNodes, updateKonvaShape } from "../utils/konvaShapes";
+import {
+  IAnnotationTool,
+  ToolContext,
+  AnchorPointConfig,
+  DrawingState,
+} from "./IAnnotationTool";
 import { ToolInteraction, InteractionContext } from "./IToolInteraction";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
-import { getAnnotationNodes, updateKonvaShape } from "../utils/konvaShapeUtils";
 
 /**
  * Base class for annotation tools providing common functionality
@@ -33,7 +38,10 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
     parentIndex?: number
   ): DrawingState;
 
-  abstract updateDrawing(state: DrawingState, pos: { x: number; y: number }): void;
+  abstract updateDrawing(
+    state: DrawingState,
+    pos: { x: number; y: number }
+  ): void;
 
   abstract completeDrawing(
     state: DrawingState,
@@ -114,7 +122,12 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
 
     if (config.onDragMove) {
       anchor.on("dragmove", () => {
-        config.onDragMove!(annotationIndex, pointIndex, anchor.position(), holeIndex);
+        config.onDragMove!(
+          annotationIndex,
+          pointIndex,
+          anchor.position(),
+          holeIndex
+        );
         this.context.annotationLayer?.batchDraw();
       });
     }
@@ -131,7 +144,11 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
 
     // Allow context menu on anchor points
     if (config.attachContextMenuHandler) {
-      config.attachContextMenuHandler(anchor, annotationIndex, holeIndex ?? undefined);
+      config.attachContextMenuHandler(
+        anchor,
+        annotationIndex,
+        holeIndex ?? undefined
+      );
     }
 
     this.context.annotationLayer?.add(anchor);
@@ -143,9 +160,15 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
    */
   removeAnchorPoints(): void {
     if (!this.context.annotationLayer) return;
-    this.context.annotationLayer.find(".anchor-point").forEach((anchor) => anchor.destroy());
-    this.context.annotationLayer.find(".edge-handle").forEach((edge) => edge.destroy());
-    this.context.annotationLayer.find(".parent-boundary-guide").forEach((guide) => guide.destroy());
+    this.context.annotationLayer
+      .find(".anchor-point")
+      .forEach((anchor) => anchor.destroy());
+    this.context.annotationLayer
+      .find(".edge-handle")
+      .forEach((edge) => edge.destroy());
+    this.context.annotationLayer
+      .find(".parent-boundary-guide")
+      .forEach((guide) => guide.destroy());
     this.context.annotationLayer.batchDraw();
   }
 
@@ -168,7 +191,10 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
     updateKonvaShape(
       parentShape,
       annotation.shape_type,
-      this.context.getCanvasCoordinates(annotation.points, this.context.imageNode)
+      this.context.getCanvasCoordinates(
+        annotation.points,
+        this.context.imageNode
+      )
     );
 
     // Update hole shapes if they exist
@@ -181,7 +207,10 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
           updateKonvaShape(
             holeShape as Konva.Shape,
             hole.shape_type,
-            this.context.getCanvasCoordinates(hole.points, this.context.imageNode)
+            this.context.getCanvasCoordinates(
+              hole.points,
+              this.context.imageNode
+            )
           );
         }
       });
@@ -194,9 +223,9 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
    * Default implementation - no constraint
    */
   constrainPointToParentShape(
-    parentAnnotation: ImageAnnotationAnswer,
+    _parentAnnotation: ImageAnnotationAnswer,
     stagePoint: Konva.Vector2d,
-    holeIndex: number | null
+    _holeIndex: number | null
   ): Konva.Vector2d {
     return stagePoint;
   }
@@ -206,7 +235,7 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
    */
   protected renderParentBoundaryGuide(
     annotation: ImageAnnotationAnswer,
-    annotationIndex: number,
+    _annotationIndex: number,
     color: string
   ): void {
     if (!this.context.annotationLayer) return;

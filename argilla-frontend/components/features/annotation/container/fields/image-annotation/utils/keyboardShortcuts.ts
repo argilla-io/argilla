@@ -2,11 +2,11 @@
  * Keyboard shortcut definitions for image annotation.
  */
 export const ANNOTATION_SHORTCUTS = {
-  CANCEL: ['Escape'],
-  COMPLETE: ['Enter'],
-  NEXT: ['ArrowRight', 'n', 'N'],
-  PREVIOUS: ['ArrowLeft', 'p', 'P'],
-  DELETE: ['Delete', 'Backspace'],
+  CANCEL: ["Escape"],
+  COMPLETE: ["Enter"],
+  NEXT: ["ArrowRight", "n", "N"],
+  PREVIOUS: ["ArrowLeft", "p", "P"],
+  DELETE: ["Delete", "Backspace"],
 } as const;
 
 /**
@@ -22,8 +22,6 @@ export const matchesKey = (
   keys: readonly string[]
 ): boolean => {
   return keys.some((k) =>
-    k.length === 1
-      ? e.key.toLowerCase() === k.toLowerCase()
-      : e.key === k
+    k.length === 1 ? e.key.toLowerCase() === k.toLowerCase() : e.key === k
   );
 };
