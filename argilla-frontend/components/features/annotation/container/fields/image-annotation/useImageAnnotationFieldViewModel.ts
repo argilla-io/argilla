@@ -27,35 +27,19 @@ import {
 } from "./utils/keyboardShortcuts";
 import { AnnotationToolFactory } from "./tools/AnnotationToolFactory";
 import { ToolContext } from "./tools/IAnnotationTool";
+import { ToolInteraction, InteractionContext } from "./tools/IToolInteraction";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 
+/**
+ * Simplified mode type - only 3 conceptual states
+ * Drawing state is now owned by activeInteraction
+ */
 type Mode =
   | { kind: "idle" }
-  | { kind: "draw-rect"; start: { x: number; y: number }; color: string }
-  | {
-      kind: "draw-poly";
-      color: string;
-      points: number[];
-      circles: Konva.Circle[];
-      previewLine: Konva.Line | null;
-    }
-  | { kind: "edit"; index: number }
-  | {
-      kind: "draw-hole-poly";
-      parentIndex: number;
-      color: string;
-      points: number[];
-      circles: Konva.Circle[];
-      previewLine: Konva.Line | null;
-    }
-  | {
-      kind: "draw-hole-rect";
-      parentIndex: number;
-      start: { x: number; y: number };
-      color: string;
-    };
+  | { kind: "drawing" }
+  | { kind: "edit"; annotationIndex: number };
 
 export const useImageAnnotationFieldViewModel = (props: {
   id: string;
@@ -89,6 +73,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     holeIndex: number | null;
   } | null>(null);
   const mode = ref<Mode>({ kind: "idle" });
+  const activeInteraction = ref<ToolInteraction | null>(null);
 
   const editMode = computed(() => ({
     active: sharedState.editModeActive.value,
@@ -106,23 +91,204 @@ export const useImageAnnotationFieldViewModel = (props: {
   const getAnnotationColor = (labelValue: string) =>
     answer.getAnnotationColor(labelValue);
 
-  const getToolContext = (): ToolContext => ({
+  /**
+   * Create base context with shared properties
+   */
+  const getBaseContext = () => ({
     annotationLayer,
     imageLayer,
     imageNode,
     getAnnotationColor,
     getImageCoordinates: (points: number[][], _imageNode: Konva.Image | null) => 
-      getImageCoordinates(points, imageNode), // Always use current imageNode
+      getImageCoordinates(points, imageNode),
     getCanvasCoordinates: (points: number[][], _imageNode: Konva.Image | null) => 
-      getCanvasCoordinates(points, imageNode), // Always use current imageNode
+      getCanvasCoordinates(points, imageNode),
     updateAnswer,
     renderAnnotations,
+  });
+
+  const getToolContext = (): ToolContext => ({
+    ...getBaseContext(),
     renderAnchorPoints,
     getToolForShape: (shapeType: string) => toolFactory?.getToolForShape(shapeType) || null,
   });
 
   const initializeToolFactory = () => {
     toolFactory = new AnnotationToolFactory(getToolContext());
+  };
+
+  /**
+   * Create InteractionContext for tool interactions
+   */
+  const getInteractionContext = (): InteractionContext => getBaseContext();
+
+  /**
+   * Handle interaction result from event handlers
+   */
+  const handleInteractionResult = (result: { 
+    shouldComplete?: boolean; 
+    shouldCancel?: boolean; 
+    shouldContinue?: boolean;
+  }) => {
+    if (result.shouldComplete) {
+      completeInteraction();
+    } else if (result.shouldCancel) {
+      cancelInteraction();
+    }
+    // shouldContinue or undefined - interaction continues
+  };
+
+  /**
+   * Start a new drawing interaction
+   */
+  const startDrawingInteraction = (pos: { x: number; y: number }) => {
+    const tool = toolFactory?.getTool(selectedTool.value);
+    if (!tool) return;
+
+    // Determine if we're in hole drawing mode
+    const isHole = sharedState.holeDrawingMode.value.active;
+    const parentIndex = sharedState.holeDrawingMode.value.parentIndex ?? undefined;
+
+    if (isHole && parentIndex !== undefined) {
+      // Drawing a hole - check if point is within parent
+      if (!isPointWithinParent(pos, parentIndex)) return;
+
+      const color = getAnnotationColor(annotations.value[parentIndex].label);
+      activeInteraction.value = tool.createInteraction(
+        getInteractionContext(),
+        pos,
+        color,
+        true,
+        parentIndex
+      );
+    } else {
+      // Drawing a normal annotation
+      if (!selectedLabel.value) {
+        alert("Please select a label first");
+        return;
+      }
+
+      const color = selectedLabel.value.color || "#cccccc";
+      activeInteraction.value = tool.createInteraction(
+        getInteractionContext(),
+        pos,
+        color,
+        false,
+        undefined,
+        selectedLabel.value
+      );
+    }
+
+    mode.value = { kind: "drawing" };
+  };
+
+  const isPointWithinParent = (
+    point: { x: number; y: number },
+    parentIndex: number
+  ): boolean => {
+    const parent = annotations.value[parentIndex];
+    if (!parent) return false;
+
+    const canvasPoints = getCanvasCoordinates(parent.points, imageNode);
+    return checkPointWithinParent(point, canvasPoints);
+  };
+
+  /**
+   * Extract points from interaction for hole creation
+   * Returns image coordinates or null if extraction fails
+   */
+  const extractHolePointsFromInteraction = (
+    interaction: ToolInteraction
+  ): number[][] | null => {
+    if (interaction.toolType === "polygon") {
+      const polyInteraction = interaction as any;
+      if (polyInteraction.getPoints) {
+        const points = flatPointsToCoordinatePairs(polyInteraction.getPoints());
+        return getImageCoordinates(points, imageNode);
+      }
+    } else if (interaction.toolType === "rectangle") {
+      const rectInteraction = interaction as any;
+      if (rectInteraction.getStartPos && rectInteraction.getCurrentPos) {
+        const startPos = rectInteraction.getStartPos();
+        const currentPos = rectInteraction.getCurrentPos();
+        return getImageCoordinates(
+          [[startPos.x, startPos.y], [currentPos.x, currentPos.y]],
+          imageNode
+        );
+      }
+    }
+    return null;
+  };
+
+  /**
+   * Complete the current interaction and create annotation or hole
+   */
+  const completeInteraction = () => {
+    if (!activeInteraction.value) return;
+
+    const annotation = activeInteraction.value.complete();
+
+    if (annotation) {
+      // Normal annotation creation
+      answer.values.push(annotation);
+      updateAnswer();
+    } else if (
+      activeInteraction.value.isHole &&
+      activeInteraction.value.parentIndex !== undefined
+    ) {
+      // Hole creation
+      const parentIndex = activeInteraction.value.parentIndex;
+      const parent = annotations.value[parentIndex];
+
+      // Extract points from interaction
+      const imageCoords = extractHolePointsFromInteraction(activeInteraction.value);
+      
+      if (!imageCoords) {
+        // Failed to extract points - cleanup and exit
+        activeInteraction.value.cleanup();
+        activeInteraction.value = null;
+        mode.value = { kind: "idle" };
+        return;
+      }
+
+      // Clamp hole coordinates to parent bounds
+      const parentBounds = getParentShapeBounds(parent.points);
+      const clampedCoords = imageCoords.map((point) =>
+        clampToParentBounds(point, parentBounds)
+      );
+
+      // Add hole to parent
+      if (!parent.holes) {
+        parent.holes = [];
+      }
+
+      parent.holes.push({
+        points: clampedCoords,
+        shape_type: activeInteraction.value.toolType as "rectangle" | "polygon",
+        flags: {},
+      });
+
+      updateAnswer();
+
+      // Stay in hole drawing mode for adding more holes
+      highlightParentForHoleDrawing(parentIndex);
+    }
+
+    activeInteraction.value.cleanup();
+    activeInteraction.value = null;
+    mode.value = { kind: "idle" };
+    renderAnnotations();
+  };
+
+  /**
+   * Cancel the current interaction
+   */
+  const cancelInteraction = () => {
+    if (!activeInteraction.value) return;
+
+    activeInteraction.value.cancel();
+    activeInteraction.value = null;
+    mode.value = { kind: "idle" };
   };
 
   const highlightAnnotation = (index: number, highlight: boolean) => {
@@ -169,16 +335,32 @@ export const useImageAnnotationFieldViewModel = (props: {
   };
 
   const enterEditMode = (annotationIndex: number) => {
-    // Cancel any ongoing drawing using mode state
-    if (
-      mode.value.kind === "draw-poly" ||
-      mode.value.kind === "draw-hole-poly"
-    ) {
-      cancelPolygon();
+    // Cancel any ongoing drawing
+    if (activeInteraction.value) {
+      cancelInteraction();
+    }
+
+    // Exit hole drawing mode if active
+    if (sharedState.holeDrawingMode.value.active) {
+      const parentIndex = sharedState.holeDrawingMode.value.parentIndex;
+      
+      // Restore all annotations
+      restoreAllAnnotations();
+      
+      // Remove parent highlight
+      if (parentIndex !== null) {
+        highlightAnnotation(parentIndex, false);
+      }
+      
+      // Clear hole drawing mode
+      sharedState.holeDrawingMode.value = {
+        active: false,
+        parentIndex: null,
+      };
     }
 
     // Update mode state
-    mode.value = { kind: "edit", index: annotationIndex };
+    mode.value = { kind: "edit", annotationIndex };
 
     // Update sharedState (editMode computed will reflect this)
     sharedState.editModeActive.value = true;
@@ -341,12 +523,9 @@ export const useImageAnnotationFieldViewModel = (props: {
   };
 
   const enterHoleDrawingMode = (parentIndex: number) => {
-    // Cancel any ongoing drawing using mode state
-    if (
-      mode.value.kind === "draw-poly" ||
-      mode.value.kind === "draw-hole-poly"
-    ) {
-      cancelPolygon();
+    // Cancel any ongoing drawing
+    if (activeInteraction.value) {
+      cancelInteraction();
     }
 
     // Exit edit mode if active
@@ -377,9 +556,9 @@ export const useImageAnnotationFieldViewModel = (props: {
   const exitHoleDrawingMode = () => {
     if (!sharedState.holeDrawingMode.value.active) return;
 
-    // Cancel any ongoing polygon drawing using mode state
-    if (mode.value.kind === "draw-hole-poly") {
-      cancelPolygon();
+    // Cancel any ongoing drawing
+    if (activeInteraction.value) {
+      cancelInteraction();
     }
 
     const parentIndex = sharedState.holeDrawingMode.value.parentIndex;
@@ -669,418 +848,78 @@ export const useImageAnnotationFieldViewModel = (props: {
     stage.on("mousemove touchmove", handleMouseMove);
     stage.on("mouseup touchend", handleMouseUp);
 
-    // Add keyboard event listener for polygon mode
+    // Add keyboard event listener for interactions
     window.addEventListener("keydown", handleKeyDown);
   };
-
-
-  const isPointWithinParent = (
-    point: { x: number; y: number },
-    parentIndex: number
-  ): boolean => {
-    const parent = annotations.value[parentIndex];
-    if (!parent) return false;
-
-    const canvasPoints = getCanvasCoordinates(parent.points, imageNode);
-    return checkPointWithinParent(point, canvasPoints);
-  };
-
-  const completePolygon = () => {
-    if (mode.value.kind !== "draw-poly" && mode.value.kind !== "draw-hole-poly")
-      return;
-    if (!toolFactory) return;
-
-    const tool = toolFactory.getTool("polygon");
-    if (!tool) return;
-
-    if (mode.value.kind === "draw-hole-poly") {
-      // Create hole and add to parent
-      const parent = annotations.value[mode.value.parentIndex];
-      
-      // Convert flat array to point pairs
-      const points = flatPointsToCoordinatePairs(mode.value.points);
-      const imageCoords = getImageCoordinates(points, imageNode);
-
-      // Clamp hole coordinates to parent bounds
-      const parentBounds = getParentShapeBounds(parent.points);
-      const clampedCoords = imageCoords.map((point) =>
-        clampToParentBounds(point, parentBounds)
-      );
-
-      if (!parent.holes) {
-        parent.holes = [];
-      }
-
-      parent.holes.push({
-        points: clampedCoords,
-        shape_type: "polygon",
-        flags: {},
-      });
-
-      updateAnswer();
-      tool.cleanupDrawing(mode.value);
-      renderAnnotations();
-
-      // Stay in hole drawing mode for adding more holes
-      highlightParentForHoleDrawing(mode.value.parentIndex);
-    } else {
-      // Normal annotation creation
-      const annotation = tool.completeDrawing(
-        mode.value,
-        annotations.value,
-        selectedLabel.value
-      );
-
-      if (annotation) {
-        answer.values.push(annotation);
-        updateAnswer();
-        tool.cleanupDrawing(mode.value);
-        renderAnnotations();
-      }
-    }
-
-    mode.value = { kind: "idle" };
-  };
-
-  const cancelPolygon = () => {
-    if (!toolFactory) return;
-    const tool = toolFactory.getTool("polygon");
-    if (tool && (mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly")) {
-      tool.cancelDrawing(mode.value);
-    }
-    mode.value = { kind: "idle" };
-    annotationLayer?.batchDraw();
-  };
-
-  const cleanupPolygonDrawing = () => {
-    if (!toolFactory) return;
-    const tool = toolFactory.getTool("polygon");
-    if (tool && (mode.value.kind === "draw-poly" || mode.value.kind === "draw-hole-poly")) {
-      tool.cleanupDrawing(mode.value);
-    }
-  };
-
-  // Helper to start polygon drawing
-  const startPolygonDrawing = (
-    pos: { x: number; y: number },
-    color: string,
-    isHole: boolean,
-    parentIndex?: number
-  ) => {
-    if (!toolFactory) return;
-    const tool = toolFactory.getTool("polygon");
-    if (!tool) return;
-
-    const drawColor = color || selectedLabel.value?.color || "#cccccc";
-    const state = tool.startDrawing(pos, drawColor, isHole, parentIndex);
-    mode.value = state as any;
-  };
-
-  // Helper to handle polygon point addition
-  const addPolygonPoint = (pos: { x: number; y: number }, color: string) => {
-    if (mode.value.kind !== "draw-poly" && mode.value.kind !== "draw-hole-poly")
-      return;
-    if (!toolFactory) return;
-
-    const tool = toolFactory.getTool("polygon");
-    if (!tool || !tool.addPoint) return;
-
-    const result = tool.addPoint(mode.value, pos);
-    if (result.shouldComplete) {
-      completePolygon();
-      return;
-    }
-
-    mode.value = result.state as any;
-  };
-
-  // Helper to start rectangle drawing
-  const startRectangleDrawing = (
-    pos: { x: number; y: number },
-    color: string,
-    isHole: boolean,
-    parentIndex?: number
-  ) => {
-    if (!toolFactory) return;
-    const tool = toolFactory.getTool("rectangle");
-    if (!tool) return;
-
-    const state = tool.startDrawing(pos, color, isHole, parentIndex);
-    mode.value = state as any;
-  };
-
 
   // Handle mouse & keyboard events
   const handleMouseDown = () => {
     const pos = stage?.getPointerPosition();
     if (!pos) return;
 
-    switch (mode.value.kind) {
-      case "idle": {
-        const inHoleMode = sharedState.holeDrawingMode.value.active;
-        const parentIndex = sharedState.holeDrawingMode.value.parentIndex;
-
-        if (inHoleMode && parentIndex !== null) {
-          if (!isPointWithinParent(pos, parentIndex)) return;
-
-          const drawColor = getAnnotationColor(
-            annotations.value[parentIndex].label
-          );
-
-          if (selectedTool.value === "rectangle") {
-            startRectangleDrawing(pos, drawColor, true, parentIndex);
-          } else if (selectedTool.value === "polygon") {
-            startPolygonDrawing(pos, drawColor, true, parentIndex);
-          }
-        } else {
-          if (!selectedLabel.value) {
-            alert("Please select a label first");
-            return;
-          }
-
-          const drawColor = selectedLabel.value.color || "#cccccc";
-
-          if (selectedTool.value === "rectangle") {
-            startRectangleDrawing(pos, drawColor, false);
-          } else if (selectedTool.value === "polygon") {
-            startPolygonDrawing(pos, drawColor, false);
-          }
-        }
-        break;
-      }
-
-      case "draw-poly":
-      case "draw-hole-poly": {
-        addPolygonPoint(pos, mode.value.color);
-        break;
-      }
-
-      case "edit":
-      case "draw-rect":
-      case "draw-hole-rect":
-        // These modes don't handle additional clicks
-        break;
+    if (activeInteraction.value) {
+      // Delegate to active interaction
+      const result = activeInteraction.value.onPointerDown(pos);
+      handleInteractionResult(result);
+    } else if (mode.value.kind === "idle") {
+      // Start new interaction
+      startDrawingInteraction(pos);
     }
   };
 
   const handleMouseMove = () => {
     const pos = stage?.getPointerPosition();
-    if (!pos || !toolFactory) return;
+    if (!pos || !activeInteraction.value) return;
 
-    switch (mode.value.kind) {
-      case "draw-rect":
-      case "draw-hole-rect": {
-        const tool = toolFactory.getTool("rectangle");
-        if (tool) {
-          tool.updateDrawing(mode.value, pos);
-        }
-        break;
-      }
-
-      case "draw-poly":
-      case "draw-hole-poly": {
-        const tool = toolFactory.getTool("polygon");
-        if (tool) {
-          tool.updateDrawing(mode.value, pos);
-        }
-        break;
-      }
-
-      case "idle":
-      case "edit":
-        // No drawing in progress
-        break;
-    }
+    activeInteraction.value.onPointerMove(pos);
   };
 
   const handleMouseUp = () => {
     const pos = stage?.getPointerPosition();
-    if (!pos || !toolFactory) return;
+    if (!pos || !activeInteraction.value) return;
 
-    // Use mode state machine for cleaner logic
-    switch (mode.value.kind) {
-      case "draw-rect": {
-        const tool = toolFactory.getTool("rectangle");
-        if (!tool) return;
-
-        const width = pos.x - mode.value.start.x;
-        const height = pos.y - mode.value.start.y;
-
-        // Minimum size check
-        if (Math.abs(width) < 5 || Math.abs(height) < 5) {
-          tool.cleanupDrawing(mode.value);
-          annotationLayer?.batchDraw();
-          mode.value = { kind: "idle" };
-          return;
-        }
-
-        // Convert to image coordinates
-        const imageCoords = getImageCoordinates(
-          [
-            [mode.value.start.x, mode.value.start.y],
-            [pos.x, pos.y],
-          ],
-          imageNode
-        );
-
-        // Normal annotation creation
-        if (!selectedLabel.value) {
-          mode.value = { kind: "idle" };
-          return;
-        }
-
-        const annotation: ImageAnnotationAnswer = {
-          label: selectedLabel.value.value,
-          points: imageCoords,
-          shape_type: "rectangle",
-          flags: {},
-        };
-
-        answer.values.push(annotation);
-        updateAnswer();
-        tool.cleanupDrawing(mode.value);
-        renderAnnotations();
-
-        mode.value = { kind: "idle" };
-        break;
-      }
-
-      case "draw-hole-rect": {
-        const tool = toolFactory.getTool("rectangle");
-        if (!tool) return;
-
-        const width = pos.x - mode.value.start.x;
-        const height = pos.y - mode.value.start.y;
-
-        // Minimum size check
-        if (Math.abs(width) < 5 || Math.abs(height) < 5) {
-          tool.cleanupDrawing(mode.value);
-          annotationLayer?.batchDraw();
-          mode.value = { kind: "idle" };
-          return;
-        }
-
-        // Convert to image coordinates
-        const imageCoords = getImageCoordinates(
-          [
-            [mode.value.start.x, mode.value.start.y],
-            [pos.x, pos.y],
-          ],
-          imageNode
-        );
-
-        // Clamp hole coordinates to parent bounds
-        const parent = annotations.value[mode.value.parentIndex];
-        const parentBounds = getParentShapeBounds(parent.points);
-        const clampedCoords = imageCoords.map((point) =>
-          clampToParentBounds(point, parentBounds)
-        );
-
-        // Create hole and add to parent
-        if (!parent.holes) {
-          parent.holes = [];
-        }
-
-        parent.holes.push({
-          points: clampedCoords,
-          shape_type: "rectangle",
-          flags: {},
-        });
-
-        updateAnswer();
-        tool.cleanupDrawing(mode.value);
-        renderAnnotations();
-
-        // Stay in hole drawing mode for adding more holes
-        highlightParentForHoleDrawing(mode.value.parentIndex);
-
-        mode.value = { kind: "idle" };
-        break;
-      }
-
-      case "idle":
-      case "edit":
-      case "draw-poly":
-      case "draw-hole-poly":
-        // These modes don't handle mouse up for rectangles
-        break;
-    }
+    const result = activeInteraction.value.onPointerUp(pos);
+    handleInteractionResult(result);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    switch (mode.value.kind) {
-      case "draw-hole-poly":
-        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
-          e.preventDefault();
-          cancelPolygon();
-        } else if (
-          matchesKey(e, ANNOTATION_SHORTCUTS.COMPLETE) &&
-          mode.value.points.length >= 6
-        ) {
-          e.preventDefault();
-          completePolygon();
-        }
-        break;
-
-      case "draw-hole-rect":
-        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
-          e.preventDefault();
-          exitHoleDrawingMode();
-        }
-        break;
-
-      case "edit":
-        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
-          e.preventDefault();
-          exitEditMode();
-        } else if (matchesKey(e, ANNOTATION_SHORTCUTS.NEXT)) {
-          e.preventDefault();
-          editNextAnnotation();
-        } else if (matchesKey(e, ANNOTATION_SHORTCUTS.PREVIOUS)) {
-          e.preventDefault();
-          editPreviousAnnotation();
-        } else if (matchesKey(e, ANNOTATION_SHORTCUTS.DELETE)) {
-          e.preventDefault();
-          if (mode.value.index !== null) {
-            const indexToDelete = mode.value.index;
-            // Move to next annotation or exit if this was the last one
-            if (annotations.value.length > 1) {
-              editNextAnnotation();
-            } else {
-              exitEditMode();
-            }
-            deleteShape(indexToDelete);
+    if (activeInteraction.value) {
+      // Delegate to active interaction
+      const result = activeInteraction.value.onKeyDown(e);
+      handleInteractionResult(result);
+    } else if (mode.value.kind === "edit") {
+      // Handle edit mode shortcuts
+      if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
+        e.preventDefault();
+        exitEditMode();
+      } else if (matchesKey(e, ANNOTATION_SHORTCUTS.NEXT)) {
+        e.preventDefault();
+        editNextAnnotation();
+      } else if (matchesKey(e, ANNOTATION_SHORTCUTS.PREVIOUS)) {
+        e.preventDefault();
+        editPreviousAnnotation();
+      } else if (matchesKey(e, ANNOTATION_SHORTCUTS.DELETE)) {
+        e.preventDefault();
+        if (mode.value.annotationIndex !== null) {
+          const indexToDelete = mode.value.annotationIndex;
+          // Move to next annotation or exit if this was the last one
+          if (annotations.value.length > 1) {
+            editNextAnnotation();
+          } else {
+            exitEditMode();
           }
+          deleteShape(indexToDelete);
         }
-        break;
-
-      case "draw-poly":
-        if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
-          e.preventDefault();
-          cancelPolygon();
-        } else if (
-          matchesKey(e, ANNOTATION_SHORTCUTS.COMPLETE) &&
-          mode.value.points.length >= 6
-        ) {
-          e.preventDefault();
-          completePolygon();
-        }
-        break;
-
-      case "idle":
-        // Exit hole drawing mode if active
-        if (
-          matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL) &&
-          sharedState.holeDrawingMode.value.active
-        ) {
-          e.preventDefault();
-          exitHoleDrawingMode();
-        }
-        break;
-
-      case "draw-rect":
-        // No keyboard shortcuts in this mode
-        break;
+      }
+    } else if (mode.value.kind === "idle") {
+      // Handle idle mode shortcuts (e.g., exit hole drawing mode)
+      if (
+        matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL) &&
+        sharedState.holeDrawingMode.value.active
+      ) {
+        e.preventDefault();
+        exitHoleDrawingMode();
+      }
     }
   };
 
@@ -1271,7 +1110,6 @@ export const useImageAnnotationFieldViewModel = (props: {
     annotationLayer?.batchDraw();
   };
 
-  // TODO only watch should stay
   // Watch for changes in annotations from the question component
   watch(
     () => answer.values.length,
@@ -1282,11 +1120,8 @@ export const useImageAnnotationFieldViewModel = (props: {
 
   // Watch for cancel polygon signal from question component
   watch(sharedState.cancelPolygonTrigger, () => {
-    if (
-      mode.value.kind === "draw-poly" ||
-      mode.value.kind === "draw-hole-poly"
-    ) {
-      cancelPolygon();
+    if (activeInteraction.value) {
+      cancelInteraction();
     }
   });
 

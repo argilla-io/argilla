@@ -1,5 +1,6 @@
 import Konva from "konva";
 import { IAnnotationTool, ToolContext, AnchorPointConfig, DrawingState } from "./IAnnotationTool";
+import { ToolInteraction, InteractionContext } from "./IToolInteraction";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 import { getAnnotationNodes, updateKonvaShape } from "../utils/konvaShapeUtils";
 
@@ -15,6 +16,15 @@ export abstract class BaseAnnotationTool implements IAnnotationTool {
   }
 
   abstract readonly shapeType: string;
+
+  abstract createInteraction(
+    context: InteractionContext,
+    startPos: { x: number; y: number },
+    color: string,
+    isHole: boolean,
+    parentIndex?: number,
+    selectedLabel?: { value: string; color: string }
+  ): ToolInteraction;
 
   abstract startDrawing(
     pos: { x: number; y: number },

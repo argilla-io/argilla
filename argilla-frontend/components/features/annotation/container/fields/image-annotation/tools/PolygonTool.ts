@@ -15,8 +15,13 @@ import {
 import {
   createPointCircle,
 } from "../utils/konvaShapeUtils";
+import {
+  ANNOTATION_SHORTCUTS,
+  matchesKey,
+} from "../utils/keyboardShortcuts";
 import { BaseAnnotationTool } from "./BaseAnnotationTool";
 import { DrawingState, AnchorPointConfig } from "./IAnnotationTool";
+import { ToolInteraction, InteractionContext, InteractionResult } from "./IToolInteraction";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
 
 interface PolygonDrawingState extends DrawingState {
@@ -29,11 +34,160 @@ interface PolygonDrawingState extends DrawingState {
 }
 
 /**
+ * Interaction implementation for polygon drawing.
+ * Encapsulates all state and behavior for drawing a polygon annotation.
+ */
+class PolygonInteraction implements ToolInteraction {
+  readonly kind = "drawing" as const;
+  readonly toolType = "polygon";
+  readonly isHole: boolean;
+  readonly parentIndex?: number;
+  readonly color: string;
+
+  private points: number[] = [];
+  private circles: Konva.Circle[] = [];
+  private previewLine: Konva.Line | null = null;
+  private drawingShape: Konva.Line | null = null;
+  private readonly CLOSE_THRESHOLD = 10;
+
+  constructor(
+    private context: InteractionContext,
+    private selectedLabel: { value: string; color: string } | undefined,
+    startPos: { x: number; y: number },
+    color: string,
+    isHole: boolean,
+    parentIndex?: number
+  ) {
+    this.color = color;
+    this.isHole = isHole;
+    this.parentIndex = parentIndex;
+
+    // Initialize first point
+    const result = initPolyDrawing(
+      startPos,
+      color,
+      context.annotationLayer,
+      createPointCircle
+    );
+    this.points = [startPos.x, startPos.y];
+    this.circles = [result.circle];
+    this.previewLine = result.previewLine;
+    this.drawingShape = result.drawingShape;
+  }
+
+  onPointerDown(pos: { x: number; y: number }): InteractionResult {
+    const result = addPolyPoint(
+      pos,
+      this.color,
+      this.points,
+      this.drawingShape as Konva.Line,
+      this.circles,
+      this.context.annotationLayer,
+      this.CLOSE_THRESHOLD,
+      createPointCircle
+    );
+
+    this.circles = result.updatedCircles;
+    return { shouldComplete: result.shouldComplete };
+  }
+
+  onPointerMove(pos: { x: number; y: number }): void {
+    updatePolygonPreview(
+      this.previewLine,
+      this.points,
+      pos,
+      this.circles,
+      this.color,
+      this.CLOSE_THRESHOLD,
+      this.context.annotationLayer
+    );
+  }
+
+  onPointerUp(_pos: { x: number; y: number }): InteractionResult {
+    return { shouldContinue: true };
+  }
+
+  onKeyDown(e: KeyboardEvent): InteractionResult {
+    if (matchesKey(e, ANNOTATION_SHORTCUTS.CANCEL)) {
+      e.preventDefault();
+      return { shouldCancel: true };
+    }
+    if (
+      matchesKey(e, ANNOTATION_SHORTCUTS.COMPLETE) &&
+      this.points.length >= 6
+    ) {
+      e.preventDefault();
+      return { shouldComplete: true };
+    }
+    return { shouldContinue: true };
+  }
+
+  complete(): ImageAnnotationAnswer | null {
+    if (this.points.length < 6) return null;
+
+    const pointPairs = flatPointsToCoordinatePairs(this.points);
+    const imageCoords = this.context.getImageCoordinates(
+      pointPairs,
+      this.context.imageNode
+    );
+
+    if (this.isHole) {
+      // Hole creation is handled by the controller
+      // Return null to signal that the controller should handle it
+      return null;
+    }
+
+    if (!this.selectedLabel) return null;
+
+    return {
+      label: this.selectedLabel.value,
+      points: imageCoords,
+      shape_type: "polygon",
+      flags: {},
+    };
+  }
+
+  cancel(): void {
+    this.cleanup();
+  }
+
+  cleanup(): void {
+    cleanupPolyDrawing(this.drawingShape, this.circles, this.previewLine);
+    this.context.annotationLayer?.batchDraw();
+  }
+
+  /**
+   * Get the current points for hole creation (used by controller)
+   */
+  getPoints(): number[] {
+    return this.points;
+  }
+}
+
+/**
  * Tool for drawing and editing polygon annotations
  */
 export class PolygonTool extends BaseAnnotationTool {
   readonly shapeType = "polygon";
   private readonly CLOSE_THRESHOLD = 10;
+
+  createInteraction(
+    context: InteractionContext,
+    startPos: { x: number; y: number },
+    color: string,
+    isHole: boolean,
+    parentIndex?: number,
+    selectedLabel?: { value: string; color: string }
+  ): ToolInteraction {
+    return new PolygonInteraction(
+      context,
+      selectedLabel,
+      startPos,
+      color,
+      isHole,
+      parentIndex
+    );
+  }
 
   startDrawing(
     pos: { x: number; y: number },

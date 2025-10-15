@@ -1,5 +1,6 @@
 import Konva from "konva";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
+import { ToolInteraction, InteractionContext } from "./IToolInteraction";
 
 export interface DrawingState {
   kind: string;
@@ -41,7 +42,28 @@ export interface IAnnotationTool {
   readonly shapeType: string;
 
   /**
+   * Create a new interaction for drawing a shape.
+   * This is the preferred method for initiating drawing operations.
+   * @param context - Interaction context with canvas layers and utilities
+   * @param startPos - Starting position for the drawing
+   * @param color - Color for the shape
+   * @param isHole - Whether this is a hole being drawn inside a parent shape
+   * @param parentIndex - Index of parent annotation if drawing a hole
+   * @param selectedLabel - Currently selected label for the annotation
+   * @returns ToolInteraction instance that owns the drawing state and behavior
+   */
+  createInteraction(
+    context: InteractionContext,
+    startPos: { x: number; y: number },
+    color: string,
+    isHole: boolean,
+    parentIndex?: number,
+    selectedLabel?: { value: string; color: string }
+  ): ToolInteraction;
+
+  /**
    * Start drawing a new shape
+   * @deprecated Use createInteraction instead
    * @param pos - Starting position
    * @param color - Color for the shape
    * @param isHole - Whether this is a hole being drawn inside a parent shape
