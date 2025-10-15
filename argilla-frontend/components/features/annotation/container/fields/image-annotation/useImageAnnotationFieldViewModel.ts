@@ -19,6 +19,7 @@ import { ToolInteraction, InteractionContext } from "./tools/IToolInteraction";
 import { Question } from "~/v1/domain/entities/question/Question";
 import { ImageAnnotationQuestionAnswer } from "~/v1/domain/entities/question/QuestionAnswer";
 import { ImageAnnotationAnswer } from "~/v1/domain/entities/IAnswer";
+import { useNotifications } from "~/v1/infrastructure/services/useNotifications";
 
 /**
  * Simplified mode type - only 3 conceptual states
@@ -39,6 +40,10 @@ export const useImageAnnotationFieldViewModel = (props: {
   const answer =
     imageAnnotationQuestion.answer as ImageAnnotationQuestionAnswer;
   const sharedState = useImageAnnotationSharedState(answer);
+  const notification = useNotifications();
+
+  // Constants
+  const MAX_HOLES_PER_SHAPE = 10;
 
   // Konva objects (managed by composables)
   let stage: Konva.Stage | null = null;
@@ -121,8 +126,8 @@ export const useImageAnnotationFieldViewModel = (props: {
   const getToolContext = (): ToolContext => ({
     ...getBaseContext(),
     renderAnchorPoints,
-    getToolForShape: (shapeType: string) =>
-      toolFactory?.getToolForShape(shapeType) || null,
+    getTool: (toolType: string) =>
+      toolFactory?.getTool(toolType) || null,
   });
 
   const initializeToolFactory = () => {
@@ -189,7 +194,10 @@ export const useImageAnnotationFieldViewModel = (props: {
     } else {
       // Drawing a normal annotation
       if (!selectedLabel.value) {
-        alert("Please select a label first");
+        notification.notify({
+          message: "Please select a label first",
+          type: "warning",
+        });
         return;
       }
 
@@ -455,10 +463,13 @@ export const useImageAnnotationFieldViewModel = (props: {
       exitEditMode();
     }
 
-    // Check if parent already has 10 holes
+    // Check if parent already has maximum holes
     const parent = annotations.value[parentIndex];
-    if (parent.holes && parent.holes.length >= 10) {
-      alert("Maximum 10 holes per shape reached");
+    if (parent.holes && parent.holes.length >= MAX_HOLES_PER_SHAPE) {
+      notification.notify({
+        message: `Maximum ${MAX_HOLES_PER_SHAPE} holes per shape reached`,
+        type: "warning",
+      });
       return;
     }
 
@@ -549,7 +560,7 @@ export const useImageAnnotationFieldViewModel = (props: {
           // Get the tool for the hole being dragged (not the parent)
           const holeShape = annotation.holes?.[holeIdx];
           if (holeShape) {
-            const holeTool = toolFactory.getToolForShape(holeShape.shape_type);
+            const holeTool = toolFactory.getTool(holeShape.shape_type);
             if (holeTool) {
               constrainedPos = holeTool.constrainPointToParentShape(
                 annotation,
@@ -591,7 +602,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     if (!targetShape) return;
 
     // Get the tool for the actual shape being dragged
-    const tool = toolFactory.getToolForShape(targetShape.shape_type);
+    const tool = toolFactory.getTool(targetShape.shape_type);
     if (!tool) return;
 
     tool.updateAnnotationFromDrag(annotation, pointIndex, newPos, holeIndex);
@@ -602,7 +613,7 @@ export const useImageAnnotationFieldViewModel = (props: {
     const annotation = annotations.value[annotationIndex];
     if (!annotation || !toolFactory) return;
 
-    const tool = toolFactory.getToolForShape(annotation.shape_type);
+    const tool = toolFactory.getTool(annotation.shape_type);
     if (!tool) return;
 
     tool.updateAnnotationShape(annotation, annotationIndex);

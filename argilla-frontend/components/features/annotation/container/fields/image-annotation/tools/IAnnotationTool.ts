@@ -252,5 +252,5 @@ export interface ToolContext {
   updateAnswer: () => void;
   renderAnnotations: () => void;
   renderAnchorPoints?: (annotationIndex: number) => void;
-  getToolForShape?: (shapeType: string) => IAnnotationTool | null;
+  getTool?: (toolType: string) => IAnnotationTool | null;
 }

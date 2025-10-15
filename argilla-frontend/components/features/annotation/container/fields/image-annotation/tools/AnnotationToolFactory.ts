@@ -20,17 +20,11 @@ export class AnnotationToolFactory {
   }
 
   /**
-   * Get a tool by its type
+   * Get a tool by its type (e.g., "rectangle", "polygon")
+   * Works for both selected tool types and existing annotation shape types
    */
   getTool(toolType: string): IAnnotationTool | undefined {
     return this.tools.get(toolType);
-  }
-
-  /**
-   * Get a tool for a specific shape type
-   */
-  getToolForShape(shapeType: string): IAnnotationTool | undefined {
-    return this.tools.get(shapeType);
   }
 
   /**

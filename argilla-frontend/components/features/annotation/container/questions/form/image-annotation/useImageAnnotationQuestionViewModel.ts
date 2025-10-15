@@ -50,6 +50,21 @@ export const useImageAnnotationQuestionViewModel = (props: {
 
   const annotations = computed(() => answer.values);
 
+  // Memoize annotation colors to avoid repeated function calls during rendering
+  const annotationColorsCache = computed(() => {
+    const cache = new Map<string, string>();
+    annotations.value.forEach((annotation) => {
+      if (!cache.has(annotation.label)) {
+        cache.set(annotation.label, answer.getAnnotationColor(annotation.label));
+      }
+    });
+    return cache;
+  });
+
+  const getAnnotationColorMemoized = (labelValue: string) => {
+    return annotationColorsCache.value.get(labelValue) || answer.getAnnotationColor(labelValue);
+  };
+
   const selectTool = (tool: Tool) => {
     // Signal to field component to cancel any ongoing polygon drawing
     if (selectedTool.value === "polygon" && tool !== "polygon") {
@@ -144,7 +159,16 @@ export const useImageAnnotationQuestionViewModel = (props: {
   const deleteAnnotation = deleteShapeFromList;
 
   const toggleExpanded = (index: number) => {
-    expandedAnnotations.value[index] = !expandedAnnotations.value[index];
+    // Use Vue.set for Vue 2 reactivity
+    const currentState = expandedAnnotations.value[index] || false;
+    expandedAnnotations.value = {
+      ...expandedAnnotations.value,
+      [index]: !currentState,
+    };
+  };
+
+  const isExpanded = (index: number) => {
+    return expandedAnnotations.value[index] || false;
   };
 
   const onAnnotationItemClick = (index: number) => {
@@ -189,7 +213,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
     selectTool,
     onLabelSelected,
     onFocus,
-    getAnnotationColor,
+    getAnnotationColor: getAnnotationColorMemoized,
     hoverAnnotation,
     unhoverAnnotation,
     selectAnnotation,
@@ -198,6 +222,7 @@ export const useImageAnnotationQuestionViewModel = (props: {
     onAnnotationItemClick,
     toggleEditMode,
     toggleExpanded,
+    isExpanded,
     onAddHole,
     deleteHole,
   };

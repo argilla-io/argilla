@@ -338,7 +338,7 @@ export class AnnotationRenderer {
 
     this.removeAnchorPoints();
 
-    const tool = this.deps.toolFactory.getToolForShape(annotation.shape_type);
+    const tool = this.deps.toolFactory.getTool(annotation.shape_type);
     if (!tool) return;
 
     // Show parent boundary guide if editing a hole

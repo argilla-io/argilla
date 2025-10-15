@@ -328,10 +328,10 @@ export class RectangleTool extends BaseAnnotationTool {
         }
       } else if (
         hole.shape_type === "polygon" &&
-        this.context.getToolForShape
+        this.context.getTool
       ) {
         // Delegate polygon holes to PolygonTool
-        const polyTool = this.context.getToolForShape("polygon");
+        const polyTool = this.context.getTool("polygon");
         if (polyTool) {
           const holeCanvasPoints = this.context.getCanvasCoordinates(
             hole.points,

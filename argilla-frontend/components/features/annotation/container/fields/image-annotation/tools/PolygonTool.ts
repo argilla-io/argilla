@@ -555,10 +555,10 @@ export class PolygonTool extends BaseAnnotationTool {
         });
       } else if (
         hole.shape_type === "rectangle" &&
-        this.context.getToolForShape
+        this.context.getTool
       ) {
         // Delegate rectangle holes to RectangleTool
-        const rectTool = this.context.getToolForShape("rectangle");
+        const rectTool = this.context.getTool("rectangle");
         if (rectTool) {
           const holeCanvasPoints = this.context.getCanvasCoordinates(
             hole.points,

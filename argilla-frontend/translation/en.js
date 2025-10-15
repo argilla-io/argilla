@@ -75,8 +75,19 @@ export default {
     contextMenu: {
       edit: "Edit Annotation",
       delete: "Delete Annotation",
-      addHole: "Add Hole",
+      addHole: "Edit Holes",
       deleteHole: "Delete Hole",
+    },
+    buttons: {
+      addHole: "Add Hole",
+      edit: "Edit",
+      delete: "Delete",
+      deleteHole: "Delete Hole",
+      expand: "Expand",
+      collapse: "Collapse",
+    },
+    tooltips: {
+      holesCount: "{count} hole | {count} holes",
     },
   },
   breadcrumbs: {

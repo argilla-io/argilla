@@ -46,7 +46,7 @@
           <div class="annotations-list">
             <div
               v-for="(annotation, index) in annotations"
-              :key="index"
+              :key="`annotation-${index}-${annotation.label}`"
               class="annotation-group"
               @click="onAnnotationItemClick(index)"
             >
@@ -62,9 +62,9 @@
                   v-if="annotation.holes && annotation.holes.length > 0"
                   class="annotation-expand"
                   @click.stop="toggleExpanded(index)"
-                  :title="expandedAnnotations[index] ? 'Collapse' : 'Expand'"
+                  :title="isExpanded(index) ? $t('imageAnnotation.buttons.collapse') : $t('imageAnnotation.buttons.expand')"
                 >
-                  <span class="expand-icon">{{ expandedAnnotations[index] ? '▼' : '▶' }}</span>
+                  <span class="expand-icon">{{ isExpanded(index) ? '▼' : '▶' }}</span>
                 </button>
                 <span v-else class="annotation-expand-spacer" />
                 
@@ -79,7 +79,7 @@
                 <span
                   v-if="annotation.holes && annotation.holes.length > 0"
                   class="annotation-hole-badge"
-                  :title="`${annotation.holes.length} hole${annotation.holes.length > 1 ? 's' : ''}`"
+                  :title="$tc('imageAnnotation.tooltips.holesCount', annotation.holes.length, { count: annotation.holes.length })"
                 >
                   <span class="hole-icon">⬚</span>
                   {{ annotation.holes.length }}
@@ -91,7 +91,7 @@
                     v-if="!annotation.holes || annotation.holes.length < 10"
                     class="annotation-add-hole"
                     @click.stop="onAddHole(index)"
-                    title="Add Hole"
+                    :title="$t('imageAnnotation.buttons.addHole')"
                   >
                     <span class="add-hole-icon">⬚</span>
                   </button>
@@ -99,7 +99,7 @@
                   <button
                     class="annotation-edit"
                     @click.stop="onEditAnnotation(index)"
-                    title="Edit"
+                    :title="$t('imageAnnotation.buttons.edit')"
                   >
                     <svgicon 
                       name="pen" 
@@ -111,7 +111,7 @@
                   <button
                     class="annotation-delete"
                     @click.stop="deleteAnnotation(index)"
-                    title="Delete"
+                    :title="$t('imageAnnotation.buttons.delete')"
                   >
                     <svgicon 
                       name="close" 
@@ -125,7 +125,8 @@
               
               <!-- Holes List (expandable) -->
               <div
-                v-if="annotation.holes && annotation.holes.length > 0 && expandedAnnotations[index]"
+                v-if="annotation.holes && annotation.holes.length > 0"
+                v-show="isExpanded(index)"
                 class="holes-list"
               >
                 <div
@@ -141,7 +142,7 @@
                     <button
                       class="hole-delete"
                       @click.stop="deleteHole(index, holeIndex)"
-                      title="Delete Hole"
+                      :title="$t('imageAnnotation.buttons.deleteHole')"
                     >
                       <svgicon 
                         name="close" 
@@ -191,6 +192,13 @@ export default {
     
     // Ensure rectangle tool is selected by default
     viewModel.selectTool("rectangle");
+    
+    // Select first label by default if none selected
+    const answer = props.question.answer;
+    const hasSelectedLabel = answer.options.some(opt => opt.isSelected);
+    if (!hasSelectedLabel && answer.options.length > 0) {
+      answer.options[0].isSelected = true;
+    }
     
     return viewModel;
   },
@@ -294,7 +302,8 @@ export default {
   padding: $base-space;
   border-radius: $border-radius-s;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.15s ease-out;
+  will-change: background-color;
 
   &:hover {
     background: var(--bg-opacity-16);
@@ -442,6 +451,8 @@ export default {
   gap: $base-space * 0.25;
   padding-left: $base-space * 2;
   margin-top: $base-space * 0.25;
+  will-change: opacity;
+  transition: opacity 0.15s ease-out;
 }
 
 .hole-item {
@@ -451,7 +462,8 @@ export default {
   padding: $base-space * 0.5 $base-space;
   border-radius: $border-radius-s;
   background: var(--bg-opacity-4);
-  transition: background 0.2s;
+  transition: background-color 0.15s ease-out;
+  will-change: background-color;
 
   &:hover {
     background: var(--bg-opacity-12);
