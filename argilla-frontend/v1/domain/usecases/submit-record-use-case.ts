@@ -10,6 +10,11 @@ export class SubmitRecordUseCase {
   ) {}
 
   async execute(record: Record) {
+    // Validate before submitting
+    if (!record.questionAreCompletedCorrectly()) {
+      throw new Error("VALIDATION_ERROR");
+    }
+
     const response = await this.recordRepository.submitRecordResponse(record);
 
     record.submit(response);

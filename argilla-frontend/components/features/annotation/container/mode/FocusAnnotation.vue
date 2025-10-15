@@ -136,8 +136,13 @@ export default {
   },
   methods: {
     async onSubmit() {
-      await this.submit(this.record);
-      this.$emit("on-submit-responses");
+      try {
+        await this.submit(this.record);
+        this.$emit("on-submit-responses");
+      } catch (error) {
+        // Error already handled in view model with toast notification
+        // Don't emit event to prevent view transition
+      }
     },
     async onDiscard() {
       if (this.record.isDiscarded) return;

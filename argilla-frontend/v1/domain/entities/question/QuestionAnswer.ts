@@ -356,6 +356,71 @@ export class ImageAnnotationQuestionAnswer extends QuestionAnswer {
     return true;
   }
 
+  get hasValidValues(): boolean {
+    // Validate that all annotations have valid data
+    return this.values.every((annotation) => {
+      // Check that points array exists and has valid coordinates
+      if (!annotation.points || !Array.isArray(annotation.points)) {
+        return false;
+      }
+
+      // Check that all points are valid numbers
+      const allPointsValid = annotation.points.every((point) => {
+        return (
+          Array.isArray(point) &&
+          point.length === 2 &&
+          typeof point[0] === "number" &&
+          typeof point[1] === "number" &&
+          !isNaN(point[0]) &&
+          !isNaN(point[1]) &&
+          isFinite(point[0]) &&
+          isFinite(point[1])
+        );
+      });
+
+      if (!allPointsValid) {
+        return false;
+      }
+
+      // Check that shape_type is valid
+      if (!annotation.shape_type || typeof annotation.shape_type !== "string") {
+        return false;
+      }
+
+      // Check that label exists
+      if (!annotation.label || typeof annotation.label !== "string") {
+        return false;
+      }
+
+      // Validate holes if present
+      if (annotation.holes && Array.isArray(annotation.holes)) {
+        const allHolesValid = annotation.holes.every((hole) => {
+          return (
+            hole.points &&
+            Array.isArray(hole.points) &&
+            hole.points.every(
+              (point) =>
+                Array.isArray(point) &&
+                point.length === 2 &&
+                typeof point[0] === "number" &&
+                typeof point[1] === "number" &&
+                !isNaN(point[0]) &&
+                !isNaN(point[1]) &&
+                isFinite(point[0]) &&
+                isFinite(point[1])
+            )
+          );
+        });
+
+        if (!allHolesValid) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
   get valuesAnswered(): ImageAnnotationAnswer[] {
     return this.values.map((value) => ({
       label: value.label,

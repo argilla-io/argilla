@@ -151,8 +151,13 @@ export class RecordRepository {
 
       return new RecordAnswer(data.id, status, data.values, data.updated_at);
     } catch (error) {
+      // Pass through the original error for better error handling
+      if (error.response?.status === 422) {
+        throw error;
+      }
       throw {
         response: RECORD_API_ERRORS.ERROR_UPDATING_RECORD_RESPONSE,
+        originalError: error,
       };
     }
   }
@@ -179,8 +184,13 @@ export class RecordRepository {
         data.updated_at
       );
     } catch (error) {
+      // Pass through the original error for better error handling
+      if (error.response?.status === 422) {
+        throw error;
+      }
       throw {
         response: RECORD_API_ERRORS.ERROR_CREATING_RECORD_RESPONSE,
+        originalError: error,
       };
     }
   }
