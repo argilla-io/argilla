@@ -48,7 +48,7 @@ export const useFocusAnnotationViewModel = () => {
         // Backend validation error - data format is invalid
         const detail = error.response?.data?.detail;
         let errorMessage = "Invalid data format";
-        
+
         if (typeof detail === "string") {
           errorMessage = detail;
         } else if (detail && typeof detail === "object") {
@@ -61,7 +61,7 @@ export const useFocusAnnotationViewModel = () => {
                 uniqueMessages.add(err.msg);
               }
             });
-            
+
             if (uniqueMessages.size > 0) {
               // Format as an HTML list
               const messageList = Array.from(uniqueMessages)
@@ -77,7 +77,7 @@ export const useFocusAnnotationViewModel = () => {
             errorMessage = detail.message || detail.msg || "Invalid data format";
           }
         }
-        
+
         notify({
           message: errorMessage,
           type: "danger",
@@ -104,15 +104,15 @@ export const useFocusAnnotationViewModel = () => {
           // Import and use the shared state to reset
           const { useImageAnnotationSharedState } = require("~/components/features/annotation/container/fields/image-annotation/useImageAnnotationSharedState");
           const sharedState = useImageAnnotationSharedState(answer);
-          
+
           // Exit edit mode
           if (sharedState.editModeActive.value) {
             sharedState.exitEditModeTrigger.value++;
           }
-          
+
           // Cancel any ongoing polygon drawing
           sharedState.cancelPolygonTrigger.value++;
-          
+
           // Exit hole drawing mode
           if (sharedState.holeDrawingMode.value.active) {
             sharedState.holeDrawingMode.value = { active: false, parentIndex: null };

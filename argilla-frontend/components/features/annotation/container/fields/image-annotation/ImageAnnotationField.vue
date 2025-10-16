@@ -10,7 +10,7 @@
         <p v-text="$t('couldNotLoadImage')" />
       </div>
       <div ref="canvasContainer" class="image-annotation-field__canvas"></div>
-      
+
       <!-- Navigation Bar (under canvas) -->
       <div class="image-annotation-field__edit-nav">
         <!-- Hole Drawing Mode: Show parent info and exit button -->
@@ -19,17 +19,17 @@
             <span class="hole-mode-icon">⬚</span>
             Drawing holes - Click ESC to exit
           </span>
-          <button 
+          <button
             class="edit-nav-button edit-nav-button--exit"
             @click="exitHoleDrawingMode"
           >
             Exit Hole Mode
           </button>
         </template>
-        
+
         <!-- Edit Mode: Full navigation -->
         <template v-else-if="editMode.active">
-          <button 
+          <button
             class="edit-nav-button"
             @click="editPreviousAnnotation"
           >
@@ -38,25 +38,25 @@
           <span class="edit-nav-counter">
             {{ $t('imageAnnotation.editMode.shapeCounter', { current: (editMode.annotationIndex ?? 0) + 1, total: imageAnnotationQuestion.answer.values.length }) }}
           </span>
-          <button 
+          <button
             class="edit-nav-button"
             @click="editNextAnnotation"
           >
             <span v-text="$t('imageAnnotation.editMode.next')" /> →
           </button>
-          <button 
+          <button
             class="edit-nav-button edit-nav-button--exit"
             @click="exitEditMode"
             v-text="$t('imageAnnotation.editMode.exitEditMode')"
           />
         </template>
-        
+
         <!-- Non-Edit Mode: Summary and Edit button -->
         <template v-else>
           <span class="edit-nav-counter">
             {{ $t('imageAnnotation.shapesCount', { count: imageAnnotationQuestion.answer.values.length }) }}
           </span>
-          <button 
+          <button
             class="edit-nav-button edit-nav-button--primary"
             @click="enterEditMode(0)"
             :disabled="imageAnnotationQuestion.answer.values.length === 0"
@@ -64,7 +64,7 @@
           />
         </template>
       </div>
-      
+
       <!-- Context Menu -->
       <div
         v-if="contextMenu.visible"
@@ -77,7 +77,7 @@
             <span v-text="$t('imageAnnotation.contextMenu.deleteHole')" />
           </div>
         </template>
-        
+
         <!-- Parent annotation menu -->
         <template v-else>
           <div class="context-menu-item" @click.stop="handleContextMenuEdit">
@@ -195,29 +195,29 @@ export default {
       &:hover {
         background: var(--bg-opacity-16);
       }
-      
+
       &:first-child:hover {
         color: var(--bg-brand);
       }
-      
+
       &--delete:hover {
         color: var(--fg-error);
       }
     }
-    
+
     .context-menu-icon {
       font-size: 16px;
       line-height: 1;
     }
   }
-  
+
   &__edit-nav {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: $base-space;
     padding: $base-space 0;
-    
+
     .edit-nav-button {
       padding: $base-space calc($base-space * 1.5);
       background: hsl(214.3, 9.6%, 14.3%);
@@ -227,37 +227,37 @@ export default {
       cursor: pointer;
       @include font-size(14px);
       transition: all 0.2s;
-      
+
       &:hover:not(:disabled) {
         background: hsl(214.3, 9.6%, 18%);
       }
-      
+
       &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
-      
+
       &--exit {
         background: var(--bg-brand);
         color: white;
         border: none;
-        
+
         &:hover {
           opacity: 0.9;
         }
       }
-      
+
       &--primary {
         background: var(--bg-brand);
         color: white;
         border: none;
-        
+
         &:hover:not(:disabled) {
           opacity: 0.9;
         }
       }
     }
-    
+
     .edit-nav-counter {
       padding: 0 $base-space;
       color: var(--fg-primary);
@@ -267,7 +267,7 @@ export default {
       align-items: center;
       gap: $base-space * 0.5;
     }
-    
+
     .hole-mode-icon {
       font-size: 18px;
       line-height: 1;

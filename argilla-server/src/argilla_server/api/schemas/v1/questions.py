@@ -325,9 +325,7 @@ class ImageAnnotationQuestionSettingsCreate(UniqueValuesCheckerMixin):
         allowed_shapes = {"rectangle", "polygon", "circle", "line", "point"}
         for shape in instance.shape_types:
             if shape not in allowed_shapes:
-                raise ValueError(
-                    f"Invalid shape type '{shape}'. Allowed types: {allowed_shapes}"
-                )
+                raise ValueError(f"Invalid shape type '{shape}'. Allowed types: {allowed_shapes}")
         return instance
 
 

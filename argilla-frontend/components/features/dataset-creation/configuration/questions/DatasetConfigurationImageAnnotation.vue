@@ -201,7 +201,7 @@ $error-color: hsl(3, 100%, 69%);
 
 .shape-types-section {
   margin-top: $base-space * 2;
-  
+
   &__label {
     display: block;
     color: var(--fg-secondary);
@@ -209,7 +209,7 @@ $error-color: hsl(3, 100%, 69%);
     font-weight: 500;
     margin-bottom: $base-space;
   }
-  
+
   &__options {
     display: flex;
     flex-direction: column;
@@ -224,23 +224,23 @@ $error-color: hsl(3, 100%, 69%);
   cursor: pointer;
   color: var(--fg-secondary);
   @include font-size(12px);
-  
+
   input[type="checkbox"] {
     cursor: pointer;
     width: 16px;
     height: 16px;
     border: 1px solid var(--bg-opacity-20);
     border-radius: $border-radius-s;
-    
+
     &:checked {
       accent-color: var(--fg-cuaternary);
     }
   }
-  
+
   &__label {
     user-select: none;
   }
-  
+
   &:hover {
     color: var(--fg-primary);
   }
@@ -253,7 +253,7 @@ $error-color: hsl(3, 100%, 69%);
   @include font-size(12px);
   flex-flow: row-reverse;
   justify-content: flex-end;
-  
+
   &:deep(.checkbox__container) {
     margin: 0;
     border-color: var(--bg-opacity-20);

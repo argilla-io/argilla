@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <QuestionHeaderComponent :question="question" />
-    
+
     <div class="image-annotation-question">
       <!-- Tool Selection -->
       <div class="image-annotation-question__tools">
@@ -11,9 +11,9 @@
             v-for="tool in tools"
             :key="tool.type"
             class="tool-button"
-            :class="{ 
+            :class="{
               'tool-button--active': selectedTool === tool.type,
-              'tool-button--disabled': editModeActive 
+              'tool-button--disabled': editModeActive
             }"
             @click="selectTool(tool.type)"
             :title="tool.label"
@@ -67,14 +67,14 @@
                   <span class="expand-icon">{{ isExpanded(index) ? '▼' : '▶' }}</span>
                 </button>
                 <span v-else class="annotation-expand-spacer" />
-                
+
                 <span
                   class="annotation-color"
                   :style="{ backgroundColor: getAnnotationColor(annotation.label) }"
                 />
                 <span class="annotation-label">{{ annotation.label }}</span>
                 <span class="annotation-type">{{ annotation.shape_type }}</span>
-                
+
                 <!-- Hole Count Badge -->
                 <span
                   v-if="annotation.holes && annotation.holes.length > 0"
@@ -84,7 +84,7 @@
                   <span class="hole-icon">⬚</span>
                   {{ annotation.holes.length }}
                 </span>
-                
+
                 <div class="annotation-actions">
                   <!-- Add Hole Button -->
                   <button
@@ -95,16 +95,16 @@
                   >
                     <span class="add-hole-icon">⬚</span>
                   </button>
-                  
+
                   <button
                     class="annotation-edit"
                     @click.stop="onEditAnnotation(index)"
                     :title="$t('imageAnnotation.buttons.edit')"
                   >
-                    <svgicon 
-                      name="pen" 
-                      width="12" 
-                      height="12" 
+                    <svgicon
+                      name="pen"
+                      width="12"
+                      height="12"
                       aria-hidden="true"
                     />
                   </button>
@@ -113,16 +113,16 @@
                     @click.stop="deleteAnnotation(index)"
                     :title="$t('imageAnnotation.buttons.delete')"
                   >
-                    <svgicon 
-                      name="close" 
-                      width="12" 
-                      height="12" 
+                    <svgicon
+                      name="close"
+                      width="12"
+                      height="12"
                       aria-hidden="true"
                     />
                   </button>
                 </div>
               </div>
-              
+
               <!-- Holes List (expandable) -->
               <div
                 v-if="annotation.holes && annotation.holes.length > 0"
@@ -144,10 +144,10 @@
                       @click.stop="deleteHole(index, holeIndex)"
                       :title="$t('imageAnnotation.buttons.deleteHole')"
                     >
-                      <svgicon 
-                        name="close" 
-                        width="10" 
-                        height="10" 
+                      <svgicon
+                        name="close"
+                        width="10"
+                        height="10"
                         aria-hidden="true"
                       />
                     </button>
@@ -189,17 +189,17 @@ export default {
   },
   setup(props) {
     const viewModel = useImageAnnotationQuestionViewModel(props);
-    
+
     // Ensure rectangle tool is selected by default
     viewModel.selectTool("rectangle");
-    
+
     // Select first label by default if none selected
     const answer = props.question.answer;
     const hasSelectedLabel = answer.options.some(opt => opt.isSelected);
     if (!hasSelectedLabel && answer.options.length > 0) {
       answer.options[0].isSelected = true;
     }
-    
+
     return viewModel;
   },
 };
@@ -431,7 +431,7 @@ export default {
 
   &:hover {
     background-color: var(--bg-opacity-1);
-    
+
     :deep(svg) {
       fill: var(--fg-primary);
     }
@@ -521,7 +521,7 @@ export default {
 
   &:hover {
     background-color: var(--bg-opacity-8);
-    
+
     :deep(svg) {
       fill: var(--fg-error);
     }

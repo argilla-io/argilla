@@ -57,6 +57,7 @@ class SpanQuestionResponseValueItem(BaseModel):
 
 class ImageAnnotationHole(BaseModel):
     """Hole/exclusion within an image annotation shape"""
+
     points: List[List[float]] = Field(..., description="Coordinates in [[x1,y1], [x2,y2], ...] format")
     shape_type: str = Field(..., description="Shape type: rectangle, polygon, circle, line, point")
     flags: Optional[Dict[str, Any]] = Field(default_factory=dict)
@@ -66,15 +67,15 @@ class ImageAnnotationHole(BaseModel):
     def check_hole_points_format(cls, instance: "ImageAnnotationHole") -> "ImageAnnotationHole":
         points = instance.points
         shape_type = instance.shape_type
-        
+
         if not points:
             raise ValueError("hole points cannot be empty")
-        
+
         # Validate each point has exactly 2 coordinates [x, y]
         for point in points:
             if len(point) != 2:
                 raise ValueError(f"Each hole point must have exactly 2 coordinates [x, y], got {len(point)}")
-        
+
         # Shape-specific validations for holes
         if shape_type == "rectangle" and len(points) != 2:
             raise ValueError("rectangle hole requires exactly 2 points (top-left and bottom-right)")
@@ -86,12 +87,13 @@ class ImageAnnotationHole(BaseModel):
             raise ValueError("polygon hole requires at least 3 points")
         elif shape_type == "circle" and len(points) != 2:
             raise ValueError("circle hole requires exactly 2 points (center and edge)")
-        
+
         return instance
 
 
 class ImageAnnotationQuestionResponseValueItem(BaseModel):
     """Image annotation in labelme format"""
+
     label: str
     points: List[List[float]] = Field(..., description="Coordinates in [[x1,y1], [x2,y2], ...] format")
     shape_type: str = Field(..., description="Shape type: rectangle, polygon, circle, line, point")
@@ -101,19 +103,21 @@ class ImageAnnotationQuestionResponseValueItem(BaseModel):
 
     @model_validator(mode="after")
     @classmethod
-    def check_points_format(cls, instance: "ImageAnnotationQuestionResponseValueItem") -> "ImageAnnotationQuestionResponseValueItem":
+    def check_points_format(
+        cls, instance: "ImageAnnotationQuestionResponseValueItem"
+    ) -> "ImageAnnotationQuestionResponseValueItem":
         points = instance.points
         shape_type = instance.shape_type
         holes = instance.holes
-        
+
         if not points:
             raise ValueError("points cannot be empty")
-        
+
         # Validate each point has exactly 2 coordinates [x, y]
         for point in points:
             if len(point) != 2:
                 raise ValueError(f"Each point must have exactly 2 coordinates [x, y], got {len(point)}")
-        
+
         # Shape-specific validations
         if shape_type == "rectangle" and len(points) != 2:
             raise ValueError("rectangle shape requires exactly 2 points (top-left and bottom-right)")
@@ -125,42 +129,49 @@ class ImageAnnotationQuestionResponseValueItem(BaseModel):
             raise ValueError("polygon shape requires at least 3 points")
         elif shape_type == "circle" and len(points) != 2:
             raise ValueError("circle shape requires exactly 2 points (center and edge)")
-        
+
         # Validate holes if present
         if holes is not None:
             if len(holes) > IMAGE_ANNOTATION_MAX_HOLES_PER_SHAPE:
-                raise ValueError(f"Maximum {IMAGE_ANNOTATION_MAX_HOLES_PER_SHAPE} holes allowed per shape, got {len(holes)}")
-            
+                raise ValueError(
+                    f"Maximum {IMAGE_ANNOTATION_MAX_HOLES_PER_SHAPE} holes allowed per shape, got {len(holes)}"
+                )
+
             # Validate geometric containment of holes within parent shape
             cls._validate_holes_containment(points, shape_type, holes)
-        
+
         return instance
-    
+
     @staticmethod
-    def _validate_holes_containment(parent_points: List[List[float]], parent_shape_type: str, holes: List[ImageAnnotationHole]) -> None:
+    def _validate_holes_containment(
+        parent_points: List[List[float]], parent_shape_type: str, holes: List[ImageAnnotationHole]
+    ) -> None:
         """Validate that all holes are geometrically contained within the parent shape"""
         # Get parent bounding box
         parent_xs = [p[0] for p in parent_points]
         parent_ys = [p[1] for p in parent_points]
         parent_min_x, parent_max_x = min(parent_xs), max(parent_xs)
         parent_min_y, parent_max_y = min(parent_ys), max(parent_ys)
-        
+
         # Check each hole
         for i, hole in enumerate(holes):
             hole_xs = [p[0] for p in hole.points]
             hole_ys = [p[1] for p in hole.points]
             hole_min_x, hole_max_x = min(hole_xs), max(hole_xs)
             hole_min_y, hole_max_y = min(hole_ys), max(hole_ys)
-            
+
             # Bounding box containment check
-            if not (parent_min_x <= hole_min_x and hole_max_x <= parent_max_x and
-                    parent_min_y <= hole_min_y and hole_max_y <= parent_max_y):
+            if not (
+                parent_min_x <= hole_min_x
+                and hole_max_x <= parent_max_x
+                and parent_min_y <= hole_min_y
+                and hole_max_y <= parent_max_y
+            ):
                 raise ValueError(f"Hole {i+1} is not fully contained within the parent shape bounds")
-            
+
             # Additional check: all hole points must be within parent bounds
             for point in hole.points:
-                if not (parent_min_x <= point[0] <= parent_max_x and
-                        parent_min_y <= point[1] <= parent_max_y):
+                if not (parent_min_x <= point[0] <= parent_max_x and parent_min_y <= point[1] <= parent_max_y):
                     raise ValueError(f"Hole {i+1} has points outside the parent shape bounds")
 
 
@@ -169,7 +180,8 @@ SpanQuestionResponseValue = Annotated[
     List[SpanQuestionResponseValueItem], Field(..., max_length=SPAN_QUESTION_RESPONSE_VALUE_MAX_ITEMS)
 ]
 ImageAnnotationQuestionResponseValue = Annotated[
-    List[ImageAnnotationQuestionResponseValueItem], Field(..., max_length=IMAGE_ANNOTATION_QUESTION_RESPONSE_VALUE_MAX_ITEMS)
+    List[ImageAnnotationQuestionResponseValueItem],
+    Field(..., max_length=IMAGE_ANNOTATION_QUESTION_RESPONSE_VALUE_MAX_ITEMS),
 ]
 MultiLabelSelectionQuestionResponseValue = List[str]
 RatingQuestionResponseValue = StrictInt
