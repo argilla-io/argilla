@@ -63,6 +63,33 @@ export default {
     noDraftRecordsToReview: "You have no draft records to review",
   },
   couldNotLoadImage: "Could not load image",
+  imageAnnotation: {
+    shapesCount: "Shapes: {count}",
+    editShapes: "Edit Shapes",
+    editMode: {
+      previous: "Previous",
+      next: "Next",
+      exitEditMode: "Exit Edit Mode",
+      shapeCounter: "Shape {current}/{total}",
+    },
+    contextMenu: {
+      edit: "Edit Annotation",
+      delete: "Delete Annotation",
+      addHole: "Edit Holes",
+      deleteHole: "Delete Hole",
+    },
+    buttons: {
+      addHole: "Add Hole",
+      edit: "Edit",
+      delete: "Delete",
+      deleteHole: "Delete Hole",
+      expand: "Expand",
+      collapse: "Collapse",
+    },
+    tooltips: {
+      holesCount: "{count} hole | {count} holes",
+    },
+  },
   breadcrumbs: {
     home: "Home",
     datasetSettings: "settings",
@@ -299,6 +326,10 @@ export default {
       span: {
         fieldRelated: "One text field is required",
       },
+      imageAnnotation: {
+        shapeTypes: "Annotation Types",
+        allowMultiple: "Allow multiple annotations",
+      },
     },
     atLeastOneQuestion: "At least one question is required.",
     atLeastOneRequired: "At least one required question is needed.",
@@ -358,6 +389,7 @@ export default {
       ranking: "Ranking",
       multi_label_selection: "Multi-label",
       span: "Span",
+      image_annotation: "Image annotation",
       "no mapping": "No mapping",
     },
     questionId: {
@@ -367,6 +399,7 @@ export default {
       ranking: "ranking",
       multi_label_selection: "multi-label",
       span: "span",
+      image_annotation: "image-annotation",
     },
   },
   persistentStorage: {

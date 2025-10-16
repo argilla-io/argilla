@@ -69,6 +69,7 @@
                 'rating',
                 'ranking',
                 'span',
+                'image_annotation',
               ]"
               @add-question="addQuestion($event)"
             />

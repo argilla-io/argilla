@@ -77,6 +77,7 @@ class QuestionType(StrEnum):
     multi_label_selection = "multi_label_selection"
     ranking = "ranking"
     span = "span"
+    image_annotation = "image_annotation"
 
 
 class MetadataPropertyType(StrEnum):

@@ -25,6 +25,7 @@ from argilla._models._settings._questions import (
     RatingQuestionSettings,
     RankingQuestionSettings,
     SpanQuestionSettings,
+    ImageAnnotationQuestionSettings,
 )
 from argilla.settings._common import SettingsPropertyBase
 
@@ -43,6 +44,7 @@ __all__ = [
     "TextQuestion",
     "RatingQuestion",
     "SpanQuestion",
+    "ImageAnnotationQuestion",
     "QuestionType",
 ]
 
@@ -469,6 +471,124 @@ class SpanQuestion(QuestionBase):
         return instance
 
 
+class ImageAnnotationQuestion(QuestionBase):
+    def __init__(
+        self,
+        name: str,
+        field: str,
+        labels: Union[List[str], Dict[str, str]],
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+        required: bool = True,
+        allow_multiple: bool = True,
+        shape_types: Optional[List[str]] = None,
+        visible_labels: Optional[int] = None,
+        client: Optional[Argilla] = None,
+    ) -> None:
+        """Define a new image annotation question for `Settings` of a `Dataset`. \
+            An image annotation question allows users to draw bounding boxes and polygons \
+            on images and assign labels to them, using the labelme format.
+
+            Parameters:
+                name (str): The name of the question to be used as a reference.
+                field (str): The name of the image field where the annotation question will be applied.
+                labels (Union[List[str], Dict[str, str]]): The list of available labels for the question, or a \
+                    dictionary of key-value pairs where the key is the label and the value is the label name displayed in the UI.
+                allow_multiple (bool): Whether multiple annotations are allowed. Default is True.
+                shape_types (Optional[List[str]]): The types of shapes allowed for annotation. \
+                    Options: "rectangle", "polygon", "circle", "line", "point". Default is ["rectangle", "polygon"].
+                visible_labels (Optional[int]): The number of visible labels for the question to be shown in the UI. \
+                    Setting it to None shows all options.
+                title (Optional[str]): The title of the question to be shown in the UI.
+                description (Optional[str]): The description of the question to be shown in the UI.
+                required (bool): If the question is required for a record to be valid. At least one question must be required.
+
+            Example:
+                ```python
+                import argilla as rg
+
+                settings = rg.Settings(
+                    fields=[
+                        rg.ImageField(name="image"),
+                    ],
+                    questions=[
+                        rg.ImageAnnotationQuestion(
+                            name="objects",
+                            field="image",
+                            labels=["person", "car", "tree"],
+                            title="Annotate objects in the image",
+                        )
+                    ],
+                )
+                ```
+            """
+        super().__init__(
+            name=name,
+            title=title,
+            required=required,
+            description=description,
+            settings=ImageAnnotationQuestionSettings(
+                field=field,
+                allow_multiple=allow_multiple,
+                shape_types=shape_types or ["rectangle", "polygon"],
+                visible_options=visible_labels,
+                options=self._render_values_as_options(labels),
+            ),
+            _client=client,
+        )
+
+    @property
+    def field(self):
+        return self._model.settings.field
+
+    @field.setter
+    def field(self, field: str):
+        self._model.settings.field = field
+
+    @property
+    def allow_multiple(self):
+        return self._model.settings.allow_multiple
+
+    @allow_multiple.setter
+    def allow_multiple(self, allow_multiple: bool):
+        self._model.settings.allow_multiple = allow_multiple
+
+    @property
+    def shape_types(self):
+        return self._model.settings.shape_types
+
+    @shape_types.setter
+    def shape_types(self, shape_types: List[str]):
+        self._model.settings.shape_types = shape_types
+
+    @property
+    def visible_labels(self) -> Optional[int]:
+        return self._model.settings.visible_options
+
+    @visible_labels.setter
+    def visible_labels(self, visible_labels: Optional[int]) -> None:
+        self._model.settings.visible_options = visible_labels
+
+    @property
+    def labels(self) -> List[str]:
+        return self._render_options_as_labels(self._model.settings.options)
+
+    @labels.setter
+    def labels(self, labels: List[str]) -> None:
+        self._model.settings.options = self._render_values_as_options(labels)
+
+    @classmethod
+    def from_model(cls, model: QuestionModel) -> "Self":
+        instance = cls(
+            name=model.name,
+            field=model.settings.field,
+            labels=cls._render_options_as_labels(model.settings.options),
+        )  # noqa
+        instance._model = model
+
+        return instance
+
+
 QuestionType = Union[
     LabelQuestion,
     MultiLabelQuestion,
@@ -476,6 +596,7 @@ QuestionType = Union[
     TextQuestion,
     RatingQuestion,
     SpanQuestion,
+    ImageAnnotationQuestion,
 ]
 
 
@@ -494,6 +615,8 @@ def question_from_model(model: QuestionModel) -> QuestionType:
         return RatingQuestion.from_model(model)
     elif question_type == "span":
         return SpanQuestion.from_model(model)
+    elif question_type == "image_annotation":
+        return ImageAnnotationQuestion.from_model(model)
     else:
         raise ValueError(f"Unsupported question model type: {question_type}")
 

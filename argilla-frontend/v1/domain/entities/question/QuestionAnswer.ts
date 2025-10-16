@@ -1,4 +1,4 @@
-import { Answer, RankingAnswer, SpanAnswer } from "../IAnswer";
+import { Answer, RankingAnswer, SpanAnswer, ImageAnnotationAnswer } from "../IAnswer";
 import { QuestionType } from "./QuestionType";
 
 export abstract class QuestionAnswer {
@@ -305,5 +305,138 @@ export class RankingQuestionAnswer extends QuestionAnswer {
 
   get valuesAnswered(): RankingValue[] {
     return this.values;
+  }
+}
+
+type ImageAnnotationValue = {
+  id: string;
+  text: string;
+  value: string;
+  color: string;
+  isSelected: boolean;
+};
+
+export class ImageAnnotationQuestionAnswer extends QuestionAnswer {
+  public readonly options: ImageAnnotationValue[] = [];
+  public values: ImageAnnotationAnswer[] = [];
+
+  constructor(
+    public readonly type: QuestionType,
+    questionName: string,
+    options: Omit<ImageAnnotationValue, "isSelected" | "id">[]
+  ) {
+    super(type);
+
+    const makeSafeForCSS = (str: string) => {
+      return str.replace(/[^a-z0-9]/g, (s) => {
+        const c = s.charCodeAt(0);
+        if (c === 32) return "-";
+        if (c >= 65 && c <= 90) return `-${s.toLowerCase()}`;
+        return `-${c.toString(16)}`;
+      });
+    };
+
+    this.options = options.map((e) => ({
+      ...e,
+      id: makeSafeForCSS(`${questionName}-${e.value}`),
+      isSelected: false,
+    }));
+    this.clear();
+  }
+
+  protected fill(answer: Answer) {
+    this.values = answer.value as ImageAnnotationAnswer[];
+  }
+
+  clear() {
+    this.values = [];
+  }
+
+  get isValid(): boolean {
+    return true;
+  }
+
+  get hasValidValues(): boolean {
+    // Validate that all annotations have valid data
+    return this.values.every((annotation) => {
+      // Check that points array exists and has valid coordinates
+      if (!annotation.points || !Array.isArray(annotation.points)) {
+        return false;
+      }
+
+      // Check that all points are valid numbers
+      const allPointsValid = annotation.points.every((point) => {
+        return (
+          Array.isArray(point) &&
+          point.length === 2 &&
+          typeof point[0] === "number" &&
+          typeof point[1] === "number" &&
+          !isNaN(point[0]) &&
+          !isNaN(point[1]) &&
+          isFinite(point[0]) &&
+          isFinite(point[1])
+        );
+      });
+
+      if (!allPointsValid) {
+        return false;
+      }
+
+      // Check that shape_type is valid
+      if (!annotation.shape_type || typeof annotation.shape_type !== "string") {
+        return false;
+      }
+
+      // Check that label exists
+      if (!annotation.label || typeof annotation.label !== "string") {
+        return false;
+      }
+
+      // Validate holes if present
+      if (annotation.holes && Array.isArray(annotation.holes)) {
+        const allHolesValid = annotation.holes.every((hole) => {
+          return (
+            hole.points &&
+            Array.isArray(hole.points) &&
+            hole.points.every(
+              (point) =>
+                Array.isArray(point) &&
+                point.length === 2 &&
+                typeof point[0] === "number" &&
+                typeof point[1] === "number" &&
+                !isNaN(point[0]) &&
+                !isNaN(point[1]) &&
+                isFinite(point[0]) &&
+                isFinite(point[1])
+            )
+          );
+        });
+
+        if (!allHolesValid) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }
+
+  get valuesAnswered(): ImageAnnotationAnswer[] {
+    return this.values.map((value) => ({
+      label: value.label,
+      points: value.points,
+      shape_type: value.shape_type,
+      group_id: value.group_id,
+      flags: value.flags,
+      holes: value.holes,
+    }));
+  }
+
+  getAnnotationColor(labelValue: string): string {
+    const option = this.options.find((opt) => opt.value === labelValue);
+    return option?.color || "#cccccc";
+  }
+  deleteAnnotation(index: number): void {
+    this.values.splice(index, 1);
   }
 }

@@ -28,6 +28,12 @@
         :textFields="selectedSubset.textFields"
         @is-focused="$emit('is-focused', $event)"
       />
+      <DatasetConfigurationImageAnnotation
+        v-else-if="question.settings.type.isImageAnnotationType"
+        :question="question"
+        :imageFields="selectedSubset.imageFields"
+        @is-focused="$emit('is-focused', $event)"
+      />
       <DatasetConfigurationRating
         v-else-if="question.settings.type.isRatingType"
         :question="question"

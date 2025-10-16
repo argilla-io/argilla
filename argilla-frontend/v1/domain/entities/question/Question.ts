@@ -9,6 +9,7 @@ import {
   MultiLabelQuestionAnswer,
   RankingQuestionAnswer,
   SpanQuestionAnswer,
+  ImageAnnotationQuestionAnswer,
 } from "./QuestionAnswer";
 import { QuestionSetting } from "./QuestionSetting";
 import { QuestionType } from "./QuestionType";
@@ -95,6 +96,10 @@ export class Question {
 
   public get isRatingType(): boolean {
     return this.type.isRatingType;
+  }
+
+  public get isImageAnnotationType(): boolean {
+    return this.type.isImageAnnotationType;
   }
 
   public get isAnswerModified(): boolean {
@@ -196,6 +201,14 @@ export class Question {
       );
     }
 
+    if (this.isImageAnnotationType) {
+      return new ImageAnnotationQuestionAnswer(
+        this.type,
+        this.name,
+        this.settings.options
+      );
+    }
+
     if (this.isRatingType) {
       return new RatingLabelQuestionAnswer(
         this.type,
@@ -238,7 +251,7 @@ export class Question {
       this.settings.visible_options = this.settings.options.length;
     }
 
-    if (this.isSpanType) {
+    if (this.isSpanType || this.isImageAnnotationType) {
       this.settings.options = this.settings.options.map((option) => {
         return {
           ...option,

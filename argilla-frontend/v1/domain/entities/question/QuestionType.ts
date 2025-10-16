@@ -5,6 +5,7 @@ const availableQuestionTypes = [
   "text",
   "span",
   "rating",
+  "image_annotation",
 ];
 
 export type QuestionTypes =
@@ -13,7 +14,8 @@ export type QuestionTypes =
   | "ranking"
   | "text"
   | "span"
-  | "rating";
+  | "rating"
+  | "image_annotation";
 
 export class QuestionType extends String {
   private constructor(value: string) {
@@ -54,5 +56,9 @@ export class QuestionType extends String {
 
   public get isRatingType(): boolean {
     return this.value === "rating";
+  }
+
+  public get isImageAnnotationType(): boolean {
+    return this.value === "image_annotation";
   }
 }

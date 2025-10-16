@@ -89,6 +89,10 @@ export class Subset {
     return this.fields.filter((f) => f.settings.type.isTextType);
   }
 
+  get imageFields() {
+    return this.fields.filter((f) => f.settings.type.isImageType);
+  }
+
   private setDefaultValues() {
     if (this.questions.length === 1) {
       this.questions[0].markAsRequired();
@@ -264,6 +268,20 @@ export class Subset {
 
       if (this.textFields.length > 0) {
         settings.field = this.textFields[0].name;
+      }
+    }
+
+    if (type === "image_annotation") {
+      settings.options = [
+        { text: "person", id: "1", value: "person" },
+        { text: "car", id: "2", value: "car" },
+        { text: "bicycle", id: "3", value: "bicycle" },
+      ];
+      settings.allow_multiple = true;
+      settings.shape_types = ["rectangle", "polygon"];
+
+      if (this.imageFields.length > 0) {
+        settings.field = this.imageFields[0].name;
       }
     }
 

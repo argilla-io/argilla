@@ -363,6 +363,7 @@ export default {
       ranking: "ランキング",
       multi_label_selection: "マルチラベル",
       span: "範囲選択",
+      image_annotation: "画像アノテーション",
       "no mapping": "マッピングなし",
     },
     questionId: {
@@ -372,6 +373,7 @@ export default {
       ranking: "ランキング",
       multi_label_selection: "マルチラベル",
       span: "範囲選択",
+      image_annotation: "画像アノテーション",
     },
   },
   persistentStorage: {

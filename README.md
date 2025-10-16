@@ -158,7 +158,7 @@ Need more info, check out [our docs](https://argilla-io.github.io/argilla/latest
 
 ## 🥇 Contributors
 
-To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs. 
+To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 
