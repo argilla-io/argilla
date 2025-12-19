@@ -25,7 +25,7 @@ services:
     networks:
       - argilla
     volumes:
-      # ARGILLA_HOME_PATH is used to define where Argilla will save it's application data.
+      # ARGILLA_HOME_PATH is used to define where Argilla will save its application data.
       # If you change ARGILLA_HOME_PATH value please copy that same value to argilladata volume too.
       - argilladata:/var/lib/argilla
     depends_on:
