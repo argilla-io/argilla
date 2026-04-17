@@ -29,13 +29,16 @@ If you just want to quickly test or use Argilla for a few hours with the risk of
 If you want to disable the persistence storage warning, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING=false`
 
 !!! warning "Read this if you have datasets and want to enable persistent storage"
-    If you want to enable persistent storage `Small PAID` and you have created datasets, users, or workspaces, follow this process:
+    If you want to enable persistent storage and you have created datasets, users, or workspaces, follow this process:
 
     - First, **make a local or remote copy of your datasets**, following the [Import and Export guide](../how_to_guides/import_export.md). This is the most important step, because changing the settings of your Space leads to a restart and thus a data loss.
     - If you have created users (not signed in with Hugging Face login), **consider storing a copy of users** following the [manage users guide](../how_to_guides/user.md).
-    - **Once you have stored all your data safely, go to you Space Settings Tab** and select `Small`.
-    - **Your Space will be restarted and existing data will be lost**. From now on, all the new data you create in Argilla will be kept safely
+    - **Once you have stored all your data safely, go to your Space Settings Tab**, scroll to the **Persistent storage** section, and select a paid storage tier.
+    - **Your Space will be restarted and existing data will be lost**. From now on, all the new data you create in Argilla will be kept safely.
     - **Recover your data**, by following the above mentioned guides.
+
+!!! tip "Disabling persistent storage after annotation work is complete"
+    Once your annotation project is finished and you have exported all your data, you can stop paying for persistent storage by going to your **Space Settings Tab**, scrolling to the **Persistent storage** section, and selecting **Ephemeral FREE**. Make sure to export all datasets before doing this, as the Space will restart and all data stored on disk will be lost.
 
 ## How to configure and disable OAuth access
 
