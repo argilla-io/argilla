@@ -90,7 +90,7 @@ class RGDatasetListener:
             def wrapper(*args, **kwargs):
                 try:
                     return job_func(*args, **kwargs)
-                except:  # noqa: E722
+                except Exception:  # noqa: E722
                     import traceback
 
                     print(traceback.format_exc())
@@ -221,7 +221,7 @@ class RGDatasetListener:
                 action_args.insert(0, argilla_v1.load(name=self.dataset, query=self.formatted_query))
             self._LOGGER.debug(f"Running action with arguments: {action_args}")
             return self.action(*args, *action_args, **kwargs)
-        except:  # noqa: E722
+        except Exception:  # noqa: E722
             import traceback
 
             print(traceback.format_exc())

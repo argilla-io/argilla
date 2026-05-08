@@ -53,7 +53,7 @@ release = version_
 try:
     version = ".".join(release.split(".")[0:2])
     release = version
-except:
+except Exception:
     version = ""
     release = ""
 
