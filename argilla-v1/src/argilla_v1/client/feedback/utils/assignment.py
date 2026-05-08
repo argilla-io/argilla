@@ -61,7 +61,7 @@ def check_workspace(workspace_to_check: str) -> Workspace:
     """
     try:
         workspace = Workspace.from_name(workspace_to_check)
-    except:
+    except Exception:
         workspace = Workspace.create(workspace_to_check)
     return workspace
 
@@ -238,7 +238,7 @@ def assign_workspaces(
                 for user_id in user_ids:
                     try:
                         workspace.add_user(user_id)
-                    except:
+                    except Exception:
                         pass
 
                 wk_assignments[workspace_name] = [User.from_id(user.id).username for user in workspace.users]
@@ -254,7 +254,7 @@ def assign_workspaces(
         for user_id in user_ids:
             try:
                 workspace.add_user(user_id)
-            except:
+            except Exception:
                 pass
 
         wk_assignments[workspace_name] = [User.from_id(user.id).username for user in workspace.users]

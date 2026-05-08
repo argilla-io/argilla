@@ -659,6 +659,6 @@ def is_on_huggingface(repo_id: str, is_model: bool = True) -> bool:
         else:
             dataset_info(repo_id)
         return True
-    except:
+    except Exception:
         # Fetching models can fail for many reasons: Repository not existing, no internet access, HF down, etc.
         return False
