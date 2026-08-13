@@ -24,6 +24,7 @@ These are the section headers that we use:
 
 - Fixed error when computing user progress with PostgreSQL database. ([#5795](https://github.com/argilla-io/argilla/pull/5795))
 - Fixed error when updating records with PostgreSQL database. ([#5795](https://github.com/argilla-io/argilla/pull/5795))
+- Fixed `GET /api/v1/status` returning 422 on the Elasticsearch backend, which also caused dataset cards to render empty in the UI. ([#5865](https://github.com/argilla-io/argilla/pull/5865)). Contributed by @St4r4x.
 
 ## [2.7.1](https://github.com/argilla-io/argilla/compare/v2.7.0...v2.7.1)
 
