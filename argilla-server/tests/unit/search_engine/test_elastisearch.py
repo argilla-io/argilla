@@ -60,3 +60,8 @@ class TestElasticSearchEngine:
 
         with pytest.raises(RequestError, match="resource_already_exists_exception"):
             await search_engine.create_index(dataset)
+
+    async def test_info_returns_plain_dict(self, search_engine: ElasticSearchEngine):
+        info = await search_engine.info()
+
+        assert isinstance(info, dict)
