@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+
 import pytest
 from argilla_server.search_engine import ElasticSearchEngine
 from argilla_server.search_engine.commons import es_index_name_for_dataset
@@ -20,6 +23,18 @@ from opensearchpy import OpenSearch
 
 from tests.factories import DatasetFactory, VectorSettingsFactory
 from tests.unit.search_engine.test_commons import refresh_dataset
+
+
+@pytest.mark.asyncio
+async def test_info_returns_plain_response_body():
+    engine = object.__new__(ElasticSearchEngine)
+    engine.client = SimpleNamespace(
+        info=AsyncMock(return_value=SimpleNamespace(body={"name": "test-node"})),
+    )
+
+    result = await engine.info()
+
+    assert result == {"name": "test-node"}
 
 
 @pytest.mark.asyncio

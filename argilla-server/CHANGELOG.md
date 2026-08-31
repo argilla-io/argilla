@@ -22,6 +22,7 @@ These are the section headers that we use:
 
 ### Fixed
 
+- Fixed the status endpoint response when using the Elasticsearch backend. ([#5864](https://github.com/argilla-io/argilla/issues/5864))
 - Fixed error when computing user progress with PostgreSQL database. ([#5795](https://github.com/argilla-io/argilla/pull/5795))
 - Fixed error when updating records with PostgreSQL database. ([#5795](https://github.com/argilla-io/argilla/pull/5795))
 
