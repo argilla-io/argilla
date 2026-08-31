@@ -69,7 +69,8 @@ class ElasticSearchEngine(BaseElasticAndOpenSearchEngine):
         return await self.client.ping()
 
     async def info(self) -> dict:
-        return await self.client.info()
+        response = await self.client.info()
+        return response.body
 
     def _mapping_for_vector_settings(self, vector_settings: VectorSettings) -> dict:
         return {
