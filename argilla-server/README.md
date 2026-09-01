@@ -73,7 +73,7 @@ These environment variables can be overridden if necessary so feel free to defin
 
 ### Run development server
 
-This single command prepares the development server to run locally. It does so by chaining commands to migrate the databse, create default users and launch the server on the right port.
+This single command prepares the development server to run locally. It does so by chaining commands to migrate the database, create default users and launch the server on the right port.
 
 ```sh
 pdm server-dev

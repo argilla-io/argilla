@@ -102,7 +102,7 @@ These guides provide step-by-step instructions for common scenarios, including d
 
     ---
 
-    Learn how Argilla webhooks are implented under the hood and the structure of the different events.
+    Learn how Argilla webhooks are implemented under the hood and the structure of the different events.
 
     [:octicons-arrow-right-24: How-to guide](webhooks_internals.md)
 

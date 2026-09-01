@@ -154,7 +154,7 @@ You can filter records based on the following fields:
 | `status`                | The record status, which can be `pending` or `completed`.                      | `("status", "==", "completed")`                                |
 | `response.status`       | The response status, which can be `draft`, `submitted`, or `discarded`.        | `("response.status", "==", "submitted")`                       |
 | `metadata.<name>`       | Filter by a metadata property                                                  | `("metadata.split", "==", "train")`                            |
-| `<question>.suggestion` | Filter by a question suggestion value                                          | `("label.sugggestion", "==", "positive")`                      |
+| `<question>.suggestion` | Filter by a question suggestion value                                          | `("label.suggestion", "==", "positive")`                       |
 | `<question>.score`      | Filter by a suggestion score                                                   | `("label.score", "<=", "0.9")`                                 |
 | `<question>.agent`      | Filter by a suggestion agent                                                   | `("label.agent", "<=", "ChatGPT4.0")`                          |
 | `<question>.response`   | Filter by a question response                                                  | `("label.response", "==", "negative")`                         |
@@ -207,7 +207,7 @@ filtered_records = dataset.records(similar_filter).to_list(flatten=True)
 
 !!! Note
     The `Similar` search expects a vector field definition as part of the dataset settings. If the dataset does not have a vector field, the search will return an error.
-    Vist the [Vectors](./dataset.md#vectors) section for more details on how to define a vector field.
+    Visit the [Vectors](./dataset.md#vectors) section for more details on how to define a vector field.
 
 ## Query and filter a dataset
 

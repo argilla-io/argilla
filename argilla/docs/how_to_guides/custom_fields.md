@@ -330,7 +330,7 @@ Besides the new `CustomField` code above, reusing the same approach as in the [U
 
 ## Updating templates
 
-As described in the [dataset guide](./dataset.md), you can update certain setting attributes for a published dataset. This includes the custom fields templates, which is a usefule feature when you want to iterate on the template of a custom field without the need to create a new dataset. The following example shows how to update the template of a custom field.
+As described in the [dataset guide](./dataset.md), you can update certain setting attributes for a published dataset. This includes the custom fields templates, which is a useful feature when you want to iterate on the template of a custom field without the need to create a new dataset. The following example shows how to update the template of a custom field.
 
 ```python
 dataset.settings.fields["custom"].template = "<new-template>"

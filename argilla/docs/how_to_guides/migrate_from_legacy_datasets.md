@@ -15,7 +15,7 @@ To follow this guide, you will need to have the following prerequisites:
 - The `argilla` sdk package installed in your environment.
 
 !!! warning
-    This guide will recreate all `User`'s' and `Workspace`'s' on a new server. Hence, they will be created with new passwords and IDs. If you want to keep the same passwords and IDs, you can can copy the datasets to a temporary v2 instance, then upgrade your current instance to v2.0 and copy the datasets back to your original instance after.
+    This guide will recreate all `User`'s' and `Workspace`'s' on a new server. Hence, they will be created with new passwords and IDs. If you want to keep the same passwords and IDs, you can copy the datasets to a temporary v2 instance, then upgrade your current instance to v2.0 and copy the datasets back to your original instance after.
 
 If your current legacy datasets are on a server with Argilla release after 1.29, you could chose to recreate your legacy datasets as new datasets on the same server. You could then upgrade the server to Argilla 2.0 and carry on working their. Your legacy datasets will not be visible on the new server, but they will remain in storage layers if you need to access them.
 
