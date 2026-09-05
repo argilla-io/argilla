@@ -126,7 +126,7 @@ Redis is used by Argilla to store information about jobs to be processed on back
 
 - `WORKSPACE`: If provided, the workspace name. If `USERNAME`, `PASSWORD` and `WORKSPACE` are provided, a default workspace will be created with this name (Default: `""`).
 
-- `API_KEY`: The default user api key to user. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
+- `API_KEY`: The default user api key to use. If API_KEY is not provided, a new random api key will be generated (Default: `""`).
 
 - `UVICORN_APP`: [Advanced] The name of the FastAPI app to run. This is useful when you want to extend the FastAPI app with additional routes or middleware. The default value is `argilla_server:app`.
 
