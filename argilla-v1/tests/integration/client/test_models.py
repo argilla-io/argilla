@@ -130,7 +130,7 @@ def test_token_classification_with_tokens_and_tags(tokens, tags, annotation):
 def test_token_classification_validations():
     with pytest.raises(
         AssertionError,
-        match=("Missing fields: " "At least one of `text` or `tokens` argument must be provided!"),
+        match=("Missing fields: At least one of `text` or `tokens` argument must be provided!"),
     ):
         TokenClassificationRecord()
 
@@ -138,13 +138,13 @@ def test_token_classification_validations():
     annotation = [("test", 0, 4)]
     with pytest.raises(
         AssertionError,
-        match=("Missing field `text`: " "char level spans must be provided with a raw text sentence"),
+        match=("Missing field `text`: char level spans must be provided with a raw text sentence"),
     ):
         TokenClassificationRecord(tokens=tokens, annotation=annotation)
 
     with pytest.raises(
         AssertionError,
-        match=("Missing field `text`: " "char level spans must be provided with a raw text sentence"),
+        match=("Missing field `text`: char level spans must be provided with a raw text sentence"),
     ):
         TokenClassificationRecord(tokens=tokens, prediction=annotation)
 

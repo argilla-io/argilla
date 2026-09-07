@@ -99,7 +99,11 @@ client = api.active_client()
 
 # This metadata key was used by the UI to store created labels in datasets
 CUSTOM_DATA_KEY = "rubrix.recogn.ai/ui/custom/userData.v1"
-datasets = [dataset for dataset in client.http_client.get("/api/datasets") if CUSTOM_DATA_KEY in dataset["metadata"]]
+datasets = [
+    dataset
+    for dataset in client.http_client.get("/api/datasets")
+    if CUSTOM_DATA_KEY in dataset["metadata"]
+]
 print(f"Found {len(datasets)} datasets to migrate")
 for ds in datasets:
     metadata = ds["metadata"]

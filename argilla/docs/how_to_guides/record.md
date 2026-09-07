@@ -15,22 +15,13 @@ A **record** in Argilla is a data item that requires annotation, consisting of o
     ```python
     rg.Record(
         external_id="1234",
-        fields={
-            "question": "Do you need oxygen to breathe?",
-            "answer": "Yes"
-        },
-        metadata={
-            "category": "A"
-        },
+        fields={"question": "Do you need oxygen to breathe?", "answer": "Yes"},
+        metadata={"category": "A"},
         vectors={
             "my_vector": [0.1, 0.2, 0.3],
         },
-        suggestions=[
-            rg.Suggestion("my_label", "positive", score=0.9, agent="model_name")
-        ],
-        responses=[
-            rg.Response("label", "positive", user_id=user_id)
-        ],
+        suggestions=[rg.Suggestion("my_label", "positive", score=0.9, agent="model_name")],
+        responses=[rg.Response("label", "positive", user_id=user_id)],
     )
     ```
     > Check the [Record - Python Reference](../reference/argilla/records/records.md) to see the attributes, arguments, and methods of the `Record` class in detail.
@@ -58,17 +49,11 @@ You can add records to a dataset in two different ways: either by using a dictio
 
     records = [
         rg.Record(
-            fields={
-                "question": "Do you need oxygen to breathe?",
-                "answer": "Yes"
-            },
+            fields={"question": "Do you need oxygen to breathe?", "answer": "Yes"},
         ),
         rg.Record(
-            fields={
-                "question": "What is the boiling point of water?",
-                "answer": "100 degrees Celsius"
-            },
-        ), # (1)
+            fields={"question": "What is the boiling point of water?", "answer": "100 degrees Celsius"},
+        ),  # (1)
     ]
 
     dataset.records.log(records)
@@ -100,7 +85,7 @@ You can add records to a dataset in two different ways: either by using a dictio
         {
             "question": "What is the boiling point of water?",
             "answer": "100 degrees Celsius",
-        }, # (1)
+        },  # (1)
     ]
     dataset.records.log(data)
 
@@ -115,7 +100,7 @@ You can add records to a dataset in two different ways: either by using a dictio
             "response": "100 degrees Celsius",
         },
     ]
-    dataset.records.log(data, mapping={"query": "question", "response": "answer"}) # (2)
+    dataset.records.log(data, mapping={"query": "question", "response": "answer"})  # (2)
     ```
 
     1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
@@ -132,9 +117,9 @@ You can add records to a dataset in two different ways: either by using a dictio
     from datasets import load_dataset
 
     client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
-    dataset = client.datasets(name="my_dataset") # (1)
+    dataset = client.datasets(name="my_dataset")  # (1)
 
-    hf_dataset = load_dataset("imdb", split="train[:100]") # (2)
+    hf_dataset = load_dataset("imdb", split="train[:100]")  # (2)
 
     dataset.records.log(records=hf_dataset)
     ```
@@ -146,9 +131,7 @@ You can add records to a dataset in two different ways: either by using a dictio
     If the Hugging Face dataset's schema does not correspond to your Argilla dataset field names, you can use a `mapping` to specify the relationship. You should indicate as key the column name of the Hugging Face dataset and, as value, the field name of the Argilla dataset.
 
     ```python
-    dataset.records.log(
-        records=hf_dataset, mapping={"text": "review", "label": "sentiment"}
-    ) # (1)
+    dataset.records.log(records=hf_dataset, mapping={"text": "review", "label": "sentiment"})  # (1)
     ```
 
     3. In this case, the `text` key in the Hugging Face dataset would correspond to the `review` field in the Argilla dataset, and the `label` key in the Hugging Face dataset would correspond to the `sentiment` field in the Argilla dataset.
@@ -161,9 +144,7 @@ Fields are the main pieces of information of the record. These are shown at firs
     Text fields expect input in the form of a `string`.
 
     ```python
-    record = rg.Record(
-        fields={"text": "Hello World, how are you?"}
-    )
+    record = rg.Record(fields={"text": "Hello World, how are you?"})
     ```
 
 === "Image"
@@ -173,15 +154,9 @@ Fields are the main pieces of information of the record. These are shown at firs
 
     ```python
     records = [
-        rg.Record(
-            fields={"image": "https://example.com/image.jpg"}
-        ),
-        rg.Record(
-            fields={"image": "path/to/image.jpg"}
-        ),
-        rg.Record(
-            fields={"image": Image.open("path/to/image.jpg")}
-        ),
+        rg.Record(fields={"image": "https://example.com/image.jpg"}),
+        rg.Record(fields={"image": "path/to/image.jpg"}),
+        rg.Record(fields={"image": Image.open("path/to/image.jpg")}),
     ]
     ```
 
@@ -193,7 +168,10 @@ Fields are the main pieces of information of the record. These are shown at firs
         fields={
             "chat": [
                 {"role": "user", "content": "What is Argilla?"},
-                {"role": "assistant", "content": "Argilla is a collaboration tool for AI engineers and domain experts to build high-quality datasets"},
+                {
+                    "role": "assistant",
+                    "content": "Argilla is a collaboration tool for AI engineers and domain experts to build high-quality datasets",
+                },
             ]
         }
     )
@@ -203,9 +181,7 @@ Fields are the main pieces of information of the record. These are shown at firs
     Custom fields expect a dictionary with the keys and values you define in the dataset settings. You need to ensure these are aligned with `CustomField.template` in order for them to be rendered in the UI.
 
     ```python
-    record = rg.Record(
-        fields={"custom": {"key": "value"}}
-    )
+    record = rg.Record(fields={"custom": {"key": "value"}})
     ```
 
 ### Metadata
@@ -225,17 +201,11 @@ Record metadata can include any information about the record that is not part of
     # Add records to the dataset with the metadata 'category'
     records = [
         rg.Record(
-            fields={
-                "question": "Do you need oxygen to breathe?",
-                "answer": "Yes"
-            },
+            fields={"question": "Do you need oxygen to breathe?", "answer": "Yes"},
             metadata={"my_metadata": "option_1"},
         ),
         rg.Record(
-            fields={
-                "question": "What is the boiling point of water?",
-                "answer": "100 degrees Celsius"
-            },
+            fields={"question": "What is the boiling point of water?", "answer": "100 degrees Celsius"},
             metadata={"my_metadata": "option_1"},
         ),
     ]
@@ -280,22 +250,12 @@ You can associate vectors, like text embeddings, to your records. They can be us
     # Add records to the dataset with the vector 'my_vector' and dimension=3
     records = [
         rg.Record(
-            fields={
-                "question": "Do you need oxygen to breathe?",
-                "answer": "Yes"
-            },
-            vectors={
-                "my_vector": [0.1, 0.2, 0.3]
-            },
+            fields={"question": "Do you need oxygen to breathe?", "answer": "Yes"},
+            vectors={"my_vector": [0.1, 0.2, 0.3]},
         ),
         rg.Record(
-            fields={
-                "question": "What is the boiling point of water?",
-                "answer": "100 degrees Celsius"
-            },
-            vectors={
-                "my_vector": [0.2, 0.5, 0.3]
-            },
+            fields={"question": "What is the boiling point of water?", "answer": "100 degrees Celsius"},
+            vectors={"my_vector": [0.2, 0.5, 0.3]},
         ),
     ]
     dataset.records.log(records)
@@ -338,32 +298,12 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
     # Add records to the dataset with the label 'my_label'
     records = [
         rg.Record(
-            fields={
-                "question": "Do you need oxygen to breathe?",
-                "answer": "Yes"
-            },
-            suggestions=[
-                rg.Suggestion(
-                    "my_label",
-                    "positive",
-                    score=0.9,
-                    agent="model_name"
-                )
-            ],
+            fields={"question": "Do you need oxygen to breathe?", "answer": "Yes"},
+            suggestions=[rg.Suggestion("my_label", "positive", score=0.9, agent="model_name")],
         ),
         rg.Record(
-            fields={
-                "question": "What is the boiling point of water?",
-                "answer": "100 degrees Celsius"
-            },
-            suggestions=[
-                rg.Suggestion(
-                    "my_label",
-                    "negative",
-                    score=0.9,
-                    agent="model_name"
-                )
-            ],
+            fields={"question": "What is the boiling point of water?", "answer": "100 degrees Celsius"},
+            suggestions=[rg.Suggestion("my_label", "negative", score=0.9, agent="model_name")],
         ),
     ]
     dataset.records.log(records)
@@ -375,7 +315,7 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 
     ```python
     # Add records to the dataset with the label question 'my_label'
-    data =  [
+    data = [
         {
             "question": "Do you need oxygen to breathe?",
             "answer": "Yes",
@@ -419,22 +359,12 @@ If your dataset includes some annotations, you can add those to the records as y
     # Add records to the dataset with the label 'my_label'
     records = [
         rg.Record(
-            fields={
-                "question": "Do you need oxygen to breathe?",
-                "answer": "Yes"
-            },
-            responses=[
-                rg.Response("my_label", "positive", user_id=user.id)
-            ]
+            fields={"question": "Do you need oxygen to breathe?", "answer": "Yes"},
+            responses=[rg.Response("my_label", "positive", user_id=user.id)],
         ),
         rg.Record(
-            fields={
-                "question": "What is the boiling point of water?",
-                "answer": "100 degrees Celsius"
-            },
-            responses=[
-                rg.Response("my_label", "negative", user_id=user.id)
-            ]
+            fields={"question": "What is the boiling point of water?", "answer": "100 degrees Celsius"},
+            responses=[rg.Response("my_label", "negative", user_id=user.id)],
         ),
     ]
     dataset.records.log(records)
@@ -466,12 +396,7 @@ If your dataset includes some annotations, you can add those to the records as y
 To list records in a dataset, you can use the `records` method on the `Dataset` object. This method returns a list of `Record` objects that can be iterated over to access the record properties.
 
 ```python
-for record in dataset.records(
-    with_suggestions=True,
-    with_responses=True,
-    with_vectors=True
-):
-
+for record in dataset.records(with_suggestions=True, with_responses=True, with_vectors=True):
     # Access the record properties
     print(record.metadata)
     print(record.vectors)
@@ -511,7 +436,6 @@ dataset.records.log(records=updated_data)
     updated_records = []
 
     for record in dataset.records():
-
         record.metadata["my_metadata"] = "new_value"
         record.metadata["my_new_metadata"] = "new_value"
 
@@ -527,9 +451,8 @@ dataset.records.log(records=updated_data)
     updated_records = []
 
     for record in dataset.records(with_vectors=True):
-
-        record.vectors["my_vector"] = [ 0, 1, 2, 3, 4, 5 ]
-        record.vectors["my_new_vector"] = [ 0, 1, 2, 3, 4, 5 ]
+        record.vectors["my_vector"] = [0, 1, 2, 3, 4, 5]
+        record.vectors["my_new_vector"] = [0, 1, 2, 3, 4, 5]
 
         updated_records.append(record)
 
@@ -546,7 +469,6 @@ dataset.records.log(records=updated_data)
     updated_records = []
 
     for record in dataset.records(with_suggestions=True):
-
         # We can update existing suggestions
         record.suggestions["label"].value = "new_value"
         record.suggestions["label"].score = 0.9
@@ -554,9 +476,7 @@ dataset.records.log(records=updated_data)
 
         # We can also add new suggestions with the `add` method:
         if not record.suggestions["label"]:
-            record.suggestions.add(
-                rg.Suggestion("value", "label", score=0.9, agent="model_name")
-            )
+            record.suggestions.add(rg.Suggestion("value", "label", score=0.9, agent="model_name"))
 
         updated_records.append(record)
 
@@ -573,12 +493,10 @@ dataset.records.log(records=updated_data)
     updated_records = []
 
     for record in dataset.records(with_responses=True):
-
         for response in record.responses["label"]:
-
             if response:
-                    response.value = "new_value"
-                    response.user_id = "existing_user_id"
+                response.value = "new_value"
+                response.user_id = "existing_user_id"
 
             else:
                 record.responses.add(rg.Response("label", "YES", user_id=user.id))
@@ -603,9 +521,7 @@ dataset.records.delete(records=records_to_delete)
     > For more information about the query syntax, check this [how-to guide](query.md).
 
     ```python
-    status_filter = rg.Query(
-        filter = rg.Filter(("response.status", "==", "pending"))
-    )
+    status_filter = rg.Query(filter=rg.Filter(("response.status", "==", "pending")))
     records_to_delete = list(dataset.records(status_filter))
 
     dataset.records.delete(records_to_delete)

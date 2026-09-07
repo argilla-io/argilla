@@ -24,7 +24,10 @@ questions = [
         name="response_ranking",
         title="Order the responses based on their accuracy and helpfulness:",
         required=True,
-        values={"response-1": "Response 1", "response-2": "Response 2"} # or ["response-1", "response-2"]
+        values={
+            "response-1": "Response 1",
+            "response-2": "Response 2",
+        },  # or ["response-1", "response-2"]
     )
 ]
 ```
@@ -40,7 +43,7 @@ questions = [
         name="response_ranking",
         title="Select the most accurate and helpful response (1) or (2). If both are equal select (0):",
         required=True,
-        values=[0, 1, 2]
+        values=[0, 1, 2],
     )
 ]
 ```
@@ -52,7 +55,7 @@ The dataset consists of **records**. Each **record** is a data point that can be
 fields = [
     rg.TextField(name="prompt", required=True),
     rg.TextField(name="response-1", required=True),
-    rg.TextField(name="response-2", required=True)
+    rg.TextField(name="response-2", required=True),
 ]
 ```
 
@@ -62,7 +65,7 @@ Next, define **guidelines** for labelers. These instructions help labelers under
 dataset = rg.FeedbackDataset(
     guidelines="Please, read the prompt carefully and...",
     questions=questions,
-    fields=fields
+    fields=fields,
 )
 ```
 
@@ -115,7 +118,13 @@ for record in prompts:
     )
     responses = [output["generated_text"] for output in outputs]
 
-    record = rg.FeedbackRecord(fields={"prompt": prompt, "response 1": responses[0], "response 2": responses[1]})
+    record = rg.FeedbackRecord(
+        fields={
+            "prompt": prompt,
+            "response 1": responses[0],
+            "response 2": responses[1],
+        }
+    )
     records.append(record)
 
 # Add records to the dataset
@@ -173,10 +182,7 @@ Once you've distributed the labeling tasks and collected the responses from labe
 
 ```python
 # Assume we distribute the workload in one dataset across multiple labelers
-feedback = rg.FeedbackDataset.from_argilla(
-    name="my-dataset",
-    workspace="my-workspace"
-)
+feedback = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
 ```
 
 If your work distribution strategy requires gathering responses from multiple datasets and workspaces, you'll need to retrieve and consolidate responses from each source. For example, if the task was divided among four labelers, here's how you can retrieve their responses:
@@ -189,10 +195,7 @@ user_workspaces = ["natalia", "amelie", "tom", "dani"]
 feedback_datasets = []
 
 for workspace in user_workspaces:
-    feedback = rg.FeedbackDataset.from_argilla(
-        name="my-dataset",
-        workspace=workspace
-    )
+    feedback = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace=workspace)
     feedback_datasets.append(feedback)
 ```
 
@@ -227,18 +230,20 @@ for record in feedback.records:
     # Ensure the response has been submitted (not discarded)
     response = record.responses[0]
 
-    if response.status == 'submitted':
+    if response.status == "submitted":
         # Get the ranking value from the response for the preferred and least preferred
         # responses, assuming there are no ties
         preferred_rank = response.values["response_ranking"].value[0]["value"]
         least_preferred_rank = response.values["response_ranking"].value[1]["value"]
 
         # Construct the triplet and append to the list
-        triplets.append({
-            "prompt": record.fields["prompt"],
-            "preferred_response": record.fields[preferred_rank],
-            "least_preferred_response": record.fields[least_preferred_rank],
-        })
+        triplets.append(
+            {
+                "prompt": record.fields["prompt"],
+                "preferred_response": record.fields[preferred_rank],
+                "least_preferred_response": record.fields[least_preferred_rank],
+            }
+        )
 
 # Now, "triplets" is a list of dictionaries, each containing a prompt and the associated
 # preferred and less preferred responses

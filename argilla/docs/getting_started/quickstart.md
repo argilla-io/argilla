@@ -128,10 +128,7 @@ To start interacting with your Argilla server, you need to instantiate a client 
 ```python
 import argilla as rg
 
-client = rg.Argilla(
-    api_url="<api_url>",
-    api_key="<api_key>"
-)
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 ```
 
 !!! info "You can't find your API URL"

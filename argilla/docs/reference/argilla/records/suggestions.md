@@ -18,7 +18,7 @@ dataset.records.log(
     [
         {
             "text": "Hello World, how are you?",
-            "label": "negative", # this will be used as a suggestion
+            "label": "negative",  # this will be used as a suggestion
         },
     ]
 )
@@ -71,10 +71,8 @@ We can also add suggestions to records as we iterate over them using the `add` m
 
 ```python
 for record in dataset.records(with_suggestions=True):
-    if not record.suggestions["label"]: # (1)
-        record.suggestions.add(
-            rg.Suggestion("positive", "label", score=0.9, agent="model_name")
-        ) # (2)
+    if not record.suggestions["label"]:  # (1)
+        record.suggestions.add(rg.Suggestion("positive", "label", score=0.9, agent="model_name"))  # (2)
 ```
 
 1. Validate that the record has a suggestion
@@ -87,67 +85,37 @@ Depending on the `Question` type, responses might need to be formatted in a slig
 === "For `LabelQuestion`"
 
     ```python
-    rg.Suggestion(
-        question_name="label",
-        value="positive",
-        score=0.9,
-        agent="model_name"
-    )
+    rg.Suggestion(question_name="label", value="positive", score=0.9, agent="model_name")
     ```
 
 === "For `MultiLabelQuestion`"
 
     ```python
-    rg.Suggestion(
-        question_name="multi-label",
-        value=["positive", "negative"],
-        score=0.9,
-        agent="model_name"
-    )
+    rg.Suggestion(question_name="multi-label", value=["positive", "negative"], score=0.9, agent="model_name")
     ```
 
 === "For `RankingQuestion`"
 
     ```python
-    rg.Suggestion(
-        question_name="rank",
-        value=["1", "3", "2"],
-        score=0.9,
-        agent="model_name"
-    )
+    rg.Suggestion(question_name="rank", value=["1", "3", "2"], score=0.9, agent="model_name")
     ```
 
 === "For `RatingQuestion`"
 
     ```python
-    rg.Suggestion(
-        question_name="rating",
-        value=4,
-        score=0.9,
-        agent="model_name"
-    )
+    rg.Suggestion(question_name="rating", value=4, score=0.9, agent="model_name")
     ```
 
 === "For `SpanQuestion`"
 
     ```python
-    rg.Suggestion(
-        question_name="span",
-        value=[{"start": 0, "end": 9, "label": "MISC"}],
-        score=0.9,
-        agent="model_name"
-    )
+    rg.Suggestion(question_name="span", value=[{"start": 0, "end": 9, "label": "MISC"}], score=0.9, agent="model_name")
     ```
 
 === "For `TextQuestion`"
 
     ```python
-    rg.Suggestion(
-        question_name="text",
-        value="value",
-        score=0.9,
-        agent="model_name"
-    )
+    rg.Suggestion(question_name="text", value="value", score=0.9, agent="model_name")
     ```
 
 ---

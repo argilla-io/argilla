@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from dataclasses import fields, dataclass
+from dataclasses import dataclass, fields
 from typing import Type, TypeVar
 
 __all__ = ["dataclass_instance_from_dict"]

@@ -36,12 +36,8 @@ records = [...]
 
 ```python
 from argilla.client.feedback.utils import assign_records
-assignments = assign_records(
-    users=users,
-    records=records,
-    overlap=1,
-    shuffle=True
-)
+
+assignments = assign_records(users=users, records=records, overlap=1, shuffle=True)
 ```
 
 3. Assign the records by pushing a dataset to their corresponding workspaces. For this, you can use `assign_workspaces` that will check if there exists the workspace or create it if needed. You can specify the parameters by providing the following arguments:
@@ -52,10 +48,7 @@ assignments = assign_records(
 ```python
 from argilla.client.feedback.utils import assign_workspaces
 
-assignments = assign_workspaces(
-    assignments=assignments,
-    workspace_type="individual"
-)
+assignments = assign_workspaces(assignments=assignments, workspace_type="individual")
 
 for username, records in assignments.items():
     dataset = rg.FeedbackDataset(
@@ -63,7 +56,7 @@ for username, records in assignments.items():
         questions=questions,
         metadata_properties=metadata_properties,
         vector_settings=vector_settings,
-        guidelines=guidelines
+        guidelines=guidelines,
     )
     dataset.add_records(records)
     remote_dataset = dataset.push_to_argilla(name="my_dataset", workspace=username)
@@ -130,11 +123,7 @@ for user in users:
         workspace.add_user(user.id)
 
     # Log the records in their personal workspace
-    rg.log(
-        records=records,
-        workspace=workspace,
-        name='my_dataset'
-    )
+    rg.log(records=records, workspace=workspace, name="my_dataset")
 ```
 
 ### Controlled overlap
@@ -151,9 +140,5 @@ for user, records in assignments.items():
         user = rg.User.from_name(user.username)
         workspace.add_user(user.id)
     # Log the records in their personal workspace
-    rg.log(
-        records=records,
-        workspace=workspace,
-        name="my_dataset"
-    )
+    rg.log(records=records, workspace=workspace, name="my_dataset")
 ```

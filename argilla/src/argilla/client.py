@@ -30,7 +30,7 @@ from argilla._helpers._resource_repr import NotebookHTMLReprMixin, ResourceHTMLR
 from argilla._models import DatasetModel, ResourceModel, UserModel, WorkspaceModel
 
 if TYPE_CHECKING:
-    from argilla import Dataset, User, Workspace, Webhook
+    from argilla import Dataset, User, Webhook, Workspace
 
 __all__ = ["Argilla"]
 
@@ -130,12 +130,10 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
     @overload
     def __call__(self, username: str) -> Optional["User"]:
         """Get a user by username if exists. Otherwise, returns `None`"""
-        ...
 
     @overload
     def __call__(self, id: Union[UUID, str]) -> Optional["User"]:
         """Get a user by id if exists. Otherwise, returns `None`"""
-        ...
 
     def __call__(self, username: str = None, id: Union[str, UUID] = None) -> Optional["User"]:
         if not (username or id):
@@ -147,7 +145,7 @@ class Users(Sequence["User"], ResourceHTMLReprMixin):
         if id is not None:
             model = _get_model_by_id(self._api, id)
             if model:
-                return self._from_model(model)  # noqa
+                return self._from_model(model)
             warnings.warn(f"User with id {id!r} not found.")
         else:
             for model in self._api.list():
@@ -226,12 +224,10 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
     @overload
     def __call__(self, name: str) -> Optional["Workspace"]:
         """Get a workspace by name if exists. Otherwise, returns `None`"""
-        ...
 
     @overload
     def __call__(self, id: Union[UUID, str]) -> Optional["Workspace"]:
         """Get a workspace by id if exists. Otherwise, returns `None`"""
-        ...
 
     def __call__(self, name: str = None, id: Union[UUID, str] = None) -> Optional["Workspace"]:
         if not (name or id):
@@ -244,12 +240,12 @@ class Workspaces(Sequence["Workspace"], ResourceHTMLReprMixin):
         if id is not None:
             model = _get_model_by_id(self._api, id)
             if model:
-                return self._from_model(model)  # noqa
+                return self._from_model(model)
             warnings.warn(f"Workspace with id {id!r} not found")
         else:
             for model in self._api.list():
                 if model.name == name:
-                    return self._from_model(model)  # noqa
+                    return self._from_model(model)
             warnings.warn(f"Workspace with name {name!r} not found.")
 
     def __iter__(self):
@@ -323,12 +319,10 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
     @overload
     def __call__(self, name: str, workspace: Optional[Union["Workspace", str]] = None) -> Optional["Dataset"]:
         """Get a dataset by name and workspace if exists. Otherwise, returns `None`"""
-        ...
 
     @overload
     def __call__(self, id: Union[UUID, str]) -> Optional["Dataset"]:
         """Get a dataset by id if exists. Otherwise, returns `None`"""
-        ...
 
     def __call__(
         self, name: str = None, workspace: Optional[Union["Workspace", str]] = None, id: Union[UUID, str] = None
@@ -343,7 +337,7 @@ class Datasets(Sequence["Dataset"], ResourceHTMLReprMixin):
         if id is not None:
             model = _get_model_by_id(self._api, id)
             if model:
-                return self._from_model(model)  # noqa
+                return self._from_model(model)
             warnings.warn(f"Dataset with id {id!r} not found")
         else:
             workspace = workspace or self._client.workspaces.default
@@ -419,7 +413,7 @@ class Webhooks(Sequence["Webhook"], ResourceHTMLReprMixin):
 
         model = _get_model_by_id(self._api, id)
         if model:
-            return self._from_model(model)  # noqa
+            return self._from_model(model)
         warnings.warn(f"Webhook with id {id!r} not found")
 
     def __iter__(self):

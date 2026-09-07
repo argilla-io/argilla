@@ -230,7 +230,7 @@ class FeedbackDataset(
         """
         if len(self._records) < 1:
             raise RuntimeError(
-                "In order to get items from `FeedbackDataset` you need to add them first" " with `add_records`."
+                "In order to get items from `FeedbackDataset` you need to add them first with `add_records`."
             )
         if isinstance(key, int) and len(self._records) < key:
             raise IndexError(f"This dataset contains {len(self)} records, so index {key} is out of range.")
@@ -331,8 +331,7 @@ class FeedbackDataset(
 
         if not self.vectors_settings:
             raise ValueError(
-                "The current `FeedbackDataset` does not contain any `vectors_settings` defined, so"
-                " none can be deleted."
+                "The current `FeedbackDataset` does not contain any `vectors_settings` defined, so none can be deleted."
             )
 
         if not all(vector_setting in self._vectors_settings.keys() for vector_setting in vectors_settings):

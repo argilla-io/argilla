@@ -53,7 +53,7 @@ sample_questions = [
             "PERSON": "Person",
             "ORG": "Organization",
             "LOC": "Location",
-            "MISC": "Miscellaneous"
+            "MISC": "Miscellaneous",
         },  # or ["PERSON", "ORG", "LOC", "MISC"]
         title="Select the entities in the text",
         description="Select the entities in the text",
@@ -76,20 +76,20 @@ sample_questions = [
             "pii": "Personal information",
             "untruthful": "False information",
             "not_english": "Not English",
-            "inappropriate": "Inappropriate content"
+            "inappropriate": "Inappropriate content",
         },  # or ["hate", "sexual", "violent", "pii", "untruthful", "not_english", "inappropriate"]
         title="Does the response contain any of the following?",
         description="Select all applicable options.",
         required=True,
         visible_labels=3,
-        labels_order="natural"
+        labels_order="natural",
     ),
     rg.RankingQuestion(
         name="question4",
         values={
             "reply-1": "Answer 1",
             "reply-2": "Answer 2",
-            "reply-3": "Answer 3"
+            "reply-3": "Answer 3",
         },  # or ["reply-1", "reply-2", "reply-3"]
         title="Rank the answers by your preference",
         description="1 = best, 3 = worst. Equal ratings are allowed.",
@@ -107,8 +107,8 @@ sample_questions = [
         title="Please provide your feedback on the answer",
         description="Please provide your feedback on the answer",
         required=True,
-        use_markdown=True
-    )
+        use_markdown=True,
+    ),
 ]
 
 sample_fields = [
@@ -147,17 +147,22 @@ new_dataset = rg.Dataset(
 )
 new_dataset.create()
 
+
 def fix_record():
     return rg.Record(
         fields={
             "chat": [
                 {"role": "user", "content": "What is Argilla?"},
-                {"role": "assistant", "content": "Argilla is a collaboration tool for AI engineers and domain experts to build high-quality datasets"},
+                {
+                    "role": "assistant",
+                    "content": "Argilla is a collaboration tool for AI engineers and domain experts to build high-quality datasets",
+                },
             ],
             "image": "https://images.unsplash.com/photo-1523567353-71ea31cb9f73?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGNvcmdpfGVufDB8fDB8fHww",
             "text": "Which town has a greater population as of the 2010 census, Minden, Nevada or Gardnerville, Nevada?",
         },
     )
+
 
 new_records = [fix_record() for _ in range(10)]
 new_dataset.records.log(new_records)
