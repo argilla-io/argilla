@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import warnings
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
-from uuid import UUID
+from collections.abc import Iterable, Sequence
 from enum import Enum
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from uuid import UUID
 
 from tqdm import tqdm
 
 from argilla._api import RecordsAPI
+from argilla._exceptions import RecordsIngestionError
 from argilla._helpers import LoggingMixin
 from argilla._models import RecordModel
-from argilla._exceptions import RecordsIngestionError
 from argilla.client import Argilla
 from argilla.records._io import GenericIO, HFDataset, HFDatasetsIO, JsonIO
 from argilla.records._mapping import IngestedRecordMapper

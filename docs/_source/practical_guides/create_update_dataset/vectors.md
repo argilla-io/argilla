@@ -18,15 +18,12 @@ To use the similarity search in the UI and the Python SDK, you will need to conf
 
 ```python
 vectors_settings = [
-    rg.VectorSettings(
-        name="my_vector",
-        dimensions=768
-    ),
+    rg.VectorSettings(name="my_vector", dimensions=768),
     rg.VectorSettings(
         name="my_other_vector",
-        title="Another Vector", # optional
-        dimensions=768
-    )
+        title="Another Vector",  # optional
+        dimensions=768,
+    ),
 ]
 ```
 
@@ -37,9 +34,7 @@ For an end-to-end example, check our [tutorial on adding vectors](/tutorials_and
 
 ```python
 vector_settings = rg.VectorSettings(
-    name="sentence_embeddings",
-    title="Sentence Embeddings",
-    dimensions=384
+    name="sentence_embeddings", title="Sentence Embeddings", dimensions=384
 )
 dataset.add_vector_settings(vector_settings)
 ```
@@ -86,8 +81,7 @@ Vectors should have the following format `List[float]`. If you are using numpy a
 
 ```python
 record = rg.FeedbackRecord(
-    fields={...},
-    vectors={"my_vector": [...], "my_other_vector": [...]}
+    fields={...}, vectors={"my_vector": [...], "my_other_vector": [...]}
 )
 ```
 
@@ -140,9 +134,11 @@ For a practical example, check our [tutorial on adding sentence transformer embe
 This can be used to update the dataset and configuration with `VectorSettings` for `Fields` in a `FeedbackDataset` or a `RemoteFeedbackDataset`.
 
 ```python
-from argilla.client.feedback.integrations.sentencetransformers import SentenceTransformersExtractor
+from argilla.client.feedback.integrations.sentencetransformers import (
+    SentenceTransformersExtractor,
+)
 
-dataset = ... # FeedbackDataset or RemoteFeedbackDataset
+dataset = ...  # FeedbackDataset or RemoteFeedbackDataset
 
 tde = SentenceTransformersExtractor(
     model="TaylorAI/bge-micro-v2",
@@ -151,9 +147,9 @@ tde = SentenceTransformersExtractor(
 
 dataset = tde.update_dataset(
     dataset=dataset,
-    fields=None, # None means using all fields
-    update_records=True, # Also, update the records in the dataset
-    overwrite=False, # Whether to overwrite existing vectors
+    fields=None,  # None means using all fields
+    update_records=True,  # Also, update the records in the dataset
+    overwrite=False,  # Whether to overwrite existing vectors
 )
 ```
 :::
@@ -194,11 +190,8 @@ You can add vectors to a `TextClassificationRecord`, `TokenClassificationRecord`
 
 ```python
 record = rg.TokenClassificationRecord(
-    text = "Michael is a professor at Harvard",
-    tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
-    vectors = {
-        "bert_base_uncased": [3.2, 4.5, 5.6, 8.9]
-        }
+    text="Michael is a professor at Harvard",
+    tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
+    vectors={"bert_base_uncased": [3.2, 4.5, 5.6, 8.9]},
 )
-
 ```

@@ -13,17 +13,17 @@
 # limitations under the License.
 
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Union, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
-from datasets import Dataset as HFDataset, Sequence
-from datasets import Image, ClassLabel, Value
+from datasets import ClassLabel, Image, Sequence, Value
+from datasets import Dataset as HFDataset
 
 from argilla._helpers._media import pil_to_data_uri, uncast_image
 from argilla.records._io._generic import GenericIO
 
 if TYPE_CHECKING:
-    from argilla.records import Record
     from argilla.datasets import Dataset
+    from argilla.records import Record
     from argilla.records._mapping import IngestedRecordMapper
 
 
@@ -263,8 +263,7 @@ class HFDatasetsIO:
         if id_column_name not in hf_dataset.column_names:
             split = hf_dataset.split
             warnings.warn(
-                message="Record id column not found in Hugging Face dataset. "
-                "Using row index and split for record ids.",
+                message="Record id column not found in Hugging Face dataset. Using row index and split for record ids.",
             )
 
             hf_dataset = hf_dataset.map(

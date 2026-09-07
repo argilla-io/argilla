@@ -422,7 +422,7 @@ class TRLModelCardData(FrameworkCardData):
                     )
                     return tokenizer.decode(outputs[0])
 
-                generate("{self.output_dir.replace('"', '')}", "Is a toad a frog?")"""
+                generate("{self.output_dir.replace('"', "")}", "Is a toad a frog?")"""
             )
         elif self.task_type == "for_reward_modeling":
             return predict_call + dedent(

@@ -46,7 +46,7 @@ trainer.train(output_dir={{ output_dir }})
 You can test the type of predictions of this model like so:
 
 ```python
-{{ predict_call }}
+{{predict_call}}
 ```
 
 ## Model Details

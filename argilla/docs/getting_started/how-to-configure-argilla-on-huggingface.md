@@ -103,11 +103,7 @@ import argilla as rg
 
 HF_TOKEN = "..."
 
-client = rg.Argilla(
-    api_url="<api_url>",
-    api_key="<api_key>",
-    headers={"Authorization": f"Bearer {HF_TOKEN}"}
-)
+client = rg.Argilla(api_url="<api_url>", api_key="<api_key>", headers={"Authorization": f"Bearer {HF_TOKEN}"})
 ```
 
 ## Space Secrets overview
