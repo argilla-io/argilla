@@ -17,7 +17,9 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
+from argilla_server.api.policies.v1 import MetadataPropertyPolicy, authorize
 from argilla_server.api.schemas.v1.records import (
     FilterScope,
     MetadataFilterScope,
@@ -26,22 +28,25 @@ from argilla_server.api.schemas.v1.records import (
 )
 from argilla_server.api.schemas.v1.responses import ResponseFilterScope
 from argilla_server.api.schemas.v1.suggestions import SuggestionFilterScope
-from argilla_server.models import MetadataProperty, Question, Suggestion, Dataset
+from argilla_server.errors.future import NotFoundError
+from argilla_server.models import MetadataProperty, Question, Suggestion, Dataset, User
 
 
 class SearchRecordsQueryValidator:
     @classmethod
-    async def validate(cls, db: AsyncSession, dataset: Dataset, query: SearchRecordsQuery) -> None:
+    async def validate(cls, db: AsyncSession, dataset: Dataset, query: SearchRecordsQuery, user: User) -> None:
         if query.filters:
             for filter in query.filters.and_:
-                await cls._validate_filter_scope(db, dataset, filter.scope)
+                await cls._validate_filter_scope(db, dataset, filter.scope, user)
 
         if query.sort:
             for order in query.sort:
-                await cls._validate_filter_scope(db, dataset, order.scope)
+                await cls._validate_filter_scope(db, dataset, order.scope, user)
 
     @classmethod
-    async def _validate_filter_scope(cls, db: AsyncSession, dataset: Dataset, filter_scope: FilterScope) -> None:
+    async def _validate_filter_scope(
+        cls, db: AsyncSession, dataset: Dataset, filter_scope: FilterScope, user: User
+    ) -> None:
         if isinstance(filter_scope, RecordFilterScope):
             return
         elif isinstance(filter_scope, ResponseFilterScope):
@@ -49,7 +54,7 @@ class SearchRecordsQueryValidator:
         elif isinstance(filter_scope, SuggestionFilterScope):
             await cls._validate_suggestion_filter_scope(db, dataset, filter_scope)
         elif isinstance(filter_scope, MetadataFilterScope):
-            await cls._validate_metadata_filter_scope(db, dataset, filter_scope)
+            await cls._validate_metadata_filter_scope(db, dataset, filter_scope, user)
         else:
             raise ValueError(f"Unknown filter scope entity `{filter_scope.entity}`")
 
@@ -70,17 +75,35 @@ class SearchRecordsQueryValidator:
 
     @staticmethod
     async def _validate_metadata_filter_scope(
-        db: AsyncSession, dataset: Dataset, filter_scope: MetadataFilterScope
+        db: AsyncSession, dataset: Dataset, filter_scope: MetadataFilterScope, user: User
     ) -> None:
-        await MetadataProperty.get_by_or_raise(
-            db,
-            name=filter_scope.metadata_property,
-            dataset_id=dataset.id,
+        # Load the property with its dataset eagerly: the policy action reads
+        # metadata_property.dataset.workspace_id, which would otherwise lazy-load
+        # outside an awaitable context.
+        result = await db.execute(
+            select(MetadataProperty)
+            .filter_by(name=filter_scope.metadata_property, dataset_id=dataset.id)
+            .options(selectinload(MetadataProperty.dataset))
         )
+        metadata_property = result.scalar_one_or_none()
+        if metadata_property is None:
+            raise NotFoundError(
+                f"MetadataProperty not found filtering by name={filter_scope.metadata_property}, "
+                f"dataset_id={dataset.id}"
+            )
+
+        # A metadata property hidden from the requesting user must not be
+        # usable as a filter or sort scope: the property value is stripped
+        # from returned records, but result-set membership would disclose it
+        # record by record. Enforce the same read policy that
+        # _filter_record_metadata_for_user enforces for returned values.
+        await authorize(user, MetadataPropertyPolicy.get(metadata_property))
 
 
-async def validate_search_records_query(db: AsyncSession, query: SearchRecordsQuery, dataset: Dataset) -> None:
-    await SearchRecordsQueryValidator.validate(db, dataset, query)
+async def validate_search_records_query(
+    db: AsyncSession, query: SearchRecordsQuery, dataset: Dataset, user: User
+) -> None:
+    await SearchRecordsQueryValidator.validate(db, dataset, query, user)
 
 
 async def get_dataset_suggestion_agents_by_question(db: AsyncSession, dataset_id: UUID) -> List[Mapping[str, Any]]:
