@@ -267,7 +267,6 @@ class TestSearchCurrentUserDatasetRecords:
             "detail": f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         }
 
-
     async def test_search_with_hidden_metadata_filter_scope_for_annotator(self, async_client: AsyncClient):
         dataset = await DatasetFactory.create()
         await TextFieldFactory.create(name="input", dataset=dataset)
