@@ -266,3 +266,110 @@ class TestSearchCurrentUserDatasetRecords:
         assert response.json() == {
             "detail": f"Question not found filtering by name=non-existent, dataset_id={dataset.id}"
         }
+
+    async def test_search_with_hidden_metadata_filter_scope_for_annotator(self, async_client: AsyncClient):
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="hidden_gold", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.owner]
+        )
+        annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
+            json={
+                "filters": {
+                    "and": [
+                        {
+                            "type": "terms",
+                            "scope": {"entity": "metadata", "metadata_property": "hidden_gold"},
+                            "values": ["A"],
+                        }
+                    ]
+                }
+            },
+        )
+
+        assert response.status_code == 403
+
+    async def test_search_with_hidden_metadata_sort_scope_for_annotator(self, async_client: AsyncClient):
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="hidden_gold", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.owner]
+        )
+        annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
+            json={"sort": [{"scope": {"entity": "metadata", "metadata_property": "hidden_gold"}, "order": "asc"}]},
+        )
+
+        assert response.status_code == 403
+
+    async def test_search_with_visible_metadata_filter_scope_for_annotator(
+        self, async_client: AsyncClient, mock_search_engine: SearchEngine
+    ):
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(
+            name="annotator_meta", dataset=dataset, allowed_roles=[UserRole.admin, UserRole.annotator]
+        )
+        annotator = await AnnotatorFactory.create(workspaces=[dataset.workspace])
+        record = await RecordFactory.create(metadata_={"annotator_meta": "A"}, dataset=dataset)
+
+        mock_search_engine.search.return_value = SearchResponses(
+            items=[SearchResponseItem(record_id=record.id, score=1.0)],
+            total=1,
+        )
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers={API_KEY_HEADER_NAME: annotator.api_key},
+            json={
+                "filters": {
+                    "and": [
+                        {
+                            "type": "terms",
+                            "scope": {"entity": "metadata", "metadata_property": "annotator_meta"},
+                            "values": ["A"],
+                        }
+                    ]
+                }
+            },
+        )
+
+        assert response.status_code == 200
+
+    async def test_search_with_any_metadata_filter_scope_for_owner(
+        self, async_client: AsyncClient, mock_search_engine: SearchEngine, owner_auth_header: dict
+    ):
+        dataset = await DatasetFactory.create()
+        await TextFieldFactory.create(name="input", dataset=dataset)
+        await TermsMetadataPropertyFactory.create(name="owner_meta", dataset=dataset, allowed_roles=[])
+        record = await RecordFactory.create(metadata_={"owner_meta": "A"}, dataset=dataset)
+
+        mock_search_engine.search.return_value = SearchResponses(
+            items=[SearchResponseItem(record_id=record.id, score=1.0)],
+            total=1,
+        )
+
+        response = await async_client.post(
+            self.url(dataset.id),
+            headers=owner_auth_header,
+            json={
+                "filters": {
+                    "and": [
+                        {
+                            "type": "terms",
+                            "scope": {"entity": "metadata", "metadata_property": "owner_meta"},
+                            "values": ["A"],
+                        }
+                    ]
+                }
+            },
+        )
+
+        assert response.status_code == 200
