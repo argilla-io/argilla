@@ -169,7 +169,7 @@ Fields are the main pieces of information of the record. These are shown at firs
 === "Image"
     Image fields expect a remote URL or local path to an image file in the form of a `string`, or a PIL object.
 
-    > Check the [Dataset.records - Python Reference](../reference/argilla/datasets/dataset_records.md) to see how to add records with with images in detail.
+    > Check the [Dataset.records - Python Reference](../reference/argilla/datasets/dataset_records.md) to see how to add records with images in detail.
 
     ```python
     records = [

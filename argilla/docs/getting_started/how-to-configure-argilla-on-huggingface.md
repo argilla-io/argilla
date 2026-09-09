@@ -17,14 +17,14 @@ This section details how to configure and deploy Argilla on Hugging Face Spaces.
 
 In the Space creation UI, persistent storage is set to `Small PAID`, which is a paid service, charged per hour of usage.
 
-**Spaces get restarted due to maintainance, inactivity, and every time you change your Spaces settings**. Persistent storage enables Argilla to save to disk your datasets and configurations across restarts.
+**Spaces get restarted due to maintenance, inactivity, and every time you change your Spaces settings**. Persistent storage enables Argilla to save to disk your datasets and configurations across restarts.
 
-!!! warning "Ephimeral FREE persistent storage"
-    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
+!!! warning "Ephemeral FREE persistent storage"
+    Not setting persistent storage to `Small` means that **you will lose your data when the Space restarts**.
 
     If you plan to **use the Argilla Space beyond testing**, it's highly recommended to **set persistent storage to `Small`**.
 
-If you just want to quickly test or use Argilla for a few hours with the risk of loosing your datasets, choose `Ephemeral FREE`. `Ephemeral FREE` means your datasets and configuration will not be saved to disk, when the Space is restarted your datasets, workspaces, and users will be lost.
+If you just want to quickly test or use Argilla for a few hours with the risk of losing your datasets, choose `Ephemeral FREE`. `Ephemeral FREE` means your datasets and configuration will not be saved to disk, when the Space is restarted your datasets, workspaces, and users will be lost.
 
 If you want to disable the persistence storage warning, you can set the environment variable `ARGILLA_SHOW_HUGGINGFACE_SPACE_PERSISTENT_STORAGE_WARNING=false`
 
@@ -83,7 +83,7 @@ Creating an Argilla Space within an organization is useful for several scenarios
 The steps are very similar the [Quickstart guide](quickstart.md) with one important difference:
 
 !!! tip "Enable Persistent Storage `SMALL`"
-    Not setting persistent storage to `Small` means that **you will loose your data when the Space restarts**.
+    Not setting persistent storage to `Small` means that **you will lose your data when the Space restarts**.
 
     For Argilla Spaces with many users, it's strongly recommended to **set persistent storage to `Small`**.
 

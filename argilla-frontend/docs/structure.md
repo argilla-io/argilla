@@ -12,7 +12,7 @@
 ├── components
 │ ├── base -> Base and stateless components
 │ ├── features -> Features used in just one page
-│ ├── annotation -> Componentes used in Annotation page
+│ ├── annotation -> Components used in Annotation page
 │ ├── datasets -> Components to support datasets page
 │ ├── global -> Components used in multiple pages ex: UserAvatarComponent
 │ ├── login -> Components to support login page
