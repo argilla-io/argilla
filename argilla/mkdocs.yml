@@ -159,6 +159,7 @@ nav:
   - Getting started:
       - Quickstart: getting_started/quickstart.md
       - Deploy with Docker: getting_started/how-to-deploy-argilla-with-docker.md
+      - Deploy with Easypanel: getting_started/how-to-deploy-argilla-with-easypanel.md
       - Hugging Face Spaces settings: getting_started/how-to-configure-argilla-on-huggingface.md
       - FAQ: getting_started/faq.md
   - How-to guides:
