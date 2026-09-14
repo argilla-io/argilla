@@ -15,7 +15,6 @@
 import httpx
 from httpx import HTTPStatusError
 
-
 __all__ = ["raise_for_status"]
 
 

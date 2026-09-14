@@ -13,11 +13,10 @@
 # limitations under the License.
 
 from datetime import datetime
-from typing import Literal
-from typing import Optional
+from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import field_serializer, ConfigDict
+from pydantic import ConfigDict, field_serializer
 
 from argilla._models import ResourceModel
 

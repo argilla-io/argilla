@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla.datasets._resource import Dataset  # noqa
+from argilla.datasets._resource import Dataset
 
 __all__ = ["Dataset"]

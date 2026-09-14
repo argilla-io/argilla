@@ -27,7 +27,6 @@ dataset = rg.Dataset(name="sentiment_analysis", settings=settings)
 
 # Create the dataset on the server
 dataset.create()
-
 ```
 
 To define the settings for fields, questions, metadata, vectors, or distribution, refer to the [`rg.TextField`](fields.md), [`rg.LabelQuestion`](questions.md), [`rg.TermsMetadataProperty`](metadata_property.md), and [`rg.VectorField`](vectors.md), [`rg.TaskDistribution`](task_distribution.md) class documentation.
@@ -54,7 +53,6 @@ settings.add(rg.TextQuestion(name="response", use_markdown=False))
 
 # Remove an existing property
 settings.questions.remove("response")
-
 ```
 
 ### Creating settings using built in templates
@@ -66,7 +64,7 @@ Argilla provides built-in templates for creating settings for common dataset typ
 You can define a classification task using the `rg.Settings.for_classification` class method. This will create a dataset with a text field and a label question. You can select field types using the `field_type` parameter with `image` or `text`.
 
 ```python
-settings = rg.Settings.for_classification(labels=["positive", "negative"]) # (1)
+settings = rg.Settings.for_classification(labels=["positive", "negative"])  # (1)
 ```
 
 This will return a `Settings` object with the following settings:

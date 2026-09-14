@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import warnings
+from collections.abc import Iterable
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from argilla._exceptions._responses import RecordResponsesError
@@ -25,7 +26,7 @@ from argilla.settings import RankingQuestion
 if TYPE_CHECKING:
     from argilla import Argilla, Record
 
-__all__ = ["Response", "UserResponse", "ResponseStatus"]
+__all__ = ["Response", "ResponseStatus", "UserResponse"]
 
 
 class ResponseStatus(str, Enum):

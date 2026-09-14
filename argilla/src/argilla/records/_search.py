@@ -11,28 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List, Any, Union, Tuple, Iterable, TYPE_CHECKING
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, List, Tuple, Union
 
 from argilla._models import SearchQueryModel
 from argilla._models._search import (
-    TextQueryModel,
-    ResponseFilterScopeModel,
-    SuggestionFilterScopeModel,
-    MetadataFilterScopeModel,
-    ScopeModel,
-    RangeFilterModel,
-    TermsFilterModel,
-    FilterModel,
     AndFilterModel,
+    FilterModel,
+    MetadataFilterScopeModel,
     QueryModel,
+    RangeFilterModel,
     RecordFilterScopeModel,
+    ResponseFilterScopeModel,
+    ScopeModel,
+    SuggestionFilterScopeModel,
+    TermsFilterModel,
+    TextQueryModel,
     VectorQueryModel,
 )
 
 if TYPE_CHECKING:
     from argilla.records import Record
 
-__all__ = ["Query", "Filter", "Condition", "Similar", "Conditions"]
+__all__ = ["Condition", "Conditions", "Filter", "Query", "Similar"]
 
 
 class Condition(Tuple[str, str, Any]):

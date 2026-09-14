@@ -16,8 +16,8 @@ import os
 import warnings
 from threading import Lock
 from typing import Optional
-from huggingface_hub.utils._runtime import is_google_colab
 
+from huggingface_hub.utils._runtime import is_google_colab
 
 _IS_GOOGLE_COLAB_CHECKED = False
 _GOOGLE_COLAB_SECRET_LOCK = Lock()
@@ -84,7 +84,7 @@ def _get_secret_from_google_colab(name: str) -> Optional[str]:
         except ColabError as e:
             # Something happen but we don't know what => recommend to open a GitHub issue
             warnings.warn(
-                f"\nError while fetching {name} secret value from your vault: '{str(e)}'."
+                f"\nError while fetching {name} secret value from your vault: '{e!s}'."
                 "\nYou are not authenticated with the Argilla in this notebook."
                 "\nIf the error persists, please let us know by opening an issue on GitHub "
                 "(https://github.com/argilla-io/argilla//issues/new)."
