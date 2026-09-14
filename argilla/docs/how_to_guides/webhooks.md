@@ -18,6 +18,7 @@ import argilla as rg
 from datetime import datetime
 from argilla import webhook_listener
 
+
 @webhook_listener(events="dataset.created")
 async def my_webhook_handler(dataset: rg.Dataset, type: str, timestamp: datetime):
     print(dataset, type, timestamp)
@@ -37,7 +38,7 @@ Under the hood, the SDK uses the `FastAPI` framework to create the webhook serve
 To run the webhook, you need to define the webhook server in your code and start it using the `uvicorn` command.
 
 ```python
-# my_webhook.py file
+# my_webhook.py file
 from argilla import get_webhook_server
 
 server = get_webhook_server()
@@ -73,14 +74,9 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-webhook = rg.Webhook(
-    url="http://127.0.0.1:8000",
-    events=["dataset.created"],
-    description="My webhook"
-)
+webhook = rg.Webhook(url="http://127.0.0.1:8000", events=["dataset.created"], description="My webhook")
 
 webhook.create()
-
 ```
 
 ### List webhooks
@@ -94,7 +90,6 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 for webhook in client.webhooks:
     print(webhook)
-
 ```
 
 ### Update a webhook
@@ -106,15 +101,10 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-webhook = rg.Webhook(
-    url="http://127.0.0.1:8000",
-    events=["dataset.created"],
-    description="My webhook"
-).create()
+webhook = rg.Webhook(url="http://127.0.0.1:8000", events=["dataset.created"], description="My webhook").create()
 
 webhook.events = ["dataset.updated"]
 webhook.update()
-
 ```
 > You should use IP address instead of localhost since the webhook validation expect a Top Level Domain (TLD) in the URL.
 
@@ -129,7 +119,6 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 for webhook in client.webhooks:
     webhook.delete()
-
 ```
 
 ## Deploying a webhooks server in a Hugging Face Space

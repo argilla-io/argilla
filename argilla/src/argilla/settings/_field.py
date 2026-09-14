@@ -13,7 +13,7 @@
 # limitations under the License.
 import os
 from abc import ABC
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
 import requests
 
@@ -21,15 +21,14 @@ from argilla import Argilla
 from argilla._api import FieldsAPI
 from argilla._exceptions import ArgillaError, SettingsError
 from argilla._models import (
-    FieldModel,
-    TextFieldSettings,
     ChatFieldSettings,
-    ImageFieldSettings,
     CustomFieldSettings,
+    FieldModel,
     FieldSettings,
+    ImageFieldSettings,
+    TextFieldSettings,
 )
 from argilla.settings._common import SettingsPropertyBase
-
 
 try:
     from typing import Self
@@ -39,7 +38,7 @@ except ImportError:
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
 
-__all__ = ["Field", "FieldBase", "TextField", "ImageField", "ChatField", "CustomField"]
+__all__ = ["ChatField", "CustomField", "Field", "FieldBase", "ImageField", "TextField"]
 
 
 class FieldBase(ABC, SettingsPropertyBase):
@@ -67,7 +66,7 @@ class FieldBase(ABC, SettingsPropertyBase):
 
     @classmethod
     def from_model(cls, model: FieldModel) -> "Self":
-        instance = cls(name=model.name)  # noqa
+        instance = cls(name=model.name)
         instance._model = model
 
         return instance

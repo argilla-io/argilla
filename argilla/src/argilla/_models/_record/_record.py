@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union, Literal
 import uuid
+import warnings
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 
@@ -24,7 +24,7 @@ from argilla._models._record._suggestion import SuggestionModel
 from argilla._models._record._vector import VectorModel
 from argilla._models._resource import ResourceModel
 
-__all__ = ["RecordModel", "FieldValue"]
+__all__ = ["FieldValue", "RecordModel"]
 
 
 class ChatFieldValue(BaseModel):

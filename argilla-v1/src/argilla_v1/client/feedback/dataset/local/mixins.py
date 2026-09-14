@@ -89,7 +89,7 @@ class ArgillaMixin:
             datasets_api_v1.delete_dataset(client=client, id=id)
         except Exception as e:
             raise Exception(
-                f"Failed while deleting the `FeedbackDataset` with ID '{id}' from Argilla with" f" exception: {e}"
+                f"Failed while deleting the `FeedbackDataset` with ID '{id}' from Argilla with exception: {e}"
             ) from e
 
     @staticmethod

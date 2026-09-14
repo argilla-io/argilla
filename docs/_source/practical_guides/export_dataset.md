@@ -17,7 +17,7 @@ From Argilla 1.14.0, calling `from_argilla` will pull the `FeedbackDataset` from
 
 ```python
 remote_dataset = rg.FeedbackDataset.from_argilla("my-dataset", workspace="my-workspace")
-local_dataset = remote_dataset.pull(max_records=100) # get first 100 records
+local_dataset = remote_dataset.pull(max_records=100)  # get first 100 records
 ```
 
 If your dataset includes vectors, by default these will **not** get pulled with the rest of the dataset in order to improve performance. If you would like to pull the vectors in your records, you will need to specify it like so:
@@ -27,18 +27,14 @@ If your dataset includes vectors, by default these will **not** get pulled with 
 :::{tab-item} All vectors
 ```python
 remote_dataset = rg.FeedbackDataset.from_argilla(
-    name="my-dataset",
-    workspace="my-workspace",
-    with_vectors="all"
+    name="my-dataset", workspace="my-workspace", with_vectors="all"
 )
 ```
 :::
 :::{tab-item} Specific vectors
 ```python
 remote_dataset = rg.FeedbackDataset.from_argilla(
-    name="my-dataset",
-    workspace="my-workspace",
-    with_vectors=["my_vectors"]
+    name="my-dataset", workspace="my-workspace", with_vectors=["my_vectors"]
 )
 ```
 :::
@@ -56,7 +52,7 @@ When using a `FeedbackDataset` pulled from Argilla via `FeedbackDataset.from_arg
 ```python
 # This publishes the dataset with its records to Argilla and returns the dataset in Argilla
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
-local_dataset = remote_dataset.pull(max_records=100) # get first 100 records
+local_dataset = remote_dataset.pull(max_records=100)  # get first 100 records
 ```
 :::
 
@@ -109,7 +105,9 @@ Additionally, due to the integration with 🤗 Datasets, you can also export the
 ```python
 hf_dataset = dataset.format_as("datasets")
 
-hf_dataset.save_to_disk("sharegpt-prompt-rating-mini")  # Save as a `datasets.Dataset` in the local filesystem
+hf_dataset.save_to_disk(
+    "sharegpt-prompt-rating-mini"
+)  # Save as a `datasets.Dataset` in the local filesystem
 hf_dataset.to_csv("sharegpt-prompt-rating-mini.csv")  # Save as CSV
 hf_dataset.to_json("sharegpt-prompt-rating-mini.json")  # Save as JSON
 hf_dataset.to_parquet()  # Save as Parquet
@@ -185,7 +183,9 @@ dataset_rg = rg.load("my_dataset")
 # export your Argilla Dataset to a datasets Dataset
 dataset_ds = dataset_rg.to_datasets()
 
-dataset_ds.save_to_disk("my_dataset")  # Save as a `datasets.Dataset` in the local filesystem
+dataset_ds.save_to_disk(
+    "my_dataset"
+)  # Save as a `datasets.Dataset` in the local filesystem
 dataset_ds.to_csv("my_dataset.csv")  # Save as CSV
 dataset_ds.to_json("my_dataset.json")  # Save as JSON
 dataset_ds.to_parquet()  # Save as Parquet
