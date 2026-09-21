@@ -12,12 +12,11 @@ links:
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_argilla(
-    name="<my_dataset_name>",
-    workspace="<my_workspace_name>"
+    name="<my_dataset_name>", workspace="<my_workspace_name>"
 )
 task = TrainingTask.for_text_classification(
     text=dataset.field_by_name("<my_field>"),
-    label=dataset.question_by_name("<my_question>")
+    label=dataset.question_by_name("<my_question>"),
 )
 trainer = ArgillaTrainer(
     dataset=dataset,

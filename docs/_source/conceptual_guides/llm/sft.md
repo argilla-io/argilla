@@ -23,11 +23,11 @@ First, we need to configure a **dataset**. Argilla datasets allow you to mix dif
 ```python
 import argilla as rg
 
-questions =[
+questions = [
     rg.TextQuestion(
         name="demonstration",
         title="Please write a harmless and helpful response for the prompt:",
-        required=True
+        required=True,
     )
 ]
 ```
@@ -35,18 +35,16 @@ questions =[
 Argilla Datasets are composed of **records**. A **record** is a data point that can be labeled by one or more labelers. A record consists of one or more **fields**. These fields and the order in which they are presented to labelers are fully configurable. In this case, we want to show labelers a prompt. We’ll just need to define a *text field*. This is how you can define this field:
 
 ```python
-fields = [
-    rg.TextField(name="prompt", required=True)
-]
+fields = [rg.TextField(name="prompt", required=True)]
 ```
 
 To configure the dataset, the final step is to define the **guidelines** for labelers. These guidelines help labelers understand and answer the questions consistently. This is how you can configure the dataset, including the guidelines:
 
 ```python
 dataset = rg.FeedbackDataset(
-	guidelines="Please, read the prompt carefully and...",
-	questions=questions,
-	fields=fields
+    guidelines="Please, read the prompt carefully and...",
+    questions=questions,
+    fields=fields,
 )
 ```
 
@@ -87,15 +85,13 @@ If none of the above is possible, a third option is to ask humans to write promp
 
 ```python
 # this will be populated from the list of writing topics you create
-fields = [
-    rg.TextField(name="writing-topic", required=True)
-]
+fields = [rg.TextField(name="writing-topic", required=True)]
 
 # we will ask the labeler to write a possible prompt or instruction
 question = rg.TextQuestion(
-	name="prompt",
-	title="Imagine and write a possible instruction for the given topic:",
-	required=True
+    name="prompt",
+    title="Imagine and write a possible instruction for the given topic:",
+    required=True,
 )
 ```
 
@@ -111,12 +107,9 @@ Once you have the dataset with prompts ready, you just need to create the record
 from datasets import load_dataset
 
 # This is only for demonstration and assumes you use a HF dataset
-prompts = load_dataset('your_prompts_dataset', split=["train"])
+prompts = load_dataset("your_prompts_dataset", split=["train"])
 
-records = [
-	rg.FeedbackRecord(fields={"prompt": record["prompt"]})
-	for record in dataset
-]
+records = [rg.FeedbackRecord(fields={"prompt": record["prompt"]}) for record in dataset]
 
 dataset.add_records(records)
 ```
@@ -155,10 +148,7 @@ Once the dataset has been labeled, you can retrieve the responses using the Pyth
 
 ```python
 # Assume we distribute the workload in one dataset with several labelers
-feedback = rg.FeedbackDataset.from_argilla(
-	name="my-dataset",
-	workspace="my-workspace"
-)
+feedback = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace="my-workspace")
 ```
 
 Your work distribution strategy may require you to gather and consolidate responses from multiple datasets and workspaces. Let's consider a scenario where you've divided the task among four labelers. Here's how you can retrieve their responses:
@@ -171,11 +161,8 @@ user_workspaces = ["natalia", "amelie", "tom", "dani"]
 feedback_datasets = []
 
 for workspace in user_workspaces:
-	feedback = rg.FeedbackDataset.from_argilla(
-		name="my-dataset",
-		workspace=workspace
-	)
-	feedback_datasets.append(feedback)
+    feedback = rg.FeedbackDataset.from_argilla(name="my-dataset", workspace=workspace)
+    feedback_datasets.append(feedback)
 ```
 
 Every record in `feedback.records` contain a `responses` attribute, which holds any feedback provided for that record. Each response includes:

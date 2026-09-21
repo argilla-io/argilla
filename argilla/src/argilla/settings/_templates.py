@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 if TYPE_CHECKING:
-    from argilla.settings._resource import Settings
     from argilla.settings._field import TextField
+    from argilla.settings._resource import Settings
 
 
 def _get_field_by_type(field_type: str) -> "TextField":
     """Get the field type from the field type string."""
-    from argilla import TextField, ImageField
+    from argilla import ImageField, TextField
 
     FIELD_MAPPING = {
         "text": TextField,
@@ -48,7 +48,7 @@ class DefaultSettingsMixin:
         questions (List[QuestionType]): List of questions.
         use_chat (bool): If True, the field will be replaced with a chat field.
         """
-        from argilla import Settings, LabelQuestion
+        from argilla import LabelQuestion, Settings
 
         settings = Settings(
             guidelines="Select a label for the document.",
@@ -73,7 +73,7 @@ class DefaultSettingsMixin:
         use_chat (bool): If True, the field will be replaced with a chat field.
 
         """
-        from argilla import Settings, RankingQuestion
+        from argilla import RankingQuestion, Settings
 
         fields = [
             _get_field_by_type(field_type)(name="instruction"),
@@ -109,7 +109,7 @@ class DefaultSettingsMixin:
         use_chat (bool): If True, the field will be replaced with a chat field.
 
         """
-        from argilla import Settings, RatingQuestion
+        from argilla import RatingQuestion, Settings
 
         fields = [
             _get_field_by_type(field_type)(name="instruction"),

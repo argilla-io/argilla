@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from argilla._exceptions import ArgillaError
@@ -33,9 +34,9 @@ from argilla.suggestions import Suggestion
 from argilla.vectors import Vector
 
 if TYPE_CHECKING:
-    from argilla.datasets import Dataset
     from argilla import Argilla
     from argilla._api import RecordsAPI
+    from argilla.datasets import Dataset
 
 
 class Record(Resource):

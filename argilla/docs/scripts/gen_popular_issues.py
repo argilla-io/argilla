@@ -116,21 +116,21 @@ with mkdocs_gen_files.open(DATA_PATH, "w") as f:
     f.write("    | Rank | Issue | Reactions | Comments |\n")
     f.write("    |------|-------|:---------:|:--------:|\n")
     for ix, row in engagement_df.iterrows():
-        f.write(f"    | {ix+1} | [{row['Issue']}]({row['URL']}) | 👍 {row['Reactions']} | 💬 {row['Comments']} |\n")
+        f.write(f"    | {ix + 1} | [{row['Issue']}]({row['URL']}) | 👍 {row['Reactions']} | 💬 {row['Comments']} |\n")
 
     f.write('\n=== "Latest issues open by the community"\n\n')
     f.write("    | Rank | Issue | Author |\n")
     f.write("    |------|-------|:------:|\n")
     for ix, row in community_issues_df.iterrows():
         state = "🟢" if row["State"] == "open" else "🟣"
-        f.write(f"    | {ix+1} | {state} [{row['Issue']}]({row['URL']}) | by **{row['Author']}** |\n")
+        f.write(f"    | {ix + 1} | {state} [{row['Issue']}]({row['URL']}) | by **{row['Author']}** |\n")
 
     f.write('\n=== "Planned issues for upcoming releases"\n\n')
     f.write("    | Rank | Issue | Milestone |\n")
     f.write("    |------|-------|:------:|\n")
     for ix, row in planned_issues_df.iterrows():
         state = "🟢" if row["State"] == "open" else "🟣"
-        f.write(f"    | {ix+1} | {state} [{row['Issue']}]({row['URL']}) |  **{row['Milestone']}** |\n")
+        f.write(f"    | {ix + 1} | {state} [{row['Issue']}]({row['URL']}) |  **{row['Milestone']}** |\n")
 
     today = datetime.today().date()
     f.write(f"\nLast update: {today}\n")
