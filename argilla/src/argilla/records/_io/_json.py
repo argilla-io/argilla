@@ -15,8 +15,8 @@ import json
 from pathlib import Path
 from typing import List, Tuple, Union
 
-from argilla.records._resource import Record
 from argilla.records._io import GenericIO
+from argilla.records._resource import Record
 
 
 class JsonIO:

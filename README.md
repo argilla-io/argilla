@@ -107,7 +107,10 @@ To use the client, you need to import the `Argilla` class and instantiate it wit
 ```python
 import argilla as rg
 
-client = rg.Argilla(api_url="https://[your-owner-name]-[your_space_name].hf.space", api_key="owner.apikey")
+client = rg.Argilla(
+    api_url="https://[your-owner-name]-[your_space_name].hf.space",
+    api_key="owner.apikey",
+)
 ```
 
 ### Create your first dataset
@@ -158,7 +161,7 @@ Need more info, check out [our docs](https://argilla-io.github.io/argilla/latest
 
 ## 🥇 Contributors
 
-To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs. 
+To help our community with the creation of contributions, we have created our [community](https://argilla-io.github.io/argilla/latest/community/) docs.
 
 <a  href="https://github.com/argilla-io/argilla/graphs/contributors">
 

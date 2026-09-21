@@ -17,7 +17,7 @@ import os
 import warnings
 from collections import defaultdict
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union, Literal
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Type, Union
 from uuid import UUID
 
 from datasets import DatasetDict
@@ -142,9 +142,10 @@ class HubImportExportMixin(DiskImportExportMixin):
         Returns:
             A `Dataset` loaded from the Hugging Face Hub.
         """
-        from argilla.settings import Settings
         from datasets import load_dataset
         from huggingface_hub import snapshot_download
+
+        from argilla.settings import Settings
 
         settings = settings or "ui"
 
@@ -334,10 +335,10 @@ class HubImportExportMixin(DiskImportExportMixin):
 
     @classmethod
     def _run_settings_ui(cls, repo_id: str, subset: str, split: str, client: Optional["Argilla"] = None) -> str:
-        from urllib.parse import quote_plus, urlencode
-        from argilla.client import Argilla
-
         import webbrowser
+        from urllib.parse import quote_plus, urlencode
+
+        from argilla.client import Argilla
 
         client = client or Argilla._get_default()
 
