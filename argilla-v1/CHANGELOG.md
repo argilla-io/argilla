@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Fixed non-deterministic `PrecisionMetric`, `RecallMetric` and `F1ScoreMetric` scores on binary data: `pos_label` was chosen via unseeded `random.choice()`, so identical inputs scored differently across calls. It is now the deterministic last value of the sorted unique labels ([#5873](https://github.com/argilla-io/argilla/issues/5873)).
+
 ## [2.0.0rc1](https://github.com/argilla-io/argilla/compare/v1.29.0...v2.0.0rc1)
 
 > [!NOTE]
