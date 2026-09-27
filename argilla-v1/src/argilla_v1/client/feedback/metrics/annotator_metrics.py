@@ -14,7 +14,6 @@
 
 """This module contains metrics for Suggestions Metric and Responses Metric."""
 
-import random
 import warnings
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
@@ -309,7 +308,7 @@ class PrecisionMetric(AnnotatorMetricBase):
         if is_multiclass(responses) or is_multiclass(suggestions):
             kwargs = {"average": "macro"}
         else:
-            kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
+            kwargs = {"average": "binary", "pos_label": np.unique(responses)[-1]}
         return precision_score(y_true=responses, y_pred=suggestions, **kwargs)
 
 
@@ -330,7 +329,7 @@ class RecallMetric(AnnotatorMetricBase):
         if is_multiclass(responses) or is_multiclass(suggestions):
             kwargs = {"average": "macro"}
         else:
-            kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
+            kwargs = {"average": "binary", "pos_label": np.unique(responses)[-1]}
         return recall_score(y_true=responses, y_pred=suggestions, **kwargs)
 
 
@@ -351,7 +350,7 @@ class F1ScoreMetric(AnnotatorMetricBase):
         if is_multiclass(responses) or is_multiclass(suggestions):
             kwargs = {"average": "macro"}
         else:
-            kwargs = {"average": "binary", "pos_label": random.choice(np.unique(responses))}
+            kwargs = {"average": "binary", "pos_label": np.unique(responses)[-1]}
 
         return f1_score(responses, suggestions, **kwargs)
 
