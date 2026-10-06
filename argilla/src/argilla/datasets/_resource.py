@@ -21,7 +21,7 @@ except ImportError:
     from typing_extensions import Self
 
 from argilla._api import DatasetsAPI
-from argilla._exceptions import NotFoundError, SettingsError, ForbiddenError
+from argilla._exceptions import ForbiddenError, NotFoundError, SettingsError
 from argilla._models import DatasetModel
 from argilla._resource import Resource
 from argilla.client import Argilla

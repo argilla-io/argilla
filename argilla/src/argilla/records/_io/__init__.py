@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from argilla.records._io._datasets import HFDatasetsIO  # noqa: F401
+from argilla.records._io._datasets import (
+    HFDataset,  # noqa: F401
+    HFDatasetsIO,  # noqa: F401
+)
 from argilla.records._io._generic import GenericIO  # noqa: F401
 from argilla.records._io._json import JsonIO  # noqa: F401
-from argilla.records._io._datasets import HFDataset  # noqa: F401

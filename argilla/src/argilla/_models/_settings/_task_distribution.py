@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ["TaskDistributionModel", "OverlapTaskDistributionModel"]
+__all__ = ["OverlapTaskDistributionModel", "TaskDistributionModel"]
 
 from typing import Literal
 
-from pydantic import BaseModel, PositiveInt, ConfigDict
+from pydantic import BaseModel, ConfigDict, PositiveInt
 
 
 class OverlapTaskDistributionModel(BaseModel):

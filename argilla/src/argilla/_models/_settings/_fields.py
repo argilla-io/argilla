@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, Literal, Annotated, Union
+from typing import Annotated, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, field_serializer, field_validator, Field
+from pydantic import BaseModel, Field, field_serializer, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from argilla._helpers import log_message

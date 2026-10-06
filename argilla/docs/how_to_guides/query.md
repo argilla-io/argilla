@@ -13,10 +13,7 @@ You can search for records in your dataset by **querying** or **filtering**. The
     === "`rg.Query`"
 
         ```python
-        rg.Query(
-            query="query",
-            filter=filter
-        )
+        rg.Query(query="query", filter=filter)
         ```
         > Check the [Query - Python Reference](../reference/argilla/search.md) to see the attributes, arguments, and methods of the `Query` class in detail.
 
@@ -112,9 +109,7 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
 
     filter_label = rg.Filter(("label", "==", "positive"))
 
-    filtered_records = dataset.records(query=rg.Query(filter=filter_label)).to_list(
-        flatten=True
-    )
+    filtered_records = dataset.records(query=rg.Query(filter=filter_label)).to_list(flatten=True)
     ```
 
 === "Multiple conditions"
@@ -131,13 +126,11 @@ You can use the `Filter` class to define the conditions and pass them to the `Da
             ("label.suggestion", "==", "positive"),
             ("metadata.count", ">=", 10),
             ("metadata.count", "<=", 20),
-            ("label", "in", ["positive", "negative"])
+            ("label", "in", ["positive", "negative"]),
         ]
     )
 
-    filtered_records = dataset.records(
-        query=rg.Query(filter=filters), with_suggestions=True
-    ).to_list(flatten=True)
+    filtered_records = dataset.records(query=rg.Query(filter=filters), with_suggestions=True).to_list(flatten=True)
     ```
 
 ### Available fields
@@ -171,14 +164,7 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
-status_filter = rg.Query(
-    filter=rg.Filter(
-        [
-            ("status", "==", "completed"),
-            ("response.status", "==", "discarded")
-        ]
-    )
-)
+status_filter = rg.Query(filter=rg.Filter([("status", "==", "completed"), ("response.status", "==", "discarded")]))
 
 filtered_records = dataset.records(status_filter).to_list(flatten=True)
 ```
@@ -188,7 +174,6 @@ filtered_records = dataset.records(status_filter).to_list(flatten=True)
 You can search for records that are similar to a given vector. You can use the `Similar` class to define the vector and pass it as part of the query argument to the `Dataset.records`.
 
 ```python
-
 import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
@@ -198,7 +183,8 @@ dataset = client.datasets(name="my_dataset", workspace="my_workspace")
 
 similar_filter = rg.Query(
     similar=rg.Similar(
-        name="vector", value=[0.1, 0.2, 0.3],
+        name="vector",
+        value=[0.1, 0.2, 0.3],
     )
 )
 
@@ -227,12 +213,10 @@ query_filter = rg.Query(
             ("label.suggestion", "==", "positive"),
             ("metadata.count", ">=", 10),
         ]
-    )
+    ),
 )
 
-queried_filtered_records = dataset.records(
-    query=query_filter,
-    with_metadata=True,
-    with_suggestions=True
-).to_list(flatten=True)
+queried_filtered_records = dataset.records(query=query_filter, with_metadata=True, with_suggestions=True).to_list(
+    flatten=True
+)
 ```
