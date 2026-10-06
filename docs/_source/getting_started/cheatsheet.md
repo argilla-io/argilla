@@ -145,8 +145,7 @@ import argilla as rg
 
 # We allow for a maximum of 5 vectors.
 record = rg.TextClassificationRecord(
-    text="Hello world, I am a vector record!",
-    vectors= {"my_vector_name": [0, 42, 1984]}
+    text="Hello world, I am a vector record!", vectors={"my_vector_name": [0, 42, 1984]}
 )
 rg.log(name="dataset", records=record)
 ```
@@ -173,7 +172,12 @@ Weak supervision for NLP is like teaching a model with "approximate" answers ins
 
 :::{tab-item} Create, update and delete Rules
 ```python
-from argilla.labeling.text_classification import add_rules, delete_rules, Rule, update_rules
+from argilla.labeling.text_classification import (
+    add_rules,
+    delete_rules,
+    Rule,
+    update_rules,
+)
 
 # Create
 rule = Rule(query="positive impact", label="optimism")
@@ -194,10 +198,7 @@ from argilla.labeling.text_classification import WeakLabels, load_rules
 
 rules = load_rules("my_dataset")
 
-weak_labels = WeakLabels(
-    rules=rules,
-    dataset="my_dataset"
-)
+weak_labels = WeakLabels(rules=rules, dataset="my_dataset")
 
 weak_labels.summary()
 ```
@@ -235,9 +236,9 @@ trainer = ArgillaTrainer(
     train_size=0.8,
     seed=42,
     limit=10,
-    query="my-query"
+    query="my-query",
 )
-trainer.update_config() # see usage below
+trainer.update_config()  # see usage below
 trainer.train()
 records = trainer.predict(["my-text"], as_argilla_records=True)
 ```

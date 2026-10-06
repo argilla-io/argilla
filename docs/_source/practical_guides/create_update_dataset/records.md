@@ -55,8 +55,7 @@ Record metadata can include any information about the record that is not part of
 
 ```python
 record = rg.FeedbackRecord(
-    fields={...},
-    metadata={"source": "encyclopedia", "text_length":150}
+    fields={...}, metadata={"source": "encyclopedia", "text_length": 150}
 )
 ```
 :::
@@ -64,8 +63,7 @@ record = rg.FeedbackRecord(
 :::{tab-item} Multiple Metadata
 ```python
 record = rg.FeedbackRecord(
-    fields={...},
-    metadata={"source": ["encyclopedia", "wikipedia"], "text_length":150}
+    fields={...}, metadata={"source": ["encyclopedia", "wikipedia"], "text_length": 150}
 )
 ```
 
@@ -82,8 +80,7 @@ Vectors should have the following format `List[float]`. If you are using numpy a
 
 ```python
 record = rg.FeedbackRecord(
-    fields={...},
-    vectors={"my_vector": [...], "my_other_vector": [...]}
+    fields={...}, vectors={"my_vector": [...], "my_other_vector": [...]}
 )
 ```
 
@@ -98,12 +95,12 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "relevant",
             "value": "YES",
         }
-    ]
+    ],
 )
 ```
 
@@ -114,12 +111,7 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
-        {
-            "question_name": "content_class",
-            "value": ["hate", "violent"]
-        }
-    ]
+    suggestions=[{"question_name": "content_class", "value": ["hate", "violent"]}],
 )
 ```
 
@@ -130,16 +122,16 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "preference",
-            "value":[
+            "value": [
                 {"rank": 1, "value": "reply-2"},
                 {"rank": 2, "value": "reply-1"},
                 {"rank": 3, "value": "reply-3"},
             ],
         }
-    ]
+    ],
 )
 ```
 
@@ -150,12 +142,12 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "quality",
             "value": 5,
         }
-    ]
+    ],
 )
 ```
 
@@ -166,12 +158,12 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "corrected-text",
             "value": "This is a *suggestion*.",
         }
-    ]
+    ],
 )
 ```
 
@@ -189,16 +181,7 @@ If your dataset includes some annotations, you can add those to the records as y
 
 ```python
 record = rg.FeedbackRecord(
-    fields=...,
-    responses = [
-        {
-            "values":{
-                "relevant":{
-                    "value": "YES"
-                }
-            }
-        }
-    ]
+    fields=..., responses=[{"values": {"relevant": {"value": "YES"}}}]
 )
 ```
 
@@ -209,15 +192,7 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    responses = [
-        {
-            "values":{
-                "content_class":{
-                    "value": ["hate", "violent"]
-                }
-            }
-        }
-    ]
+    responses=[{"values": {"content_class": {"value": ["hate", "violent"]}}}],
 )
 ```
 
@@ -228,11 +203,11 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    responses = [
+    responses=[
         {
-            "values":{
-                "preference":{
-                    "value":[
+            "values": {
+                "preference": {
+                    "value": [
                         {"rank": 1, "value": "reply-2"},
                         {"rank": 2, "value": "reply-1"},
                         {"rank": 3, "value": "reply-3"},
@@ -240,7 +215,7 @@ record = rg.FeedbackRecord(
                 }
             }
         }
-    ]
+    ],
 )
 ```
 
@@ -250,16 +225,7 @@ record = rg.FeedbackRecord(
 
 ```python
 record = rg.FeedbackRecord(
-    fields=...,
-    responses = [
-        {
-            "values":{
-                "quality":{
-                    "value": 5
-                }
-            }
-        }
-    ]
+    fields=..., responses=[{"values": {"quality": {"value": 5}}}]
 )
 ```
 
@@ -270,15 +236,7 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    responses = [
-        {
-            "values":{
-                "corrected-text":{
-                    "value": "This is a *response*."
-                }
-            }
-        }
-    ]
+    responses=[{"values": {"corrected-text": {"value": "This is a *response*."}}}],
 )
 ```
 
@@ -299,7 +257,7 @@ If you are working with a public dataset, remember to always check the license t
 from datasets import load_dataset
 
 # Load and inspect a dataset from the Hugging Face Hub
-hf_dataset = load_dataset('databricks/databricks-dolly-15k', split='train')
+hf_dataset = load_dataset("databricks/databricks-dolly-15k", split="train")
 df = hf_dataset.to_pandas()
 df
 ```
@@ -317,7 +275,8 @@ records = [
     rg.FeedbackRecord(
         fields={"question": record["instruction"], "answer": record["response"]}
     )
-    for record in hf_dataset if record["category"]=="open_qa"
+    for record in hf_dataset
+    if record["category"] == "open_qa"
 ]
 
 dataset.add_records(records)
@@ -432,7 +391,7 @@ import argilla as rg
 rec = rg.TextClassificationRecord(
     text="beautiful accommodations stayed hotel santa... hotels higher ranked website.",
     prediction=[("price", 0.75), ("hygiene", 0.25)],
-    annotation="price"
+    annotation="price",
 )
 rg.log(records=rec, name="my_dataset")
 ```
@@ -448,7 +407,7 @@ rec = rg.TextClassificationRecord(
     text="damn this kid and her fancy clothes make me feel like a bad parent.",
     prediction=[("admiration", 0.75), ("annoyance", 0.25)],
     annotation=["price", "annoyance"],
-    multi_label=True
+    multi_label=True,
 )
 rg.log(records=rec, name="my_dataset")
 ```
@@ -516,7 +475,8 @@ You can delete records by passing their `id` into the `rg.delete_records()` func
 ```python
 ## Delete by id
 import argilla as rg
-rg.delete_records(name="example-dataset", ids=[1,3,5])
+
+rg.delete_records(name="example-dataset", ids=[1, 3, 5])
 ```
 :::
 
@@ -524,6 +484,7 @@ rg.delete_records(name="example-dataset", ids=[1,3,5])
 ```python
 ## Discard records by query
 import argilla as rg
+
 rg.delete_records(name="example-dataset", query="metadata.code=33", discard_only=True)
 ```
 :::

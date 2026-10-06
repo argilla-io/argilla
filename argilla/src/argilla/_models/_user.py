@@ -15,12 +15,12 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import field_validator, ConfigDict
+from pydantic import ConfigDict, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from argilla._models import ResourceModel
 
-__all__ = ["UserModel", "Role"]
+__all__ = ["Role", "UserModel"]
 
 
 class Role(str, Enum):

@@ -90,7 +90,7 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 
 workspaces = rg.Workspace.list()
 for workspace in workspaces:
-   ...
+    ...
 ```
 :::
 
@@ -162,7 +162,7 @@ workspace = rg.Workspace.from_name("new-workspace")
 
 users = workspace.users
 for user in users:
-   ...
+    ...
 workspace.add_user(user.id)
 workspace.delete_user(user.id)
 ```
@@ -232,7 +232,7 @@ rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
 dataset_list = rg.FeedbackDataset.list(workspace="admin")
 
 for dataset in dataset_list:
-   print(dataset.name)
+    print(dataset.name)
 ```
 
 As the `list()` method creates a list of `RemoteFeedbackDataset` objects, you can directly work each item of the list.

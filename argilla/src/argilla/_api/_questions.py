@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict
+from typing import Dict, List
 from uuid import UUID
 
 import httpx
+
 from argilla._api._base import ResourceAPI
 from argilla._exceptions import api_error_handler
 from argilla._models import QuestionModel

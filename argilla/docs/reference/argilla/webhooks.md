@@ -15,6 +15,7 @@ when a webhook is received:
 ```python
 from argilla.webhooks import webhook_listener
 
+
 @webhook_listener(events="dataset.created")
 async def my_webhook_listener(dataset):
     print(dataset)
@@ -23,11 +24,7 @@ async def my_webhook_listener(dataset):
 To manually create a new webhook, instantiate the `Webhook` object with the client and the name:
 
 ```python
-webhook = rg.Webhook(
-    url="https://somehost.com/webhook",
-    events=["dataset.created"],
-    description="My webhook"
-)
+webhook = rg.Webhook(url="https://somehost.com/webhook", events=["dataset.created"], description="My webhook")
 webhook.create()
 ```
 
