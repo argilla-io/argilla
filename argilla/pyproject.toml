@@ -10,6 +10,7 @@ dynamic = ["version"]
 
 dependencies = [
     "httpx>=0.26.0",
+    "requests>=2.32.3",
     "pydantic>=2.6.0, <3.0.0",
     "huggingface_hub>=0.22.0",
     "tqdm>=4.60.0",

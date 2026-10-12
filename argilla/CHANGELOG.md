@@ -16,6 +16,10 @@ These are the section headers that we use:
 
 ## [Unreleased]()
 
+### Fixed
+
+- Declared the SDK's direct `requests` dependency to prevent import errors when it is not installed transitively.
+
 ## [2.7.0](https://github.com/argilla-io/argilla/compare/v2.6.0...v2.7.0)
 
 ### Added
