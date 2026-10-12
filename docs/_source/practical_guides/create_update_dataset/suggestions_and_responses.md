@@ -20,14 +20,14 @@ Suggestions refer to suggested responses (e.g. model predictions) that you can a
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "relevant",
             "value": "YES",
             "score": 0.7,
             "agent": model_name,
         }
-    ]
+    ],
 )
 ```
 
@@ -38,14 +38,14 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "content_class",
             "value": ["hate", "violent"],
             "score": [0.3, 0.2],
             "agent": model_name,
         }
-    ]
+    ],
 )
 ```
 
@@ -56,10 +56,10 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "preference",
-            "value":[
+            "value": [
                 {"rank": 1, "value": "reply-2"},
                 {"rank": 2, "value": "reply-1"},
                 {"rank": 3, "value": "reply-3"},
@@ -67,7 +67,7 @@ record = rg.FeedbackRecord(
             "score": [0.20, 0.10, 0.01],
             "agent": model_name,
         }
-    ]
+    ],
 )
 ```
 
@@ -78,14 +78,14 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "quality",
             "value": 5,
             "score": 0.7,
             "agent": model_name,
         }
-    ]
+    ],
 )
 ```
 
@@ -98,20 +98,20 @@ from argilla.client.feedback.schemas import SpanValueSchema
 
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "entities",
             "value": [
                 SpanValueSchema(
-                    start=0, # position of the first character of the span
-                    end=10, # position of the character right after the end of the span
+                    start=0,  # position of the first character of the span
+                    end=10,  # position of the character right after the end of the span
                     label="ORG",
-                    score=1.0
+                    score=1.0,
                 )
             ],
             "agent": model_name,
         }
-    ]
+    ],
 )
 ```
 
@@ -122,14 +122,14 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    suggestions = [
+    suggestions=[
         {
             "question_name": "corrected-text",
             "value": "This is a *suggestion*.",
             "score": 0.7,
             "agent": model_name,
         }
-    ]
+    ],
 )
 ```
 
@@ -196,16 +196,7 @@ If your dataset includes some annotations, you can add those to the records as y
 
 ```python
 record = rg.FeedbackRecord(
-    fields=...,
-    responses = [
-        {
-            "values":{
-                "relevant":{
-                    "value": "YES"
-                }
-            }
-        }
-    ]
+    fields=..., responses=[{"values": {"relevant": {"value": "YES"}}}]
 )
 ```
 
@@ -216,15 +207,7 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    responses = [
-        {
-            "values":{
-                "content_class":{
-                    "value": ["hate", "violent"]
-                }
-            }
-        }
-    ]
+    responses=[{"values": {"content_class": {"value": ["hate", "violent"]}}}],
 )
 ```
 
@@ -235,11 +218,11 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    responses = [
+    responses=[
         {
-            "values":{
-                "preference":{
-                    "value":[
+            "values": {
+                "preference": {
+                    "value": [
                         {"rank": 1, "value": "reply-2"},
                         {"rank": 2, "value": "reply-1"},
                         {"rank": 3, "value": "reply-3"},
@@ -247,7 +230,7 @@ record = rg.FeedbackRecord(
                 }
             }
         }
-    ]
+    ],
 )
 ```
 
@@ -257,16 +240,7 @@ record = rg.FeedbackRecord(
 
 ```python
 record = rg.FeedbackRecord(
-    fields=...,
-    responses = [
-        {
-            "values":{
-                "quality":{
-                    "value": 5
-                }
-            }
-        }
-    ]
+    fields=..., responses=[{"values": {"quality": {"value": 5}}}]
 )
 ```
 
@@ -279,21 +253,13 @@ from argilla.client.feedback.schemas import SpanValueSchema
 
 record = rg.FeedbackRecord(
     fields=...,
-    responses = [
+    responses=[
         {
-            "values":{
-                "entities":{
-                    "value": [
-                        SpanValueSchema(
-                            start=0,
-                            end=10,
-                            label="ORG"
-                        )
-                    ]
-                }
+            "values": {
+                "entities": {"value": [SpanValueSchema(start=0, end=10, label="ORG")]}
             }
         }
-    ]
+    ],
 )
 ```
 
@@ -304,15 +270,7 @@ record = rg.FeedbackRecord(
 ```python
 record = rg.FeedbackRecord(
     fields=...,
-    responses = [
-        {
-            "values":{
-                "corrected-text":{
-                    "value": "This is a *response*."
-                }
-            }
-        }
-    ]
+    responses=[{"values": {"corrected-text": {"value": "This is a *response*."}}}],
 )
 ```
 
@@ -336,8 +294,8 @@ The dataset not yet pushed to Argilla or pulled from HuggingFace Hub is an insta
 for record in dataset.records:
     record.responses = [
         {
-            "values":{
-                "label":{
+            "values": {
+                "label": {
                     "value": "YES",
                 }
             }
@@ -356,8 +314,8 @@ modified_records = []
 for record in dataset.records:
     record.responses = [
         {
-            "values":{
-                "label":{
+            "values": {
+                "label": {
                     "value": "YES",
                 }
             },
@@ -413,9 +371,7 @@ In this case, we expect a `List[Tuple[str, float]]` as the prediction, where the
 import argilla as rg
 
 rec = rg.TextClassificationRecord(
-    text=...,
-    prediction=[("label_1", 0.75), ("label_2", 0.75)],
-    multi_label=True
+    text=..., prediction=[("label_1", 0.75), ("label_2", 0.75)], multi_label=True
 )
 ```
 
@@ -488,9 +444,7 @@ In this case, we expect a `List[str]` as the annotation. In case of multi-label,
 import argilla as rg
 
 rec = rg.TextClassificationRecord(
-    text=...,
-    annotation=["label_1", "label_2"],
-    multi_label=True
+    text=..., annotation=["label_1", "label_2"], multi_label=True
 )
 ```
 

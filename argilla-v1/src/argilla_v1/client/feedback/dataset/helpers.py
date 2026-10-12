@@ -169,7 +169,7 @@ def normalize_records(
             new_records.append(record)
         else:
             raise ValueError(
-                "Expected `records` to be a list of `dict` or `FeedbackRecord`," f" got type `{type(record)}` instead."
+                f"Expected `records` to be a list of `dict` or `FeedbackRecord`, got type `{type(record)}` instead."
             )
     return new_records
 
@@ -384,7 +384,7 @@ def _validate_record_metadata(record: FeedbackRecord, metadata_schema: typing.Ty
         metadata_schema.parse_obj(record.metadata)
     except ValidationError as e:
         raise ValueError(
-            f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema," f" with exception: {e}"
+            f"`FeedbackRecord.metadata` {record.metadata} does not match the expected schema, with exception: {e}"
         ) from e
 
 

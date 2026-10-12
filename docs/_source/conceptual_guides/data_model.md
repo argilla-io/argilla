@@ -99,17 +99,12 @@ Let's see examples of a spam classifier.
 ```python
 record = rg.TextClassificationRecord(
     text="Access this link to get free discounts!",
-
-    prediction = [('SPAM', 0.8), ('HAM', 0.2)],
-    prediction_agent = "link or reference to agent",
-
-    annotation = "SPAM",
-    annotation_agent= "link or reference to annotator",
-
+    prediction=[("SPAM", 0.8), ("HAM", 0.2)],
+    prediction_agent="link or reference to agent",
+    annotation="SPAM",
+    annotation_agent="link or reference to annotator",
     # Extra information about this record
-    metadata={
-        "split": "train"
-    },
+    metadata={"split": "train"},
 )
 ```
 
@@ -120,14 +115,11 @@ Another similar task to Text Classification, but yet a bit different, is Multi-l
 ```python
 record = rg.TextClassificationRecord(
     text="I can't wait to travel to Egypt and visit the pyramids",
-
-    multi_label = True,
-
-    prediction = [('travel', 0.8), ('history', 0.6), ('economy', 0.3), ('sports', 0.2)],
-    prediction_agent = "link or reference to agent",
-
-    annotation = ['travel', 'history'],
-    annotation_agent= "link or reference to annotator",
+    multi_label=True,
+    prediction=[("travel", 0.8), ("history", 0.6), ("economy", 0.3), ("sports", 0.2)],
+    prediction_agent="link or reference to agent",
+    annotation=["travel", "history"],
+    annotation_agent="link or reference to annotator",
 )
 ```
 
@@ -137,21 +129,18 @@ Tasks of the kind of token classification are NLP tasks aimed at dividing the in
 
 ```python
 record = rg.TokenClassificationRecord(
-    text = "Michael is a professor at Harvard",
-    tokens = ["Michael", "is", "a", "professor", "at", "Harvard"],
-
+    text="Michael is a professor at Harvard",
+    tokens=["Michael", "is", "a", "professor", "at", "Harvard"],
     # Predictions are a list of tuples with all your token labels and their starting and ending positions
-    prediction = [('NAME', 0, 7), ('LOC', 26, 33)],
-    prediction_agent = "link or reference to agent",
-
+    prediction=[("NAME", 0, 7), ("LOC", 26, 33)],
+    prediction_agent="link or reference to agent",
     # Annotations are a list of tuples with all your token labels and their starting and ending positions
-    annotation = [('NAME', 0, 7), ('ORG', 26, 33)],
-    annotation_agent = "link or reference to annotator",
-
+    annotation=[("NAME", 0, 7), ("ORG", 26, 33)],
+    annotation_agent="link or reference to annotator",
     metadata={  # Information about this record
         "split": "train"
-        },
-    )
+    },
+)
 ```
 
 ##### Text2Text
@@ -160,14 +149,12 @@ Text2Text tasks, like text generation, are tasks where the model receives and ou
 
 ```python
 record = rg.Text2TextRecord(
-    text = "Michael is a professor at Harvard",
-
+    text="Michael is a professor at Harvard",
     # The prediction is a list of texts or tuples if you want to add a score to a prediction
-    prediction = ["Michael es profesor en Harvard", "Michael es un profesor de Harvard"],
-    prediction_agent = "link or reference to agent",
-
+    prediction=["Michael es profesor en Harvard", "Michael es un profesor de Harvard"],
+    prediction_agent="link or reference to agent",
     # The annotation is a string representing the expected output text for the given input text
-    annotation = "Michael es profesor en Harvard"
+    annotation="Michael es profesor en Harvard",
 )
 ```
 

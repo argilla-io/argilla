@@ -24,10 +24,7 @@ Depending on [your Argilla deployment](../getting_started/quickstart.md), the in
 !!! info "Main Class"
 
     ```python
-    rg.Workspace(
-        name = "name",
-        client=client
-    )
+    rg.Workspace(name="name", client=client)
     ```
     > Check the [Workspace - Python Reference](../reference/argilla/workspaces.md) to see the attributes, arguments, and methods of the `Workspace` class in detail.
 
@@ -116,7 +113,7 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-workspace = client.workspaces('my_workspace')
+workspace = client.workspaces("my_workspace")
 
 for user in workspace.users:
     print(user)

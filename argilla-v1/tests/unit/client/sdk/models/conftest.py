@@ -45,7 +45,7 @@ class Helpers:
                     continue
                 if name not in server_props:
                     LOGGER.warning(
-                        f"Client property {name} not found in server properties. " "Make sure your API compatibility"
+                        f"Client property {name} not found in server properties. Make sure your API compatibility"
                     )
                     different_props.append(name)
                     continue

@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, Union, List, TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from argilla._api._metadata import MetadataAPI
 from argilla._exceptions import MetadataError
 from argilla._models import (
-    TermsMetadataPropertySettings,
     FloatMetadataPropertySettings,
     IntegerMetadataPropertySettings,
     MetadataFieldModel,
+    TermsMetadataPropertySettings,
 )
 from argilla._resource import Resource
 from argilla.client import Argilla
@@ -34,10 +34,10 @@ if TYPE_CHECKING:
     from argilla import Dataset
 
 __all__ = [
-    "TermsMetadataProperty",
     "FloatMetadataProperty",
     "IntegerMetadataProperty",
     "MetadataType",
+    "TermsMetadataProperty",
 ]
 
 
