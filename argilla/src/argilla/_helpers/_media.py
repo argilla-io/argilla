@@ -16,7 +16,7 @@ import base64
 import io
 import warnings
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional, Union
 
 from PIL import Image
 

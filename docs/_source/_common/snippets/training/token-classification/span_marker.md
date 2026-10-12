@@ -17,7 +17,7 @@ trainer = ArgillaTrainer(
     name="<my_dataset_name>",
     workspace="<my_workspace_name>",
     framework="span_marker",
-    train_size=0.8
+    train_size=0.8,
 )
 trainer.update_config(num_train_epochs=10)
 trainer.train(output_dir="token-classification")

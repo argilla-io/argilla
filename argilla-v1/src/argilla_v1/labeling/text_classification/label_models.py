@@ -240,8 +240,7 @@ class MajorityVoter(LabelModel):
                 pred_for_rec = [(self._weak_labels.labels[idx], prob[idx]) for idx in np.argsort(prob)[::-1]]
             else:
                 raise NotImplementedError(
-                    f"The tie break policy '{tie_break_policy.value}' is not"
-                    f" implemented for {self.__class__.__name__}!"
+                    f"The tie break policy '{tie_break_policy.value}' is not implemented for {self.__class__.__name__}!"
                 )
 
             records_with_prediction.append(rec.copy(deep=True))
