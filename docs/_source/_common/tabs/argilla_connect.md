@@ -22,10 +22,7 @@ setx ARGILLA_API_URL="argilla-api-key"
 ```python
 import argilla as rg
 
-rg.init(
-    api_url="argilla-api-url",
-    api_key="argilla-api-key"
-)
+rg.init(api_url="argilla-api-url", api_key="argilla-api-key")
 ```
 :::
 
@@ -33,10 +30,7 @@ rg.init(
 ```python
 from argilla.client.client import Argilla
 
-client = Argilla(
-    api_url="argilla-api-url",
-    api_key="argilla-api-key"
-)
+client = Argilla(api_url="argilla-api-url", api_key="argilla-api-key")
 ```
 :::
 

@@ -11,17 +11,15 @@ This returns a list of Tuples with the records and their similarity score (betwe
 ds = rg.FeedbackDataset.from_argilla("my_dataset", workspace="my_workspace")
 
 # using text embeddings
-similar_records =  ds.find_similar_records(
+similar_records = ds.find_similar_records(
     vector_name="my_vector",
-    value=embedder_model.embeddings("My text is here")
+    value=embedder_model.embeddings("My text is here"),
     # value=embedder_model.embeddings("My text is here").tolist() # for numpy arrays
 )
 
 # using another record
-similar_records =  ds.find_similar_records(
-    vector_name="my_vector",
-    record=ds.records[0],
-    max_results=5
+similar_records = ds.find_similar_records(
+    vector_name="my_vector", record=ds.records[0], max_results=5
 )
 
 # work with the resulting tuples
@@ -32,8 +30,9 @@ for record, score in similar_records:
 You can also combine filters and semantic search like this:
 
 ```python
-similar_records = (dataset
-    .filter_by(metadata=[rg.TermsMetadataFilter(values=["Positive"])])
-    .find_similar_records(vector_name="vector", value=model.encode("Another text").tolist())
+similar_records = dataset.filter_by(
+    metadata=[rg.TermsMetadataFilter(values=["Positive"])]
+).find_similar_records(
+    vector_name="vector", value=model.encode("Another text").tolist()
 )
 ```

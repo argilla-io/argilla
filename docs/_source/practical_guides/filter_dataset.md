@@ -45,13 +45,12 @@ filtered_records = dataset.filter_by(
     metadata_filters=[
         rg.IntegerMetadataFilter(
             name="tokens-length",
-            ge=900, # at least one of ge or le should be provided
-            le=1000
+            ge=900,  # at least one of ge or le should be provided
+            le=1000,
         ),
         rg.TermsMetadataFilter(
-            name="task",
-            values=["summarization", "information-extraction"]
-        )
+            name="task", values=["summarization", "information-extraction"]
+        ),
     ]
 )
 ```

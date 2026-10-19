@@ -15,7 +15,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field, ConfigDict
+from pydantic import ConfigDict, Field
 
 from argilla._models._base import ResourceModel
 
