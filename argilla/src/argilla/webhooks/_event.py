@@ -20,12 +20,12 @@ from pydantic import BaseModel, ConfigDict
 
 from argilla import Dataset, Record, UserResponse, Workspace
 from argilla._exceptions import ArgillaAPIError
-from argilla._models import RecordModel, UserResponseModel, WorkspaceModel, EventType
+from argilla._models import EventType, RecordModel, UserResponseModel, WorkspaceModel
 
 if TYPE_CHECKING:
     from argilla import Argilla
 
-__all__ = ["RecordEvent", "DatasetEvent", "UserResponseEvent", "WebhookEvent"]
+__all__ = ["DatasetEvent", "RecordEvent", "UserResponseEvent", "WebhookEvent"]
 
 
 class RecordEvent(BaseModel):

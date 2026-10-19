@@ -19,15 +19,12 @@ Here's an example of how to create a `FeedbackDataset` in Argilla that can be us
 ```python
 import argilla as rg
 
-rg.init(
-    api_url="...",
-    api_key="..."
-)
+rg.init(api_url="...", api_key="...")
 
 dataset = rg.FeedbackDataset(
     fields=[
         rg.TextField(name="prompt", required=True),
-        rg.TextField(name="response", required=True)
+        rg.TextField(name="response", required=True),
     ],
     questions=[
         rg.RatingQuestion(
@@ -171,6 +168,7 @@ argilla_callback = ArgillaCallbackHandler(
 topics = ["opening a new account", "applying for a loan", "applying for a credit card"]
 sentiment = ["positive", "neutral", "negative"]
 
+
 def get_prompt():
     prompt = (
         "Write a customer review for a bank. "
@@ -178,6 +176,7 @@ def get_prompt():
         f"Do that with one a {random.choice(sentiment)} sentiment."
     )
     return template
+
 
 llm = OpenAI(temperature=0.9, callbacks=[argilla_callback])
 llm.generate([get_prompt() for _ in range(3)])

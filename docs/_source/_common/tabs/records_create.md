@@ -11,10 +11,10 @@ import argilla as rg
 record = rg.FeedbackRecord(
     fields={
         "question": "Why can camels survive long without water?",
-        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
+        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time.",
     },
     metadata={"source": "encyclopedia"},
-    external_id='rec_1'
+    external_id="rec_1",
 )
 ```
 
@@ -30,7 +30,7 @@ import argilla as rg
 rec = rg.TextClassificationRecord(
     text="beautiful accomodations stayed hotel santa... hotels higer ranked website.",
     prediction=[("price", 0.75), ("hygiene", 0.25)],
-    annotation="price"
+    annotation="price",
 )
 rg.log(records=rec, name="my_dataset")
 ```
@@ -45,7 +45,7 @@ rec = rg.TextClassificationRecord(
     text="damn this kid and her fancy clothes makes me feel like a bad parent.",
     prediction=[("admiration", 0.75), ("annoyance", 0.25)],
     annotation=["price", "annoyance"],
-    multi_label=True
+    multi_label=True,
 )
 rg.log(records=rec, name="my_dataset")
 ```

@@ -82,11 +82,11 @@ for user in users_v1:
         first_name=user.first_name,
         last_name=user.last_name,
         role=user.role,
-        password="<your_chosen_password>" # (1)
+        password="<your_chosen_password>",  # (1)
     ).create()
 
     if user.role == "owner":
-       continue
+        continue
 
     for workspace in user.workspaces:
         workspace_v2 = client.workspaces(name=workspace.name)
@@ -152,16 +152,16 @@ Next, define the new dataset settings:
     ```python
     settings = rg.Settings(
         fields=[
-            rg.TextField(name="text"), # (1)
+            rg.TextField(name="text"),  # (1)
         ],
         questions=[
             rg.LabelQuestion(name="label", labels=settings_v1.label_schema),
         ],
         metadata=[
-            rg.TermsMetadataProperty(name="split"), # (2)
+            rg.TermsMetadataProperty(name="split"),  # (2)
         ],
         vectors=[
-            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (3)
+            rg.VectorField(name="mini-lm-sentence-transformers", dimensions=384),  # (3)
         ],
     )
     ```
@@ -175,16 +175,16 @@ Next, define the new dataset settings:
     ```python
     settings = rg.Settings(
         fields=[
-            rg.TextField(name="text"), # (1)
+            rg.TextField(name="text"),  # (1)
         ],
         questions=[
             rg.MultiLabelQuestion(name="labels", labels=settings_v1.label_schema),
         ],
         metadata=[
-            rg.TermsMetadataProperty(name="split"), # (2)
+            rg.TermsMetadataProperty(name="split"),  # (2)
         ],
         vectors=[
-            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (3)
+            rg.VectorField(name="mini-lm-sentence-transformers", dimensions=384),  # (3)
         ],
     )
     ```
@@ -204,10 +204,10 @@ Next, define the new dataset settings:
             rg.SpanQuestion(name="spans", labels=settings_v1.label_schema),
         ],
         metadata=[
-            rg.TermsMetadataProperty(name="split"), # (1)
+            rg.TermsMetadataProperty(name="split"),  # (1)
         ],
         vectors=[
-            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (2)
+            rg.VectorField(name="mini-lm-sentence-transformers", dimensions=384),  # (2)
         ],
     )
     ```
@@ -226,10 +226,10 @@ Next, define the new dataset settings:
             rg.TextQuestion(name="text_generation"),
         ],
         metadata=[
-            rg.TermsMetadataProperty(name="split"), # (1)
+            rg.TermsMetadataProperty(name="split"),  # (1)
         ],
         vectors=[
-            rg.VectorField(name='mini-lm-sentence-transformers', dimensions=384), # (2)
+            rg.VectorField(name="mini-lm-sentence-transformers", dimensions=384),  # (2)
         ],
     )
     ```
@@ -264,7 +264,7 @@ Here are a set of example functions to convert the records for single-label and 
 
     ```python
     def map_to_record_for_single_label(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
-        """ This function maps a text classification record dictionary to the new Argilla record."""
+        """This function maps a text classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
 
@@ -273,10 +273,10 @@ Here are a set of example functions to convert the records for single-label and 
             agent = data["prediction_agent"]
             suggestions.append(
                 rg.Suggestion(
-                    question_name="label", # (1)
+                    question_name="label",  # (1)
                     value=label,
                     score=score,
-                    agent=agent
+                    agent=agent,
                 )
             )
 
@@ -284,9 +284,9 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(
                 rg.Response(
-                    question_name="label", # (2)
+                    question_name="label",  # (2)
                     value=annotation,
-                    user_id=user_id
+                    user_id=user_id,
                 )
             )
 
@@ -310,7 +310,7 @@ Here are a set of example functions to convert the records for single-label and 
 
     ```python
     def map_to_record_for_multi_label(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
-        """ This function maps a text classification record dictionary to the new Argilla record."""
+        """This function maps a text classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
 
@@ -319,10 +319,10 @@ Here are a set of example functions to convert the records for single-label and 
             agent = data["prediction_agent"]
             suggestions.append(
                 rg.Suggestion(
-                    question_name="labels", # (1)
+                    question_name="labels",  # (1)
                     value=labels,
                     score=scores,
-                    agent=agent
+                    agent=agent,
                 )
             )
 
@@ -330,9 +330,9 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(
                 rg.Response(
-                    question_name="labels", # (2)
+                    question_name="labels",  # (2)
                     value=annotation,
-                    user_id=user_id
+                    user_id=user_id,
                 )
             )
 
@@ -356,7 +356,7 @@ Here are a set of example functions to convert the records for single-label and 
 
     ```python
     def map_to_record_for_span(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
-        """ This function maps a token classification record dictionary to the new Argilla record."""
+        """This function maps a token classification record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
 
@@ -365,10 +365,10 @@ Here are a set of example functions to convert the records for single-label and 
             agent = data["prediction_agent"]
             suggestions.append(
                 rg.Suggestion(
-                    question_name="spans", # (1)
+                    question_name="spans",  # (1)
                     value=prediction,
                     score=scores,
-                    agent=agent
+                    agent=agent,
                 )
             )
 
@@ -376,9 +376,9 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(
                 rg.Response(
-                    question_name="spans", # (2)
+                    question_name="spans",  # (2)
                     value=annotation,
-                    user_id=user_id
+                    user_id=user_id,
                 )
             )
 
@@ -403,7 +403,7 @@ Here are a set of example functions to convert the records for single-label and 
 
     ```python
     def map_to_record_for_text_generation(data: dict, users_by_name: dict, current_user: rg.User) -> rg.Record:
-        """ This function maps a text2text record dictionary to the new Argilla record."""
+        """This function maps a text2text record dictionary to the new Argilla record."""
         suggestions = []
         responses = []
 
@@ -412,10 +412,10 @@ Here are a set of example functions to convert the records for single-label and 
             agent = data["prediction_agent"]
             suggestions.append(
                 rg.Suggestion(
-                    question_name="text_generation", # (1)
+                    question_name="text_generation",  # (1)
                     value=first["text"],
                     score=first["score"],
-                    agent=agent
+                    agent=agent,
                 )
             )
 
@@ -424,9 +424,9 @@ Here are a set of example functions to convert the records for single-label and 
             user_id = users_by_name.get(data["annotation_agent"], current_user).id
             responses.append(
                 rg.Response(
-                    question_name="text_generation", # (2)
+                    question_name="text_generation",  # (2)
                     value=annotation,
-                    user_id=user_id
+                    user_id=user_id,
                 )
             )
 

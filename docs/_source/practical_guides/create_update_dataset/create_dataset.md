@@ -140,15 +140,12 @@ To use the similarity search in the UI and the Python SDK, you will need to conf
 
 ```python
 vectors_settings = [
-    rg.VectorSettings(
-        name="my_vector",
-        dimensions=768
-    ),
+    rg.VectorSettings(name="my_vector", dimensions=768),
     rg.VectorSettings(
         name="my_other_vector",
-        title="Another Vector", # optional
-        dimensions=768
-    )
+        title="Another Vector",  # optional
+        dimensions=768,
+    ),
 ]
 ```
 
@@ -198,28 +195,28 @@ dataset = rg.FeedbackDataset(
             required=False,
         ),
     ],
-    metadata_properties = [
+    metadata_properties=[
         rg.TermsMetadataProperty(
             name="groups",
             title="Annotation groups",
-            values=["group-a", "group-b", "group-c"] #optional
+            values=["group-a", "group-b", "group-c"],  # optional
         ),
         rg.FloatMetadataProperty(
             name="temperature",
-            min=-0, #optional
-            max=1, #optional
-            visible_for_annotators=False
-        )
+            min=-0,  # optional
+            max=1,  # optional
+            visible_for_annotators=False,
+        ),
     ],
-    allow_extra_metadata = False,
+    allow_extra_metadata=False,
     vectors_settings=[
         rg.VectorSettings(
             name="sentence_embeddings",
             dimensions=768,
-            title="Sentence Embeddings" #optional
+            title="Sentence Embeddings",  # optional
         )
     ],
-    guidelines="Please, read the question carefully and try to answer it as accurately as possible."
+    guidelines="Please, read the question carefully and try to answer it as accurately as possible.",
 )
 ```
 
@@ -383,7 +380,7 @@ This works for both local and remote `FeedbackDataset` instances.
 dataset = rg.FeedbackDataset(...)
 
 # Define new guidelines for a question
-dataset.questions[0].description = 'New description for the question.'
+dataset.questions[0].description = "New description for the question."
 ```
 
 :::
@@ -450,7 +447,7 @@ import argilla as rg
 rec = rg.TextClassificationRecord(
     text="beautiful accommodations stayed hotel santa... hotels higher ranked website.",
     prediction=[("price", 0.75), ("hygiene", 0.25)],
-    annotation="price"
+    annotation="price",
 )
 
 rg.log(records=rec, name="my_dataset")
