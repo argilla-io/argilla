@@ -17,7 +17,7 @@ from uuid import UUID
 
 from argilla import Workspace
 from argilla._api import UsersAPI
-from argilla._models import UserModel, Role
+from argilla._models import Role, UserModel
 from argilla._resource import Resource
 from argilla.client import Argilla
 

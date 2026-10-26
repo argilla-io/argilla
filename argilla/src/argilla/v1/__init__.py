@@ -15,7 +15,7 @@
 import warnings
 
 try:
-    from argilla_v1 import *  # noqa
+    from argilla_v1 import *
 except ModuleNotFoundError as ex:
     raise Exception(
         'The package argilla-v1 is not installed. Please install it by typing: pip install "argilla[legacy]"',

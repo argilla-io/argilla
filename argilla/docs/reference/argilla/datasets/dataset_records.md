@@ -25,21 +25,14 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
     You can also add records to a dataset by initializing a `Record` object directly.
 
     ```python
-
     records = [
         rg.Record(
-            fields={
-                "question": "Do you need oxygen to breathe?",
-                "answer": "Yes"
-            },
+            fields={"question": "Do you need oxygen to breathe?", "answer": "Yes"},
         ),
         rg.Record(
-            fields={
-                "question": "What is the boiling point of water?",
-                "answer": "100 degrees Celsius"
-            },
+            fields={"question": "What is the boiling point of water?", "answer": "100 degrees Celsius"},
         ),
-    ] # (1)
+    ]  # (1)
 
     dataset.records.log(records)
     ```
@@ -49,7 +42,6 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
 === "From a data structure"
 
     ```python
-
     data = [
         {
             "question": "Do you need oxygen to breathe?",
@@ -59,7 +51,7 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
             "question": "What is the boiling point of water?",
             "answer": "100 degrees Celsius",
         },
-    ] # (1)
+    ]  # (1)
 
     dataset.records.log(data)
     ```
@@ -78,12 +70,11 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
             "query": "What is the boiling point of water?",
             "response": "100 degrees Celsius",
         },
-    ] # (1)
+    ]  # (1)
     dataset.records.log(
         records=data,
-        mapping={"query": "question", "response": "answer"} # (2)
+        mapping={"query": "question", "response": "answer"},  # (2)
     )
-
     ```
 
     1. The data structure's keys must match the fields or questions in the Argilla dataset. In this case, there are fields named `question` and `answer`.
@@ -100,7 +91,7 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
     ```python
     from datasets import load_dataset
 
-    hf_dataset = load_dataset("imdb", split="train[:100]") # (1)
+    hf_dataset = load_dataset("imdb", split="train[:100]")  # (1)
 
     dataset.records.log(records=hf_dataset)
     ```
@@ -110,7 +101,7 @@ To add records to a dataset, use the `log` method. Records can be added as dicti
     Here we use the `mapping` parameter to specify the relationship between the Hugging Face dataset and the Argilla dataset.
 
     ```python
-    dataset.records.log(records=hf_dataset, mapping={"txt": "text", "y": "label"}) # (1)
+    dataset.records.log(records=hf_dataset, mapping={"txt": "text", "y": "label"})  # (1)
     ```
 
     1. In this case, the `txt` key in the Hugging Face dataset corresponds to the `text` field in the Argilla dataset, and the `y` key in the Hugging Face dataset corresponds to the `label` field in the Argilla dataset.
@@ -125,11 +116,10 @@ Records can also be updated using the `log` method with records that contain an 
     You can update records in a dataset by initializing a `Record` object directly and providing the `id` field.
 
     ```python
-
     records = [
         rg.Record(
             metadata={"department": "toys"},
-            id="2" # (1)
+            id="2",  # (1)
         ),
     ]
 
@@ -143,11 +133,10 @@ Records can also be updated using the `log` method with records that contain an 
     You can also update records in a dataset by providing the `id` field in the data structure.
 
     ```python
-
     data = [
         {
             "metadata": {"department": "toys"},
-            "id": "2" # (1)
+            "id": "2",  # (1)
         },
     ]
 
@@ -165,15 +154,14 @@ Records can also be updated using the `log` method with records that contain an 
     data = [
         {
             "metadata": {"department": "toys"},
-            "my_id": "2" # (1)
+            "my_id": "2",  # (1)
         },
     ]
 
     dataset.records.log(
         records=data,
-        mapping={"my_id": "id"} # (2)
+        mapping={"my_id": "id"},  # (2)
     )
-
     ```
 
     1. The `id` field is required to identify the record to be updated. The `id` field must be unique for each record in the dataset. If the `id` field is not provided, the record will be added as a new record.
@@ -186,9 +174,9 @@ Records can also be updated using the `log` method with records that contain an 
     ```python
     from datasets import load_dataset
 
-    hf_dataset = load_dataset("imdb", split="train[:100]") # (1)
+    hf_dataset = load_dataset("imdb", split="train[:100]")  # (1)
 
-    dataset.records.log(records=hf_dataset, mapping={"uuid": "id"}) # (2)
+    dataset.records.log(records=hf_dataset, mapping={"uuid": "id"})  # (2)
     ```
 
     1. In this example, the Hugging Face dataset matches the Argilla dataset schema.
@@ -227,10 +215,10 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
 
     data = [
         {
-            "image": os.path.join(image_dir, "image1.jpg"), # (1)
+            "image": os.path.join(image_dir, "image1.jpg"),  # (1)
         },
         {
-            "image": Image.open(os.path.join(image_dir, "image2.jpg")), # (2)
+            "image": Image.open(os.path.join(image_dir, "image2.jpg")),  # (2)
         },
     ]
 
@@ -252,7 +240,7 @@ Argilla datasets can contain image fields. You can add images to a dataset by pa
     If the image field is not defined as an `Image` in the dataset's features, you can cast the dataset to the correct schema before adding it to the Argilla dataset. This is only necessary if the image field is not defined as an `Image` in the dataset's features, and is not one of the supported image types by Argilla (URL, local path, or PIL object).
 
     ```python
-    hf_dataset = load_dataset("<my_custom_dataset>") # (1)
+    hf_dataset = load_dataset("<my_custom_dataset>")  # (1)
     hf_dataset = hf_dataset.cast(
         features=Features({"image": Image(), "label": Value("string")}),
     )
