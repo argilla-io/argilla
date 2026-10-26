@@ -44,7 +44,7 @@ css_template = """
     flex: 1;
 }
 </style>
-""" # (1)
+"""  # (1)
 
 html_template = """
 <div id="container">
@@ -57,7 +57,7 @@ html_template = """
         <img src="{{record.fields.image.revision}}" />
     </div>
 </div>
-""" # (2)
+"""  # (2)
 ```
 
 1. This is a CSS template, which ensures that the container and columns are styled.
@@ -83,15 +83,17 @@ dataset = rg.Dataset(
     settings=settings,
 ).create()
 
-dataset.records.log([
-    rg.Record(
-        fields={
-            "image": {
-                "original": "https://argilla.io/brand-assets/argilla/argilla-logo-color-black.png",
-                "revision": "https://argilla.io/brand-assets/argilla/argilla-logo-black.png",
+dataset.records.log(
+    [
+        rg.Record(
+            fields={
+                "image": {
+                    "original": "https://argilla.io/brand-assets/argilla/argilla-logo-color-black.png",
+                    "revision": "https://argilla.io/brand-assets/argilla/argilla-logo-black.png",
+                }
             }
-        }
-    )]
+        )
+    ]
 )
 ```
 
@@ -145,7 +147,7 @@ The result will be the following:
         metadata={
             "name": "John Doe",
             "age": 25,
-        }
+        },
     )
     ```
     ![example-gallery-end](../assets/images/how_to_guides/custom_field/metadata_table.png)
@@ -201,7 +203,7 @@ template = """
         </div>
     </div>
 </script>
-""" # (1)
+"""  # (1)
 
 script = """
 <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
@@ -211,7 +213,7 @@ script = """
     const html = compiledTemplate({ record });
     document.getElementById("content").innerHTML = html;
 </script>
-""" # (2)
+"""  # (2)
 ```
 
 1. This is a JavaScript template script. We set `id` to `template` to use it later in our JavaScript code and `type` to `text/x-handlebars-template` to indicate that this is a Handlebars template. Note that we also added a `div` with `id` to `content` to render the template into.
@@ -222,11 +224,7 @@ We can now pass these templates to the `CustomField` class, ensuring that the `a
 ```python
 import argilla as rg
 
-custom_field = rg.CustomField(
-    name="image",
-    template=template + script,
-    advanced_mode=True
-)
+custom_field = rg.CustomField(name="image", template=template + script, advanced_mode=True)
 ```
 
 Besides the new `CustomField` code above, reusing the same approach as in the [Using handlebars in your template](#using-handlebars-in-your-template) section, will create a dataset and log a record to it, yielding the same result.

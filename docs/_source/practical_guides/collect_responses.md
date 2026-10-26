@@ -50,7 +50,9 @@ for record in feedback.records:
         submitted = [r for r in record.responses if r.status == "submitted"]
         count_submitted[len(submitted)] += 1
 count_submitted = OrderedDict(sorted(count_submitted.items()))
-count_submitted = [{"submitted_responses": k, "no_records": v} for k, v in count_submitted.items()]
+count_submitted = [
+    {"submitted_responses": k, "no_records": v} for k, v in count_submitted.items()
+]
 
 fig = px.bar(count_submitted, x="submitted_responses", y="no_records")
 fig.update_xaxes(title_text="No. of submitted responses", dtick=1)
@@ -63,15 +65,28 @@ fig.show()
 ```python
 # plot 2: distance between responses in rating question
 list_values = []
-for record_ix,record in enumerate(feedback):
+for record_ix, record in enumerate(feedback):
     if record.responses:
         submitted = [r for r in record.responses if r.status == "submitted"]
         if len(submitted) > 1:
             for response_ix, response in enumerate(submitted):
-                list_values.append({"record": str(record_ix+1), "annotator": str(response_ix+1), "value": response.values["rating"].value})
+                list_values.append(
+                    {
+                        "record": str(record_ix + 1),
+                        "annotator": str(response_ix + 1),
+                        "value": response.values["rating"].value,
+                    }
+                )
 
 
-fig = px.box(list_values, x="annotator", y="value", color="annotator", points="all", hover_data="record")
+fig = px.box(
+    list_values,
+    x="annotator",
+    y="value",
+    color="annotator",
+    points="all",
+    hover_data="record",
+)
 fig.update_yaxes(dtick=1)
 fig.show()
 ```
@@ -141,10 +156,12 @@ import argilla as rg
 from argilla.client.feedback.metrics import AgreementMetric
 
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
-metric = AgreementMetric(dataset=feedback_dataset, field_name="text", question_name="question_name")
+metric = AgreementMetric(
+    dataset=feedback_dataset, field_name="text", question_name="question_name"
+)
 agreement_metrics = metric.compute("alpha")
-# >>> agreement_metrics
-# [AgreementMetricResult(metric_name='alpha', count=1000, result=0.467889)]
+# >>> agreement_metrics
+# [AgreementMetricResult(metric_name='alpha', count=1000, result=0.467889)]
 ```
 
 With the `compute` function, we have obtained a container that stores the metric name and the value of the metric as well as the number of records that were used to calculate the metric.
@@ -154,9 +171,11 @@ The metrics can also be computed easily from a `FeedbackDataset`:
 ```python
 import argilla as rg
 
-#dataset = rg.FeedbackDataset.from_huggingface("argilla/go_emotions_raw")
+# dataset = rg.FeedbackDataset.from_huggingface("argilla/go_emotions_raw")
 
-agreement_metrics = dataset.compute_agreement_metrics(question_name="label", field_name="text", metric_names="alpha")
+agreement_metrics = dataset.compute_agreement_metrics(
+    question_name="label", field_name="text", metric_names="alpha"
+)
 agreement_metrics
 
 # AgreementMetricResult(metric_name='alpha', count=191792, result=0.2703263452657748)
@@ -194,8 +213,8 @@ from argilla.client.feedback.metrics import ModelMetric
 feedback_dataset = rg.FeedbackDataset.from_argilla("...", workspace="...")
 metric = ModelMetric(dataset=feedback_dataset, question_name="question_name")
 annotator_metrics = metric.compute("accuracy")
-# >>> annotator_metrics
-# {'00000000-0000-0000-0000-000000000001': [ModelMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [ModelMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [ModelMetricResult(metric_name='accuracy', count=3, result=0.5)]}
+# >>> annotator_metrics
+# {'00000000-0000-0000-0000-000000000001': [ModelMetricResult(metric_name='accuracy', count=3, result=0.5)], '00000000-0000-0000-0000-000000000002': [ModelMetricResult(metric_name='accuracy', count=3, result=0.25)], '00000000-0000-0000-0000-000000000003': [ModelMetricResult(metric_name='accuracy', count=3, result=0.5)]}
 ```
 
 We obtain a `dict` where the keys contain the `user_id` of a given annotator and a list with the metrics requested. For the interpretation of these metrics, we assume here that the predictions correspond to the suggestions given to an annotator and the true labels correspond to the responses given by an annotator. This way, we can interpret the metrics and see whether the model is performing as expected. The metrics are calculated for each annotator individually, so we can see which annotators are giving responses that align with the model and which are not.
@@ -203,8 +222,10 @@ We obtain a `dict` where the keys contain the `user_id` of a given annotator and
 Alternatively, we have the opportunity to compute the metrics directly from the dataset. Let’s use the following dataset for this, and compute the metrics for the suggestions:
 
 ```python
-mmodel_metrics = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"])
-suggestions_metrics['00000000-0000-0000-0000-000000000001']
+mmodel_metrics = dataset.compute_model_metrics(
+    question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"]
+)
+suggestions_metrics["00000000-0000-0000-0000-000000000001"]
 # [ModelMetricResult(metric_name='accuracy', count=1269, result=0.43341213553979513),
 #  ModelMetricResult(metric_name='precision', count=1269, result=0.5593881715337764),
 #  ModelMetricResult(metric_name='recall', count=1269, result=0.6166023130799764),
@@ -226,8 +247,8 @@ strategy_name = "majority"
 unified_dataset = feedback_dataset.compute_unified_responses(question, strategy_name)
 metric = UnifiedModelMetric(dataset=unified_dataset, question_name="question_name")
 unified_metrics = metric.compute("accuracy")
-# >>> unified_metrics
-# ModelMetricResult(metric_name='accuracy', count=3, result=0.25)
+# >>> unified_metrics
+# ModelMetricResult(metric_name='accuracy', count=3, result=0.25)
 ```
 
 We obtain the same container for the metrics result, but in this case, it’s not associated with any specific annotator but their general alignment.
@@ -235,7 +256,11 @@ We obtain the same container for the metrics result, but in this case, it’s no
 We can make use of the same methods we saw above directly from the `FeedbackDataset`, but note the use of the strategy argument used here:
 
 ```python
-model_metrics_unified = dataset.compute_model_metrics(question_name="label", metric_names=["accuracy", "precision", "recall", "f1-score"], strategy="majority")
+model_metrics_unified = dataset.compute_model_metrics(
+    question_name="label",
+    metric_names=["accuracy", "precision", "recall", "f1-score"],
+    strategy="majority",
+)
 model_metrics_unified
 # [ModelMetricResult(metric_name='accuracy', count=53990, result=0.8048342285608446),
 #  ModelMetricResult(metric_name='precision', count=53990, result=0.8085185809086417),
@@ -322,13 +347,12 @@ Let's log spaCy predictions using the built-in `rg.monitor` method:
 ```python
 nlp = rg.monitor(nlp, dataset="spacy_sm_wnut17")
 
+
 def predict(records):
-    for _ in nlp.pipe([
-        " ".join(record_tokens)
-        for record_tokens in records["tokens"]
-    ]):
+    for _ in nlp.pipe([" ".join(record_tokens) for record_tokens in records["tokens"]]):
         pass
-    return {"predicted": [True]*len(records["tokens"])}
+    return {"predicted": [True] * len(records["tokens"])}
+
 
 dataset.map(predict, batched=True, batch_size=512)
 ```
@@ -435,10 +459,7 @@ from argilla.metrics.token_classification import top_k_mentions
 from argilla.metrics.token_classification.metrics import Annotations
 
 top_k_mentions(
-    name="conll2002_es",
-    k=30,
-    threshold=4,
-    compute_for=Annotations
+    name="conll2002_es", k=30, threshold=4, compute_for=Annotations
 ).visualize()
 ```
 
