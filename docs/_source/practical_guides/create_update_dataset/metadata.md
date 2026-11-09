@@ -30,9 +30,7 @@ If you want to add metadata properties when creating a dataset, you can pass the
 
 ```python
 metadata_property = rg.TermsMetadataProperty(
-    name="groups",
-    title="Annotation groups",
-    values=["group-a", "group-b", "group-c"]
+    name="groups", title="Annotation groups", values=["group-a", "group-b", "group-c"]
 )
 dataset.add_metadata_property(metadata_property)
 ```
@@ -80,8 +78,7 @@ Record metadata can include any information about the record that is not part of
 
 ```python
 record = rg.FeedbackRecord(
-    fields={...},
-    metadata={"source": "encyclopedia", "text_length":150}
+    fields={...}, metadata={"source": "encyclopedia", "text_length": 150}
 )
 ```
 :::
@@ -89,8 +86,7 @@ record = rg.FeedbackRecord(
 :::{tab-item} Multiple Metadata
 ```python
 record = rg.FeedbackRecord(
-    fields={...},
-    metadata={"source": ["encyclopedia", "wikipedia"], "text_length":150}
+    fields={...}, metadata={"source": ["encyclopedia", "wikipedia"], "text_length": 150}
 )
 ```
 
@@ -212,7 +208,6 @@ rg.TokenClassificationRecord(
     tokens=tokens,
     metadata={"my_metadata": metadata},
 )
-
 ```
 
 You can easily add metadata to a record by modifying the `metadata` dictionary. This can also be used to modify existing metadata.

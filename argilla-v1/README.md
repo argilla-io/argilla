@@ -184,7 +184,7 @@ dataset = rg.FeedbackDataset(
             description="If you think the answer is not accurate, please, correct it.",
             required=False,
         ),
-    ]
+    ],
 )
 remote_dataset = dataset.push_to_argilla(name="my-dataset", workspace="my-workspace")
 ```
@@ -204,10 +204,10 @@ import argilla_v1 as rg
 record = rg.FeedbackRecord(
     fields={
         "question": "Why can camels survive long without water?",
-        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time."
+        "answer": "Camels use the fat in their humps to keep them filled with energy and hydration for long periods of time.",
     },
     metadata={"source": "encyclopedia"},
-    external_id='rec_1'
+    external_id="rec_1",
 )
 remote_dataset.add_records(record)
 ```
@@ -245,16 +245,12 @@ import argilla_v1 as rg
 # using text embeddings
 similar_records = ds.find_similar_records(
     vector_name="my_vector",
-    value=embedder_model.embeddings("My text is here")
+    value=embedder_model.embeddings("My text is here"),
     # value=embedder_model.embeddings("My text is here").tolist() # for numpy arrays
 )
 
 # using another record
-similar_records = ds.find_similar_records(
-    vector_name="my_vector",
-    record=ds.records[0],
-    max_results=5
-)
+similar_records = ds.find_similar_records(vector_name="my_vector", record=ds.records[0], max_results=5)
 ```
 
 <a href="https://docs.v1.argilla.io/en/latest/practical_guides/filter_dataset.html"><img src="https://docs.v1.argilla.io/en/latest/_images/features-similaritysearch.png" width="100%"></a>
@@ -310,7 +306,7 @@ trainer = ArgillaTrainer(
     train_size=0.8,
     seed=42,
     limit=10,
-    query="my-query"
+    query="my-query",
 )
 trainer.update_config()  # see usage below
 trainer.train()

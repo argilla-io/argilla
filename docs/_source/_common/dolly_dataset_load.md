@@ -3,5 +3,7 @@ We will use our [curated Dolly dataset](https://huggingface.co/datasets/argilla/
 ```python
 import argilla as rg
 
-feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+feedback_dataset = rg.FeedbackDataset.from_huggingface(
+    "argilla/databricks-dolly-15k-curated-en"
+)
 ```

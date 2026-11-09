@@ -18,12 +18,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
     === "`rg.Dataset`"
 
         ```python
-        rg.Dataset(
-            name="name",
-            workspace="workspace",
-            settings=settings,
-            client=client
-        )
+        rg.Dataset(name="name", workspace="workspace", settings=settings, client=client)
         ```
         > Check the [Dataset - Python Reference](../reference/argilla/datasets/datasets.md) to see the attributes, arguments, and methods of the `Dataset` class in detail.
 
@@ -32,12 +27,7 @@ A **dataset** is a collection of records that you can configure for labelers to 
         ```python
         rg.Settings(
             fields=[rg.TextField(name="text")],
-            questions=[
-                rg.LabelQuestion(
-                    name="label",
-                    labels=["label_1", "label_2", "label_3"]
-                )
-            ],
+            questions=[rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"])],
             metadata=[rg.TermsMetadataProperty(name="metadata")],
             vectors=[rg.VectorField(name="vector", dimensions=10)],
             guidelines="guidelines",
@@ -68,10 +58,7 @@ settings = rg.Settings(
         ),
     ],
     questions=[
-        rg.LabelQuestion(
-            name="label",
-            labels=["label_1", "label_2", "label_3"]
-        ),
+        rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"]),
     ],
 )
 
@@ -100,9 +87,7 @@ client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 settings = rg.Settings(
     guidelines="These are some guidelines.",
     fields=[rg.TextField(name="text", use_markdown=True)],
-    questions=[
-        rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"])
-    ],
+    questions=[rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"])],
     distribution=rg.TaskDistribution(min_submitted=3),
 )
 
@@ -221,11 +206,11 @@ To collect feedback for your dataset, you need to formulate questions that annot
     ```python
     rg.LabelQuestion(
         name="label",
-        labels={"YES": "Yes", "NO": "No"}, # or ["YES", "NO"]
+        labels={"YES": "Yes", "NO": "No"},  # or ["YES", "NO"]
         title="Is the response relevant for the given prompt?",
         description="Select the one that applies.",
         required=True,
-        visible_labels=10
+        visible_labels=10,
     )
     ```
     ![LabelQuestion](../assets/images/how_to_guides/dataset/label_question.png)
@@ -243,13 +228,13 @@ To collect feedback for your dataset, you need to formulate questions that annot
             "pii": "Personal information",
             "untruthful": "Untruthful info",
             "not_english": "Not English",
-            "inappropriate": "Inappropriate content"
-        }, # or ["hate", "sexual", "violent", "pii", "untruthful", "not_english", "inappropriate"]
+            "inappropriate": "Inappropriate content",
+        },  # or ["hate", "sexual", "violent", "pii", "untruthful", "not_english", "inappropriate"]
         title="Does the response include any of the following?",
         description="Select all that apply.",
         required=True,
         visible_labels=10,
-        labels_order="natural"
+        labels_order="natural",
     )
     ```
     ![MultiLabelQuestion](../assets/images/how_to_guides/dataset/multilabel_question.png)
@@ -299,13 +284,13 @@ To collect feedback for your dataset, you need to formulate questions that annot
             "PERSON": "Person",
             "ORG": "Organization",
             "LOC": "Location",
-            "MISC": "Miscellaneous"
-        }, # or ["PERSON", "ORG", "LOC", "MISC"]
+            "MISC": "Miscellaneous",
+        },  # or ["PERSON", "ORG", "LOC", "MISC"]
         title="Select the entities in the text",
         description="Select the entities in the text",
         required=True,
         allow_overlapping=False,
-        visible_labels=10
+        visible_labels=10,
     )
     ```
 
@@ -320,7 +305,7 @@ To collect feedback for your dataset, you need to formulate questions that annot
         title="Please provide feedback on the response",
         description="Please provide feedback on the response",
         required=True,
-        use_markdown=True
+        use_markdown=True,
     )
     ```
 
@@ -381,11 +366,7 @@ To use the similarity search in the UI and the Python SDK, you will need to conf
 > Check the [Vector - Python Reference](../reference/argilla/settings/vectors.md) to see the `VectorField` class in detail.
 
 ```python
-rg.VectorField(
-    name="my_vector",
-    title="My Vector",
-    dimensions=768
-)
+rg.VectorField(name="my_vector", title="My Vector", dimensions=768)
 ```
 ![VectorField](../assets/images/how_to_guides/dataset/vectors.png)
 
@@ -415,9 +396,7 @@ When working as a team, you may want to distribute the annotation task to ensure
 > Check the [Task Distribution - Python Reference](../reference/argilla/settings/task_distribution.md) to see the `TaskDistribution` class in detail.
 
 ```python
-rg.TaskDistribution(
-    min_submitted = 2
-)
+rg.TaskDistribution(min_submitted=2)
 ```
 
 > To learn more about how to distribute the task among team members in the [Distribute the annotation guide](../how_to_guides/distribution.md).
@@ -448,7 +427,7 @@ import argilla as rg
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
 for dataset in client.datasets:
-    dataset.settings.get() # this will get the dataset settings from the server
+    dataset.settings.get()  # this will get the dataset settings from the server
     print(dataset.settings)
 ```
 

@@ -20,9 +20,7 @@ When a record has met the minimum number of submissions, the status of the recor
 !!! info "Main Class"
 
     ```python
-    rg.TaskDistribution(
-        min_submitted = 2
-    )
+    rg.TaskDistribution(min_submitted=2)
     ```
     > Check the [Task Distribution - Python Reference](../reference/argilla/settings/task_distribution.md) to see the attributes, arguments, and methods of the `TaskDistribution` class in detail.
 
@@ -44,12 +42,9 @@ settings = rg.Settings(
         ),
     ],
     questions=[
-        rg.LabelQuestion(
-            name="label",
-            labels=["label_1", "label_2", "label_3"]
-        ),
+        rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"]),
     ],
-    distribution=rg.TaskDistribution(min_submitted=3)
+    distribution=rg.TaskDistribution(min_submitted=3),
 )
 ```
 

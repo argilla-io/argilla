@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict, Tuple, Union, Optional
+from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 import httpx
@@ -20,7 +20,7 @@ from typing_extensions import deprecated
 
 from argilla._api._base import ResourceAPI
 from argilla._exceptions import api_error_handler
-from argilla._models import RecordModel, UserResponseModel, SearchQueryModel
+from argilla._models import RecordModel, SearchQueryModel, UserResponseModel
 
 __all__ = ["RecordsAPI"]
 

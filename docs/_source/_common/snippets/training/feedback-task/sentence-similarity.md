@@ -10,12 +10,11 @@ links:
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_argilla(
-    name="<my_dataset_name>",
-    workspace="<my_workspace_name>"
+    name="<my_dataset_name>", workspace="<my_workspace_name>"
 )
 task = TrainingTask.for_question_answering(
     texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
-    label=dataset.question_by_name("label")
+    label=dataset.question_by_name("label"),
 )
 trainer = ArgillaTrainer(
     dataset=dataset,

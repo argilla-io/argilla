@@ -87,7 +87,6 @@ argilla whoami
 :::{tab-item} Python client
 
 ```python
-
 import argilla as rg
 
 rg.init(api_url="<ARGILLA_API_URL>", api_key="<ARGILLA_API_KEY>")
@@ -132,7 +131,7 @@ user = rg.User.create(
     last_name="User",
     password="new-password",
     role="admin",
-    workspaces=["ws1", "ws2"]
+    workspaces=["ws1", "ws2"],
 )
 ```
 

@@ -1156,7 +1156,7 @@ class DatasetForTokenClassification(DatasetBase):
                     raise ValueError(
                         "The following annotation does not align with the tokens"
                         " produced by the provided spacy language model:"
-                        f" {(anno[0], record.text[anno[1]:anno[2]])}, {list(doc)}"
+                        f" {(anno[0], record.text[anno[1] : anno[2]])}, {list(doc)}"
                     )
                 else:
                     entities.append(span)

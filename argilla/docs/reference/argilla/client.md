@@ -35,13 +35,11 @@ client = rg.Argilla(
 The `Argilla` clients provides access to the `Dataset`, `Workspace`, and `User` objects of the Argilla server.
 
 ```python
-
 my_dataset = client.datasets("my_dataset")
 
 my_workspace = client.workspaces("my_workspace")
 
 my_user = client.users("my_user")
-
 ```
 
 These resources can then be interacted with to access their properties and methods. For example, to list all datasets in a workspace:

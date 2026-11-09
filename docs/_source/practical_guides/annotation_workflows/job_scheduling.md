@@ -33,10 +33,11 @@ Listeners are decorators and wrap about a function that you would like to schedu
 import argilla as rg
 from argilla.listeners import listener
 
+
 @listener(
-    dataset="my_dataset", # dataset to get record from
-    query="lucene query", # https://docs.v1.argilla.io/en/latest/guides/query_datasets.html
-    execution_interval_in_seconds=3, # interval to check execution of `update_records`
+    dataset="my_dataset",  # dataset to get record from
+    query="lucene query",  # https://docs.v1.argilla.io/en/latest/guides/query_datasets.html
+    execution_interval_in_seconds=3,  # interval to check execution of `update_records`
 )
 def update_records(records, ctx):
     # records get the records that adhere to the query
@@ -80,9 +81,9 @@ During an execution loop, it is possible to update and change `query_params` to 
 
 ```python
 @listener(
-    dataset="uber-reviews", # dataset to get record from
+    dataset="uber-reviews",  # dataset to get record from
     query="metadata.batch_id:{batch_id}",
-    batch_id=0
+    batch_id=0,
 )
 def update_records(records, ctx):
     # next iteration the query is executed with batch_id = 1
@@ -95,8 +96,8 @@ Potentially actions like reporting can be done, based on the metrics provided by
 
 ```python
 @listener(
-    dataset="my_dataset", # dataset to get record from
-    metrics=["F1"]
+    dataset="my_dataset",  # dataset to get record from
+    metrics=["F1"],
 )
 def update_records(records, ctx):
     # next iteration the query is executed with batch_id = 1
@@ -109,8 +110,8 @@ Sometimes we might just want to listen without loading and processing the docs d
 
 ```python
 @listener(
-    dataset="my_dataset", # dataset to get record from
-    query_records=False
+    dataset="my_dataset",  # dataset to get record from
+    query_records=False,
 )
 def update_records(ctx):
     # Don`t load the records

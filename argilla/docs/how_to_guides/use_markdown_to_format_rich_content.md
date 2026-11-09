@@ -52,15 +52,9 @@ A DataURL is a scheme that allows data to be encoded into a base64-encoded strin
     ```python
     from argilla.markdown import image_to_html
 
-    html = image_to_html(
-        "local_image_file.png",
-        width="300px",
-        height="300px"
-    )
+    html = image_to_html("local_image_file.png", width="300px", height="300px")
 
-    rg.Record(
-        fields={"markdown_enabled_field": html}
-    )
+    rg.Record(fields={"markdown_enabled_field": html})
     ```
 
 === "Audio"
@@ -68,17 +62,9 @@ A DataURL is a scheme that allows data to be encoded into a base64-encoded strin
     ```python
     from argilla.markdown import audio_to_html
 
-    html = audio_to_html(
-        "local_audio_file.mp3",
-        width="300px",
-        height="300px",
-        autoplay=True,
-        loop=True
-    )
+    html = audio_to_html("local_audio_file.mp3", width="300px", height="300px", autoplay=True, loop=True)
 
-    rg.Record(
-        fields={"markdown_enabled_field": html}
-    )
+    rg.Record(fields={"markdown_enabled_field": html})
     ```
 
 === "Video"
@@ -86,17 +72,9 @@ A DataURL is a scheme that allows data to be encoded into a base64-encoded strin
     ```python
     from argilla.markdown import video_to_thml
 
-    html = video_to_html(
-        "local_video_file.mp4",
-        width="300px",
-        height="300px",
-        autoplay=True,
-        loop=True
-    )
+    html = video_to_html("local_video_file.mp4", width="300px", height="300px", autoplay=True, loop=True)
 
-    rg.Record(
-        fields={"markdown_enabled_field": html}
-    )
+    rg.Record(fields={"markdown_enabled_field": html})
     ```
 
 === "PDF"
@@ -104,15 +82,9 @@ A DataURL is a scheme that allows data to be encoded into a base64-encoded strin
     ```python
     from argilla.markdown import pdf_to_html
 
-    html = pdf_to_html(
-        "local_pdf_file.pdf",
-        width="300px",
-        height="300px"
-    )
+    html = pdf_to_html("local_pdf_file.pdf", width="300px", height="300px")
 
-    rg.Record(
-        fields={"markdown_enabled_field": html}
-    )
+    rg.Record(fields={"markdown_enabled_field": html})
     ```
 
 ### Hosted content
@@ -127,9 +99,7 @@ Instead of uploading local files through DataURLs, we can also visualize URLs di
     ```python
     html = "<img src='https://example.com/public-image-file.jpg'>"
 
-    rg.Record(
-        fields={"markdown_enabled_field": html}
-    )
+    rg.Record(fields={"markdown_enabled_field": html})
     ```
 
 === "Audio"
@@ -189,14 +159,12 @@ from argilla.markdown import chat_to_html
 
 messages = [
     {"role": "user", "content": "Hello! How are you?"},
-    {"role": "assistant", "content": "I'm good, thank you!"}
+    {"role": "assistant", "content": "I'm good, thank you!"},
 ]
 
 html = chat_to_html(messages)
 
-rg.Record(
-    fields={"markdown_enabled_field": html}
-)
+rg.Record(fields={"markdown_enabled_field": html})
 ```
 
 ![media](../assets/images/how_to_guides/markdown/chat.png)
