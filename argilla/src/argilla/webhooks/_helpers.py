@@ -15,7 +15,7 @@ import os
 import time
 import warnings
 from threading import Thread
-from typing import TYPE_CHECKING, Optional, Callable, Union, List
+from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
 import argilla as rg
 from argilla import Argilla
@@ -25,7 +25,7 @@ from argilla.webhooks._resource import Webhook
 if TYPE_CHECKING:
     from fastapi import FastAPI
 
-__all__ = ["webhook_listener", "get_webhook_server", "set_webhook_server", "start_webhook_server"]
+__all__ = ["get_webhook_server", "set_webhook_server", "start_webhook_server", "webhook_listener"]
 
 
 def _compute_default_webhook_server_url() -> str:

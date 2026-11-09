@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # from typing import Literal, Any, Dict
-from typing import Dict, Any, Literal
+from typing import Any, Dict, Literal
 
 from argilla._models._settings._task_distribution import OverlapTaskDistributionModel
 

@@ -24,18 +24,12 @@ Underneath, you can see the happy flow for using the `ArgillaTrainer`.
 ```python
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
-dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/emotion"
-)
+dataset = FeedbackDataset.from_huggingface(repo_id="argilla/emotion")
 task = TrainingTask.for_text_classification(
     text=dataset.field_by_name("text"),
     label=dataset.question_by_name("label"),
 )
-trainer = ArgillaTrainer(
-    dataset=dataset,
-    task=task,
-    framework="setfit"
-)
+trainer = ArgillaTrainer(dataset=dataset, task=task, framework="setfit")
 trainer.update_config(num_iterations=1)
 trainer.train(output_dir="my_setfit_model")
 trainer.predict("This is awesome!")
@@ -95,7 +89,7 @@ trainer = ArgillaTrainer(
     framework="setfit",
     filter_by={"response_status": ["submitted"]},
     sort_by=[SortBy(field="metadata.my-metadata", order="asc")],
-    max_records=1000
+    max_records=1000,
 )
 ```
 
@@ -258,9 +252,7 @@ Text classification is one of the most widely supported training tasks within NL
 ```python
 from argilla.feedback import FeedbackDataset
 
-dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/emotion"
-)
+dataset = FeedbackDataset.from_huggingface(repo_id="argilla/emotion")
 ```
 
 For this task, we assume we need a `text-label`-pair or a `formatting_func` for defining the `TrainingTask.for_text_classification`.
@@ -277,13 +269,11 @@ An overview of the unifcation measures can be found [here](/practical_guides/col
 ```python
 from argilla.feedback import FeedbackDataset, TrainingTask
 
-dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/emotion"
-)
+dataset = FeedbackDataset.from_huggingface(repo_id="argilla/emotion")
 task = TrainingTask.for_text_classification(
     text=dataset.field_by_name("text"),
     label=dataset.question_by_name("label"),
-    label_strategy=None # defaults presets
+    label_strategy=None,  # defaults presets
 )
 ```
 
@@ -295,9 +285,8 @@ We offer the option to provide a `formatting_func` to the `TrainingTask.for_text
 ```python
 from argilla.feedback import FeedbackDataset, TrainingTask
 
-dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/emotion"
-)
+dataset = FeedbackDataset.from_huggingface(repo_id="argilla/emotion")
+
 
 def formatting_func(sample):
     text = sample["text"]
@@ -314,6 +303,7 @@ def formatting_func(sample):
         return (text, label)
     else:
         return None
+
 
 task = TrainingTask.for_text_classification(formatting_func=formatting_func)
 ```
@@ -394,6 +384,7 @@ task = TrainingTask.for_question_answering(
 ```python
 from argilla.feedback import TrainingTask
 
+
 def formatting_func(sample):
     question = sample["question"]
     context = sample["context"]
@@ -401,6 +392,7 @@ def formatting_func(sample):
         if not all([question, context, answer["value"]]):
             continue
         yield question, context, answer["value"]
+
 
 task = TrainingTask.for_question_answering(formatting_func=formatting_func)
 ```
@@ -424,7 +416,6 @@ trainer = ArgillaTrainer(
 )
 
 trainer.train(output_dir="qna_model")
-
 ```
 
 **Inference**
@@ -437,7 +428,7 @@ from transformers import pipeline
 qa_model = pipeline("question-answering", model="qna_model")
 question = "Where do I live?"
 context = "My name is Merve and I live in İstanbul."
-qa_model(question = question, context = context)
+qa_model(question=question, context=context)
 ## {'answer': 'İstanbul', 'end': 39, 'score': 0.953, 'start': 31}
 ```
 
@@ -529,7 +520,7 @@ from argilla.feedback import TrainingTask
 
 task = TrainingTask.for_sentence_similarity(
     texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
-    label=dataset.question_by_name("label")
+    label=dataset.question_by_name("label"),
 )
 ```
 
@@ -539,7 +530,7 @@ For datasets that were annotated with numerical values we could also pass the la
 task = TrainingTask.for_sentence_similarity(
     texts=[dataset.field_by_name("premise"), dataset.field_by_name("hypothesis")],
     label=dataset.question_by_name("other-question"),
-    label_strategy="majority" # or "mean" for RankingQuestion
+    label_strategy="majority",  # or "mean" for RankingQuestion
 )
 ```
 
@@ -567,6 +558,7 @@ def formatting_func(sample):
     else:
         return None
 
+
 task = TrainingTask.for_sentence_similarity(formatting_func=formatting_func)
 ```
 
@@ -585,7 +577,7 @@ trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="sentence-transformers",
-    framework_kwargs={"cross_encoder": False}
+    framework_kwargs={"cross_encoder": False},
 )
 trainer.train(output_dir="my_sentence_transformer_model")
 ```
@@ -605,7 +597,11 @@ from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 trainer.predict(
     [
         "Machine learning is so easy.",
-        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
+        [
+            "Deep learning is so straightforward.",
+            "This is so difficult, like rocket science.",
+            "I can't believe how much I struggled with this.",
+        ],
     ]
 )
 # [0.77857256, 0.4587626, 0.29062212]
@@ -614,12 +610,14 @@ trainer.predict(
 Just to see the other format that can be passed to get the sentence similarity (a list with pairs of sentences), let's see the following example (the pairs don't need to share the first sentence, it's an example to check the same values are returned with both options).
 
 ```python
-
 trainer.predict(
     [
         ["Machine learning is so easy.", "Deep learning is so straightforward."],
         ["Machine learning is so easy.", "This is so difficult, like rocket science."],
-        ["Machine learning is so easy.", "I can't believe how much I struggled with this."]
+        [
+            "Machine learning is so easy.",
+            "I can't believe how much I struggled with this.",
+        ],
     ]
 )
 # [0.77857256, 0.4587626, 0.29062212]
@@ -632,12 +630,16 @@ trainer = ArgillaTrainer(
     dataset=dataset,
     task=task,
     framework="sentence-transformers",
-    framework_kwargs={"cross_encoder": True}
+    framework_kwargs={"cross_encoder": True},
 )
 trainer.predict(
     [
         "Machine learning is so easy.",
-        ["Deep learning is so straightforward.", "This is so difficult, like rocket science.", "I can't believe how much I struggled with this."]
+        [
+            "Deep learning is so straightforward.",
+            "This is so difficult, like rocket science.",
+            "I can't believe how much I struggled with this.",
+        ],
     ]
 )
 # [2.2006402, -6.2634926, -10.251489]
@@ -715,7 +717,9 @@ The [Transformer Reinforcement Learning (TRL)](https://huggingface.co/docs/trl) 
 import argilla as rg
 from datasets import Dataset
 
-feedback_dataset = rg.FeedbackDataset.from_huggingface("argilla/databricks-dolly-15k-curated-en")
+feedback_dataset = rg.FeedbackDataset.from_huggingface(
+    "argilla/databricks-dolly-15k-curated-en"
+)
 ```
 
 We offer the option to provide a `formatting_func` to the `TrainingTask.for_supervised_fine_tuning`. This function is applied to each sample in the dataset and can be used for advanced preprocessing and data formatting. The function should return a `text` as `str`.
@@ -729,6 +733,7 @@ template = """\
 ### Context: {context}\n
 ### Response: {response}"""
 
+
 def formatting_func(sample: Dict[str, Any]) -> str:
     # What `sample` looks like depends a lot on your FeedbackDataset fields and questions
     return template.format(
@@ -737,16 +742,14 @@ def formatting_func(sample: Dict[str, Any]) -> str:
         response=sample["new-response"][0]["value"],
     )
 
+
 task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func)
 ```
 
 You can observe the resulting dataset by calling `FeedbackDataset.prepare_for_training`. We can use `"trl"` as the framework for example:
 
 ```python
-dataset = feedback_dataset.prepare_for_training(
-    framework="trl",
-    task=task
-)
+dataset = feedback_dataset.prepare_for_training(framework="trl", task=task)
 """
 >>> dataset
 Dataset({
@@ -792,6 +795,7 @@ Let's observe if it worked to train the model to respond within our template. We
 
 ```python
 from transformers import GenerationConfig, AutoTokenizer, GPT2LMHeadModel
+
 
 def generate(model_id: str, instruction: str, context: str = "") -> str:
     model = GPT2LMHeadModel.from_pretrained(model_id)
@@ -891,14 +895,19 @@ template = """\
 ### Context: {context}\n
 ### Response: {response}"""
 
+
 def formatting_func(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
     # Our annotators were asked to provide new responses, which we assume are better than the originals
     og_instruction = sample["original-instruction"]
     og_context = sample["original-context"]
     og_response = sample["original-response"]
-    rejected = template.format(instruction=og_instruction, context=og_context, response=og_response)
+    rejected = template.format(
+        instruction=og_instruction, context=og_context, response=og_response
+    )
 
-    for instruction, context, response in zip(sample["new-instruction"], sample["new-context"], sample["new-response"]):
+    for instruction, context, response in zip(
+        sample["new-instruction"], sample["new-context"], sample["new-response"]
+    ):
         if response["status"] == "submitted":
             chosen = template.format(
                 instruction=instruction["value"],
@@ -907,6 +916,7 @@ def formatting_func(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
             )
             if chosen != rejected:
                 yield chosen, rejected
+
 
 task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
 ```
@@ -960,9 +970,12 @@ import torch
 model = AutoModelForSequenceClassification.from_pretrained("reward_model")
 tokenizer = AutoTokenizer.from_pretrained("reward_model")
 
+
 def get_score(model, tokenizer, text):
     # Tokenize the input sequences
-    inputs = tokenizer(text, truncation=True, padding="max_length", max_length=512, return_tensors="pt")
+    inputs = tokenizer(
+        text, truncation=True, padding="max_length", max_length=512, return_tensors="pt"
+    )
 
     # Perform forward pass
     with torch.no_grad():
@@ -971,13 +984,18 @@ def get_score(model, tokenizer, text):
     # Extract the logits
     return outputs.logits[0, 0].item()
 
+
 # Example usage
 prompt = "Is a toad a frog?"
-context = "Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads."
+context = 'Both frogs and toads are amphibians in the order Anura, which means "without a tail." Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.'
 good_response = "Yes"
-bad_response = "Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\""
-example_good = template.format(instruction=prompt, context=context, response=good_response)
-example_bad = template.format(instruction=prompt, context=context, response=bad_response)
+bad_response = 'Both frogs and toads are amphibians in the order Anura, which means "without a tail."'
+example_good = template.format(
+    instruction=prompt, context=context, response=good_response
+)
+example_bad = template.format(
+    instruction=prompt, context=context, response=bad_response
+)
 
 score = get_score(model, tokenizer, example_good)
 print(score)
@@ -1037,14 +1055,16 @@ template = """\
 ### Context: {context}\n
 ### Response: {response}"""
 
+
 def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
     for instruction, context in zip(sample["new-instruction"], sample["new-context"]):
         if instruction["status"] == "submitted":
             yield template.format(
                 instruction=instruction["value"],
                 context=context["value"][:500],
-                response=""
+                response="",
             ).strip()
+
 
 task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
 ```
@@ -1093,7 +1113,7 @@ trainer.update_config(
         "top_p": 1.0,
         "do_sample": True,
     },
-    config=PPOConfig(batch_size=16)
+    config=PPOConfig(batch_size=16),
 )
 trainer.train(output_dir="ppo_model")
 ```
@@ -1111,8 +1131,8 @@ tokenizer.pad_token = tokenizer.eos_token
 
 inputs = template.format(
     instruction="Is a toad a frog?",
-    context="Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.",
-    response=""
+    context='Both frogs and toads are amphibians in the order Anura, which means "without a tail." Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.',
+    response="",
 ).strip()
 encoding = tokenizer([inputs], return_tensors="pt")
 outputs = model.generate(**encoding, max_new_tokens=30)
@@ -1171,14 +1191,19 @@ template = """\
 ### Context: {context}\n
 ### Response: {response}"""
 
+
 def formatting_func(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
     # Our annotators were asked to provide new responses, which we assume are better than the originals
     og_instruction = sample["original-instruction"]
     og_context = sample["original-context"]
     rejected = sample["original-response"]
-    prompt = template.format(instruction=og_instruction, context=og_context, response="")
+    prompt = template.format(
+        instruction=og_instruction, context=og_context, response=""
+    )
 
-    for instruction, context, response in zip(sample["new-instruction"], sample["new-context"], sample["new-response"]):
+    for instruction, context, response in zip(
+        sample["new-instruction"], sample["new-context"], sample["new-response"]
+    ):
         if response["status"] == "submitted":
             chosen = response["value"]
             if chosen != rejected:
@@ -1217,8 +1242,8 @@ tokenizer.pad_token = tokenizer.eos_token
 
 inputs = template.format(
     instruction="Is a toad a frog?",
-    context="Both frogs and toads are amphibians in the order Anura, which means \"without a tail.\" Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.",
-    response=""
+    context='Both frogs and toads are amphibians in the order Anura, which means "without a tail." Toads are a sub-classification of frogs, meaning that all toads are frogs, but not all frogs are toads.',
+    response="",
 ).strip()
 encoding = tokenizer([inputs], return_tensors="pt")
 outputs = model.generate(**encoding, max_new_tokens=30)
@@ -1294,7 +1319,7 @@ from typing import Dict, Any, Iterator
 
 
 # adapation from LlamaIndex's TEXT_QA_PROMPT_TMPL_MSGS[1].content
-user_message_prompt ="""Context information is below.
+user_message_prompt = """Context information is below.
 ---------------------
 {context_str}
 ---------------------
@@ -1310,16 +1335,23 @@ Some rules to follow:
 2. Avoid statements like 'Based on the context, ...' or 'The context information ...' or anything along those lines.
 """
 
-def formatting_func(sample: dict) -> Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]:
+
+def formatting_func(
+    sample: dict,
+) -> Union[Tuple[str, str, str, str], List[Tuple[str, str, str, str]]]:
     from uuid import uuid4
+
     if sample["response"]:
         chat = str(uuid4())
-        user_message = user_message_prompt.format(context_str=sample["context"], query_str=sample["user-message"])
+        user_message = user_message_prompt.format(
+            context_str=sample["context"], query_str=sample["user-message"]
+        )
         yield [
             (chat, "0", "system", system_prompt),
             (chat, "1", "user", user_message),
-            (chat, "2", "assistant", sample["response"][0]["value"])
+            (chat, "2", "assistant", sample["response"][0]["value"]),
         ]
+
 
 task = TrainingTask.for_chat_completion(formatting_func=formatting_func)
 ```
@@ -1347,11 +1379,11 @@ After training, we can directly use the model but we need to do so so, we need t
 import openai
 
 completion = openai.ChatCompletion.create(
-  model="ft:gpt-3.5-turbo:my-org:custom_suffix:id",
-  messages=[
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "Hello!"}
-  ]
+    model="ft:gpt-3.5-turbo:my-org:custom_suffix:id",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello!"},
+    ],
 )
 ```
 
@@ -1428,18 +1460,12 @@ For a multi-label scenario, it is recommended to add some examples without any l
 ```python
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
-dataset = FeedbackDataset.from_huggingface(
-    repo_id="argilla/emotion"
-)
+dataset = FeedbackDataset.from_huggingface(repo_id="argilla/emotion")
 task = TrainingTask.for_text_classification(
     text=dataset.field_by_name("text"),
     label=dataset.question_by_name("label"),
 )
-trainer = ArgillaTrainer(
-    dataset=dataset,
-    task=task,
-    framework="setfit"
-)
+trainer = ArgillaTrainer(dataset=dataset, task=task, framework="setfit")
 trainer.update_config(num_iterations=1)
 trainer.train(output_dir="my_setfit_model")
 trainer.predict("This is awesome!")
@@ -1466,10 +1492,7 @@ dataset_rg = rg.DatasetForTokenClassification.from_datasets(
 rg.log(dataset_rg, name="conll2003", workspace="admin")
 
 trainer = ArgillaTrainer(
-    name="conll2003",
-    workspace="admin",
-    framework="spacy",
-    train_size=0.8
+    name="conll2003", workspace="admin", framework="spacy", train_size=0.8
 )
 trainer.update_config(num_train_epochs=2)
 trainer.train(output_dir="my_spacy_model")
@@ -1498,10 +1521,7 @@ dataset_rg = rg.DatasetForText2Text.from_datasets(
 rg.log(dataset_rg, name="opus_books", workspace="admin")
 
 trainer = ArgillaTrainer(
-    name="opus_books",
-    workspace="admin",
-    framework="openAI",
-    train_size=0.8
+    name="opus_books", workspace="admin", framework="openAI", train_size=0.8
 )
 trainer.update_config(max_epochs=2)
 trainer.train(output_dir="my_openAI_model")

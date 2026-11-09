@@ -129,18 +129,20 @@ openai.api_key = "<your api key goes here>"
 # Load dataset
 dataset = load_dataset("banking77", split="test")
 
+
 def get_embedding(texts, model="text-similarity-ada-001"):
-    response = openai.Embedding.create(input = texts, model=model)
+    response = openai.Embedding.create(input=texts, model=model)
     vectors = [item["embedding"] for item in response["data"]]
     return vectors
 
+
 # Encode text. Get only 500 vectors for testing, remove the select to do the full dataset
-dataset = dataset.select(range(500)).map(lambda batch: {"vectors": get_embedding(batch["text"])}, batch_size=16, batched=True)
+dataset = dataset.select(range(500)).map(
+    lambda batch: {"vectors": get_embedding(batch["text"])}, batch_size=16, batched=True
+)
 
 # Turn vectors into a dictionary
-dataset = dataset.map(
-    lambda r: {"vectors": {"text-similarity-ada-001": r["vectors"]}}
-)
+dataset = dataset.map(lambda r: {"vectors": {"text-similarity-ada-001": r["vectors"]}})
 ```
 
 ### Cohere `Co.Embed`
@@ -167,16 +169,18 @@ co = cohere.Client(api_key)
 # Load dataset
 dataset = load_dataset("banking77", split="test")
 
+
 def get_embedding(texts):
     return co.embed(texts, model="small").embeddings
 
+
 # Encode text. Get only 1000 vectors for testing, remove the select to do the full dataset
-dataset = dataset.select(range(1000)).map(lambda batch: {"vectors": get_embedding(batch["text"])}, batch_size=16, batched=True)
+dataset = dataset.select(range(1000)).map(
+    lambda batch: {"vectors": get_embedding(batch["text"])}, batch_size=16, batched=True
+)
 
 # Turn vectors into a dictionary
-dataset = dataset.map(
-    lambda r: {"vectors": {"cohere-embed": r["vectors"]}}
-)
+dataset = dataset.map(lambda r: {"vectors": {"cohere-embed": r["vectors"]}})
 ```
 
 ## Configure your dataset
@@ -192,20 +196,20 @@ Let's first configure a Feedback Dataset that includes vector settings:
 import argilla as rg
 
 local_ds = rg.FeedbackDataset(
-    fields=[
-        rg.TextField(name="text")
-    ],
+    fields=[rg.TextField(name="text")],
     questions=[
         rg.MultiLabelQuestion(
             name="topic",
             title="Select the topics mentioned in the text:",
-            labels=dataset.info.features['label'].names, #these are the labels in the original dataset
+            labels=dataset.info.features[
+                "label"
+            ].names,  # these are the labels in the original dataset
         )
     ],
     vectors_settings=[
         rg.VectorSettings(name=key, dimensions=len(value))
-        for key,value in dataset[0]["vectors"].items()
-    ]
+        for key, value in dataset[0]["vectors"].items()
+    ],
 )
 remote_ds = local_ds.push_to_argilla("banking77", workspace="admin")
 ```
@@ -214,10 +218,7 @@ Now we can create records and add them to the dataset:
 
 ```python
 records = [
-    rg.FeedbackRecord(
-        fields={"text": rec["text"]},
-        vectors=rec["vectors"]
-    )
+    rg.FeedbackRecord(fields={"text": rec["text"]}, vectors=rec["vectors"])
     for rec in dataset
 ]
 remote_ds.add_records(records)
@@ -289,8 +290,7 @@ vector = encoder.encode("I lost my credit card. What should I do?").tolist()
 
 ```python
 vector = openai.Embedding.create(
-    input = ["I lost my credit card. What should I do?"],
-    model="text-similarity-ada-001"
+    input=["I lost my credit card. What should I do?"], model="text-similarity-ada-001"
 )["data"][0]["embedding"]
 ```
 
@@ -299,7 +299,9 @@ vector = openai.Embedding.create(
 :::{tab-item} Cohere co.Embed
 
 ```python
-vector = co.embed(["I lost my credit card. What should I do?"], model="small").embeddings[0]
+vector = co.embed(
+    ["I lost my credit card. What should I do?"], model="small"
+).embeddings[0]
 ```
 
 :::
@@ -328,7 +330,7 @@ ds = rg.load(
     name="banking77-openai",
     vector=("my-vector-name", vector),
     limit=20,
-    query="annotated_as:card_arrival"
+    query="annotated_as:card_arrival",
 )
 ```
 

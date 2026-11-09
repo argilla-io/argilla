@@ -15,11 +15,11 @@
 from typing import Optional
 from uuid import UUID
 
-from pydantic import field_validator, field_serializer
+from pydantic import field_serializer, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
-from argilla._models import ResourceModel
 from argilla._helpers import log_message
+from argilla._models import ResourceModel
 
 
 class VectorFieldModel(ResourceModel):

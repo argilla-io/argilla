@@ -43,33 +43,21 @@ Depending on the `MetadataProperty` type, metadata might need to be formatted in
 === "For `TermsMetadataProperty`"
 
     ```python
-    rg.Records(
-        fields={"text": "example"},
-        metadata={"category": "A"}
-    )
+    rg.Records(fields={"text": "example"}, metadata={"category": "A"})
 
     # with multiple terms
 
-    rg.Records(
-        fields={"text": "example"},
-        metadata={"category": ["A", "B"]}
-    )
+    rg.Records(fields={"text": "example"}, metadata={"category": ["A", "B"]})
     ```
 
 === "For `FloatMetadataProperty`"
 
     ```python
-    rg.Records(
-        fields={"text": "example"},
-        metadata={"category": 2.1}
-    )
+    rg.Records(fields={"text": "example"}, metadata={"category": 2.1})
     ```
 
 === "For `IntegerMetadataProperty`"
 
     ```python
-    rg.Records(
-        fields={"text": "example"},
-        metadata={"category": 42}
-    )
+    rg.Records(fields={"text": "example"}, metadata={"category": 42})
     ```

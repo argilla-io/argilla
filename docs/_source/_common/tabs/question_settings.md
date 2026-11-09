@@ -6,9 +6,9 @@
 rg.LabelQuestion(
     name="relevant",
     title="Is the response relevant for the given prompt?",
-    labels={"YES": "Yes", "NO": "No"}, # or ["YES","NO"]
+    labels={"YES": "Yes", "NO": "No"},  # or ["YES","NO"]
     required=True,
-    visible_labels=None
+    visible_labels=None,
 )
 ```
 
@@ -22,10 +22,18 @@ rg.MultiLabelQuestion(
     name="content_class",
     title="Does the response include any of the following?",
     description="Select all that apply",
-    labels={"hate": "Hate Speech" , "sexual": "Sexual content", "violent": "Violent content", "pii": "Personal information", "untruthful": "Untruthful info", "not_english": "Not English", "inappropriate": "Inappropriate content"}, # or ["hate", "sexual", "violent", "pii", "untruthful", "not_english", "inappropriate"]
+    labels={
+        "hate": "Hate Speech",
+        "sexual": "Sexual content",
+        "violent": "Violent content",
+        "pii": "Personal information",
+        "untruthful": "Untruthful info",
+        "not_english": "Not English",
+        "inappropriate": "Inappropriate content",
+    },  # or ["hate", "sexual", "violent", "pii", "untruthful", "not_english", "inappropriate"]
     required=False,
     visible_labels=4,
-    labels_order="natural"
+    labels_order="natural",
 )
 ```
 
@@ -40,7 +48,11 @@ rg.RankingQuestion(
     title="Order replies based on your preference",
     description="1 = best, 3 = worst. Ties are allowed.",
     required=True,
-    values={"reply-1": "Reply 1", "reply-2": "Reply 2", "reply-3": "Reply 3"} # or ["reply-1", "reply-2", "reply-3"]
+    values={
+        "reply-1": "Reply 1",
+        "reply-2": "Reply 2",
+        "reply-3": "Reply 3",
+    },  # or ["reply-1", "reply-2", "reply-3"]
 )
 ```
 
@@ -55,7 +67,7 @@ rg.RatingQuestion(
     title="Rate the quality of the response:",
     description="1 = very bad - 5= very good",
     required=True,
-    values=[1, 2, 3, 4, 5]
+    values=[1, 2, 3, 4, 5],
 )
 ```
 
@@ -72,7 +84,7 @@ rg.SpanQuestion(
     # or ["PER", "ORG", "EVE"],
     field="text",
     required=True,
-    allow_overlapping=False
+    allow_overlapping=False,
 )
 ```
 
@@ -86,7 +98,7 @@ rg.TextQuestion(
     name="corrected-text",
     title="Provide a correction to the response:",
     required=False,
-    use_markdown=True
+    use_markdown=True,
 )
 ```
 

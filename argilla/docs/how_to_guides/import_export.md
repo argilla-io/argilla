@@ -17,43 +17,28 @@ Check the [Dataset - Python Reference](../reference/argilla/datasets/datasets.md
     === "`rg.Dataset.to_hub`"
 
         ```python
-        rg.Dataset.to_hub(
-            repo_id="<my_org>/<my_dataset>",
-            with_records=True,
-            generate_card=True
-        )
+        rg.Dataset.to_hub(repo_id="<my_org>/<my_dataset>", with_records=True, generate_card=True)
         ```
 
     === "`rg.Dataset.from_hub`"
 
         ```python
         rg.Dataset.from_hub(
-            repo_id="<my_org>/<my_dataset>",
-            name="my_dataset",
-            workspace="my_workspace",
-            client=rg.Client(),
-            with_records=True
+            repo_id="<my_org>/<my_dataset>", name="my_dataset", workspace="my_workspace", client=rg.Client(), with_records=True
         )
         ```
 
     === "`rg.Dataset.to_disk`"
 
         ```python
-        rg.Dataset.to_disk(
-            path="<path-empty-directory>",
-            with_records=True
-        )
+        rg.Dataset.to_disk(path="<path-empty-directory>", with_records=True)
         ```
 
     === "`rg.Dataset.from_disk`"
 
         ```python
         rg.Dataset.from_disk(
-            path="<path-dataset-directory>",
-            name="my_dataset",
-            workspace="my_workspace",
-            client=rg.Client(),
-            with_records=True
+            path="<path-dataset-directory>", name="my_dataset", workspace="my_workspace", client=rg.Client(), with_records=True
         )
         ```
 
@@ -110,7 +95,6 @@ dataset.to_hub(repo_id="<my_org>/<my_dataset>")
 You can pull a dataset from the Hugging Face Hub to Argilla. This is useful if you want to restore a dataset and its configuration. You can pull the dataset from the Hugging Face Hub using the `rg.Dataset.from_hub` method.
 
 ```python
-
 import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
@@ -123,7 +107,6 @@ By default, the `Dataset.from_hub` method will return the URL of the dataset con
 You can infer the settings of the dataset automatically by configuring the `settings` parameter to `"auto"`. This will infer the dataset's settings based on the dataset's features in `datasets.Features`.
 
 ```python
-
 import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
@@ -146,7 +129,7 @@ The `rg.Dataset.from_hub` method loads the configuration and records from the da
 
     ```python
     hf_dataset = load_dataset("<my_org>/<my_dataset>")
-    dataset.records.log(hf_dataset) # (1)
+    dataset.records.log(hf_dataset)  # (1)
     ```
 
     1. You could also use the `mapping` parameter to map record field names to argilla field and question names.
@@ -161,10 +144,7 @@ When importing datasets from the hub, Argilla will load settings from the hub in
 3. You can pass a custom `rg.Settings` object to the `rg.Dataset.from_hub` method via the `settings` parameter. This will override the settings loaded from the hub.
 
 ```python
-settings = rg.Settings(
-    fields=[rg.TextField(name="text")],
-    questions=[rg.TextQuestion(name="answer")]
-) # (1)
+settings = rg.Settings(fields=[rg.TextField(name="text")], questions=[rg.TextQuestion(name="answer")])  # (1)
 
 dataset = rg.Dataset.from_hub(repo_id="<my_org>/<my_dataset>", settings=settings)
 ```

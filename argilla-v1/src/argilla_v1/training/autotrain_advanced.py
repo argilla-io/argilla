@@ -211,7 +211,7 @@ class ArgillaAutoTrainTrainer(ArgillaTrainerSkeleton, AutoTrainMixin):
             formatted_string.append(arg_dict_key)
             for idx, item in enumerate(arg_dict_single):
                 for key, val in item.items():
-                    formatted_string.append(f"\tjob{idx+1}-{key}: {val}")
+                    formatted_string.append(f"\tjob{idx + 1}-{key}: {val}")
         return "\n".join(formatted_string)
 
     def train(self, output_dir: str):
