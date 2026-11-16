@@ -14,8 +14,8 @@
 from argilla._exceptions import ArgillaError
 
 __all__ = [
-    "ImportDatasetError",
     "DatasetsServerException",
+    "ImportDatasetError",
 ]
 
 

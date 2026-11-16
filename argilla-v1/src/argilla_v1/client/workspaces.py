@@ -120,8 +120,7 @@ class Workspace:
 
     def __repr__(self) -> str:
         return (
-            f"Workspace(id={self.id}, name={self.name},"
-            f" inserted_at={self.inserted_at}, updated_at={self.updated_at})"
+            f"Workspace(id={self.id}, name={self.name}, inserted_at={self.inserted_at}, updated_at={self.updated_at})"
         )
 
     @allowed_for_roles(roles=[UserRole.owner])
@@ -330,8 +329,7 @@ class Workspace:
             ) from e
         except ValidationApiError as e:
             raise ValueError(
-                "The ID you provided is not a valid UUID, so please make sure that the"
-                " ID you provided is a valid one."
+                "The ID you provided is not a valid UUID, so please make sure that the ID you provided is a valid one."
             ) from e
         except BaseClientError as e:
             raise RuntimeError(f"Error while retrieving workspace with id=`{id}` from Argilla.") from e

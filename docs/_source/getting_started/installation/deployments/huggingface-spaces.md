@@ -68,16 +68,16 @@ import argilla as rg
 
 # If you connect to your public HF Space
 rg.init(
-  api_url="[your_space_url]",
-  api_key="admin.apikey" # this is the default API key, don't change it if you didn't set up one during the Space creation
-  )
+    api_url="[your_space_url]",
+    api_key="admin.apikey",  # this is the default API key, don't change it if you didn't set up one during the Space creation
+)
 
 # If you connect to your private HF Space
 rg.init(
-  api_url="[your_space_url]",
-  api_key="admin.apikey", # this is the default API key, don't change it if you didn't set up one during the Space creation
-  extra_headers={"Authorization": f"Bearer {os.environ['HF_TOKEN']}"}
-  )
+    api_url="[your_space_url]",
+    api_key="admin.apikey",  # this is the default API key, don't change it if you didn't set up one during the Space creation
+    extra_headers={"Authorization": f"Bearer {os.environ['HF_TOKEN']}"},
+)
 ```
 Now, create a dataset for text classification. We'll use a task template, check the [docs](../../../practical_guides/create_update_dataset/create_dataset.md) to create a custom dataset. Indicate the workspace where the dataset will be created. You can check them in "My settings" (UI).
 
@@ -106,7 +106,7 @@ records = [
         fields={
             "text": "I feel sad today",
         },
-    )
+    ),
 ]
 dataset.add_records(records)
 ```

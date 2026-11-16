@@ -15,18 +15,19 @@
 import json
 import os
 import warnings
+from collections.abc import Iterator, Sequence
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING, Dict, Union, Iterator, Sequence, Literal
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from argilla._exceptions import SettingsError, ArgillaAPIError, ArgillaSerializeError
+from argilla._exceptions import ArgillaAPIError, ArgillaSerializeError, SettingsError
 from argilla._models._dataset import DatasetModel
 from argilla._resource import Resource
-from argilla.settings._field import Field, _field_from_dict, _field_from_model, FieldBase
+from argilla.settings._field import Field, FieldBase, _field_from_dict, _field_from_model
 from argilla.settings._io import build_settings_from_repo_id
-from argilla.settings._metadata import MetadataType, MetadataField, MetadataPropertyBase
-from argilla.settings._question import QuestionType, question_from_model, _question_from_dict, QuestionBase
+from argilla.settings._metadata import MetadataField, MetadataPropertyBase, MetadataType
+from argilla.settings._question import QuestionBase, QuestionType, _question_from_dict, question_from_model
 from argilla.settings._task_distribution import TaskDistribution
 from argilla.settings._templates import DefaultSettingsMixin
 from argilla.settings._vector import VectorField
@@ -566,4 +567,4 @@ class SettingsProperties(Sequence[Property]):
     def __repr__(self) -> str:
         """Return a string representation of the object."""
 
-        return f"{repr([prop for prop in self])}"
+        return f"{[prop for prop in self]!r}"
