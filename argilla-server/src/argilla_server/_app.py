@@ -298,7 +298,7 @@ def _show_telemetry_warning():
         "    https://docs.argilla.io/latest/reference/argilla-server/telemetry/\n\n"
         "Telemetry is currently enabled. If you want to disable it, you can configure\n"
         "the environment variable before relaunching the server:\n\n"
-        f'{"#set HF_HUB_DISABLE_TELEMETRY=1" if os.name == "nt" else "$>export HF_HUB_DISABLE_TELEMETRY=1"}'
+        f"{'#set HF_HUB_DISABLE_TELEMETRY=1' if os.name == 'nt' else '$>export HF_HUB_DISABLE_TELEMETRY=1'}"
     )
     _LOGGER.warning(message)
 

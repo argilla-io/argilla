@@ -66,7 +66,7 @@ For the new users, the username and password are set during the creation process
         last_name="last_name",
         role="owner",
         password="password",
-        client=client
+        client=client,
     )
     ```
     > Check the [User - Python Reference](../reference/argilla/users.md) to see the attributes, arguments, and methods of the `User` class in detail.
@@ -169,7 +169,7 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-workspace = client.workspaces('my_workspace')
+workspace = client.workspaces("my_workspace")
 
 for user in workspace.users:
     print(user)
@@ -186,8 +186,8 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-user = client.users('my_username')
-workspace = client.workspaces('my_workspace')
+user = client.users("my_username")
+workspace = client.workspaces("my_workspace")
 
 added_user = user.add_to_workspace(workspace)
 ```
@@ -203,8 +203,8 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-user = client.users('my_username')
-workspace = client.workspaces('my_workspace')
+user = client.users("my_username")
+workspace = client.workspaces("my_workspace")
 
 removed_user = user.remove_from_workspace(workspace)
 ```
@@ -218,12 +218,12 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-user_to_update = client.users('my_username')
+user_to_update = client.users("my_username")
 
-user_to_update.username = 'new_username'
-user_to_update.first_name = 'new_first_name'
-user_to_update.last_name = 'new_last_name'
-user_to_update.role = 'admin'
+user_to_update.username = "new_username"
+user_to_update.first_name = "new_first_name"
+user_to_update.last_name = "new_last_name"
+user_to_update.role = "admin"
 
 updated_user = user_to_update.update()
 ```
@@ -237,7 +237,7 @@ import argilla as rg
 
 client = rg.Argilla(api_url="<api_url>", api_key="<api_key>")
 
-user_to_delete = client.users('my_username')
+user_to_delete = client.users("my_username")
 
 deleted_user = user_to_delete.delete()
 ```

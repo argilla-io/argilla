@@ -9,23 +9,23 @@ dataset = rg.FeedbackDataset(
     guidelines="Add some guidelines for the annotation team here.",
     fields=[
         rg.TextField(name="prompt", title="Human prompt"),
-        rg.TextField(name="output", title="Generated output", use_markdown=True)
+        rg.TextField(name="output", title="Generated output", use_markdown=True),
     ],
-    questions =[
+    questions=[
         rg.RatingQuestion(
             name="rating",
             title="Rate the quality of the response:",
             description="1 = very bad - 5= very good",
             required=True,
-            values=[1,2,3,4,5]
+            values=[1, 2, 3, 4, 5],
         ),
         rg.TextQuestion(
             name="corrected-text",
             title="Provide a correction to the response:",
             required=False,
-            use_markdown=True
-        )
-    ]
+            use_markdown=True,
+        ),
+    ],
 )
 
 dataset.push_to_argilla(name="my_dataset", workspace="my_workspace")
