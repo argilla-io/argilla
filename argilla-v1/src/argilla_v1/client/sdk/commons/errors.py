@@ -26,7 +26,7 @@ class WrongResponseError(BaseClientError):
         self.response = response
 
     def __str__(self):
-        return f"\nUnexpected response: {self.message}" "\nResponse content:" f"\n{self.response}"
+        return f"\nUnexpected response: {self.message}\nResponse content:\n{self.response}"
 
 
 class InputValueError(BaseClientError):
@@ -52,7 +52,7 @@ class ArApiResponseError(BaseClientError):
         self.ctx = ctx
 
     def __str__(self):
-        return f"Argilla server returned an error with http status: {self.HTTP_STATUS}. " f"Error details: {self.ctx!r}"
+        return f"Argilla server returned an error with http status: {self.HTTP_STATUS}. Error details: {self.ctx!r}"
 
 
 class BadRequestApiError(ArApiResponseError):

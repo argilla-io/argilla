@@ -20,7 +20,7 @@ from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 
-from argilla._exceptions import RecordsIngestionError, ArgillaError, ImportDatasetError
+from argilla._exceptions import ArgillaError, ImportDatasetError, RecordsIngestionError
 from argilla._models import DatasetModel
 from argilla.client import Argilla
 from argilla.settings import Settings

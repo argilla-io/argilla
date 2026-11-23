@@ -13,24 +13,25 @@
 # limitations under the License.
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union, Tuple
-from uuid import UUID
 import warnings
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from uuid import UUID
 
 from argilla._exceptions import RecordsIngestionError
+from argilla.records._mapping._routes import (
+    AttributeParameter,
+    AttributeRoute,
+    AttributeType,
+    ParameterType,
+    RecordAttributesMap,
+)
 from argilla.records._resource import Record
 from argilla.responses import Response
 from argilla.settings import FieldBase, VectorField
 from argilla.settings._metadata import MetadataPropertyBase
 from argilla.settings._question import QuestionBase
 from argilla.suggestions import Suggestion
-from argilla.records._mapping._routes import (
-    AttributeRoute,
-    RecordAttributesMap,
-    AttributeType,
-    ParameterType,
-    AttributeParameter,
-)
 
 if TYPE_CHECKING:
     from argilla.datasets import Dataset
@@ -84,7 +85,7 @@ class IngestedRecordMapper:
         metadata = self._map_attributes(data=data, mapping=self.mapping.metadata)
         vectors = self._map_attributes(data=data, mapping=self.mapping.vector)
 
-        unknown_keys = [key for key in data.keys() if key not in self.mapping.keys()]
+        unknown_keys = [key for key in data if key not in self.mapping.keys()]
         if unknown_keys:
             warnings.warn(f"Keys {unknown_keys} in data are not present in the mapping and will be ignored.")
 
