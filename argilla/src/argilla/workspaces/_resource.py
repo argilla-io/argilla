@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, TYPE_CHECKING, Optional, overload, Union, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, List, Optional, Union, overload
 from uuid import UUID
 
 from argilla._api._workspaces import WorkspacesAPI
-from argilla._helpers import GenericIterator
-from argilla._helpers import LoggingMixin
+from argilla._helpers import GenericIterator, LoggingMixin
 from argilla._models import WorkspaceModel
 from argilla._resource import Resource
 from argilla.client import Argilla

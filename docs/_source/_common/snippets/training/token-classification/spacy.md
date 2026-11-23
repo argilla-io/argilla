@@ -17,7 +17,7 @@ trainer = ArgillaTrainer(
     name="<my_dataset_name>",
     workspace="<my_workspace_name>",
     framework="spacy",
-    train_size=0.8
+    train_size=0.8,
 )
 trainer.update_config(max_epochs=10)
 trainer.train(output_dir="token-classification")
@@ -29,18 +29,18 @@ records = trainer.predict("The ArgillaTrainer is great!", as_argilla_records=Tru
 ```python
 # `spacy.training`
 trainer.update_config(
-    dev_corpus = "corpora.dev",
-    train_corpus = "corpora.train",
-    seed = 42,
-    gpu_allocator = 0,
-    accumulate_gradient = 1,
-    patience = 1600,
-    max_epochs = 0,
-    max_steps = 20000,
-    eval_frequency = 200,
-    frozen_components = [],
-    annotating_components = [],
-    before_to_disk = None,
-    before_update = None
+    dev_corpus="corpora.dev",
+    train_corpus="corpora.train",
+    seed=42,
+    gpu_allocator=0,
+    accumulate_gradient=1,
+    patience=1600,
+    max_epochs=0,
+    max_steps=20000,
+    eval_frequency=200,
+    frozen_components=[],
+    annotating_components=[],
+    before_to_disk=None,
+    before_update=None,
 )
 ```

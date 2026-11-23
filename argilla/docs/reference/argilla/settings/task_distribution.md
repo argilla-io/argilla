@@ -18,18 +18,12 @@ settings = rg.Settings(
         ),
     ],
     questions=[
-        rg.LabelQuestion(
-            name="label",
-            labels=["label_1", "label_2", "label_3"]
-        ),
+        rg.LabelQuestion(name="label", labels=["label_1", "label_2", "label_3"]),
     ],
-    distribution=rg.TaskDistribution(min_submitted=3)
+    distribution=rg.TaskDistribution(min_submitted=3),
 )
 
-dataset = rg.Dataset(
-    name="my_dataset",
-    settings=settings
-)
+dataset = rg.Dataset(name="my_dataset", settings=settings)
 ```
 
 ---

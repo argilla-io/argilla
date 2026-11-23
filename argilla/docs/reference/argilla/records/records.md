@@ -18,7 +18,7 @@ dataset.records.log(
             fields={"text": "Hello World, how are you?"},
         ),
     ]
-) # (1)
+)  # (1)
 ```
 
 1. The Argilla dataset contains a field named `text` matching the key here.
@@ -29,7 +29,7 @@ To create records with image fields, pass the image to the record object as eith
 dataset.records.log(
     records=[
         rg.Record(
-            fields={"image": "https://example.com/image.jpg"}, # (1)
+            fields={"image": "https://example.com/image.jpg"},  # (1)
         ),
     ]
 )
@@ -45,12 +45,7 @@ dataset.records.log(
 The `Record` object has suggestions, responses, metadata, and vectors attributes that can be accessed directly whilst iterating over records in a dataset.
 
 ```python
-for record in dataset.records(
-    with_suggestions=True,
-    with_responses=True,
-    with_metadata=True,
-    with_vectors=True
-    ):
+for record in dataset.records(with_suggestions=True, with_responses=True, with_metadata=True, with_vectors=True):
     print(record.suggestions)
     print(record.responses)
     print(record.metadata)

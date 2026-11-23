@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Annotated, Union, Optional, ClassVar, List, Dict, Literal
+from typing import Annotated, ClassVar, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import ConfigDict, field_validator, Field, BaseModel, model_validator, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from argilla._models import ResourceModel

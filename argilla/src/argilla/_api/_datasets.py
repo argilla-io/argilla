@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 from uuid import UUID
 
 import httpx
+
 from argilla._api._base import ResourceAPI
 from argilla._exceptions._api import api_error_handler
 from argilla._models import DatasetModel
 
 __all__ = ["DatasetsAPI"]
 
-from argilla._models._dataset_progress import UserProgressModel, DatasetProgressModel
+from argilla._models._dataset_progress import DatasetProgressModel, UserProgressModel
 
 
 class DatasetsAPI(ResourceAPI[DatasetModel]):

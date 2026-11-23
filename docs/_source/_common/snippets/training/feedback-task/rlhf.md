@@ -14,13 +14,13 @@ links:
 from argilla.feedback import ArgillaTrainer, FeedbackDataset, TrainingTask
 
 dataset = FeedbackDataset.from_argilla(
-    name="<my_dataset_name>",
-    workspace="<my_workspace_name>"
+    name="<my_dataset_name>", workspace="<my_workspace_name>"
 )
 template = """\
 ### Instruction: {instruction}\n
 ### Context: {context}\n
 ### Response: {response}"""
+
 
 def formatting_func_sft(sample: Dict[str, Any]) -> str:
     # What `sample` looks like depends a lot on your FeedbackDataset fields and questions
@@ -29,16 +29,23 @@ def formatting_func_sft(sample: Dict[str, Any]) -> str:
         context=sample["new-context"][0]["value"],
         response=sample["new-response"][0]["value"],
     )
+
+
 task = TrainingTask.for_supervised_fine_tuning(formatting_func=formatting_func)
+
 
 def formatting_func_rm(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
     # Our annotators were asked to provide new responses, which we assume are better than the originals
     og_instruction = sample["original-instruction"]
     og_context = sample["original-context"]
     og_response = sample["original-response"]
-    rejected = template.format(instruction=og_instruction, context=og_context, response=og_response)
+    rejected = template.format(
+        instruction=og_instruction, context=og_context, response=og_response
+    )
 
-    for instruction, context, response in zip(sample["new-instruction"], sample["new-context"], sample["new-response"]):
+    for instruction, context, response in zip(
+        sample["new-instruction"], sample["new-context"], sample["new-response"]
+    ):
         if response["status"] == "submitted":
             chosen = template.format(
                 instruction=instruction["value"],
@@ -47,7 +54,10 @@ def formatting_func_rm(sample: Dict[str, Any]) -> Iterator[Tuple[str, str]]:
             )
             if chosen != rejected:
                 yield chosen, rejected
+
+
 task = TrainingTask.for_reward_modeling(formatting_func=formatting_func)
+
 
 def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
     for instruction, context in zip(sample["new-instruction"], sample["new-context"]):
@@ -55,8 +65,10 @@ def formatting_func(sample: Dict[str, Any]) -> Iterator[str]:
             yield template.format(
                 instruction=instruction["value"],
                 context=context["value"][:500],
-                response=""
+                response="",
             ).strip()
+
+
 task = TrainingTask.for_proximal_policy_optimization(formatting_func=formatting_func)
 
 trainer = ArgillaTrainer(
